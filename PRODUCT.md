@@ -232,12 +232,12 @@ Champs :
 | `presentation.showStatsOnFinal` | booléen | non | Affiche le détail du passage sur l'écran final projeté. Défaut : `false`. |
 | `presentation.drawAnimation` | booléen | non | Animation lors du tirage. Défaut : `true`. |
 | `presentation.defaultColorMode` | `"light"` \| `"dark"` \| `"system"` | non | Défaut : `system`. |
-| `theme.light`, `theme.dark` | objet token → valeur CSS | non | Surcharge des variables CSS de shadcn/ui. Seuls les noms de tokens d'une liste blanche sont acceptés, alignée sur la version de shadcn/ui utilisée (couleurs de base, `chart-*`, `sidebar-*`, `radius`). Un token absent garde la valeur par défaut de shadcn. |
+| `theme.light`, `theme.dark` | objet token → valeur CSS | non | Surcharge des variables CSS de shadcn/ui. Seuls les noms de tokens d'une liste blanche sont acceptés, alignée sur la version de shadcn/ui utilisée (couleurs de base, `chart-*`, `sidebar-*`, `radius`). Un token absent garde la valeur par défaut de shadcn. Les valeurs sont validées par le navigateur (`CSS.supports('color', …)`, `border-radius` pour `radius`) à la création de session. |
 | `categories[].id` | string | oui | Identifiant stable. |
 | `categories[].label` | string | oui | Libellé affiché. |
 | `categories[].scale` | nombre[] | oui | Valeurs attribuables, décimales autorisées. Sa valeur maximale est la valeur de la catégorie (« points max »), affichée sur la tuile et utilisée dans les exports et les stats. |
-| `categories[].color` | couleur CSS | non | Couleur de la tuile. |
-| `categories[].icon` | string | non | Nom d'icône Lucide. Nom inconnu : pas d'icône, avec un avertissement. |
+| `categories[].color` | couleur CSS | non | Couleur de la tuile. Validée par le navigateur (`CSS.supports`) à la création de session. |
+| `categories[].icon` | string | non | Nom d'icône Lucide (kebab-case, liste `iconNames` de `lucide-react/dynamic`). Nom inconnu : pas d'icône, avec un avertissement. Le JSON Schema propose les noms connus en autocomplétion sans refuser les autres. |
 | `categories[].order` | entier | non | Ordre d'affichage. Défaut : ordre du tableau. |
 | `categories[].questions[].id` | string | oui | Identifiant stable, unique dans toute la config. |
 | `categories[].questions[].title` | string | non | Libellé court, utilisé dans le side panel et les exports. Défaut : début du `prompt` sans markdown. |
@@ -319,16 +319,19 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 **Objectif.** Charger, valider et expliquer une config.
 
 **Contenu.**
-- Schéma Zod complet (§6.2) avec les règles croisées.
-- Génération du JSON Schema au build, publié à la racine du site.
-- Fichier `examples/config.example.json` versionné, avec au moins 4 catégories et assez de questions pour passer la validation. Il est téléchargeable depuis l'application.
+- Schéma Zod complet (§6.2) avec les règles croisées. Le schéma est portable (navigateur, Vitest sous Node, génération du JSON Schema) : il ne valide que la forme des valeurs CSS (chaîne non vide, sans `;`, `{`, `}`, `<`). La validation réelle des valeurs CSS est une fonction `cssSupports` injectée par l'appelant (F06), remplacée par un faux dans les tests.
+- La config validée est **normalisée** : défauts appliqués, `title` des questions dérivé du `prompt`. C'est cette forme qui est figée dans la session.
+- Génération du JSON Schema par un plugin Vite local (`runnerImport` du module de schéma, `z.toJSONSchema()`), publié à une URL stable à la racine du site : `config.schema.json`. Le même plugin publie `config.example.json`. Les règles croisées ne sont pas exprimables en JSON Schema : l'éditeur ne valide que la structure, l'application valide tout.
+- Fichier `examples/config.example.json` versionné : un oral PHP réaliste, 4 catégories de tailles inégales (dont une catégorie à 2 questions, pour rendre visible le grisage de F09), blocs de code `php`, éléments de réponse et tags. Il est téléchargeable depuis l'application.
 - Le fichier d'exemple embarque le thème « Synthwave » ci-dessus, décliné de la bannière du projet, avec `defaultColorMode: "dark"`. Couleurs des catégories : Facile cyan `oklch(0.797 0.134 211.5)`, Normal violet `oklch(0.709 0.159 293.5)`, Difficile magenta `oklch(0.687 0.252 323.9)`, Cauchemar orange `oklch(0.758 0.159 55.9)`. Le thème par défaut de l'application reste celui de shadcn : ce thème ne s'applique qu'aux sessions créées avec cette config.
-- Formatage des erreurs et avertissements avec chemin JSON, dans la langue de l'interface.
+- Le validateur ne produit aucun texte : il renvoie des issues `{ severity, path, code, params }`. Les issues Zod natives sont converties en codes propres, un JSON mal formé donne le code `json_syntax` (avec ligne et colonne si disponibles). `formatPath` produit `categories[2].questions[5].id`.
+- Messages fr/en par code, via un **noyau i18n minimal** posé ici (type `Locale`, dictionnaires typés, `t()`), étendu par F07.
 
 **Critères d'acceptation.**
 - Le fichier d'exemple passe la validation.
 - Chaque règle du §6.2 a un test qui la déclenche.
-- Le JSON Schema publié valide le fichier d'exemple dans VSCode.
+- Le JSON Schema publié valide le fichier d'exemple dans VSCode, et un test le vérifie avec ajv.
+- La liste blanche des tokens de thème correspond exactement aux variables CSS de shadcn présentes dans `src/index.css` (test).
 
 ### F03 — Moteur de notation
 
@@ -370,7 +373,7 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 
 **Contenu.**
 - Formulaire : nom de session, nom de l'examinateur (facultatif, modifiable ensuite depuis l'accueil), fichier CSV, fichier JSON. Glisser-déposer accepté.
-- Aperçu : nombre d'étudiants, doublons éventuels, résumé de la config (catégories, nombre de questions, barèmes, règles de notation), erreurs et avertissements de F02.
+- Aperçu : nombre d'étudiants, doublons éventuels, résumé de la config (catégories, nombre de questions, barèmes, règles de notation), erreurs et avertissements de F02. La validation passe ici la fonction `cssSupports` du navigateur (`CSS.supports`).
 - Lien de téléchargement du fichier de config d'exemple.
 - À la validation : snapshot de la config dans la session, création des étudiants dans l'ordre du CSV, ouverture de l'écran de passage sur le premier étudiant.
 
@@ -384,10 +387,10 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 **Objectif.** Appliquer l'identité visuelle et la langue définies par la config.
 
 **Contenu.**
-- Application des surcharges de tokens `theme.light` et `theme.dark` sur les variables CSS de shadcn, sur les deux vues.
+- Application des surcharges de tokens `theme.light` et `theme.dark` sur les variables CSS de shadcn, sur les deux vues, **uniquement via `style.setProperty`**, jamais en construisant une feuille de style en texte.
 - Mode clair, sombre ou système selon `presentation.defaultColorMode`, modifiable à la main dans chaque fenêtre.
-- Couleur et icône par catégorie.
-- Interface en français et en anglais via un dictionnaire typé léger. L'accueil, sans config chargée, suit la langue du navigateur.
+- Couleur et icône par catégorie. Les icônes Lucide sont servies par un chunk unique chargé à la demande (`import * as icons from 'lucide-react'`), pré-caché par F17. Poids à mesurer : au-delà d'environ 300 Ko gzippé, repli sur `DynamicIcon` avec préchargement des icônes de la config.
+- Interface en français et en anglais via un dictionnaire typé léger, en étendant le noyau i18n posé par F02. L'accueil, sans config chargée, suit la langue du navigateur.
 
 **Critères d'acceptation.**
 - Une surcharge de `primary` change les boutons principaux sur les deux vues.
@@ -534,7 +537,7 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 
 **Objectif.** Fonctionner sans réseau après un premier chargement.
 
-**Contenu.** vite-plugin-pwa (Workbox) avec précache de tous les assets, dont les grammaires Shiki et ExcelJS. Scope du service worker réglé pour le sous-chemin GitHub Pages. Indication discrète quand une nouvelle version est disponible.
+**Contenu.** vite-plugin-pwa (Workbox) avec précache de tous les assets, dont les grammaires Shiki, ExcelJS et le chunk d'icônes Lucide (F07). Scope du service worker réglé pour le sous-chemin GitHub Pages. Indication discrète quand une nouvelle version est disponible.
 
 **Critères d'acceptation.** Après un chargement en ligne, l'application permet, réseau coupé, de créer une session, de faire passer un étudiant, d'ouvrir la vue projetée et d'exporter un Excel.
 

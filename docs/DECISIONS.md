@@ -214,3 +214,75 @@ vérifiées sur npm et les sources officielles le 2026-09-24.
   clé inconnue = erreur.
 
 **Reporté dans** : `PRODUCT.md` F01, §9. Impacte F01.
+
+## D14 — Fichier d'exemple : un vrai oral PHP, catégories de tailles inégales (2026-09-24)
+
+**Décision** : `examples/config.example.json` est un oral PHP réaliste (4 catégories,
+blocs `php`, éléments de réponse, tags), avec une catégorie à 2 questions.
+
+**Pourquoi** : c'est la vitrine du format et le jeu de données de test manuel de F08
+(coloration) et F09 (grisage d'une catégorie épuisée, cf. D06).
+
+**Reporté dans** : `PRODUCT.md` F02. Impacte F02.
+
+## D15 — Valeurs CSS : forme dans Zod, validité par `CSS.supports` injecté (2026-09-24)
+
+**Question** : `CSS.supports` n'existe que dans le navigateur, or le schéma doit tourner
+aussi sous Node (tests, génération du JSON Schema).
+
+**Décision** : Zod ne vérifie que la forme (chaîne non vide, sans `;{}<`). La validité
+est vérifiée par une fonction `cssSupports` injectée (`color` pour les couleurs,
+`border-radius` pour `radius`) ; échec = erreur bloquante avec chemin. F07 applique les
+tokens uniquement via `style.setProperty`.
+
+**Pourquoi** : pas de parseur de couleurs CSS maison ; `setProperty` ignore une valeur
+invalide et ne peut pas injecter d'autre déclaration, la forme Zod n'est qu'une défense
+en profondeur.
+
+**Reporté dans** : `PRODUCT.md` §6.2, F02, F06, F07. Impacte F02, F06, F07.
+
+## D16 — Icônes Lucide : un chunk unique chargé à la demande (2026-09-24)
+
+**Question** : accepter les ~1 600 icônes Lucide sans alourdir le bundle ni casser le
+hors ligne.
+
+**Décision** : validation par `iconNames` (`lucide-react/dynamic`), avertissement si
+inconnu. Rendu par un chunk unique `import * as icons from 'lucide-react'`, chargé à la
+demande, pré-caché par F17. JSON Schema : `anyOf: [enum des noms, string]` pour
+l'autocomplétion sans refus. Repli sur `DynamicIcon` + préchargement si le chunk
+dépasse ~300 Ko gzippé.
+
+**Pourquoi** : un seul fichier à pré-cacher, hors ligne trivial ; `DynamicIcon` seul
+imposerait ~1 600 fichiers à pré-cacher.
+
+**Reporté dans** : `PRODUCT.md` §6.2, F07, F17. Impacte F02, F07, F17.
+
+## D17 — JSON Schema généré par un plugin Vite local, URL stable (2026-09-24)
+
+**Décision** : plugin Vite du dépôt qui charge le module de schéma via `runnerImport`,
+appelle `z.toJSONSchema()` (draft 2020-12) et émet `config.schema.json` et
+`config.example.json` à la racine du site (middleware en dev). Test de cohérence : le
+fichier d'exemple est validé par Zod et par le JSON Schema (ajv).
+
+**Pourquoi** : une seule source de vérité, alias `@/` et TS résolus comme l'app, rien
+de généré à commiter. L'alternative (script Node à type stripping) imposait des imports
+`.ts` et l'absence d'alias dans le module de schéma.
+
+**Limite assumée** : les règles croisées ne sont pas exprimables en JSON Schema ;
+l'éditeur ne valide que la structure, à dire dans le README.
+
+**Reporté dans** : `PRODUCT.md` F02. Impacte F02.
+
+## D18 — Issues de validation structurées, noyau i18n posé par F02 (2026-09-24)
+
+**Décision** : le validateur renvoie `{ severity, path, code, params }`, jamais de texte.
+Issues Zod converties en codes propres, `json_syntax` pour un JSON mal formé,
+`formatPath` pour l'affichage. F02 pose un noyau i18n minimal (`Locale`, dictionnaires
+typés, `t()`) ; F07 l'étend à toute l'interface. Les règles croisées ne tournent que si
+la structure est valide (comportement de Zod), limite acceptée. Config stockée
+normalisée (défauts appliqués, `title` dérivés).
+
+**Pourquoi** : aucune dépendance aux messages ni à la traduction de Zod ; complétude
+fr/en garantie par le typage ; la config figée ne dépend plus des défauts de l'app.
+
+**Reporté dans** : `PRODUCT.md` F02, F07. Impacte F02, F06, F07.
