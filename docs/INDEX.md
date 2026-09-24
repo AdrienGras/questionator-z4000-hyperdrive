@@ -11,6 +11,7 @@ Voir aussi : `ENVIRONMENT.md` · `DECISIONS.md` · `QUIRKS.md` · `BACKLOG.md` �
 
 | Feature | Date | Spec | Plan | Statut | Notes |
 |---|---|---|---|---|---|
+| F01 — Socle projet et déploiement (#1, PR #18) | 2026-09-24 | `docs/superpowers/specs/2026-09-24-f01-socle-design.md` | `docs/superpowers/plans/2026-09-24-f01-socle.md` | Livré | Vite 8 / React 19 / TS 7, shadcn v4 + Tabler (D37), routeur par hash, oxlint type-aware, CI + Pages, `main` protégée (`check` requis) |
 
 ## Commandes / scripts utilitaires
 
