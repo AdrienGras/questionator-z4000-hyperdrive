@@ -323,3 +323,29 @@ F03, premier consommateur, puis persistés par F04.
 incomplet. Les ordres de grandeur (~2·10¹¹ au pire) restent loin de 2⁵³.
 
 **Reporté dans** : `PRODUCT.md` F03. Impacte F03, F04, F11–F13, F16.
+
+## D22 — Stockage : un document par session, mutations transactionnelles (2026-09-24)
+
+**Question** : un document par session (étudiants et attempts imbriqués) ou des tables
+normalisées ?
+
+**Décision** : une table `sessions`, un document par session. Toute mutation passe par
+`updateSession(id, mutator)`, lecture et écriture dans une seule transaction `rw`.
+
+**Pourquoi** : volume minuscule, backup = le document tel quel, la vue projetée observe
+un seul objet. IndexedDB sérialise les transactions sur une table, y compris entre
+onglets : deux onglets examinateur ne perdent pas d'écriture.
+
+**Reporté dans** : `PRODUCT.md` F04. Impacte F04, F05, et toutes les features qui
+écrivent (F06, F09–F13).
+
+## D23 — Vérification entre fenêtres : manuelle en F04, automatisée en F14 (2026-09-24)
+
+**Décision** : en F04, base exposée en dev sur `window.__questionatorDb`, procédure
+manuelle décrite dans la PR ; tests Vitest avec `fake-indexeddb` pour le reste. Test
+automatisé entre deux vraies fenêtres en F14, avec Playwright.
+
+**Pourquoi** : F04 n'a pas d'UI à observer ; `fake-indexeddb` ne simule pas la
+propagation entre contextes.
+
+**Reporté dans** : `PRODUCT.md` F04. Impacte F04 et F14.

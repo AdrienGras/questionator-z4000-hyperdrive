@@ -347,9 +347,11 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 **Objectif.** Stocker les sessions de façon durable dans le navigateur.
 
 **Contenu.**
-- Base IndexedDB via Dexie, schéma versionné.
+- Base IndexedDB via Dexie, schéma versionné. Une seule table `sessions` : un document par session, étudiants et attempts imbriqués (§7). C'est aussi le format du backup (F05).
+- Toute mutation passe par `updateSession(id, mutator)`, qui lit et réécrit dans **une seule transaction `rw`** : aucune écriture perdue, même avec deux onglets examinateur. Les mutations métier (tirer, noter, skipper…) sont écrites par leurs features.
 - Demande de stockage persistant (`navigator.storage.persist()`) à la première création de session, avec un indicateur discret si le navigateur refuse.
-- Hooks de lecture réactifs (`useLiveQuery`).
+- Hooks de lecture réactifs (`useLiveQuery`) : `useSessions()`, `useSession(id)`. Hook `usePersistenceStatus()` pour l'indicateur, affiché par F05.
+- En dev uniquement, la base est exposée sur `window.__questionatorDb` pour vérifier à la main la réactivité entre fenêtres. Tests automatiques sous Vitest avec `fake-indexeddb` ; le test automatisé entre deux vraies fenêtres est fait en F14 (Playwright).
 
 **Critères d'acceptation.**
 - Une session créée survit à la fermeture et à la réouverture du navigateur.
