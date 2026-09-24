@@ -476,9 +476,10 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 
 **Contenu.**
 - Liste des questions tirées : ordre, catégorie, titre, points obtenus sur points max, ou motif de skip.
-- Modification d'une note déjà saisie (sélection parmi les valeurs du barème), avec recalcul immédiat. La date de modification est conservée pour l'export.
+- Modification d'une note déjà saisie (sélection parmi les valeurs du barème), avec recalcul immédiat. La date de modification est conservée pour l'export. Uniquement sur un attempt `scored` : ni un skip ni une question en cours ne se modifient ici.
+- Panneau repliable à deux onglets (« Étudiant », « Étudiants ») ; état ouvert / fermé et onglet actif mémorisés en `localStorage`.
 - Totaux : brute, plafonnée, convertie, ajustement, finale.
-- Commentaire libre sur l'étudiant, sauvegardé automatiquement.
+- Commentaire libre sur l'étudiant, sauvegardé automatiquement (délai d'environ 500 ms et à la sortie du champ), avec un indicateur « Enregistré ».
 - Bascule du statut absent, réversible. Sans attempt, elle est directe. Si le passage est entamé, une confirmation indique le nombre de questions tirées qui seront supprimées ; l'accepter réinitialise l'étudiant (comme F11, commentaire conservé) puis le marque absent. Un étudiant absent n'a donc jamais d'attempt.
 
 **Critères d'acceptation.**
