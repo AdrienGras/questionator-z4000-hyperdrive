@@ -461,9 +461,10 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 **Objectif.** Clore le passage et fixer la note.
 
 **Contenu.**
-- Affichage de la note selon `presentation.finalScoreDisplay`, et du détail du passage (questions, catégories, points, skips).
-- Popup d'ajustement réservée à l'examinateur, ouverte à la fin du passage et rouvrable ensuite : valeur positive ou négative, en points de l'échelle finale, saisie par multiples du pas d'arrondi (§5), et justification facultative. La note finale recalculée est affichée en direct, bornée entre 0 et `finalScale`.
+- Affichage de toutes les notes (brute, plafonnée, convertie, ajustement, finale) et du détail du passage (questions, catégories, points, skips). `presentation.finalScoreDisplay` ne s'applique qu'à la vue projetée (F14) : l'examinateur voit toujours tout.
+- Popup d'ajustement réservée à l'examinateur, ouverte automatiquement **une seule fois**, au moment où la dernière note termine le passage, puis rouvrable par un bouton « Ajuster » : valeur positive ou négative, en points de l'échelle finale, saisie par multiples du pas d'arrondi (§5), et justification facultative. La note finale recalculée est affichée en direct, bornée entre 0 et `finalScale`. Champ numérique avec boutons − / + d'un pas ; une valeur hors pas bloque l'enregistrement. Calcul affiché en direct (« 13,5 + 1 = 14,5 / 20 », mention « bornée à 20 » si le bornage intervient). Un ajustement de 0 supprime l'ajustement et sa justification.
 - Bouton « Réinitialiser l'étudiant » avec confirmation : supprime tous les attempts et l'ajustement, et remet l'étudiant à « à passer ». Le commentaire est conservé : il porte sur l'étudiant, pas sur son passage.
+- Bouton « Étudiant suivant » : l'étudiant actif devient le prochain étudiant non terminé et non absent (à passer ou en cours) dans l'ordre de passage, en reprenant au début si besoin. La vue projetée n'est pas modifiée. S'il ne reste personne : bouton désactivé, « Tous les étudiants sont passés ».
 
 **Critères d'acceptation.**
 - Un étudiant à 20/20 avec un ajustement de +1 reste à 20.

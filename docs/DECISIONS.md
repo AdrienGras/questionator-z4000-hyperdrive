@@ -423,3 +423,20 @@ les schémas dans les énoncés sont utiles.
 double tirage possible ; la réponse ne s'affiche jamais sans action de l'examinateur.
 
 **Reporté dans** : `PRODUCT.md` F09. Impacte F09, F10, F13, F14.
+
+## D29 — Écran final : tout pour l'examinateur, popup une fois, « Étudiant suivant » (2026-09-24)
+
+**Décision** :
+- `finalScoreDisplay` ne concerne que la vue projetée ; l'examinateur voit toutes les
+  notes.
+- Popup d'ajustement ouverte automatiquement une seule fois, à la note qui termine le
+  passage ; ensuite bouton « Ajuster ». Ajustement 0 = suppression (justification
+  comprise).
+- Bouton « Étudiant suivant » : prochain étudiant à passer ou en cours, dans l'ordre,
+  avec reprise au début ; ne touche pas à la projection.
+
+**Pourquoi** : `presentation` règle ce que voit l'étudiant ; une popup qui surgit à
+chaque consultation gêne ; changer d'étudiant est le geste le plus fréquent. Les
+étudiants « en cours » sont inclus pour ne pas oublier un passage interrompu.
+
+**Reporté dans** : `PRODUCT.md` F11. Impacte F11, F14.
