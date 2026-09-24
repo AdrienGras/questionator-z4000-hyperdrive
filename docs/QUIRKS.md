@@ -57,3 +57,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : la restauration du scroll de TanStack Router appelle `window.scrollTo`, absent de jsdom.
 **Workaround** : `window.scrollTo = () => {}` dans `src/test/setup.ts`. Pas de globals Vitest : `afterEach(cleanup)` explicite dans le même fichier (sinon Testing Library ne nettoie pas le DOM entre les tests).
 **Référence** : `src/test/setup.ts`.
+
+## SonarQube Cloud n'analyse pas une branche sans PR (2026-09-24)
+
+**Découvert** : F01, PR #18 (quality gate en échec découvert après ouverture).
+**Symptôme** : `api/qualitygates/project_status?branch=<branche>` renvoie 404 ; seule `main` apparaît dans `api/project_branches/list`.
+**Cause** : le projet est en analyse automatique, qui ne couvre que la branche principale et les pull requests.
+**Workaround** : ouvrir la PR en brouillon, puis `.claude/scripts/sonar-check.sh --pr <n> --wait` avant de la passer en « Ready for review ».
+**Référence** : `.claude/scripts/sonar-check.sh`, `.sonarcloud.properties`.

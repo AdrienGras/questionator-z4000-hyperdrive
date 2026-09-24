@@ -92,3 +92,19 @@ corepack pnpm dlx shadcn@latest add <composant> -y
 
 - `import/no-unassigned-import` reste en erreur, avec une liste blanche pour les imports à effet de bord légitimes (`**/*.css`, `@testing-library/jest-dom/vitest`). Ajouter une entrée à `allow` dans `.oxlintrc.json` plutôt que désactiver la règle.
 - Lint type-aware obligatoire (`--type-aware`) : une promesse non gérée est une erreur.
+
+## Pull request — checklist avant « Ready for review »
+
+```bash
+git push -u origin <branche>
+gh pr create --draft -B main -t "Fxx — …" -F corps.md     # avec « Closes #n »
+gh pr checks <n> --watch                                   # job CI « check » vert
+.claude/scripts/sonar-check.sh --pr <n> --wait             # quality gate OK, 0 issue, 0 hotspot
+gh pr ready <n>
+```
+
+### Règles tacites
+
+- Toujours ouvrir la PR en brouillon : SonarQube Cloud (analyse automatique) n'analyse que `main` et les PR, pas une branche poussée seule.
+- Chaque issue Sonar est corrigée, pas marquée « won't fix », sauf accord explicite. Un fichier généré (ex. `src/routeTree.gen.ts`) s'exclut dans `.sonarcloud.properties`.
+- Actions GitHub épinglées par **SHA de commit**, version en commentaire (`uses: owner/action@<sha> # vX.Y.Z`) — règle Sonar `githubactions:S7637`.
