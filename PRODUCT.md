@@ -492,7 +492,9 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 **Contenu.**
 - Liste dans l'ordre de passage : nom, prénom, statut, note brute, note convertie ou « ABS ».
 - Clic sur un étudiant : il devient l'étudiant actif de la vue examinateur. On reprend son passage s'il n'est pas terminé, sinon on affiche son écran final. Cela ne change pas la vue projetée (voir F14).
-- Ajout d'un étudiant en cours de session (nom, prénom), placé en fin de liste et marqué `addedDuringSession`.
+- L'étudiant actif est surligné, l'étudiant projeté porte une icône d'écran.
+- Ajout d'un étudiant en cours de session (nom, prénom), placé en fin de liste et marqué `addedDuringSession`. Doublon : avertissement sans blocage. Deux boutons : « Ajouter » et « Ajouter et faire passer » (il devient aussi l'étudiant actif).
+- Pas de suppression d'étudiant (l'absence couvre le cas).
 - Bouton d'export Excel (F16).
 - Bouton « Statistiques », qui ouvre l'écran de F15.
 
