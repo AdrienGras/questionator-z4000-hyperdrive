@@ -20,6 +20,32 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-24 — F01 livré : socle, CI, Pages
+
+**Dernière chose faite** : F01 (#1) implémenté en subagent-driven development (5 tâches du
+plan + migration shadcn v4 / Tabler demandée en cours de route), revue finale de branche,
+PR #18 mergée. App vide en ligne sur https://adriengras.github.io/questionator-z4000-hyperdrive/
+(404 par hash vérifiée en navigateur). `main` protégée (job `check` requis). Alertes
+SonarQube Cloud corrigées (actions épinglées par SHA, `String.raw`, `routeTree.gen.ts`
+exclu) et étape Sonar ajoutée avant toute PR. D37 : shadcn v4 base-ui + Tabler partout,
+chunk d'icônes complet (~489 Kio gz) accepté ; tickets #2, #7, #17 mis à jour.
+
+**Trucs en suspens** : favicon manquant (404 console) → F17. Question ouverte à l'utilisateur :
+rendre aussi le quality gate SonarQube Cloud obligatoire dans la protection de `main` ?
+Cette PR de clôture (docs) à merger.
+
+**Prochaine chose à creuser** : ticket #2 (F02 — schéma de config et validation) : branche,
+figer la spec de l'issue dans `docs/superpowers/specs/`, plan, subagent-driven development.
+Attention : noms d'icônes Tabler (`iconsList`), liste blanche des tokens alignée sur
+`src/index.css` (shadcn v4 Nova).
+
+**Notes pour future Claude** : cycle d'une PR = branche → PR **brouillon** → `gh pr checks`
+→ `.claude/scripts/sonar-check.sh --pr <n> --wait` → `gh pr ready` (SonarQube Cloud n'analyse
+que `main` et les PR). pnpm via `corepack pnpm` (pnpm global 9.x). Après ajout d'une route :
+`pnpm test` ou `pnpm dev` pour régénérer `routeTree.gen.ts`, puis commit (voir QUIRKS). Le CLI
+shadcn v4 doit recevoir toutes ses options, stdin fermé (voir QUIRKS). Sous-agents : leur
+passer brief + contraintes globales en fichiers, jamais d'outil interactif.
+
 ## 2026-09-24 — Spec V1 arbitrée et 17 tickets rédigés
 
 **Dernière chose faite** : les 12 points ouverts de `PRODUCT.md` tranchés, puis chaque
