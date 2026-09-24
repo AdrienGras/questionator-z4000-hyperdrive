@@ -286,3 +286,40 @@ normalisée (défauts appliqués, `title` dérivés).
 fr/en garantie par le typage ; la config figée ne dépend plus des défauts de l'app.
 
 **Reporté dans** : `PRODUCT.md` F02, F07. Impacte F02, F06, F07.
+
+## D19 — Mode `nearest` : égalité vers le haut (2026-09-24)
+
+**Décision** : en `nearest`, une valeur à égale distance de deux pas va vers le haut
+(pas 0,5 : 13,25 → 13,5). Pas d'arrondi bancaire.
+
+**Pourquoi** : usage courant pour des notes, explicable à un étudiant. Les notes sont
+positives après bornage, le sens pour les négatifs ne se pose pas.
+
+**Reporté dans** : `PRODUCT.md` §5. Impacte F03.
+
+## D20 — Arrondir puis borner (corrige D02) (2026-09-24)
+
+**Question** : avec un pas de 0,3 sur /20, la convertie exacte 20 s'arrondit à 20,1,
+au-delà de l'échelle : la formule de D02 (borner puis arrondir) la laissait passer.
+
+**Décision** :
+- `convertie = clamp(arrondi(exacte), 0, finalScale)`.
+- `finale = clamp(arrondi(convertie + ajustement), 0, finalScale)`.
+- Avertissement de validation (F02) si `finalScale` n'est pas multiple du pas.
+
+**Pourquoi** : 0 et `finalScale` toujours atteignables et jamais dépassés, même hors
+grille.
+
+**Reporté dans** : `PRODUCT.md` §5, §6.2. Impacte F02 et F03. Remplace les formules de D02.
+
+## D21 — Moteur de notation : pas de note finale partielle, types de domaine posés en F03 (2026-09-24)
+
+**Décision** : `computeScores` renvoie `converted` et `final` à `null` tant que
+l'étudiant n'est pas terminé. Entiers `Number` en millièmes (pas de BigInt, garde
+`Number.isSafeInteger`). Les types `Session`, `Student`, `Attempt` du §7 sont posés en
+F03, premier consommateur, puis persistés par F04.
+
+**Pourquoi** : aucune vue ne peut afficher par erreur une note finale sur un passage
+incomplet. Les ordres de grandeur (~2·10¹¹ au pire) restent loin de 2⁵³.
+
+**Reporté dans** : `PRODUCT.md` F03. Impacte F03, F04, F11–F13, F16.

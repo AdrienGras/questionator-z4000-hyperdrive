@@ -46,12 +46,12 @@ Pour un étudiant ayant terminé son passage :
 
 1. `brute = somme des points des questions notées`
 2. `plafonnée = min(brute, scoring.maxRawScore)`
-3. `convertie = arrondi(plafonnée × scoring.finalScale / scoring.maxRawScore)`, selon `scoring.rounding`
-4. `finale = arrondi(clamp(convertie + ajustement, 0, scoring.finalScale))`
+3. `convertie = clamp(arrondi(plafonnée × scoring.finalScale / scoring.maxRawScore), 0, scoring.finalScale)`, arrondi selon `scoring.rounding`
+4. `finale = clamp(arrondi(convertie + ajustement), 0, scoring.finalScale)`
 
-La note convertie est arrondie **avant** l'ajustement : l'examinateur voit toujours un calcul juste (« 13,5 + 1 = 14,5 »). L'ajustement se saisit par multiples du pas d'arrondi, donc `convertie + ajustement` tombe déjà sur le pas ; l'arrondi de l'étape 4 ne sert que lorsque le bornage ramène la note sur une valeur hors pas (`finalScale` non multiple du pas). La note finale est bornée à 0 en bas et à `finalScale` en haut.
+La note convertie est arrondie **avant** l'ajustement : l'examinateur voit toujours un calcul juste (« 13,5 + 1 = 14,5 »). L'ajustement se saisit par multiples du pas d'arrondi, donc `convertie + ajustement` tombe déjà sur le pas et l'arrondi de l'étape 4 est sans effet dans le cas normal. On **arrondit puis on borne** : les bornes 0 et `finalScale` sont toujours atteignables et jamais dépassées, même quand `finalScale` n'est pas un multiple du pas (pas de 0,3 sur /20 : un étudiant au plafond a 20, pas 20,1).
 
-Arrondi : le pas vaut `rounding.step` s'il est défini (exemple : `0.5` pour arrondir au demi-point), sinon `10^-rounding.decimals`. Le mode `nearest`, `up` ou `down` s'applique à ce pas.
+Arrondi : le pas vaut `rounding.step` s'il est défini (exemple : `0.5` pour arrondir au demi-point), sinon `10^-rounding.decimals`. Le mode s'applique à ce pas : `nearest` arrondit à la valeur la plus proche, une égalité allant vers le haut (pas de 0,5 : 13,25 → 13,5) ; `up` arrondit au pas supérieur, `down` au pas inférieur.
 
 Précision et représentation numérique :
 
@@ -258,6 +258,7 @@ Règles de validation, en plus des types :
 - **Erreur** sur toute clé inconnue, à tout niveau (schéma strict ; seule `$schema` est admise en plus des champs du tableau) : une faute de frappe dans un nom de champ ne doit jamais retomber silencieusement sur la valeur par défaut.
 - **Erreur** si `schemaVersion` est supérieure à celle que connaît l'application, avec un message invitant à recharger la page pour mettre l'application à jour.
 - **Avertissement** si `questionsPerStudent × (plus grande valeur de barème, toutes catégories confondues)` est inférieur à `maxRawScore` (note maximale inatteignable).
+- **Avertissement** si `finalScale` n'est pas un multiple du pas d'arrondi (la note maximale sera hors grille, §5).
 
 Les erreurs sont listées avec leur chemin JSON (`categories[2].questions[5].id`) et un message lisible dans la langue de l'interface. Une config avec des erreurs bloque la création de session ; des avertissements seuls ne la bloquent pas.
 
@@ -337,7 +338,7 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 
 **Objectif.** Calculer toutes les notes à partir d'un étudiant et d'une config.
 
-**Contenu.** Fonctions pures : note brute, plafonnée, convertie, finale, arrondi selon mode et pas, bornage de l'ajustement, valeur exportée pour un absent.
+**Contenu.** Fonctions pures : note brute, plafonnée, convertie, finale, arrondi selon mode et pas, bornage de l'ajustement, valeur exportée pour un absent. Aussi : statut dérivé de l'étudiant (§7), validité d'un ajustement (multiple du pas), formatage localisé d'une note. Les notes convertie et finale valent `null` tant que le passage n'est pas terminé : le moteur n'expose jamais de note finale partielle. F03 pose les types de domaine du §7 (`Session`, `Student`, `Attempt`), persistés ensuite par F04.
 
 **Critères d'acceptation.** Tests unitaires couvrant les cas du §5 et l'absence de dérive en virgule flottante sur les barèmes décimaux.
 
