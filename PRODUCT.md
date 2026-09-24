@@ -410,8 +410,8 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 **Objectif.** Afficher énoncés et éléments de réponse.
 
 **Contenu.**
-- react-markdown + remark-gfm. Pas de HTML brut interprété.
-- Coloration syntaxique avec Shiki, limitée aux langages utiles (PHP, SQL, HTML, JS, JSON, bash), chargée à la demande et embarquée dans le build pour fonctionner hors ligne.
+- react-markdown + remark-gfm. Pas de HTML brut interprété (pas de `rehype-raw`). Liens ouverts dans un nouvel onglet (`rel="noopener noreferrer"`). Images autorisées ; une image distante ne s'affiche pas hors ligne (précisé dans le README).
+- Coloration syntaxique avec Shiki, limitée aux langages utiles (PHP, SQL, HTML, JS, JSON, bash), chargée à la demande et embarquée dans le build pour fonctionner hors ligne. `shiki/core` avec le moteur d'expressions régulières JavaScript (pas de WASM), langages importés explicitement, thèmes `github-light` / `github-dark` rendus en double via variables CSS (pas de re-rendu au changement de mode). Langage inconnu : texte brut.
 - Taille de texte adaptée à la projection dans la vue projetée.
 
 **Critères d'acceptation.**

@@ -394,3 +394,15 @@ session de 30 étudiants, mais personne ne doit disparaître en silence (aperçu
 une couleur de config en fond rendrait le contraste imprévisible.
 
 **Reporté dans** : `PRODUCT.md` F07. Impacte F07, F09, F14.
+
+## D27 — Markdown : Shiki allégé sans WASM, thèmes GitHub, images autorisées (2026-09-24)
+
+**Décision** : `shiki/core` + moteur regex JavaScript, 6 langages importés
+explicitement et chargés à la demande, thèmes `github-light` / `github-dark` en double
+rendu CSS. Pas de `rehype-raw`. Liens en nouvel onglet. Images autorisées, limite hors
+ligne documentée.
+
+**Pourquoi** : pas de WASM à pré-cacher ; thèmes neutres compatibles avec toute config ;
+les schémas dans les énoncés sont utiles.
+
+**Reporté dans** : `PRODUCT.md` F08. Impacte F08, F17.
