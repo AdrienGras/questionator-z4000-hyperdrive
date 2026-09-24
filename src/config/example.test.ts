@@ -4,13 +4,46 @@ import exampleText from '../../examples/config.example.json?raw'
 import { buildConfigJsonSchema, CONFIG_SCHEMA_URL } from './json-schema'
 import { validateConfig } from './validate'
 
-function isConfigSchemaShape(value: unknown): value is {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+/**
+ * Vérifie réellement, niveau par niveau, la forme utilisée par les tests ci-dessous (au lieu
+ * d'un cast `as` ou d'un garde qui ne contrôlerait que la racine) : une régression de
+ * `buildConfigJsonSchema` qui ferait disparaître un de ces champs échoue ici avec un message
+ * précis, plutôt que plus loin avec un `Cannot read properties of undefined` peu clair.
+ */
+function assertConfigSchemaShape(value: unknown): asserts value is {
   $id: string
   $schema: string
   additionalProperties: boolean
   properties: { categories: { items: { properties: { icon: { anyOf: unknown[] } } } } }
 } {
-  return typeof value === 'object' && value !== null
+  if (!isRecord(value)) throw new Error('schéma généré : racine non-objet')
+  if (typeof value.$id !== 'string') throw new Error('schéma généré : $id absent ou non-string')
+  if (typeof value.$schema !== 'string') {
+    throw new Error('schéma généré : $schema absent ou non-string')
+  }
+  if (typeof value.additionalProperties !== 'boolean') {
+    throw new Error('schéma généré : additionalProperties absent ou non-booléen')
+  }
+  if (!isRecord(value.properties)) throw new Error('schéma généré : properties absent')
+  if (!isRecord(value.properties.categories)) {
+    throw new Error('schéma généré : properties.categories absent')
+  }
+  if (!isRecord(value.properties.categories.items)) {
+    throw new Error('schéma généré : properties.categories.items absent')
+  }
+  if (!isRecord(value.properties.categories.items.properties)) {
+    throw new Error('schéma généré : properties.categories.items.properties absent')
+  }
+  if (!isRecord(value.properties.categories.items.properties.icon)) {
+    throw new Error('schéma généré : properties.categories.items.properties.icon absent')
+  }
+  if (!Array.isArray(value.properties.categories.items.properties.icon.anyOf)) {
+    throw new Error('schéma généré : properties.categories.items.properties.icon.anyOf absent')
+  }
 }
 
 describe('fichier d’exemple', () => {
@@ -45,9 +78,8 @@ describe('fichier d’exemple', () => {
 })
 
 describe('buildConfigJsonSchema', () => {
-  const rawSchema = buildConfigJsonSchema()
-  if (!isConfigSchemaShape(rawSchema)) throw new Error('schéma généré de forme inattendue')
-  const schema = rawSchema
+  const schema = buildConfigJsonSchema()
+  assertConfigSchemaShape(schema)
 
   test('porte l’URL publique et le draft 2020-12', () => {
     expect(schema.$id).toBe(CONFIG_SCHEMA_URL)
