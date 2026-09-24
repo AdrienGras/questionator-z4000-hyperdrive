@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { readFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, test } from 'vitest'
 import {
   EXAMPLE_FILE_NAME,
@@ -25,7 +26,7 @@ describe('matchConfigAsset', () => {
 
 describe('renderConfigAssets', () => {
   test('génère le schéma via runnerImport et recopie l’exemple', async () => {
-    const { schema, example } = await renderConfigAssets()
+    const { schema, example, watchFiles } = await renderConfigAssets()
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- schema généré par buildConfigJsonSchema() puis reparsé : on affirme juste la forme qu'on vient d'écrire.
     const parsed = JSON.parse(schema) as { $id: string }
     expect(parsed.$id).toBe(
@@ -36,5 +37,12 @@ describe('renderConfigAssets', () => {
       'utf8',
     )
     expect(example).toBe(exampleFile)
+    expect(watchFiles).toEqual(
+      expect.arrayContaining([
+        fileURLToPath(new URL('../src/config/json-schema.ts', import.meta.url)),
+        fileURLToPath(new URL('../src/config/schema.ts', import.meta.url)),
+        fileURLToPath(new URL('../examples/config.example.json', import.meta.url)),
+      ]),
+    )
   }, 30_000)
 })

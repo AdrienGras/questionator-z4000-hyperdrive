@@ -16,16 +16,29 @@ export function matchConfigAsset(url: string | undefined, base: string): string 
   return [SCHEMA_FILE_NAME, EXAMPLE_FILE_NAME].find((name) => pathname === `${base}${name}`)
 }
 
-/** Charge le module de schéma hors de l'application (sans vite.config.ts) et lit l'exemple. */
-export async function renderConfigAssets(): Promise<{ schema: string; example: string }> {
-  const { module } = await runnerImport<JsonSchemaModule>(SCHEMA_MODULE, { configFile: false })
+/**
+ * Charge le module de schéma hors de l'application (sans vite.config.ts), lit l'exemple, et
+ * renvoie la liste des fichiers à surveiller : les dépendances transitives de `json-schema.ts`
+ * (tout `src/config/`, cf. D17) plus l'exemple lui-même.
+ */
+export async function renderConfigAssets(): Promise<{
+  schema: string
+  example: string
+  watchFiles: string[]
+}> {
+  const { module, dependencies } = await runnerImport<JsonSchemaModule>(SCHEMA_MODULE, {
+    configFile: false,
+  })
   const schema = `${JSON.stringify(module.buildConfigJsonSchema(), null, 2)}\n`
   const example = await readFile(EXAMPLE_FILE, 'utf8')
-  return { schema, example }
+  const watchFiles = [...new Set([SCHEMA_MODULE, ...dependencies, EXAMPLE_FILE])]
+  return { schema, example, watchFiles }
 }
 
 /** Publie config.schema.json et config.example.json à la racine du site (D17). */
 export function configSchemaPlugin(): Plugin {
+  let rendered: { schema: string; example: string } | undefined
+
   return {
     name: 'questionator:config-schema',
     configureServer(server) {
@@ -46,13 +59,17 @@ export function configSchemaPlugin(): Plugin {
         )
       })
     },
-    buildStart() {
-      this.addWatchFile(EXAMPLE_FILE)
+    async buildStart() {
+      const { schema, example, watchFiles } = await renderConfigAssets()
+      rendered = { schema, example }
+      for (const file of watchFiles) this.addWatchFile(file)
     },
-    async generateBundle() {
-      const { schema, example } = await renderConfigAssets()
-      this.emitFile({ type: 'asset', fileName: SCHEMA_FILE_NAME, source: schema })
-      this.emitFile({ type: 'asset', fileName: EXAMPLE_FILE_NAME, source: example })
+    generateBundle() {
+      if (!rendered) {
+        throw new Error('questionator:config-schema : buildStart ne s’est pas exécuté')
+      }
+      this.emitFile({ type: 'asset', fileName: SCHEMA_FILE_NAME, source: rendered.schema })
+      this.emitFile({ type: 'asset', fileName: EXAMPLE_FILE_NAME, source: rendered.example })
     },
   }
 }
