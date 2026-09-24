@@ -1,0 +1,568 @@
+# QUESTIONATOR Z-4000 HYPERDRIVE
+
+> Slug de repo proposé : `questionator-z4000`.
+
+## 1. Vision
+
+Questionator Z-4000 Hyperdrive est une application web front-only qui sert à faire passer des oraux notés par tirage de questions. L'étudiant choisit une catégorie de difficulté, l'application tire une question au hasard dans cette catégorie, l'examinateur note la réponse avec les valeurs du barème, et le score cumulé est communiqué après chaque question. L'étudiant arbitre ainsi lui-même entre prudence et prise de risque.
+
+L'application tourne entièrement dans le navigateur, sans backend : aucune donnée ne quitte la machine de l'examinateur. Elle est publiée sur GitHub Pages sous licence MIT, fonctionne hors ligne après un premier chargement, et propose un mode présentateur : une fenêtre projetée pour l'étudiant, une fenêtre de pilotage pour l'examinateur.
+
+## 2. Contexte d'usage
+
+- Un oral compte un nombre fixe de questions par étudiant (exemple : 3). Chaque catégorie a une valeur maximale (exemple : Facile 1 pt, Normal 2 pts, Difficile 3 pts, Cauchemar 4 pts). La note brute est plafonnée à un score cible (exemple : 10), puis convertie sur une échelle finale (exemple : /20).
+- Plusieurs examinateurs peuvent faire passer les oraux en parallèle, chacun sur sa machine, avec sa propre liste d'étudiants et le même fichier de configuration. La consolidation se fait hors de l'outil, à partir des exports Excel.
+- L'examinateur partage un écran avec l'étudiant. La vue projetée ne doit jamais afficher les éléments de réponse, les notes des autres étudiants ni les outils d'ajustement.
+
+## 3. Principes directeurs
+
+1. **Aucun backend.** Toutes les données vivent dans IndexedDB, dans le navigateur de l'examinateur.
+2. **Config figée.** À la création d'une session, une copie complète de la configuration est stockée dans la session. Modifier le fichier source ensuite n'a aucun effet sur les sessions existantes.
+3. **Persistance immédiate.** Chaque action (tirage, note, skip, ajustement) est écrite en base au moment où elle a lieu. En particulier, recharger la page ne permet pas de retirer une question déjà tirée.
+4. **Séparation stricte des vues.** La vue projetée est en lecture seule et n'affiche que l'étudiant explicitement projeté par l'examinateur.
+5. **Logique de notation isolée.** Plafond, conversion, arrondi et ajustement sont des fonctions pures, couvertes par des tests unitaires.
+
+## 4. Glossaire
+
+| Terme | Définition |
+|---|---|
+| Session | Un ensemble d'oraux : un nom, une config figée, une liste d'étudiants et leurs passages. |
+| Config | Le fichier JSON qui décrit l'épreuve : catégories, questions, barèmes, règles de notation, thème, options. |
+| Catégorie | Un groupe de questions de même difficulté, avec une valeur maximale et un barème. |
+| Barème | La liste des valeurs attribuables pour une question d'une catégorie (exemple : `[0, 0.5, 1, 1.5, 2]`). |
+| Passage | La séquence de questions d'un étudiant. |
+| Tirage | La sélection aléatoire d'une question dans une catégorie, parmi celles encore disponibles pour cet étudiant. |
+| Skip | L'abandon d'une question tirée, avec un motif facultatif. La question est exclue pour cet étudiant et ne compte pas dans le nombre de questions. |
+| Note brute | La somme des points obtenus aux questions. |
+| Note plafonnée | `min(note brute, maxRawScore)`. |
+| Note convertie | La note plafonnée ramenée sur l'échelle finale. |
+| Ajustement | Un bonus ou malus libre appliqué par l'examinateur sur la note convertie, avec une justification facultative. |
+| Note finale | La note convertie arrondie plus l'ajustement, bornée entre 0 et l'échelle finale. |
+| Étudiant projeté | L'étudiant que l'examinateur a explicitement poussé vers la vue projetée. |
+
+## 5. Règles de notation
+
+Pour un étudiant ayant terminé son passage :
+
+1. `brute = somme des points des questions notées`
+2. `plafonnée = min(brute, scoring.maxRawScore)`
+3. `convertie = arrondi(plafonnée × scoring.finalScale / scoring.maxRawScore)`, selon `scoring.rounding`
+4. `finale = arrondi(clamp(convertie + ajustement, 0, scoring.finalScale))`
+
+La note convertie est arrondie **avant** l'ajustement : l'examinateur voit toujours un calcul juste (« 13,5 + 1 = 14,5 »). L'ajustement se saisit par multiples du pas d'arrondi, donc `convertie + ajustement` tombe déjà sur le pas ; l'arrondi de l'étape 4 ne sert que lorsque le bornage ramène la note sur une valeur hors pas (`finalScale` non multiple du pas). La note finale est bornée à 0 en bas et à `finalScale` en haut.
+
+Arrondi : le pas vaut `rounding.step` s'il est défini (exemple : `0.5` pour arrondir au demi-point), sinon `10^-rounding.decimals`. Le mode `nearest`, `up` ou `down` s'applique à ce pas.
+
+Précision et représentation numérique :
+
+- Toute valeur saisie ou configurée qui entre dans un calcul de note (valeurs de barème, `maxRawScore`, `finalScale`, `rounding.step`, `absent.value`, ajustement) a **au plus 3 décimales**. La config est rejetée sinon ; la saisie de l'ajustement est limitée à 3 décimales.
+- Les notes sont manipulées en **millièmes entiers**. La conversion d'échelle ne produit pas forcément un nombre entier de millièmes (exemple : /20 avec un plafond à 7) : elle est conservée sous forme de **fraction exacte** (numérateur et dénominateur entiers) jusqu'à son arrondi au pas demandé (étape 3). Aucun calcul intermédiaire en virgule flottante.
+- La conversion en nombre décimal n'a lieu qu'à l'affichage et à l'export.
+
+Des tests unitaires couvrent les cas limites : plafond atteint, ajustement qui ferait dépasser l'échelle, ajustement négatif sous zéro, barèmes décimaux, chaque mode d'arrondi.
+
+Pendant le passage, le score cumulé affiché est la note brute. L'affichage de la note finale (brute, convertie ou les deux) est réglé par `presentation.finalScoreDisplay`.
+
+## 6. Fichiers d'entrée
+
+### 6.1 Liste d'étudiants (CSV)
+
+- Deux colonnes : nom et prénom.
+- En-tête détecté sans tenir compte de la casse ni des accents (`nom`, `prenom`, `prénom`, `Nom`, `Prénom`…). L'ordre des colonnes est libre si l'en-tête est présent. Sans en-tête, l'ordre attendu est nom puis prénom.
+- Séparateur `,` ou `;` détecté automatiquement (les exports Excel en français utilisent souvent `;`).
+- UTF-8, avec ou sans BOM.
+- L'ordre des lignes détermine l'ordre de passage.
+- Lignes vides ignorées. Doublons signalés par un avertissement, sans blocage.
+
+### 6.2 Configuration (JSON)
+
+Le schéma est défini avec Zod. Un JSON Schema en est généré au build et publié sur GitHub Pages, pour que le champ `$schema` du fichier donne l'autocomplétion et la validation dans l'éditeur. Un fichier d'exemple complet est versionné dans le dépôt et téléchargeable depuis l'écran de création de session.
+
+Exemple :
+
+```json
+{
+  "$schema": "https://<owner>.github.io/questionator-z4000/config.schema.json",
+  "schemaVersion": 1,
+  "locale": "fr",
+  "exam": {
+    "title": "Oral PHP",
+    "subject": "PHP",
+    "cohort": "B2 2026"
+  },
+  "scoring": {
+    "questionsPerStudent": 3,
+    "maxRawScore": 10,
+    "finalScale": 20,
+    "rounding": { "mode": "nearest", "decimals": 2, "step": null }
+  },
+  "absent": {
+    "export": "label",
+    "label": "ABS",
+    "value": 0
+  },
+  "skips": {
+    "enabled": true,
+    "maxPerStudent": 2,
+    "reasons": ["Question déjà vue", "Hors programme", "Énoncé ambigu"],
+    "allowFreeText": true
+  },
+  "presentation": {
+    "showCumulativeScore": true,
+    "finalScoreDisplay": "both",
+    "showStatsOnFinal": false,
+    "drawAnimation": true,
+    "defaultColorMode": "dark"
+  },
+  "theme": {
+    "light": {
+      "background": "oklch(0.980 0.013 310.5)",
+      "foreground": "oklch(0.234 0.095 287.8)",
+      "card": "oklch(1 0 0)",
+      "card-foreground": "oklch(0.234 0.095 287.8)",
+      "popover": "oklch(1 0 0)",
+      "popover-foreground": "oklch(0.234 0.095 287.8)",
+      "primary": "oklch(0.518 0.226 323.9)",
+      "primary-foreground": "oklch(1 0 0)",
+      "secondary": "oklch(0.934 0.037 300.8)",
+      "secondary-foreground": "oklch(0.234 0.095 287.8)",
+      "muted": "oklch(0.948 0.025 303.5)",
+      "muted-foreground": "oklch(0.456 0.103 294.2)",
+      "accent": "oklch(0.956 0.044 203.4)",
+      "accent-foreground": "oklch(0.450 0.077 224.3)",
+      "destructive": "oklch(0.577 0.215 27.3)",
+      "border": "oklch(0.869 0.060 303.6)",
+      "input": "oklch(0.869 0.060 303.6)",
+      "ring": "oklch(0.518 0.226 323.9)",
+      "chart-1": "oklch(0.518 0.226 323.9)",
+      "chart-2": "oklch(0.609 0.111 221.7)",
+      "chart-3": "oklch(0.646 0.194 41.1)",
+      "chart-4": "oklch(0.541 0.247 293.0)",
+      "chart-5": "oklch(0.592 0.218 0.6)",
+      "sidebar": "oklch(0.959 0.024 304.5)",
+      "sidebar-foreground": "oklch(0.234 0.095 287.8)",
+      "sidebar-primary": "oklch(0.518 0.226 323.9)",
+      "sidebar-primary-foreground": "oklch(1 0 0)",
+      "sidebar-accent": "oklch(0.934 0.037 300.8)",
+      "sidebar-accent-foreground": "oklch(0.234 0.095 287.8)",
+      "sidebar-border": "oklch(0.869 0.060 303.6)",
+      "sidebar-ring": "oklch(0.518 0.226 323.9)",
+      "radius": "0.75rem"
+    },
+    "dark": {
+      "background": "oklch(0.192 0.075 287.5)",
+      "foreground": "oklch(0.950 0.032 309.9)",
+      "card": "oklch(0.237 0.094 288.4)",
+      "card-foreground": "oklch(0.950 0.032 309.9)",
+      "popover": "oklch(0.237 0.094 288.4)",
+      "popover-foreground": "oklch(0.950 0.032 309.9)",
+      "primary": "oklch(0.687 0.252 323.9)",
+      "primary-foreground": "oklch(0.192 0.075 287.5)",
+      "secondary": "oklch(0.300 0.128 286.5)",
+      "secondary-foreground": "oklch(0.950 0.032 309.9)",
+      "muted": "oklch(0.269 0.113 287.1)",
+      "muted-foreground": "oklch(0.758 0.100 298.0)",
+      "accent": "oklch(0.797 0.134 211.5)",
+      "accent-foreground": "oklch(0.192 0.075 287.5)",
+      "destructive": "oklch(0.679 0.213 14.7)",
+      "border": "oklch(0.399 0.169 290.7)",
+      "input": "oklch(0.399 0.169 290.7)",
+      "ring": "oklch(0.687 0.252 323.9)",
+      "chart-1": "oklch(0.687 0.252 323.9)",
+      "chart-2": "oklch(0.797 0.134 211.5)",
+      "chart-3": "oklch(0.758 0.159 55.9)",
+      "chart-4": "oklch(0.606 0.219 292.7)",
+      "chart-5": "oklch(0.725 0.175 349.8)",
+      "sidebar": "oklch(0.237 0.094 288.4)",
+      "sidebar-foreground": "oklch(0.950 0.032 309.9)",
+      "sidebar-primary": "oklch(0.687 0.252 323.9)",
+      "sidebar-primary-foreground": "oklch(0.192 0.075 287.5)",
+      "sidebar-accent": "oklch(0.300 0.128 286.5)",
+      "sidebar-accent-foreground": "oklch(0.950 0.032 309.9)",
+      "sidebar-border": "oklch(0.399 0.169 290.7)",
+      "sidebar-ring": "oklch(0.687 0.252 323.9)",
+      "radius": "0.75rem"
+    }
+  },
+  "categories": [
+    {
+      "id": "facile",
+      "label": "Facile",
+      "scale": [0, 0.5, 1],
+      "color": "oklch(0.797 0.134 211.5)",
+      "icon": "leaf",
+      "order": 1,
+      "questions": [
+        {
+          "id": "facile-001",
+          "title": "== vs ===",
+          "tags": ["bases"],
+          "prompt": "Quelle différence entre `==` et `===` en PHP ?\n\n```php\nvar_dump(0 == \"a\");\n```",
+          "answer": "- `==` compare après conversion de type\n- `===` compare valeur **et** type\n- Depuis PHP 8, `0 == \"a\"` vaut `false`"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Champs :
+
+| Champ | Type | Obligatoire | Description |
+|---|---|---|---|
+| `schemaVersion` | entier | oui | Version du format de config. Sert à la compatibilité des sessions et des backups. |
+| `locale` | `"fr"` \| `"en"` | non | Langue de l'interface. Défaut : langue du navigateur si supportée, sinon `fr`. |
+| `exam.title` | string | oui | Titre affiché sur la vue projetée et en tête des exports. |
+| `exam.subject`, `exam.cohort` | string | non | Métadonnées reprises dans les exports. |
+| `scoring.questionsPerStudent` | entier > 0 | oui | Nombre de questions notées par passage. |
+| `scoring.maxRawScore` | nombre > 0 | oui | Plafond de la note brute. |
+| `scoring.finalScale` | nombre > 0 | oui | Échelle de la note finale. |
+| `scoring.rounding.mode` | `"nearest"` \| `"up"` \| `"down"` | non | Défaut : `nearest`. |
+| `scoring.rounding.decimals` | entier 0–3 | non | Défaut : 2. |
+| `scoring.rounding.step` | nombre > 0 \| null | non | Pas d'arrondi. S'il est défini, il prime sur `decimals`. |
+| `absent.export` | `"label"` \| `"zero"` \| `"value"` | non | Ce que l'export met en note pour un absent. Défaut : `label`. |
+| `absent.label` | string | non | Défaut : `ABS`. |
+| `absent.value` | nombre | si `export = "value"` | Note attribuée aux absents. |
+| `skips.enabled` | booléen | non | Défaut : `true`. |
+| `skips.maxPerStudent` | entier ≥ 0 | non | Défaut : 1. |
+| `skips.reasons` | string[] | non | Motifs proposés dans la boîte de skip. |
+| `skips.allowFreeText` | booléen | non | Autorise un motif libre. Défaut : `true`. |
+| `presentation.showCumulativeScore` | booléen | non | Affiche le score cumulé sur la vue projetée après chaque question. Défaut : `true`. |
+| `presentation.finalScoreDisplay` | `"raw"` \| `"converted"` \| `"both"` | non | Défaut : `both`. |
+| `presentation.showStatsOnFinal` | booléen | non | Affiche le détail du passage sur l'écran final projeté. Défaut : `false`. |
+| `presentation.drawAnimation` | booléen | non | Animation lors du tirage. Défaut : `true`. |
+| `presentation.defaultColorMode` | `"light"` \| `"dark"` \| `"system"` | non | Défaut : `system`. |
+| `theme.light`, `theme.dark` | objet token → valeur CSS | non | Surcharge des variables CSS de shadcn/ui. Seuls les noms de tokens d'une liste blanche sont acceptés, alignée sur la version de shadcn/ui utilisée (couleurs de base, `chart-*`, `sidebar-*`, `radius`). Un token absent garde la valeur par défaut de shadcn. |
+| `categories[].id` | string | oui | Identifiant stable. |
+| `categories[].label` | string | oui | Libellé affiché. |
+| `categories[].scale` | nombre[] | oui | Valeurs attribuables, décimales autorisées. Sa valeur maximale est la valeur de la catégorie (« points max »), affichée sur la tuile et utilisée dans les exports et les stats. |
+| `categories[].color` | couleur CSS | non | Couleur de la tuile. |
+| `categories[].icon` | string | non | Nom d'icône Lucide. Nom inconnu : pas d'icône, avec un avertissement. |
+| `categories[].order` | entier | non | Ordre d'affichage. Défaut : ordre du tableau. |
+| `categories[].questions[].id` | string | oui | Identifiant stable, unique dans toute la config. |
+| `categories[].questions[].title` | string | non | Libellé court, utilisé dans le side panel et les exports. Défaut : début du `prompt` sans markdown. |
+| `categories[].questions[].tags` | string[] | non | Notions pédagogiques, utilisées dans les stats. |
+| `categories[].questions[].prompt` | markdown | oui | Énoncé affiché aux deux vues. |
+| `categories[].questions[].answer` | markdown | non | Éléments de réponse, visibles uniquement dans la vue examinateur. |
+
+Règles de validation, en plus des types :
+
+- **Erreur** si un `id` de catégorie est dupliqué.
+- **Erreur** si un `id` de question est dupliqué dans l'ensemble de la config.
+- **Erreur** si un barème est vide, contient une valeur négative ou des doublons, ou si sa valeur maximale est 0.
+- **Erreur** si une catégorie n'a aucune question.
+- **Erreur** si le nombre total de questions de la config est inférieur à `questionsPerStudent + (skips.enabled ? skips.maxPerStudent : 0)`. Ce seuil garantit qu'un étudiant peut toujours terminer son passage, quitte à changer de catégorie. Une catégorie peut en revanche compter moins de questions que ce seuil : elle sera grisée pour un étudiant qui l'a épuisée (F09).
+- **Erreur** si `absent.export = "value"` sans `absent.value`.
+- **Erreur** si une valeur numérique de notation (barème, `maxRawScore`, `finalScale`, `rounding.step`, `absent.value`) a plus de 3 décimales (§5).
+- **Erreur** si un token de thème ne fait pas partie de la liste blanche.
+- **Erreur** sur toute clé inconnue, à tout niveau (schéma strict ; seule `$schema` est admise en plus des champs du tableau) : une faute de frappe dans un nom de champ ne doit jamais retomber silencieusement sur la valeur par défaut.
+- **Erreur** si `schemaVersion` est supérieure à celle que connaît l'application, avec un message invitant à recharger la page pour mettre l'application à jour.
+- **Avertissement** si `questionsPerStudent × (plus grande valeur de barème, toutes catégories confondues)` est inférieur à `maxRawScore` (note maximale inatteignable).
+
+Les erreurs sont listées avec leur chemin JSON (`categories[2].questions[5].id`) et un message lisible dans la langue de l'interface. Une config avec des erreurs bloque la création de session ; des avertissements seuls ne la bloquent pas.
+
+## 7. Modèle de données (indicatif)
+
+```ts
+Session {
+  id, name, createdAt, updatedAt,
+  examiner?,               // nom de l'examinateur, facultatif
+  appVersion,              // version de l'app à la création
+  config,                  // snapshot figé et validé
+  students: Student[],
+  activeStudentId?,        // étudiant ouvert dans la vue examinateur
+  projection: { mode: 'waiting' | 'student', studentId? }
+}
+
+Student {
+  id, lastName, firstName, order,
+  addedDuringSession: boolean,
+  absent: boolean,
+  attempts: Attempt[],     // questions tirées, dans l'ordre
+  adjustment?: { value: number, reason?: string },
+  comment?: string
+}
+
+Attempt {
+  id, categoryId, questionId, drawnAt,
+  outcome: 'pending' | 'scored' | 'skipped',
+  score?: number,          // si scored, valeur du barème
+  skipReason?: string,     // si skipped
+  editedAt?                // dernière modification de la note
+}
+```
+
+Le statut affiché d'un étudiant est dérivé : **absent** si `absent`, sinon **terminé** si le nombre d'attempts `scored` atteint `questionsPerStudent`, sinon **en cours** si au moins un attempt existe, sinon **à passer**.
+
+## 8. Features
+
+Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé suit les dépendances.
+
+### F01 — Socle projet et déploiement
+
+**Objectif.** Un dépôt prêt à développer et à déployer.
+
+**Contenu.**
+- Vite + React + TypeScript strict, TanStack Router en mode SPA avec historique par hash (GitHub Pages n'offre pas de fallback SPA).
+- Tailwind + shadcn/ui, thème par défaut de shadcn.
+- ESLint, Prettier, Vitest.
+- GitHub Action : lint, tests, build, déploiement sur GitHub Pages à chaque push sur `main`. `base` Vite réglé sur le nom du repo.
+- Licence MIT, README (usage, format des fichiers, lien vers le schéma et l'exemple).
+
+**Critères d'acceptation.**
+- L'application vide est accessible sur l'URL GitHub Pages et les routes fonctionnent après rechargement.
+- La CI échoue si lint ou tests échouent.
+
+### F02 — Schéma de configuration et validation
+
+**Objectif.** Charger, valider et expliquer une config.
+
+**Contenu.**
+- Schéma Zod complet (§6.2) avec les règles croisées.
+- Génération du JSON Schema au build, publié à la racine du site.
+- Fichier `examples/config.example.json` versionné, avec au moins 4 catégories et assez de questions pour passer la validation. Il est téléchargeable depuis l'application.
+- Le fichier d'exemple embarque le thème « Synthwave » ci-dessus, décliné de la bannière du projet, avec `defaultColorMode: "dark"`. Couleurs des catégories : Facile cyan `oklch(0.797 0.134 211.5)`, Normal violet `oklch(0.709 0.159 293.5)`, Difficile magenta `oklch(0.687 0.252 323.9)`, Cauchemar orange `oklch(0.758 0.159 55.9)`. Le thème par défaut de l'application reste celui de shadcn : ce thème ne s'applique qu'aux sessions créées avec cette config.
+- Formatage des erreurs et avertissements avec chemin JSON, dans la langue de l'interface.
+
+**Critères d'acceptation.**
+- Le fichier d'exemple passe la validation.
+- Chaque règle du §6.2 a un test qui la déclenche.
+- Le JSON Schema publié valide le fichier d'exemple dans VSCode.
+
+### F03 — Moteur de notation
+
+**Objectif.** Calculer toutes les notes à partir d'un étudiant et d'une config.
+
+**Contenu.** Fonctions pures : note brute, plafonnée, convertie, finale, arrondi selon mode et pas, bornage de l'ajustement, valeur exportée pour un absent.
+
+**Critères d'acceptation.** Tests unitaires couvrant les cas du §5 et l'absence de dérive en virgule flottante sur les barèmes décimaux.
+
+### F04 — Persistance
+
+**Objectif.** Stocker les sessions de façon durable dans le navigateur.
+
+**Contenu.**
+- Base IndexedDB via Dexie, schéma versionné.
+- Demande de stockage persistant (`navigator.storage.persist()`) à la première création de session, avec un indicateur discret si le navigateur refuse.
+- Hooks de lecture réactifs (`useLiveQuery`).
+
+**Critères d'acceptation.**
+- Une session créée survit à la fermeture et à la réouverture du navigateur.
+- Une écriture dans un onglet est visible dans un autre onglet de la même origine, **y compris une fenêtre ouverte par `window.open`**. C'est le test de réactivité entre fenêtres dont dépend F14 : il est fait ici, avec `liveQuery` seul. S'il échoue, F14 ajoute une notification par BroadcastChannel.
+
+### F05 — Accueil et gestion des sessions
+
+**Objectif.** Point d'entrée de l'application.
+
+**Contenu.**
+- Liste des sessions avec nom, titre de l'épreuve, date de dernière modification et avancement (passés, absents, restants).
+- Actions : reprendre, créer, renommer, modifier l'examinateur, supprimer (avec confirmation), exporter un backup, importer un backup.
+- Backup : un fichier JSON contenant la session complète, avec `appVersion` et une version de format. À l'import, validation Zod ; si une session avec le même `id` existe, l'utilisateur choisit entre remplacer et annuler.
+
+**Critères d'acceptation.**
+- Un backup exporté puis importé dans un autre navigateur restitue une session identique, passages et ajustements compris.
+- Un backup corrompu ou d'un format inconnu affiche une erreur explicite et ne modifie rien.
+
+### F06 — Création de session
+
+**Objectif.** Initialiser une session à partir d'un nom, d'un CSV et d'une config.
+
+**Contenu.**
+- Formulaire : nom de session, nom de l'examinateur (facultatif, modifiable ensuite depuis l'accueil), fichier CSV, fichier JSON. Glisser-déposer accepté.
+- Aperçu : nombre d'étudiants, doublons éventuels, résumé de la config (catégories, nombre de questions, barèmes, règles de notation), erreurs et avertissements de F02.
+- Lien de téléchargement du fichier de config d'exemple.
+- À la validation : snapshot de la config dans la session, création des étudiants dans l'ordre du CSV, ouverture de l'écran de passage sur le premier étudiant.
+
+**Critères d'acceptation.**
+- Un CSV séparé par `;` avec BOM et en-tête `Nom;Prénom` est importé correctement.
+- Une config invalide bloque la création et affiche toutes les erreurs.
+- Modifier ensuite le fichier de config n'a aucun effet sur la session.
+
+### F07 — Thème et langue
+
+**Objectif.** Appliquer l'identité visuelle et la langue définies par la config.
+
+**Contenu.**
+- Application des surcharges de tokens `theme.light` et `theme.dark` sur les variables CSS de shadcn, sur les deux vues.
+- Mode clair, sombre ou système selon `presentation.defaultColorMode`, modifiable à la main dans chaque fenêtre.
+- Couleur et icône par catégorie.
+- Interface en français et en anglais via un dictionnaire typé léger. L'accueil, sans config chargée, suit la langue du navigateur.
+
+**Critères d'acceptation.**
+- Une surcharge de `primary` change les boutons principaux sur les deux vues.
+- Toutes les chaînes de l'interface existent dans les deux langues (vérifié par un test de typage ou un test unitaire).
+
+### F08 — Rendu markdown
+
+**Objectif.** Afficher énoncés et éléments de réponse.
+
+**Contenu.**
+- react-markdown + remark-gfm. Pas de HTML brut interprété.
+- Coloration syntaxique avec Shiki, limitée aux langages utiles (PHP, SQL, HTML, JS, JSON, bash), chargée à la demande et embarquée dans le build pour fonctionner hors ligne.
+- Taille de texte adaptée à la projection dans la vue projetée.
+
+**Critères d'acceptation.**
+- Un bloc ```` ```php ```` est coloré dans les deux vues, y compris hors ligne.
+- Une balise `<script>` dans le markdown est affichée comme du texte, sans être exécutée.
+
+### F09 — Écran de passage (vue examinateur)
+
+**Objectif.** Dérouler le passage d'un étudiant.
+
+**Contenu.**
+- En-tête : nom de l'étudiant, numéro de question (`2 / 3`), score cumulé brut.
+- Grille des catégories triées par `order`, avec libellé, valeur max, couleur et icône.
+- Une catégorie est grisée, avec une infobulle, si elle n'a plus de question disponible pour cet étudiant (toutes tirées, notées ou skippées).
+- Au clic sur une catégorie : tirage uniforme parmi les questions disponibles pour cet étudiant, via `crypto.getRandomValues`. L'attempt `pending` est persisté immédiatement.
+- Tant qu'une question est `pending`, la grille est désactivée : il faut noter ou skipper.
+- Affichage de la question : énoncé markdown, puis éléments de réponse dans un bloc repliable réservé à l'examinateur.
+- Sous la question : un bouton par valeur du barème de la catégorie. Au clic, l'attempt passe en `scored`, le score cumulé est mis à jour et la grille redevient disponible.
+- Après la dernière question notée : passage à l'écran final (F11).
+
+**Critères d'acceptation.**
+- Un même étudiant ne peut pas tirer deux fois la même question, y compris une question skippée.
+- Deux étudiants différents peuvent tirer la même question.
+- Recharger la page pendant qu'une question est `pending` réaffiche la même question.
+
+### F10 — Skip de question
+
+**Objectif.** Abandonner une question tirée sans pénaliser l'étudiant.
+
+**Contenu.**
+- Bouton « Passer la question » sur une question `pending`, si `skips.enabled`.
+- Boîte de dialogue : motifs prédéfinis de `skips.reasons`, champ libre si `skips.allowFreeText`. Le motif est facultatif.
+- L'attempt passe en `skipped`, la question est exclue pour cet étudiant, et l'étudiant rechoisit une catégorie.
+- Le bouton est désactivé une fois `skips.maxPerStudent` atteint.
+
+**Critères d'acceptation.**
+- Un skip ne compte pas dans `questionsPerStudent`.
+- Le motif apparaît dans le side panel et dans l'export.
+
+### F11 — Écran final et ajustement
+
+**Objectif.** Clore le passage et fixer la note.
+
+**Contenu.**
+- Affichage de la note selon `presentation.finalScoreDisplay`, et du détail du passage (questions, catégories, points, skips).
+- Popup d'ajustement réservée à l'examinateur, ouverte à la fin du passage et rouvrable ensuite : valeur positive ou négative, en points de l'échelle finale, saisie par multiples du pas d'arrondi (§5), et justification facultative. La note finale recalculée est affichée en direct, bornée entre 0 et `finalScale`.
+- Bouton « Réinitialiser l'étudiant » avec confirmation : supprime tous les attempts et l'ajustement, et remet l'étudiant à « à passer ». Le commentaire est conservé : il porte sur l'étudiant, pas sur son passage.
+
+**Critères d'acceptation.**
+- Un étudiant à 20/20 avec un ajustement de +1 reste à 20.
+- La justification de l'ajustement apparaît dans l'export.
+
+### F12 — Side panel, onglet « Étudiant »
+
+**Objectif.** Suivre et corriger l'étudiant actif.
+
+**Contenu.**
+- Liste des questions tirées : ordre, catégorie, titre, points obtenus sur points max, ou motif de skip.
+- Modification d'une note déjà saisie (sélection parmi les valeurs du barème), avec recalcul immédiat. La date de modification est conservée pour l'export.
+- Totaux : brute, plafonnée, convertie, ajustement, finale.
+- Commentaire libre sur l'étudiant, sauvegardé automatiquement.
+- Bascule du statut absent, réversible. Sans attempt, elle est directe. Si le passage est entamé, une confirmation indique le nombre de questions tirées qui seront supprimées ; l'accepter réinitialise l'étudiant (comme F11, commentaire conservé) puis le marque absent. Un étudiant absent n'a donc jamais d'attempt.
+
+**Critères d'acceptation.**
+- Modifier une note d'un étudiant terminé met à jour sa note finale partout, vue projetée comprise si elle l'affiche.
+
+### F13 — Side panel, onglet « Étudiants »
+
+**Objectif.** Naviguer dans la session.
+
+**Contenu.**
+- Liste dans l'ordre de passage : nom, prénom, statut, note brute, note convertie ou « ABS ».
+- Clic sur un étudiant : il devient l'étudiant actif de la vue examinateur. On reprend son passage s'il n'est pas terminé, sinon on affiche son écran final. Cela ne change pas la vue projetée (voir F14).
+- Ajout d'un étudiant en cours de session (nom, prénom), placé en fin de liste et marqué `addedDuringSession`.
+- Bouton d'export Excel (F16).
+- Bouton « Statistiques », qui ouvre l'écran de F15.
+
+**Critères d'acceptation.**
+- Basculer d'un étudiant à un autre puis revenir restitue exactement l'état du premier.
+
+### F14 — Mode présentateur
+
+**Objectif.** Une vue projetée pour l'étudiant, pilotée depuis la vue examinateur.
+
+**Contenu.**
+- Bouton « Ouvrir la vue projetée » : ouvre une nouvelle fenêtre sur la route `#/present/:sessionId`.
+- La vue projetée est en lecture seule. Sa seule commande est un bouton plein écran (l'API Fullscreen exige un geste utilisateur dans cette fenêtre).
+- Elle n'affiche que l'étudiant projeté (`projection`), jamais l'étudiant actif par défaut.
+- Dans la vue examinateur, un bouton « Projeter cet étudiant » pousse l'étudiant actif, et un bouton « Écran d'attente » repasse en attente. Si l'étudiant actif n'est pas celui qui est projeté, un bandeau le signale.
+- Écran d'attente : titre de l'épreuve et message d'attente.
+- Écran étudiant : grille des catégories, question tirée (énoncé seul), score cumulé si `showCumulativeScore`, note finale selon `finalScoreDisplay`, détail du passage si `showStatsOnFinal`. Animation de tirage si `drawAnimation`.
+- Synchronisation : la vue projetée lit IndexedDB via `liveQuery`. La réactivité entre fenêtres est vérifiée par F04 ; le repli sur BroadcastChannel n'est ajouté que si ce critère a échoué.
+- La vue projetée se reconstruit entièrement depuis la base si elle est fermée puis rouverte.
+
+**Critères d'acceptation.**
+- Aucun élément de réponse, note d'un autre étudiant, commentaire ni ajustement n'apparaît dans la vue projetée.
+- Un tirage ou une note dans la vue examinateur apparaît dans la vue projetée sans action supplémentaire.
+
+### F15 — Statistiques de session
+
+**Objectif.** Vue d'ensemble de la session.
+
+**Contenu.** Écran dédié, route `#/session/:sessionId/stats`, ouvert depuis l'onglet « Étudiants » du side panel (F13), avec retour à l'écran de passage. Le contenu est repris dans l'export :
+- Effectifs : passés, en cours, à passer, absents, ajoutés en cours de session.
+- Notes finales : moyenne, médiane, minimum, maximum, écart-type, histogramme.
+- Catégories : nombre de choix, taux de réussite (points obtenus / points max).
+- Tags : taux de réussite par notion.
+- Questions : les plus tirées, les plus skippées avec leurs motifs.
+- Stratégies : combinaisons de catégories choisies et note moyenne associée.
+- Ajustements : nombre, somme, moyenne.
+
+**Critères d'acceptation.** Les absents sont exclus des statistiques de notes.
+
+### F16 — Export Excel
+
+**Objectif.** Tout sortir dans un classeur exploitable pour la consolidation.
+
+**Contenu.** Classeur `.xlsx` généré avec ExcelJS, chargé à la demande :
+- **Synthèse** : examinateur, nom, prénom, ordre, statut, ajouté en cours de session, note brute, plafonnée, convertie, ajustement, justification, note finale (ou valeur absent selon `absent.export`), commentaire.
+- **Détail des questions** : examinateur, étudiant, rang, catégorie, id et titre de la question, tags, résultat (noté ou skippé), points, points max, motif de skip, dates de tirage et de modification.
+- **Statistiques** : contenu de F15.
+- **Configuration** : catégories, barèmes, règles de notation et d'arrondi, version du schéma.
+- **Métadonnées** : nom de session, examinateur, titre, matière, promo, dates de création et d'export, version de l'application.
+- Mise en forme : en-têtes figés, largeurs adaptées, formats numériques avec le nombre de décimales configuré.
+- Nom de fichier : `<slug-session>-<date>.xlsx`.
+
+**Critères d'acceptation.**
+- Le fichier s'ouvre sans avertissement dans Excel et LibreOffice.
+- Les notes y sont des nombres, pas du texte, sauf la valeur absent en mode `label`.
+
+### F17 — Hors ligne
+
+**Objectif.** Fonctionner sans réseau après un premier chargement.
+
+**Contenu.** vite-plugin-pwa (Workbox) avec précache de tous les assets, dont les grammaires Shiki et ExcelJS. Scope du service worker réglé pour le sous-chemin GitHub Pages. Indication discrète quand une nouvelle version est disponible.
+
+**Critères d'acceptation.** Après un chargement en ligne, l'application permet, réseau coupé, de créer une session, de faire passer un étudiant, d'ouvrir la vue projetée et d'exporter un Excel.
+
+## 9. Stack technique
+
+| Besoin | Choix |
+|---|---|
+| Build | Vite, TypeScript strict |
+| UI | React, Tailwind, shadcn/ui, icônes Lucide |
+| Routing | TanStack Router, historique par hash |
+| Persistance | Dexie (IndexedDB), `useLiveQuery` |
+| Validation | Zod v4, génération de JSON Schema |
+| CSV | PapaParse |
+| Excel | ExcelJS, chargé à la demande |
+| Markdown | react-markdown, remark-gfm, Shiki |
+| Hors ligne | vite-plugin-pwa |
+| Tests | Vitest ; Playwright en option pour les parcours critiques |
+| Déploiement | GitHub Actions vers GitHub Pages |
+
+Pas de store global ni de TanStack Query : Dexie et `liveQuery` couvrent l'état persistant, l'état local d'interface reste dans les composants.
+
+## 10. Hors périmètre V1
+
+- Contraintes sur le choix des catégories (exemple : un seul Cauchemar).
+- Synchronisation entre machines et fusion automatique des exports de plusieurs examinateurs.
+- Édition de la config dans l'application, et remplacement de la config d'une session existante.
+- Chronomètre.
+- Duplication de session.
+
+## 11. Points à confirmer
+
+Aucun point ouvert. Les arbitrages sont tracés dans `docs/DECISIONS.md`.
