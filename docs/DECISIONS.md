@@ -378,3 +378,19 @@ ne doit pas entrer sans contrôle. La suppression est la seule action irréversi
 session de 30 étudiants, mais personne ne doit disparaître en silence (aperçu).
 
 **Reporté dans** : `PRODUCT.md` §6.1, F06. Impacte F06.
+
+## D26 — Thème : périmètre session, mode mémorisé par vue, couleur de catégorie en accent (2026-09-24)
+
+**Décision** :
+- Le thème de la config ne s'applique qu'aux routes de session ; `<SessionTheme>`
+  applique les tokens du mode courant et les retire au démontage.
+- Langue : `config.locale` en session, sinon navigateur ; pas de sélecteur.
+- Choix clair/sombre manuel mémorisé par session et par vue (examinateur / projetée)
+  en `localStorage` ; défaut `presentation.defaultColorMode`.
+- Couleur de catégorie en accent (bordure, icône, halo, pastille), jamais en fond sous
+  du texte.
+
+**Pourquoi** : la vue projetée peut avoir besoin d'un mode différent (vidéoprojecteur) ;
+une couleur de config en fond rendrait le contraste imprévisible.
+
+**Reporté dans** : `PRODUCT.md` F07. Impacte F07, F09, F14.

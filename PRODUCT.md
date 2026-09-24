@@ -396,10 +396,10 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 **Objectif.** Appliquer l'identité visuelle et la langue définies par la config.
 
 **Contenu.**
-- Application des surcharges de tokens `theme.light` et `theme.dark` sur les variables CSS de shadcn, sur les deux vues, **uniquement via `style.setProperty`**, jamais en construisant une feuille de style en texte.
-- Mode clair, sombre ou système selon `presentation.defaultColorMode`, modifiable à la main dans chaque fenêtre.
-- Couleur et icône par catégorie. Les icônes Lucide sont servies par un chunk unique chargé à la demande (`import * as icons from 'lucide-react'`), pré-caché par F17. Poids à mesurer : au-delà d'environ 300 Ko gzippé, repli sur `DynamicIcon` avec préchargement des icônes de la config.
-- Interface en français et en anglais via un dictionnaire typé léger, en étendant le noyau i18n posé par F02. L'accueil, sans config chargée, suit la langue du navigateur.
+- Application des surcharges de tokens `theme.light` et `theme.dark` sur les variables CSS de shadcn, sur les deux vues, **uniquement via `style.setProperty`**, jamais en construisant une feuille de style en texte. Le thème de la config ne s'applique qu'aux routes de session (passage, stats, vue projetée) ; l'accueil et la création gardent le thème shadcn par défaut. Un composant `<SessionTheme>` applique les tokens du mode courant, les réapplique au changement de mode et les retire au démontage.
+- Mode clair, sombre ou système selon `presentation.defaultColorMode`, modifiable à la main dans chaque fenêtre. Le choix manuel est mémorisé par session et par vue (examinateur, projetée) dans `localStorage`.
+- Couleur et icône par catégorie. La couleur sert d'accent (bordure, icône, halo, pastille de valeur max), jamais de fond sous le texte : le texte garde le `foreground` du thème, lisible quelles que soient les couleurs de la config. Les icônes Lucide sont servies par un chunk unique chargé à la demande (`import * as icons from 'lucide-react'`), pré-caché par F17. Poids à mesurer : au-delà d'environ 300 Ko gzippé, repli sur `DynamicIcon` avec préchargement des icônes de la config.
+- Interface en français et en anglais via un dictionnaire typé léger, en étendant le noyau i18n posé par F02. Langue : `config.locale` dans une session, sinon celle du navigateur ; pas de sélecteur manuel. L'accueil, sans config chargée, suit la langue du navigateur.
 
 **Critères d'acceptation.**
 - Une surcharge de `primary` change les boutons principaux sur les deux vues.
