@@ -283,7 +283,8 @@ Student {
   absent: boolean,
   attempts: Attempt[],     // questions tirées, dans l'ordre
   adjustment?: { value: number, reason?: string },
-  comment?: string
+  comment?: string,
+  finalRevealedAt?         // note finale affichée sur la vue projetée (F14)
 }
 
 Attempt {
@@ -462,8 +463,8 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 
 **Contenu.**
 - Affichage de toutes les notes (brute, plafonnée, convertie, ajustement, finale) et du détail du passage (questions, catégories, points, skips). `presentation.finalScoreDisplay` ne s'applique qu'à la vue projetée (F14) : l'examinateur voit toujours tout.
-- Popup d'ajustement réservée à l'examinateur, ouverte automatiquement **une seule fois**, au moment où la dernière note termine le passage, puis rouvrable par un bouton « Ajuster » : valeur positive ou négative, en points de l'échelle finale, saisie par multiples du pas d'arrondi (§5), et justification facultative. La note finale recalculée est affichée en direct, bornée entre 0 et `finalScale`. Champ numérique avec boutons − / + d'un pas ; une valeur hors pas bloque l'enregistrement. Calcul affiché en direct (« 13,5 + 1 = 14,5 / 20 », mention « bornée à 20 » si le bornage intervient). Un ajustement de 0 supprime l'ajustement et sa justification.
-- Bouton « Réinitialiser l'étudiant » avec confirmation : supprime tous les attempts et l'ajustement, et remet l'étudiant à « à passer ». Le commentaire est conservé : il porte sur l'étudiant, pas sur son passage.
+- Popup d'ajustement réservée à l'examinateur, ouverte automatiquement **une seule fois**, au moment où la dernière note termine le passage, puis rouvrable par un bouton « Ajuster » : valeur positive ou négative, en points de l'échelle finale, saisie par multiples du pas d'arrondi (§5), et justification facultative. La note finale recalculée est affichée en direct, bornée entre 0 et `finalScale`. Champ numérique avec boutons − / + d'un pas ; une valeur hors pas bloque l'enregistrement. Calcul affiché en direct (« 13,5 + 1 = 14,5 / 20 », mention « bornée à 20 » si le bornage intervient). Un ajustement de 0 supprime l'ajustement et sa justification. La fermeture de la popup ouverte en fin de passage (enregistrer ou annuler) renseigne `finalRevealedAt` si ce n'est pas déjà fait (F14).
+- Bouton « Réinitialiser l'étudiant » avec confirmation : supprime tous les attempts, l'ajustement et `finalRevealedAt`, et remet l'étudiant à « à passer ». Le commentaire est conservé : il porte sur l'étudiant, pas sur son passage.
 - Bouton « Étudiant suivant » : l'étudiant actif devient le prochain étudiant non terminé et non absent (à passer ou en cours) dans l'ordre de passage, en reprenant au début si besoin. La vue projetée n'est pas modifiée. S'il ne reste personne : bouton désactivé, « Tous les étudiants sont passés ».
 
 **Critères d'acceptation.**
@@ -506,18 +507,22 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 **Objectif.** Une vue projetée pour l'étudiant, pilotée depuis la vue examinateur.
 
 **Contenu.**
-- Bouton « Ouvrir la vue projetée » : ouvre une nouvelle fenêtre sur la route `#/present/:sessionId`.
-- La vue projetée est en lecture seule. Sa seule commande est un bouton plein écran (l'API Fullscreen exige un geste utilisateur dans cette fenêtre).
+- Bouton « Ouvrir la vue projetée » : `window.open(url, 'questionator-present')` sur la route `#/present/:sessionId` ; un second clic remet la fenêtre existante au premier plan.
+- **Étanchéité** : la vue projetée ne rend jamais l'objet `Session`. Une fonction pure `toProjectedView(session)` produit un type `ProjectedView` limité à l'affichable (titre, catégories, énoncé de la question en cours, scores autorisés par la config) ; les composants de la route `present` ne reçoivent que ce type.
+- La vue projetée est en lecture seule. Ses seules commandes sont le plein écran (l'API Fullscreen exige un geste utilisateur dans cette fenêtre) et la bascule de mode (F07) ; curseur et commandes masqués après quelques secondes d'inactivité.
 - Elle n'affiche que l'étudiant projeté (`projection`), jamais l'étudiant actif par défaut.
 - Dans la vue examinateur, un bouton « Projeter cet étudiant » pousse l'étudiant actif, et un bouton « Écran d'attente » repasse en attente. Si l'étudiant actif n'est pas celui qui est projeté, un bandeau le signale.
 - Écran d'attente : titre de l'épreuve et message d'attente.
-- Écran étudiant : grille des catégories, question tirée (énoncé seul), score cumulé si `showCumulativeScore`, note finale selon `finalScoreDisplay`, détail du passage si `showStatsOnFinal`. Animation de tirage si `drawAnimation`.
+- Écran étudiant : grille des catégories, question tirée (énoncé seul), score cumulé si `showCumulativeScore`, note finale selon `finalScoreDisplay`, détail du passage si `showStatsOnFinal`. `converted` désigne ici la **note finale, ajustement compris** (« Note : 14,5 / 20 ») ; le montant et la justification de l'ajustement ne sont jamais affichés.
+- La note finale n'apparaît qu'une fois `finalRevealedAt` renseigné, c'est-à-dire à la fermeture de la popup d'ajustement de F11 (enregistrer ou annuler). Avant : « Passage terminé » et, si `showCumulativeScore`, le score cumulé brut. Une modification ultérieure met à jour la note affichée sans la masquer.
+- Animation de tirage si `drawAnimation` : **neutre**, sans jamais afficher d'autre question que celle tirée (cartes retournées aux couleurs de la catégorie qui se mélangent ~1,5 s, puis l'une se retourne sur l'énoncé). Fondu simple si `prefers-reduced-motion`.
 - Synchronisation : la vue projetée lit IndexedDB via `liveQuery`. La réactivité entre fenêtres est vérifiée par F04 ; le repli sur BroadcastChannel n'est ajouté que si ce critère a échoué.
 - La vue projetée se reconstruit entièrement depuis la base si elle est fermée puis rouverte.
 
 **Critères d'acceptation.**
 - Aucun élément de réponse, note d'un autre étudiant, commentaire ni ajustement n'apparaît dans la vue projetée.
 - Un tirage ou une note dans la vue examinateur apparaît dans la vue projetée sans action supplémentaire.
+- Test Playwright à deux fenêtres couvrant ces deux critères (D23).
 
 ### F15 — Statistiques de session
 
@@ -574,7 +579,7 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 | Excel | ExcelJS, chargé à la demande |
 | Markdown | react-markdown, remark-gfm, Shiki |
 | Hors ligne | vite-plugin-pwa |
-| Tests | Vitest 5 ; Playwright en option pour les parcours critiques |
+| Tests | Vitest 5 ; Playwright (Chromium, job CI `e2e`) pour les parcours à plusieurs fenêtres et le hors ligne |
 | Déploiement | GitHub Actions vers GitHub Pages |
 
 Pas de store global ni de TanStack Query : Dexie et `liveQuery` couvrent l'état persistant, l'état local d'interface reste dans les composants.

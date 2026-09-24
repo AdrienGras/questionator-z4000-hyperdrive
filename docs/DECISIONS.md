@@ -440,3 +440,48 @@ chaque consultation gêne ; changer d'étudiant est le geste le plus fréquent. 
 étudiants « en cours » sont inclus pour ne pas oublier un passage interrompu.
 
 **Reporté dans** : `PRODUCT.md` F11. Impacte F11, F14.
+
+## D30 — Vue projetée : étanchéité par `toProjectedView`, fenêtre unique (2026-09-24)
+
+**Décision** : la route `present` ne rend que le type `ProjectedView` produit par une
+fonction pure `toProjectedView(session)` (ni `answer`, ni commentaire, ni ajustement,
+ni autre étudiant) ; test sur la sérialisation. `window.open(url, 'questionator-present')`
+pour une fenêtre unique. Commandes : plein écran et mode, masquées à l'inactivité.
+
+**Pourquoi** : l'étanchéité garantie par un type et un test plutôt que par la vigilance
+de chaque composant.
+
+**Reporté dans** : `PRODUCT.md` F14. Impacte F14.
+
+## D31 — Note projetée = note finale, révélée à la fermeture de la popup d'ajustement (2026-09-24)
+
+**Décision** : sur la vue projetée, `converted` = note finale ajustement compris ;
+montant et justification jamais affichés. Nouveau champ `Student.finalRevealedAt`,
+renseigné à la fermeture de la popup de fin de passage (F11) ; avant, « Passage
+terminé » (+ brute si `showCumulativeScore`). `resetStudent` le vide.
+
+**Pourquoi** : la note projetée doit être la vraie note, et l'ajustement ne doit pas se
+voir par la variation de la note sous les yeux de l'étudiant. Aucun bouton de plus.
+
+**Reporté dans** : `PRODUCT.md` §7, F11, F14. Impacte F03 (types), F11, F14, backup F05.
+
+## D32 — Animation de tirage neutre (2026-09-24)
+
+**Décision** : cartes retournées aux couleurs de la catégorie, mélange ~1,5 s, puis
+révélation de l'énoncé tiré ; fondu si `prefers-reduced-motion`. Jamais d'autre
+question affichée.
+
+**Pourquoi** : un défilement de titres dévoilerait les autres questions de la catégorie.
+
+**Reporté dans** : `PRODUCT.md` F14. Impacte F14.
+
+## D33 — Playwright adopté (Chromium, job CI `e2e`) (2026-09-24)
+
+**Décision** : `@playwright/test`, Chromium seul, job CI séparé sur `vite preview`.
+Premier scénario en F14 (deux fenêtres, synchronisation, étanchéité) ; réutilisé par F17
+(hors ligne).
+
+**Pourquoi** : seul moyen de tester automatiquement la synchro entre fenêtres (D23) et
+le hors ligne.
+
+**Reporté dans** : `PRODUCT.md` §9, F14. Impacte F14, F17.
