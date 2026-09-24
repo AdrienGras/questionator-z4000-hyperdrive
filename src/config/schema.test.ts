@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import css from '../index.css?raw'
 import { minimalConfig } from '../test/config-fixtures'
-import { ConfigSchema, THEME_TOKENS } from './schema'
+import { ConfigSchema, THEME_TOKENS, type ParsedConfig } from './schema'
 
 function rootCssVariables(source: string): string[] {
   const rootBlock = /^:root\s*\{([^}]*)\}/m.exec(source)?.[1] ?? ''
@@ -13,6 +13,13 @@ describe('ConfigSchema', () => {
     const variables = rootCssVariables(css)
     expect(variables).toHaveLength(THEME_TOKENS.length)
     expect(new Set(variables)).toEqual(new Set(THEME_TOKENS))
+  })
+
+  test('le thème est typé exactement sur ThemeToken (régression de typage)', () => {
+    type ThemeOverrides = NonNullable<NonNullable<ParsedConfig['theme']>['light']>
+    // @ts-expect-error une clé absente de THEME_TOKENS doit être rejetée par le typage, pas seulement à l'exécution
+    const invalidTheme: ThemeOverrides = { thisKeyDoesNotExistAsThemeToken: 'x' }
+    expect(invalidTheme).toBeDefined()
   })
 
   test('accepte la config minimale et le champ $schema', () => {

@@ -60,10 +60,11 @@ export const CssValueSchema = z
 export const IconSchema = z.string()
 
 const ThemeSchema = z.strictObject(
-  THEME_TOKENS.reduce<Record<string, z.ZodOptional<typeof CssValueSchema>>>((shape, token) => {
-    shape[token] = CssValueSchema.optional()
-    return shape
-  }, {}),
+  // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- Object.fromEntries ne peut pas exprimer l'ensemble exhaustif des clés ThemeToken ; la forme est garantie par THEME_TOKENS ci-dessus.
+  Object.fromEntries(THEME_TOKENS.map((token) => [token, CssValueSchema.optional()])) as Record<
+    ThemeToken,
+    z.ZodOptional<typeof CssValueSchema>
+  >,
 )
 
 const QuestionSchema = z.strictObject({
