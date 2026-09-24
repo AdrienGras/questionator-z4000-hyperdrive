@@ -1,0 +1,9 @@
+{
+  "files": [],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
+  "compilerOptions": {
+    // Requis par la détection d'alias du CLI shadcn v4 : sans ce `paths` ici (à la racine),
+    // le CLI résout les alias vers `<root>/@/…`. TypeScript, lui, n'utilise que celui de tsconfig.app.json.
+    "paths": { "@/*": ["./src/*"] }
+  }
+}

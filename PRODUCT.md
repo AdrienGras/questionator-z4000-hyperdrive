@@ -239,7 +239,7 @@ Champs :
 | `categories[].label` | string | oui | Libellé affiché. |
 | `categories[].scale` | nombre[] | oui | Valeurs attribuables, décimales autorisées. Sa valeur maximale est la valeur de la catégorie (« points max »), affichée sur la tuile et utilisée dans les exports et les stats. |
 | `categories[].color` | couleur CSS | non | Couleur de la tuile. Validée par le navigateur (`CSS.supports`) à la création de session. |
-| `categories[].icon` | string | non | Nom d'icône Lucide (kebab-case, liste `iconNames` de `lucide-react/dynamic`). Nom inconnu : pas d'icône, avec un avertissement. Le JSON Schema propose les noms connus en autocomplétion sans refuser les autres. |
+| `categories[].icon` | string | non | Nom d'icône Tabler (kebab-case, ex. `leaf`, `brand-php` ; liste `iconsList` de `@tabler/icons-react`, 6 220 noms). Nom inconnu : pas d'icône, avec un avertissement. Le JSON Schema propose les noms connus en autocomplétion sans refuser les autres. |
 | `categories[].order` | entier | non | Ordre d'affichage. Défaut : ordre du tableau. |
 | `categories[].questions[].id` | string | oui | Identifiant stable, unique dans toute la config. |
 | `categories[].questions[].title` | string | non | Libellé court, utilisé dans le side panel et les exports. Défaut : début du `prompt` sans markdown. |
@@ -399,7 +399,7 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 **Contenu.**
 - Application des surcharges de tokens `theme.light` et `theme.dark` sur les variables CSS de shadcn, sur les deux vues, **uniquement via `style.setProperty`**, jamais en construisant une feuille de style en texte. Le thème de la config ne s'applique qu'aux routes de session (passage, stats, vue projetée) ; l'accueil et la création gardent le thème shadcn par défaut. Un composant `<SessionTheme>` applique les tokens du mode courant, les réapplique au changement de mode et les retire au démontage.
 - Mode clair, sombre ou système selon `presentation.defaultColorMode`, modifiable à la main dans chaque fenêtre. Le choix manuel est mémorisé par session et par vue (examinateur, projetée) dans `localStorage`.
-- Couleur et icône par catégorie. La couleur sert d'accent (bordure, icône, halo, pastille de valeur max), jamais de fond sous le texte : le texte garde le `foreground` du thème, lisible quelles que soient les couleurs de la config. Les icônes Lucide sont servies par un chunk unique chargé à la demande (`import * as icons from 'lucide-react'`), pré-caché par F17. Poids à mesurer : au-delà d'environ 300 Ko gzippé, repli sur `DynamicIcon` avec préchargement des icônes de la config.
+- Couleur et icône par catégorie. La couleur sert d'accent (bordure, icône, halo, pastille de valeur max), jamais de fond sous le texte : le texte garde le `foreground` du thème, lisible quelles que soient les couleurs de la config. Les icônes Tabler sont servies par un chunk unique chargé à la demande sur les vues de session (`import * as icons from '@tabler/icons-react'`, ~489 Kio gzippés mesurés), pré-caché par F17 (D37).
 - Interface en français et en anglais via un dictionnaire typé léger, en étendant le noyau i18n posé par F02. Langue : `config.locale` dans une session, sinon celle du navigateur ; pas de sélecteur manuel. L'accueil, sans config chargée, suit la langue du navigateur.
 
 **Critères d'acceptation.**
@@ -572,7 +572,7 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 
 **Objectif.** Fonctionner sans réseau après un premier chargement.
 
-**Contenu.** vite-plugin-pwa (Workbox) avec précache de tous les assets, dont les grammaires Shiki, write-excel-file, le chunk d'icônes Lucide (F07) et le chunk de graphiques des stats (F15). Scope du service worker réglé pour le sous-chemin GitHub Pages. Indication discrète quand une nouvelle version est disponible.
+**Contenu.** vite-plugin-pwa (Workbox) avec précache de tous les assets, dont les grammaires Shiki, write-excel-file, le chunk d'icônes Tabler (F07) et le chunk de graphiques des stats (F15). Scope du service worker réglé pour le sous-chemin GitHub Pages. Indication discrète quand une nouvelle version est disponible.
 - Mise à jour proposée, jamais imposée (`registerType: 'prompt'`) : indicateur « Nouvelle version disponible — Recharger » dans la vue examinateur uniquement. Aucun rechargement automatique pendant une session.
 - La vue projetée n'affiche jamais l'indicateur. Si une nouvelle version ouvre la base avec un schéma Dexie plus récent, la vue projetée (lecture seule, reconstruite depuis la base) se recharge d'elle-même à l'événement `versionchange`.
 - Application installable : manifeste avec icônes carrées 192 et 512 px (recadrage d'un élément de la bannière, sinon monogramme aux couleurs Synthwave), `display: standalone`.
@@ -587,7 +587,7 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 | Runtime | Node 24 LTS via nvm (`.nvmrc`), pnpm 12 |
 | Build | Vite 8, TypeScript 7 strict (compilateur natif) |
 | Lint / format | oxlint + oxlint-tsgolint (type-aware), Prettier + prettier-plugin-tailwindcss |
-| UI | React, Tailwind, shadcn/ui, icônes Lucide |
+| UI | React, Tailwind, shadcn/ui v4 (base-ui, preset Nova, police Geist), icônes Tabler |
 | Routing | TanStack Router, historique par hash |
 | Persistance | Dexie (IndexedDB), `useLiveQuery` |
 | Validation | Zod v4, génération de JSON Schema |

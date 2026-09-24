@@ -1,0 +1,7 @@
+dist
+coverage
+pnpm-lock.yaml
+src/routeTree.gen.ts
+**/*.md
+.claude
+.rtk
