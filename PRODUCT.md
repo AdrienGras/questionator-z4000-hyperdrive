@@ -553,13 +553,15 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 
 **Objectif.** Tout sortir dans un classeur exploitable pour la consolidation.
 
-**Contenu.** Classeur `.xlsx` généré avec ExcelJS, chargé à la demande :
+**Contenu.** Classeur `.xlsx` généré avec write-excel-file (`write-excel-file/browser`), chargé à la demande :
 - **Synthèse** : examinateur, nom, prénom, ordre, statut, ajouté en cours de session, note brute, plafonnée, convertie, ajustement, justification, note finale (ou valeur absent selon `absent.export`), commentaire.
-- **Détail des questions** : examinateur, étudiant, rang, catégorie, id et titre de la question, tags, résultat (noté ou skippé), points, points max, motif de skip, dates de tirage et de modification.
+- **Détail des questions** : examinateur, étudiant, rang, catégorie, id et titre de la question, tags, résultat (noté, skippé ou en cours), points, points max, motif de skip, dates de tirage et de modification.
 - **Statistiques** : contenu de F15.
 - **Configuration** : catégories, barèmes, règles de notation et d'arrondi, version du schéma.
 - **Métadonnées** : nom de session, examinateur, titre, matière, promo, dates de création et d'export, version de l'application.
 - Mise en forme : en-têtes figés, largeurs adaptées, formats numériques avec le nombre de décimales configuré.
+- Valeurs uniquement, aucune formule (le classeur sert à la consolidation par copier-coller). Onglets et en-têtes dans la langue de la session. Dates en vraies cellules date. Étudiant en cours : convertie et finale vides, statut « en cours ». Statistiques : blocs de `computeStats` (F15) empilés, une ligne de titre par bloc.
+- Le bouton « Exporter en Excel » de l'onglet « Étudiants » est ajouté par ce ticket.
 - Nom de fichier : `<slug-session>-<date>.xlsx`.
 
 **Critères d'acceptation.**
@@ -570,7 +572,7 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 
 **Objectif.** Fonctionner sans réseau après un premier chargement.
 
-**Contenu.** vite-plugin-pwa (Workbox) avec précache de tous les assets, dont les grammaires Shiki, ExcelJS, le chunk d'icônes Lucide (F07) et le chunk de graphiques des stats (F15). Scope du service worker réglé pour le sous-chemin GitHub Pages. Indication discrète quand une nouvelle version est disponible.
+**Contenu.** vite-plugin-pwa (Workbox) avec précache de tous les assets, dont les grammaires Shiki, write-excel-file, le chunk d'icônes Lucide (F07) et le chunk de graphiques des stats (F15). Scope du service worker réglé pour le sous-chemin GitHub Pages. Indication discrète quand une nouvelle version est disponible.
 
 **Critères d'acceptation.** Après un chargement en ligne, l'application permet, réseau coupé, de créer une session, de faire passer un étudiant, d'ouvrir la vue projetée et d'exporter un Excel.
 
@@ -586,7 +588,7 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 | Persistance | Dexie (IndexedDB), `useLiveQuery` |
 | Validation | Zod v4, génération de JSON Schema |
 | CSV | PapaParse |
-| Excel | ExcelJS, chargé à la demande |
+| Excel | write-excel-file, chargé à la demande |
 | Markdown | react-markdown, remark-gfm, Shiki |
 | Hors ligne | vite-plugin-pwa |
 | Tests | Vitest 5 ; Playwright (Chromium, job CI `e2e`) pour les parcours à plusieurs fenêtres et le hors ligne |

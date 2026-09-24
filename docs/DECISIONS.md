@@ -498,3 +498,19 @@ tirées. Graphique shadcn / Recharts chargé seulement sur la route des stats.
 choix éparpillerait des données déjà maigres.
 
 **Reporté dans** : `PRODUCT.md` F15, F17. Impacte F15, F16, F17.
+
+## D35 — Export Excel : write-excel-file à la place d'ExcelJS, valeurs sans formules (2026-09-24)
+
+**Question** : ExcelJS (4.4.0, dernière publication fin 2023) reste-t-il le bon choix ?
+
+**Décision** : write-excel-file (`write-excel-file/browser`, Web Worker), chargé à la
+demande. Valeurs uniquement, aucune formule ; onglets et en-têtes dans la langue de la
+session ; dates en cellules date ; notes en nombres (sauf absent en mode `label`) ;
+étudiant en cours : convertie et finale vides.
+
+**Pourquoi** : maintenu (juin 2026), une seule dépendance (`fflate`) contre neuf
+orientées Node, chunk plus léger à pré-cacher ; couvre tout le besoin d'écriture
+(onglets, largeurs, formats, dates, lignes figées). Les formules casseraient au
+copier-coller entre classeurs de jurys différents. Pas d'autofiltre : non demandé.
+
+**Reporté dans** : `PRODUCT.md` F16, F17, §9. Impacte F16, F17.
