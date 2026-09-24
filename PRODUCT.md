@@ -423,12 +423,15 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 **Objectif.** Dérouler le passage d'un étudiant.
 
 **Contenu.**
+- Route `#/session/$sessionId` ; l'étudiant affiché est `session.activeStudentId`, lu en base (pas de paramètre d'URL).
 - En-tête : nom de l'étudiant, numéro de question (`2 / 3`), score cumulé brut.
 - Grille des catégories triées par `order`, avec libellé, valeur max, couleur et icône.
 - Une catégorie est grisée, avec une infobulle, si elle n'a plus de question disponible pour cet étudiant (toutes tirées, notées ou skippées).
-- Au clic sur une catégorie : tirage uniforme parmi les questions disponibles pour cet étudiant, via `crypto.getRandomValues`. L'attempt `pending` est persisté immédiatement.
+- Au clic sur une catégorie : tirage uniforme parmi les questions disponibles pour cet étudiant, via `crypto.getRandomValues` avec rejet des valeurs hors plage (pas de biais de modulo), source d'aléa injectable pour les tests. L'attempt `pending` est persisté immédiatement.
 - Tant qu'une question est `pending`, la grille est désactivée : il faut noter ou skipper.
-- Affichage de la question : énoncé markdown, puis éléments de réponse dans un bloc repliable réservé à l'examinateur.
+- Les mutations (tirer, noter) revérifient leurs invariants **dans la transaction** de `updateSession` : pas de tirage si un attempt est `pending`, si le passage est terminé, si l'étudiant est absent ou si la catégorie est épuisée. Un double-clic ou deux onglets ne créent jamais deux tirages.
+- Étudiant absent : état dédié avec renvoi vers F12 pour annuler l'absence.
+- Affichage de la question : énoncé markdown, puis éléments de réponse dans un bloc repliable réservé à l'examinateur, **replié par défaut à chaque nouvelle question**. Pas d'animation de tirage dans cette vue (réservée à la vue projetée, F14).
 - Sous la question : un bouton par valeur du barème de la catégorie. Au clic, l'attempt passe en `scored`, le score cumulé est mis à jour et la grille redevient disponible.
 - Après la dernière question notée : passage à l'écran final (F11).
 

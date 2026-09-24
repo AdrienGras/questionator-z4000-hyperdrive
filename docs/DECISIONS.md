@@ -406,3 +406,20 @@ ligne documentée.
 les schémas dans les énoncés sont utiles.
 
 **Reporté dans** : `PRODUCT.md` F08. Impacte F08, F17.
+
+## D28 — Écran de passage : étudiant actif en base, invariants transactionnels, réponse repliée (2026-09-24)
+
+**Décision** :
+- Route unique `#/session/$sessionId`, étudiant affiché = `activeStudentId` en base.
+- Tirage uniforme par rejet (`crypto.getRandomValues`), aléa injectable.
+- Mutations tirer / noter / skipper : invariants revérifiés dans la transaction
+  `updateSession` (pas de `pending` existant, pas terminé, pas absent, catégorie non
+  épuisée).
+- Éléments de réponse repliés par défaut à chaque question.
+- Animation de tirage réservée à la vue projetée.
+- Pas de confirmation sur les boutons de note (correction via F12).
+
+**Pourquoi** : une seule source de vérité pour l'étudiant actif (F13, F14) ; aucun
+double tirage possible ; la réponse ne s'affiche jamais sans action de l'examinateur.
+
+**Reporté dans** : `PRODUCT.md` F09. Impacte F09, F10, F13, F14.
