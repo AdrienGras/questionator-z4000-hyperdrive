@@ -485,3 +485,16 @@ Premier scénario en F14 (deux fenêtres, synchronisation, étanchéité) ; réu
 le hors ligne.
 
 **Reporté dans** : `PRODUCT.md` §9, F14. Impacte F14, F17.
+
+## D34 — Définitions des statistiques (2026-09-24)
+
+**Décision** : `computeStats(session)` pur, partagé par l'écran et l'export. Notes,
+histogramme, stratégies sur les terminés seulement ; écart-type de population ;
+histogramme à 1 point si `finalScale` ≤ 20 (sinon `finalScale / 20`) ; stratégies =
+combinaison sans ordre ; taux de réussite sur les attempts notés ; top 10 des questions
+tirées. Graphique shadcn / Recharts chargé seulement sur la route des stats.
+
+**Pourquoi** : usage descriptif d'un groupe ; lecture naturelle sur /20 ; l'ordre des
+choix éparpillerait des données déjà maigres.
+
+**Reporté dans** : `PRODUCT.md` F15, F17. Impacte F15, F16, F17.

@@ -537,6 +537,16 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 - Stratégies : combinaisons de catégories choisies et note moyenne associée.
 - Ajustements : nombre, somme, moyenne.
 
+Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
+- Notes finales, histogramme et stratégies : étudiants **terminés** uniquement. Écart-type de population (division par n). Médiane d'un effectif pair : moyenne des deux valeurs centrales.
+- Histogramme : intervalles de 1 point si `finalScale` ≤ 20, sinon `finalScale / 20` (20 barres au plus) ; intervalles `[a, a + largeur[`, le dernier inclut `finalScale`.
+- Catégories : nombre de choix = attempts de la catégorie (notés et passés) ; taux de réussite = Σ points ÷ Σ points max sur les attempts notés. Tags : même taux, par tag ; une question à plusieurs tags compte dans chacun.
+- Questions : les 10 plus tirées (tous résultats) ; les plus passées, avec le décompte des motifs.
+- Stratégies : combinaison des catégories des questions notées, sans ordre, triée par `order` ; effectif et note finale moyenne par combinaison.
+- Ajustements : sur les étudiants ajustés ; somme algébrique.
+- Aucun étudiant terminé : indicateurs de notes affichés « — ».
+- Histogramme via le composant chart de shadcn (Recharts), chargé uniquement sur la route des stats. Le bouton « Statistiques » de l'onglet « Étudiants » est ajouté par ce ticket.
+
 **Critères d'acceptation.** Les absents sont exclus des statistiques de notes.
 
 ### F16 — Export Excel
@@ -560,7 +570,7 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 
 **Objectif.** Fonctionner sans réseau après un premier chargement.
 
-**Contenu.** vite-plugin-pwa (Workbox) avec précache de tous les assets, dont les grammaires Shiki, ExcelJS et le chunk d'icônes Lucide (F07). Scope du service worker réglé pour le sous-chemin GitHub Pages. Indication discrète quand une nouvelle version est disponible.
+**Contenu.** vite-plugin-pwa (Workbox) avec précache de tous les assets, dont les grammaires Shiki, ExcelJS, le chunk d'icônes Lucide (F07) et le chunk de graphiques des stats (F15). Scope du service worker réglé pour le sous-chemin GitHub Pages. Indication discrète quand une nouvelle version est disponible.
 
 **Critères d'acceptation.** Après un chargement en ligne, l'application permet, réseau coupé, de créer une session, de faire passer un étudiant, d'ouvrir la vue projetée et d'exporter un Excel.
 
