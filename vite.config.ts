@@ -6,7 +6,15 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   base: '/questionator-z4000-hyperdrive/',
-  plugins: [tanstackRouter({ target: 'react', autoCodeSplitting: true }), react(), tailwindcss()],
+  plugins: [
+    tanstackRouter({
+      target: 'react',
+      autoCodeSplitting: true,
+      routeFileIgnorePattern: '\\.test\\.tsx?$',
+    }),
+    react(),
+    tailwindcss(),
+  ],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
