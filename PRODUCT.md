@@ -68,11 +68,13 @@ Pendant le passage, le score cumulé affiché est la note brute. L'affichage de 
 ### 6.1 Liste d'étudiants (CSV)
 
 - Deux colonnes : nom et prénom.
-- En-tête détecté sans tenir compte de la casse ni des accents (`nom`, `prenom`, `prénom`, `Nom`, `Prénom`…). L'ordre des colonnes est libre si l'en-tête est présent. Sans en-tête, l'ordre attendu est nom puis prénom.
+- En-tête reconnu sans tenir compte de la casse, des accents, des espaces ni des tirets. Nom : `nom`, `nom de famille`, `last name`, `lastname`, `surname`, `family name`. Prénom : `prenom`, `first name`, `firstname`, `given name`. La première ligne est un en-tête si elle contient les deux colonnes ; l'ordre des colonnes est alors libre. Sinon, c'est une ligne de données, dans l'ordre nom puis prénom.
 - Séparateur `,` ou `;` détecté automatiquement (les exports Excel en français utilisent souvent `;`).
 - UTF-8, avec ou sans BOM.
 - L'ordre des lignes détermine l'ordre de passage.
-- Lignes vides ignorées. Doublons signalés par un avertissement, sans blocage.
+- Lignes vides ignorées. Espaces de début et de fin supprimés, casse conservée.
+- Aucune ligne isolée ne bloque, tout est visible dans l'aperçu : ligne avec un seul champ rempli ignorée avec un avertissement et son numéro de ligne ; colonnes en trop ignorées avec un avertissement unique ; doublons (nom et prénom identiques après normalisation) signalés par un avertissement.
+- **Erreur** bloquante si aucun étudiant valide.
 
 ### 6.2 Configuration (JSON)
 
@@ -381,6 +383,7 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 - Formulaire : nom de session, nom de l'examinateur (facultatif, modifiable ensuite depuis l'accueil), fichier CSV, fichier JSON. Glisser-déposer accepté.
 - Aperçu : nombre d'étudiants, doublons éventuels, résumé de la config (catégories, nombre de questions, barèmes, règles de notation), erreurs et avertissements de F02. La validation passe ici la fonction `cssSupports` du navigateur (`CSS.supports`).
 - Lien de téléchargement du fichier de config d'exemple.
+- Nom de session prérempli dès le chargement de la config : `<exam.title> — <date du jour>`, modifiable.
 - À la validation : snapshot de la config dans la session, création des étudiants dans l'ordre du CSV, ouverture de l'écran de passage sur le premier étudiant.
 
 **Critères d'acceptation.**

@@ -362,3 +362,19 @@ backup d'abord » dans la confirmation de suppression.
 ne doit pas entrer sans contrôle. La suppression est la seule action irréversible.
 
 **Reporté dans** : `PRODUCT.md` F05. Impacte F05.
+
+## D25 — Lecture du CSV : en-têtes fr/en, lignes anormales en avertissement (2026-09-24)
+
+**Décision** :
+- En-têtes reconnus sans casse, accents, espaces ni tirets : `nom`, `nom de famille`,
+  `last name`, `lastname`, `surname`, `family name` / `prenom`, `first name`,
+  `firstname`, `given name`. En-tête = première ligne contenant les deux.
+- Ligne à un seul champ : ignorée + avertissement avec numéro de ligne. Colonnes en
+  trop : ignorées + avertissement unique. Trim, casse conservée. Doublons : avertissement.
+- Aucun étudiant valide : erreur bloquante.
+- Nom de session prérempli `<exam.title> — <date>`.
+
+**Pourquoi** : interface bilingue ; une ligne mal formée ne doit pas bloquer une
+session de 30 étudiants, mais personne ne doit disparaître en silence (aperçu).
+
+**Reporté dans** : `PRODUCT.md` §6.1, F06. Impacte F06.
