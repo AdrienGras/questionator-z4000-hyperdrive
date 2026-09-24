@@ -29,7 +29,12 @@ q="$mode=$target"
 if $wait; then
   head=$(git rev-parse HEAD)
   for _ in $(seq 60); do
-    rev=$(curl -fsS "$API/project_analyses/search?project=$PROJECT&$q&ps=1" | jq -r '.analyses[0].revision // empty' || true)
+    # project_analyses ne donne pas le commit analysé d'une PR : on lit la liste des PR / branches.
+    if [ "$mode" = pullRequest ]; then
+      rev=$(curl -fsS "$API/project_pull_requests/list?project=$PROJECT" | jq -r --arg k "$target" '.pullRequests[] | select(.key == $k) | .commit.sha // empty' || true)
+    else
+      rev=$(curl -fsS "$API/project_branches/list?project=$PROJECT" | jq -r --arg k "$target" '.branches[] | select(.name == $k) | .commit.sha // empty' || true)
+    fi
     [ "$rev" = "$head" ] && break
     sleep 10
   done
