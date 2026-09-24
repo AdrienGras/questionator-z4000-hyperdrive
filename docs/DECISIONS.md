@@ -241,7 +241,7 @@ en profondeur.
 
 **Reporté dans** : `PRODUCT.md` §6.2, F02, F06, F07. Impacte F02, F06, F07.
 
-## D16 — Icônes Lucide : un chunk unique chargé à la demande (2026-09-24)
+## D16 — Icônes Lucide : un chunk unique chargé à la demande (2026-09-24) — révisée par D37 (Tabler)
 
 **Question** : accepter les ~1 600 icônes Lucide sans alourdir le bundle ni casser le
 hors ligne.
@@ -527,3 +527,30 @@ passage fait perdre le fil, surtout devant l'étudiant ; la vue projetée, en le
 seule, peut se recharger sans risque.
 
 **Reporté dans** : `PRODUCT.md` F17. Impacte F17.
+
+## D37 — shadcn v4 (base-ui, preset Nova) et Tabler à la place de Lucide (2026-09-24)
+
+**Question** : F01 avait épinglé le CLI shadcn 3.8.5 (Radix + Lucide), la v4 ne proposant
+plus l'interface classique. Rester sur une version figée, ou passer à la v4 ?
+
+**Décision** :
+- shadcn CLI v4 (4.21.0), primitives **base-ui**, preset Nova avec la bibliothèque
+  d'icônes **Tabler** (code de preset `balE`), police Geist imposée par le preset.
+- **Tabler partout** : UI shadcn et icônes de catégorie de la config. Remplace Lucide
+  dans D16 : noms kebab-case validés par `iconsList` de `@tabler/icons-react` (6 220 noms),
+  JSON Schema `anyOf: [enum, string]`.
+- Chargement des icônes de catégorie : chunk unique `import * as icons from
+  '@tabler/icons-react'`, **~3 Mo, ~489 Kio gzippés** (mesuré), chargé à la demande sur
+  les vues de session, pré-caché par F17. Pas de chargement par icône : Tabler n'a pas
+  d'équivalent officiel à `DynamicIcon`, et un chunk par icône compliquerait le hors ligne.
+- `shadcn` reste en devDependency (`src/index.css` importe `shadcn/tailwind.css`), avec
+  `ts-morph` en transitif (cf. ruling F01 : il embarque sa propre copie de TypeScript).
+- Le `Button` du preset Nova est plus compact (h-8, rounded-lg, destructive teinté, pas
+  d'`asChild`) : changement voulu.
+
+**Pourquoi** : dernière version stable ; Tabler offre plus d'icônes et est très répandu ;
+une seule bibliothèque d'icônes. Poids du chunk acceptable pour un outil installé en PWA
+sur le portable de l'examinateur (téléchargé une fois).
+
+**Reporté dans** : `PRODUCT.md` §6.2, F07, F17, §9 ; tickets #2, #7, #17. Remplace la
+bibliothèque et le seuil de repli de D16.
