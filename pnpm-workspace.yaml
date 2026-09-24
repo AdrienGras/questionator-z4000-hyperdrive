@@ -1,7 +1,6 @@
 allowBuilds:
-  # msw (Mock Service Worker) is a transitive dependency of the shadcn CLI
-  # (devDependency, used only to resolve the `shadcn/tailwind.css` import in
-  # src/index.css). Its postinstall script only scaffolds a browser mock
+  # msw (Mock Service Worker) is a transitive dependency of Vitest (through
+  # @vitest/mocker). Its postinstall script only scaffolds a browser mock
   # service worker file for consumers that use msw directly in the browser,
   # which this project does not do. No native build is needed.
   msw: false
