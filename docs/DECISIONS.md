@@ -514,3 +514,16 @@ orientées Node, chunk plus léger à pré-cacher ; couvre tout le besoin d'écr
 copier-coller entre classeurs de jurys différents. Pas d'autofiltre : non demandé.
 
 **Reporté dans** : `PRODUCT.md` F16, F17, §9. Impacte F16, F17.
+
+## D36 — PWA installable, mise à jour proposée jamais imposée (2026-09-24)
+
+**Décision** : manifeste avec icônes 192 / 512 px, `display: standalone`.
+`registerType: 'prompt'`, indicateur dans la vue examinateur seulement. La vue projetée
+se recharge d'elle-même sur `versionchange` de Dexie (nouvelle version avec schéma plus
+récent). Critère hors ligne vérifié par Playwright.
+
+**Pourquoi** : une fenêtre dédiée le jour de l'oral ; un rechargement imposé en plein
+passage fait perdre le fil, surtout devant l'étudiant ; la vue projetée, en lecture
+seule, peut se recharger sans risque.
+
+**Reporté dans** : `PRODUCT.md` F17. Impacte F17.

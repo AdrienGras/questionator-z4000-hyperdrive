@@ -573,6 +573,10 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 **Objectif.** Fonctionner sans réseau après un premier chargement.
 
 **Contenu.** vite-plugin-pwa (Workbox) avec précache de tous les assets, dont les grammaires Shiki, write-excel-file, le chunk d'icônes Lucide (F07) et le chunk de graphiques des stats (F15). Scope du service worker réglé pour le sous-chemin GitHub Pages. Indication discrète quand une nouvelle version est disponible.
+- Mise à jour proposée, jamais imposée (`registerType: 'prompt'`) : indicateur « Nouvelle version disponible — Recharger » dans la vue examinateur uniquement. Aucun rechargement automatique pendant une session.
+- La vue projetée n'affiche jamais l'indicateur. Si une nouvelle version ouvre la base avec un schéma Dexie plus récent, la vue projetée (lecture seule, reconstruite depuis la base) se recharge d'elle-même à l'événement `versionchange`.
+- Application installable : manifeste avec icônes carrées 192 et 512 px (recadrage d'un élément de la bannière, sinon monogramme aux couleurs Synthwave), `display: standalone`.
+- Critère réseau coupé vérifié par Playwright (mode hors ligne du contexte).
 
 **Critères d'acceptation.** Après un chargement en ligne, l'application permet, réseau coupé, de créer une session, de faire passer un étudiant, d'ouvrir la vue projetée et d'exporter un Excel.
 
