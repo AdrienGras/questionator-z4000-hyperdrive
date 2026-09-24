@@ -3,3 +3,5 @@ dist
 coverage
 *.local
 *.tsbuildinfo
+.tanstack
+.superpowers
