@@ -446,9 +446,11 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 
 **Contenu.**
 - Bouton « Passer la question » sur une question `pending`, si `skips.enabled`.
-- Boîte de dialogue : motifs prédéfinis de `skips.reasons`, champ libre si `skips.allowFreeText`. Le motif est facultatif.
+- Boîte de dialogue : motifs prédéfinis de `skips.reasons` en choix unique, champ libre si `skips.allowFreeText` (taper dans le champ désélectionne le motif prédéfini, et inversement). Un seul motif, facultatif.
 - L'attempt passe en `skipped`, la question est exclue pour cet étudiant, et l'étudiant rechoisit une catégorie.
-- Le bouton est désactivé une fois `skips.maxPerStudent` atteint.
+- Le bouton affiche le nombre de passes restantes ; il est désactivé, avec une infobulle, une fois `skips.maxPerStudent` atteint.
+- La mutation revérifie dans la transaction : attempt `pending`, skips activés, quota non atteint (même principe que F09).
+- Un skip n'est pas annulable ; en cas d'erreur, « Réinitialiser l'étudiant » (F11).
 
 **Critères d'acceptation.**
 - Un skip ne compte pas dans `questionsPerStudent`.
