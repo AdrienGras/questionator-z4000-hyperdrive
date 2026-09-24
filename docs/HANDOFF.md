@@ -20,6 +20,35 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-24 — Spec V1 arbitrée et 17 tickets rédigés
+
+**Dernière chose faite** : les 12 points ouverts de `PRODUCT.md` tranchés, puis chaque
+feature F01–F17 creusée (brainstorming superpowers) et rédigée en issue GitHub #1 à #17,
+rangées dans le projet n°3 en **Ready**, avec Priority, Size et relations « blocked by ».
+36 décisions tracées dans `docs/DECISIONS.md` (D01–D36) et reportées dans `PRODUCT.md`.
+Toolset challengé : TS 7, oxlint type-aware, Prettier, pnpm, Node 24 via nvm (D13) ;
+ExcelJS remplacé par write-excel-file (D35) ; Playwright adopté (D33). Conventions :
+commits gitmoji, une branche + PR par ticket. Tout est commité et poussé sur `main`
+(pas encore de code applicatif).
+
+**Trucs en suspens** : rien sur la spec. `rtk trust` à lancer par l'utilisateur pour
+les filtres RTK du projet (modèle vide, sans effet). Protection de `main` à activer à la
+fin de F01 (critère du ticket #1).
+
+**Prochaine chose à creuser** : prendre le ticket #1 (F01 — socle) : créer la branche
+`feat/f01-socle`, figer la spec de l'issue dans
+`docs/superpowers/specs/AAAA-MM-JJ-f01-socle-design.md`, puis writing-plans et le cycle
+habituel. Ordre des dépendances : #1 → #2 → #3 → #4 → (#5, #6) → #7, #8 → #9 → #10, #11 →
+#12 → #13 → #14, #15 → #16 → #17.
+
+**Notes pour future Claude** : `PRODUCT.md` (~40 Ko) est la source de vérité produit ;
+le lire par sections (`grep -n '^##'`). Le corps de chaque issue est la spec détaillée
+de sa feature (`gh issue view <n> -R AdrienGras/questionator-z4000-hyperdrive`).
+`docs/DECISIONS.md` garde le pourquoi (`## Dnn — Sujet (date)`), à compléter à chaque
+arbitrage. Créer un ticket : `.claude/scripts/gh-ticket.sh` (voir `INDEX.md`). TS 7 :
+pas de `baseUrl`, rien qui dépende de l'API JS de TypeScript (typescript-eslint,
+ts-morph). `gh` a le scope `project`. Interface et docs en français.
+
 ## 2026-09-24 — Bootstrap de la mémoire projet et arbitrage de PRODUCT.md
 
 **Dernière chose faite** : mise en place du système de mémoire projet via

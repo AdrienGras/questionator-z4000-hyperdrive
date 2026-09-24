@@ -16,3 +16,4 @@ Voir aussi : `ENVIRONMENT.md` · `DECISIONS.md` · `QUIRKS.md` · `BACKLOG.md` �
 
 | Commande | Date | Cible |
 |---|---|---|
+| `.claude/scripts/gh-ticket.sh "<titre>" <corps.md> <P0-P2> <XS-XL> [n° bloquants…]` | 2026-09-24 | Crée une issue `feature`, la range dans le projet n°3 (Status Ready, Priority, Size) et pose les relations « blocked by » |
