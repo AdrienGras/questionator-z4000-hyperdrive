@@ -34,12 +34,12 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Workaround** : lancer `corepack pnpm …` (corepack, livré avec Node 24, résout la version épinglée). La CI utilise `pnpm/action-setup`, qui lit `packageManager`.
 **Référence** : `package.json`, `.github/workflows/ci.yml`.
 
-## `tsc -b` échoue sur un clone sans `src/routeTree.gen.ts` (2026-09-24)
+## Ajouter une route casse `tsc -b` tant que `routeTree.gen.ts` n'est pas régénéré (2026-09-24)
 
 **Découvert** : F01, tâche routeur.
-**Symptôme** : `pnpm build` (`tsc -b && vite build`) échoue avant que Vite ne génère l'arbre de routes.
-**Cause** : `routeTree.gen.ts` n'est généré que par le plugin Vite du routeur (build, dev, Vitest).
-**Workaround** : le fichier est **commité** ; après tout ajout de route, lancer `pnpm build` (ou `pnpm dev`) et commiter le fichier régénéré. La CI échoue si le fichier commité est périmé (`git diff --exit-code`).
+**Symptôme** : après l'ajout d'une route, `pnpm build` et `pnpm check` échouent dès `tsc -b` (TS2345) avant que Vite n'ait la moindre chance de régénérer l'arbre.
+**Cause** : `tsc -b` s'exécute avant Vite dans `pnpm build` (`tsc -b && vite build`) ; seul le plugin Vite du routeur régénère `routeTree.gen.ts`, donc seuls `pnpm dev`, `pnpm test` (Vitest) ou `vite build` le régénèrent — jamais `tsc -b` seul.
+**Workaround** : le fichier est **commité** ; après tout ajout ou renommage de route, lancer `pnpm test` (ou `pnpm dev`) pour régénérer `src/routeTree.gen.ts`, puis le commiter. La CI échoue si le fichier commité est périmé (`git diff --exit-code`).
 **Référence** : `src/routeTree.gen.ts`, `.github/workflows/ci.yml`.
 
 ## Fichiers de test dans `src/routes/` : warning « does not export a Route » (2026-09-24)

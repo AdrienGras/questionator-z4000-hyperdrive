@@ -72,7 +72,7 @@ function SessionPage() {
 
 - Historique **par hash** (`createHashHistory` dans `src/main.tsx`) : les URL publiques sont `…/#/session/<id>`.
 - Le routeur est créé par `createAppRouter(history)` (`src/router.tsx`) ; les tests passent `createMemoryHistory({ initialEntries: ['/…'] })`.
-- Après ajout ou renommage d'une route : régénérer et **commiter** `src/routeTree.gen.ts` (voir QUIRKS).
+- Après ajout ou renommage d'une route : `pnpm test` (ou `pnpm dev`) régénère `src/routeTree.gen.ts` ; le **commiter** (voir QUIRKS).
 - Les tests peuvent vivre dans `src/routes/` (`*.test.tsx`, ignorés par le plugin).
 
 ## Composant shadcn — ajout

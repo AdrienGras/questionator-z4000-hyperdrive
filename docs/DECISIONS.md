@@ -243,6 +243,8 @@ en profondeur.
 
 ## D16 — Icônes Lucide : un chunk unique chargé à la demande (2026-09-24) — révisée par D37 (Tabler)
 
+> **Révisée par D37** : Tabler remplace Lucide et le seuil de repli (~300 Ko, DynamicIcon) est abandonné. Lire D37.
+
 **Question** : accepter les ~1 600 icônes Lucide sans alourdir le bundle ni casser le
 hors ligne.
 

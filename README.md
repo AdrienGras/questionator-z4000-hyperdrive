@@ -19,10 +19,11 @@ Tout tourne dans le navigateur : aucune donnée ne quitte la machine de l'examin
 
 ## Développement
 
-Prérequis : [nvm](https://github.com/nvm-sh/nvm) et pnpm (version fixée par `packageManager`).
+Prérequis : [nvm](https://github.com/nvm-sh/nvm) et pnpm (version fixée par `packageManager`). Activer corepack avant l'installation (Node 24 le fournit ; avec un pnpm global plus ancien, préfixer chaque commande par `corepack pnpm …`).
 
 ```bash
 nvm use
+corepack enable
 pnpm install
 pnpm dev        # serveur de développement
 pnpm check      # format, lint, types, tests (comme la CI, hors build)
