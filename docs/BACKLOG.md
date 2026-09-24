@@ -10,3 +10,8 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 `- [ ] …`.
 
 ---
+
+## Outillage
+
+- [ ] Passer `.nvmrc` (et la CI) à Node 26 une fois LTS (prévu le 2026-10-28) ; Node 24 passe en maintenance le 2026-10-20.
+- [ ] Évaluer oxfmt en remplacement de Prettier + prettier-plugin-tailwindcss quand il sort en 1.0 (tri Tailwind natif via `sortTailwindcss`).

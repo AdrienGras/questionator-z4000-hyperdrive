@@ -185,3 +185,32 @@ de F14.
 vérifier tôt, dans la feature qui pose la persistance, évite de bloquer F14.
 
 **Reporté dans** : `PRODUCT.md` F04, F14. Impacte F04 et F14.
+
+## D13 — Toolset : TypeScript 7, oxlint type-aware, Prettier, pnpm, Node 24 via nvm (2026-09-24)
+
+**Question** : `PRODUCT.md` prévoyait ESLint + Prettier. Challenge du toolset avant F01.
+
+**Décision** :
+- TypeScript 7 (compilateur natif Go), Vite 8, Vitest 5, Tailwind 4.3, shadcn, React 19.
+- Lint : oxlint + oxlint-tsgolint (type-aware), plugins natifs `typescript`, `react`
+  (hooks et react-refresh inclus), `jsx-a11y`, `import`, `vitest`. Pas d'ESLint.
+- Format : Prettier + prettier-plugin-tailwindcss (`tailwindStylesheet` requis en v4).
+- pnpm 12 épinglé par `packageManager: "pnpm@<version exacte>"`.
+- Node 24 LTS épinglé par `.nvmrc` ; nvm en local, `actions/setup-node` avec
+  `node-version-file: .nvmrc` en CI.
+- CI : `tsc -b` explicite en plus d'oxlint.
+
+**Pourquoi** : typescript-eslint ne supporte pas TS 7 (peerDep `<6.1.0`, issue #12518
+« not planned ») ; oxlint-tsgolint est stable depuis le 22/07/2026 et embarque
+typescript-go. oxfmt est prometteur (tri Tailwind natif) mais encore en beta. Versions
+vérifiées sur npm et les sources officielles le 2026-09-24.
+
+**Contraintes induites** :
+- Pas de `baseUrl` dans les tsconfig (supprimé en TS 7), seulement `paths` — le guide
+  shadcn l'ajoute, à retirer.
+- Aucune dépendance à l'API JS de TypeScript (typescript-eslint, ts-morph…). Parade
+  officielle si inévitable : alias `@typescript/typescript6`.
+- pnpm ≥ 11 : scripts d'install autorisés via `allowBuilds` dans `pnpm-workspace.yaml`,
+  clé inconnue = erreur.
+
+**Reporté dans** : `PRODUCT.md` F01, §9. Impacte F01.

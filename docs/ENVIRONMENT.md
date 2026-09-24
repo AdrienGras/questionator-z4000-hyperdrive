@@ -11,7 +11,7 @@ Carte des paths, services, accès, commandes. À jour au fil des découvertes.
 - **Path hôte** : `/srv/AdrienGras/questionator-z4000-hyperdrive`
 - **Remote** : `git@github.com:AdrienGras/questionator-z4000-hyperdrive.git`
 - **Branche par défaut** : `main`
-- **Convention de merge** : à définir (déploiement GitHub Pages à chaque push sur `main`, cf. `PRODUCT.md` F01)
+- **Convention de merge** : une branche par ticket (`feat/f01-socle`, `fix/…`), PR vers `main` avec `Closes #n`, CI verte requise. Déploiement GitHub Pages à chaque push sur `main`.
 
 ## Stack d'exécution
 
@@ -23,6 +23,7 @@ Carte des paths, services, accès, commandes. À jour au fil des découvertes.
 | Service | Rôle | Accès |
 |---|---|---|
 | GitHub Pages | Hébergement de la SPA et du JSON Schema publié | prévu, via GitHub Actions |
+| GitHub Project n°3 | Kanban des tickets (une issue par feature Fxx, label `feature`/`spike`). Champs : Status (Backlog → Ready = spec rédigée dans l’issue → In progress → In review → Done), Priority P0–P2, Size XS–XL | https://github.com/users/AdrienGras/projects/3 — `gh project … --owner AdrienGras` |
 
 ## Variables d'environnement
 

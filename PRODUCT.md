@@ -1,6 +1,6 @@
 # QUESTIONATOR Z-4000 HYPERDRIVE
 
-> Slug de repo proposé : `questionator-z4000`.
+> Dépôt : `AdrienGras/questionator-z4000-hyperdrive`, publié sur `https://adriengras.github.io/questionator-z4000-hyperdrive/`.
 
 ## 1. Vision
 
@@ -82,7 +82,7 @@ Exemple :
 
 ```json
 {
-  "$schema": "https://<owner>.github.io/questionator-z4000/config.schema.json",
+  "$schema": "https://adriengras.github.io/questionator-z4000-hyperdrive/config.schema.json",
   "schemaVersion": 1,
   "locale": "fr",
   "exam": {
@@ -305,7 +305,8 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 **Contenu.**
 - Vite + React + TypeScript strict, TanStack Router en mode SPA avec historique par hash (GitHub Pages n'offre pas de fallback SPA).
 - Tailwind + shadcn/ui, thème par défaut de shadcn.
-- ESLint, Prettier, Vitest.
+- oxlint avec lint type-aware (oxlint-tsgolint), Prettier avec prettier-plugin-tailwindcss, Vitest.
+- Node 24 LTS épinglé par `.nvmrc` (nvm en local, `node-version-file` en CI), pnpm épinglé par `packageManager`.
 - GitHub Action : lint, tests, build, déploiement sur GitHub Pages à chaque push sur `main`. `base` Vite réglé sur le nom du repo.
 - Licence MIT, README (usage, format des fichiers, lien vers le schéma et l'exemple).
 
@@ -541,7 +542,9 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 
 | Besoin | Choix |
 |---|---|
-| Build | Vite, TypeScript strict |
+| Runtime | Node 24 LTS via nvm (`.nvmrc`), pnpm 12 |
+| Build | Vite 8, TypeScript 7 strict (compilateur natif) |
+| Lint / format | oxlint + oxlint-tsgolint (type-aware), Prettier + prettier-plugin-tailwindcss |
 | UI | React, Tailwind, shadcn/ui, icônes Lucide |
 | Routing | TanStack Router, historique par hash |
 | Persistance | Dexie (IndexedDB), `useLiveQuery` |
@@ -550,7 +553,7 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 | Excel | ExcelJS, chargé à la demande |
 | Markdown | react-markdown, remark-gfm, Shiki |
 | Hors ligne | vite-plugin-pwa |
-| Tests | Vitest ; Playwright en option pour les parcours critiques |
+| Tests | Vitest 5 ; Playwright en option pour les parcours critiques |
 | Déploiement | GitHub Actions vers GitHub Pages |
 
 Pas de store global ni de TanStack Query : Dexie et `liveQuery` couvrent l'état persistant, l'état local d'interface reste dans les composants.

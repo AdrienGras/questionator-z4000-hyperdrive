@@ -1,6 +1,7 @@
 # Conventions du projet
 
 - **Commits en [gitmoji](https://gitmoji.dev)** : `<emoji> <message au présent, en français>`, emoji en Unicode (pas de `:shortcode:`). Détail et emojis courants : `docs/CONVENTIONS.md` § « Message de commit — gitmoji ».
+- **Une branche et une PR par ticket** vers `main`, `Closes #n` dans la PR ; pas de push direct sur `main` une fois F01 livré.
 - `PRODUCT.md` est la source de vérité produit ; tout arbitrage est tracé dans `docs/DECISIONS.md`.
 
 <!-- MEMORY_BLOCK_START -->
