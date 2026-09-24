@@ -364,7 +364,10 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 **Contenu.**
 - Liste des sessions avec nom, titre de l'épreuve, date de dernière modification et avancement (passés, absents, restants).
 - Actions : reprendre, créer, renommer, modifier l'examinateur, supprimer (avec confirmation), exporter un backup, importer un backup.
-- Backup : un fichier JSON contenant la session complète, avec `appVersion` et une version de format. À l'import, validation Zod ; si une session avec le même `id` existe, l'utilisateur choisit entre remplacer et annuler.
+- Backup : un fichier JSON `{ format: "questionator-backup", formatVersion, appVersion, exportedAt, session }`, nommé `<slug-session>-backup-<AAAA-MM-JJ>.json`. `appVersion` vient de `package.json` (injecté au build). À l'import, validation de l'enveloppe, de la session (schéma Zod de `Session`) **et de sa config figée par le validateur de F02**. `formatVersion` ou `schemaVersion` plus récents : erreur invitant à mettre l'application à jour. Si une session avec le même `id` existe, l'utilisateur choisit entre remplacer et annuler.
+- État vide : bouton « Créer une session » et lien vers la config d'exemple.
+- Indicateur discret dans l'en-tête, seulement si le navigateur a refusé le stockage persistant (F04), avec une infobulle qui recommande les backups.
+- La confirmation de suppression propose « Exporter un backup d'abord ».
 
 **Critères d'acceptation.**
 - Un backup exporté puis importé dans un autre navigateur restitue une session identique, passages et ajustements compris.

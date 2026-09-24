@@ -349,3 +349,16 @@ automatisé entre deux vraies fenêtres en F14, avec Playwright.
 propagation entre contextes.
 
 **Reporté dans** : `PRODUCT.md` F04. Impacte F04 et F14.
+
+## D24 — Backup : enveloppe versionnée, revalidation complète à l'import (2026-09-24)
+
+**Décision** : enveloppe `{ format, formatVersion, appVersion, exportedAt, session }`.
+L'import revalide l'enveloppe, la session (Zod) et sa config figée (validateur F02) ;
+versions futures refusées avec invitation à mettre à jour ; rien n'est écrit en cas
+d'erreur. Ajouts UX : état vide, indicateur de persistance refusée, « exporter un
+backup d'abord » dans la confirmation de suppression.
+
+**Pourquoi** : un backup est un fichier éditable à la main ; une config figée corrompue
+ne doit pas entrer sans contrôle. La suppression est la seule action irréversible.
+
+**Reporté dans** : `PRODUCT.md` F05. Impacte F05.
