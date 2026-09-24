@@ -3,6 +3,7 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
+import { configSchemaPlugin } from './vite/config-schema-plugin'
 
 export default defineConfig({
   base: '/questionator-z4000-hyperdrive/',
@@ -14,6 +15,7 @@ export default defineConfig({
     }),
     react(),
     tailwindcss(),
+    configSchemaPlugin(),
   ],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
