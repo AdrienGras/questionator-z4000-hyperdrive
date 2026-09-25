@@ -161,3 +161,35 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : `.map` passe aussi l'index et le tableau ; une fonction dont la signature accepte un 2ᵉ paramètre les recevrait par accident si elle évolue.
 **Workaround** : toujours une flèche explicite, `items.map((item, index) => build(item, index))`.
 **Référence** : `src/test/student-fixtures.ts`.
+
+## `useLiveQuery` garde son dernier résultat quand ses dépendances changent (2026-09-25)
+
+**Découvert** : F04, revue de la tâche 3 (hooks).
+**Symptôme** : juste après `rerender({ id: 'b' })`, `useSession('b')` renvoyait encore la session `a` pendant un rendu.
+**Cause** : `dexie-react-hooks` conserve le résultat de l'observable précédent et ne recalcule pas de valeur initiale quand il en a déjà une.
+**Workaround** : la requête renvoie `{ id, session }` et le hook masque (`undefined`) un résultat dont l'`id` n'est pas le courant. À reproduire pour tout hook `useLiveQuery` paramétré.
+**Référence** : `src/db/hooks.ts`.
+
+## Après `versionchange`, `close()` fait échouer toute opération et les `liveQuery` se taisent (2026-09-25)
+
+**Découvert** : F04 (D45), sonde et revue finale.
+**Symptôme** : dans l'ancien onglet, `put` rejette `DatabaseClosedError` ; les hooks gardent leur dernière valeur sans se mettre à jour.
+**Cause** : `close()` sans argument vaut `{ disableAutoOpen: true }`. Le traitement par défaut de Dexie passe `false` et rouvrirait en silence sur l'ancien schéma.
+**Workaround** : ne pas changer l'argument de `close()` ; se fier à `useDbStatus() === 'outdated'` pour proposer le rechargement.
+**Référence** : `src/db/db.ts`.
+
+## `import 'fake-indexeddb/auto'` exige l'exception oxlint `import/no-unassigned-import` (2026-09-25)
+
+**Découvert** : F04.
+**Symptôme** : lint rouge sur la première ligne des tests de `src/db/`.
+**Cause** : la règle n'autorise que les imports à effet de bord listés.
+**Workaround** : `"fake-indexeddb/auto"` ajouté à `allow` dans `.oxlintrc.json`. Importer `Dexie` par l'export nommé (`import { Dexie } from 'dexie'`), l'import par défaut déclenche `import/no-named-as-default`.
+**Référence** : `.oxlintrc.json`, `src/db/*.test.ts`.
+
+## Rien n'évalue `src/db` tant qu'aucune feature ne l'importe : `window.__questionatorDb` absent en dev (2026-09-25)
+
+**Découvert** : F04, vérification manuelle entre fenêtres.
+**Symptôme** : `typeof window.__questionatorDb === 'undefined'` sous `pnpm dev`.
+**Cause** : Vite ne charge que les modules importés depuis `main.tsx`.
+**Workaround** : `src/main.tsx` importe `@/db/db` en dev seulement. En prod, rien tant que F05 n'importe pas `@/db`.
+**Référence** : `src/main.tsx`.

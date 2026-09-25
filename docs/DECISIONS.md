@@ -664,3 +664,53 @@ largement tout barème d'oral. La garde `isSafeInteger` ne sert plus qu'aux donn
 corrompues.
 
 **Reporté dans** : `PRODUCT.md` §5, §6.2, spec F03. Impacte F02, F03, F11.
+
+## D45 — Changement de schéma venu d'un autre onglet : fermeture propre, état `outdated` (2026-09-25)
+
+**Question** : une nouvelle version de l'app (PWA, mise à jour proposée et non imposée,
+D36) qui monte le schéma Dexie alors qu'un autre onglet tourne sur l'ancienne version.
+
+**Décision** : F04 intercepte `versionchange` : l'instance ferme sa connexion, passe à
+l'état `'outdated'` (hook `useDbStatus()`) et remplace le traitement par défaut de Dexie.
+Les écritures suivantes échouent avec `DatabaseClosedError`. Le message « recharger la
+page » est affiché par la feature de mise à jour PWA.
+
+**Pourquoi** : l'onglet qui monte de version n'est jamais bloqué, et l'ancien onglet a
+un état observable au lieu d'erreurs silencieuses en console.
+
+**Reporté dans** : spec F04. Impacte F04 et la feature PWA.
+
+## D46 — Contrat d'écriture : `createSession` refuse un doublon, mutator synchrone sur la session fraîche (2026-09-25)
+
+**Question** : forme exacte des écritures de F04 (création, import, mutations).
+
+**Décision** :
+- `createSession(session)` reçoit une `Session` complète (construite par F06) et rejette
+  `SessionExistsError` si l'`id` existe ; `putSession` écrase (import F05, après
+  confirmation).
+- `updateSession(id, mutator)` : mutator synchrone `(Session) => Session`, appelé sur la
+  session fraîchement lue dans la transaction (déjà une copie : IndexedDB clone à la
+  lecture, donc pas de `structuredClone`) ; un
+  changement d'`id` est refusé ; `updatedAt` posé par F04. Les contrôles métier se font
+  dans le mutator, jamais sur l'état affiché.
+
+**Pourquoi** : un import ne peut pas écraser une session par accident ; deux onglets
+examinateur appliquent leurs contrôles sur l'état réel ; un mutator peut modifier en
+place sans effet de bord.
+
+**Reporté dans** : spec F04. Impacte F05, F06, F09–F13.
+
+## D47 — Base IndexedDB indisponible : état `unavailable` (2026-09-25)
+
+**Question** : IndexedDB bloqué (Safari « bloquer tous les cookies », politique
+d'entreprise) ou absent : `useSessions()` restait `undefined` indéfiniment et l'état de
+connexion affichait `'open'`.
+
+**Décision** : `DbStatus` gagne `'unavailable'`. `QuestionatorDb` ouvre la base dès sa
+construction et passe à `'unavailable'` si l'ouverture échoue. F05 affiche un message
+explicite au lieu d'un chargement sans fin.
+
+**Pourquoi** : un examinateur sur un navigateur qui bloque le stockage doit savoir
+pourquoi rien ne s'affiche ; l'état coûte quelques lignes et reste additif.
+
+**Reporté dans** : spec F04. Impacte F04, F05.

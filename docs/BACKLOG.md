@@ -28,6 +28,11 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] `formatScore` en `final` : si `finalScale` a plus de décimales que le pas (ex. 20,25 au pas de 0,5, déjà signalé par `final_scale_off_grid`), Intl arrondit l'affichage de la note plafonnée (« 20,3 »). Prendre le max des décimales du pas et de `finalScale`, ou refuser ce cas en F02.
 - [ ] Valider en F04/F11 les données persistées (ajustement hors bornes, attempt `scored` sans `score`) : aujourd'hui `computeScores` lève sur donnée corrompue.
 
+## Persistance
+
+- [ ] Relire `navigator.storage.persisted()` sur `visibilitychange` : le navigateur peut accorder la persistance de lui-même (PWA installée), l'indicateur de F05 resterait sinon à `best-effort` jusqu'au rechargement.
+- [ ] Première migration de schéma (`version(2)`) : tester l'ouverture d'un ancien onglet sur une base déjà montée de version.
+
 ## Écran de passage
 
 - [ ] Raccourcis clavier : chiffres pour les valeurs du barème, touches pour les catégories, raccourci de skip.

@@ -20,6 +20,34 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-25 — F04 implémenté : persistance
+
+**Dernière chose faite** : F04 (#4) implémenté sur `feat/f04-persistence` en subagent-driven
+development : spec + D45–D47, plan en 4 tâches, une seule correction en revue de tâche
+(`useSession` renvoyait brièvement la session de l'ancien `id`), revue finale « with fixes »
+puis une vague de 6 corrections (état `unavailable`, exposition dev réellement chargée, import
+nommé de `Dexie`, `index.ts` sans le singleton, séquence des relectures de persistance).
+`src/db/` : Dexie 4, un document par session, `updateSession` transactionnel (seule voie
+d'écriture), hooks `useSessions`/`useSession`/`useDbStatus`, états `open`/`outdated`/
+`unavailable`, `requestPersistentStorage`/`usePersistenceStatus`. Réactivité entre fenêtres
+vérifiée dans Chromium (fenêtre ouverte par `window.open` : l'écriture de l'autre apparaît
+sans rechargement) : F14 n'a pas besoin de BroadcastChannel. `pnpm check` vert (238 tests).
+Mémoire à jour (INDEX, QUIRKS ×4, BACKLOG, CONVENTIONS « Mutation de session »).
+
+**Trucs en suspens** : branche non poussée ; PR brouillon à ouvrir (`Closes #4`) avec la
+procédure manuelle consignée, puis Sonar. Non vérifié : survie à un vrai redémarrage du
+navigateur (seule une fermeture de page a été testée) — à faire à la main avant le merge.
+
+**Prochaine chose à creuser** : F05 (accueil, backup/import : premier consommateur de
+`useSessions`, `putSession`, `useDbStatus`, `usePersistenceStatus`) ou F06 (création de
+session : `createSession`, `requestPersistentStorage`, `validateConfig`).
+
+**Notes pour future Claude** : écrire uniquement via `updateSession` (CONVENTIONS « Mutation de
+session ») ; `@/db` n'exporte pas le singleton. Tout hook `useLiveQuery` paramétré doit masquer
+le résultat d'anciens paramètres (QUIRKS). Afficher un message si `useDbStatus()` vaut
+`'outdated'` ou `'unavailable'`. Tests de `src/db/` : `import 'fake-indexeddb/auto'` en tête,
+`createDb(nomUnique)` pour le cycle de vie.
+
 ## 2026-09-25 — F03 implémenté : moteur de notation
 
 **Dernière chose faite** : F03 (#3) livré, PR #23 mergée (`364e451`). Implémenté en
