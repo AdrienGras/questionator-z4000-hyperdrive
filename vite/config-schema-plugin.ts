@@ -6,7 +6,8 @@ export const SCHEMA_FILE_NAME = 'config.schema.json'
 export const EXAMPLE_FILE_NAME = 'config.example.json'
 export const STUDENTS_EXAMPLE_FILE_NAME = 'students.example.csv'
 
-const SCHEMA_MODULE = fileURLToPath(new URL('../src/config/json-schema.ts', import.meta.url))
+const SRC_DIR = fileURLToPath(new URL('../src', import.meta.url))
+const SCHEMA_MODULE = fileURLToPath(new URL('../src/domain/config/json-schema.ts', import.meta.url))
 const EXAMPLE_FILE = fileURLToPath(new URL('../examples/config.example.json', import.meta.url))
 const STUDENTS_EXAMPLE_FILE = fileURLToPath(
   new URL('../examples/students.example.csv', import.meta.url),
@@ -25,7 +26,7 @@ export function matchConfigAsset(url: string | undefined, base: string): string 
 /**
  * Charge le module de schéma hors de l'application (sans vite.config.ts), lit l'exemple de config
  * et la liste d'étudiants d'exemple (BOM conservé), et renvoie la liste des fichiers à surveiller :
- * les dépendances transitives de `json-schema.ts` (tout `src/config/`, cf. D17) plus les exemples
+ * les dépendances transitives de `json-schema.ts` (tout `src/domain/config/`, cf. D17) plus les exemples
  * eux-mêmes.
  */
 export async function renderConfigAssets(): Promise<{
@@ -36,6 +37,8 @@ export async function renderConfigAssets(): Promise<{
 }> {
   const { module, dependencies } = await runnerImport<JsonSchemaModule>(SCHEMA_MODULE, {
     configFile: false,
+    // Même alias que vite.config.ts : le code de src/ importe par `@/` (#31).
+    resolve: { alias: { '@': SRC_DIR } },
   })
   const schema = `${JSON.stringify(module.buildConfigJsonSchema(), null, 2)}\n`
   const example = await readFile(EXAMPLE_FILE, 'utf8')

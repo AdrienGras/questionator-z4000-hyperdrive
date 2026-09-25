@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto'
 import { screen } from '@testing-library/react'
 import { expect, test } from 'vitest'
-import { renderAt } from '@/test/render-at'
+import { renderAt } from '@/testing/render-at'
 
 test("la route / affiche l'accueil", async () => {
   renderAt('/')

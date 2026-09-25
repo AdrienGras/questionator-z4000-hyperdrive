@@ -1,5 +1,5 @@
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
-import { useUi } from '@/i18n/use-ui'
+import { useUi } from '@/lib/i18n/use-ui'
 
 export function NotFound() {
   const { text } = useUi()
