@@ -52,6 +52,11 @@ describe('accueil', () => {
     const example = screen.getByRole('link', { name: "Télécharger la config d'exemple" })
     expect(example.getAttribute('href')).toMatch(/config\.example\.json$/)
     expect(example).toHaveAttribute('download')
+    const studentsExample = screen.getByRole('link', {
+      name: "Télécharger la liste d'étudiants d'exemple",
+    })
+    expect(studentsExample.getAttribute('href')).toMatch(/students\.example\.csv$/)
+    expect(studentsExample).toHaveAttribute('download')
   })
 
   test('liste triée de la plus récente à la plus ancienne, avec jury et avancement', async () => {

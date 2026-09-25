@@ -12,7 +12,7 @@ Tout tourne dans le navigateur : aucune donnée ne quitte la machine de l'examin
 
 ## Usage prévu
 
-1. Préparer une liste d'étudiants (CSV nom / prénom) et un fichier de configuration (JSON : catégories, questions, barèmes).
+1. Préparer une liste d'étudiants (CSV nom / prénom, partir du [fichier d'exemple](https://adriengras.github.io/questionator-z4000-hyperdrive/students.example.csv), aussi dans [`examples/students.example.csv`](examples/students.example.csv)) et un fichier de configuration (JSON : catégories, questions, barèmes).
 2. Créer une session dans l'application à partir de ces deux fichiers.
 3. Faire passer chaque étudiant, avec une vue projetée pour l'étudiant et une vue de pilotage pour l'examinateur.
 4. Exporter les résultats en Excel.

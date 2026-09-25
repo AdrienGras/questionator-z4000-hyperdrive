@@ -18,6 +18,7 @@ const SAMPLE: UiMessageParams = {
   empty_title: {},
   empty_body: {},
   empty_example_link: {},
+  empty_students_example_link: {},
   card_examiner: { name: 'Ada' },
   card_updated: { date: '01/01/2026' },
   card_progress: { done: 3, absent: 1, remaining: 2 },

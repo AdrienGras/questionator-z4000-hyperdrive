@@ -23,13 +23,22 @@ export function EmptyState({ ui, onImport }: EmptyStateProps) {
             {text('home_import', {})}
           </Button>
         </div>
-        <a
-          href={`${import.meta.env.BASE_URL}config.example.json`}
-          download
-          className="text-sm text-primary underline underline-offset-4"
-        >
-          {text('empty_example_link', {})}
-        </a>
+        <div className="flex flex-wrap justify-center gap-x-4">
+          <a
+            href={`${import.meta.env.BASE_URL}config.example.json`}
+            download
+            className="text-sm text-primary underline underline-offset-4"
+          >
+            {text('empty_example_link', {})}
+          </a>
+          <a
+            href={`${import.meta.env.BASE_URL}students.example.csv`}
+            download
+            className="text-sm text-primary underline underline-offset-4"
+          >
+            {text('empty_students_example_link', {})}
+          </a>
+        </div>
       </CardContent>
     </Card>
   )
