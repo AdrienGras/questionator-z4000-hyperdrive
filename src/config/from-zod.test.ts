@@ -18,6 +18,14 @@ describe('fromZodIssues', () => {
     ])
   })
 
+  test('schemaVersion absent → required, pas invalid_enum', () => {
+    const withoutVersion: Record<string, unknown> = { ...minimalConfig() }
+    delete withoutVersion.schemaVersion
+    expect(convert(withoutVersion)).toEqual([
+      { severity: 'error', code: 'required', path: ['schemaVersion'], params: {} },
+    ])
+  })
+
   test('mauvais type → invalid_type avec le type attendu', () => {
     const input = { ...minimalConfig(), exam: { title: 42 } }
     expect(convert(input)).toEqual([

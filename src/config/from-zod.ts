@@ -55,6 +55,7 @@ function fromZodIssue(issue: ZodIssue, input: unknown): ConfigIssue[] {
     case 'invalid_type':
       return [fromInvalidType(issue.expected, path, input)]
     case 'invalid_value':
+      if (valueAt(input, path) === undefined) return [configError('required', path, {})]
       return [
         configError('invalid_enum', path, {
           options: issue.values
