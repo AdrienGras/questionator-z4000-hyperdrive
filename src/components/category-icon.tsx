@@ -4,11 +4,19 @@ type IconComponent = ComponentType<{ className?: string; 'aria-hidden'?: boolean
 
 let iconsModule: Promise<Readonly<Record<string, unknown>> | null> | undefined
 
-/** Chunk unique de toutes les icônes Tabler, chargé une fois à la demande (D37). `null` si échec. */
+/**
+ * Chunk unique de toutes les icônes Tabler, chargé une fois à la demande (D37). `null` si échec.
+ * Un échec (réseau, chunk introuvable) est transitoire : le cache est vidé pour qu'un montage
+ * ultérieur de `CategoryIcon` retente le chargement, au lieu de désactiver les icônes pour le
+ * reste de la session.
+ */
 function loadIcons(): Promise<Readonly<Record<string, unknown>> | null> {
   iconsModule ??= import('@tabler/icons-react').then(
     (module) => Object.fromEntries(Object.entries(module)),
-    () => null,
+    () => {
+      iconsModule = undefined
+      return null
+    },
   )
   return iconsModule
 }
