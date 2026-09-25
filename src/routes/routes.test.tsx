@@ -1,13 +1,7 @@
 import 'fake-indexeddb/auto'
-import { createMemoryHistory, RouterProvider } from '@tanstack/react-router'
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { expect, test } from 'vitest'
-import { createAppRouter } from '@/router'
-
-function renderAt(path: string) {
-  const router = createAppRouter(createMemoryHistory({ initialEntries: [path] }))
-  render(<RouterProvider router={router} />)
-}
+import { renderAt } from '@/test/render-at'
 
 test("la route / affiche l'accueil", async () => {
   renderAt('/')
@@ -22,8 +16,13 @@ test('une route inconnue affiche la page 404 avec un lien de retour', async () =
   expect(screen.getByRole('link', { name: "Retour à l'accueil" })).toHaveAttribute('href', '/')
 })
 
-test.each(['/new', '/session/abc'])('%s affiche la page provisoire', async (path) => {
-  renderAt(path)
+test("la route /new affiche l'écran de création", async () => {
+  renderAt('/new')
+  expect(await screen.findByRole('heading', { name: 'Nouvelle session' })).toBeInTheDocument()
+})
+
+test('la route /session/$sessionId affiche la page provisoire', async () => {
+  renderAt('/session/abc')
   expect(await screen.findByRole('heading', { name: 'Bientôt disponible' })).toBeInTheDocument()
   expect(screen.getByRole('link', { name: "Retour à l'accueil" })).toHaveAttribute('href', '/')
 })

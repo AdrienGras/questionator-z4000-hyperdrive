@@ -57,6 +57,7 @@ const SAMPLE: UiMessageParams = {
   create_file_status_ok: {},
   create_file_status_warnings: {},
   create_file_status_errors: {},
+  create_file_status_reading: {},
   create_students_example_link: {},
   create_validator_load_error: {},
   create_submit: {},
@@ -113,6 +114,11 @@ describe('UI_MESSAGES', () => {
     expect(t(UI_MESSAGES, 'fr', 'card_progress', { done: 0, absent: 0, remaining: 2 })).toContain(
       '2 restants',
     )
+  })
+
+  test('create_file_status_reading : libellé de lecture en fr et en en', () => {
+    expect(t(UI_MESSAGES, 'fr', 'create_file_status_reading', {})).toBe('Lecture en cours…')
+    expect(t(UI_MESSAGES, 'en', 'create_file_status_reading', {})).toBe('Reading…')
   })
 
   test('preview_students_count accorde le singulier et le pluriel en fr', () => {

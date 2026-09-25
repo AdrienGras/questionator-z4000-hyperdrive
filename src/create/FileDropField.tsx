@@ -24,35 +24,33 @@ type FileDropFieldProps = Readonly<{
 
 type CheckedStatus = Exclude<FileDropStatus, 'empty' | 'reading'>
 
-const STATUS_ICONS: Record<
-  CheckedStatus,
-  { icon: Icon; label: `create_file_status_${CheckedStatus}`; className: string }
+const STATUS_ICONS: Record<CheckedStatus, { icon: Icon; className: string }> = {
+  ok: { icon: IconCircleCheck, className: 'text-primary' },
+  warnings: { icon: IconAlertTriangle, className: 'text-muted-foreground' },
+  errors: { icon: IconCircleX, className: 'text-destructive' },
+}
+
+const STATUS_LABELS: Record<
+  Exclude<FileDropStatus, 'empty'>,
+  `create_file_status_${Exclude<FileDropStatus, 'empty'>}`
 > = {
-  ok: { icon: IconCircleCheck, label: 'create_file_status_ok', className: 'text-primary' },
-  warnings: {
-    icon: IconAlertTriangle,
-    label: 'create_file_status_warnings',
-    className: 'text-muted-foreground',
-  },
-  errors: { icon: IconCircleX, label: 'create_file_status_errors', className: 'text-destructive' },
+  reading: 'create_file_status_reading',
+  ok: 'create_file_status_ok',
+  warnings: 'create_file_status_warnings',
+  errors: 'create_file_status_errors',
 }
 
 function hasFiles(event: DragEvent<HTMLElement>): boolean {
   return Array.from(event.dataTransfer.types).includes('Files')
 }
 
-function StatusIcon({ ui, status }: Readonly<{ ui: Ui; status: FileDropStatus }>) {
+function StatusIcon({ status }: Readonly<{ status: FileDropStatus }>) {
   if (status === 'empty') return null
   if (status === 'reading') {
     return <IconLoader2 aria-hidden className="size-4 animate-spin text-muted-foreground" />
   }
-  const { icon: StateIcon, label, className } = STATUS_ICONS[status]
-  return (
-    <>
-      <StateIcon aria-hidden className={cn('size-4', className)} />
-      <span className="sr-only">{ui.text(label, {})}</span>
-    </>
-  )
+  const { icon: StateIcon, className } = STATUS_ICONS[status]
+  return <StateIcon aria-hidden className={cn('size-4', className)} />
 }
 
 /**
@@ -125,9 +123,13 @@ export function FileDropField({
           disabled={disabled}
           onChange={handleChange}
         />
+        {/* Toujours monté : une région live n'annonce que les changements d'un élément existant. */}
+        <span aria-live="polite" className="sr-only">
+          {fileName !== undefined && status !== 'empty' ? text(STATUS_LABELS[status], {}) : ''}
+        </span>
         {fileName !== undefined && (
           <p className="flex items-center gap-2 text-sm">
-            <StatusIcon ui={ui} status={status} />
+            <StatusIcon status={status} />
             <span className="truncate">{fileName}</span>
           </p>
         )}

@@ -11,7 +11,7 @@ type Props = Parameters<typeof FileDropField>[0]
 
 function renderField(overrides: Partial<Props> = {}) {
   const onFile = vi.fn<(file: File) => void>()
-  const { container } = render(
+  const field = (props: Partial<Props>) => (
     <FileDropField
       ui={ui}
       label="Liste d'étudiants (CSV)"
@@ -19,12 +19,18 @@ function renderField(overrides: Partial<Props> = {}) {
       fileName={undefined}
       status="empty"
       onFile={onFile}
-      {...overrides}
-    />,
+      {...props}
+    />
   )
+  const { container, rerender } = render(field(overrides))
   const input = container.querySelector('input[type=file]')
   if (!(input instanceof HTMLInputElement)) throw new Error('input fichier absent')
-  return { onFile, input, zone: screen.getByRole('group', { name: "Liste d'étudiants (CSV)" }) }
+  return {
+    onFile,
+    input,
+    zone: screen.getByRole('group', { name: "Liste d'étudiants (CSV)" }),
+    rerender: (props: Partial<Props>) => rerender(field(props)),
+  }
 }
 
 const file = new File(['Nom;Prénom'], 'etudiants.csv', { type: 'text/csv' })
@@ -93,9 +99,18 @@ describe('FileDropField', () => {
     ['ok', 'Fichier valide'],
     ['warnings', 'Fichier valide, avec avertissements'],
     ['errors', 'Fichier invalide'],
+    ['reading', 'Lecture en cours…'],
   ] as const)('état %s annoncé par un libellé accessible', (status, label) => {
     renderField({ fileName: 'etudiants.csv', status })
     expect(screen.getByText(label)).toHaveClass('sr-only')
+  })
+
+  test('région live : le passage de la lecture au résultat est annoncé', () => {
+    const { rerender } = renderField({ fileName: 'etudiants.csv', status: 'reading' })
+    const live = screen.getByText('Lecture en cours…')
+    expect(live).toHaveAttribute('aria-live', 'polite')
+    rerender({ fileName: 'etudiants.csv', status: 'errors' })
+    expect(live).toHaveTextContent('Fichier invalide')
   })
 
   test('aucun état annoncé sans fichier', () => {
