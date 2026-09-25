@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import type { NormalizedConfig } from '../config/normalize'
-import { makeSession } from '../test/session-fixtures'
+import { richSession } from '../test/backup-fixtures'
 import { makeStudent } from '../test/student-fixtures'
 import { APP_VERSION } from '../app-version'
 import { SessionSchema, type ParsedSession } from './schema'
@@ -15,22 +15,6 @@ type Simplify<T> = { [K in keyof T]: T[K] }
 type WithConfig = Simplify<Omit<ParsedSession, 'config'> & { config: NormalizedConfig }>
 // Casse `tsc` si Session et SessionSchema divergent.
 const aligned: Equal<WithConfig, Session> = true
-
-function richSession(): Session {
-  return makeSession({
-    examiner: 'M. Dupont',
-    activeStudentId: 'student-1',
-    projection: { mode: 'student', studentId: 'student-1' },
-    students: [
-      makeStudent([2, { skipped: 'Déjà vue' }, 'pending'], {
-        adjustment: { value: -0.5, reason: 'Hors sujet' },
-        comment: 'Bien',
-        finalRevealedAt: '2026-09-25T10:00:00.000Z',
-      }),
-      makeStudent([], { id: 'student-2', order: 2, absent: true }),
-    ],
-  })
-}
 
 function champManquant(s: Record<string, unknown>): void {
   delete s.name
