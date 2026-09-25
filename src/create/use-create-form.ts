@@ -75,7 +75,7 @@ async function readStudentsCsv(file: File): Promise<CsvParseResult | undefined> 
 export function useCreateForm(locale: Locale, dbStatus: DbStatus): CreateForm {
   const [students, setStudents] = useState<FileSlot<CsvParseResult>>({ kind: 'empty' })
   const [config, setConfig] = useState<FileSlot<ValidationResult>>({ kind: 'empty' })
-  const [name, setNameValue] = useState('')
+  const [name, setName] = useState('')
   const [examiner, setExaminer] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState(false)
@@ -127,13 +127,13 @@ export function useCreateForm(locale: Locale, dbStatus: DbStatus): CreateForm {
     const result = validateConfig(text, { cssSupports })
     setConfig({ kind: 'loaded', fileName, result })
     if (result.ok && !nameEdited.current) {
-      setNameValue(defaultSessionName(result.config.exam.title, new Date(), locale))
+      setName(defaultSessionName(result.config.exam.title, new Date(), locale))
     }
   }
 
-  function setName(value: string) {
+  function editName(value: string) {
     nameEdited.current = true
-    setNameValue(value)
+    setName(value)
   }
 
   async function submit(): Promise<string | undefined> {
@@ -171,7 +171,7 @@ export function useCreateForm(locale: Locale, dbStatus: DbStatus): CreateForm {
     canSubmit,
     setStudentsFile,
     setConfigFile,
-    setName,
+    setName: editName,
     setExaminer,
     submit,
   }
