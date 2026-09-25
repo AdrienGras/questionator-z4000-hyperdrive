@@ -48,6 +48,32 @@ const SAMPLE: UiMessageParams = {
   import_conflict_title: {},
   import_conflict_body: { existing: 'Ada', date: '01/01/2026', imported: 'Bob' },
   import_replace: {},
+  create_title: {},
+  create_students_label: {},
+  create_config_label: {},
+  create_choose_file: {},
+  create_replace_file: {},
+  create_drop_hint: {},
+  create_file_status_ok: {},
+  create_file_status_warnings: {},
+  create_file_status_errors: {},
+  create_students_example_link: {},
+  create_validator_load_error: {},
+  create_submit: {},
+  create_write_error: {},
+  create_preview_title: {},
+  create_preview_empty: {},
+  preview_students_count: { count: 2 },
+  preview_students_list: {},
+  preview_line: { line: 3, message: 'Doublon' },
+  preview_config_title: {},
+  preview_subject: { subject: 'PHP' },
+  preview_cohort: { cohort: 'B2' },
+  preview_category: { label: 'A', questions: 3, scale: '0, 1, 2' },
+  preview_scoring: { questionsPerStudent: 3, maxRawScore: 6, finalScale: 20 },
+  preview_rounding: { mode: 'nearest', step: 0.5, decimals: 2 },
+  preview_skips_disabled: {},
+  preview_skips: { max: 1 },
 }
 
 function isUiMessageKey(key: string): key is keyof UiMessageParams {
@@ -86,6 +112,31 @@ describe('UI_MESSAGES', () => {
     )
     expect(t(UI_MESSAGES, 'fr', 'card_progress', { done: 0, absent: 0, remaining: 2 })).toContain(
       '2 restants',
+    )
+  })
+
+  test('preview_students_count accorde le singulier et le pluriel en fr', () => {
+    expect(t(UI_MESSAGES, 'fr', 'preview_students_count', { count: 1 })).toBe('1 étudiant')
+    expect(t(UI_MESSAGES, 'fr', 'preview_students_count', { count: 2 })).toBe('2 étudiants')
+    expect(t(UI_MESSAGES, 'en', 'preview_students_count', { count: 1 })).toBe('1 student')
+    expect(t(UI_MESSAGES, 'en', 'preview_students_count', { count: 2 })).toBe('2 students')
+  })
+
+  test('preview_rounding : forme « au pas de » et forme « à N décimales »', () => {
+    expect(
+      t(UI_MESSAGES, 'fr', 'preview_rounding', { mode: 'nearest', step: 0.5, decimals: 2 }),
+    ).toBe('Arrondi au plus proche, au pas de 0,5')
+    expect(t(UI_MESSAGES, 'fr', 'preview_rounding', { mode: 'up', step: null, decimals: 2 })).toBe(
+      'Arrondi supérieur, à 2 décimales',
+    )
+    expect(
+      t(UI_MESSAGES, 'fr', 'preview_rounding', { mode: 'down', step: null, decimals: 1 }),
+    ).toBe('Arrondi inférieur, à 1 décimale')
+    expect(
+      t(UI_MESSAGES, 'en', 'preview_rounding', { mode: 'nearest', step: 0.5, decimals: 2 }),
+    ).toBe('Rounded to nearest, step 0.5')
+    expect(t(UI_MESSAGES, 'en', 'preview_rounding', { mode: 'up', step: null, decimals: 2 })).toBe(
+      'Rounded up, 2 decimals',
     )
   })
 })
