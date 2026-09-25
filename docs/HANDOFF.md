@@ -40,9 +40,8 @@ Chromium sur le build de prod (`vite preview`) : refus d'un fichier qui n'est pa
 strictement identique en base, export identique, renommage, suppression avec « exporter
 d'abord », conflit d'`id` avec Remplacer.
 
-**Trucs en suspens** : PR brouillon à ouvrir, puis `sonar-check.sh --pr <n> --wait`
-jusqu'à 0 issue / 0 hotspot. Les composants vendus de `src/components/ui/` ne sont pas dans
-`sonar.exclusions` et pourraient remonter des issues. Toujours non vérifié depuis F04 : la
+**Trucs en suspens** : PR #27 en revue (CI verte, SonarQube : gate OK, 0 issue, 0 hotspot,
+après un correctif du `Label` vendu pour S6853), à merger. Toujours non vérifié depuis F04 : la
 survie des données à un vrai redémarrage du navigateur. Le serveur `pnpm dev` qui tournait
 sur 5173 avant la session est cassé (504 « Outdated Optimize Dep ») par ma tentative de
 second démarrage ; il suffit de le relancer (QUIRKS).
