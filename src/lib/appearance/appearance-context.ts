@@ -1,4 +1,4 @@
-import { createContext, useContext, useLayoutEffect } from 'react'
+import { createContext, useContext, useId, useLayoutEffect } from 'react'
 import { colorModeKey, type ColorMode, type EffectiveMode } from './color-mode'
 
 /** Surcharges de tokens shadcn d'un mode : nom sans `--` → valeur CSS (D15). */
@@ -18,7 +18,10 @@ export type AppearanceContextValue = {
   mode: ColorMode
   effective: EffectiveMode
   setMode: (mode: ColorMode) => void
-  declareScope: (scope: AppearanceScope) => () => void
+  /** Ajoute une entrée sans portée en fin de pile ; renvoie le retrait. */
+  register: (id: string) => () => void
+  /** Remplace le contenu de l'entrée `id` À LA MÊME position (ne la déplace pas dans la pile). */
+  update: (id: string, scope: AppearanceScope) => void
 }
 
 export const AppearanceContext = createContext<AppearanceContextValue | null>(null)
@@ -29,10 +32,17 @@ function useAppearanceContext(): AppearanceContextValue {
   return value
 }
 
-/** Déclare `scope` tant que le composant est monté. `scope` doit être mémoïsé (`useMemo`). */
+/**
+ * Déclare `scope` tant que le composant est monté. Garde sa place dans la pile même re-mémoïsé
+ * (un nouvel objet à chaque rendu ne la fait pas passer en fin de pile) ; mémoïser `scope` reste
+ * recommandé pour éviter de réécrire les tokens à chaque rendu.
+ */
 export function useAppearanceScope(scope: AppearanceScope): void {
-  const { declareScope } = useAppearanceContext()
-  useLayoutEffect(() => declareScope(scope), [declareScope, scope])
+  const { register, update } = useAppearanceContext()
+  const id = useId()
+  // Le register doit précéder l'update au montage : deux effets séparés, dans cet ordre.
+  useLayoutEffect(() => register(id), [register, id])
+  useLayoutEffect(() => update(id, scope), [update, id, scope])
 }
 
 export function useColorModeControl(): Pick<

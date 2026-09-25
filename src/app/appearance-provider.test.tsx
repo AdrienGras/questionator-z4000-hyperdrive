@@ -108,6 +108,20 @@ describe('AppearanceProvider — portée globale', () => {
     expect(screen.getByText('dark/dark')).toBeInTheDocument()
   })
 
+  test('le mode mémorisé est lu une seule fois par clé : une écriture externe entre-temps ne bascule pas le mode', () => {
+    render(
+      <AppearanceProvider>
+        <Control />
+      </AppearanceProvider>,
+    )
+    expect(screen.getByText('system/light')).toBeInTheDocument()
+    // Écriture directe (autre onglet), hors du flux `setMode` de cette fenêtre.
+    localStorage.setItem('questionator:color-mode:global', 'dark')
+    // Un rendu non lié (préférence système) ne doit pas relire la clé.
+    act(() => setSystemDark(true))
+    expect(screen.getByText('system/dark')).toBeInTheDocument()
+  })
+
   test('stockage inaccessible : le choix s’applique quand même dans la fenêtre', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('SecurityError')
@@ -178,6 +192,103 @@ describe('AppearanceProvider — portée déclarée', () => {
     )
     fireEvent.click(screen.getByRole('button', { name: 'changer' }))
     expect(html.style.getPropertyValue('--primary')).toBe('rgb(9, 9, 9)')
+  })
+})
+
+describe('AppearanceProvider — pile de portées imbriquées', () => {
+  const OUTER_SCOPE: AppearanceScope = {
+    key: colorModeKey({ sessionId: 'outer', view: 'examiner' }),
+    defaultMode: 'light',
+    theme: { light: { primary: 'rgb(1, 1, 1)' }, dark: {} },
+  }
+  const INNER_SCOPE: AppearanceScope = {
+    key: colorModeKey({ sessionId: 'inner', view: 'examiner' }),
+    defaultMode: 'light',
+    theme: { light: { primary: 'rgb(2, 2, 2)' }, dark: {} },
+  }
+
+  function Inner() {
+    useAppearanceScope(INNER_SCOPE)
+    return null
+  }
+
+  // La portée interne se déclare *après-coup*, une fois la portée externe déjà montée : c'est le
+  // cas F15 visé par le point 1 (un enfant qui s'ouvre plus tard, ex. un panneau). Monter les deux
+  // dans le même commit donnerait, par l'ordre des effets React (enfant puis parent), l'externe en
+  // dernière position dès le départ — ce n'est pas le scénario du bogue.
+  function Nested() {
+    const [outerPrimary, setOuterPrimary] = useState('rgb(1, 1, 1)')
+    const [showInner, setShowInner] = useState(false)
+    const outerScope = useMemo<AppearanceScope>(
+      () => ({ ...OUTER_SCOPE, theme: { light: { primary: outerPrimary }, dark: {} } }),
+      [outerPrimary],
+    )
+    useAppearanceScope(outerScope)
+    return (
+      <>
+        <button type="button" onClick={() => setShowInner(true)}>
+          afficher interne
+        </button>
+        <button type="button" onClick={() => setOuterPrimary('rgb(3, 3, 3)')}>
+          externe
+        </button>
+        <button type="button" onClick={() => setShowInner(false)}>
+          retirer interne
+        </button>
+        {showInner ? <Inner /> : null}
+      </>
+    )
+  }
+
+  function NestedSameValue() {
+    const [tick, setTick] = useState(0)
+    const [showInner, setShowInner] = useState(false)
+    // Nouvel objet à chaque rendu, même contenu (simule une émission `liveQuery` inchangée).
+    const outerScope: AppearanceScope = {
+      ...OUTER_SCOPE,
+      theme: { light: { primary: 'rgb(1, 1, 1)' }, dark: {} },
+    }
+    useAppearanceScope(outerScope)
+    return (
+      <>
+        <p>tick {tick}</p>
+        <button type="button" onClick={() => setShowInner(true)}>
+          afficher interne
+        </button>
+        <button type="button" onClick={() => setTick((value) => value + 1)}>
+          re-rendre
+        </button>
+        {showInner ? <Inner /> : null}
+      </>
+    )
+  }
+
+  test('une portée externe re-mémoïsée avec une nouvelle valeur garde sa place sous la portée interne', () => {
+    render(
+      <AppearanceProvider>
+        <Nested />
+      </AppearanceProvider>,
+    )
+    expect(html.style.getPropertyValue('--primary')).toBe('rgb(1, 1, 1)')
+    fireEvent.click(screen.getByRole('button', { name: 'afficher interne' }))
+    expect(html.style.getPropertyValue('--primary')).toBe('rgb(2, 2, 2)')
+    fireEvent.click(screen.getByRole('button', { name: 'externe' }))
+    expect(html.style.getPropertyValue('--primary')).toBe('rgb(2, 2, 2)')
+    fireEvent.click(screen.getByRole('button', { name: 'retirer interne' }))
+    expect(html.style.getPropertyValue('--primary')).toBe('rgb(3, 3, 3)')
+  })
+
+  test('une portée externe re-mémoïsée avec la même valeur garde sa place et le rendu reste juste', () => {
+    render(
+      <AppearanceProvider>
+        <NestedSameValue />
+      </AppearanceProvider>,
+    )
+    expect(html.style.getPropertyValue('--primary')).toBe('rgb(1, 1, 1)')
+    fireEvent.click(screen.getByRole('button', { name: 'afficher interne' }))
+    expect(html.style.getPropertyValue('--primary')).toBe('rgb(2, 2, 2)')
+    fireEvent.click(screen.getByRole('button', { name: 're-rendre' }))
+    expect(html.style.getPropertyValue('--primary')).toBe('rgb(2, 2, 2)')
   })
 })
 
