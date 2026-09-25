@@ -108,7 +108,7 @@ Chaque fichier de test de `src/db/` commence par `import 'fake-indexeddb/auto'`.
 ## Vérification manuelle (à consigner dans la PR)
 
 1. `pnpm dev`, ouvrir l'app dans une fenêtre A, puis une fenêtre B via `window.open(location.href)` depuis A.
-2. Dans B : `Dexie.liveQuery(() => __questionatorDb.sessions.toArray()).subscribe(console.log)` (ou équivalent via l'import dynamique de `dexie`).
+2. Dans B : `__questionatorDb.constructor.liveQuery(() => __questionatorDb.sessions.toArray()).subscribe(console.log)` (`liveQuery` est une statique de `Dexie`, héritée par `QuestionatorDb` ; à vérifier à l'implémentation, sinon exposer aussi `liveQuery` en dev).
 3. Dans A : écrire une session via `__questionatorDb.sessions.put({...})`.
 4. Constater le log dans B sans rechargement. En cas d'échec : F14 ajoute une notification BroadcastChannel (D12).
 5. Fermer et rouvrir le navigateur : la session est toujours là.
