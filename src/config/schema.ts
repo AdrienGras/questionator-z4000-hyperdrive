@@ -43,7 +43,7 @@ export type ThemeToken = (typeof THEME_TOKENS)[number]
 
 const FORBIDDEN_CSS_CHARACTERS = /[;{}<]/
 
-function nonEmptyString() {
+export function nonEmptyString() {
   return z.string().refine((value) => value.trim().length > 0, {
     params: { code: 'empty_string' },
   })
