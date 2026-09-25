@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { forwardRef } from 'react'
 import { describe, expect, test, vi } from 'vitest'
 import { CategoryIcon, iconComponentName } from './category-icon'
@@ -31,9 +31,15 @@ describe('CategoryIcon', () => {
   })
 
   test('un nom inconnu ne rend rien', async () => {
-    const { container } = render(<CategoryIcon name="inconnue" />)
-    await waitFor(() => {
-      expect(container).toBeEmptyDOMElement()
-    })
+    const { container } = render(
+      <>
+        <CategoryIcon name="brand-php" />
+        <CategoryIcon name="inconnue" />
+      </>,
+    )
+    // Preuve que le chargement du chunk a abouti avant de vérifier ce qui n'a pas été rendu.
+    await screen.findByTestId('icon-brand-php')
+    // Un seul élément au total (le SVG de `brand-php`) : rien pour `inconnue`, pas même un fallback.
+    expect(container.querySelectorAll('*')).toHaveLength(1)
   })
 })
