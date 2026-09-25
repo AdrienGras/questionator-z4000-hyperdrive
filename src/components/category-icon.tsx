@@ -2,24 +2,32 @@ import { useEffect, useState, type ComponentType } from 'react'
 
 type IconComponent = ComponentType<{ className?: string; 'aria-hidden'?: boolean }>
 
-let iconsModule: Promise<Readonly<Record<string, unknown>> | null> | undefined
-
 /**
- * Chunk unique de toutes les icônes Tabler, chargé une fois à la demande (D37). `null` si échec.
- * Un échec (réseau, chunk introuvable) est transitoire : le cache est vidé pour qu'un montage
- * ultérieur de `CategoryIcon` retente le chargement, au lieu de désactiver les icônes pour le
- * reste de la session.
+ * Fabrique du chargeur du chunk d'icônes Tabler : le cache (`iconsModule`) vit dans la fermeture
+ * plutôt qu'au niveau du module, pour rester testable avec un `importIcons` injecté (`vi.fn`),
+ * sans `vi.mock` ni réinstanciation du module (D37).
+ *
+ * Un échec (réseau, chunk introuvable) est transitoire : le cache est vidé pour qu'un appel
+ * ultérieur (donc un montage ultérieur de `CategoryIcon`) retente le chargement, au lieu de
+ * renvoyer indéfiniment `null` pour la session. `null` est renvoyé pour l'appel en échec.
  */
-function loadIcons(): Promise<Readonly<Record<string, unknown>> | null> {
-  iconsModule ??= import('@tabler/icons-react').then(
-    (module) => Object.fromEntries(Object.entries(module)),
-    () => {
-      iconsModule = undefined
-      return null
-    },
-  )
-  return iconsModule
+export function createIconLoader(
+  importIcons: () => Promise<object>,
+): () => Promise<Readonly<Record<string, unknown>> | null> {
+  let iconsModule: Promise<Readonly<Record<string, unknown>> | null> | undefined
+  return function loadIcons(): Promise<Readonly<Record<string, unknown>> | null> {
+    iconsModule ??= importIcons().then(
+      (module) => Object.fromEntries(Object.entries(module)),
+      () => {
+        iconsModule = undefined
+        return null
+      },
+    )
+    return iconsModule
+  }
 }
+
+const loadIcons = createIconLoader(() => import('@tabler/icons-react'))
 
 function isIconComponent(value: unknown): value is IconComponent {
   // Composants Tabler : `forwardRef` (objet) ; une fonction reste acceptée.
