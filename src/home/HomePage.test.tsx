@@ -100,9 +100,7 @@ describe('accueil', () => {
     expect(screen.getByRole('button', { name: 'Recharger' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Oral de test' })).not.toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Aucune session' })).not.toBeInTheDocument()
-    for (const button of screen.queryAllByRole('button', { name: 'Importer un backup' })) {
-      expect(button).toBeDisabled()
-    }
+    expect(screen.getByRole('button', { name: 'Importer un backup' })).toBeDisabled()
   })
 
   test('unavailable : message et pas de création', async () => {

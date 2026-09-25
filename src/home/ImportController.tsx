@@ -23,11 +23,11 @@ import type { Ui } from '@/i18n/use-ui'
 import { formatDateTime } from './format-date'
 import { useBackupImport, type ImportState } from './use-backup-import'
 
-type ImportControllerProps = {
+type ImportControllerProps = Readonly<{
   ui: Ui
   disabled: boolean
   children: (openPicker: () => void) => ReactNode
-}
+}>
 
 function hasFiles(event: DragEvent<HTMLElement>): boolean {
   return Array.from(event.dataTransfer.types).includes('Files')
@@ -50,7 +50,13 @@ export function ImportController({ ui, disabled, children }: ImportControllerPro
   }
 
   function handleDragOver(event: DragEvent<HTMLDivElement>) {
-    if (disabled || !hasFiles(event)) return
+    if (!hasFiles(event)) return
+    if (disabled) {
+      // Empêche le navigateur d'ouvrir le JSON (et de quitter l'app) sans activer la surimpression.
+      event.preventDefault()
+      event.dataTransfer.dropEffect = 'none'
+      return
+    }
     event.preventDefault()
     setDragging(true)
   }
@@ -114,7 +120,7 @@ function errorView(state: ImportState, ui: Ui): ErrorView | null {
   return null
 }
 
-type ImportErrorDialogProps = { ui: Ui; state: ImportState; onClose: () => void }
+type ImportErrorDialogProps = Readonly<{ ui: Ui; state: ImportState; onClose: () => void }>
 
 /** Fichier refusé (toutes les issues, chemin en `<code>`), illisible, ou écriture échouée. */
 function ImportErrorDialog({ ui, state, onClose }: ImportErrorDialogProps) {
@@ -155,12 +161,12 @@ function ImportErrorDialog({ ui, state, onClose }: ImportErrorDialogProps) {
   )
 }
 
-type ImportConflictDialogProps = {
+type ImportConflictDialogProps = Readonly<{
   ui: Ui
   state: ImportState
   onCancel: () => void
   onReplace: () => void
-}
+}>
 
 /** Même `id` déjà en base : remplacer ou annuler. */
 function ImportConflictDialog({ ui, state, onCancel, onReplace }: ImportConflictDialogProps) {

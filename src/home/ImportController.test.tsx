@@ -189,10 +189,10 @@ describe('import de backup', () => {
   test('désactivé en outdated : import indisponible, dépôt ignoré', async () => {
     dbState.status = 'outdated'
     await renderImport()
-    for (const button of screen.queryAllByRole('button', { name: 'Importer un backup' })) {
-      expect(button).toBeDisabled()
-    }
-    fireEvent.dragOver(screen.getByRole('main'), { dataTransfer: { types: ['Files'] } })
+    expect(screen.getByRole('button', { name: 'Importer un backup' })).toBeDisabled()
+    expect(
+      fireEvent.dragOver(screen.getByRole('main'), { dataTransfer: { types: ['Files'] } }),
+    ).toBe(false)
     expect(screen.queryByText('Déposez le backup ici')).not.toBeInTheDocument()
     drop(sessionFile(makeSession({ id: 'deposee' })))
     await new Promise((resolve) => setTimeout(resolve, 50))

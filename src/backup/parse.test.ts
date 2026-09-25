@@ -27,7 +27,7 @@ function issueCodes(text: string) {
 describe('parseBackup', () => {
   test('aller-retour identique sur une session riche', () => {
     const session = richSession()
-    expect(parseBackup(serializeBackup(session), deps)).toEqual({ ok: true, session })
+    expect(parseBackup(serializeBackup(session), deps)).toStrictEqual({ ok: true, session })
   })
 
   test('JSON invalide', () => {

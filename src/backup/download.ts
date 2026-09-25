@@ -5,5 +5,5 @@ export function downloadText(fileName: string, text: string): void {
   link.href = url
   link.download = fileName
   link.click()
-  URL.revokeObjectURL(url)
+  setTimeout(() => URL.revokeObjectURL(url), 0)
 }
