@@ -333,7 +333,9 @@ type FileSlot<T> =
 export function XPage() {
   const { sessionId } = route.useParams()
   const session = useSession(sessionId)
+  const status = useDbStatus()
   const ui = useUi() // états sans session seulement : langue du navigateur
+  if (status !== 'open') return <DbStatusBanner ui={ui} status={status} />
   if (session === undefined) return <SessionFallback ui={ui} kind="loading" />
   if (session === null) return <SessionFallback ui={ui} kind="not-found" />
   return (
@@ -346,7 +348,8 @@ export function XPage() {
 
 ### Règles tacites
 
-- Un seul écrivain sur `<html>` : `AppearanceProvider` (`src/app/`), monté dans `__root.tsx`. Un écran ne touche jamais `document.documentElement`. Il déclare une portée avec `<SessionAppearance>` ou `useAppearanceScope(scope)`, et `scope` doit être mémoïsé (D60).
+- Un seul écrivain sur `<html>` : `AppearanceProvider` (`src/app/`), monté dans `__root.tsx`. Un écran ne touche jamais `document.documentElement`. Il déclare une portée avec `<SessionAppearance>` ou `useAppearanceScope(scope)` ; une portée garde sa place dans la pile même re-mémoïsée (un nouvel objet à chaque rendu ne la fait pas passer en fin de pile), mais mémoïser `scope` (`useMemo`) reste recommandé pour éviter de réécrire les tokens à chaque rendu (D60).
+- `color-scheme` suit le mode forcé : `:root { color-scheme: light; }` et `.dark { color-scheme: dark; }` dans `src/index.css`, pour que les contrôles natifs (barres de défilement…) suivent le mode de l'app plutôt que la préférence système (D26).
 - Sous `SessionAppearance`, `useUi()` s'appelle **dans** l'enfant : appelé au-dessus, il ignore `config.locale`.
 - Couleur de config sur un élément : `style={{ '--category-color': color }}`, autorisé car React passe par `setProperty` (D15). Elle s'utilise en accent (`border-[var(--category-color)]`), jamais en fond sous du texte (D26).
 - Bascule de mode : `<ColorModeToggle ui={ui} />` dans l'en-tête de chaque écran.
