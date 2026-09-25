@@ -15,6 +15,10 @@ export type UiMessageParams = {
   db_outdated: NoParams
   db_reload: NoParams
   db_unavailable: NoParams
+  color_mode_label: { mode: string }
+  color_mode_light: NoParams
+  color_mode_dark: NoParams
+  color_mode_system: NoParams
   empty_title: NoParams
   empty_body: NoParams
   empty_example_link: NoParams
@@ -128,6 +132,10 @@ const fr: Dictionary<UiMessageParams> = {
   db_reload: () => 'Recharger',
   db_unavailable: () =>
     'Le stockage local est indisponible (navigation privée ou cookies bloqués ?). Les sessions ne peuvent pas être enregistrées.',
+  color_mode_label: ({ mode }) => `Mode d'affichage : ${mode}`,
+  color_mode_light: () => 'Clair',
+  color_mode_dark: () => 'Sombre',
+  color_mode_system: () => 'Système',
   empty_title: () => 'Aucune session',
   empty_body: () =>
     "Créez une session à partir d'une liste d'étudiants et d'un fichier de configuration, ou importez un backup.",
@@ -212,6 +220,10 @@ const en: Dictionary<UiMessageParams> = {
   db_reload: () => 'Reload',
   db_unavailable: () =>
     'Local storage is unavailable (private browsing or blocked cookies?). Sessions cannot be saved.',
+  color_mode_label: ({ mode }) => `Display mode: ${mode}`,
+  color_mode_light: () => 'Light',
+  color_mode_dark: () => 'Dark',
+  color_mode_system: () => 'System',
   empty_title: () => 'No sessions yet',
   empty_body: () =>
     'Create a session from a student list and a configuration file, or import a backup.',

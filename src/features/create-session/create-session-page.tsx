@@ -1,5 +1,6 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useId, useRef, type DragEvent, type FormEvent } from 'react'
+import { ColorModeToggle } from '@/components/color-mode-toggle'
 import { DbStatusBanner } from '@/components/db-status-banner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -81,9 +82,12 @@ export function CreateSessionPage() {
       className="mx-auto flex min-h-svh max-w-5xl flex-col gap-6 p-4 sm:p-6"
     >
       <header className="flex flex-col gap-2">
-        <Link to="/" className="self-start text-sm text-primary underline underline-offset-4">
-          {text('back_home', {})}
-        </Link>
+        <div className="flex items-center justify-between gap-2">
+          <Link to="/" className="text-sm text-primary underline underline-offset-4">
+            {text('back_home', {})}
+          </Link>
+          <ColorModeToggle ui={ui} />
+        </div>
         <h1 className="text-2xl font-bold tracking-tight">{text('create_title', {})}</h1>
       </header>
       <DbStatusBanner ui={ui} status={status} />
