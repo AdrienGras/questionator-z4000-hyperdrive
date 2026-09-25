@@ -137,3 +137,27 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : une classe qui n'exclut pas le délimiteur ouvrant, ou un `.+?` suivi d'une rétro-référence, relance le parcours à chaque position ; une alternance de marqueurs en une seule regex dépasse la complexité autorisée.
 **Workaround** : parcours linéaire à la main (`indexOf`) pour les liens et images ; classes excluant le délimiteur (`[^*]+?`) pour l'emphase ; plusieurs petites regex ancrées appliquées en boucle pour les marqueurs de bloc. Lancer `.claude/scripts/sonar-check.sh --pr <n> --wait` tôt : Sonar voit des choses qu'oxlint ne voit pas.
 **Référence** : `src/config/derive-title.ts`.
+
+## Le hook RTK réécrit `pnpm vitest` : sortie illisible et `.vitest/json/output.json` qui casse `pnpm check` (2026-09-25)
+
+**Découvert** : F03, implémentation en subagents.
+**Symptôme** : `pnpm vitest run <fichier>` (ou `rtk proxy pnpm vitest`) ne rend aucune sortie lisible, puis `pnpm check` échoue à l'étape Prettier sur `.vitest/json/output.json`.
+**Cause** : le hook Claude Code RTK réécrit la commande vers son filtre vitest, qui écrit un rapport JSON dans `.vitest/` à la racine.
+**Workaround** : lancer un test ciblé avec `./node_modules/.bin/vitest run <fichier>` ; `pnpm test` / `pnpm check` restent sûrs. `.vitest/` est désormais dans `.gitignore` ; supprimer le dossier s'il traîne.
+**Référence** : `.gitignore`, `docs/superpowers/plans/2026-09-25-f03-scoring.md`.
+
+## Un littéral décimal « à 3 décimales » peut tomber sous la demie une fois ×1000, et `Math.round(-0)` vaut `-0` (2026-09-25)
+
+**Découvert** : F03, relecture du plan et revue finale.
+**Symptôme** : `Math.round(2.0005 * 1000)` donne 2000, pas 2001 ; `formatScore(toMilli(-0))` affichait « -0,0 ».
+**Cause** : 2.0005 n'est pas représentable (2.000499999…), le produit tombe juste sous .5 ; `Math.round` conserve le signe de zéro, et `Intl.NumberFormat` affiche le signe de `-0`.
+**Workaround** : ne jamais écrire de test sur une demie « exacte » à la 4ᵉ décimale ; `toMilli` normalise `-0` en `0`. Toute conversion décimal → millièmes passe par `toMilli` (moteur) ou `roundToMilli` (règles F02).
+**Référence** : `src/scoring/milli.ts`.
+
+## SonarQube refuse `tableau.map(fonction)` quand la fonction a un 2ᵉ paramètre (2026-09-25)
+
+**Découvert** : PR #23 (F03), `src/test/student-fixtures.ts`.
+**Symptôme** : bug MAJOR `typescript:S7727` (« Do not pass function directly to `.map(…)` ») et quality gate en échec (fiabilité), alors qu'oxlint et les tests passaient.
+**Cause** : `.map` passe aussi l'index et le tableau ; une fonction dont la signature accepte un 2ᵉ paramètre les recevrait par accident si elle évolue.
+**Workaround** : toujours une flèche explicite, `items.map((item, index) => build(item, index))`.
+**Référence** : `src/test/student-fixtures.ts`.

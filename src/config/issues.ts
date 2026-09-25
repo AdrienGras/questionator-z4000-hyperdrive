@@ -26,6 +26,7 @@ export type ConfigIssueParams = {
   not_enough_questions: { total: number; required: number; skips: number }
   missing_absent_value: NoParams
   too_many_decimals: { value: number }
+  scoring_value_too_large: { value: number; max: number }
   invalid_css_value: { property: 'color' | 'border-radius'; value: string }
   unreachable_max_score: { reachable: number; maxRawScore: number }
   final_scale_off_grid: { finalScale: number; step: number }

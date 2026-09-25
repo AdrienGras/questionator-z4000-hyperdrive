@@ -178,6 +178,40 @@ describe('checkRules', () => {
     expect(only(config, 'too_many_decimals')).toEqual([])
   })
 
+  test('scoring_value_too_large au-delà de 10 000 en valeur absolue', () => {
+    const config = minimalConfig()
+    config.categories[0]!.scale = [0, 1, 10_001]
+    config.scoring.maxRawScore = 10_000.5
+    config.scoring.finalScale = 20_000
+    config.scoring.rounding = { step: 10_001 }
+    config.absent = { export: 'value', value: -10_001 }
+    const issues = only(config, 'scoring_value_too_large')
+    expect(issues.map((issue) => issue.path)).toEqual([
+      ['scoring', 'maxRawScore'],
+      ['scoring', 'finalScale'],
+      ['scoring', 'rounding', 'step'],
+      ['absent', 'value'],
+      ['categories', 0, 'scale', 2],
+    ])
+    expect(issues[0]).toMatchObject({ severity: 'error', params: { value: 10_000.5, max: 10_000 } })
+  })
+
+  test('scoring_value_too_large : 10 000 accepté', () => {
+    const config = minimalConfig()
+    config.categories[0]!.scale = [0, 10_000]
+    config.scoring.maxRawScore = 10_000
+    config.scoring.finalScale = 10_000
+    expect(only(config, 'scoring_value_too_large')).toEqual([])
+  })
+
+  test('une config à 1e20 produit des issues sans lever', () => {
+    const config = minimalConfig()
+    config.scoring.maxRawScore = 1e20
+    config.scoring.finalScale = 1e20
+    expect(() => checkRules(config, deps)).not.toThrow()
+    expect(only(config, 'scoring_value_too_large')).toHaveLength(2)
+  })
+
   test('invalid_css_value : couleurs de thème, radius et couleur de catégorie', () => {
     const config = minimalConfig()
     config.theme = { light: { primary: 'bad-color', radius: 'bad-radius' }, dark: { ring: 'red' } }
