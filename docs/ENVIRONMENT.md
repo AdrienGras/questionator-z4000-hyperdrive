@@ -23,7 +23,8 @@ Carte des paths, services, accès, commandes. À jour au fil des découvertes.
 - **Commandes principales** :
   - `nvm use && corepack pnpm install`
   - `pnpm dev` — serveur de dev (régénère `src/routeTree.gen.ts`)
-  - `pnpm check` — format, lint type-aware, types, tests (comme la CI, hors build)
+  - `pnpm check` — format, lint type-aware, dépendances entre dossiers, types, tests (comme la CI, hors build)
+  - `pnpm deps` — dependency-cruiser sur `src/` (`.dependency-cruiser.cjs`, parseur swc) ; vérifier que « N modules » n'est pas 0
   - `pnpm build` / `pnpm preview` — build de prod dans `dist/` et prévisualisation sous `/questionator-z4000-hyperdrive/`
   - `pnpm test` — tests (régénère aussi l'arbre de routes)
   - `.claude/scripts/sonar-check.sh --pr <n> --wait` — état SonarQube Cloud d'une PR

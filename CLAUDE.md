@@ -4,6 +4,7 @@
 - **Une branche et une PR par ticket** vers `main`, `Closes #n` dans la PR ; pas de push direct sur `main` une fois F01 livré.
 - **SonarQube Cloud avant toute revue** : ouvrir la PR en **brouillon**, lancer `.claude/scripts/sonar-check.sh --pr <n> --wait`, corriger jusqu'à « Quality gate OK », 0 issue, 0 hotspot, puis seulement passer la PR en « Ready for review ». SonarQube Cloud n'analyse que `main` et les PR (pas les branches seules).
 - `PRODUCT.md` est la source de vérité produit ; tout arbitrage est tracé dans `docs/DECISIONS.md`.
+- **Arborescence de `src/` (D59)** : avant de créer un fichier, lire `docs/CONVENTIONS.md` § « Arborescence et imports » (où ranger quoi). `lib/` = technique, `domain/` = règles métier sans React, `features/<x>/` = un écran, jamais d'import entre features. Imports par `@/`, pas de barrel, fichiers en kebab-case. `pnpm deps` (dependency-cruiser) fait respecter le sens des imports : corriger l'emplacement, pas la règle.
 
 <!-- MEMORY_BLOCK_START -->
 ## Mémoire projet

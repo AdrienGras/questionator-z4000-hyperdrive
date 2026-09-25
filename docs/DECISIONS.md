@@ -880,3 +880,23 @@ La config JSON reste en UTF-8.
 autre encodage 8 bits.
 
 **Reporté dans** : `PRODUCT.md` §6.1, spec F06 (revue finale). Impacte F06.
+
+## D59 — Arborescence de `src/` : lib, domain, features, sens des imports vérifié par dependency-cruiser (2026-09-25)
+
+**Question** : après F06, `src/` comptait 14 dossiers à plat qui mélangeaient infrastructure, métier, écrans et UI partagée. Le métier de session était éclaté sur quatre dossiers, `home/` et `create/` mêlaient composants et utilitaires génériques, deux styles d'import coexistaient et les barrels étaient incohérents. Faut-il tout mettre dans `lib/` ou séparer le métier ? Quel nommage adopter, que faire des barrels, et comment faire respecter la structure ?
+
+**Décision** (#31) :
+- Structure inspirée de Bulletproof React, en version allégée : `app/`, `routes/` (minces), `features/<x>/` (`<x>-page.tsx`, `components/`, `hooks/`), `components/` (ui + transverse), `lib/` (technique : db, i18n, cn, download, format-date…), `domain/` (règles de PRODUCT.md, sans React : config, scoring, session, students, backup) et `testing/`.
+- Sens unique des imports : `lib` ← `domain` ← `components` ← `features` ← `routes` / `app`, et jamais d'import entre features. Deux exceptions : `lib/db/` peut lire les types de `domain/`, et `domain/` n'importe que la partie pure de `lib/`.
+- Imports par `@/` partout, `./` seulement dans le même dossier. `runnerImport` reçoit l'alias `@`, ce qui supprime la règle « imports relatifs dans config/i18n/scoring/domain ».
+- Aucun barrel. Tous les fichiers en kebab-case, hors routes TanStack.
+- Vérification : dependency-cruiser (`pnpm deps`, dans `pnpm check` et la CI) contrôle les cycles, les couches, les imports entre features, les barrels, le singleton `db` et le dossier `testing/`. oxlint vérifie le kebab-case et interdit `../`.
+
+**Pourquoi** :
+- Le métier est séparé de `lib/` parce qu'un dossier de 40 fichiers mêlant Dexie et règles de notation n'aurait pas permis de savoir où ranger un fichier. `domain/` pur reste testable sous Node et chargeable par le plugin Vite.
+- Pas de barrels, comme le recommande Bulletproof : les contournements existaient déjà pour préserver les chunks chargés à la demande.
+- Le kebab-case suit Bulletproof et shadcn, et ne coûtait rien de plus puisque tous les fichiers étaient déjà déplacés.
+- dependency-cruiser plutôt qu'oxlint pour les couches : oxlint n'a pas `import/no-restricted-paths`, et ses plugins JS sont en alpha.
+- Feature-Sliced Design est écarté car surdimensionné pour environ 150 fichiers. On en garde seulement la règle « couche inférieure seulement ».
+
+**Reporté dans** : `docs/CONVENTIONS.md` § « Arborescence et imports », `CLAUDE.md`, `.dependency-cruiser.cjs`, `.oxlintrc.json`. Impacte toutes les features à venir.

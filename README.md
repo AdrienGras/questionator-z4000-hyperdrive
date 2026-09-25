@@ -36,7 +36,8 @@ nvm use
 corepack enable
 pnpm install
 pnpm dev        # serveur de développement
-pnpm check      # format, lint, types, tests (comme la CI, hors build)
+pnpm check      # format, lint, dépendances, types, tests (comme la CI, hors build)
+pnpm deps       # sens des imports entre dossiers (dependency-cruiser)
 pnpm build      # build de production dans dist/
 ```
 
