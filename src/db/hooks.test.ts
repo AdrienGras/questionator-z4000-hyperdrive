@@ -74,4 +74,16 @@ describe('useDbStatus', () => {
     const { result } = renderHook(() => useDbStatus())
     expect(result.current).toBe(db.status)
   })
+
+  test('unavailable quand IndexedDB est bloqué (D47)', async () => {
+    const indexedDB = {
+      open: () => {
+        throw new DOMException('IndexedDB inaccessible.', 'SecurityError')
+      },
+    }
+    const database = createDb('hooks-unavailable', { indexedDB, IDBKeyRange })
+    const { result } = renderHook(() => useDbStatus(database))
+
+    await waitFor(() => expect(result.current).toBe('unavailable'))
+  })
 })

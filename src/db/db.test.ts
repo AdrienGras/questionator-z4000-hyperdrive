@@ -1,6 +1,5 @@
 import 'fake-indexeddb/auto'
-// oxlint-disable-next-line import/no-named-as-default -- le seul export par défaut du module ; l'export nommé "Dexie" n'est que le namespace de types fusionné dessus.
-import Dexie from 'dexie'
+import { Dexie } from 'dexie'
 import { describe, expect, test, vi } from 'vitest'
 import { makeSession } from '../test/session-fixtures'
 import { createDb, db } from './db'
@@ -55,6 +54,32 @@ describe('QuestionatorDb', () => {
     expect(import.meta.env.DEV).toBe(true)
     // oxlint-disable-next-line no-underscore-dangle -- convention de nommage historique pour un hook dev global (D23).
     expect(window.__questionatorDb).toBe(db)
+  })
+
+  test('IndexedDB bloqué ou absent fait passer le statut à unavailable (D47)', async () => {
+    // Simule le SecurityError synchrone que Safari lève depuis indexedDB.open() en navigation
+    // privée ou cookies bloqués : Dexie capture ce throw dans la promesse d'ouverture et la
+    // rejette, exactement comme un vrai échec d'ouverture.
+    const indexedDB = {
+      open: () => {
+        throw new DOMException('IndexedDB inaccessible.', 'SecurityError')
+      },
+    }
+    const database = createDb('db-unavailable', { indexedDB, IDBKeyRange })
+    const listener = vi.fn<() => void>()
+    database.onStatusChange(listener)
+
+    await vi.waitFor(() => {
+      expect(database.status).toBe('unavailable')
+    })
+    expect(listener).toHaveBeenCalledTimes(1)
+  })
+
+  test('une ouverture normale reste open', async () => {
+    const database = createDb('db-open-normal')
+    await database.open()
+    expect(database.status).toBe('open')
+    database.close()
   })
 })
 

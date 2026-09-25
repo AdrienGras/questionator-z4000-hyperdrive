@@ -1,9 +1,12 @@
-// oxlint-disable-next-line import/no-named-as-default -- le seul export par défaut du module ; l'export nommé "Dexie" n'est que le namespace de types fusionné dessus.
-import Dexie, { type EntityTable } from 'dexie'
+import { Dexie, type DexieOptions, type EntityTable } from 'dexie'
 import type { Session } from '@/domain/types'
 
-/** `outdated` : un autre onglet a monté le schéma, cette connexion est fermée (D45). */
-export type DbStatus = 'open' | 'outdated'
+/**
+ * `outdated` : un autre onglet a monté le schéma, cette connexion est fermée (D45).
+ * `unavailable` : l'ouverture a échoué (IndexedDB bloqué ou absent — politique navigateur,
+ * Safari « bloquer tous les cookies », etc.) (D47).
+ */
+export type DbStatus = 'open' | 'outdated' | 'unavailable'
 
 /** Un document par session, étudiants et attempts imbriqués (D22). */
 export class QuestionatorDb extends Dexie {
@@ -12,16 +15,27 @@ export class QuestionatorDb extends Dexie {
   #status: DbStatus = 'open'
   readonly #listeners = new Set<() => void>()
 
-  constructor(name: string) {
-    super(name)
+  constructor(name: string, options?: DexieOptions) {
+    super(name, options)
     // Toute évolution passe par version(n).stores(...).upgrade(...).
     this.version(1).stores({ sessions: 'id, updatedAt' })
     // Remplace le traitement par défaut de Dexie (fermeture + log console) : l'onglet qui
     // monte de version n'est jamais bloqué, et celui-ci expose un état observable.
     this.on('versionchange', () => {
+      // Sans argument, close() vaut { disableAutoOpen: true } : la réouverture automatique est
+      // désactivée, donc les opérations suivantes rejettent avec la DatabaseClosedError de Dexie
+      // au lieu de rouvrir silencieusement sur un schéma périmé (close({ disableAutoOpen: false })
+      // rouvrirait sans que l'utilisateur ne recharge la page).
       this.close()
       this.#setStatus('outdated')
       return false
+    })
+    // Ouverture anticipée (D47) : un échec (IndexedDB bloqué ou absent) ne doit jamais rester un
+    // rejet non géré. `versionchange` ne peut se produire qu'après une ouverture réussie, donc si
+    // ce catch s'exécute le statut est forcément encore 'open' ; le garde reste là pour ne jamais
+    // écraser un 'outdated' déjà posé, sans complexifier plus que nécessaire.
+    this.open().catch(() => {
+      if (this.#status === 'open') this.#setStatus('unavailable')
     })
   }
 
@@ -42,8 +56,8 @@ export class QuestionatorDb extends Dexie {
   }
 }
 
-export function createDb(name: string): QuestionatorDb {
-  return new QuestionatorDb(name)
+export function createDb(name: string, options?: DexieOptions): QuestionatorDb {
+  return new QuestionatorDb(name, options)
 }
 
 export const db = createDb('questionator')
