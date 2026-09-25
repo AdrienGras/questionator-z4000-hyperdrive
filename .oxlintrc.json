@@ -9,7 +9,7 @@
     "react/react-in-jsx-scope": "off",
     "import/no-unassigned-import": [
       "error",
-      { "allow": ["**/*.css", "@testing-library/jest-dom/vitest"] }
+      { "allow": ["**/*.css", "@testing-library/jest-dom/vitest", "fake-indexeddb/auto"] }
     ]
   },
   "ignorePatterns": ["dist", "coverage", "src/routeTree.gen.ts", "src/components/ui"]
