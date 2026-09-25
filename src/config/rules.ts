@@ -86,9 +86,10 @@ function checkQuestionCounts(config: ParsedConfig): ConfigIssue[] {
   const total = config.categories.reduce((sum, category) => sum + category.questions.length, 0)
   const skipsEnabled = config.skips?.enabled ?? CONFIG_DEFAULTS.skips.enabled
   const maxSkips = config.skips?.maxPerStudent ?? CONFIG_DEFAULTS.skips.maxPerStudent
-  const required = config.scoring.questionsPerStudent + (skipsEnabled ? maxSkips : 0)
+  const skips = skipsEnabled ? maxSkips : 0
+  const required = config.scoring.questionsPerStudent + skips
   if (total < required) {
-    issues.push(configError('not_enough_questions', ['categories'], { total, required }))
+    issues.push(configError('not_enough_questions', ['categories'], { total, required, skips }))
   }
   return issues
 }

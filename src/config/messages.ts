@@ -32,7 +32,8 @@ const fr: Dictionary<ConfigIssueParams> = {
   unsupported_schema_version: ({ found, supported }) =>
     `Cette configuration utilise la version ${found} du format, mais l’application ne connaît que la version ${supported}. Rechargez la page pour mettre l’application à jour.`,
   required: () => 'Champ obligatoire manquant.',
-  invalid_type: ({ expected }) => `Type invalide : ${typeName('fr', expected)} est attendu.`,
+  invalid_type: ({ expected }) =>
+    `Type invalide : la valeur doit être ${typeName('fr', expected)}.`,
   unknown_key: ({ key }) => `Clé inconnue « ${key} » : vérifiez l’orthographe du nom de champ.`,
   invalid_enum: ({ options }) => `Valeur non autorisée. Valeurs possibles : ${options}.`,
   not_integer: () => 'Un nombre entier est attendu.',
@@ -59,10 +60,12 @@ const fr: Dictionary<ConfigIssueParams> = {
   zero_max_scale: () =>
     'La valeur maximale du barème est 0 : la catégorie ne rapporterait aucun point.',
   category_without_questions: () => 'Cette catégorie ne contient aucune question.',
-  not_enough_questions: ({ total, required }) =>
-    `La configuration contient ${total} question(s), il en faut au moins ${required} (questions par étudiant + skips autorisés).`,
+  not_enough_questions: ({ total, required, skips }) =>
+    skips > 0
+      ? `La configuration contient ${total} question(s), il en faut au moins ${required} (${required - skips} par étudiant, plus ${skips} skip(s) autorisé(s)).`
+      : `La configuration contient ${total} question(s), il en faut au moins ${required}.`,
   missing_absent_value: () =>
-    '« absent.value » est obligatoire quand « absent.export » vaut "value".',
+    '« absent.value » est obligatoire quand « absent.export » vaut « value ».',
   too_many_decimals: ({ value }) =>
     `${value} a plus de 3 décimales : les notes sont calculées au millième.`,
   invalid_css_value: ({ property, value }) =>
@@ -109,8 +112,10 @@ const en: Dictionary<ConfigIssueParams> = {
   duplicate_scale_value: ({ value }) => `The value ${value} appears more than once in the scale.`,
   zero_max_scale: () => 'The highest value of the scale is 0: the category would award no points.',
   category_without_questions: () => 'This category has no questions.',
-  not_enough_questions: ({ total, required }) =>
-    `The configuration has ${total} question(s); at least ${required} are needed (questions per student + allowed skips).`,
+  not_enough_questions: ({ total, required, skips }) =>
+    skips > 0
+      ? `The configuration has ${total} question(s); at least ${required} are needed (${required - skips} per student, plus ${skips} allowed skip(s)).`
+      : `The configuration has ${total} question(s); at least ${required} are needed.`,
   missing_absent_value: () => '"absent.value" is required when "absent.export" is "value".',
   too_many_decimals: ({ value }) =>
     `${value} has more than 3 decimal places: scores are computed to the thousandth.`,

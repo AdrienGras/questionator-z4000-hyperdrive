@@ -115,7 +115,7 @@ describe('checkRules', () => {
         severity: 'error',
         code: 'not_enough_questions',
         path: ['categories'],
-        params: { total: 1, required: 2 },
+        params: { total: 1, required: 2, skips: 1 },
       },
     ])
   })
@@ -123,7 +123,21 @@ describe('checkRules', () => {
   test('not_enough_questions : skips absents = activés, 1 par défaut', () => {
     const config = minimalConfig()
     delete config.skips
-    expect(only(config, 'not_enough_questions')[0]?.params).toEqual({ total: 1, required: 2 })
+    expect(only(config, 'not_enough_questions')[0]?.params).toEqual({
+      total: 1,
+      required: 2,
+      skips: 1,
+    })
+  })
+
+  test('not_enough_questions : skips désactivés → skips 0', () => {
+    const config = minimalConfig()
+    config.scoring.questionsPerStudent = 2
+    expect(only(config, 'not_enough_questions')[0]?.params).toEqual({
+      total: 1,
+      required: 2,
+      skips: 0,
+    })
   })
 
   test('missing_absent_value', () => {

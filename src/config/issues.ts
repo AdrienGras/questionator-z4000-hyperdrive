@@ -23,7 +23,7 @@ export type ConfigIssueParams = {
   duplicate_scale_value: { value: number }
   zero_max_scale: NoParams
   category_without_questions: NoParams
-  not_enough_questions: { total: number; required: number }
+  not_enough_questions: { total: number; required: number; skips: number }
   missing_absent_value: NoParams
   too_many_decimals: { value: number }
   invalid_css_value: { property: 'color' | 'border-radius'; value: string }
