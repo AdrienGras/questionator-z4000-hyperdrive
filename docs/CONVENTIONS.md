@@ -152,3 +152,26 @@ const cumulative = formatScore(scores.raw, 'raw', session.config, locale) // bru
 - Fabriquer un `Milli` : `asMilli(n)` (garde de type), jamais `n as Milli`.
 - Une donnée corrompue (attempt `scored` sans `score`) lève une `Error` ; une saisie utilisateur passe d'abord par un validateur qui ne lève pas (`isValidAdjustment`).
 - Tests : fixtures `makeConfig(scoring, absent)` et `makeStudent(attempts, overrides)` de `src/test/student-fixtures.ts` (nombre → attempt noté, `'pending'`, `{ skipped }`).
+
+## Mutation de session — squelette
+
+Toute écriture métier passe par `updateSession` (`@/db`), jamais par `db.sessions.*` : `index.ts` n'exporte d'ailleurs pas le singleton. Le mutator est synchrone et refait ses contrôles sur la session **fraîche** qu'il reçoit (deux onglets examinateur peuvent écrire en même temps).
+
+```ts
+import { updateSession } from '@/db'
+
+await updateSession(sessionId, (session) => {
+  const student = session.students.find((s) => s.id === studentId)
+  if (!student) throw new Error(`Étudiant « ${studentId} » introuvable`)
+  if (student.attempts.some((a) => a.outcome === 'pending')) throw new Error('Une question est déjà en cours')
+  student.attempts.push(newAttempt) // modification en place autorisée : la session est une copie
+  return session
+})
+```
+
+### Règles tacites
+
+- Jamais d'`await` étranger à Dexie dans un mutator (le typage refuse un mutator `async`) : préparer les données avant l'appel.
+- Un mutator qui lève annule tout ; l'erreur remonte telle quelle à la feature, qui l'affiche.
+- Lecture : `useSession(id)` / `useSessions()` ; `undefined` = chargement, `null` = absente. Afficher un message si `useDbStatus()` vaut `'outdated'` (recharger) ou `'unavailable'` (stockage bloqué).
+- Tests de `src/db/` : `import 'fake-indexeddb/auto'` en première ligne ; `createDb(nomUnique)` pour les tests de cycle de vie, `beforeEach(() => db.sessions.clear())` pour ceux du singleton ; `makeSession()` de `src/test/session-fixtures.ts`.

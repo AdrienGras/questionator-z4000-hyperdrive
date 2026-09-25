@@ -699,3 +699,18 @@ examinateur appliquent leurs contrôles sur l'état réel ; un mutator peut modi
 place sans effet de bord.
 
 **Reporté dans** : spec F04. Impacte F05, F06, F09–F13.
+
+## D47 — Base IndexedDB indisponible : état `unavailable` (2026-09-25)
+
+**Question** : IndexedDB bloqué (Safari « bloquer tous les cookies », politique
+d'entreprise) ou absent : `useSessions()` restait `undefined` indéfiniment et l'état de
+connexion affichait `'open'`.
+
+**Décision** : `DbStatus` gagne `'unavailable'`. `QuestionatorDb` ouvre la base dès sa
+construction et passe à `'unavailable'` si l'ouverture échoue. F05 affiche un message
+explicite au lieu d'un chargement sans fin.
+
+**Pourquoi** : un examinateur sur un navigateur qui bloque le stockage doit savoir
+pourquoi rien ne s'affiche ; l'état coûte quelques lignes et reste additif.
+
+**Reporté dans** : spec F04. Impacte F04, F05.

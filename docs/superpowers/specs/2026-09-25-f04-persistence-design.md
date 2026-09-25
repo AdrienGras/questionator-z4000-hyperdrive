@@ -9,7 +9,7 @@
 
 Toutes les données vivent dans le navigateur de l'examinateur (aucun backend) et chaque action est écrite au moment où elle a lieu (persistance immédiate, §3). La vue projetée (F14) lit la même base depuis une autre fenêtre. F04 pose la couche de stockage sur laquelle toutes les features métier s'appuient ; elle n'a pas d'UI.
 
-Références : [`PRODUCT.md`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/PRODUCT.md) §3, §7 et F04 · [`docs/DECISIONS.md`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/DECISIONS.md) D12, D22, D23, D36, D45, D46.
+Références : [`PRODUCT.md`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/PRODUCT.md) §3, §7 et F04 · [`docs/DECISIONS.md`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/DECISIONS.md) D12, D22, D23, D36, D45–D47.
 
 ## Objectif
 
@@ -30,7 +30,7 @@ src/db/
   sessions.ts     createSession, getSession, listSessions, putSession, deleteSession, updateSession
   hooks.ts        useSessions(), useSession(id), useDbStatus()
   persistence.ts  requestPersistentStorage(), usePersistenceStatus()
-  index.ts        réexports publics
+  index.ts        réexports publics : fonctions, hooks, erreurs, types ; ni `db` ni `createDb` (D22 : aucune écriture hors de `sessions.ts`)
 ```
 
 Imports : `src/db/` peut utiliser l'alias `@/` (il n'est pas chargé par le plugin Vite de F02). Il importe `@/domain/types` ; il n'importe ni `src/scoring` ni l'UI.
@@ -38,20 +38,21 @@ Imports : `src/db/` peut utiliser l'alias `@/` (il n'est pas chargé par le plug
 ## Base (`db.ts`)
 
 ```ts
-type DbStatus = 'open' | 'outdated'
+type DbStatus = 'open' | 'outdated' | 'unavailable'
 
 class QuestionatorDb extends Dexie {
-  sessions!: EntityTable<Session, 'id'>
+  declare readonly sessions: EntityTable<Session, 'id'>   // `declare` : aucun champ émis qui écraserait la table posée par Dexie
   get status(): DbStatus
   onStatusChange(listener: () => void): () => void   // renvoie la désinscription
 }
-function createDb(name: string): QuestionatorDb
+function createDb(name: string, options?: DexieOptions): QuestionatorDb
 export const db = createDb('questionator')
 ```
 
+- **Ouverture anticipée (D47)** : le constructeur ouvre la base ; un échec (IndexedDB bloqué ou absent) passe l'état à `'unavailable'`.
 - `version(1).stores({ sessions: 'id, updatedAt' })`. Toute évolution future passe par `version(n).stores(...).upgrade(...)`.
-- **`versionchange` (D45)** : l'instance ferme sa connexion, passe à `'outdated'`, notifie ses abonnés et renvoie `false` (remplace le traitement par défaut de Dexie, qui ferme et écrit dans la console). L'onglet qui monte de version n'est jamais bloqué. Les opérations suivantes sur l'instance fermée échouent avec la `DatabaseClosedError` de Dexie, que les fonctions de `sessions.ts` laissent remonter. Le message « recharger la page » est affiché par la feature de mise à jour PWA, pas par F04.
-- **Dev (D23)** : `if (import.meta.env.DEV) window.__questionatorDb = db`, avec une déclaration globale typée (`declare global { interface Window { __questionatorDb?: QuestionatorDb } }`). Vite élimine la branche en production.
+- **`versionchange` (D45)** : l'instance ferme sa connexion, passe à `'outdated'`, notifie ses abonnés et renvoie `false` (remplace le traitement par défaut de Dexie, qui ferme et écrit dans la console). L'onglet qui monte de version n'est jamais bloqué. `close()` sans argument désactive la réouverture automatique : c'est ce qui fait échouer les opérations suivantes. Les opérations suivantes sur l'instance fermée échouent avec la `DatabaseClosedError` de Dexie, que les fonctions de `sessions.ts` laissent remonter. Le message « recharger la page » est affiché par la feature de mise à jour PWA, pas par F04.
+- **Dev (D23)** : `if (import.meta.env.DEV) window.__questionatorDb = db` ; `src/main.tsx` importe le module en dev seulement, sinon rien ne l'évaluerait tant qu'aucune feature ne l'utilise, avec une déclaration globale typée (`declare global { interface Window { __questionatorDb?: QuestionatorDb } }`). Vite élimine la branche en production.
 
 ## Sessions (`sessions.ts`, D22, D46)
 
@@ -69,7 +70,7 @@ export const db = createDb('questionator')
 1. Lire la session ; absente → `SessionNotFoundError`.
 2. `next = mutator(current)` : `current` est déjà une copie fraîche (IndexedDB clone chaque valeur à la lecture), le mutator peut donc la modifier en place ou renvoyer un nouvel objet sans risque.
 3. `next.id !== id` → `Error` (l'annulation de la transaction ne laisse rien écrit).
-4. `next.updatedAt = new Date().toISOString()`, `put(next)`, renvoyer `next`.
+4. `written = { ...next, updatedAt: new Date().toISOString() }`, `put(written)`, renvoyer `written`.
 
 Le mutator est **synchrone** : il reçoit toujours la version fraîche lue dans la transaction, et c'est là qu'une feature refait ses contrôles métier (question déjà tirée, étudiant déjà terminé…), jamais sur l'état affiché. Un mutator qui lève annule la transaction et l'erreur remonte telle quelle. Le typage refuse un mutator qui renvoie une `Promise` : un `await` étranger à Dexie fermerait la transaction.
 
@@ -78,8 +79,8 @@ Le mutator est **synchrone** : il reçoit toujours la version fraîche lue dans 
 ## Hooks (`hooks.ts`)
 
 - `useSessions(): Session[] | undefined` — `useLiveQuery(listSessions)` ; `undefined` pendant le chargement.
-- `useSession(id: string): Session | null | undefined` — `useLiveQuery(() => getSession(id), [id])` ; `undefined` pendant le chargement, `null` si absente ou supprimée.
-- `useDbStatus(): DbStatus` — `useSyncExternalStore` sur `db.onStatusChange` / `db.status`.
+- `useSession(id: string): Session | null | undefined` — `useLiveQuery(async () => ({ id, session: await getSession(id) }), [id])`, résultat masqué (`undefined`) si son `id` n'est pas l'`id` courant : `useLiveQuery` garde son dernier résultat quand les dépendances changent, et renverrait sinon la session de l'ancien `id` pendant un rendu. `undefined` pendant le chargement, `null` si absente ou supprimée.
+- `useDbStatus(database = db): DbStatus` — `useSyncExternalStore` sur `onStatusChange` / `status` (paramètre pour les tests).
 
 `useLiveQuery` observe aussi les écritures des autres fenêtres de la même origine (D12) ; la vérification réelle est manuelle (voir plus bas).
 
@@ -92,6 +93,7 @@ function usePersistenceStatus(): PersistenceStatus | undefined
 ```
 
 - Store au niveau du module : état courant, abonnés. Première lecture au premier abonnement via `navigator.storage.persisted()` ; `'unsupported'` si `navigator.storage?.persisted` est absent. `undefined` tant que la première lecture n'a pas répondu.
+- Un compteur de séquence garantit que seule la dernière relecture écrit l'état (deux relectures qui se chevauchent ne peuvent pas laisser un `'best-effort'` périmé).
 - `requestPersistentStorage()` : `'unsupported'` → `false` ; sinon `navigator.storage.persist()`, puis relit `persisted()` et notifie les abonnés. Idempotente. Appelée par F06 à la première création de session.
 - L'indicateur « stockage non persistant » est affiché par F05 (`'best-effort'`).
 
