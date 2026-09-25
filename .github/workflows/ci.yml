@@ -23,6 +23,8 @@ jobs:
         run: pnpm format:check
       - name: Lint
         run: pnpm lint
+      - name: Dépendances entre dossiers
+        run: pnpm deps
       - name: Types
         run: pnpm typecheck
       - name: Tests

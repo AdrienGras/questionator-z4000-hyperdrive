@@ -7,10 +7,32 @@
   },
   "rules": {
     "react/react-in-jsx-scope": "off",
+    "unicorn/filename-case": ["error", { "case": "kebabCase" }],
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["../*"],
+            "message": "Importer par `@/…` ; `./…` seulement dans le même dossier (docs/CONVENTIONS.md § Arborescence et imports)."
+          }
+        ]
+      }
+    ],
     "import/no-unassigned-import": [
       "error",
       { "allow": ["**/*.css", "@testing-library/jest-dom/vitest", "fake-indexeddb/auto"] }
     ]
   },
+  "overrides": [
+    {
+      "files": ["src/routes/**"],
+      "rules": { "unicorn/filename-case": "off" }
+    },
+    {
+      "files": ["src/domain/config/example.test.ts"],
+      "rules": { "no-restricted-imports": "off" }
+    }
+  ],
   "ignorePatterns": ["dist", "coverage", "src/routeTree.gen.ts", "src/components/ui"]
 }

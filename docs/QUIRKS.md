@@ -55,8 +55,8 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Découvert** : F01.
 **Symptôme** : warnings jsdom dans la sortie de `pnpm test`.
 **Cause** : la restauration du scroll de TanStack Router appelle `window.scrollTo`, absent de jsdom.
-**Workaround** : `window.scrollTo = () => {}` dans `src/test/setup.ts`. Pas de globals Vitest : `afterEach(cleanup)` explicite dans le même fichier (sinon Testing Library ne nettoie pas le DOM entre les tests).
-**Référence** : `src/test/setup.ts`.
+**Workaround** : `window.scrollTo = () => {}` dans `src/testing/setup.ts`. Pas de globals Vitest : `afterEach(cleanup)` explicite dans le même fichier (sinon Testing Library ne nettoie pas le DOM entre les tests).
+**Référence** : `src/testing/setup.ts`.
 
 ## SonarQube Cloud n'analyse pas une branche sans PR (2026-09-24)
 
@@ -72,7 +72,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : impossible de distinguer « champ manquant » de « mauvais type » à partir de l'issue seule ; un `schemaVersion` absent sortait en « valeur non autorisée ».
 **Cause** : Zod 4 ne reporte pas l'entrée dans l'issue (`reportInput` désactivé) ; un `z.literal` absent donne `invalid_value`.
 **Workaround** : relire la valeur au chemin de l'issue dans l'entrée brute (`valueAt`) : `undefined` → code `required`.
-**Référence** : `src/config/from-zod.ts`.
+**Référence** : `src/domain/config/from-zod.ts`.
 
 ## Zod 4 : `z.int()` renvoie `expected: 'number'` quand la valeur n'est pas un nombre (2026-09-25)
 
@@ -80,7 +80,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : une chaîne dans `questionsPerStudent` donnait « un nombre est attendu » au lieu de « un nombre entier ».
 **Cause** : `expected: 'int'` n'apparaît que pour un nombre non entier ; pour une non-number, Zod dit `number`.
 **Workaround** : liste `INTEGER_FIELDS` (champs `z.int()` du schéma, par nom) dans `from-zod.ts`. Tout nouveau `z.int()` doit y être ajouté.
-**Référence** : `src/config/from-zod.ts`, `src/config/schema.ts`.
+**Référence** : `src/domain/config/from-zod.ts`, `src/domain/config/schema.ts`.
 
 ## V8 (Chrome, Node 24) ne donne aucune position pour la plupart des erreurs `JSON.parse` (2026-09-25)
 
@@ -88,7 +88,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : virgule finale, commentaire, guillemets simples, valeur manquante → message « Unexpected token … » sans `position` ni `line/column`.
 **Cause** : format des messages de V8 récent ; seuls certains cas portent `at position N (line L column C)`. Le message cite aussi un extrait du source, qui peut contenir « position 3 ».
 **Workaround** : localiser avec `jsonc-parser` (offset de la première erreur, commentaires et virgules finales interdits) ; regex de repli ancrées en fin de message sur le libellé exact du moteur.
-**Référence** : `src/config/parse-json.ts`.
+**Référence** : `src/domain/config/parse-json.ts`.
 
 ## Vitest vide le contenu des imports CSS, même avec `?raw` (2026-09-25)
 
@@ -96,15 +96,15 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : `import css from '../index.css?raw'` vaut `''` sous Vitest.
 **Cause** : Vitest ne traite que les CSS listés dans `test.css.include` ; les autres sont remplacés par une chaîne vide, requête `?raw` comprise.
 **Workaround** : `test: { css: { include: [/index\.css/] } }` dans `vite.config.ts`. Les JSON `?raw` fonctionnent sans réglage.
-**Référence** : `vite.config.ts`, `src/config/schema.test.ts`.
+**Référence** : `vite.config.ts`, `src/domain/config/schema.test.ts`.
 
 ## `setupFiles` de Vitest s'exécute aussi dans les fichiers `@vitest-environment node` (2026-09-25)
 
 **Découvert** : F02, premier test en environnement `node` (plugin Vite).
 **Symptôme** : `window is not defined` avant même le premier test.
-**Cause** : `src/test/setup.ts` touche `window` et tourne pour chaque fichier, quel que soit son environnement.
+**Cause** : `src/testing/setup.ts` touche `window` et tourne pour chaque fichier, quel que soit son environnement.
 **Workaround** : garder tout accès à `window` derrière `typeof window !== 'undefined'`.
-**Référence** : `src/test/setup.ts`, `vite/config-schema-plugin.test.ts`.
+**Référence** : `src/testing/setup.ts`, `vite/config-schema-plugin.test.ts`.
 
 ## oxlint type-aware refuse les `as`, les `expect` conditionnels et les suppressions sur deux lignes (2026-09-25)
 
@@ -112,7 +112,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : lint rouge sur du code pourtant correct.
 **Cause** : règles actives `typescript/no-unsafe-type-assertion` (tests compris), `unicorn/no-array-sort`, `unicorn/consistent-function-scoping`, `vitest/no-conditional-expect`, `vitest/valid-expect` (pas de 2ᵉ argument à `expect`). Un `// oxlint-disable-next-line <règle> -- <raison>` ne marche que sur **une seule ligne physique**.
 **Workaround** : gardes de type réelles (qui vérifient chaque niveau et lèvent une erreur), `.toSorted()`, helpers au niveau module, `if (!x) throw` avant `expect`. Suppression ciblée et justifiée seulement si un cast est inévitable.
-**Référence** : `.oxlintrc.json`, `src/config/*.test.ts`.
+**Référence** : `.oxlintrc.json`, `src/domain/config/*.test.ts`.
 
 ## Un bloc ```php dans une chaîne JSON de PRODUCT.md casse l'extraction naïve du bloc ```json (2026-09-25)
 
@@ -136,7 +136,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : règles `typescript:S8786` (backtracking super-linéaire) et `S5843` (complexité > 20) sur les regex de nettoyage markdown de `derive-title.ts`, alors que le lint et les tests passaient.
 **Cause** : une classe qui n'exclut pas le délimiteur ouvrant, ou un `.+?` suivi d'une rétro-référence, relance le parcours à chaque position ; une alternance de marqueurs en une seule regex dépasse la complexité autorisée.
 **Workaround** : parcours linéaire à la main (`indexOf`) pour les liens et images ; classes excluant le délimiteur (`[^*]+?`) pour l'emphase ; plusieurs petites regex ancrées appliquées en boucle pour les marqueurs de bloc. Lancer `.claude/scripts/sonar-check.sh --pr <n> --wait` tôt : Sonar voit des choses qu'oxlint ne voit pas.
-**Référence** : `src/config/derive-title.ts`.
+**Référence** : `src/domain/config/derive-title.ts`.
 
 ## Le hook RTK réécrit `pnpm vitest` : sortie illisible et `.vitest/json/output.json` qui casse `pnpm check` (2026-09-25)
 
@@ -152,15 +152,15 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : `Math.round(2.0005 * 1000)` donne 2000, pas 2001 ; `formatScore(toMilli(-0))` affichait « -0,0 ».
 **Cause** : 2.0005 n'est pas représentable (2.000499999…), le produit tombe juste sous .5 ; `Math.round` conserve le signe de zéro, et `Intl.NumberFormat` affiche le signe de `-0`.
 **Workaround** : ne jamais écrire de test sur une demie « exacte » à la 4ᵉ décimale ; `toMilli` normalise `-0` en `0`. Toute conversion décimal → millièmes passe par `toMilli` (moteur) ou `roundToMilli` (règles F02).
-**Référence** : `src/scoring/milli.ts`.
+**Référence** : `src/domain/scoring/milli.ts`.
 
 ## SonarQube refuse `tableau.map(fonction)` quand la fonction a un 2ᵉ paramètre (2026-09-25)
 
-**Découvert** : PR #23 (F03), `src/test/student-fixtures.ts`.
+**Découvert** : PR #23 (F03), `src/testing/student-fixtures.ts`.
 **Symptôme** : bug MAJOR `typescript:S7727` (« Do not pass function directly to `.map(…)` ») et quality gate en échec (fiabilité), alors qu'oxlint et les tests passaient.
 **Cause** : `.map` passe aussi l'index et le tableau ; une fonction dont la signature accepte un 2ᵉ paramètre les recevrait par accident si elle évolue.
 **Workaround** : toujours une flèche explicite, `items.map((item, index) => build(item, index))`.
-**Référence** : `src/test/student-fixtures.ts`.
+**Référence** : `src/testing/student-fixtures.ts`.
 
 ## `useLiveQuery` garde son dernier résultat quand ses dépendances changent (2026-09-25)
 
@@ -168,7 +168,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : juste après `rerender({ id: 'b' })`, `useSession('b')` renvoyait encore la session `a` pendant un rendu.
 **Cause** : `dexie-react-hooks` conserve le résultat de l'observable précédent et ne recalcule pas de valeur initiale quand il en a déjà une.
 **Workaround** : la requête renvoie `{ id, session }` et le hook masque (`undefined`) un résultat dont l'`id` n'est pas le courant. À reproduire pour tout hook `useLiveQuery` paramétré.
-**Référence** : `src/db/hooks.ts`.
+**Référence** : `src/lib/db/hooks.ts`.
 
 ## Après `versionchange`, `close()` fait échouer toute opération et les `liveQuery` se taisent (2026-09-25)
 
@@ -176,31 +176,31 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : dans l'ancien onglet, `put` rejette `DatabaseClosedError` ; les hooks gardent leur dernière valeur sans se mettre à jour.
 **Cause** : `close()` sans argument vaut `{ disableAutoOpen: true }`. Le traitement par défaut de Dexie passe `false` et rouvrirait en silence sur l'ancien schéma.
 **Workaround** : ne pas changer l'argument de `close()` ; se fier à `useDbStatus() === 'outdated'` pour proposer le rechargement.
-**Référence** : `src/db/db.ts`.
+**Référence** : `src/lib/db/db.ts`.
 
 ## `import 'fake-indexeddb/auto'` exige l'exception oxlint `import/no-unassigned-import` (2026-09-25)
 
 **Découvert** : F04.
-**Symptôme** : lint rouge sur la première ligne des tests de `src/db/`.
+**Symptôme** : lint rouge sur la première ligne des tests de `src/lib/db/`.
 **Cause** : la règle n'autorise que les imports à effet de bord listés.
 **Workaround** : `"fake-indexeddb/auto"` ajouté à `allow` dans `.oxlintrc.json`. Importer `Dexie` par l'export nommé (`import { Dexie } from 'dexie'`), l'import par défaut déclenche `import/no-named-as-default`.
-**Référence** : `.oxlintrc.json`, `src/db/*.test.ts`.
+**Référence** : `.oxlintrc.json`, `src/lib/db/*.test.ts`.
 
-## Rien n'évalue `src/db` tant qu'aucune feature ne l'importe : `window.__questionatorDb` absent en dev (2026-09-25)
+## Rien n'évalue `src/lib/db` tant qu'aucune feature ne l'importe : `window.__questionatorDb` absent en dev (2026-09-25)
 
 **Découvert** : F04, vérification manuelle entre fenêtres.
 **Symptôme** : `typeof window.__questionatorDb === 'undefined'` sous `pnpm dev`.
 **Cause** : Vite ne charge que les modules importés depuis `main.tsx`.
-**Workaround** : `src/main.tsx` importe `@/db/db` en dev seulement. En prod, rien tant que F05 n'importe pas `@/db`.
+**Workaround** : `src/main.tsx` importe `@/lib/db/db` en dev seulement. En prod, rien tant que F05 n'importe pas `src/lib/db`.
 **Référence** : `src/main.tsx`.
 
 ## Le premier `findBy*` d'un test rendu via le routeur dépasse 1 s sous la suite complète (2026-09-25)
 
 **Découvert** : F05, tâche 5 (accueil), en lançant `pnpm check`.
-**Symptôme** : le premier test de `src/home/HomePage.test.tsx` et le test de `/` dans `routes.test.tsx` passent seuls mais échouent en suite complète (« Unable to find role="heading" » après ~1050 ms), de façon déterministe.
+**Symptôme** : le premier test de `src/features/home/home-page.test.tsx` et le test de `/` dans `routes.test.tsx` passent seuls mais échouent en suite complète (« Unable to find role="heading" » après ~1050 ms), de façon déterministe.
 **Cause** : `autoCodeSplitting` charge le composant de la route par import dynamique ; sous 36 fichiers en parallèle, la première transformation de l'accueil et de ses composants base-ui prend ~2 s, au-delà du délai par défaut de 1 s de Testing Library.
-**Workaround** : `configure({ asyncUtilTimeout: 5000 })` dans `src/test/setup.ts`. Les menus et dialogues base-ui s'ouvrent bien avec `fireEvent.click` : `@testing-library/user-event` n'est pas nécessaire.
-**Référence** : `src/test/setup.ts`, `vite.config.ts` (`autoCodeSplitting`).
+**Workaround** : `configure({ asyncUtilTimeout: 5000 })` dans `src/testing/setup.ts`. Les menus et dialogues base-ui s'ouvrent bien avec `fireEvent.click` : `@testing-library/user-event` n'est pas nécessaire.
+**Référence** : `src/testing/setup.ts`, `vite.config.ts` (`autoCodeSplitting`).
 
 ## `Equal<A, B>` (astuce des fonctions génériques) déclare différents une intersection et l'objet aplati équivalent (2026-09-25)
 
@@ -208,7 +208,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : `Equal<Omit<ParsedSession, 'config'> & { config: NormalizedConfig }, Session>` vaut `false` alors que clés, types et optionalité sont identiques et que l'assignabilité mutuelle passe.
 **Cause** : l'astuce `(<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2)` compare l'identité des types, pas leur structure : une intersection n'est pas identique à un objet aplati.
 **Workaround** : aplatir avant de comparer, `type Simplify<T> = { [K in keyof T]: T[K] }`, puis `Equal<Simplify<A>, B>`.
-**Référence** : `src/domain/schema.test.ts`.
+**Référence** : `src/domain/session/schema.test.ts`.
 
 ## `shadcn add` (CLI 4.21) injecte une dépendance `cn` et réécrit l'import de `cn` dans tous les composants (2026-09-25)
 
@@ -231,8 +231,8 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Découvert** : F06, lecture d'un export Excel FR (`;`, BOM, CRLF, ligne vide finale).
 **Symptôme** : le fichier est découpé à la virgule : chaque ligne devient une seule cellule, donc des `single_field_row` en série.
 **Cause** : `guessDelimiter` exige une moyenne de plus de 1,99 champ par ligne sur l'échantillon ; une ligne vide finale, un préambule d'un mot ou une ligne à un champ la fait échouer, et PapaParse prend `,` par défaut.
-**Workaround** : `detectDelimiter` (`src/students/parse-csv.ts`) parse l'échantillon avec chaque candidat (`preview: 50`, guillemets respectés) et garde celui qui donne le plus de lignes à au moins deux cellules non vides ; égalité → `;`. Un comptage brut des caractères ne suffit pas (virgules d'une adresse ou d'un titre).
-**Référence** : `src/students/parse-csv.ts`, `src/students/parse-csv.test.ts`.
+**Workaround** : `detectDelimiter` (`src/domain/students/parse-csv.ts`) parse l'échantillon avec chaque candidat (`preview: 50`, guillemets respectés) et garde celui qui donne le plus de lignes à au moins deux cellules non vides ; égalité → `;`. Un comptage brut des caractères ne suffit pas (virgules d'une adresse ou d'un titre).
+**Référence** : `src/domain/students/parse-csv.ts`, `src/domain/students/parse-csv.test.ts`.
 
 ## Un guillemet ouvrant mal placé dans un CSV avale toute la suite du fichier (2026-09-25)
 
@@ -240,7 +240,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : `"Bob" Martin;Paul` produit `InvalidQuotes` puis `MissingQuotes` ; toutes les lignes suivantes finissent dans une seule cellule.
 **Cause** : comportement RFC 4180 de PapaParse : un guillemet en début de cellule ouvre un champ cité jusqu'au prochain guillemet.
 **Workaround** : toute erreur PapaParse de type `Quotes` donne `csv_syntax` (bloquant, avec numéro de ligne) plutôt que des étudiants faux. Les numéros de ligne dérivent aussi après un saut de ligne dans une cellule citée (cas accepté, documenté dans le code).
-**Référence** : `src/students/parse-csv.ts`.
+**Référence** : `src/domain/students/parse-csv.ts`.
 
 ## L'export « CSV » d'Excel en français est en Windows-1252, pas en UTF-8 (2026-09-25)
 
@@ -248,4 +248,36 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : `file.text()` décode en UTF-8 : « Prénom » devient « Pr�nom », l'en-tête n'est plus reconnu et devient un étudiant, sans aucune issue.
 **Cause** : seul le format « CSV UTF-8 » d'Excel écrit de l'UTF-8 (avec BOM) ; « CSV (séparateur : point-virgule) » écrit en Windows-1252.
 **Workaround** : lire les octets (`file.arrayBuffer()`), décoder avec `new TextDecoder('utf-8', { fatal: true })`, et en cas d'exception relire en `windows-1252` avec l'avertissement `legacy_encoding` (D58).
-**Référence** : `src/students/decode.ts`, `src/create/use-create-form.ts`.
+**Référence** : `src/domain/students/decode.ts`, `src/features/create-session/hooks/use-create-form.ts`.
+
+## dependency-cruiser ne lit pas les sources avec typescript@7 : parseur swc obligatoire (2026-09-25)
+
+**Découvert** : #31, mise en place de `pnpm deps`.
+**Symptôme** : `✔ no dependency violations found (0 modules, 0 dependencies cruised)`, suivi de l'avertissement `missing-typescript-transpiler`. La commande passe au vert sans avoir rien analysé.
+**Cause** : dependency-cruiser 18 s'appuie sur l'API JS de `typescript` (versions 2 à 6). typescript@7, réécrit en Go, n'en publie pas encore.
+**Workaround** : `options.parser: 'swc'` dans `.dependency-cruiser.cjs`, avec `@swc/core` en devDependency. Le type-only est bien détecté (`dependencyTypes` contient `type-only`). L'avertissement reste affiché à chaque exécution et on l'ignore. Toujours contrôler la ligne « N modules » : si elle retombe à 0, rien n'a été analysé.
+**Référence** : `.dependency-cruiser.cjs`, `pnpm-workspace.yaml`.
+
+## dependency-cruiser voit les paquets npm sous `node_modules/.pnpm/<pkg>@<v>/node_modules/<pkg>/` (2026-09-25)
+
+**Découvert** : #31, règle `domain-no-ui-packages`.
+**Symptôme** : une règle `to.path: '^node_modules/react/'` ne se déclenche jamais, même quand `domain/` importe React.
+**Cause** : avec pnpm, le chemin résolu passe par le store virtuel `.pnpm`.
+**Workaround** : ancrer sur le segment final, `'/node_modules/(react|dexie|…)/'`, et vérifier chaque nouvelle règle avec un fichier fautif temporaire.
+**Référence** : `.dependency-cruiser.cjs`.
+
+## `pnpm add` d'un paquet à postinstall ajoute la clé factice `'<pkg>': set this to true or false` dans `allowBuilds` (2026-09-25)
+
+**Découvert** : #31, ajout de `@swc/core`.
+**Symptôme** : `pnpm install --frozen-lockfile` échoue d'abord sur « Ignored build scripts ». Une fois la vraie clé ajoutée à la main, il échoue sur `duplicate mapping key`.
+**Cause** : pnpm 12 est strict sur les scripts de build. Il écrit une entrée d'attente dans `pnpm-workspace.yaml`, et cette entrée casse l'installation en CI.
+**Workaround** : remplacer cette ligne par `'<pkg>': false` (ou `true`) avec un commentaire qui justifie le choix, comme pour `msw`.
+**Référence** : `pnpm-workspace.yaml`.
+
+## `vi.mock` doit viser le fichier qui déclare le symbole, pas un dossier ni un ancien barrel (2026-09-25)
+
+**Découvert** : #31, suppression des `index.ts`.
+**Symptôme** : un `vi.mock('@/db', …)` qui remplaçait `useDbStatus` n'agit plus une fois le composant passé à un import direct (`@/lib/db/hooks`). Le test lit la vraie base.
+**Cause** : Vitest remplace un module par son identifiant résolu. Mocker le barrel ne touche pas le fichier que le code importe réellement.
+**Workaround** : un `vi.mock` par fichier source (`@/lib/db/hooks` pour `useDbStatus`, `@/lib/db/persistence` pour `usePersistenceStatus`, `@/lib/db/sessions` pour `createSession`).
+**Référence** : `src/features/home/home-page.test.tsx`, `src/features/create-session/hooks/use-create-form.test.ts`.

@@ -47,8 +47,8 @@ describe('renderConfigAssets', () => {
     expect(studentsExample).toBe(studentsExampleFile)
     expect(watchFiles).toEqual(
       expect.arrayContaining([
-        fileURLToPath(new URL('../src/config/json-schema.ts', import.meta.url)),
-        fileURLToPath(new URL('../src/config/schema.ts', import.meta.url)),
+        fileURLToPath(new URL('../src/domain/config/json-schema.ts', import.meta.url)),
+        fileURLToPath(new URL('../src/domain/config/schema.ts', import.meta.url)),
         fileURLToPath(new URL('../examples/config.example.json', import.meta.url)),
         fileURLToPath(new URL('../examples/students.example.csv', import.meta.url)),
       ]),
@@ -89,8 +89,8 @@ describe('configSchemaPlugin.buildStart', () => {
     const watched = await watchedFilesFor('build')
     expect(watched).toEqual(
       expect.arrayContaining([
-        fileURLToPath(new URL('../src/config/json-schema.ts', import.meta.url)),
-        fileURLToPath(new URL('../src/config/schema.ts', import.meta.url)),
+        fileURLToPath(new URL('../src/domain/config/json-schema.ts', import.meta.url)),
+        fileURLToPath(new URL('../src/domain/config/schema.ts', import.meta.url)),
         fileURLToPath(new URL('../examples/config.example.json', import.meta.url)),
         fileURLToPath(new URL('../examples/students.example.csv', import.meta.url)),
       ]),
