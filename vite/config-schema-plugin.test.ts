@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, test } from 'vitest'
 import {
+  configSchemaPlugin,
   EXAMPLE_FILE_NAME,
   matchConfigAsset,
   renderConfigAssets,
@@ -38,6 +39,47 @@ describe('renderConfigAssets', () => {
     )
     expect(example).toBe(exampleFile)
     expect(watchFiles).toEqual(
+      expect.arrayContaining([
+        fileURLToPath(new URL('../src/config/json-schema.ts', import.meta.url)),
+        fileURLToPath(new URL('../src/config/schema.ts', import.meta.url)),
+        fileURLToPath(new URL('../examples/config.example.json', import.meta.url)),
+      ]),
+    )
+  }, 30_000)
+})
+
+/** Déroule un hook Rollup, qu'il soit une fonction ou un objet `{ handler }`. */
+function handlerOf(hook: unknown): unknown {
+  return typeof hook === 'object' && hook !== null && 'handler' in hook ? hook.handler : hook
+}
+
+/** Joue configResolved puis buildStart avec un contexte factice ; renvoie les fichiers surveillés. */
+async function watchedFilesFor(command: 'serve' | 'build'): Promise<string[]> {
+  const plugin = configSchemaPlugin()
+  const configResolved = handlerOf(plugin.configResolved)
+  const buildStart = handlerOf(plugin.buildStart)
+  if (typeof configResolved !== 'function' || typeof buildStart !== 'function') {
+    throw new TypeError('configResolved et buildStart doivent être définis')
+  }
+  const watched: string[] = []
+  const context = {
+    addWatchFile: (file: string) => {
+      watched.push(file)
+    },
+  }
+  await Reflect.apply(configResolved, context, [{ command }])
+  await Reflect.apply(buildStart, context, [{}])
+  return watched
+}
+
+describe('configSchemaPlugin.buildStart', () => {
+  test('en dev (serve) : ne rend ni ne surveille rien', async () => {
+    expect(await watchedFilesFor('serve')).toEqual([])
+  })
+
+  test('en build : surveille le module de schéma, ses dépendances et l’exemple', async () => {
+    const watched = await watchedFilesFor('build')
+    expect(watched).toEqual(
       expect.arrayContaining([
         fileURLToPath(new URL('../src/config/json-schema.ts', import.meta.url)),
         fileURLToPath(new URL('../src/config/schema.ts', import.meta.url)),

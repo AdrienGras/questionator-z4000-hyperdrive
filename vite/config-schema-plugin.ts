@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
-import { runnerImport, type Plugin } from 'vite'
+import { runnerImport, type Plugin, type ResolvedConfig } from 'vite'
 
 export const SCHEMA_FILE_NAME = 'config.schema.json'
 export const EXAMPLE_FILE_NAME = 'config.example.json'
@@ -38,9 +38,13 @@ export async function renderConfigAssets(): Promise<{
 /** Publie config.schema.json et config.example.json à la racine du site (D17). */
 export function configSchemaPlugin(): Plugin {
   let rendered: { schema: string; example: string } | undefined
+  let command: ResolvedConfig['command'] | undefined
 
   return {
     name: 'questionator:config-schema',
+    configResolved(config) {
+      command = config.command
+    },
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const fileName = matchConfigAsset(req.url, server.config.base)
@@ -48,18 +52,20 @@ export function configSchemaPlugin(): Plugin {
           next()
           return
         }
-        renderConfigAssets().then(
-          ({ schema, example }) => {
+        // Le `.catch` terminal capte aussi une exception de `setHeader`/`end` : réponse 500.
+        renderConfigAssets()
+          .then(({ schema, example }) => {
             res.setHeader('Content-Type', 'application/json; charset=utf-8')
             res.end(fileName === SCHEMA_FILE_NAME ? schema : example)
-          },
-          (error: unknown) => {
+          })
+          .catch((error: unknown) => {
             next(error)
-          },
-        )
+          })
       })
     },
+    /** En dev, seul le middleware rend les fichiers : une erreur n'y bloque pas le démarrage. */
     async buildStart() {
+      if (command !== 'build') return
       const { schema, example, watchFiles } = await renderConfigAssets()
       rendered = { schema, example }
       for (const file of watchFiles) this.addWatchFile(file)
