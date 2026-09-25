@@ -9,24 +9,8 @@ const STAR_EMPHASIS = /(\*{1,3})(?=\S)(.+?)(?<=\S)\1/g
 const UNDERSCORE_EMPHASIS = /(?<![\p{L}\p{N}_])(_{1,3})(?=\S)(.+?)(?<=\S)\1(?![\p{L}\p{N}_])/gu
 const STRIKETHROUGH = /~~(?=\S)(.+?)(?<=\S)~~/g
 const LEFTOVER_MARKERS = /^[*_~\-\s]+$/
-
-function splitFencedCode(prompt: string): { prose: string[]; code: string[] } {
-  const prose: string[] = []
-  const code: string[] = []
-  let inFence = false
-  for (const line of prompt.split(/\r?\n/)) {
-    if (FENCE.test(line)) {
-      inFence = !inFence
-      continue
-    }
-    if (inFence) {
-      code.push(line)
-    } else {
-      prose.push(line)
-    }
-  }
-  return { prose, code }
-}
+/** Borne chaque ligne avant les regex : un titre n'en garde que 60 caractères (F7). */
+const MAX_LINE_LENGTH = 500
 
 function stripEmphasis(text: string): string {
   return text
@@ -65,10 +49,19 @@ function truncateOnWord(text: string, max: number): string {
 
 /** Titre court dérivé du `prompt` (D41) : première ligne de texte, markdown retiré, 60 caractères. */
 export function deriveTitle(prompt: string, fallback: string): string {
-  const { prose, code } = splitFencedCode(prompt)
-  const line =
-    prose.map(stripInlineMarkdown).find((text) => text !== '') ??
-    code.map(collapseSpaces).find((text) => text !== '') ??
-    fallback
-  return truncateOnWord(line, MAX_TITLE_LENGTH)
+  let inFence = false
+  let firstCode: string | undefined
+  for (const rawLine of prompt.split(/\r?\n/)) {
+    const line = rawLine.slice(0, MAX_LINE_LENGTH)
+    if (FENCE.test(line)) {
+      inFence = !inFence
+    } else if (inFence) {
+      const text = collapseSpaces(line)
+      if (text !== '') firstCode ??= text
+    } else {
+      const text = stripInlineMarkdown(line)
+      if (text !== '') return truncateOnWord(text, MAX_TITLE_LENGTH)
+    }
+  }
+  return truncateOnWord(firstCode ?? fallback, MAX_TITLE_LENGTH)
 }

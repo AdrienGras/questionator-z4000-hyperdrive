@@ -50,4 +50,14 @@ describe('deriveTitle', () => {
     const exact = 'b'.repeat(60)
     expect(deriveTitle(exact, 'q')).toBe(exact)
   })
+
+  test('ligne de 50 000 caractères pathologique → traitée en moins de 200 ms', () => {
+    const prompt = '**a '.repeat(12_500)
+    const start = performance.now()
+    const title = deriveTitle(prompt, 'q')
+    const elapsed = performance.now() - start
+    expect(elapsed).toBeLessThan(200)
+    expect(title.length).toBeGreaterThan(0)
+    expect(title.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH)
+  })
 })
