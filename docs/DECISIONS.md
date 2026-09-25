@@ -714,3 +714,81 @@ explicite au lieu d'un chargement sans fin.
 pourquoi rien ne s'affiche ; l'état coûte quelques lignes et reste additif.
 
 **Reporté dans** : spec F04. Impacte F04, F05.
+
+## D48 — Import de backup : règles croisées entre session et config (2026-09-25)
+
+**Question** : D24 revalide la forme de la session et sa config figée, mais pas leur
+cohérence mutuelle. Un backup retouché à la main peut être bien formé et incohérent
+(attempt vers une question inconnue, score hors barème, étudiant actif inexistant).
+
+**Décision** : `parseBackup` ajoute une dernière passe `checkSessionRules`, sur le
+modèle de D38 : références (catégorie, question, étudiant actif et projeté), score dans
+le barème et cohérent avec `outcome`, `skipReason` seulement sur `skipped`, un seul
+`pending` par étudiant (D28), aucun attempt pour un absent (D08), unicité des `id`
+d'étudiants et d'attempts, cohérence de `projection`. Toutes les issues sont collectées
+et l'import est refusé.
+
+**Pourquoi** : les features suivantes (F09–F16) peuvent supposer une session
+cohérente ; une incohérence entrée par un import ferait planter l'écran de passage bien
+loin de sa cause.
+
+**Reporté dans** : `PRODUCT.md` F05, spec F05. Impacte F05.
+
+## D49 — Import : config figée renormalisée, dates et version d'origine conservées (2026-09-25)
+
+**Question** : à l'import, stocker la config telle qu'elle figure dans le fichier ou
+celle que renvoie le validateur de F02 ?
+
+**Décision** : celle que renvoie `validateConfig`, donc renormalisée. `createdAt`,
+`updatedAt` et `appVersion` de la session sont conservés tels quels.
+
+**Pourquoi** : `normalize` est idempotent, un backup produit par l'app ressort
+strictement identique ; un backup retouché (catégories désordonnées, défauts omis)
+reprend la forme canonique que le reste de l'app suppose. Un import restitue, il ne
+modifie pas : les dates restent celles du fichier.
+
+**Reporté dans** : spec F05. Impacte F05.
+
+## D50 — F05 avant F06, routes provisoires `/new` et `/session/$sessionId` (2026-09-25)
+
+**Question** : F05 renvoie vers la création (F06) et l'écran de passage (F09), qui
+n'existent pas encore. Faire F06 d'abord, et que faire des liens ?
+
+**Décision** : F05 d'abord. Elle crée deux routes provisoires « Bientôt disponible »
+avec un lien de retour ; F06 et F09 remplaceront leur composant, les liens de F05 sont
+définitifs.
+
+**Pourquoi** : l'import de backup remplit la base sans F06 ; F05 pose le socle d'UI
+(dictionnaire, dialogues) que F06 réutilisera ; F06 aurait eu de toute façon besoin
+d'une route provisoire pour F09.
+
+**Reporté dans** : spec F05. Impacte F05, F06, F09.
+
+## D51 — Dictionnaire d'interface et langue du navigateur posés par F05 (2026-09-25)
+
+**Question** : F05 doit être bilingue (langue du navigateur) alors que F07, qui porte
+l'i18n de l'interface, n'est pas faite.
+
+**Décision** : F05 crée `src/i18n/ui-messages.ts` (dictionnaire typé fr/en, lu par
+`t()` du noyau F02) et `detectBrowserLocale` (premier sous-tag primaire supporté de
+`navigator.languages`, sinon `fr`). F07 étend le dictionnaire et ajoute `config.locale`
+pour les routes de session.
+
+**Pourquoi** : aucune chaîne de l'accueil ne doit être écrite en dur puis réécrite ;
+le noyau D18 est déjà prévu pour être étendu.
+
+**Reporté dans** : spec F05. Impacte F05, F07.
+
+## D52 — Accueil : cartes et menu d'actions, un étudiant en cours compte comme restant (2026-09-25)
+
+**Décision** :
+- Une carte par session, « Reprendre » en bouton principal, les autres actions dans un
+  menu `⋯` (supprimer en dernier, séparée, style destructif).
+- Avancement : passés = `done`, absents = `absent`, restants = `todo` + `in_progress`.
+- « Exporter un backup d'abord » télécharge et laisse le dialogue de suppression ouvert.
+
+**Pourquoi** : peu de sessions en pratique (une par oral), la carte reste lisible sur un
+petit écran ; un passage entamé n'est pas terminé ; l'examinateur confirme la
+suppression une fois le fichier en main.
+
+**Reporté dans** : spec F05. Impacte F05.
