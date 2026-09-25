@@ -21,7 +21,6 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] JSON Schema : descriptions et défauts (`.meta({ description })` depuis le tableau de `PRODUCT.md` §6.2) pour l'aide au survol dans VSCode.
 - [ ] Identifiants de catégorie/question avec espaces en bord (`'a-1 '`) ou en formes Unicode différentes (NFC/NFD) : erreur ou avertissement.
 - [ ] Test d'alignement entre `INTEGER_FIELDS` (`from-zod.ts`) et les champs `z.int()` du schéma.
-- [ ] Vérifier en F06 que le chunk qui charge le validateur n'embarque pas les composants Tabler (seulement `iconsList`, ~20 Ko gzip).
 
 ## Notation
 
@@ -46,3 +45,11 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Tests manquants : erreurs d'écriture (renommer, examinateur, suppression), réinitialisation du champ à la réouverture d'un dialogue, « toutes les issues » avec un décompte exact, `score` sur un attempt `skipped`, date locale vs UTC du nom de fichier (cas à 00:30).
 - [ ] Désactiver « Annuler » pendant un enregistrement en cours dans les dialogues de saisie.
 - [ ] Ajouter un favicon (404 sur `/favicon.ico` en preview et en prod).
+
+## Création de session
+
+- [ ] Factoriser le glisser-déposer (`hasFiles`, dragover/dragleave/drop) de `FileDropField` et `ImportController` dans un hook `useFileDrop(disabled, onFile)`.
+- [ ] Remplacer les sauts de ligne et espaces multiples internes aux noms lus dans le CSV par une espace (`"Du\nrand"`).
+- [ ] Message dédié pour un fichier séparé par tabulations (aujourd'hui : lignes à un champ puis « aucun étudiant valide »).
+- [ ] Garde de montage de la création : comparer aussi `router.state.location.pathname` avant de naviguer (fenêtre résiduelle pendant le chargement du chunk de l'accueil).
+- [ ] Tests manquants : courses du slot config (nom saisi pendant la lecture, deux configs successives), messages `read-error` / `load-error` rendus, état `unavailable` à l'écran, `activeStudentId` affirmé dans le test d'écran.

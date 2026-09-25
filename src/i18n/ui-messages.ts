@@ -18,6 +18,7 @@ export type UiMessageParams = {
   empty_title: NoParams
   empty_body: NoParams
   empty_example_link: NoParams
+  empty_students_example_link: NoParams
   card_examiner: { name: string }
   card_updated: { date: string }
   card_progress: { done: number; absent: number; remaining: number }
@@ -47,9 +48,69 @@ export type UiMessageParams = {
   import_conflict_title: NoParams
   import_conflict_body: { existing: string; date: string; imported: string }
   import_replace: NoParams
+  create_title: NoParams
+  create_students_label: NoParams
+  create_config_label: NoParams
+  create_choose_file: NoParams
+  create_replace_file: NoParams
+  create_drop_hint: NoParams
+  create_file_status_ok: NoParams
+  create_file_status_warnings: NoParams
+  create_file_status_errors: NoParams
+  create_file_status_reading: NoParams
+  create_students_example_link: NoParams
+  create_validator_load_error: NoParams
+  create_submit: NoParams
+  create_write_error: NoParams
+  create_preview_title: NoParams
+  create_preview_empty: NoParams
+  preview_students_count: { count: number }
+  preview_students_list: NoParams
+  preview_line: { line: number; message: string }
+  preview_config_title: NoParams
+  preview_subject: { subject: string }
+  preview_cohort: { cohort: string }
+  /** `scale` : barème déjà mis en forme par l'appelant (`category.scale.join(', ')`). */
+  preview_category: { label: string; questions: number; scale: string }
+  preview_scoring: { questionsPerStudent: number; maxRawScore: number; finalScale: number }
+  preview_rounding: RoundingParams
+  preview_skips_disabled: NoParams
+  preview_skips: { max: number }
 }
 
+type RoundingMode = 'nearest' | 'up' | 'down'
+type RoundingParams = { mode: RoundingMode; step: number | null; decimals: number }
+
 const plural = (count: number, one: string, many: string) => (count > 1 ? many : one)
+const pluralEn = (count: number, one: string, many: string) => (count === 1 ? one : many)
+
+const ROUNDING_MODE_FR: Record<RoundingMode, string> = {
+  nearest: 'au plus proche',
+  up: 'supérieur',
+  down: 'inférieur',
+}
+const ROUNDING_MODE_EN: Record<RoundingMode, string> = {
+  nearest: 'to nearest',
+  up: 'up',
+  down: 'down',
+}
+
+/** Pas d'arrondi s'il est défini, sinon nombre de décimales. */
+function roundingFr({ mode, step, decimals }: RoundingParams): string {
+  const precision =
+    step === null
+      ? `à ${decimals} ${plural(decimals, 'décimale', 'décimales')}`
+      : `au pas de ${step.toLocaleString('fr')}`
+  return `Arrondi ${ROUNDING_MODE_FR[mode]}, ${precision}`
+}
+
+function roundingEn({ mode, step, decimals }: RoundingParams): string {
+  const precision =
+    step === null
+      ? `${decimals} ${pluralEn(decimals, 'decimal', 'decimals')}`
+      : `step ${step.toLocaleString('en')}`
+  return `Rounded ${ROUNDING_MODE_EN[mode]}, ${precision}`
+}
 
 const fr: Dictionary<UiMessageParams> = {
   app_title: () => 'Questionator Z-4000 Hyperdrive',
@@ -71,6 +132,7 @@ const fr: Dictionary<UiMessageParams> = {
   empty_body: () =>
     "Créez une session à partir d'une liste d'étudiants et d'un fichier de configuration, ou importez un backup.",
   empty_example_link: () => "Télécharger la config d'exemple",
+  empty_students_example_link: () => "Télécharger la liste d'étudiants d'exemple",
   card_examiner: ({ name }) => `Jury : ${name}`,
   card_updated: ({ date }) => `Modifiée le ${date}`,
   card_progress: ({ done, absent, remaining }) =>
@@ -103,6 +165,36 @@ const fr: Dictionary<UiMessageParams> = {
   import_conflict_body: ({ existing, date, imported }) =>
     `Une session « ${existing} » (modifiée le ${date}) porte le même identifiant. La remplacer par « ${imported} » ?`,
   import_replace: () => 'Remplacer',
+  create_title: () => 'Nouvelle session',
+  create_students_label: () => "Liste d'étudiants (CSV)",
+  create_config_label: () => 'Configuration (JSON)',
+  create_choose_file: () => 'Choisir un fichier',
+  create_replace_file: () => 'Remplacer',
+  create_drop_hint: () => 'ou déposez-le ici',
+  create_file_status_ok: () => 'Fichier valide',
+  create_file_status_warnings: () => 'Fichier valide, avec avertissements',
+  create_file_status_errors: () => 'Fichier invalide',
+  create_file_status_reading: () => 'Lecture en cours…',
+  create_students_example_link: () => "Télécharger la liste d'exemple",
+  create_validator_load_error: () => "La validation n'a pas pu démarrer. Rechargez la page.",
+  create_submit: () => 'Créer la session',
+  create_write_error: () => 'La création a échoué. Réessayez.',
+  create_preview_title: () => 'Aperçu',
+  create_preview_empty: () =>
+    "Déposez une liste d'étudiants et une configuration pour voir l'aperçu.",
+  preview_students_count: ({ count }) => `${count} ${plural(count, 'étudiant', 'étudiants')}`,
+  preview_students_list: () => 'Voir la liste',
+  preview_line: ({ line, message }) => `Ligne ${line} : ${message}`,
+  preview_config_title: () => 'Configuration',
+  preview_subject: ({ subject }) => `Matière : ${subject}`,
+  preview_cohort: ({ cohort }) => `Promotion : ${cohort}`,
+  preview_category: ({ label, questions, scale }) =>
+    `${label} : ${questions} ${plural(questions, 'question', 'questions')}, barème ${scale}`,
+  preview_scoring: ({ questionsPerStudent, maxRawScore, finalScale }) =>
+    `${questionsPerStudent} ${plural(questionsPerStudent, 'question', 'questions')} par étudiant · note brute sur ${maxRawScore} → note finale sur ${finalScale}`,
+  preview_rounding: roundingFr,
+  preview_skips_disabled: () => 'Skips désactivés',
+  preview_skips: ({ max }) => `Skips autorisés : ${max} par étudiant`,
 }
 
 const en: Dictionary<UiMessageParams> = {
@@ -124,6 +216,7 @@ const en: Dictionary<UiMessageParams> = {
   empty_body: () =>
     'Create a session from a student list and a configuration file, or import a backup.',
   empty_example_link: () => 'Download the example config',
+  empty_students_example_link: () => 'Download the example student list',
   card_examiner: ({ name }) => `Examiner: ${name}`,
   card_updated: ({ date }) => `Updated ${date}`,
   card_progress: ({ done, absent, remaining }) =>
@@ -155,6 +248,35 @@ const en: Dictionary<UiMessageParams> = {
   import_conflict_body: ({ existing, date, imported }) =>
     `A session "${existing}" (updated ${date}) has the same identifier. Replace it with "${imported}"?`,
   import_replace: () => 'Replace',
+  create_title: () => 'New session',
+  create_students_label: () => 'Student list (CSV)',
+  create_config_label: () => 'Configuration (JSON)',
+  create_choose_file: () => 'Choose a file',
+  create_replace_file: () => 'Replace',
+  create_drop_hint: () => 'or drop it here',
+  create_file_status_ok: () => 'Valid file',
+  create_file_status_warnings: () => 'Valid file, with warnings',
+  create_file_status_errors: () => 'Invalid file',
+  create_file_status_reading: () => 'Reading…',
+  create_students_example_link: () => 'Download the example list',
+  create_validator_load_error: () => 'Validation could not start. Reload the page.',
+  create_submit: () => 'Create session',
+  create_write_error: () => 'Creation failed. Please try again.',
+  create_preview_title: () => 'Preview',
+  create_preview_empty: () => 'Drop a student list and a configuration to see the preview.',
+  preview_students_count: ({ count }) => `${count} ${pluralEn(count, 'student', 'students')}`,
+  preview_students_list: () => 'Show the list',
+  preview_line: ({ line, message }) => `Line ${line}: ${message}`,
+  preview_config_title: () => 'Configuration',
+  preview_subject: ({ subject }) => `Subject: ${subject}`,
+  preview_cohort: ({ cohort }) => `Cohort: ${cohort}`,
+  preview_category: ({ label, questions, scale }) =>
+    `${label}: ${questions} ${pluralEn(questions, 'question', 'questions')}, scale ${scale}`,
+  preview_scoring: ({ questionsPerStudent, maxRawScore, finalScale }) =>
+    `${questionsPerStudent} ${pluralEn(questionsPerStudent, 'question', 'questions')} per student · raw score out of ${maxRawScore} → final score out of ${finalScale}`,
+  preview_rounding: roundingEn,
+  preview_skips_disabled: () => 'Skips disabled',
+  preview_skips: ({ max }) => `Skips allowed: ${max} per student`,
 }
 
 export const UI_MESSAGES: Record<Locale, Dictionary<UiMessageParams>> = { fr, en }

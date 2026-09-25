@@ -807,3 +807,76 @@ rapport avec le code du projet. oxlint l'ignore déjà (`ignorePatterns`) pour l
 
 **Reporté dans** : `.sonarcloud.properties`, `docs/CONVENTIONS.md`. Impacte toutes les
 features qui ajoutent des composants shadcn.
+
+## D54 — Création de session sur `#/new`, pas `#/session/new` (2026-09-25)
+
+**Question** : le ticket F06 plaçait l'écran en `/session/new`, alors que F05 a posé la route
+provisoire `/new` (D50) et que les liens de l'accueil y mènent.
+
+**Décision** : l'écran de création reste sur `/new`.
+
+**Pourquoi** : les liens de F05 sont définitifs ; une route fixe `/session/new` à côté de
+`/session/$sessionId` rendrait inaccessible une session d'`id` « new ».
+
+**Reporté dans** : `PRODUCT.md` F06, spec F06. Impacte F06.
+
+## D55 — En-tête CSV cherché dans les 5 premières lignes non vides (corrige D25) (2026-09-25)
+
+**Question** : D25 (« première ligne contenant les deux ») et le ticket F06 (« la première
+ligne si elle contient les deux ») divergeaient ; les exports d'ENT ou d'Excel commencent
+souvent par une ligne de titre.
+
+**Décision** : l'en-tête est la première des 5 premières lignes non vides qui contient une
+colonne nom et une colonne prénom. Les lignes qui la précèdent sont ignorées avec un
+avertissement unique (`preamble_skipped`). Sans en-tête, toutes les lignes sont des données,
+dans l'ordre nom puis prénom.
+
+**Pourquoi** : couvre les exports avec préambule sans risquer de prendre une ligne
+d'étudiant au milieu du fichier pour un en-tête ; rien n'est ignoré en silence.
+
+**Reporté dans** : `PRODUCT.md` §6.1, spec F06. Impacte F06.
+
+## D56 — Liste d'étudiants d'exemple publiée (2026-09-25)
+
+**Décision** : `examples/students.example.csv` (UTF-8 avec BOM, `;`, en-tête `Nom;Prénom`,
+noms fictifs accentués) est publié à la racine du site par le plugin Vite qui publie déjà
+la config d'exemple. Liens depuis l'écran de création, l'état vide de l'accueil et le README.
+Un test garantit qu'il se lit sans aucune issue.
+
+**Pourquoi** : symétrie avec la config d'exemple ; montre d'un coup le format attendu,
+calqué sur l'export Excel français le plus courant.
+
+**Reporté dans** : `PRODUCT.md` F06, spec F06. Impacte F05 (état vide), F06.
+
+## D57 — Écran de création : deux colonnes, nom prérempli une seule fois, persistance demandée à chaque création (2026-09-25)
+
+**Décision** :
+- Formulaire à gauche (deux zones de dépôt, nom, examinateur, « Créer »), aperçu à droite ;
+  empilés sur petit écran.
+- Nom prérempli `<exam.title> — <date longue localisée>` dès qu'une config valide est
+  chargée, tant que l'utilisateur n'a pas touché au champ ; toute saisie manuelle arrête
+  le préremplissage.
+- `requestPersistentStorage()` appelée à chaque création (idempotente) plutôt qu'à la
+  « première » session ; un refus ne bloque pas la création.
+
+**Pourquoi** : tout visible d'un coup sur un portable ; une config changée après coup ne
+doit pas écraser un nom choisi ; « première session » n'a pas de définition fiable (base
+vidée, import de backup).
+
+**Reporté dans** : spec F06. Impacte F06.
+
+## D58 — CSV en Windows-1252 lu avec un avertissement, pas refusé (2026-09-25)
+
+**Question** : l'export « CSV (séparateur : point-virgule) » d'Excel en français, le plus
+courant, est en Windows-1252 ; lu comme de l'UTF-8, il donnait des noms corrompus et un
+faux étudiant pour l'en-tête, sans aucun message (§6.1 ne prévoyait que l'UTF-8).
+
+**Décision** : décodage en UTF-8 strict (`TextDecoder` `fatal`) ; en cas d'échec, repli sur
+Windows-1252 et avertissement `legacy_encoding` dans l'aperçu (« vérifiez les accents »).
+La config JSON reste en UTF-8.
+
+**Pourquoi** : refuser le fichier renverrait l'enseignant vers une manipulation d'Excel
+(« CSV UTF-8 ») pour un cas qu'on sait lire ; l'avertissement couvre le rare fichier dans un
+autre encodage 8 bits.
+
+**Reporté dans** : `PRODUCT.md` §6.1, spec F06 (revue finale). Impacte F06.

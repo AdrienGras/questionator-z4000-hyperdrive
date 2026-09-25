@@ -8,14 +8,16 @@ import {
   matchConfigAsset,
   renderConfigAssets,
   SCHEMA_FILE_NAME,
+  STUDENTS_EXAMPLE_FILE_NAME,
 } from './config-schema-plugin'
 
 const BASE = '/questionator-z4000-hyperdrive/'
 
 describe('matchConfigAsset', () => {
-  test('reconnaît les deux fichiers sous la base, avec ou sans query', () => {
+  test('reconnaît les trois fichiers sous la base, avec ou sans query', () => {
     expect(matchConfigAsset(`${BASE}config.schema.json`, BASE)).toBe(SCHEMA_FILE_NAME)
     expect(matchConfigAsset(`${BASE}config.example.json?t=1`, BASE)).toBe(EXAMPLE_FILE_NAME)
+    expect(matchConfigAsset(`${BASE}students.example.csv`, BASE)).toBe(STUDENTS_EXAMPLE_FILE_NAME)
   })
 
   test('ignore les autres chemins', () => {
@@ -27,7 +29,7 @@ describe('matchConfigAsset', () => {
 
 describe('renderConfigAssets', () => {
   test('génère le schéma via runnerImport et recopie l’exemple', async () => {
-    const { schema, example, watchFiles } = await renderConfigAssets()
+    const { schema, example, studentsExample, watchFiles } = await renderConfigAssets()
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- schema généré par buildConfigJsonSchema() puis reparsé : on affirme juste la forme qu'on vient d'écrire.
     const parsed = JSON.parse(schema) as { $id: string }
     expect(parsed.$id).toBe(
@@ -38,11 +40,17 @@ describe('renderConfigAssets', () => {
       'utf8',
     )
     expect(example).toBe(exampleFile)
+    const studentsExampleFile = await readFile(
+      new URL('../examples/students.example.csv', import.meta.url),
+      'utf8',
+    )
+    expect(studentsExample).toBe(studentsExampleFile)
     expect(watchFiles).toEqual(
       expect.arrayContaining([
         fileURLToPath(new URL('../src/config/json-schema.ts', import.meta.url)),
         fileURLToPath(new URL('../src/config/schema.ts', import.meta.url)),
         fileURLToPath(new URL('../examples/config.example.json', import.meta.url)),
+        fileURLToPath(new URL('../examples/students.example.csv', import.meta.url)),
       ]),
     )
   }, 30_000)
@@ -77,13 +85,14 @@ describe('configSchemaPlugin.buildStart', () => {
     expect(await watchedFilesFor('serve')).toEqual([])
   })
 
-  test('en build : surveille le module de schéma, ses dépendances et l’exemple', async () => {
+  test('en build : surveille le module de schéma, ses dépendances et les exemples', async () => {
     const watched = await watchedFilesFor('build')
     expect(watched).toEqual(
       expect.arrayContaining([
         fileURLToPath(new URL('../src/config/json-schema.ts', import.meta.url)),
         fileURLToPath(new URL('../src/config/schema.ts', import.meta.url)),
         fileURLToPath(new URL('../examples/config.example.json', import.meta.url)),
+        fileURLToPath(new URL('../examples/students.example.csv', import.meta.url)),
       ]),
     )
   }, 30_000)

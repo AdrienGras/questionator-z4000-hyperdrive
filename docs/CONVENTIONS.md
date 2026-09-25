@@ -204,7 +204,7 @@ export function SessionToolbar({ ui, disabled, onExport }: SessionToolbarProps) 
 
 - `useUi()` (`@/i18n/use-ui`) une seule fois par écran, au composant de page ; les sous-composants reçoivent `ui: Ui` en prop. Langue : celle du navigateur hors session (D51) ; F07 ajoutera `config.locale`.
 - Toute chaîne visible, `aria-label` compris, passe par `text(clé, params)` ; nouvelle clé = ajout dans `UiMessageParams` et dans les dictionnaires `fr` **et** `en` de `src/i18n/ui-messages.ts` (le test échoue sinon).
-- Props en `Readonly<{…}>` (SonarQube S6759) ; jamais `const [x] = useState(...)` sans le setter (S6754) : `useMemo` ou une constante de module.
+- Props en `Readonly<{…}>` (SonarQube S6759) ; jamais `const [x] = useState(...)` sans le setter, et le setter nommé `setX` (S6754 signale aussi `[name, setNameValue]`) : `useMemo` ou une constante de module.
 - Tests : `src/test/setup.ts` force `navigator.languages = ['fr-FR']` ; un test en anglais redéfinit la propriété puis la restaure. Monter un écran routé via `createAppRouter(createMemoryHistory(...))` (voir `src/test/render-home.tsx`).
 
 ## Dialogue de saisie — squelette
@@ -244,3 +244,36 @@ try {
 - Le validateur de config (liste des 6 220 icônes Tabler comprise) pèse ~200 kB : l'écran qui l'utilise ponctuellement le charge en `import()` dynamique, avec un état d'erreur si le chunk ne se charge pas.
 - Importer les autres modules du même dossier **par chemin direct** (`@/backup/serialize`, `@/backup/messages`…) : passer par un `index.ts` qui réexporte le module lourd le remet dans le chunk principal.
 - `pnpm build` ne doit afficher aucun avertissement de taille de chunk.
+
+## Fichier déposé et lu — squelette
+
+```tsx
+<FileDropField
+  ui={ui}
+  label={text('create_students_label', {})}
+  accept=".csv,text/csv"
+  fileName={slot.kind === 'empty' ? undefined : slot.fileName}
+  status={slotStatus(slot)}
+  onFile={(file) => void form.setStudentsFile(file)}
+  disabled={form.submitting}
+/>
+```
+
+```ts
+// état d'un emplacement (src/create/use-create-form.ts)
+type FileSlot<T> =
+  | { kind: 'empty' }
+  | { kind: 'reading'; fileName: string }
+  | { kind: 'read-error'; fileName: string }
+  | { kind: 'load-error'; fileName: string }
+  | { kind: 'loaded'; fileName: string; result: T }
+```
+
+### Règles tacites
+
+- Un compteur de séquence par emplacement : seule la dernière lecture lancée écrit son résultat (un fichier lent ne remplace jamais un fichier plus récent).
+- Une valeur lue après un `await` (drapeau « saisi à la main », verrou d'envoi) vit dans un `useRef`, pas dans un état capturé par la fermeture.
+- `dragover` appelle toujours `preventDefault()` quand des fichiers sont survolés, même désactivé (`dropEffect = 'none'`), et la page entière pose la même garde : sinon le navigateur ouvre le fichier et le formulaire est perdu.
+- Statut annoncé par une région `aria-live="polite"` toujours montée (`reading` compris) ; la zone est un `<fieldset>` + `<legend>` (rôle `group` nommé par le libellé visible).
+- CSV : lire les octets et décoder avec `decodeCsvBytes` (UTF-8 strict, repli Windows-1252, D58), jamais `file.text()`.
+- Référence : `src/create/FileDropField.tsx`, `src/create/use-create-form.ts`, `src/create/slot-status.ts`.
