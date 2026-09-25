@@ -792,3 +792,18 @@ petit écran ; un passage entamé n'est pas terminé ; l'examinateur confirme la
 suppression une fois le fichier en main.
 
 **Reporté dans** : spec F05. Impacte F05.
+
+## D53 — Composants shadcn vendus exclus de SonarQube (2026-09-25)
+
+**Question** : SonarQube a remonté une issue (S6853) sur `src/components/ui/label.tsx`, code
+vendu par le CLI shadcn : patcher le composant, ou l'exclure de l'analyse ?
+
+**Décision** : `src/components/ui/**` est ajouté à `sonar.exclusions` dans
+`.sonarcloud.properties`. Le composant `Label` garde son code d'origine.
+
+**Pourquoi** : ce code est réécrit à chaque `shadcn add --overwrite` ; un correctif local
+serait perdu en silence et chaque nouvel ajout pourrait remonter de nouvelles issues sans
+rapport avec le code du projet. oxlint l'ignore déjà (`ignorePatterns`) pour la même raison.
+
+**Reporté dans** : `.sonarcloud.properties`, `docs/CONVENTIONS.md`. Impacte toutes les
+features qui ajoutent des composants shadcn.
