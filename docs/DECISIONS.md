@@ -591,6 +591,9 @@ consommateurs de trier par `order` ?
 
 **Décision** : `normalize` trie les catégories par `order` puis par position dans le
 tableau, et réécrit `order` en 1…n. Deux `order` égaux ne sont pas une erreur.
+Cas mixte (certaines catégories avec `order`, d'autres sans) : une catégorie sans
+`order` prend sa position 1-based comme clé, dans le même espace que les valeurs
+explicites ; à clé égale, la position départage. Comportement figé par un test.
 
 **Pourquoi** : F09, le side panel et les exports lisent un ordre unique sans retrier.
 
