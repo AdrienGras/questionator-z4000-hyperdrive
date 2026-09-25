@@ -20,6 +20,35 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-25 — F03 implémenté : moteur de notation
+
+**Dernière chose faite** : F03 (#3) implémenté sur `feat/f03-scoring` en subagent-driven
+development : spec + D42–D44, plan en 7 tâches, chaque tâche revue sans tour de correction,
+revue finale de branche (« with fixes ») puis une vague de 4 corrections (`-0`, accents des
+tests, exhaustivité `never`, `.vitest/` ignoré). `src/scoring/` : millièmes entiers
+(`Milli`), fraction exacte, arrondi entier au pas (vérifié contre un oracle BigInt),
+`computeScores` (null tant que non terminé), `studentStatus`, `exportedFinal`,
+`isValidAdjustment`, `formatScore` ; types `Session`/`Student`/`Attempt` dans
+`src/domain/types.ts`. F02 réutilise `milli.ts` et rejette toute valeur de notation au-delà
+de 10 000 (`scoring_value_too_large`, D44). `pnpm check` vert (205 tests). Mémoire à jour
+(INDEX, QUIRKS ×2, BACKLOG, CONVENTIONS, PRODUCT §5/§6.2).
+
+**Trucs en suspens** : branche non poussée ; PR brouillon à ouvrir (`Closes #3`), puis
+`.claude/scripts/sonar-check.sh --pr <n> --wait` avant « Ready for review ». Les pieds de
+commit des tâches créditent le modèle réel de chaque sous-agent (Haiku 4.5, Sonnet 5), pas
+Opus : à réécrire par rebase si on veut l'uniformité. Toujours ouvert : quality gate Sonar
+obligatoire sur `main` ?
+
+**Prochaine chose à creuser** : F04 (persistance Dexie des types de `src/domain/`, un document
+par session, D22) ou F06 (création de session, premier consommateur de `validateConfig`).
+
+**Notes pour future Claude** : aucune arithmétique de note hors `src/scoring/` : passer par
+`computeScores` puis `formatScore` (`raw` pour la brute, `final` pour convertie, finale et
+ajustement) — voir CONVENTIONS « Calcul de note ». `toMilli` lève hors des entiers sûrs,
+`roundToMilli` (règles F02) jamais. Tests ciblés : `./node_modules/.bin/vitest run <fichier>`,
+pas `pnpm vitest` (hook RTK, voir QUIRKS). Reporté en BACKLOG : affichage d'un `finalScale`
+à plus de décimales que le pas, validation des données persistées.
+
 ## 2026-09-25 — F02 implémenté : schéma de config et validation
 
 **Dernière chose faite** : F02 (#2) livré, PR #21 mergée (`7f5a3ce`) ; Pages sert

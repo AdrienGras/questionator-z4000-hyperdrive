@@ -20,7 +20,7 @@ Des fonctions pures qui, à partir d'un étudiant et d'une `NormalizedConfig` (F
 ```
 src/domain/types.ts        Session, Student, Attempt (§7) — posés ici, persistés par F04
 src/scoring/
-  milli.ts                 Milli, asMilli, roundToMilli, toMilli, fromMilli, assertSafeInteger,
+  milli.ts                 Milli, isMilli, asMilli, roundToMilli, toMilli, fromMilli, assertSafeInteger,
                            hasAtMostThreeDecimals, MAX_SCORING_VALUE
   fraction.ts              Fraction { num, den }, fraction(num, den)
   rounding.ts              roundToStep(value, stepMilli, mode), stepMilli(config)

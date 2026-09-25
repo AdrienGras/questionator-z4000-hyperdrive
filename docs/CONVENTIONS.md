@@ -132,3 +132,23 @@ configError('untrimmed_id', ['categories', c, 'id'], { id: category.id })
 - Un nouveau champ `z.int()` s'ajoute aussi à `INTEGER_FIELDS` (`from-zod.ts`).
 - Les défauts de §6.2 vivent dans `defaults.ts`, lus par les règles et la normalisation ; le schéma n'a aucun `.default()`.
 - **Valeurs CSS de la config (thème, couleurs) : uniquement via `element.style.setProperty(nom, valeur)`**, jamais concaténées dans du texte CSS ou une balise `<style>`. Le filtre de forme (D15) laisse passer `/*`, `\` et `url(` : il n'est sûr qu'avec `setProperty`.
+
+## Calcul de note — squelette
+
+Toute note se calcule dans `src/scoring/`, en millièmes entiers (`Milli`, D01). Les vues et l'export ne font jamais d'arithmétique sur des décimaux : ils appellent le moteur, puis `formatScore` (affichage) ou `fromMilli` (export).
+
+```ts
+import { computeScores, formatScore, studentStatus } from '../scoring'
+
+const scores = computeScores(student, session.config) // converted/final null si non terminé (D21)
+const shown = scores.final === null ? '—' : formatScore(scores.final, 'final', session.config, locale)
+const cumulative = formatScore(scores.raw, 'raw', session.config, locale) // brute : jusqu'à 3 décimales (D42)
+```
+
+### Règles tacites
+
+- `src/scoring/` et `src/domain/` n'utilisent que des **imports relatifs** : `src/config/rules.ts` importe `src/scoring/milli.ts`, chargé par le plugin Vite sans alias.
+- Décimal → millièmes : `toMilli` dans le moteur (lève hors des entiers sûrs), `roundToMilli` dans les règles F02 (ne lève jamais : une config absurde produit des issues). Millièmes → décimal : `fromMilli` seulement.
+- Fabriquer un `Milli` : `asMilli(n)` (garde de type), jamais `n as Milli`.
+- Une donnée corrompue (attempt `scored` sans `score`) lève une `Error` ; une saisie utilisateur passe d'abord par un validateur qui ne lève pas (`isValidAdjustment`).
+- Tests : fixtures `makeConfig(scoring, absent)` et `makeStudent(attempts, overrides)` de `src/test/student-fixtures.ts` (nombre → attempt noté, `'pending'`, `{ skipped }`).
