@@ -680,7 +680,7 @@ un état observable au lieu d'erreurs silencieuses en console.
 
 **Reporté dans** : spec F04. Impacte F04 et la feature PWA.
 
-## D46 — Contrat d'écriture : `createSession` refuse un doublon, mutator synchrone sur une copie (2026-09-25)
+## D46 — Contrat d'écriture : `createSession` refuse un doublon, mutator synchrone sur la session fraîche (2026-09-25)
 
 **Question** : forme exacte des écritures de F04 (création, import, mutations).
 
@@ -688,13 +688,14 @@ un état observable au lieu d'erreurs silencieuses en console.
 - `createSession(session)` reçoit une `Session` complète (construite par F06) et rejette
   `SessionExistsError` si l'`id` existe ; `putSession` écrase (import F05, après
   confirmation).
-- `updateSession(id, mutator)` : mutator synchrone `(Session) => Session`, appelé sur une
-  copie (`structuredClone`) de la session fraîchement lue dans la transaction ; un
+- `updateSession(id, mutator)` : mutator synchrone `(Session) => Session`, appelé sur la
+  session fraîchement lue dans la transaction (déjà une copie : IndexedDB clone à la
+  lecture, donc pas de `structuredClone`) ; un
   changement d'`id` est refusé ; `updatedAt` posé par F04. Les contrôles métier se font
   dans le mutator, jamais sur l'état affiché.
 
 **Pourquoi** : un import ne peut pas écraser une session par accident ; deux onglets
-examinateur appliquent leurs contrôles sur l'état réel ; une mutation en place ne peut
-pas corrompre la valeur lue.
+examinateur appliquent leurs contrôles sur l'état réel ; un mutator peut modifier en
+place sans effet de bord.
 
 **Reporté dans** : spec F04. Impacte F05, F06, F09–F13.

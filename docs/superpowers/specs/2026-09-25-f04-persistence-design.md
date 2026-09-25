@@ -67,11 +67,11 @@ export const db = createDb('questionator')
 `updateSession(id: string, mutator: (session: Session) => Session): Promise<Session>`, dans une seule transaction `db.transaction('rw', db.sessions, …)` :
 
 1. Lire la session ; absente → `SessionNotFoundError`.
-2. `next = mutator(structuredClone(current))` : le clone protège la valeur lue d'une mutation en place.
+2. `next = mutator(current)` : `current` est déjà une copie fraîche (IndexedDB clone chaque valeur à la lecture), le mutator peut donc la modifier en place ou renvoyer un nouvel objet sans risque.
 3. `next.id !== id` → `Error` (l'annulation de la transaction ne laisse rien écrit).
 4. `next.updatedAt = new Date().toISOString()`, `put(next)`, renvoyer `next`.
 
-Le mutator est **synchrone et pur** : il reçoit toujours la version fraîche lue dans la transaction, et c'est là qu'une feature refait ses contrôles métier (question déjà tirée, étudiant déjà terminé…), jamais sur l'état affiché. Un mutator qui lève annule la transaction et l'erreur remonte telle quelle. Le typage refuse un mutator qui renvoie une `Promise` : un `await` étranger à Dexie fermerait la transaction.
+Le mutator est **synchrone** : il reçoit toujours la version fraîche lue dans la transaction, et c'est là qu'une feature refait ses contrôles métier (question déjà tirée, étudiant déjà terminé…), jamais sur l'état affiché. Un mutator qui lève annule la transaction et l'erreur remonte telle quelle. Le typage refuse un mutator qui renvoie une `Promise` : un `await` étranger à Dexie fermerait la transaction.
 
 `SessionNotFoundError` et `SessionExistsError` (`errors.ts`) étendent `Error`, portent l'`id` et se reconnaissent par `instanceof`.
 
@@ -100,7 +100,7 @@ function usePersistenceStatus(): PersistenceStatus | undefined
 Chaque fichier de test de `src/db/` commence par `import 'fake-indexeddb/auto'`. Les tests sur le singleton vident la table dans un `beforeEach` ; les tests de cycle de vie utilisent des instances `createDb(nom)` dédiées. Constructeur de `Session` de test dans `src/test/session-fixtures.ts`.
 
 - **CRUD** : création puis lecture ; `SessionExistsError` sur doublon ; `putSession` écrase ; `deleteSession` (y compris absente) ; `getSession` absente → `null` ; tri de `listSessions`.
-- **`updateSession`** : applique le mutator et renvoie la session écrite ; `updatedAt` avance (horloge simulée) ; `SessionNotFoundError` ; mutator qui lève → base inchangée et erreur propagée ; changement d'`id` refusé, base inchangée ; mutation en place dans le mutator sans effet sur la valeur d'origine ; **deux appels concurrents** (`Promise.all`, chacun ajoute un étudiant) → les deux étudiants présents.
+- **`updateSession`** : applique le mutator et renvoie la session écrite ; `updatedAt` avance (horloge simulée) ; `SessionNotFoundError` ; mutator qui lève → base inchangée et erreur propagée ; changement d'`id` refusé, base inchangée ; **deux appels concurrents** (`Promise.all`, chacun ajoute un étudiant) → les deux étudiants présents.
 - **Hooks** (`renderHook`, `waitFor`) : `useSessions` `undefined` → liste, puis mise à jour après une écriture ; `useSession` `undefined` → session → `null` après suppression ; `useDbStatus` passe à `'outdated'`.
 - **`versionchange`** : instance `createDb('t')` ouverte, puis `new Dexie('t').version(2)` ouverte → la première passe à `'outdated'`, `isOpen()` faux, ses abonnés sont notifiés, l'ouverture en version 2 aboutit ; une écriture sur l'instance fermée rejette.
 - **Persistance** (`vi.stubGlobal('navigator', …)`) : persistée, `best-effort`, API absente → `'unsupported'` et `requestPersistentStorage()` → `false` ; une demande acceptée fait passer le hook de `'best-effort'` à `'persisted'`.
@@ -108,7 +108,7 @@ Chaque fichier de test de `src/db/` commence par `import 'fake-indexeddb/auto'`.
 ## Vérification manuelle (à consigner dans la PR)
 
 1. `pnpm dev`, ouvrir l'app dans une fenêtre A, puis une fenêtre B via `window.open(location.href)` depuis A.
-2. Dans B : `__questionatorDb.constructor.liveQuery(() => __questionatorDb.sessions.toArray()).subscribe(console.log)` (`liveQuery` est une statique de `Dexie`, héritée par `QuestionatorDb` ; à vérifier à l'implémentation, sinon exposer aussi `liveQuery` en dev).
+2. Dans B : `__questionatorDb.constructor.liveQuery(() => __questionatorDb.sessions.toArray()).subscribe(console.log)` (`liveQuery` est une statique de `Dexie`, héritée par `QuestionatorDb` : vérifié).
 3. Dans A : écrire une session via `__questionatorDb.sessions.put({...})`.
 4. Constater le log dans B sans rechargement. En cas d'échec : F14 ajoute une notification BroadcastChannel (D12).
 5. Fermer et rouvrir le navigateur : la session est toujours là.
