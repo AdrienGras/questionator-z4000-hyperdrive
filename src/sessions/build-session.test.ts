@@ -32,7 +32,7 @@ function build(overrides: Partial<Parameters<typeof buildSession>[0]> = {}) {
 }
 
 describe('buildSession', () => {
-  test("session complete, etudiants dans l'ordre du CSV", () => {
+  test("session complète, étudiants dans l'ordre du CSV", () => {
     const config = makeConfig()
     expect(build({ config })).toStrictEqual({
       id: 'id-1',
@@ -67,22 +67,22 @@ describe('buildSession', () => {
     })
   })
 
-  test("config figee = l'objet normalise fourni (meme reference)", () => {
+  test("config figée = l'objet normalisé fourni (même référence)", () => {
     const config = makeConfig()
     expect(build({ config }).config).toBe(config)
   })
 
-  test('examinateur vide ou blanc : cle absente', () => {
+  test('examinateur vide ou blanc : clé absente', () => {
     expect('examiner' in build({ examiner: '   ' })).toBe(false)
   })
 
-  test('valide pour le schema et les regles croisees du backup', () => {
+  test('valide pour le schéma et les règles croisées du backup', () => {
     const session = build()
     expect(SessionSchema.safeParse(session).success).toBe(true)
     expect(checkSessionRules(session)).toEqual([])
   })
 
-  test('sans etudiant : leve', () => {
+  test('sans étudiant : lève', () => {
     expect(() => build({ students: [] })).toThrow('Une session exige au moins un étudiant.')
   })
 })
