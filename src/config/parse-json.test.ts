@@ -57,19 +57,20 @@ describe('parseJson', () => {
 describe('locateFromEngineMessage', () => {
   const text = '{\n  "a": 1,\n  x\n}'
 
-  test('message V8 avec ligne et colonne', () => {
-    const message = 'Expected double-quoted property name in JSON at position 14 (line 3 column 3)'
-    expect(locateFromEngineMessage(message, text)).toEqual({ line: 3, column: 3 })
-  })
-
-  test('message V8 avec la position seule → ligne et colonne calculées', () => {
-    const message = 'Expected double-quoted property name in JSON at position 14'
-    expect(locateFromEngineMessage(message, text)).toEqual({ line: 3, column: 3 })
-  })
-
-  test('message Firefox', () => {
-    const message =
-      'JSON.parse: expected double-quoted property name at line 3 column 3 of the JSON data'
+  test.each([
+    [
+      'message V8 avec ligne et colonne',
+      'Expected double-quoted property name in JSON at position 14 (line 3 column 3)',
+    ],
+    [
+      'message V8 avec la position seule → ligne et colonne calculées',
+      'Expected double-quoted property name in JSON at position 14',
+    ],
+    [
+      'message Firefox',
+      'JSON.parse: expected double-quoted property name at line 3 column 3 of the JSON data',
+    ],
+  ])('%s', (_description, message) => {
     expect(locateFromEngineMessage(message, text)).toEqual({ line: 3, column: 3 })
   })
 

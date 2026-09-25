@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { deriveTitle, MAX_TITLE_LENGTH } from './derive-title'
+import { deriveTitle, MAX_TITLE_LENGTH, stripLinksAndImages } from './derive-title'
 
 describe('deriveTitle', () => {
   test('retire le markdown en gardant le texte du code en ligne', () => {
@@ -59,5 +59,20 @@ describe('deriveTitle', () => {
     expect(elapsed).toBeLessThan(200)
     expect(title.length).toBeGreaterThan(0)
     expect(title.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH)
+  })
+
+  // deriveTitle borne chaque ligne à 500 caractères (MAX_LINE_LENGTH) avant d'appliquer les
+  // regex, ce qui masquerait un retour arrière en O(n²) sur des crochets non appariés : on
+  // appelle donc directement le helper, sans passer par la troncature (typescript:S8786).
+  test('stripLinksAndImages reste linéaire sur des crochets non appariés ou répétés', () => {
+    const unmatchedBrackets = '['.repeat(20_000)
+    const start1 = performance.now()
+    stripLinksAndImages(unmatchedBrackets)
+    expect(performance.now() - start1).toBeLessThan(200)
+
+    const repeatedLinks = '[a]('.repeat(5_000)
+    const start2 = performance.now()
+    stripLinksAndImages(repeatedLinks)
+    expect(performance.now() - start2).toBeLessThan(200)
   })
 })
