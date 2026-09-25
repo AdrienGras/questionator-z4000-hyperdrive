@@ -208,7 +208,7 @@ describe('écran de création', () => {
       target: { value: 'Mme Durand' },
     })
     fireEvent.click(submitButton())
-    expect(await screen.findByRole('heading', { name: 'Bientôt disponible' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Oral de test' })).toBeInTheDocument()
     const [session] = await db.sessions.toArray()
     if (session === undefined) throw new Error('session absente de la base')
     expect(session.students.map((s) => `${s.lastName} ${s.firstName}`)).toEqual([
@@ -224,7 +224,7 @@ describe('écran de création', () => {
   test('une autre config chargée ensuite ne modifie pas la session créée', async () => {
     const first = await renderFilled()
     fireEvent.click(submitButton())
-    await screen.findByRole('heading', { name: 'Bientôt disponible' })
+    await screen.findByRole('heading', { name: 'Oral de test' })
     const [before] = await db.sessions.toArray()
     first.unmount()
 

@@ -15,6 +15,14 @@ export type UiMessageParams = {
   db_outdated: NoParams
   db_reload: NoParams
   db_unavailable: NoParams
+  color_mode_label: { mode: string }
+  color_mode_light: NoParams
+  color_mode_dark: NoParams
+  color_mode_system: NoParams
+  session_loading: NoParams
+  session_not_found: NoParams
+  session_categories: NoParams
+  present_waiting: NoParams
   empty_title: NoParams
   empty_body: NoParams
   empty_example_link: NoParams
@@ -128,6 +136,14 @@ const fr: Dictionary<UiMessageParams> = {
   db_reload: () => 'Recharger',
   db_unavailable: () =>
     'Le stockage local est indisponible (navigation privée ou cookies bloqués ?). Les sessions ne peuvent pas être enregistrées.',
+  color_mode_label: ({ mode }) => `Mode d'affichage : ${mode.toLocaleLowerCase('fr')}`,
+  color_mode_light: () => 'Clair',
+  color_mode_dark: () => 'Sombre',
+  color_mode_system: () => 'Système',
+  session_loading: () => 'Chargement de la session…',
+  session_not_found: () => 'Session introuvable',
+  session_categories: () => 'Catégories',
+  present_waiting: () => "L'épreuve va bientôt commencer.",
   empty_title: () => 'Aucune session',
   empty_body: () =>
     "Créez une session à partir d'une liste d'étudiants et d'un fichier de configuration, ou importez un backup.",
@@ -212,6 +228,14 @@ const en: Dictionary<UiMessageParams> = {
   db_reload: () => 'Reload',
   db_unavailable: () =>
     'Local storage is unavailable (private browsing or blocked cookies?). Sessions cannot be saved.',
+  color_mode_label: ({ mode }) => `Display mode: ${mode.toLocaleLowerCase('en')}`,
+  color_mode_light: () => 'Light',
+  color_mode_dark: () => 'Dark',
+  color_mode_system: () => 'System',
+  session_loading: () => 'Loading session…',
+  session_not_found: () => 'Session not found',
+  session_categories: () => 'Categories',
+  present_waiting: () => 'The exam will start soon.',
   empty_title: () => 'No sessions yet',
   empty_body: () =>
     'Create a session from a student list and a configuration file, or import a backup.',

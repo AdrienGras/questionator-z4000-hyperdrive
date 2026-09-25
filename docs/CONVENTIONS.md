@@ -325,3 +325,38 @@ type FileSlot<T> =
 - Statut annoncé par une région `aria-live="polite"` toujours montée (`reading` compris) ; la zone est un `<fieldset>` + `<legend>` (rôle `group` nommé par le libellé visible).
 - CSV : lire les octets et décoder avec `decodeCsvBytes` (UTF-8 strict, repli Windows-1252, D58), jamais `file.text()`.
 - Référence : `src/features/create-session/components/file-drop-field.tsx`, `src/features/create-session/hooks/use-create-form.ts`, `src/features/create-session/slot-status.ts`.
+
+## Vue de session thémée — squelette
+
+```tsx
+// src/features/<x>/<x>-page.tsx
+export function XPage() {
+  const { sessionId } = route.useParams()
+  const session = useSession(sessionId)
+  const status = useDbStatus()
+  const ui = useUi() // états sans session seulement : langue du navigateur
+  if (status !== 'open')
+    return (
+      <main className="mx-auto flex min-h-svh max-w-3xl flex-col gap-6 p-4 sm:p-6">
+        <DbStatusBanner ui={ui} status={status} />
+      </main>
+    )
+  if (session === undefined) return <SessionFallback ui={ui} kind="loading" />
+  if (session === null) return <SessionFallback ui={ui} kind="not-found" />
+  return (
+    <SessionAppearance sessionId={session.id} view="examiner" config={session.config}>
+      <XView session={session} /> {/* appelle useUi() lui-même : langue de la config */}
+    </SessionAppearance>
+  )
+}
+```
+
+### Règles tacites
+
+- Un seul écrivain sur `<html>` : `AppearanceProvider` (`src/app/`), monté dans `__root.tsx`. Un écran ne touche jamais `document.documentElement`. Il déclare une portée avec `<SessionAppearance>` ou `useAppearanceScope(scope)` ; une portée garde sa place dans la pile même re-mémoïsée (un nouvel objet à chaque rendu ne la fait pas passer en fin de pile), mais mémoïser `scope` (`useMemo`) reste recommandé pour éviter de réécrire les tokens à chaque rendu (D60).
+- `color-scheme` suit le mode forcé : `:root { color-scheme: light; }` et `.dark { color-scheme: dark; }` dans `src/index.css`, pour que les contrôles natifs (barres de défilement…) suivent le mode de l'app plutôt que la préférence système (D26).
+- Sous `SessionAppearance`, `useUi()` s'appelle **dans** l'enfant : appelé au-dessus, il ignore `config.locale`.
+- Couleur de config sur un élément : `style={{ '--category-color': color }}`, autorisé car React passe par `setProperty` (D15). Elle s'utilise en accent (`border-[var(--category-color)]`), jamais en fond sous du texte (D26).
+- Bascule de mode : `<ColorModeToggle ui={ui} />` dans l'en-tête de chaque écran.
+- Tests : `src/testing/setup.ts` simule `matchMedia` (`setSystemDark(true)` de `@/testing/match-media` pour simuler un système sombre) et vide `localStorage` après chaque test.
+- Vue projetée : ses composants ne reçoivent jamais la `Session` (`usePresentedConfig`, puis `toProjectedView` en F14).

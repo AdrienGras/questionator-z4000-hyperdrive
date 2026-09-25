@@ -1,14 +1,14 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback } from 'react'
 import { t, type Locale } from './i18n'
-import { detectBrowserLocale, readNavigatorLanguages } from './browser-locale'
+import { useLocale } from './locale-context'
 import { UI_MESSAGES, type UiMessageParams } from './ui-messages'
 
-/** Langue du navigateur (accueil, création : pas de config chargée, D51) et accès au dictionnaire. */
+/** Dictionnaire d'interface dans la langue du `LocaleProvider` le plus proche (navigateur hors session, config en session). */
 export function useUi(): {
   locale: Locale
   text: <K extends keyof UiMessageParams>(key: K, params: UiMessageParams[K]) => string
 } {
-  const locale = useMemo(() => detectBrowserLocale(readNavigatorLanguages()), [])
+  const locale = useLocale()
   const text = useCallback(
     <K extends keyof UiMessageParams>(key: K, params: UiMessageParams[K]) =>
       t(UI_MESSAGES, locale, key, params),

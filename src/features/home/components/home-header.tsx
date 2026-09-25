@@ -1,5 +1,6 @@
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
+import { ColorModeToggle } from '@/components/color-mode-toggle'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { usePersistenceStatus } from '@/lib/db/persistence'
@@ -19,6 +20,7 @@ export function HomeHeader({ ui, storageAvailable, importDisabled, onImport }: H
     <header className="flex flex-wrap items-center justify-between gap-3">
       <h1 className="text-2xl font-bold tracking-tight">{text('app_title', {})}</h1>
       <div className="flex flex-wrap items-center gap-2">
+        <ColorModeToggle ui={ui} />
         {persistence === 'best-effort' && (
           <Tooltip>
             <TooltipTrigger

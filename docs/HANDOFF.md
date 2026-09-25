@@ -20,6 +20,36 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-25 — F07 implémenté : thème et langue
+
+**Dernière chose faite** : F07 (#7) implémenté sur `feat/f07-theme` en subagent-driven development. D'abord la spec, avec D60 (F07 avant F09 : écrans de session provisoires et apparence par portées), puis un plan en 6 tâches, une revue finale et une vague de correction.
+- `AppearanceProvider` (`src/app/`), seul à écrire sur `<html>` : classe `.dark` et tokens via `setProperty`. Les portées sont déclarées par `useAppearanceScope` et `<SessionAppearance>`. Une portée garde sa place dans la pile même si elle est re-mémoïsée (`register` + `update` par `useId`).
+- Mode clair, sombre ou système, mémorisé par session et par vue (`questionator:color-mode:<id>:<examiner|present>`), avec une clé globale pour l'accueil et la création. La bascule `ColorModeToggle` est présente partout, et `color-scheme` suit `.dark`.
+- `LocaleProvider` : le propriétaire le plus externe est le seul à écrire `lang`, les providers imbriqués se déclarent auprès de lui. `useUi()` lit ce contexte.
+- `CategoryIcon` : chunk Tabler unique chargé à la demande (`icons-*`, 2 370 kB, 441 kB gzip), avec un nouvel essai après un échec.
+- Écrans provisoires : `#/session/$sessionId` (en-tête, catégories, bouton principal désactivé) et `#/present/$sessionId` (écran d'attente, reçoit la config seule).
+
+Défauts rattrapés pendant l'exécution :
+- ordre des effets entre `LocaleProvider` imbriqués ;
+- un test de nouvel essai qui ne prouvait rien (`vi.resetModules`) ;
+- **fuite des 2,8 Mo d'icônes dans le bundle de l'accueil**, corrigée par un import profond (QUIRKS) ;
+- portée re-mémoïsée qui passait en fin de pile.
+
+`pnpm check` est vert (493 tests) et `pnpm build` ne donne aucun avertissement. Vérifié à la main dans Chromium sur `vite preview` avec la config d'exemple en `locale: 'en'` :
+- vue examinateur : sombre par défaut, `lang="en"`, 32 tokens, bouton principal à la couleur `primary`, 4 icônes ;
+- vue projetée : passée en clair dans un second onglet, fermée puis rouverte, elle reste claire, et seule la clé `:present` a été écrite ;
+- accueil : aucun token, pas de `.dark`, et aucun chunk `icons-*` chargé à froid.
+
+**Trucs en suspens** : PR F07 à ouvrir, CI et Sonar à vérifier, puis revue. INDEX indique « En revue ». Les mineurs reportés sont dans BACKLOG § « Thème et langue » (garde-fou de build du chunk statique, synchronisation du mode entre onglets, cas limites de `LocaleProvider`, `isIconComponent`). Toujours non vérifié depuis F04 : la survie des données à un vrai redémarrage du navigateur.
+
+**Prochaine chose à creuser** : F09 (écran de passage), qui remplace le corps de `ExaminerView` dans `src/features/session/`, ou F08 (rendu markdown).
+
+**Notes pour future Claude** :
+- Sous `SessionAppearance`, `useUi()` s'appelle dans l'enfant, sinon `config.locale` est ignoré (CONVENTIONS § « Vue de session thémée »).
+- Ne touche jamais `document.documentElement` depuis un écran : déclare une portée. React exécute les effets de l'enfant avant ceux du parent.
+- Après chaque build qui touche aux icônes, vérifie `for f in dist/assets/*.js; do grep -l "from\"./icons-" $f; done` : la sortie doit être vide.
+- Le script `task-brief` du skill SDD cherche des titres « Task N ». Le plan F07 utilise « Tâche N », donc les briefs ont été extraits avec un awk adapté.
+
 ## 2026-09-25 — Arborescence de src/ réorganisée (#31)
 
 **Dernière chose faite** : #31 traité sur `refactor/31-arborescence`, PR #32. Recherche des standards (Bulletproof React, FSD, TanStack Router, shadcn) et état des lieux, puis arbitrage avec l'utilisateur (D59) :

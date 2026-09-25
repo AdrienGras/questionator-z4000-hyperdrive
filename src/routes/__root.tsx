@@ -1,5 +1,7 @@
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
+import { AppearanceProvider } from '@/app/appearance-provider'
 import { useUi } from '@/lib/i18n/use-ui'
+import { LocaleProvider, useLocale } from '@/lib/i18n/locale-context'
 
 export function NotFound() {
   const { text } = useUi()
@@ -13,11 +15,19 @@ export function NotFound() {
   )
 }
 
+function RootLayout() {
+  return (
+    <LocaleProvider locale={useLocale()}>
+      <AppearanceProvider>
+        <div className="min-h-svh bg-background text-foreground">
+          <Outlet />
+        </div>
+      </AppearanceProvider>
+    </LocaleProvider>
+  )
+}
+
 export const Route = createRootRoute({
-  component: () => (
-    <div className="min-h-svh bg-background text-foreground">
-      <Outlet />
-    </div>
-  ),
+  component: RootLayout,
   notFoundComponent: NotFound,
 })
