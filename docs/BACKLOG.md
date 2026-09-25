@@ -36,3 +36,13 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 ## Écran de passage
 
 - [ ] Raccourcis clavier : chiffres pour les valeurs du barème, touches pour les catégories, raccourci de skip.
+
+## Accueil et backup
+
+- [ ] Ignorer le glisser-déposer pendant qu'un dialogue d'import est ouvert (aujourd'hui un second fichier remplace le conflit en attente) et pendant un import en cours.
+- [ ] Surimpression de dépôt : compteur `dragenter`/`dragleave` au lieu du test `relatedTarget` (WebKit envoie `relatedTarget = null`, scintillement possible).
+- [ ] Garder le contenu des dialogues d'import pendant l'animation de fermeture (il disparaît dès que l'état revient à `idle`).
+- [ ] Dédoublonner les issues identiques avant affichage (clé React `chemin|message`).
+- [ ] Tests manquants : erreurs d'écriture (renommer, examinateur, suppression), réinitialisation du champ à la réouverture d'un dialogue, « toutes les issues » avec un décompte exact, `score` sur un attempt `skipped`, date locale vs UTC du nom de fichier (cas à 00:30).
+- [ ] Désactiver « Annuler » pendant un enregistrement en cours dans les dialogues de saisie.
+- [ ] Ajouter un favicon (404 sur `/favicon.ico` en preview et en prod).

@@ -193,3 +193,35 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : Vite ne charge que les modules importés depuis `main.tsx`.
 **Workaround** : `src/main.tsx` importe `@/db/db` en dev seulement. En prod, rien tant que F05 n'importe pas `@/db`.
 **Référence** : `src/main.tsx`.
+
+## Le premier `findBy*` d'un test rendu via le routeur dépasse 1 s sous la suite complète (2026-09-25)
+
+**Découvert** : F05, tâche 5 (accueil), en lançant `pnpm check`.
+**Symptôme** : le premier test de `src/home/HomePage.test.tsx` et le test de `/` dans `routes.test.tsx` passent seuls mais échouent en suite complète (« Unable to find role="heading" » après ~1050 ms), de façon déterministe.
+**Cause** : `autoCodeSplitting` charge le composant de la route par import dynamique ; sous 36 fichiers en parallèle, la première transformation de l'accueil et de ses composants base-ui prend ~2 s, au-delà du délai par défaut de 1 s de Testing Library.
+**Workaround** : `configure({ asyncUtilTimeout: 5000 })` dans `src/test/setup.ts`. Les menus et dialogues base-ui s'ouvrent bien avec `fireEvent.click` : `@testing-library/user-event` n'est pas nécessaire.
+**Référence** : `src/test/setup.ts`, `vite.config.ts` (`autoCodeSplitting`).
+
+## `Equal<A, B>` (astuce des fonctions génériques) déclare différents une intersection et l'objet aplati équivalent (2026-09-25)
+
+**Découvert** : test d'alignement `SessionSchema` / `Session` en F05.
+**Symptôme** : `Equal<Omit<ParsedSession, 'config'> & { config: NormalizedConfig }, Session>` vaut `false` alors que clés, types et optionalité sont identiques et que l'assignabilité mutuelle passe.
+**Cause** : l'astuce `(<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2)` compare l'identité des types, pas leur structure : une intersection n'est pas identique à un objet aplati.
+**Workaround** : aplatir avant de comparer, `type Simplify<T> = { [K in keyof T]: T[K] }`, puis `Equal<Simplify<A>, B>`.
+**Référence** : `src/domain/schema.test.ts`.
+
+## `shadcn add` (CLI 4.21) injecte une dépendance `cn` et réécrit l'import de `cn` dans tous les composants (2026-09-25)
+
+**Découvert** : ajout de `dialog`, `alert-dialog`, `dropdown-menu`… en F05.
+**Symptôme** : `package.json` et `pnpm-lock.yaml` gagnent `"cn": "^0.4.0"`, et les fichiers de `src/components/ui/` (y compris `button.tsx`, déjà présent) importent `cn` depuis ce paquet au lieu de `@/lib/utils`.
+**Cause** : comportement du CLI 4.21 avec le preset Nova ; non documenté.
+**Workaround** : après chaque `add`, remettre `import { cn } from '@/lib/utils'` dans les fichiers touchés, retirer la dépendance `cn`, `corepack pnpm install`, puis vérifier que `git diff package.json pnpm-lock.yaml src/components/ui/button.tsx` est vide.
+**Référence** : `src/components/ui/`, `src/lib/utils.ts`, section CONVENTIONS « Composant shadcn — ajout ».
+
+## Lancer un second `pnpm dev` réoptimise le cache Vite partagé et casse le serveur déjà ouvert (504 « Outdated Optimize Dep ») (2026-09-25)
+
+**Découvert** : vérification manuelle de F05, un serveur de dev tournait déjà sur 5173.
+**Symptôme** : le second `vite` échoue (`Port 5173 is already in use`), mais la page du premier serveur ne charge plus : 504 « Outdated Optimize Dep » sur `react`, `@tanstack/react-router`…, page blanche, même après rechargement.
+**Cause** : au démarrage, le second processus réécrit `node_modules/.vite/deps` (« Re-optimizing dependencies because vite config has changed ») avant d'échouer sur le port ; le premier serveur garde en mémoire l'ancienne empreinte.
+**Workaround** : vérifier le port avant (`ss -ltnp | grep 5173`) et réutiliser le serveur existant ; pour une vérification indépendante, `pnpm build` puis `vite preview --port 4173` (aucune optimisation de dépendances). Si le mal est fait, redémarrer le serveur de dev cassé.
+**Référence** : `node_modules/.vite/`, `docs/ENVIRONMENT.md` (commandes).

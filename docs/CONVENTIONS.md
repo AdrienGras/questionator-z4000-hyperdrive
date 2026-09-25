@@ -86,6 +86,8 @@ corepack pnpm dlx shadcn@latest add <composant> -y
 - shadcn v4, primitives base-ui, icônes Tabler (`@tabler/icons-react`), preset Nova (D37).
 - Code vendu dans `src/components/ui/` : ignoré par oxlint, formaté par Prettier ; on peut le modifier, mais toute personnalisation doit rester compatible avec un `add --overwrite`.
 - Un seul `cn`, dans `@/lib/utils`.
+- Après chaque `add` : vérifier que le CLI n'a pas réécrit l'import de `cn` ni ajouté la dépendance `cn` (QUIRKS 2026-09-25).
+- `DialogContent` du vendor affiche par défaut un bouton « Close » en anglais : toujours `showCloseButton={false}`, et fermer via un bouton traduit.
 - Couleurs uniquement via les tokens CSS (`bg-primary`, `text-foreground`…), jamais de couleur en dur : le thème de session (F07) surcharge ces tokens.
 
 ## oxlint — règles configurées
@@ -106,7 +108,7 @@ gh pr ready <n>
 ### Règles tacites
 
 - Toujours ouvrir la PR en brouillon : SonarQube Cloud (analyse automatique) n'analyse que `main` et les PR, pas une branche poussée seule.
-- Chaque issue Sonar est corrigée, pas marquée « won't fix », sauf accord explicite. Un fichier généré (ex. `src/routeTree.gen.ts`) s'exclut dans `.sonarcloud.properties`.
+- Chaque issue Sonar est corrigée, pas marquée « won't fix », sauf accord explicite. Un fichier généré (ex. `src/routeTree.gen.ts`) ou vendu (`src/components/ui/`, D53) s'exclut dans `.sonarcloud.properties`, comme dans `ignorePatterns` d'oxlint.
 - Actions GitHub épinglées par **SHA de commit**, version en commentaire (`uses: owner/action@<sha> # vX.Y.Z`) — règle Sonar `githubactions:S7637`.
 
 ## Code d'issue de config — ajout
@@ -175,3 +177,70 @@ await updateSession(sessionId, (session) => {
 - Un mutator qui lève annule tout ; l'erreur remonte telle quelle à la feature, qui l'affiche.
 - Lecture : `useSession(id)` / `useSessions()` ; `undefined` = chargement, `null` = absente. Afficher un message si `useDbStatus()` vaut `'outdated'` (recharger) ou `'unavailable'` (stockage bloqué).
 - Tests de `src/db/` : `import 'fake-indexeddb/auto'` en première ligne ; `createDb(nomUnique)` pour les tests de cycle de vie, `beforeEach(() => db.sessions.clear())` pour ceux du singleton ; `makeSession()` de `src/test/session-fixtures.ts`.
+
+## Composant d'écran traduit — squelette
+
+```tsx
+import { Button } from '@/components/ui/button'
+import type { Ui } from '@/i18n/use-ui'
+
+type SessionToolbarProps = Readonly<{
+  ui: Ui
+  disabled: boolean
+  onExport: () => void
+}>
+
+export function SessionToolbar({ ui, disabled, onExport }: SessionToolbarProps) {
+  const { text } = ui
+  return (
+    <Button variant="outline" disabled={disabled} onClick={onExport}>
+      {text('action_export', {})}
+    </Button>
+  )
+}
+```
+
+### Règles tacites
+
+- `useUi()` (`@/i18n/use-ui`) une seule fois par écran, au composant de page ; les sous-composants reçoivent `ui: Ui` en prop. Langue : celle du navigateur hors session (D51) ; F07 ajoutera `config.locale`.
+- Toute chaîne visible, `aria-label` compris, passe par `text(clé, params)` ; nouvelle clé = ajout dans `UiMessageParams` et dans les dictionnaires `fr` **et** `en` de `src/i18n/ui-messages.ts` (le test échoue sinon).
+- Props en `Readonly<{…}>` (SonarQube S6759) ; jamais `const [x] = useState(...)` sans le setter (S6754) : `useMemo` ou une constante de module.
+- Tests : `src/test/setup.ts` force `navigator.languages = ['fr-FR']` ; un test en anglais redéfinit la propriété puis la restaure. Monter un écran routé via `createAppRouter(createMemoryHistory(...))` (voir `src/test/render-home.tsx`).
+
+## Dialogue de saisie — squelette
+
+```tsx
+<Dialog open={open} onOpenChange={onOpenChange}>
+  <DialogContent showCloseButton={false}>
+    <DialogHeader>
+      <DialogTitle>{title}</DialogTitle>
+    </DialogHeader>
+    {/* Formulaire dans un composant enfant : démonté à la fermeture, son état repart de zéro. */}
+    <TextFieldForm ui={ui} initialValue={initialValue} onSave={onSave} onClose={() => onOpenChange(false)} />
+  </DialogContent>
+</Dialog>
+```
+
+### Règles tacites
+
+- État du champ dans l'enfant (`useState(initialValue)`), pas d'`useEffect` de synchronisation : base-ui démonte le contenu d'un dialogue fermé.
+- `onSave` renvoie une promesse : succès → fermeture ; échec → message `write_error` en `role="alert"`, dialogue ouvert.
+- Référence : `src/home/TextFieldDialog.tsx`, `src/home/DeleteDialog.tsx`.
+
+## Module lourd chargé à la demande — squelette
+
+```ts
+// src/home/use-backup-import.ts
+try {
+  const { parseBackup } = await import('@/backup/parse')
+  // …
+} catch {
+  setState({ kind: 'load-error', fileName: file.name })
+}
+```
+
+### Règles tacites
+
+- Le validateur de config (liste des 6 220 icônes Tabler comprise) pèse ~200 kB : l'écran qui l'utilise ponctuellement le charge en `import()` dynamique, avec un état d'erreur si le chunk ne se charge pas.
+- Importer les autres modules du même dossier **par chemin direct** (`@/backup/serialize`, `@/backup/messages`…) : passer par un `index.ts` qui réexporte le module lourd le remet dans le chunk principal.
+- `pnpm build` ne doit afficher aucun avertissement de taille de chunk.

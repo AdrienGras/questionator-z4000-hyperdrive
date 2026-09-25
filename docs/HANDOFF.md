@@ -20,6 +20,43 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-25 — F05 implémenté : accueil et backup
+
+**Dernière chose faite** : F05 (#5) implémenté sur `feat/f05-accueil` en subagent-driven
+development : spec + D48–D52, plan en 6 tâches, toutes approuvées en revue de tâche sans
+boucle de correction. En cours de route, le validateur est passé en chargement à la demande
+(chunk de l'accueil 515 → 316 kB). La revue finale a rendu « with fixes » : trois alertes
+SonarQube anticipées (props `Readonly`, `useState` à moitié déstructuré, regex ancrée en fin)
+et quatre mineurs, tous corrigés et revalidés. Livré :
+- `src/domain/schema.ts` (`SessionSchema`) ;
+- `src/backup/` (enveloppe, `parseBackup` en 5 étapes avec règles croisées, config renormalisée) ;
+- `src/i18n/` (langue du navigateur, dictionnaire d'interface, `useUi`) ;
+- `src/home/` (cartes, dialogues, import par fichier ou glisser-déposer) ;
+- routes provisoires `/new` et `/session/$sessionId`.
+
+`pnpm check` vert (332 tests), `pnpm build` sans avertissement. Vérifié à la main dans
+Chromium sur le build de prod (`vite preview`) : refus d'un fichier qui n'est pas un backup
+(une seule issue) et d'un backup incohérent (3 règles croisées avec chemins), import
+strictement identique en base, export identique, renommage, suppression avec « exporter
+d'abord », conflit d'`id` avec Remplacer.
+
+**Trucs en suspens** : PR #27 en revue (CI verte, SonarQube : gate OK, 0 issue, 0 hotspot,
+après exclusion de `src/components/ui/` de l'analyse, D53), à merger. Toujours non vérifié depuis F04 : la
+survie des données à un vrai redémarrage du navigateur. Le serveur `pnpm dev` qui tournait
+sur 5173 avant la session est cassé (504 « Outdated Optimize Dep ») par ma tentative de
+second démarrage ; il suffit de le relancer (QUIRKS).
+
+**Prochaine chose à creuser** : F06 (création de session). Elle remplit la route provisoire
+`/new` et réutilise `useUi`, le « Dialogue de saisie » et le chargement du validateur à la
+demande (CONVENTIONS) ; elle appelle `createSession` et `requestPersistentStorage`.
+
+**Notes pour future Claude** : `makeStudent` dérive `questionId` de l'index (`a-1`, `a-2`…)
+alors que la config minimale n'a que `a-1`. Une session de fixture à plusieurs attempts
+échoue donc aux règles croisées : `richSession()` (`src/test/backup-fixtures.ts`) utilise
+une config à 3 questions. `asyncUtilTimeout` vaut 5 s dans `src/test/setup.ts`, parce que
+le chargement à la demande des routes dépasse 1 s quand la suite tourne en parallèle.
+Idées reportées : BACKLOG « Accueil et backup ».
+
 ## 2026-09-25 — F04 implémenté : persistance
 
 **Dernière chose faite** : F04 (#4) livré, PR #25 mergée (`7f61e5b`, CI et Sonar verts dès la
