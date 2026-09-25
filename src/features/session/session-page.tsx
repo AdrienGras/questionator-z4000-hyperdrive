@@ -17,7 +17,12 @@ export function SessionPage() {
   const session = useSession(sessionId)
   const status = useDbStatus()
   const ui = useUi()
-  if (status !== 'open') return <DbStatusBanner ui={ui} status={status} />
+  if (status !== 'open')
+    return (
+      <main className="mx-auto flex min-h-svh max-w-3xl flex-col gap-6 p-4 sm:p-6">
+        <DbStatusBanner ui={ui} status={status} />
+      </main>
+    )
   if (session === undefined) return <SessionFallback ui={ui} kind="loading" />
   if (session === null) return <SessionFallback ui={ui} kind="not-found" />
   return (

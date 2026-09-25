@@ -136,7 +136,7 @@ const fr: Dictionary<UiMessageParams> = {
   db_reload: () => 'Recharger',
   db_unavailable: () =>
     'Le stockage local est indisponible (navigation privée ou cookies bloqués ?). Les sessions ne peuvent pas être enregistrées.',
-  color_mode_label: ({ mode }) => `Mode d'affichage : ${mode}`,
+  color_mode_label: ({ mode }) => `Mode d'affichage : ${mode.toLocaleLowerCase('fr')}`,
   color_mode_light: () => 'Clair',
   color_mode_dark: () => 'Sombre',
   color_mode_system: () => 'Système',
@@ -228,7 +228,7 @@ const en: Dictionary<UiMessageParams> = {
   db_reload: () => 'Reload',
   db_unavailable: () =>
     'Local storage is unavailable (private browsing or blocked cookies?). Sessions cannot be saved.',
-  color_mode_label: ({ mode }) => `Display mode: ${mode}`,
+  color_mode_label: ({ mode }) => `Display mode: ${mode.toLocaleLowerCase('en')}`,
   color_mode_light: () => 'Light',
   color_mode_dark: () => 'Dark',
   color_mode_system: () => 'System',

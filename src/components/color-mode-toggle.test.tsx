@@ -29,12 +29,12 @@ test('affiche le mode courant et permet d’en choisir un autre', async () => {
       <Toggle />
     </AppearanceProvider>,
   )
-  const trigger = screen.getByRole('button', { name: "Mode d'affichage : Système" })
+  const trigger = screen.getByRole('button', { name: "Mode d'affichage : système" })
   fireEvent.click(trigger)
   fireEvent.click(await screen.findByRole('menuitemradio', { name: 'Sombre' }))
   expect(document.documentElement).toHaveClass('dark')
   expect(
-    await screen.findByRole('button', { name: "Mode d'affichage : Sombre" }),
+    await screen.findByRole('button', { name: "Mode d'affichage : sombre" }),
   ).toBeInTheDocument()
 })
 
@@ -45,7 +45,7 @@ test('dans la vue projetée, le choix ne touche pas la clé de la vue examinateu
       <PresentToggle />
     </AppearanceProvider>,
   )
-  fireEvent.click(screen.getByRole('button', { name: "Mode d'affichage : Clair" }))
+  fireEvent.click(screen.getByRole('button', { name: "Mode d'affichage : clair" }))
   fireEvent.click(await screen.findByRole('menuitemradio', { name: 'Sombre' }))
   expect(localStorage.getItem('questionator:color-mode:s1:present')).toBe('dark')
   expect(localStorage.getItem('questionator:color-mode:s1:examiner')).toBe('light')

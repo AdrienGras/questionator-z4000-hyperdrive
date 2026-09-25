@@ -5,7 +5,11 @@ import type { Ui } from '@/lib/i18n/use-ui'
 export function SessionFallback({ ui, kind }: Readonly<{ ui: Ui; kind: 'loading' | 'not-found' }>) {
   const { text } = ui
   if (kind === 'loading') {
-    return <p className="p-6 text-center text-muted-foreground">{text('session_loading', {})}</p>
+    return (
+      <main className="flex min-h-svh flex-col items-center justify-center gap-4 p-6 text-center">
+        <p className="text-muted-foreground">{text('session_loading', {})}</p>
+      </main>
+    )
   }
   return (
     <main className="flex min-h-svh flex-col items-center justify-center gap-4 p-6 text-center">
