@@ -1,61 +1,97 @@
-import { createContext, useContext, useLayoutEffect, useMemo, useRef, type ReactNode } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
 import { detectBrowserLocale, readNavigatorLanguages } from './browser-locale'
 import type { Locale } from './i18n'
 
-const LocaleContext = createContext<Locale | null>(null)
-const ProviderDepthContext = createContext<number>(0)
+type LocaleContextValue = Readonly<{
+  locale: Locale
+  /** Déclare une locale auprès du propriétaire ; retourne la fonction de retrait. */
+  declare: (locale: Locale) => () => void
+}>
 
-// Stack to track active providers and ensure only the deepest updates lang
-const providerStack: Array<{ id: symbol; locale: Locale; depth: number }> = []
+const LocaleContext = createContext<LocaleContextValue | undefined>(undefined)
+
+/**
+ * Racine de la portée de langue (sans `LocaleProvider` parent) : seule à écrire `lang` sur
+ * `<html>`, à partir de la dernière locale déclarée par ses descendants (sinon sa propre prop).
+ */
+function OwnerLocaleProvider({
+  locale,
+  children,
+}: Readonly<{ locale: Locale; children: ReactNode }>) {
+  const [stack, setStack] = useState<ReadonlyArray<Readonly<{ locale: Locale }>>>([])
+
+  const declare = useCallback((declaredLocale: Locale) => {
+    const entry = { locale: declaredLocale }
+    setStack((prev) => [...prev, entry])
+    return () => {
+      setStack((prev) => prev.filter((candidate) => candidate !== entry))
+    }
+  }, [])
+
+  const lastDeclared = stack.at(-1)
+  const effective = lastDeclared ? lastDeclared.locale : locale
+
+  useLayoutEffect(() => {
+    const root = document.documentElement
+    const previous = root.lang
+    root.lang = effective
+    return () => {
+      root.lang = previous
+    }
+  }, [effective])
+
+  const value = useMemo<LocaleContextValue>(() => ({ locale, declare }), [locale, declare])
+
+  return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>
+}
+
+/**
+ * Portée de langue imbriquée : n'écrit jamais `lang`, se déclare auprès du propriétaire et
+ * transmet à ses enfants sa propre locale avec le `declare` du propriétaire.
+ */
+function NestedLocaleProvider({
+  locale,
+  parent,
+  children,
+}: Readonly<{ locale: Locale; parent: LocaleContextValue; children: ReactNode }>) {
+  const { declare } = parent
+
+  useLayoutEffect(() => declare(locale), [declare, locale])
+
+  const value = useMemo<LocaleContextValue>(() => ({ locale, declare }), [locale, declare])
+
+  return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>
+}
 
 /** Fixe la langue de l'interface pour ses enfants et `lang` sur `<html>` (rétabli au démontage). */
 export function LocaleProvider({
   locale,
   children,
 }: Readonly<{ locale: Locale; children: ReactNode }>) {
-  const parentDepth = useContext(ProviderDepthContext)
-  const myDepth = parentDepth + 1
-  const providerIdRef = useRef(Symbol('locale-provider'))
-  const prevLangRef = useRef('')
-
-  useLayoutEffect(() => {
-    const root = document.documentElement
-    prevLangRef.current = root.lang
-
-    // Register this provider
-    providerStack.push({ id: providerIdRef.current, locale, depth: myDepth })
-
-    // Only the deepest provider (highest depth) updates lang
-    const deepest = providerStack.reduce(
-      (max, p) => (p.depth > max.depth ? p : max),
-      providerStack[0],
+  const parent = useContext(LocaleContext)
+  if (parent) {
+    return (
+      <NestedLocaleProvider locale={locale} parent={parent}>
+        {children}
+      </NestedLocaleProvider>
     )
-    if (deepest.id === providerIdRef.current) {
-      root.lang = locale
-    }
-
-    return () => {
-      // Unregister by removing from stack
-      const index = providerStack.findIndex((p) => p.id === providerIdRef.current)
-      if (index !== -1) {
-        providerStack.splice(index, 1)
-      }
-      // Restore previous value
-      root.lang = prevLangRef.current
-    }
-  }, [locale, myDepth])
-  return (
-    <LocaleContext.Provider value={locale}>
-      <ProviderDepthContext.Provider value={myDepth}>{children}</ProviderDepthContext.Provider>
-    </LocaleContext.Provider>
-  )
+  }
+  return <OwnerLocaleProvider locale={locale}>{children}</OwnerLocaleProvider>
 }
 
 /** Langue du provider le plus proche ; hors provider, celle du navigateur (D51). */
 export function useLocale(): Locale {
-  const provided = useContext(LocaleContext)
+  const context = useContext(LocaleContext)
   const browser = useMemo(() => detectBrowserLocale(readNavigatorLanguages()), [])
-  return provided ?? browser
+  return context?.locale ?? browser
 }
 
 /** Langue d'une vue de session : `config.locale`, sinon navigateur, sinon `fr` (D26). */

@@ -69,4 +69,17 @@ describe('LocaleProvider', () => {
     )
     expect(document.documentElement.lang).toBe('fr')
   })
+
+  test('provider imbriqué monté d’emblée : lang dès le montage initial, sans rerender', () => {
+    document.documentElement.lang = ''
+    render(
+      <LocaleProvider locale="fr">
+        <LocaleProvider locale="en">
+          <ShowLocale />
+        </LocaleProvider>
+      </LocaleProvider>,
+    )
+    expect(screen.getByText('en en Back to home')).toBeInTheDocument()
+    expect(document.documentElement.lang).toBe('en')
+  })
 })
