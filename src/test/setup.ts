@@ -6,6 +6,8 @@ import { afterEach } from 'vitest'
 // où `window` n'existe pas.
 if (typeof window !== 'undefined') {
   window.scrollTo = () => {}
+  // jsdom annonce en-US : l'interface suit la langue du navigateur (D51), les tests l'attendent en fr.
+  Object.defineProperty(window.navigator, 'languages', { value: ['fr-FR'], configurable: true })
 }
 
 afterEach(() => {

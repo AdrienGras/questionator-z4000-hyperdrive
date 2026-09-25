@@ -1,11 +1,13 @@
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router'
+import { useUi } from '@/i18n/use-ui'
 
 export function NotFound() {
+  const { text } = useUi()
   return (
     <main className="flex min-h-svh flex-col items-center justify-center gap-4 p-6">
-      <h1 className="text-2xl font-bold">Page introuvable</h1>
+      <h1 className="text-2xl font-bold">{text('not_found_title', {})}</h1>
       <Link to="/" className="text-primary underline underline-offset-4">
-        Retour à l'accueil
+        {text('back_home', {})}
       </Link>
     </main>
   )

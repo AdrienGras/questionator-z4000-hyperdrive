@@ -21,3 +21,9 @@ test('une route inconnue affiche la page 404 avec un lien de retour', async () =
   expect(await screen.findByRole('heading', { name: 'Page introuvable' })).toBeInTheDocument()
   expect(screen.getByRole('link', { name: "Retour à l'accueil" })).toHaveAttribute('href', '/')
 })
+
+test.each(['/new', '/session/abc'])('%s affiche la page provisoire', async (path) => {
+  renderAt(path)
+  expect(await screen.findByRole('heading', { name: 'Bientôt disponible' })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: "Retour à l'accueil" })).toHaveAttribute('href', '/')
+})
