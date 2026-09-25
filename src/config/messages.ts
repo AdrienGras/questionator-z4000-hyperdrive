@@ -68,6 +68,8 @@ const fr: Dictionary<ConfigIssueParams> = {
     '« absent.value » est obligatoire quand « absent.export » vaut « value ».',
   too_many_decimals: ({ value }) =>
     `${value} a plus de 3 décimales : les notes sont calculées au millième.`,
+  scoring_value_too_large: ({ value, max }) =>
+    `${value} dépasse ${max} en valeur absolue, le maximum pour une valeur de notation.`,
   invalid_css_value: ({ property, value }) =>
     property === 'color'
       ? `« ${value} » n’est pas une couleur CSS reconnue par ce navigateur.`
@@ -119,6 +121,8 @@ const en: Dictionary<ConfigIssueParams> = {
   missing_absent_value: () => '"absent.value" is required when "absent.export" is "value".',
   too_many_decimals: ({ value }) =>
     `${value} has more than 3 decimal places: scores are computed to the thousandth.`,
+  scoring_value_too_large: ({ value, max }) =>
+    `${value} exceeds ${max} in absolute value, the maximum for a scoring value.`,
   invalid_css_value: ({ property, value }) =>
     property === 'color'
       ? `"${value}" is not a CSS color this browser recognises.`
