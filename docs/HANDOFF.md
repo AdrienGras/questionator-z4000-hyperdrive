@@ -22,7 +22,9 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ## 2026-09-25 — F02 implémenté : schéma de config et validation
 
-**Dernière chose faite** : F02 (#2) implémenté en subagent-driven development sur
+**Dernière chose faite** : F02 (#2) livré, PR #21 mergée (`7f5a3ce`) ; Pages sert
+`config.schema.json` et `config.example.json` (200, `application/json`). Implémenté en
+subagent-driven development sur
 `feat/f02-config` : spec + D38–D41, plan en 7 tâches, chaque tâche revue (3 tours de
 correction au total), revue finale de branche puis une vague de 8 corrections (dont la
 localisation des erreurs JSON sous Chrome via `jsonc-parser`). `validateConfig` renvoie des
@@ -30,10 +32,10 @@ issues typées sans texte, messages fr/en, config normalisée ; JSON Schema et e
 publiés par `vite/config-schema-plugin.ts`. `pnpm check` (104 tests) et `pnpm build` verts,
 sans avertissement. Mémoire à jour (INDEX, QUIRKS ×8, BACKLOG, CONVENTIONS, ENVIRONMENT, D40).
 
-**Trucs en suspens** : PR brouillon F02 à ouvrir (`Closes #2`), CI, étape SonarQube Cloud,
-puis « Ready for review » et merge ; après merge, vérifier que
-`…/config.schema.json` et `…/config.example.json` répondent 200 sur Pages. Question toujours
-ouverte : rendre le quality gate Sonar obligatoire dans la protection de `main` ?
+**Trucs en suspens** : cette PR de clôture (docs) à merger. SonarQube avait relevé 3 issues
+sur la PR (regex complexes ou à backtracking dans `derive-title.ts`, tests à paramétrer),
+corrigées avant la revue. Question toujours ouverte : rendre le quality gate Sonar
+obligatoire dans la protection de `main` ?
 
 **Prochaine chose à creuser** : F03 (moteur de notation) ou F06 (création de session, premier
 consommateur de `validateConfig` : `cssSupports` = `CSS.supports`, chargement paresseux du
