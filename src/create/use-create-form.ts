@@ -3,7 +3,7 @@ import type { ValidationResult } from '@/config/validate'
 import { createSession, requestPersistentStorage, type DbStatus } from '@/db'
 import type { Locale } from '@/i18n'
 import { buildSession } from '@/sessions/build-session'
-import { parseStudentsCsv, type CsvParseResult } from '@/students'
+import { csvWarning, decodeCsvBytes, parseStudentsCsv, type CsvParseResult } from '@/students'
 import { defaultSessionName } from './default-session-name'
 
 export type FileSlot<T> =
@@ -51,6 +51,24 @@ async function readText(file: File): Promise<string | undefined> {
 }
 
 /**
+ * Lit et décode un CSV déposé (D58) : octets bruts, jamais `file.text()` qui forcerait l'UTF-8 et
+ * corromprait un export Excel FR (Windows-1252). Un avertissement `legacy_encoding` est ajouté en
+ * tête des issues quand le repli Windows-1252 a été nécessaire.
+ */
+async function readStudentsCsv(file: File): Promise<CsvParseResult | undefined> {
+  let bytes: ArrayBuffer
+  try {
+    bytes = await file.arrayBuffer()
+  } catch {
+    return undefined
+  }
+  const { text, encoding } = decodeCsvBytes(bytes)
+  const result = parseStudentsCsv(text)
+  if (encoding === 'utf-8') return result
+  return { ...result, issues: [csvWarning('legacy_encoding', {}), ...result.issues] }
+}
+
+/**
  * État du formulaire de création (F06) : lecture et validation des deux fichiers, nom prérempli
  * depuis la config tant que l'utilisateur ne l'a pas saisi, création de la session.
  */
@@ -79,13 +97,13 @@ export function useCreateForm(locale: Locale, dbStatus: DbStatus): CreateForm {
     const seq = ++studentsSeq.current
     const fileName = file.name
     setStudents({ kind: 'reading', fileName })
-    const text = await readText(file)
+    const result = await readStudentsCsv(file)
     if (seq !== studentsSeq.current) return
-    if (text === undefined) {
+    if (result === undefined) {
       setStudents({ kind: 'read-error', fileName })
       return
     }
-    setStudents({ kind: 'loaded', fileName, result: parseStudentsCsv(text) })
+    setStudents({ kind: 'loaded', fileName, result })
   }
 
   async function setConfigFile(file: File): Promise<void> {

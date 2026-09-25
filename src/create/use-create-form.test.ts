@@ -55,16 +55,31 @@ function invalidConfigFile(): File {
 function unreadableFile(name: string): File {
   const file = new File([''], name)
   vi.spyOn(file, 'text').mockRejectedValue(new Error('lecture'))
+  vi.spyOn(file, 'arrayBuffer').mockRejectedValue(new Error('lecture'))
   return file
 }
 
-/** Lecture de fichier en suspens, libérée à la main (réponse tardive). */
-function deferredText() {
-  let settle: ((text: string) => void) | undefined
-  const promise = new Promise<string>((resolve) => {
+/** Convertit une chaîne dont chaque caractère est déjà un code d'octet (0-255) en octets. */
+function toBytes(latin1: string): Uint8Array<ArrayBuffer> {
+  return new Uint8Array(Array.from(latin1, (char) => char.charCodeAt(0)))
+}
+
+/** CSV encodé en Windows-1252 (export Excel FR historique, D58), pas en UTF-8. */
+function windows1252CsvFile(): File {
+  const bytes = toBytes('Nom;Pr\xe9nom\r\nLef\xe8vre;Chlo\xe9\r\n')
+  return new File([bytes], 'etudiants.csv', { type: 'text/csv' })
+}
+
+/** Lecture d'octets en suspens (CSV, lu via `arrayBuffer`), libérée à la main. */
+function deferredArrayBuffer() {
+  let settle: ((buffer: ArrayBuffer) => void) | undefined
+  const promise = new Promise<ArrayBuffer>((resolve) => {
     settle = resolve
   })
-  return { promise, release: (text: string) => settle?.(text) }
+  return {
+    promise,
+    release: (text: string) => settle?.(new TextEncoder().encode(text).buffer),
+  }
 }
 
 function renderForm(status: DbStatus = 'open') {
@@ -110,6 +125,17 @@ describe('useCreateForm', () => {
     expect(students.fileName).toBe('etudiants.csv')
     expect(students.result.issues.length).toBeGreaterThan(0)
     expect(result.current.canSubmit).toBe(true)
+  })
+
+  test('CSV en Windows-1252 (export Excel FR) : noms corrects, avertissement legacy_encoding', async () => {
+    const { result } = renderForm()
+    await act(() => result.current.setStudentsFile(windows1252CsvFile()))
+    const students = result.current.students
+    if (students.kind !== 'loaded') throw new Error('CSV non chargé')
+    expect(students.result.students).toEqual([{ lastName: 'Lefèvre', firstName: 'Chloé', line: 2 }])
+    expect(students.result.issues).toEqual([
+      { severity: 'warning', code: 'legacy_encoding', params: {} },
+    ])
   })
 
   test('CSV sans étudiant → création impossible', async () => {
@@ -174,8 +200,8 @@ describe('useCreateForm', () => {
   test('seul le dernier fichier déposé compte si le premier répond en retard', async () => {
     const { result } = renderForm()
     const slow = csvFile(CSV_EMPTY)
-    const { promise, release } = deferredText()
-    vi.spyOn(slow, 'text').mockReturnValue(promise)
+    const { promise, release } = deferredArrayBuffer()
+    vi.spyOn(slow, 'arrayBuffer').mockReturnValue(promise)
     let first: Promise<void> = Promise.resolve()
     act(() => {
       first = result.current.setStudentsFile(slow)
@@ -283,8 +309,8 @@ describe('useCreateForm', () => {
   test('état reading pendant la lecture', async () => {
     const { result } = renderForm()
     const slow = csvFile()
-    const { promise, release } = deferredText()
-    vi.spyOn(slow, 'text').mockReturnValue(promise)
+    const { promise, release } = deferredArrayBuffer()
+    vi.spyOn(slow, 'arrayBuffer').mockReturnValue(promise)
     let pending: Promise<void> = Promise.resolve()
     act(() => {
       pending = result.current.setStudentsFile(slow)

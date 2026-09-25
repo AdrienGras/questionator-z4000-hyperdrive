@@ -7,6 +7,7 @@ import { CSV_ISSUE_MESSAGES, formatCsvIssue } from './messages'
 /** Un jeu de paramètres réels par code, pour vérifier que chaque texte est non vide. */
 const SAMPLE_PARAMS: CsvIssueParams = {
   csv_syntax: {},
+  legacy_encoding: {},
   no_students: {},
   preamble_skipped: { count: 2 },
   single_field_row: {},
@@ -19,6 +20,7 @@ describe('messages de lecture CSV', () => {
     const dictionary = CSV_ISSUE_MESSAGES[locale]
     // Accès par propriété littérale : le type de chaque appel est connu statiquement, pas de `as`.
     expect(dictionary.csv_syntax(SAMPLE_PARAMS.csv_syntax).length).toBeGreaterThan(0)
+    expect(dictionary.legacy_encoding(SAMPLE_PARAMS.legacy_encoding).length).toBeGreaterThan(0)
     expect(dictionary.no_students(SAMPLE_PARAMS.no_students).length).toBeGreaterThan(0)
     expect(dictionary.preamble_skipped(SAMPLE_PARAMS.preamble_skipped).length).toBeGreaterThan(0)
     expect(dictionary.single_field_row(SAMPLE_PARAMS.single_field_row).length).toBeGreaterThan(0)

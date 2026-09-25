@@ -5,6 +5,8 @@ const plural = (count: number, suffix: string) => (count > 1 ? suffix : '')
 
 const fr: Dictionary<CsvIssueParams> = {
   csv_syntax: () => 'Guillemet non fermé : la suite du fichier ne peut pas être lue.',
+  legacy_encoding: () =>
+    "Fichier lu en Windows-1252 (export Excel) : vérifiez les accents dans l'aperçu.",
   no_students: () =>
     'Aucun étudiant valide dans ce fichier (il faut un nom et un prénom par ligne).',
   preamble_skipped: ({ count }) =>
@@ -17,6 +19,7 @@ const fr: Dictionary<CsvIssueParams> = {
 
 const en: Dictionary<CsvIssueParams> = {
   csv_syntax: () => 'Unclosed quote: the rest of the file cannot be read.',
+  legacy_encoding: () => 'File read as Windows-1252 (Excel export): check accents in the preview.',
   no_students: () =>
     'No valid student in this file (each line needs a last name and a first name).',
   preamble_skipped: ({ count }) => `${count} line${plural(count, 's')} before the header ignored.`,

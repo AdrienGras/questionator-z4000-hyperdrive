@@ -3,6 +3,7 @@ type NoParams = Record<string, never>
 /** Paramètres par code (D18) ; le numéro de ligne est porté par `CsvIssue.line`. */
 export type CsvIssueParams = {
   csv_syntax: NoParams
+  legacy_encoding: NoParams
   no_students: NoParams
   preamble_skipped: { count: number }
   single_field_row: NoParams

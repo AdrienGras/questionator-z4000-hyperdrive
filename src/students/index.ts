@@ -1,3 +1,5 @@
 export { parseStudentsCsv, type CsvStudent, type CsvParseResult } from './parse-csv'
 export type { CsvIssue, CsvIssueCode, CsvIssueParams } from './issues'
+export { csvWarning } from './issues'
 export { formatCsvIssue, CSV_ISSUE_MESSAGES } from './messages'
+export { decodeCsvBytes, type DecodedCsv } from './decode'
