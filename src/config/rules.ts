@@ -7,6 +7,7 @@ import {
   type ConfigIssueParams,
   type IssuePath,
 } from './issues'
+import { hasAtMostThreeDecimals, roundToMilli } from '../scoring/milli'
 import { THEME_TOKENS, type ParsedConfig } from './schema'
 
 export type CssSupports = (property: string, value: string) => boolean
@@ -20,12 +21,6 @@ type CssEntry = {
   value: string
   path: IssuePath
 }
-
-/** Les notes sont calculées au millième (D01) : on compare en millièmes entiers. */
-const toThousandths = (value: number) => Math.round(value * 1000)
-/** Un entier a toujours au plus 3 décimales ; au-delà de 2^53 / 1000, le calcul en millièmes déraille. */
-const hasAtMostThreeDecimals = (value: number) =>
-  Number.isInteger(value) || toThousandths(value) / 1000 === value
 
 function findDuplicates(
   entries: IdEntry[],
@@ -151,10 +146,10 @@ function checkReachableMax(config: ParsedConfig): ConfigIssue[] {
   if (scaleValues.length === 0) return []
   const { questionsPerStudent, maxRawScore } = config.scoring
   const reachable = questionsPerStudent * Math.max(...scaleValues)
-  return toThousandths(reachable) < toThousandths(maxRawScore)
+  return roundToMilli(reachable) < roundToMilli(maxRawScore)
     ? [
         configWarning('unreachable_max_score', ['scoring', 'maxRawScore'], {
-          reachable: toThousandths(reachable) / 1000,
+          reachable: roundToMilli(reachable) / 1000,
           maxRawScore,
         }),
       ]
@@ -165,9 +160,9 @@ function checkFinalScaleGrid(config: ParsedConfig): ConfigIssue[] {
   const { finalScale, rounding } = config.scoring
   const decimals = rounding?.decimals ?? CONFIG_DEFAULTS.rounding.decimals
   const step = rounding?.step ?? 10 ** -decimals
-  const stepThousandths = toThousandths(step)
+  const stepThousandths = roundToMilli(step)
   if (stepThousandths === 0) return []
-  return toThousandths(finalScale) % stepThousandths === 0
+  return roundToMilli(finalScale) % stepThousandths === 0
     ? []
     : [configWarning('final_scale_off_grid', ['scoring', 'finalScale'], { finalScale, step })]
 }
