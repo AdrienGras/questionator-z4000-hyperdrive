@@ -35,6 +35,11 @@ describe('toMilli / fromMilli', () => {
     expect(roundToMilli(1e20)).toBe(1e23)
     expect(roundToMilli(1.2344)).toBe(1234)
   })
+
+  test('toMilli(-0) ne renvoie jamais -0', () => {
+    expect(Object.is(toMilli(-0), 0)).toBe(true)
+    expect(Object.is(toMilli(-0.0001), 0)).toBe(true)
+  })
 })
 
 describe('gardes', () => {

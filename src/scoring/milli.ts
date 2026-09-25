@@ -31,7 +31,8 @@ export function roundToMilli(value: number): number {
 
 /** Seule conversion décimal → millièmes du moteur. */
 export function toMilli(value: number): Milli {
-  return asMilli(roundToMilli(value))
+  // `+ 0` normalise un éventuel -0 (ex. Math.round(-0.0001 * 1000)) en 0, sans toucher NaN/Infinity.
+  return asMilli(roundToMilli(value) + 0)
 }
 
 /** Seule conversion millièmes → décimal : affichage et export. */

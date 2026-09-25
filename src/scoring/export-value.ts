@@ -17,8 +17,10 @@ function absentValue(config: NormalizedConfig): number | string {
         )
       }
       return value
-    default:
-      throw new Error('Mode absent invalide')
+    default: {
+      const unreachable: never = config.absent.export
+      throw new Error(`Mode absent invalide : ${String(unreachable)}`)
+    }
   }
 }
 
