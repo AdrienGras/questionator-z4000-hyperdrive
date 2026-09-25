@@ -664,3 +664,37 @@ largement tout barème d'oral. La garde `isSafeInteger` ne sert plus qu'aux donn
 corrompues.
 
 **Reporté dans** : `PRODUCT.md` §5, §6.2, spec F03. Impacte F02, F03, F11.
+
+## D45 — Changement de schéma venu d'un autre onglet : fermeture propre, état `outdated` (2026-09-25)
+
+**Question** : une nouvelle version de l'app (PWA, mise à jour proposée et non imposée,
+D36) qui monte le schéma Dexie alors qu'un autre onglet tourne sur l'ancienne version.
+
+**Décision** : F04 intercepte `versionchange` : l'instance ferme sa connexion, passe à
+l'état `'outdated'` (hook `useDbStatus()`) et remplace le traitement par défaut de Dexie.
+Les écritures suivantes échouent avec `DatabaseClosedError`. Le message « recharger la
+page » est affiché par la feature de mise à jour PWA.
+
+**Pourquoi** : l'onglet qui monte de version n'est jamais bloqué, et l'ancien onglet a
+un état observable au lieu d'erreurs silencieuses en console.
+
+**Reporté dans** : spec F04. Impacte F04 et la feature PWA.
+
+## D46 — Contrat d'écriture : `createSession` refuse un doublon, mutator synchrone sur une copie (2026-09-25)
+
+**Question** : forme exacte des écritures de F04 (création, import, mutations).
+
+**Décision** :
+- `createSession(session)` reçoit une `Session` complète (construite par F06) et rejette
+  `SessionExistsError` si l'`id` existe ; `putSession` écrase (import F05, après
+  confirmation).
+- `updateSession(id, mutator)` : mutator synchrone `(Session) => Session`, appelé sur une
+  copie (`structuredClone`) de la session fraîchement lue dans la transaction ; un
+  changement d'`id` est refusé ; `updatedAt` posé par F04. Les contrôles métier se font
+  dans le mutator, jamais sur l'état affiché.
+
+**Pourquoi** : un import ne peut pas écraser une session par accident ; deux onglets
+examinateur appliquent leurs contrôles sur l'état réel ; une mutation en place ne peut
+pas corrompre la valeur lue.
+
+**Reporté dans** : spec F04. Impacte F05, F06, F09–F13.
