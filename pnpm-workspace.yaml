@@ -4,3 +4,8 @@ allowBuilds:
   # service worker file for consumers that use msw directly in the browser,
   # which this project does not do. No native build is needed.
   msw: false
+  # @swc/core is the parser of dependency-cruiser (`pnpm deps`), whose TypeScript
+  # parser does not support typescript@7 yet. The native binary ships as an
+  # optional dependency (@swc/core-<platform>); the postinstall script only
+  # checks it and falls back to a WASM build, which is not needed here.
+  '@swc/core': false
