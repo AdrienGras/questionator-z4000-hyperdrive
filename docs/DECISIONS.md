@@ -646,3 +646,21 @@ restent dans les unités de la config ; un absent n'a pas de note, seulement une
 exportée.
 
 **Reporté dans** : spec F03. Impacte F04, F11–F13, F15.
+
+## D44 — Valeurs de notation bornées à 10 000 (2026-09-25)
+
+**Question** : une config valide pour F02 (`maxRawScore` et `finalScale` à 10⁶) faisait
+sortir le moteur des entiers sûrs (10⁹ × 10⁹ millièmes²) : la garde de D21 aurait levé
+une exception en plein passage.
+
+**Décision** :
+- Erreur de validation `scoring_value_too_large` si une valeur de notation (barème,
+  `maxRawScore`, `finalScale`, `rounding.step`, `absent.value`) dépasse 10 000 en valeur
+  absolue.
+- Un ajustement valide est au plus `finalScale` en valeur absolue.
+
+**Pourquoi** : aucune config acceptée ne peut faire échouer le moteur ; 10 000 couvre
+largement tout barème d'oral. La garde `isSafeInteger` ne sert plus qu'aux données
+corrompues.
+
+**Reporté dans** : `PRODUCT.md` §5, §6.2, spec F03. Impacte F02, F03, F11.

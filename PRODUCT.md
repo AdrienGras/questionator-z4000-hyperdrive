@@ -55,7 +55,7 @@ Arrondi : le pas vaut `rounding.step` s'il est défini (exemple : `0.5` pour arr
 
 Précision et représentation numérique :
 
-- Toute valeur saisie ou configurée qui entre dans un calcul de note (valeurs de barème, `maxRawScore`, `finalScale`, `rounding.step`, `absent.value`, ajustement) a **au plus 3 décimales**. La config est rejetée sinon ; la saisie de l'ajustement est limitée à 3 décimales.
+- Toute valeur saisie ou configurée qui entre dans un calcul de note (valeurs de barème, `maxRawScore`, `finalScale`, `rounding.step`, `absent.value`, ajustement) a **au plus 3 décimales**. La config est rejetée sinon ; la saisie de l'ajustement est limitée à 3 décimales et, en valeur absolue, à `finalScale`. Les valeurs configurées sont bornées à 10 000 en valeur absolue.
 - Les notes sont manipulées en **millièmes entiers**. La conversion d'échelle ne produit pas forcément un nombre entier de millièmes (exemple : /20 avec un plafond à 7) : elle est conservée sous forme de **fraction exacte** (numérateur et dénominateur entiers) jusqu'à son arrondi au pas demandé (étape 3). Aucun calcul intermédiaire en virgule flottante.
 - La conversion en nombre décimal n'a lieu qu'à l'affichage et à l'export.
 
@@ -256,6 +256,7 @@ Règles de validation, en plus des types :
 - **Erreur** si le nombre total de questions de la config est inférieur à `questionsPerStudent + (skips.enabled ? skips.maxPerStudent : 0)`. Ce seuil garantit qu'un étudiant peut toujours terminer son passage, quitte à changer de catégorie. Une catégorie peut en revanche compter moins de questions que ce seuil : elle sera grisée pour un étudiant qui l'a épuisée (F09).
 - **Erreur** si `absent.export = "value"` sans `absent.value`.
 - **Erreur** si une valeur numérique de notation (barème, `maxRawScore`, `finalScale`, `rounding.step`, `absent.value`) a plus de 3 décimales (§5).
+- **Erreur** si une valeur numérique de notation (mêmes champs) dépasse 10 000 en valeur absolue (D44).
 - **Erreur** si un token de thème ne fait pas partie de la liste blanche.
 - **Erreur** sur toute clé inconnue, à tout niveau (schéma strict ; seule `$schema` est admise en plus des champs du tableau) : une faute de frappe dans un nom de champ ne doit jamais retomber silencieusement sur la valeur par défaut.
 - **Erreur** si `schemaVersion` est supérieure à celle que connaît l'application, avec un message invitant à recharger la page pour mettre l'application à jour.
