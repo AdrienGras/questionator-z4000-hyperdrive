@@ -70,7 +70,7 @@ Pendant le passage, le score cumulé affiché est la note brute. L'affichage de 
 - Deux colonnes : nom et prénom.
 - En-tête reconnu sans tenir compte de la casse, des accents, des espaces ni des tirets. Nom : `nom`, `nom de famille`, `last name`, `lastname`, `surname`, `family name`. Prénom : `prenom`, `first name`, `firstname`, `given name`. L'en-tête est la première des cinq premières lignes non vides qui contient les deux colonnes ; l'ordre des colonnes est alors libre, et les lignes qui la précèdent (titre d'un export) sont ignorées avec un avertissement. Sans en-tête, toutes les lignes sont des données, dans l'ordre nom puis prénom.
 - Séparateur `,` ou `;` détecté automatiquement (les exports Excel en français utilisent souvent `;`).
-- UTF-8, avec ou sans BOM.
+- UTF-8, avec ou sans BOM. Un fichier qui n'est pas de l'UTF-8 valide (export « CSV » d'Excel en français) est relu en Windows-1252, avec un avertissement invitant à vérifier les accents.
 - L'ordre des lignes détermine l'ordre de passage.
 - Lignes vides ignorées. Espaces de début et de fin supprimés, casse conservée.
 - Aucune ligne isolée ne bloque, tout est visible dans l'aperçu : ligne avec un seul champ rempli ignorée avec un avertissement et son numéro de ligne ; colonnes en trop ignorées avec un avertissement unique ; doublons (nom et prénom identiques après normalisation) signalés par un avertissement.

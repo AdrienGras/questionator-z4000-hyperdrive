@@ -225,3 +225,27 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : au démarrage, le second processus réécrit `node_modules/.vite/deps` (« Re-optimizing dependencies because vite config has changed ») avant d'échouer sur le port ; le premier serveur garde en mémoire l'ancienne empreinte.
 **Workaround** : vérifier le port avant (`ss -ltnp | grep 5173`) et réutiliser le serveur existant ; pour une vérification indépendante, `pnpm build` puis `vite preview --port 4173` (aucune optimisation de dépendances). Si le mal est fait, redémarrer le serveur de dev cassé.
 **Référence** : `node_modules/.vite/`, `docs/ENVIRONMENT.md` (commandes).
+
+## PapaParse `delimitersToGuess` retombe sur `,` dès qu'une ligne est courte ou vide (2026-09-25)
+
+**Découvert** : F06, lecture d'un export Excel FR (`;`, BOM, CRLF, ligne vide finale).
+**Symptôme** : le fichier est découpé à la virgule : chaque ligne devient une seule cellule, donc des `single_field_row` en série.
+**Cause** : `guessDelimiter` exige une moyenne de plus de 1,99 champ par ligne sur l'échantillon ; une ligne vide finale, un préambule d'un mot ou une ligne à un champ la fait échouer, et PapaParse prend `,` par défaut.
+**Workaround** : `detectDelimiter` (`src/students/parse-csv.ts`) parse l'échantillon avec chaque candidat (`preview: 50`, guillemets respectés) et garde celui qui donne le plus de lignes à au moins deux cellules non vides ; égalité → `;`. Un comptage brut des caractères ne suffit pas (virgules d'une adresse ou d'un titre).
+**Référence** : `src/students/parse-csv.ts`, `src/students/parse-csv.test.ts`.
+
+## Un guillemet ouvrant mal placé dans un CSV avale toute la suite du fichier (2026-09-25)
+
+**Découvert** : revue de F06.
+**Symptôme** : `"Bob" Martin;Paul` produit `InvalidQuotes` puis `MissingQuotes` ; toutes les lignes suivantes finissent dans une seule cellule.
+**Cause** : comportement RFC 4180 de PapaParse : un guillemet en début de cellule ouvre un champ cité jusqu'au prochain guillemet.
+**Workaround** : toute erreur PapaParse de type `Quotes` donne `csv_syntax` (bloquant, avec numéro de ligne) plutôt que des étudiants faux. Les numéros de ligne dérivent aussi après un saut de ligne dans une cellule citée (cas accepté, documenté dans le code).
+**Référence** : `src/students/parse-csv.ts`.
+
+## L'export « CSV » d'Excel en français est en Windows-1252, pas en UTF-8 (2026-09-25)
+
+**Découvert** : revue finale de F06.
+**Symptôme** : `file.text()` décode en UTF-8 : « Prénom » devient « Pr�nom », l'en-tête n'est plus reconnu et devient un étudiant, sans aucune issue.
+**Cause** : seul le format « CSV UTF-8 » d'Excel écrit de l'UTF-8 (avec BOM) ; « CSV (séparateur : point-virgule) » écrit en Windows-1252.
+**Workaround** : lire les octets (`file.arrayBuffer()`), décoder avec `new TextDecoder('utf-8', { fatal: true })`, et en cas d'exception relire en `windows-1252` avec l'avertissement `legacy_encoding` (D58).
+**Référence** : `src/students/decode.ts`, `src/create/use-create-form.ts`.

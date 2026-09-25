@@ -864,3 +864,19 @@ doit pas écraser un nom choisi ; « première session » n'a pas de définition
 vidée, import de backup).
 
 **Reporté dans** : spec F06. Impacte F06.
+
+## D58 — CSV en Windows-1252 lu avec un avertissement, pas refusé (2026-09-25)
+
+**Question** : l'export « CSV (séparateur : point-virgule) » d'Excel en français, le plus
+courant, est en Windows-1252 ; lu comme de l'UTF-8, il donnait des noms corrompus et un
+faux étudiant pour l'en-tête, sans aucun message (§6.1 ne prévoyait que l'UTF-8).
+
+**Décision** : décodage en UTF-8 strict (`TextDecoder` `fatal`) ; en cas d'échec, repli sur
+Windows-1252 et avertissement `legacy_encoding` dans l'aperçu (« vérifiez les accents »).
+La config JSON reste en UTF-8.
+
+**Pourquoi** : refuser le fichier renverrait l'enseignant vers une manipulation d'Excel
+(« CSV UTF-8 ») pour un cas qu'on sait lire ; l'avertissement couvre le rare fichier dans un
+autre encodage 8 bits.
+
+**Reporté dans** : `PRODUCT.md` §6.1, spec F06 (revue finale). Impacte F06.

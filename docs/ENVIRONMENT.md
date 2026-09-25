@@ -18,7 +18,8 @@ Carte des paths, services, accès, commandes. À jour au fil des découvertes.
 - **Runtime** : navigateur uniquement, aucun backend. Node 24 (`.nvmrc`, via nvm) pour l'outillage ; pnpm 12.6.0 épinglé par `packageManager` (lancer `corepack pnpm …` si le pnpm global est plus ancien).
 - **Installé (F01)** : Vite 8, React 19, TypeScript 7 (natif), TanStack Router (hash, file-based), Tailwind 4, shadcn v4 (base-ui, preset Nova, icônes Tabler), Vitest 5 + jsdom, oxlint + oxlint-tsgolint, Prettier.
 - **Ajouté (F02)** : Zod 4.6, jsonc-parser (localisation des erreurs JSON), ajv 8 (dev, test du JSON Schema).
-- **Prévu** (`PRODUCT.md` §9) : Dexie, PapaParse, write-excel-file, react-markdown + Shiki, vite-plugin-pwa, Playwright.
+- **Ajouté (F04–F06)** : Dexie 4 + dexie-react-hooks, `fake-indexeddb` (dev), PapaParse 5 (lecture du CSV d'étudiants).
+- **Prévu** (`PRODUCT.md` §9) : write-excel-file, react-markdown + Shiki, vite-plugin-pwa, Playwright.
 - **Commandes principales** :
   - `nvm use && corepack pnpm install`
   - `pnpm dev` — serveur de dev (régénère `src/routeTree.gen.ts`)
