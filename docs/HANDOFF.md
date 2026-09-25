@@ -29,7 +29,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 La migration a été scriptée : 120 `git mv`, imports réécrits vers `@/`, imports de barrel éclatés symbole par symbole. Viennent ensuite `pnpm deps` (10 règles, chacune testée avec un fichier fautif) et deux règles oxlint (kebab-case, `../` interdit). La documentation suit : CONVENTIONS § « Arborescence et imports », D59, 4 QUIRKS, `CLAUDE.md`. `pnpm check` est vert (427 tests, identique à `main`), le build ne produit aucun avertissement, les chunks sont équivalents et le JSON Schema est identique octet pour octet. CI verte, Sonar : gate OK, 0 issue, 0 hotspot.
 
-**Trucs en suspens** : PR #32 à relire et merger ; la ligne INDEX indique « En revue », à passer à « Livré » au merge. Pas de vérification manuelle dans le navigateur : il n'y a aucun changement de comportement et les tests d'écran couvrent les routes. Toujours non vérifié depuis F04 : la survie des données à un vrai redémarrage du navigateur.
+**Trucs en suspens** : PR #32 mergée (`2eda85a`), #31 fermé. Pas de vérification manuelle dans le navigateur : il n'y a aucun changement de comportement et les tests d'écran couvrent les routes. Toujours non vérifié depuis F04 : la survie des données à un vrai redémarrage du navigateur.
 
 **Prochaine chose à creuser** : F07 (thème et langue, provider dans `src/app/`) ou F09 (écran de passage, `src/features/session/`, route mince + `getRouteApi`).
 
