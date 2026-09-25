@@ -193,3 +193,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : Vite ne charge que les modules importés depuis `main.tsx`.
 **Workaround** : `src/main.tsx` importe `@/db/db` en dev seulement. En prod, rien tant que F05 n'importe pas `@/db`.
 **Référence** : `src/main.tsx`.
+
+## Le premier `findBy*` d'un test rendu via le routeur dépasse 1 s sous la suite complète (2026-09-25)
+
+**Découvert** : F05, tâche 5 (accueil), en lançant `pnpm check`.
+**Symptôme** : le premier test de `src/home/HomePage.test.tsx` et le test de `/` dans `routes.test.tsx` passent seuls mais échouent en suite complète (« Unable to find role="heading" » après ~1050 ms), de façon déterministe.
+**Cause** : `autoCodeSplitting` charge le composant de la route par import dynamique ; sous 36 fichiers en parallèle, la première transformation de l'accueil et de ses composants base-ui prend ~2 s, au-delà du délai par défaut de 1 s de Testing Library.
+**Workaround** : `configure({ asyncUtilTimeout: 5000 })` dans `src/test/setup.ts`. Les menus et dialogues base-ui s'ouvrent bien avec `fireEvent.click` : `@testing-library/user-event` n'est pas nécessaire.
+**Référence** : `src/test/setup.ts`, `vite.config.ts` (`autoCodeSplitting`).

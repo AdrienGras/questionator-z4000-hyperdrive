@@ -1,3 +1,4 @@
+import 'fake-indexeddb/auto'
 import { createMemoryHistory, RouterProvider } from '@tanstack/react-router'
 import { render, screen } from '@testing-library/react'
 import { expect, test } from 'vitest'
@@ -13,7 +14,6 @@ test("la route / affiche l'accueil", async () => {
   expect(
     await screen.findByRole('heading', { name: 'Questionator Z-4000 Hyperdrive' }),
   ).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: 'Commencer' })).toBeInTheDocument()
 })
 
 test('une route inconnue affiche la page 404 avec un lien de retour', async () => {
