@@ -89,6 +89,22 @@ describe('normalize', () => {
     ])
   })
 
+  test('order mélangé présent/absent : la position 1-based sert de clé, égalité → position', () => {
+    const config = minimalConfig()
+    config.categories = [
+      { id: 'x', label: 'X', scale: [1], questions: question('x-1') },
+      { id: 'y', label: 'Y', scale: [1], order: 2, questions: question('y-1') },
+      { id: 'z', label: 'Z', scale: [1], questions: question('z-1') },
+      { id: 'w', label: 'W', scale: [1], order: 1, questions: question('w-1') },
+    ]
+    expect(normalize(config).categories.map(({ id, order }) => [id, order])).toEqual([
+      ['x', 1],
+      ['w', 2],
+      ['y', 3],
+      ['z', 4],
+    ])
+  })
+
   test('ne modifie pas la config d’entrée', () => {
     const config = minimalConfig()
     const snapshot = structuredClone(config)

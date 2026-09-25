@@ -75,7 +75,12 @@ function normalizeCategory(category: ParsedCategory, order: number): NormalizedC
   }
 }
 
-/** Tri par `order` puis par position ; sans `order`, la position (1…n) tient lieu d'ordre (D40). */
+/**
+ * Tri stable par clé puis par position (D40). La clé est `order` s'il est fourni, sinon la
+ * position 1-based de la catégorie dans le fichier : les deux partagent le même espace de valeurs,
+ * donc une catégorie sans `order` placée 1re a la clé 1 et vient à égalité avec un `order: 1`
+ * explicite. À clé égale, la position dans le fichier départage.
+ */
 function sortCategories(categories: ParsedCategory[]): ParsedCategory[] {
   return categories
     .map((category, index) => ({ category, index, key: category.order ?? index + 1 }))
