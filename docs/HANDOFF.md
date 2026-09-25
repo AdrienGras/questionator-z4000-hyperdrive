@@ -22,8 +22,8 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ## 2026-09-25 — F03 implémenté : moteur de notation
 
-**Dernière chose faite** : F03 (#3) implémenté sur `feat/f03-scoring` en subagent-driven
-development : spec + D42–D44, plan en 7 tâches, chaque tâche revue sans tour de correction,
+**Dernière chose faite** : F03 (#3) livré, PR #23 mergée (`364e451`). Implémenté en
+subagent-driven development sur `feat/f03-scoring` : spec + D42–D44, plan en 7 tâches, chaque tâche revue sans tour de correction,
 revue finale de branche (« with fixes ») puis une vague de 4 corrections (`-0`, accents des
 tests, exhaustivité `never`, `.vitest/` ignoré). `src/scoring/` : millièmes entiers
 (`Milli`), fraction exacte, arrondi entier au pas (vérifié contre un oracle BigInt),
@@ -31,12 +31,12 @@ tests, exhaustivité `never`, `.vitest/` ignoré). `src/scoring/` : millièmes e
 `isValidAdjustment`, `formatScore` ; types `Session`/`Student`/`Attempt` dans
 `src/domain/types.ts`. F02 réutilise `milli.ts` et rejette toute valeur de notation au-delà
 de 10 000 (`scoring_value_too_large`, D44). `pnpm check` vert (205 tests). Mémoire à jour
-(INDEX, QUIRKS ×2, BACKLOG, CONVENTIONS, PRODUCT §5/§6.2).
+(INDEX, QUIRKS ×3, BACKLOG, CONVENTIONS, PRODUCT §5/§6.2).
 
-**Trucs en suspens** : branche non poussée ; PR brouillon à ouvrir (`Closes #3`), puis
-`.claude/scripts/sonar-check.sh --pr <n> --wait` avant « Ready for review ». Les pieds de
+**Trucs en suspens** : cette PR de clôture (docs) à merger. SonarQube avait relevé 1 bug
+(S7727, `map(fonction)` dans la fixture d'étudiant), corrigé avant la revue. Les pieds de
 commit des tâches créditent le modèle réel de chaque sous-agent (Haiku 4.5, Sonnet 5), pas
-Opus : à réécrire par rebase si on veut l'uniformité. Toujours ouvert : quality gate Sonar
+Opus (laissé tel quel, historique mergé). Toujours ouvert : quality gate Sonar
 obligatoire sur `main` ?
 
 **Prochaine chose à creuser** : F04 (persistance Dexie des types de `src/domain/`, un document
