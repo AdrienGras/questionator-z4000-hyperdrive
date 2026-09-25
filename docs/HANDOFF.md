@@ -40,7 +40,7 @@ Défauts rattrapés pendant l'exécution :
 - vue projetée : passée en clair dans un second onglet, fermée puis rouverte, elle reste claire, et seule la clé `:present` a été écrite ;
 - accueil : aucun token, pas de `.dark`, et aucun chunk `icons-*` chargé à froid.
 
-**Trucs en suspens** : PR F07 à ouvrir, CI et Sonar à vérifier, puis revue. INDEX indique « En revue ». Les mineurs reportés sont dans BACKLOG § « Thème et langue » (garde-fou de build du chunk statique, synchronisation du mode entre onglets, cas limites de `LocaleProvider`, `isIconComponent`). Toujours non vérifié depuis F04 : la survie des données à un vrai redémarrage du navigateur.
+**Trucs en suspens** : PR #34 mergée (`35c5bcf`), #7 fermé. CI verte et SonarQube : gate OK, 0 issue, 0 hotspot, après D61 (dictionnaire exclu de la détection de duplication) et la fusion de deux tests identiques. Les mineurs reportés sont dans BACKLOG § « Thème et langue ». Toujours non vérifié depuis F04 : la survie des données à un vrai redémarrage du navigateur.
 
 **Prochaine chose à creuser** : F09 (écran de passage), qui remplace le corps de `ExaminerView` dans `src/features/session/`, ou F08 (rendu markdown).
 
