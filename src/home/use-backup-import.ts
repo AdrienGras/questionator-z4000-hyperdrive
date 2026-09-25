@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { parseBackup, type BackupIssue } from '@/backup'
+import type { BackupIssue } from '@/backup/issues'
+import type { BackupParseResult } from '@/backup/parse'
 import { getSession, putSession } from '@/db'
 import type { Session } from '@/domain/types'
 
@@ -7,11 +8,21 @@ export type ImportState =
   | { kind: 'idle' }
   | { kind: 'error'; fileName: string; issues: BackupIssue[] }
   | { kind: 'read-error'; fileName: string }
+  | { kind: 'load-error'; fileName: string }
   | { kind: 'conflict'; fileName: string; incoming: Session; existing: Session }
   | { kind: 'write-error'; fileName: string }
 
 /** Appel paresseux : `CSS` n'est lu qu'au moment de la validation (absent de jsdom). */
 const cssSupports = (property: string, value: string) => CSS.supports(property, value)
+
+/**
+ * Validateur chargé à la demande : il embarque toute la validation de config (schémas, noms
+ * d'icônes), inutile tant qu'aucun import n'est lancé, et trop lourd pour le chunk de l'accueil.
+ */
+async function validateBackup(text: string): Promise<BackupParseResult> {
+  const { parseBackup } = await import('@/backup/parse')
+  return parseBackup(text, { cssSupports })
+}
 
 /**
  * Machine d'états de l'import : lecture → validation → conflit d'`id` éventuel → écriture.
@@ -28,7 +39,13 @@ export function useBackupImport() {
       setState({ kind: 'read-error', fileName: file.name })
       return
     }
-    const result = parseBackup(text, { cssSupports })
+    let result: BackupParseResult
+    try {
+      result = await validateBackup(text)
+    } catch {
+      setState({ kind: 'load-error', fileName: file.name })
+      return
+    }
     if (!result.ok) {
       setState({ kind: 'error', fileName: file.name, issues: result.issues })
       return

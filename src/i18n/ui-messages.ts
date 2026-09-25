@@ -43,6 +43,7 @@ export type UiMessageParams = {
   import_drop_hint: NoParams
   import_error_title: { fileName: string }
   import_read_error: NoParams
+  import_load_error: NoParams
   import_conflict_title: NoParams
   import_conflict_body: { existing: string; date: string; imported: string }
   import_replace: NoParams
@@ -97,6 +98,7 @@ const fr: Dictionary<UiMessageParams> = {
   import_drop_hint: () => 'Déposez le backup ici',
   import_error_title: ({ fileName }) => `Import impossible : ${fileName}`,
   import_read_error: () => "Le fichier n'a pas pu être lu.",
+  import_load_error: () => "L'import n'a pas pu démarrer. Rechargez la page et réessayez.",
   import_conflict_title: () => 'Session déjà présente',
   import_conflict_body: ({ existing, date, imported }) =>
     `Une session « ${existing} » (modifiée le ${date}) porte le même identifiant. La remplacer par « ${imported} » ?`,
@@ -148,6 +150,7 @@ const en: Dictionary<UiMessageParams> = {
   import_drop_hint: () => 'Drop the backup here',
   import_error_title: ({ fileName }) => `Cannot import ${fileName}`,
   import_read_error: () => 'The file could not be read.',
+  import_load_error: () => 'The import could not start. Reload the page and try again.',
   import_conflict_title: () => 'Session already exists',
   import_conflict_body: ({ existing, date, imported }) =>
     `A session "${existing}" (updated ${date}) has the same identifier. Replace it with "${imported}"?`,

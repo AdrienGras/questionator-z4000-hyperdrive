@@ -17,7 +17,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { formatBackupIssue, formatIssuePath, type BackupIssue } from '@/backup'
+import type { BackupIssue } from '@/backup/issues'
+import { formatBackupIssue, formatIssuePath } from '@/backup/messages'
 import type { Ui } from '@/i18n/use-ui'
 import { formatDateTime } from './format-date'
 import { useBackupImport, type ImportState } from './use-backup-import'
@@ -106,6 +107,8 @@ function errorView(state: ImportState, ui: Ui): ErrorView | null {
   if (state.kind === 'error') return { fileName: state.fileName, issues: state.issues }
   if (state.kind === 'read-error')
     return { fileName: state.fileName, issues: [], message: ui.text('import_read_error', {}) }
+  if (state.kind === 'load-error')
+    return { fileName: state.fileName, issues: [], message: ui.text('import_load_error', {}) }
   if (state.kind === 'write-error')
     return { fileName: state.fileName, issues: [], message: ui.text('write_error', {}) }
   return null

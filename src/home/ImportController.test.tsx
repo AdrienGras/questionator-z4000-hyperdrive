@@ -18,6 +18,19 @@ vi.mock('@/db', async (importOriginal) => ({
   useDbStatus: () => dbState.status,
   usePersistenceStatus: () => persistence.status,
 }))
+const parseLoad = vi.hoisted((): { fail: boolean } => ({ fail: false }))
+
+// Simule l'échec du chargement dynamique du validateur (chunk introuvable après un déploiement).
+vi.mock('@/backup/parse', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/backup/parse')>()
+  return {
+    ...actual,
+    get parseBackup() {
+      if (parseLoad.fail) throw new Error('chargement impossible')
+      return actual.parseBackup
+    },
+  }
+})
 vi.mock('@/backup/download', () => ({
   downloadText: vi.fn<(fileName: string, text: string) => void>(),
 }))
@@ -57,6 +70,7 @@ beforeEach(async () => {
   await db.sessions.clear()
   dbState.status = 'open'
   persistence.status = 'persisted'
+  parseLoad.fail = false
   vi.stubGlobal('CSS', { supports: () => true })
 })
 
@@ -148,6 +162,17 @@ describe('import de backup', () => {
     pick(input, file)
     const dialog = await screen.findByRole('dialog')
     expect(within(dialog).getByText("Le fichier n'a pas pu être lu.")).toBeVisible()
+    expect(await db.sessions.count()).toBe(0)
+  })
+
+  test('module de validation introuvable : message de chargement, rien écrit', async () => {
+    parseLoad.fail = true
+    const input = await renderImport()
+    pick(input, sessionFile(makeSession()))
+    const dialog = await screen.findByRole('dialog')
+    expect(
+      within(dialog).getByText("L'import n'a pas pu démarrer. Rechargez la page et réessayez."),
+    ).toBeVisible()
     expect(await db.sessions.count()).toBe(0)
   })
 

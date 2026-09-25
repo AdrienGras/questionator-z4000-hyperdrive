@@ -43,6 +43,7 @@ const SAMPLE: UiMessageParams = {
   import_drop_hint: {},
   import_error_title: { fileName: 'backup.json' },
   import_read_error: {},
+  import_load_error: {},
   import_conflict_title: {},
   import_conflict_body: { existing: 'Ada', date: '01/01/2026', imported: 'Bob' },
   import_replace: {},
