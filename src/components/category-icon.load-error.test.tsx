@@ -2,7 +2,7 @@ import { render } from '@testing-library/react'
 import { expect, test, vi } from 'vitest'
 import { CategoryIcon } from './category-icon'
 
-vi.mock('@tabler/icons-react', () => {
+vi.mock('@tabler/icons-react/dist/esm/icons/index.mjs', () => {
   throw new Error('chunk introuvable')
 })
 

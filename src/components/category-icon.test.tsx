@@ -3,7 +3,7 @@ import { forwardRef } from 'react'
 import { describe, expect, test, vi } from 'vitest'
 import { CategoryIcon, iconComponentName } from './category-icon'
 
-vi.mock('@tabler/icons-react', () => ({
+vi.mock('@tabler/icons-react/dist/esm/icons/index.mjs', () => ({
   IconBrandPhp: forwardRef<SVGSVGElement, { className?: string }>(
     function IconBrandPhp(props, ref) {
       return <svg ref={ref} data-testid="icon-brand-php" {...props} />

@@ -27,7 +27,11 @@ export function createIconLoader(
   }
 }
 
-const loadIcons = createIconLoader(() => import('@tabler/icons-react'))
+// Import profond (le paquet n'a pas de champ `exports`, donc autorisé) plutôt que le barrel
+// `@tabler/icons-react` : sinon Rollup regroupe ce chunk dynamique avec les imports statiques par
+// nom (`IconSun`, `IconDots`…) qui visent le même module, et le fait fuiter dans le bundle initial
+// (D37).
+const loadIcons = createIconLoader(() => import('@tabler/icons-react/dist/esm/icons/index.mjs'))
 
 function isIconComponent(value: unknown): value is IconComponent {
   // Composants Tabler : `forwardRef` (objet) ; une fonction reste acceptée.
