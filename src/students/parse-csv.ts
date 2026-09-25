@@ -33,19 +33,38 @@ function identityKey(lastName: string, firstName: string): string {
   return `${fold(lastName)}\u0000${fold(firstName)}`
 }
 
+function nonEmptyCellCount(cells: readonly string[]): number {
+  return cells.filter((cell) => cell.trim() !== '').length
+}
+
+/** Nombre de lignes (parmi un extrait) qu'un délimiteur candidat segmente en au moins 2 cellules non vides. */
+function scoreDelimiter(source: string, delimiter: ',' | ';'): number {
+  const preview = Papa.parse<string[]>(source, {
+    header: false,
+    skipEmptyLines: false,
+    delimiter,
+    preview: 50,
+  })
+  return preview.data.filter((cells) => nonEmptyCellCount(cells) >= 2).length
+}
+
 /**
- * Détecte le séparateur (`,` ou `;`) par comptage brut de caractères dans le texte entier.
+ * Détecte le séparateur (`,` ou `;`) en comparant, guillemets respectés, le nombre de lignes que
+ * chaque candidat segmente en au moins deux cellules non vides ; le plus consistant gagne. Égalité
+ * (aucun signal, p. ex. fichier à une seule colonne) : `;`, le séparateur des exports Excel FR.
  *
- * PapaParse propose `delimitersToGuess`, mais son algorithme de détection (comparaison de la
- * régularité du nombre de champs par ligne, sur un extrait) échoue dès que l'échantillon contient
- * des lignes courtes ou vides : ligne vide finale (export Excel), lignes de préambule à un seul
- * mot, ligne à un seul champ au milieu du fichier. Ce sont justement les cas réels visés ici, donc
- * un simple comptage de caractères est plus robuste que le devineur intégré.
+ * PapaParse propose `delimitersToGuess`, mais son algorithme interne (comparaison de la régularité
+ * du nombre de champs par ligne, sans tenir compte du sens des colonnes) échoue dès que
+ * l'échantillon contient des lignes courtes ou vides : ligne vide finale (export Excel), lignes de
+ * préambule à un seul mot, ligne à un seul champ au milieu du fichier. Un simple comptage de
+ * caractères bruts échoue à son tour dès qu'une colonne contient des virgules ou points-virgules
+ * non significatifs (préambule, adresse). Faire segmenter chaque candidat par PapaParse lui-même
+ * (guillemets respectés) et compter les lignes correctement découpées est robuste aux deux.
  */
 function detectDelimiter(source: string): ',' | ';' {
-  const semicolons = (source.match(/;/g) ?? []).length
-  const commas = (source.match(/,/g) ?? []).length
-  return semicolons > commas ? ';' : ','
+  const semicolonScore = scoreDelimiter(source, ';')
+  const commaScore = scoreDelimiter(source, ',')
+  return commaScore > semicolonScore ? ',' : ';'
 }
 
 /** Lit les lignes de données : construit les étudiants et signale doublons / lignes incomplètes / colonnes en trop. */

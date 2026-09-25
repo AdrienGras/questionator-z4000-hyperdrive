@@ -104,16 +104,41 @@ describe('parseStudentsCsv', () => {
     expect(names('Nom;Prénom\n"Martin; Jr";Paul')).toEqual(['Martin; Jr Paul'])
   })
 
-  test('guillemet non fermé : erreur csv_syntax, aucun étudiant', () => {
+  test('cellule entre guillemets contenant le séparateur, fichier séparé par des virgules', () => {
+    expect(names('Nom,Prénom\n"Martin; Jr",Paul')).toEqual(['Martin; Jr Paul'])
+  })
+
+  test('guillemet non fermé : erreur csv_syntax avec son numéro de ligne, aucun étudiant', () => {
     const result = parseStudentsCsv('Nom;Prénom\n"Durand;Alice\nMartin;Bruno')
     expect(result.students).toEqual([])
-    expect(result.issues).toEqual([
-      expect.objectContaining({ severity: 'error', code: 'csv_syntax' }),
-    ])
+    expect(result.issues).toEqual([{ severity: 'error', code: 'csv_syntax', line: 2, params: {} }])
   })
 
   test('une seule colonne : lignes ignorées puis no_students, pas csv_syntax', () => {
     expect(codes('Durand\nMartin')).toEqual(['single_field_row', 'single_field_row', 'no_students'])
+  })
+
+  test('préambule séparé par des virgules devant un en-tête à points-virgules : le point-virgule gagne', () => {
+    const result = parseStudentsCsv(
+      'Classe BTS SIO 2, groupe A, 2026-2027\nNom;Prénom\nDurand;Alice',
+    )
+    expect(result.students).toEqual([{ lastName: 'Durand', firstName: 'Alice', line: 3 }])
+    expect(result.issues).toEqual([
+      { severity: 'warning', code: 'preamble_skipped', params: { count: 1 } },
+    ])
+  })
+
+  test('colonne adresse à virgules non significatives dans un fichier à points-virgules', () => {
+    const result = parseStudentsCsv(
+      'Nom;Prénom;Adresse\nDurand;Alice;Bât. B, 12, rue des Lilas, Paris\nMartin;Bruno;Chemin, Neuf',
+    )
+    expect(result.students).toEqual([
+      { lastName: 'Durand', firstName: 'Alice', line: 2 },
+      { lastName: 'Martin', firstName: 'Bruno', line: 3 },
+    ])
+    expect(result.issues).toEqual([
+      { severity: 'warning', code: 'extra_columns', params: { count: 2 } },
+    ])
   })
 
   test.each([
