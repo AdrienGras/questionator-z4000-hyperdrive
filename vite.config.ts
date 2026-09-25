@@ -25,6 +25,13 @@ function readPackageVersion(): string {
 export default defineConfig({
   base: '/questionator-z4000-hyperdrive/',
   define: { __APP_VERSION__: JSON.stringify(readPackageVersion()) },
+  build: {
+    // Le chunk séparé des icônes Tabler (chargé à la demande par `createIconLoader`, F07 tâche 5)
+    // pèse ~2,9 Mo minifiés : attendu et accepté par D37, pas un signe de mauvais découpage.
+    // Valeur fixée juste au-dessus du poids mesuré (2 888,84 kB) pour garder l'avertissement actif
+    // sur un futur chunk qui grossirait pour une autre raison.
+    chunkSizeWarningLimit: 2950,
+  },
   plugins: [
     tanstackRouter({
       target: 'react',
