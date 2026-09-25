@@ -1,10 +1,9 @@
 import 'fake-indexeddb/auto'
-import { createMemoryHistory, RouterProvider } from '@tanstack/react-router'
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { getSession, putSession, type DbStatus, type PersistenceStatus } from '@/db'
 import { db } from '@/db/db'
-import { createAppRouter } from '@/router'
+import { renderHome } from '@/test/render-home'
 import { makeSession } from '@/test/session-fixtures'
 import { makeStudent } from '@/test/student-fixtures'
 
@@ -22,12 +21,6 @@ vi.mock('@/db', async (importOriginal) => ({
 vi.mock('@/backup/download', () => ({ downloadText: download }))
 
 const ACTIONS = 'Actions pour « Oral de test »'
-
-function renderHome() {
-  render(
-    <RouterProvider router={createAppRouter(createMemoryHistory({ initialEntries: ['/'] }))} />,
-  )
-}
 
 /** Ouvre le menu de la carte « Oral de test » et choisit l'action. */
 async function chooseAction(action: string) {
