@@ -9,7 +9,7 @@ export function isColorMode(value: unknown): value is ColorMode {
   return typeof value === 'string' && (COLOR_MODES as readonly string[]).includes(value)
 }
 
-/** Choix memorise, sinon defaut de la portee ; `system` est tranche par la preference du systeme. */
+/** Choix mémorisé, sinon défaut de la portée ; `system` est tranché par la préférence du système. */
 export function resolveColorMode(
   stored: ColorMode | undefined,
   fallback: ColorMode,
@@ -20,13 +20,13 @@ export function resolveColorMode(
   return mode
 }
 
-/** Cle `localStorage` du choix manuel : globale hors session, par session et par vue en session (D26). */
+/** Clé `localStorage` du choix manuel : globale hors session, par session et par vue en session (D26). */
 export function colorModeKey(scope: 'global' | { sessionId: string; view: ColorModeView }): string {
   if (scope === 'global') return `${KEY_PREFIX}global`
   return `${KEY_PREFIX}${scope.sessionId}:${scope.view}`
 }
 
-/** `undefined` si la cle est absente, invalide ou si le stockage est inaccessible. */
+/** `undefined` si la clé est absente, invalide ou si le stockage est inaccessible. */
 export function readStoredMode(key: string): ColorMode | undefined {
   try {
     const value = localStorage.getItem(key)
@@ -40,6 +40,6 @@ export function writeStoredMode(key: string, mode: ColorMode): void {
   try {
     localStorage.setItem(key, mode)
   } catch {
-    // Stockage inaccessible (navigation privee, quota) : le choix ne vaut que pour la fenetre.
+    // Stockage inaccessible (navigation privée, quota) : le choix ne vaut que pour la fenêtre.
   }
 }

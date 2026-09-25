@@ -18,7 +18,7 @@ describe('resolveColorMode', () => {
     [undefined, 'system', true, 'dark'],
     [undefined, 'system', false, 'light'],
   ] as const)(
-    'choix %s, defaut %s, systeme sombre %s → %s',
+    'choix %s, défaut %s, système sombre %s → %s',
     (stored, fallback, systemDark, expected) => {
       expect(resolveColorMode(stored, fallback, systemDark)).toBe(expected)
     },
@@ -26,11 +26,11 @@ describe('resolveColorMode', () => {
 })
 
 describe('colorModeKey', () => {
-  test('cle globale', () => {
+  test('clé globale', () => {
     expect(colorModeKey('global')).toBe('questionator:color-mode:global')
   })
 
-  test('une cle par session et par vue', () => {
+  test('une clé par session et par vue', () => {
     expect(colorModeKey({ sessionId: 's1', view: 'examiner' })).toBe(
       'questionator:color-mode:s1:examiner',
     )
@@ -47,7 +47,7 @@ describe('isColorMode', () => {
   test.each(['light', 'dark', 'system'])('%s est un mode', (value) => {
     expect(isColorMode(value)).toBe(true)
   })
-  test.each(['blue', '', null, undefined, 1])("%s n'est pas un mode", (value) => {
+  test.each(['blue', '', null, undefined, 1])('%s n’est pas un mode', (value) => {
     expect(isColorMode(value)).toBe(false)
   })
 })
@@ -57,21 +57,21 @@ describe('stockage', () => {
     vi.restoreAllMocks()
   })
 
-  test('relit ce qui a ete ecrit', () => {
+  test('relit ce qui a été écrit', () => {
     writeStoredMode('k', 'dark')
     expect(readStoredMode('k')).toBe('dark')
   })
 
-  test('cle absente → undefined', () => {
+  test('clé absente → undefined', () => {
     expect(readStoredMode('absente')).toBeUndefined()
   })
 
-  test('valeur invalide ignoree', () => {
+  test('valeur invalide ignorée', () => {
     localStorage.setItem('k', 'blue')
     expect(readStoredMode('k')).toBeUndefined()
   })
 
-  test("un stockage qui leve ne fait pas planter la lecture ni l'ecriture", () => {
+  test('un stockage qui lève ne fait pas planter la lecture ni l’écriture', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('SecurityError')
     })
@@ -83,6 +83,6 @@ describe('stockage', () => {
   })
 })
 
-test('localStorage est vide entre les tests (setup)', () => {
+test('localStorage est vidé entre les tests (setup)', () => {
   expect(localStorage.getItem('k')).toBeNull()
 })
