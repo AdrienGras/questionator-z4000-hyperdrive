@@ -20,6 +20,21 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-25 — Arborescence de src/ réorganisée (#31)
+
+**Dernière chose faite** : #31 traité sur `refactor/31-arborescence`, PR #32. Recherche des standards (Bulletproof React, FSD, TanStack Router, shadcn) et état des lieux, puis arbitrage avec l'utilisateur (D59) :
+- `lib/` pour la technique, `domain/` pour le métier sans React, `features/<x>/` pour les écrans, plus `app/` et `testing/`.
+- Tout en kebab-case, aucun barrel.
+- dependency-cruiser ajouté à l'outillage.
+
+La migration a été scriptée : 120 `git mv`, imports réécrits vers `@/`, imports de barrel éclatés symbole par symbole. Viennent ensuite `pnpm deps` (10 règles, chacune testée avec un fichier fautif) et deux règles oxlint (kebab-case, `../` interdit). La documentation suit : CONVENTIONS § « Arborescence et imports », D59, 4 QUIRKS, `CLAUDE.md`. `pnpm check` est vert (427 tests, identique à `main`), le build ne produit aucun avertissement, les chunks sont équivalents et le JSON Schema est identique octet pour octet. CI verte, Sonar : gate OK, 0 issue, 0 hotspot.
+
+**Trucs en suspens** : PR #32 à relire et merger ; la ligne INDEX indique « En revue », à passer à « Livré » au merge. Pas de vérification manuelle dans le navigateur : il n'y a aucun changement de comportement et les tests d'écran couvrent les routes. Toujours non vérifié depuis F04 : la survie des données à un vrai redémarrage du navigateur.
+
+**Prochaine chose à creuser** : F07 (thème et langue, provider dans `src/app/`) ou F09 (écran de passage, `src/features/session/`, route mince + `getRouteApi`).
+
+**Notes pour future Claude** : avant de créer un fichier, lire CONVENTIONS § « Arborescence et imports » (lignes 14 à 54). Si `pnpm deps` casse, déplace le fichier au lieu d'assouplir la règle ; une exception s'écrit dans la règle avec sa raison. Si `pnpm deps` annonce « 0 modules », le parseur swc n'a pas tourné (QUIRKS). Un `vi.mock` vise le fichier qui déclare le symbole. Le ticket #31 a été créé à la main puis ajouté au projet n°3 : pour les prochains, utiliser `.claude/scripts/gh-ticket.sh`.
+
 ## 2026-09-25 — F06 implémenté : création de session
 
 **Dernière chose faite** : F06 (#6) livré, PR #29 mergée. Implémenté sur `feat/f06-creation` en subagent-driven
