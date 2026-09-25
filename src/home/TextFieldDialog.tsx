@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { Ui } from '@/i18n/use-ui'
 
-type TextFieldDialogProps = {
+type TextFieldDialogProps = Readonly<{
   ui: Ui
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -22,7 +22,7 @@ type TextFieldDialogProps = {
   initialValue: string
   required: boolean
   onSave: (value: string) => Promise<void>
-}
+}>
 
 /** Dialogue à un champ texte (nom de session, examinateur) ; valeur trimée avant `onSave`. */
 export function TextFieldDialog({ ui, open, onOpenChange, title, ...form }: TextFieldDialogProps) {
@@ -40,10 +40,11 @@ export function TextFieldDialog({ ui, open, onOpenChange, title, ...form }: Text
   )
 }
 
-type TextFieldFormProps = Pick<
-  TextFieldDialogProps,
-  'ui' | 'label' | 'initialValue' | 'required' | 'onSave'
-> & { onClose: () => void }
+type TextFieldFormProps = Readonly<
+  Pick<TextFieldDialogProps, 'ui' | 'label' | 'initialValue' | 'required' | 'onSave'> & {
+    onClose: () => void
+  }
+>
 
 function TextFieldForm({ ui, label, initialValue, required, onSave, onClose }: TextFieldFormProps) {
   const { text } = ui

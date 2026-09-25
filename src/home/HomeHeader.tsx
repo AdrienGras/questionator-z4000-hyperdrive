@@ -5,12 +5,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { usePersistenceStatus } from '@/db'
 import type { Ui } from '@/i18n/use-ui'
 
-type HomeHeaderProps = {
+type HomeHeaderProps = Readonly<{
   ui: Ui
   storageAvailable: boolean
   importDisabled: boolean
   onImport: () => void
-}
+}>
 
 export function HomeHeader({ ui, storageAvailable, importDisabled, onImport }: HomeHeaderProps) {
   const { text } = ui

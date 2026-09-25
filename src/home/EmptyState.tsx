@@ -3,10 +3,10 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { Ui } from '@/i18n/use-ui'
 
-type EmptyStateProps = {
+type EmptyStateProps = Readonly<{
   ui: Ui
   onImport: () => void
-}
+}>
 
 export function EmptyState({ ui, onImport }: EmptyStateProps) {
   const { text } = ui

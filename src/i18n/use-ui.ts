@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { t, type Locale } from './index'
 import { detectBrowserLocale, readNavigatorLanguages } from './browser-locale'
 import { UI_MESSAGES, type UiMessageParams } from './ui-messages'
@@ -8,7 +8,7 @@ export function useUi(): {
   locale: Locale
   text: <K extends keyof UiMessageParams>(key: K, params: UiMessageParams[K]) => string
 } {
-  const [locale] = useState(() => detectBrowserLocale(readNavigatorLanguages()))
+  const locale = useMemo(() => detectBrowserLocale(readNavigatorLanguages()), [])
   const text = useCallback(
     <K extends keyof UiMessageParams>(key: K, params: UiMessageParams[K]) =>
       t(UI_MESSAGES, locale, key, params),

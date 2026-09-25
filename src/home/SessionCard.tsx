@@ -29,10 +29,10 @@ import { sessionProgress } from './progress'
 import { withExaminer } from './session-edits'
 import { TextFieldDialog } from './TextFieldDialog'
 
-type SessionCardProps = {
+type SessionCardProps = Readonly<{
   ui: Ui
   session: Session
-}
+}>
 
 type OpenDialog = 'rename' | 'examiner' | 'delete' | null
 

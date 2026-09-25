@@ -14,12 +14,12 @@ import type { Session } from '@/domain/types'
 import type { Ui } from '@/i18n/use-ui'
 import { exportSession } from './export-session'
 
-type DeleteDialogProps = {
+type DeleteDialogProps = Readonly<{
   ui: Ui
   session: Session
   open: boolean
   onOpenChange: (open: boolean) => void
-}
+}>
 
 /** Confirmation de suppression ; « Exporter un backup d'abord » laisse le dialogue ouvert. */
 export function DeleteDialog({ ui, session, open, onOpenChange }: DeleteDialogProps) {

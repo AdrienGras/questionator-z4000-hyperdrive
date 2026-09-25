@@ -5,12 +5,12 @@ import type { Ui } from '@/i18n/use-ui'
 import { EmptyState } from './EmptyState'
 import { SessionCard } from './SessionCard'
 
-type SessionListProps = {
+type SessionListProps = Readonly<{
   ui: Ui
   status: DbStatus
   sessions: Session[] | undefined
   onImport: () => void
-}
+}>
 
 /** États de la liste par priorité : outdated, unavailable, chargement, vide, cartes. */
 export function SessionList({ ui, status, sessions, onImport }: SessionListProps) {

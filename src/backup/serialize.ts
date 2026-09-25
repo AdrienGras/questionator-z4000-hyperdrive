@@ -16,23 +16,25 @@ export function serializeBackup(session: Session, now: Date = new Date()): strin
 }
 
 /**
- * Retire les tirets en tête/queue sans alternance ancrée des deux côtés (`^-+|-+$`) : signalée
- * super-linéaire par SonarQube (voir QUIRKS), on la remplace par deux passes ancrées séparées.
+ * Retire au plus un tiret de tête et un de queue, sans regex ancrée en fin (signalée
+ * super-linéaire par SonarQube, voir QUIRKS) : après le `replaceAll` de `slugify`, les tirets
+ * consécutifs sont déjà réduits à un seul, donc `startsWith`/`endsWith` + `slice` suffisent.
  */
-function trimDashes(value: string): string {
-  return value.replace(/^-+/, '').replace(/-+$/, '')
+function trimEdgeDash(value: string): string {
+  const withoutLeading = value.startsWith('-') ? value.slice(1) : value
+  return withoutLeading.endsWith('-') ? withoutLeading.slice(0, -1) : withoutLeading
 }
 
 function slugify(name: string): string {
-  const slug = trimDashes(
+  const collapsed = trimEdgeDash(
     name
       .normalize('NFD')
       .replaceAll(/\p{Diacritic}/gu, '')
       .toLowerCase()
       .replaceAll(/[^a-z0-9]+/g, '-'),
   )
-    .slice(0, SLUG_MAX_LENGTH)
-    .replace(/-+$/, '')
+  // La troncature peut faire retomber un tiret interne en position de queue : on le retire aussi.
+  const slug = trimEdgeDash(collapsed.slice(0, SLUG_MAX_LENGTH))
   return slug === '' ? 'session' : slug
 }
 
