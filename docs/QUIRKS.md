@@ -153,3 +153,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : 2.0005 n'est pas représentable (2.000499999…), le produit tombe juste sous .5 ; `Math.round` conserve le signe de zéro, et `Intl.NumberFormat` affiche le signe de `-0`.
 **Workaround** : ne jamais écrire de test sur une demie « exacte » à la 4ᵉ décimale ; `toMilli` normalise `-0` en `0`. Toute conversion décimal → millièmes passe par `toMilli` (moteur) ou `roundToMilli` (règles F02).
 **Référence** : `src/scoring/milli.ts`.
+
+## SonarQube refuse `tableau.map(fonction)` quand la fonction a un 2ᵉ paramètre (2026-09-25)
+
+**Découvert** : PR #23 (F03), `src/test/student-fixtures.ts`.
+**Symptôme** : bug MAJOR `typescript:S7727` (« Do not pass function directly to `.map(…)` ») et quality gate en échec (fiabilité), alors qu'oxlint et les tests passaient.
+**Cause** : `.map` passe aussi l'index et le tableau ; une fonction dont la signature accepte un 2ᵉ paramètre les recevrait par accident si elle évolue.
+**Workaround** : toujours une flèche explicite, `items.map((item, index) => build(item, index))`.
+**Référence** : `src/test/student-fixtures.ts`.

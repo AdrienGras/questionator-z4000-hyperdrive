@@ -40,7 +40,7 @@ export function makeStudent(
     order: 1,
     addedDuringSession: false,
     absent: false,
-    attempts: attempts.map(makeAttempt),
+    attempts: attempts.map((spec, index) => makeAttempt(spec, index)),
     ...overrides,
   }
 }
