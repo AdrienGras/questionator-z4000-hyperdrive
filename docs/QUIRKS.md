@@ -281,3 +281,27 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : Vitest remplace un module par son identifiant résolu. Mocker le barrel ne touche pas le fichier que le code importe réellement.
 **Workaround** : un `vi.mock` par fichier source (`@/lib/db/hooks` pour `useDbStatus`, `@/lib/db/persistence` pour `usePersistenceStatus`, `@/lib/db/sessions` pour `createSession`).
 **Référence** : `src/features/home/home-page.test.tsx`, `src/features/create-session/hooks/use-create-form.test.ts`.
+
+## `import('@tabler/icons-react')` fait fuiter les 2,8 Mo d'icônes dans le bundle initial (2026-09-25)
+
+**Découvert** : F07, tâche 6 (vérification du build).
+**Symptôme** : `pnpm build` produit un chunk de 2,8 Mo au nom trompeur (`db-status-banner-*.js`), importé **statiquement** par l'accueil, `/new` et le validateur. `validate-*` tombe de 196 à 104 kB : les icônes ont été déplacées dans ce chunk partagé.
+**Cause** : l'import dynamique vise le même module barrel que les imports statiques par nom de l'UI (`IconSun`, `IconX`…). Rollup place alors le barrel et tout son espace de noms dans un chunk partagé par tous.
+**Workaround** : importer dynamiquement un module **distinct**, `import('@tabler/icons-react/dist/esm/icons/index.mjs')` (le paquet n'a pas de champ `exports`), déclaré dans `src/lib/tabler-icons-index.d.ts`. Contrôler après chaque build : `for f in dist/assets/*.js; do grep -l "from\"./icons-" $f; done` doit rester vide. `dist/esm/dynamic-imports.mjs` de Tabler 3.48 est inutilisable : il pointe vers des `.ts` absents.
+**Référence** : `src/components/category-icon.tsx`, `vite.config.ts` (`chunkSizeWarningLimit`).
+
+## Deux `LocaleProvider` imbriqués qui posent `lang` : le parent écrase l'enfant au montage (2026-09-25)
+
+**Découvert** : F07, tâche 2.
+**Symptôme** : une session `locale: 'en'` sous la racine `fr` donne `lang="fr"` dès le premier rendu.
+**Cause** : React exécute les effets (`useLayoutEffect` compris) de l'enfant **avant** ceux du parent. Si chaque niveau écrit sur le DOM, c'est le plus externe qui gagne.
+**Workaround** : un seul propriétaire écrit sur le DOM, et les niveaux imbriqués se déclarent auprès de lui par un état. C'est le principe des portées (D60), appliqué à `AppearanceProvider` et `LocaleProvider`. Une portée garde sa place dans la pile même quand elle est re-mémoïsée (`register` + `update` par `useId`).
+**Référence** : `src/lib/i18n/locale-context.tsx`, `src/app/appearance-provider.tsx`.
+
+## `vi.resetModules()` remet à zéro le cache d'un module : un test de « nouvelle tentative » passe alors même sur le code bogué (2026-09-25)
+
+**Découvert** : F07, tâche 5, tour de correction 1.
+**Symptôme** : un test qui simule un échec puis un succès de chargement passe avec et sans le correctif.
+**Cause** : `vi.resetModules()` réinstancie le module testé, et donc son cache au niveau du module. Le test simule un rechargement de page, pas un remontage dans la même session.
+**Workaround** : extraire la logique de cache dans une fabrique injectable (`createIconLoader(importIcons)`) et la tester directement avec un faux importeur. Vérifier que le test devient rouge quand on retire le correctif.
+**Référence** : `src/components/category-icon.loader.test.tsx`.
