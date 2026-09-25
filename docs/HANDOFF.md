@@ -22,7 +22,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ## 2026-09-25 — F05 implémenté : accueil et backup
 
-**Dernière chose faite** : F05 (#5) implémenté sur `feat/f05-accueil` en subagent-driven
+**Dernière chose faite** : F05 (#5) livré, PR #27 mergée. Implémenté sur `feat/f05-accueil` en subagent-driven
 development : spec + D48–D52, plan en 6 tâches, toutes approuvées en revue de tâche sans
 boucle de correction. En cours de route, le validateur est passé en chargement à la demande
 (chunk de l'accueil 515 → 316 kB). La revue finale a rendu « with fixes » : trois alertes
@@ -40,8 +40,8 @@ Chromium sur le build de prod (`vite preview`) : refus d'un fichier qui n'est pa
 strictement identique en base, export identique, renommage, suppression avec « exporter
 d'abord », conflit d'`id` avec Remplacer.
 
-**Trucs en suspens** : PR #27 en revue (CI verte, SonarQube : gate OK, 0 issue, 0 hotspot,
-après exclusion de `src/components/ui/` de l'analyse, D53), à merger. Toujours non vérifié depuis F04 : la
+**Trucs en suspens** : PR #27 mergée (`a10625a`, CI verte, SonarQube : gate OK, 0 issue,
+0 hotspot, après exclusion de `src/components/ui/` de l'analyse, D53). Toujours non vérifié depuis F04 : la
 survie des données à un vrai redémarrage du navigateur. Le serveur `pnpm dev` qui tournait
 sur 5173 avant la session est cassé (504 « Outdated Optimize Dep ») par ma tentative de
 second démarrage ; il suffit de le relancer (QUIRKS).
