@@ -22,7 +22,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ## 2026-09-25 — F06 implémenté : création de session
 
-**Dernière chose faite** : F06 (#6) implémenté sur `feat/f06-creation` en subagent-driven
+**Dernière chose faite** : F06 (#6) livré, PR #29 mergée. Implémenté sur `feat/f06-creation` en subagent-driven
 development : spec + D54–D57, plan en 5 tâches.
 - Deux corrections en revue de tâche : la détection du séparateur CSV (le comptage brut de
   `;`/`,` se trompait sur une ligne de titre ou une colonne d'adresse ; score par parse
@@ -40,8 +40,8 @@ Windows-1252, CSV avec préambule, ligne incomplète, doublon et colonnes en tro
 invalide (3 erreurs avec chemins, bouton bloqué, nom conservé), création jusqu'à la page de
 session, carte visible sur l'accueil.
 
-**Trucs en suspens** : PR #29 en revue (CI verte ; SonarQube : gate OK, 0 issue, 0 hotspot, après
-renommage d'un setter pour S6754), à merger. Pendant la tâche 2, un
+**Trucs en suspens** : PR #29 mergée (`4e388e3`, CI verte ; SonarQube : gate OK, 0 issue,
+0 hotspot, après renommage d'un setter pour S6754). Pendant la tâche 2, un
 glisser-déposer involontaire (bureau à distance RustDesk) a déplacé `src/i18n` vers
 `src/lib/i18n` ; restauré et nettoyé, sans trace dans l'historique. Toujours non vérifié
 depuis F04 : survie des données à un vrai redémarrage du navigateur.
