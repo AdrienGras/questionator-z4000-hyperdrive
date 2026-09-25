@@ -1,5 +1,4 @@
-// oxlint-disable-next-line import/no-named-as-default -- le seul export par défaut du module ; l'export nommé "Dexie" n'est que le namespace de types fusionné dessus.
-import Dexie from 'dexie'
+import { Dexie } from 'dexie'
 import type { Session } from '@/domain/types'
 import { db } from './db'
 import { SessionExistsError, SessionNotFoundError } from './errors'

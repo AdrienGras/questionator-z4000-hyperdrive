@@ -5,6 +5,7 @@ export type PersistenceStatus = 'persisted' | 'best-effort' | 'unsupported'
 
 let status: PersistenceStatus | undefined
 let firstRead: Promise<void> | undefined
+let refreshSeq = 0
 const listeners = new Set<() => void>()
 
 function storageManager(): StorageManager | undefined {
@@ -22,8 +23,17 @@ async function readStatus(): Promise<PersistenceStatus> {
   }
 }
 
+/**
+ * `subscribe` (premier abonnement) et `requestPersistentStorage` peuvent chacun déclencher un
+ * `refresh()` ; s'ils se chevauchent, rien ne garantit que le premier lancé se résout le premier.
+ * Le compteur de séquence ne laisse écrire `status` et notifier que le dernier `refresh()` lancé,
+ * pour qu'un `'best-effort'` périmé n'écrase jamais un `'persisted'` plus récent.
+ */
 async function refresh(): Promise<void> {
-  status = await readStatus()
+  const seq = ++refreshSeq
+  const next = await readStatus()
+  if (seq !== refreshSeq) return
+  status = next
   for (const listener of listeners) listener()
 }
 

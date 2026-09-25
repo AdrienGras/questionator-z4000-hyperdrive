@@ -1,4 +1,4 @@
-export { createDb, db, QuestionatorDb, type DbStatus } from './db'
+export { QuestionatorDb, type DbStatus } from './db'
 export { SessionExistsError, SessionNotFoundError } from './errors'
 export { useDbStatus, useSession, useSessions } from './hooks'
 export {
