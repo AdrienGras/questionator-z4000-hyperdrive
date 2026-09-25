@@ -157,6 +157,13 @@ describe('checkRules', () => {
     expect(only(config, 'too_many_decimals')).toEqual([])
   })
 
+  test('too_many_decimals : les grands entiers ne sont pas signalés', () => {
+    const config = minimalConfig()
+    config.scoring.maxRawScore = 1e20
+    config.scoring.finalScale = 1e20
+    expect(only(config, 'too_many_decimals')).toEqual([])
+  })
+
   test('invalid_css_value : couleurs de thème, radius et couleur de catégorie', () => {
     const config = minimalConfig()
     config.theme = { light: { primary: 'bad-color', radius: 'bad-radius' }, dark: { ring: 'red' } }
@@ -203,6 +210,18 @@ describe('checkRules', () => {
     config.categories[0]!.questions.push({ id: 'a-2', prompt: 'Q2' }, { id: 'a-3', prompt: 'Q3' })
     config.scoring.maxRawScore = 0.3
     expect(only(config, 'unreachable_max_score')).toEqual([])
+  })
+
+  test('unreachable_max_score : reachable arrondi au millième, sans bruit flottant', () => {
+    const config = minimalConfig()
+    config.scoring.questionsPerStudent = 3
+    config.categories[0]!.scale = [0, 0.1]
+    config.categories[0]!.questions.push({ id: 'a-2', prompt: 'Q2' }, { id: 'a-3', prompt: 'Q3' })
+    config.scoring.maxRawScore = 1
+    expect(only(config, 'unreachable_max_score')[0]?.params).toEqual({
+      reachable: 0.3,
+      maxRawScore: 1,
+    })
   })
 
   test('final_scale_off_grid avec un pas explicite (avertissement)', () => {

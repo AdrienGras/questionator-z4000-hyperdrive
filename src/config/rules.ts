@@ -23,7 +23,9 @@ type CssEntry = {
 
 /** Les notes sont calculées au millième (D01) : on compare en millièmes entiers. */
 const toThousandths = (value: number) => Math.round(value * 1000)
-const hasAtMostThreeDecimals = (value: number) => toThousandths(value) / 1000 === value
+/** Un entier a toujours au plus 3 décimales ; au-delà de 2^53 / 1000, le calcul en millièmes déraille. */
+const hasAtMostThreeDecimals = (value: number) =>
+  Number.isInteger(value) || toThousandths(value) / 1000 === value
 
 function findDuplicates(
   entries: IdEntry[],
@@ -151,7 +153,7 @@ function checkReachableMax(config: ParsedConfig): ConfigIssue[] {
   return toThousandths(reachable) < toThousandths(maxRawScore)
     ? [
         configWarning('unreachable_max_score', ['scoring', 'maxRawScore'], {
-          reachable,
+          reachable: toThousandths(reachable) / 1000,
           maxRawScore,
         }),
       ]
