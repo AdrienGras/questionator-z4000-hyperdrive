@@ -40,7 +40,8 @@ Windows-1252, CSV avec préambule, ligne incomplète, doublon et colonnes en tro
 invalide (3 erreurs avec chemins, bouton bloqué, nom conservé), création jusqu'à la page de
 session, carte visible sur l'accueil.
 
-**Trucs en suspens** : PR brouillon à ouvrir, puis SonarQube. Pendant la tâche 2, un
+**Trucs en suspens** : PR #29 en revue (CI verte ; SonarQube : gate OK, 0 issue, 0 hotspot, après
+renommage d'un setter pour S6754), à merger. Pendant la tâche 2, un
 glisser-déposer involontaire (bureau à distance RustDesk) a déplacé `src/i18n` vers
 `src/lib/i18n` ; restauré et nettoyé, sans trace dans l'historique. Toujours non vérifié
 depuis F04 : survie des données à un vrai redémarrage du navigateur.
