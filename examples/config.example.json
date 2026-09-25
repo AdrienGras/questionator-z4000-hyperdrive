@@ -1,0 +1,268 @@
+{
+  "$schema": "https://adriengras.github.io/questionator-z4000-hyperdrive/config.schema.json",
+  "schemaVersion": 1,
+  "locale": "fr",
+  "exam": {
+    "title": "Oral PHP",
+    "subject": "PHP",
+    "cohort": "B2 2026"
+  },
+  "scoring": {
+    "questionsPerStudent": 3,
+    "maxRawScore": 10,
+    "finalScale": 20,
+    "rounding": {
+      "mode": "nearest",
+      "decimals": 2,
+      "step": null
+    }
+  },
+  "absent": {
+    "export": "label",
+    "label": "ABS",
+    "value": 0
+  },
+  "skips": {
+    "enabled": true,
+    "maxPerStudent": 2,
+    "reasons": ["Question déjà vue", "Hors programme", "Énoncé ambigu"],
+    "allowFreeText": true
+  },
+  "presentation": {
+    "showCumulativeScore": true,
+    "finalScoreDisplay": "both",
+    "showStatsOnFinal": false,
+    "drawAnimation": true,
+    "defaultColorMode": "dark"
+  },
+  "theme": {
+    "light": {
+      "background": "oklch(0.980 0.013 310.5)",
+      "foreground": "oklch(0.234 0.095 287.8)",
+      "card": "oklch(1 0 0)",
+      "card-foreground": "oklch(0.234 0.095 287.8)",
+      "popover": "oklch(1 0 0)",
+      "popover-foreground": "oklch(0.234 0.095 287.8)",
+      "primary": "oklch(0.518 0.226 323.9)",
+      "primary-foreground": "oklch(1 0 0)",
+      "secondary": "oklch(0.934 0.037 300.8)",
+      "secondary-foreground": "oklch(0.234 0.095 287.8)",
+      "muted": "oklch(0.948 0.025 303.5)",
+      "muted-foreground": "oklch(0.456 0.103 294.2)",
+      "accent": "oklch(0.956 0.044 203.4)",
+      "accent-foreground": "oklch(0.450 0.077 224.3)",
+      "destructive": "oklch(0.577 0.215 27.3)",
+      "border": "oklch(0.869 0.060 303.6)",
+      "input": "oklch(0.869 0.060 303.6)",
+      "ring": "oklch(0.518 0.226 323.9)",
+      "chart-1": "oklch(0.518 0.226 323.9)",
+      "chart-2": "oklch(0.609 0.111 221.7)",
+      "chart-3": "oklch(0.646 0.194 41.1)",
+      "chart-4": "oklch(0.541 0.247 293.0)",
+      "chart-5": "oklch(0.592 0.218 0.6)",
+      "sidebar": "oklch(0.959 0.024 304.5)",
+      "sidebar-foreground": "oklch(0.234 0.095 287.8)",
+      "sidebar-primary": "oklch(0.518 0.226 323.9)",
+      "sidebar-primary-foreground": "oklch(1 0 0)",
+      "sidebar-accent": "oklch(0.934 0.037 300.8)",
+      "sidebar-accent-foreground": "oklch(0.234 0.095 287.8)",
+      "sidebar-border": "oklch(0.869 0.060 303.6)",
+      "sidebar-ring": "oklch(0.518 0.226 323.9)",
+      "radius": "0.75rem"
+    },
+    "dark": {
+      "background": "oklch(0.192 0.075 287.5)",
+      "foreground": "oklch(0.950 0.032 309.9)",
+      "card": "oklch(0.237 0.094 288.4)",
+      "card-foreground": "oklch(0.950 0.032 309.9)",
+      "popover": "oklch(0.237 0.094 288.4)",
+      "popover-foreground": "oklch(0.950 0.032 309.9)",
+      "primary": "oklch(0.687 0.252 323.9)",
+      "primary-foreground": "oklch(0.192 0.075 287.5)",
+      "secondary": "oklch(0.300 0.128 286.5)",
+      "secondary-foreground": "oklch(0.950 0.032 309.9)",
+      "muted": "oklch(0.269 0.113 287.1)",
+      "muted-foreground": "oklch(0.758 0.100 298.0)",
+      "accent": "oklch(0.797 0.134 211.5)",
+      "accent-foreground": "oklch(0.192 0.075 287.5)",
+      "destructive": "oklch(0.679 0.213 14.7)",
+      "border": "oklch(0.399 0.169 290.7)",
+      "input": "oklch(0.399 0.169 290.7)",
+      "ring": "oklch(0.687 0.252 323.9)",
+      "chart-1": "oklch(0.687 0.252 323.9)",
+      "chart-2": "oklch(0.797 0.134 211.5)",
+      "chart-3": "oklch(0.758 0.159 55.9)",
+      "chart-4": "oklch(0.606 0.219 292.7)",
+      "chart-5": "oklch(0.725 0.175 349.8)",
+      "sidebar": "oklch(0.237 0.094 288.4)",
+      "sidebar-foreground": "oklch(0.950 0.032 309.9)",
+      "sidebar-primary": "oklch(0.687 0.252 323.9)",
+      "sidebar-primary-foreground": "oklch(0.192 0.075 287.5)",
+      "sidebar-accent": "oklch(0.300 0.128 286.5)",
+      "sidebar-accent-foreground": "oklch(0.950 0.032 309.9)",
+      "sidebar-border": "oklch(0.399 0.169 290.7)",
+      "sidebar-ring": "oklch(0.687 0.252 323.9)",
+      "radius": "0.75rem"
+    }
+  },
+  "categories": [
+    {
+      "id": "facile",
+      "label": "Facile",
+      "scale": [0, 0.5, 1],
+      "color": "oklch(0.797 0.134 211.5)",
+      "icon": "leaf",
+      "order": 1,
+      "questions": [
+        {
+          "id": "facile-001",
+          "title": "== vs ===",
+          "tags": ["bases", "types"],
+          "prompt": "Quelle différence entre `==` et `===` en PHP ?\n\n```php\nvar_dump(0 == \"a\");\n```",
+          "answer": "- `==` compare après conversion de type\n- `===` compare valeur **et** type\n- Depuis PHP 8, `0 == \"a\"` vaut `false`"
+        },
+        {
+          "id": "facile-002",
+          "tags": ["bases"],
+          "prompt": "Quelle est la différence entre `echo` et `print` ?",
+          "answer": "- `echo` accepte plusieurs arguments et ne renvoie rien\n- `print` n'accepte qu'un argument et renvoie toujours `1`\n- Les deux sont des constructions du langage, pas des fonctions"
+        },
+        {
+          "id": "facile-003",
+          "title": "Parcourir un tableau associatif",
+          "tags": ["tableaux"],
+          "prompt": "Comment afficher chaque clé et chaque valeur de ce tableau ?\n\n```php\n$notes = ['Ada' => 18, 'Linus' => 15];\n```",
+          "answer": "```php\nforeach ($notes as $nom => $note) {\n    echo \"$nom : $note\\n\";\n}\n```"
+        },
+        {
+          "id": "facile-004",
+          "title": "Guillemets simples ou doubles",
+          "tags": ["chaînes"],
+          "prompt": "Qu'affiche ce code ?\n\n```php\n$nom = 'Ada';\necho 'Bonjour $nom';\necho \"Bonjour $nom\";\n```",
+          "answer": "- `Bonjour $nom` : pas d'interpolation entre guillemets simples\n- `Bonjour Ada` : les guillemets doubles interpolent les variables"
+        },
+        {
+          "id": "facile-005",
+          "title": "isset ou empty",
+          "tags": ["bases"],
+          "prompt": "Que renvoient `isset($x)` et `empty($x)` quand `$x = 0` ?",
+          "answer": "- `isset($x)` : `true`, la variable existe et n'est pas `null`\n- `empty($x)` : `true`, `0` est une valeur « vide »"
+        }
+      ]
+    },
+    {
+      "id": "normal",
+      "label": "Normal",
+      "scale": [0, 0.5, 1, 1.5, 2],
+      "color": "oklch(0.709 0.159 293.5)",
+      "icon": "brand-php",
+      "order": 2,
+      "questions": [
+        {
+          "id": "normal-001",
+          "title": "strict_types",
+          "tags": ["types"],
+          "prompt": "Que change `declare(strict_types=1);` en tête de fichier ?\n\n```php\ndeclare(strict_types=1);\n\nfunction double(int $n): int { return $n * 2; }\n\ndouble('4');\n```",
+          "answer": "- Sans la directive, `'4'` est converti en `4`\n- Avec, l'appel lève une `TypeError`\n- La directive porte sur les appels faits depuis ce fichier"
+        },
+        {
+          "id": "normal-002",
+          "title": "Opérateur ??",
+          "tags": ["opérateurs"],
+          "prompt": "Que font `??` et `??=` ?\n\n```php\n$page = $_GET['page'] ?? 1;\n$options['lang'] ??= 'fr';\n```",
+          "answer": "- `??` renvoie l'opérande gauche s'il existe et n'est pas `null`, sinon la droite\n- Pas d'avertissement sur une clé absente\n- `??=` n'affecte que si la valeur est absente ou `null`"
+        },
+        {
+          "id": "normal-003",
+          "title": "match ou switch",
+          "tags": ["contrôle"],
+          "prompt": "Quelles différences entre `match` et `switch` ?",
+          "answer": "- `match` est une expression : elle renvoie une valeur\n- Comparaison stricte (`===`)\n- Pas de `break`, pas de passage au cas suivant\n- Aucun cas correspondant : `UnhandledMatchError`"
+        },
+        {
+          "id": "normal-004",
+          "title": "Portée et closures",
+          "tags": ["fonctions"],
+          "prompt": "Pourquoi ce code affiche-t-il une erreur, et comment le corriger ?\n\n```php\n$taux = 1.2;\n$ttc = function (float $ht) {\n    return $ht * $taux;\n};\n```",
+          "answer": "- Une closure ne voit pas les variables du scope parent\n- Correction : `function (float $ht) use ($taux)`\n- Ou une fonction fléchée : `fn (float $ht) => $ht * $taux`"
+        },
+        {
+          "id": "normal-005",
+          "title": "Interface ou classe abstraite",
+          "tags": ["poo"],
+          "prompt": "Quand choisir une **interface** plutôt qu'une **classe abstraite** ?",
+          "answer": "- Interface : un contrat, aucune implémentation d'état, implémentations multiples possibles\n- Classe abstraite : code et état partagés, héritage simple\n- Une classe peut implémenter plusieurs interfaces mais n'étendre qu'une classe"
+        },
+        {
+          "id": "normal-006",
+          "title": "Arguments nommés",
+          "tags": ["fonctions", "php8"],
+          "prompt": "Que permet cet appel ?\n\n```php\nhtmlspecialchars($texte, double_encode: false);\n```",
+          "answer": "- Arguments nommés (PHP 8) : on passe un argument par son nom\n- On saute les paramètres optionnels intermédiaires\n- L'ordre des arguments nommés est libre"
+        }
+      ]
+    },
+    {
+      "id": "difficile",
+      "label": "Difficile",
+      "scale": [0, 1, 2, 3],
+      "color": "oklch(0.687 0.252 323.9)",
+      "icon": "flame",
+      "order": 3,
+      "questions": [
+        {
+          "id": "difficile-001",
+          "title": "self:: ou static::",
+          "tags": ["poo"],
+          "prompt": "Qu'affiche ce code, et pourquoi ?\n\n```php\nclass A {\n    public static function creer(): static { return new static(); }\n    public static function nom(): string { return self::class; }\n}\nclass B extends A {}\n\necho get_class(B::creer()), ' ', B::nom();\n```",
+          "answer": "- Affiche `B A`\n- `static` : late static binding, résolu sur la classe appelée\n- `self` : résolu sur la classe où la méthode est écrite"
+        },
+        {
+          "id": "difficile-002",
+          "title": "Générateurs",
+          "tags": ["fonctions"],
+          "prompt": "Quel intérêt a `yield` pour lire un fichier de plusieurs gigaoctets ?\n\n```php\nfunction lignes(string $chemin): Generator {\n    $f = fopen($chemin, 'r');\n    while (($ligne = fgets($f)) !== false) {\n        yield $ligne;\n    }\n    fclose($f);\n}\n```",
+          "answer": "- Les lignes sont produites une à une, à la demande\n- La mémoire reste constante, quel que soit le fichier\n- Le générateur s'utilise directement dans un `foreach`"
+        },
+        {
+          "id": "difficile-003",
+          "title": "Injection SQL",
+          "tags": ["sécurité", "pdo"],
+          "prompt": "Quel est le problème de ce code, et comment le corriger ?\n\n```php\n$sql = \"SELECT * FROM users WHERE email = '\" . $_POST['email'] . \"'\";\n$pdo->query($sql);\n```",
+          "answer": "- Injection SQL : l'entrée utilisateur est concaténée à la requête\n- Correction : requête préparée\n\n```php\n$stmt = $pdo->prepare('SELECT * FROM users WHERE email = ?');\n$stmt->execute([$_POST['email']]);\n```"
+        },
+        {
+          "id": "difficile-004",
+          "title": "Enums",
+          "tags": ["types", "php8"],
+          "prompt": "Que gagne-t-on avec une enum adossée ?\n\n```php\nenum Statut: string {\n    case Brouillon = 'draft';\n    case Publie = 'published';\n}\n\n$statut = Statut::from($ligne['statut']);\n```",
+          "answer": "- Un ensemble fermé de valeurs, vérifié par le typage\n- `from()` lève une `ValueError` sur une valeur inconnue, `tryFrom()` renvoie `null`\n- `->value` redonne la valeur stockée"
+        }
+      ]
+    },
+    {
+      "id": "cauchemar",
+      "label": "Cauchemar",
+      "scale": [0, 1, 2, 3, 4],
+      "color": "oklch(0.758 0.159 55.9)",
+      "icon": "skull",
+      "order": 4,
+      "questions": [
+        {
+          "id": "cauchemar-001",
+          "title": "Référence dans un foreach",
+          "tags": ["tableaux", "références"],
+          "prompt": "Qu'affiche ce code ?\n\n```php\n$t = [1, 2, 3];\nforeach ($t as &$v) {}\nforeach ($t as $v) {}\nprint_r($t);\n```",
+          "answer": "- Affiche `[1, 2, 2]`\n- Après la première boucle, `$v` reste une référence vers `$t[2]`\n- La seconde boucle écrit chaque valeur dans `$t[2]`\n- Correction : `unset($v)` après une boucle par référence"
+        },
+        {
+          "id": "cauchemar-002",
+          "title": "Chaînes numériques",
+          "tags": ["types", "comparaison"],
+          "prompt": "Que renvoient ces comparaisons en PHP 8 ?\n\n```php\nvar_dump('1e3' == '1000');\nvar_dump('abc' == 0);\nvar_dump(null == false);\n```",
+          "answer": "- `true` : deux chaînes numériques sont comparées comme des nombres\n- `false` : depuis PHP 8, une chaîne non numérique est comparée à `0` comme une chaîne\n- `true` : `null` et `false` sont tous deux « faux »"
+        }
+      ]
+    }
+  ]
+}

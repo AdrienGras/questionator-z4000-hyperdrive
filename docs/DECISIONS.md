@@ -556,3 +556,60 @@ sur le portable de l'examinateur (téléchargé une fois).
 
 **Reporté dans** : `PRODUCT.md` §6.2, F07, F17, §9 ; tickets #2, #7, #17. Remplace la
 bibliothèque et le seuil de repli de D16.
+
+## D38 — Règles croisées de la config : passe séparée après le parse structurel (2026-09-24)
+
+**Question** : brancher les règles croisées de F02 dans le schéma Zod (`superRefine`), ou
+dans une passe à part ?
+
+**Décision** : `checkRules(parsed, { cssSupports, iconNames })` est une fonction pure
+appelée seulement si `ConfigSchema.safeParse` a réussi. Elle renvoie directement des
+`ConfigIssue` avec leur sévérité.
+
+**Pourquoi** : même comportement que `superRefine` (D18), mais Zod ne sait pas porter
+d'avertissement, et le schéma exporté par `z.toJSONSchema()` reste purement structurel.
+
+**Reporté dans** : spec F02.
+
+## D39 — `schemaVersion` future : seule issue renvoyée (2026-09-24)
+
+**Question** : une config d'une version future doit-elle aussi lister ses autres erreurs ?
+
+**Décision** : pré-contrôle avant le parse strict. Si le JSON est un objet dont
+`schemaVersion` est un entier supérieur à `SCHEMA_VERSION`, `validateConfig` renvoie
+uniquement `unsupported_schema_version`.
+
+**Pourquoi** : une version future contient probablement des champs inconnus ; une
+avalanche d'`unknown_key` noierait le seul message utile (recharger la page, D05).
+
+**Reporté dans** : spec F02.
+
+## D40 — Config normalisée : catégories triées, `order` réécrit (2026-09-24)
+
+**Question** : la config normalisée garde-t-elle l'ordre du tableau, charge aux
+consommateurs de trier par `order` ?
+
+**Décision** : `normalize` trie les catégories par `order` puis par position dans le
+tableau, et réécrit `order` en 1…n. Deux `order` égaux ne sont pas une erreur.
+Cas mixte (certaines catégories avec `order`, d'autres sans) : une catégorie sans
+`order` prend sa position 1-based comme clé, dans le même espace que les valeurs
+explicites ; à clé égale, la position départage. Comportement figé par un test.
+
+**Pourquoi** : F09, le side panel et les exports lisent un ordre unique sans retrier.
+
+**Reporté dans** : spec F02.
+
+## D41 — `title` dérivé du `prompt` : première ligne, 60 caractères (2026-09-24)
+
+**Question** : comment dériver le `title` d'une question sans `title` (§6.2 : « début du
+`prompt` sans markdown ») ?
+
+**Décision** : blocs de code clôturés ignorés, première ligne non vide, markdown retiré
+par expressions régulières (code en ligne gardé sans backticks, liens réduits à leur
+texte, marqueurs `#`, `>`, listes et emphase supprimés), coupure à 60 caractères sur
+une frontière de mot suivie de `…`.
+
+**Pourquoi** : court et lisible dans le side panel et une cellule Excel ; pas de
+dépendance au moteur markdown de F08.
+
+**Reporté dans** : spec F02.

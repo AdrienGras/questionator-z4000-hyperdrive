@@ -108,3 +108,27 @@ gh pr ready <n>
 - Toujours ouvrir la PR en brouillon : SonarQube Cloud (analyse automatique) n'analyse que `main` et les PR, pas une branche poussée seule.
 - Chaque issue Sonar est corrigée, pas marquée « won't fix », sauf accord explicite. Un fichier généré (ex. `src/routeTree.gen.ts`) s'exclut dans `.sonarcloud.properties`.
 - Actions GitHub épinglées par **SHA de commit**, version en commentaire (`uses: owner/action@<sha> # vX.Y.Z`) — règle Sonar `githubactions:S7637`.
+
+## Code d'issue de config — ajout
+
+Un nouveau contrôle de config produit une issue typée, jamais du texte. Trois endroits, dans cet ordre :
+
+1. `src/config/issues.ts` : ajouter le code et le type exact de ses paramètres dans `ConfigIssueParams`.
+2. `src/config/messages.ts` : ajouter le message dans `fr` **et** `en` (le typage `Dictionary<ConfigIssueParams>` fait échouer `pnpm check` s'il en manque un).
+3. Le contrôle lui-même : structurel dans `schema.ts` (un `refine` avec `params: { code }`, converti par `from-zod.ts`) ou croisé dans `rules.ts` (`configError` / `configWarning`), plus un test qui déclenche le code.
+
+```ts
+// issues.ts
+untrimmed_id: { id: string }
+// messages.ts (fr)
+untrimmed_id: ({ id }) => `L’identifiant « ${id} » commence ou finit par une espace.`,
+// rules.ts
+configError('untrimmed_id', ['categories', c, 'id'], { id: category.id })
+```
+
+### Règles tacites
+
+- `src/config/` et `src/i18n/` n'utilisent que des **imports relatifs** : le plugin Vite les charge par `runnerImport` sans l'alias `@/`.
+- Un nouveau champ `z.int()` s'ajoute aussi à `INTEGER_FIELDS` (`from-zod.ts`).
+- Les défauts de §6.2 vivent dans `defaults.ts`, lus par les règles et la normalisation ; le schéma n'a aucun `.default()`.
+- **Valeurs CSS de la config (thème, couleurs) : uniquement via `element.style.setProperty(nom, valeur)`**, jamais concaténées dans du texte CSS ou une balise `<style>`. Le filtre de forme (D15) laisse passer `/*`, `\` et `url(` : il n'est sûr qu'avec `setProperty`.

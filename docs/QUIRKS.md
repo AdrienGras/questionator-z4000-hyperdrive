@@ -65,3 +65,67 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : le projet est en analyse automatique, qui ne couvre que la branche principale et les pull requests.
 **Workaround** : ouvrir la PR en brouillon, puis `.claude/scripts/sonar-check.sh --pr <n> --wait` avant de la passer en « Ready for review ».
 **Référence** : `.claude/scripts/sonar-check.sh`, `.sonarcloud.properties`.
+
+## Zod 4 : un champ absent n'est signalé que par `invalid_type` (ou `invalid_value` pour un littéral) (2026-09-25)
+
+**Découvert** : F02, conversion des issues Zod en codes propres.
+**Symptôme** : impossible de distinguer « champ manquant » de « mauvais type » à partir de l'issue seule ; un `schemaVersion` absent sortait en « valeur non autorisée ».
+**Cause** : Zod 4 ne reporte pas l'entrée dans l'issue (`reportInput` désactivé) ; un `z.literal` absent donne `invalid_value`.
+**Workaround** : relire la valeur au chemin de l'issue dans l'entrée brute (`valueAt`) : `undefined` → code `required`.
+**Référence** : `src/config/from-zod.ts`.
+
+## Zod 4 : `z.int()` renvoie `expected: 'number'` quand la valeur n'est pas un nombre (2026-09-25)
+
+**Découvert** : F02.
+**Symptôme** : une chaîne dans `questionsPerStudent` donnait « un nombre est attendu » au lieu de « un nombre entier ».
+**Cause** : `expected: 'int'` n'apparaît que pour un nombre non entier ; pour une non-number, Zod dit `number`.
+**Workaround** : liste `INTEGER_FIELDS` (champs `z.int()` du schéma, par nom) dans `from-zod.ts`. Tout nouveau `z.int()` doit y être ajouté.
+**Référence** : `src/config/from-zod.ts`, `src/config/schema.ts`.
+
+## V8 (Chrome, Node 24) ne donne aucune position pour la plupart des erreurs `JSON.parse` (2026-09-25)
+
+**Découvert** : revue finale de F02.
+**Symptôme** : virgule finale, commentaire, guillemets simples, valeur manquante → message « Unexpected token … » sans `position` ni `line/column`.
+**Cause** : format des messages de V8 récent ; seuls certains cas portent `at position N (line L column C)`. Le message cite aussi un extrait du source, qui peut contenir « position 3 ».
+**Workaround** : localiser avec `jsonc-parser` (offset de la première erreur, commentaires et virgules finales interdits) ; regex de repli ancrées en fin de message sur le libellé exact du moteur.
+**Référence** : `src/config/parse-json.ts`.
+
+## Vitest vide le contenu des imports CSS, même avec `?raw` (2026-09-25)
+
+**Découvert** : F02, test d'alignement `THEME_TOKENS` ↔ `src/index.css`.
+**Symptôme** : `import css from '../index.css?raw'` vaut `''` sous Vitest.
+**Cause** : Vitest ne traite que les CSS listés dans `test.css.include` ; les autres sont remplacés par une chaîne vide, requête `?raw` comprise.
+**Workaround** : `test: { css: { include: [/index\.css/] } }` dans `vite.config.ts`. Les JSON `?raw` fonctionnent sans réglage.
+**Référence** : `vite.config.ts`, `src/config/schema.test.ts`.
+
+## `setupFiles` de Vitest s'exécute aussi dans les fichiers `@vitest-environment node` (2026-09-25)
+
+**Découvert** : F02, premier test en environnement `node` (plugin Vite).
+**Symptôme** : `window is not defined` avant même le premier test.
+**Cause** : `src/test/setup.ts` touche `window` et tourne pour chaque fichier, quel que soit son environnement.
+**Workaround** : garder tout accès à `window` derrière `typeof window !== 'undefined'`.
+**Référence** : `src/test/setup.ts`, `vite/config-schema-plugin.test.ts`.
+
+## oxlint type-aware refuse les `as`, les `expect` conditionnels et les suppressions sur deux lignes (2026-09-25)
+
+**Découvert** : F02, sur presque chaque tâche.
+**Symptôme** : lint rouge sur du code pourtant correct.
+**Cause** : règles actives `typescript/no-unsafe-type-assertion` (tests compris), `unicorn/no-array-sort`, `unicorn/consistent-function-scoping`, `vitest/no-conditional-expect`, `vitest/valid-expect` (pas de 2ᵉ argument à `expect`). Un `// oxlint-disable-next-line <règle> -- <raison>` ne marche que sur **une seule ligne physique**.
+**Workaround** : gardes de type réelles (qui vérifient chaque niveau et lèvent une erreur), `.toSorted()`, helpers au niveau module, `if (!x) throw` avant `expect`. Suppression ciblée et justifiée seulement si un cast est inévitable.
+**Référence** : `.oxlintrc.json`, `src/config/*.test.ts`.
+
+## Un bloc ```php dans une chaîne JSON de PRODUCT.md casse l'extraction naïve du bloc ```json (2026-09-25)
+
+**Découvert** : F02, copie du thème Synthwave dans l'exemple.
+**Symptôme** : `JSON.parse` → « Unterminated string » en découpant le bloc d'exemple de §6.2 au premier ```.
+**Cause** : un `prompt` de l'exemple contient une clôture ``` dans une chaîne.
+**Workaround** : chercher la clôture seule sur sa ligne (`indexOf('\n```\n', début)`).
+**Référence** : `PRODUCT.md` §6.2, `examples/config.example.json`.
+
+## Importer un plugin Vite local sans extension déclenche l'avertissement `configLoader: 'native'` (2026-09-25)
+
+**Découvert** : F02.
+**Symptôme** : `(!) Your Vite config uses features that are unsupported by 'configLoader: native'` à chaque build et run de tests.
+**Cause** : `import … from './vite/config-schema-plugin'` sans extension dans `vite.config.ts`.
+**Workaround** : importer avec `.ts` et activer `allowImportingTsExtensions` dans `tsconfig.node.json` (déjà `noEmit`).
+**Référence** : `vite.config.ts`, `tsconfig.node.json`.

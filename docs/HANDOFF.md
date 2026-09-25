@@ -20,6 +20,32 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-25 — F02 implémenté : schéma de config et validation
+
+**Dernière chose faite** : F02 (#2) implémenté en subagent-driven development sur
+`feat/f02-config` : spec + D38–D41, plan en 7 tâches, chaque tâche revue (3 tours de
+correction au total), revue finale de branche puis une vague de 8 corrections (dont la
+localisation des erreurs JSON sous Chrome via `jsonc-parser`). `validateConfig` renvoie des
+issues typées sans texte, messages fr/en, config normalisée ; JSON Schema et exemple
+publiés par `vite/config-schema-plugin.ts`. `pnpm check` (104 tests) et `pnpm build` verts,
+sans avertissement. Mémoire à jour (INDEX, QUIRKS ×8, BACKLOG, CONVENTIONS, ENVIRONMENT, D40).
+
+**Trucs en suspens** : PR brouillon F02 à ouvrir (`Closes #2`), CI, étape SonarQube Cloud,
+puis « Ready for review » et merge ; après merge, vérifier que
+`…/config.schema.json` et `…/config.example.json` répondent 200 sur Pages. Question toujours
+ouverte : rendre le quality gate Sonar obligatoire dans la protection de `main` ?
+
+**Prochaine chose à creuser** : F03 (moteur de notation) ou F06 (création de session, premier
+consommateur de `validateConfig` : `cssSupports` = `CSS.supports`, chargement paresseux du
+validateur, affichage des issues via `formatConfigIssue` + `formatPath`).
+
+**Notes pour future Claude** : dans `src/config/`, imports relatifs uniquement (runnerImport
+sans alias). Ajouter un code d'issue = `ConfigIssueParams` + fr/en + contrôle + test
+(CONVENTIONS). Tout nouveau `z.int()` va aussi dans `INTEGER_FIELDS`. Les valeurs CSS de la
+config ne passent que par `style.setProperty` (F07). oxlint type-aware est strict sur les
+`as` et les `expect` conditionnels : voir QUIRKS. Registre SDD du plan dans
+`.superpowers/sdd/2026-09-24-f02-config/` (ignoré par git, supprimé à la fin).
+
 ## 2026-09-24 — F01 livré : socle, CI, Pages
 
 **Dernière chose faite** : F01 (#1) implémenté en subagent-driven development (5 tâches du
