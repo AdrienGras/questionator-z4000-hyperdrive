@@ -87,6 +87,7 @@ corepack pnpm dlx shadcn@latest add <composant> -y
 - Code vendu dans `src/components/ui/` : ignoré par oxlint, formaté par Prettier ; on peut le modifier, mais toute personnalisation doit rester compatible avec un `add --overwrite`.
 - Un seul `cn`, dans `@/lib/utils`.
 - Après chaque `add` : vérifier que le CLI n'a pas réécrit l'import de `cn` ni ajouté la dépendance `cn` (QUIRKS 2026-09-25).
+- `label.tsx` : `htmlFor` destructuré et reposé explicitement sur `<label>` (SonarQube S6853 ne voit pas l'association via `...props`) ; à refaire après un `add --overwrite label`.
 - `DialogContent` du vendor affiche par défaut un bouton « Close » en anglais : toujours `showCloseButton={false}`, et fermer via un bouton traduit.
 - Couleurs uniquement via les tokens CSS (`bg-primary`, `text-foreground`…), jamais de couleur en dur : le thème de session (F07) surcharge ces tokens.
 
