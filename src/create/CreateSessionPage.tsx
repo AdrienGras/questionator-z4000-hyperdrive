@@ -1,5 +1,5 @@
 import { Link, useNavigate } from '@tanstack/react-router'
-import { useEffect, useId, useRef, type FormEvent } from 'react'
+import { useEffect, useId, useRef, type DragEvent, type FormEvent } from 'react'
 import { DbStatusBanner } from '@/components/DbStatusBanner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -9,7 +9,7 @@ import { useDbStatus } from '@/db'
 import type { UiMessageParams } from '@/i18n/ui-messages'
 import { useUi } from '@/i18n/use-ui'
 import { ConfigPreview } from './ConfigPreview'
-import { FileDropField } from './FileDropField'
+import { FileDropField, hasFiles } from './FileDropField'
 import { StudentsPreview } from './StudentsPreview'
 import { configSlotStatus, studentsSlotStatus } from './slot-status'
 import { useCreateForm, type FileSlot } from './use-create-form'
@@ -25,6 +25,19 @@ function slotErrorKey(slot: FileSlot<unknown>): keyof UiMessageParams | undefine
   if (slot.kind === 'read-error') return 'import_read_error'
   if (slot.kind === 'load-error') return 'create_validator_load_error'
   return undefined
+}
+
+// Garde de dépôt au niveau de la page : un fichier déposé hors des deux zones ne doit jamais être
+// ouvert par le navigateur (le formulaire serait perdu). Les zones gèrent leur propre dépôt et
+// s'exécutent avant, par propagation.
+function handlePageDragOver(event: DragEvent<HTMLElement>) {
+  if (!hasFiles(event)) return
+  event.preventDefault()
+  event.dataTransfer.dropEffect = 'none'
+}
+
+function handlePageDrop(event: DragEvent<HTMLElement>) {
+  event.preventDefault()
 }
 
 /** Écran de création d'une session (F06) : deux fichiers, nom, examinateur, aperçu. */
@@ -61,7 +74,12 @@ export function CreateSessionPage() {
   const bothEmpty = form.students.kind === 'empty' && form.config.kind === 'empty'
 
   return (
-    <main className="mx-auto flex min-h-svh max-w-5xl flex-col gap-6 p-4 sm:p-6">
+    // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- garde de dépôt (voir handlePageDragOver/handlePageDrop) : n'ajoute ni rôle ni interaction clavier, se contente d'empêcher le navigateur d'ouvrir le fichier hors des deux zones dédiées.
+    <main
+      onDragOver={handlePageDragOver}
+      onDrop={handlePageDrop}
+      className="mx-auto flex min-h-svh max-w-5xl flex-col gap-6 p-4 sm:p-6"
+    >
       <header className="flex flex-col gap-2">
         <Link to="/" className="self-start text-sm text-primary underline underline-offset-4">
           {text('back_home', {})}

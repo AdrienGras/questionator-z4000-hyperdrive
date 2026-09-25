@@ -118,6 +118,18 @@ describe('écran de création', () => {
     expect(screen.getByText('etudiants.csv')).toBeInTheDocument()
   })
 
+  test('dépôt hors des zones : navigateur empêché d’ouvrir le fichier, formulaire inchangé', async () => {
+    await renderPage()
+    const main = screen.getByRole('main')
+    const dragOverResult = fireEvent.dragOver(main, { dataTransfer: { types: ['Files'] } })
+    expect(dragOverResult).toBe(false)
+    fireEvent.drop(main, {
+      dataTransfer: { files: [new File([VALID_CSV], 'etudiants.csv')], types: ['Files'] },
+    })
+    expect(screen.queryByText('etudiants.csv')).not.toBeInTheDocument()
+    expect(submitButton()).toBeDisabled()
+  })
+
   test('config invalide à plusieurs erreurs : toutes affichées avec leur chemin', async () => {
     const { exam: _exam, ...withoutExam } = minimalConfig()
     const text = JSON.stringify({

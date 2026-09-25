@@ -40,7 +40,8 @@ const STATUS_LABELS: Record<
   errors: 'create_file_status_errors',
 }
 
-function hasFiles(event: DragEvent<HTMLElement>): boolean {
+/** Un fichier est survolé ou déposé (par opposition à du texte, une image glissée, etc.). */
+export function hasFiles(event: DragEvent<HTMLElement>): boolean {
   return Array.from(event.dataTransfer.types).includes('Files')
 }
 
