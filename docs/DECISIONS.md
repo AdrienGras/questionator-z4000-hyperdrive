@@ -913,3 +913,13 @@ autre encodage 8 bits.
 **Pourquoi** : F09 et F14 n'auront qu'à se brancher. Un hook par écran casserait dès que deux écrans s'imbriquent, car les effets des enfants s'exécutent avant ceux des parents. Des layouts sans chemin auraient forcé à déplacer les routes, pour le même problème en F15.
 
 **Reporté dans** : spec F07. Impacte F07, F09, F14, F15.
+
+## D61 — Dictionnaire d'interface exclu de la détection de duplication SonarQube (2026-09-25)
+
+**Question** : la PR F07 échouait sur la quality gate (`new_duplicated_lines_density` 4,3 % pour un seuil de 3 %), en grande partie à cause de `src/lib/i18n/ui-messages.ts`. Ce fichier comptait déjà 32 lignes « dupliquées » sur `main`, 70 après F07.
+
+**Décision** : `sonar.cpd.exclusions=src/lib/i18n/ui-messages.ts`. Le fichier reste analysé pour les issues. Les duplications réelles, comme deux tests identiques à la route près, se corrigent plutôt que de s'exclure.
+
+**Pourquoi** : les dictionnaires `fr` et `en` se reflètent par construction, car `Dictionary<P>` impose la parité des clés. La détection de Sonar ignore les littéraux et y voit donc toujours un bloc copié. Chaque nouvelle chaîne d'interface aggravait la mesure sans qu'il existe de code à factoriser.
+
+**Reporté dans** : `.sonarcloud.properties`. Impacte toutes les features qui ajoutent des chaînes d'interface.
