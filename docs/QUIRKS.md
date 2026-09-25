@@ -129,3 +129,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : `import … from './vite/config-schema-plugin'` sans extension dans `vite.config.ts`.
 **Workaround** : importer avec `.ts` et activer `allowImportingTsExtensions` dans `tsconfig.node.json` (déjà `noEmit`).
 **Référence** : `vite.config.ts`, `tsconfig.node.json`.
+
+## SonarQube signale les regex `\[([^\]]*)\]\(…\)` et `(.+?)…\1` comme super-linéaires (2026-09-25)
+
+**Découvert** : PR #21 (F02), analyse SonarQube Cloud.
+**Symptôme** : règles `typescript:S8786` (backtracking super-linéaire) et `S5843` (complexité > 20) sur les regex de nettoyage markdown de `derive-title.ts`, alors que le lint et les tests passaient.
+**Cause** : une classe qui n'exclut pas le délimiteur ouvrant, ou un `.+?` suivi d'une rétro-référence, relance le parcours à chaque position ; une alternance de marqueurs en une seule regex dépasse la complexité autorisée.
+**Workaround** : parcours linéaire à la main (`indexOf`) pour les liens et images ; classes excluant le délimiteur (`[^*]+?`) pour l'emphase ; plusieurs petites regex ancrées appliquées en boucle pour les marqueurs de bloc. Lancer `.claude/scripts/sonar-check.sh --pr <n> --wait` tôt : Sonar voit des choses qu'oxlint ne voit pas.
+**Référence** : `src/config/derive-title.ts`.
