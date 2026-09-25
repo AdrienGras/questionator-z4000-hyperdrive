@@ -14,7 +14,9 @@ export function useSessions(): Session[] | undefined {
 
 /** `undefined` pendant le chargement, `null` si la session est absente ou supprimée. */
 export function useSession(id: string): Session | null | undefined {
-  return useLiveQuery(() => getSession(id), [id])
+  const result = useLiveQuery(async () => ({ id, session: await getSession(id) }), [id])
+  // useLiveQuery garde le dernier résultat quand `id` change : on masque celui d'un autre id.
+  return result?.id === id ? result.session : undefined
 }
 
 /** `outdated` quand un autre onglet a monté le schéma (D45) : la page doit être rechargée. */

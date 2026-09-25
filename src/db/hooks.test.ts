@@ -50,6 +50,7 @@ describe('useSession', () => {
     })
     await waitFor(() => expect(result.current?.name).toBe('Session A'))
     rerender({ id: 'b' })
+    expect(result.current?.name).not.toBe('Session A')
     await waitFor(() => expect(result.current?.name).toBe('Session B'))
   })
 })
