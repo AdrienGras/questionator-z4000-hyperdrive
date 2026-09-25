@@ -613,3 +613,36 @@ une frontière de mot suivie de `…`.
 dépendance au moteur markdown de F08.
 
 **Reporté dans** : spec F02.
+
+## D42 — Formatage des notes : `raw` à 3 décimales, `final` au pas (2026-09-25)
+
+**Question** : le ticket F03 dérivait le nombre de décimales du pas d'arrondi pour toute
+note. Une brute hors grille (barème à 0,25, pas de 0,5 : brute 7,25) s'affichait alors
+« 7,3 ».
+
+**Décision** : `formatScore(milli, kind, config, locale)`. `kind: 'final'` (convertie,
+finale, ajustement) : décimales fixes dérivées du pas (« 14,0 », « 14,5 » au pas de 0,5).
+`kind: 'raw'` : 0 à 3 décimales, zéros de fin retirés (« 7,25 », « 7 »).
+
+**Pourquoi** : la brute s'affiche exacte ; les notes arrondies gardent un nombre de
+décimales constant, alignées dans une colonne.
+
+**Reporté dans** : spec F03. Impacte F09, F11–F13, F16.
+
+## D43 — Types de domaine : dates ISO, décimaux hors moteur, absent sans note (2026-09-25)
+
+**Question** : représentation des dates et des valeurs de note dans `Session`, `Student`,
+`Attempt` ; notes d'un étudiant absent dans `computeScores`.
+
+**Décision** :
+- Identifiants en `string`, dates en chaînes ISO 8601.
+- `Attempt.score` et `adjustment.value` restent des `number` décimaux, convertis en
+  millièmes à l'entrée du moteur seulement.
+- Absent : `converted` et `final` à `null`, `adjustment` à 0 ; la valeur d'absent ne passe
+  que par `exportedFinal`.
+
+**Pourquoi** : dates lisibles dans IndexedDB et un export JSON ; les données persistées
+restent dans les unités de la config ; un absent n'a pas de note, seulement une valeur
+exportée.
+
+**Reporté dans** : spec F03. Impacte F04, F11–F13, F15.
