@@ -413,7 +413,7 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 
 **Contenu.**
 - react-markdown + remark-gfm. Pas de HTML brut interprété (pas de `rehype-raw`). Liens ouverts dans un nouvel onglet (`rel="noopener noreferrer"`). Images autorisées ; une image distante ne s'affiche pas hors ligne (précisé dans le README).
-- Coloration syntaxique avec Shiki, limitée aux langages utiles (PHP, SQL, HTML, JS, JSON, bash), chargée à la demande et embarquée dans le build pour fonctionner hors ligne. `shiki/core` avec le moteur d'expressions régulières JavaScript (pas de WASM), langages importés explicitement, thèmes `github-light` / `github-dark` rendus en double via variables CSS (pas de re-rendu au changement de mode). Langage inconnu : texte brut.
+- Coloration syntaxique avec Shiki, chargée à la demande et embarquée dans le build pour fonctionner hors ligne. Langages : PHP, SQL, HTML, JS, JSON et bash en V1 (D27), étendus à tout le catalogue Shiki par F18 (D63). `shiki/core` avec le moteur d'expressions régulières JavaScript (pas de WASM), langages importés explicitement, thèmes `github-light` / `github-dark` rendus en double via variables CSS (pas de re-rendu au changement de mode). Langage inconnu : texte brut.
 - Taille de texte adaptée à la projection dans la vue projetée.
 
 **Critères d'acceptation.**
@@ -573,13 +573,28 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 
 **Objectif.** Fonctionner sans réseau après un premier chargement.
 
-**Contenu.** vite-plugin-pwa (Workbox) avec précache de tous les assets, dont les grammaires Shiki, write-excel-file, le chunk d'icônes Tabler (F07) et le chunk de graphiques des stats (F15). Scope du service worker réglé pour le sous-chemin GitHub Pages. Indication discrète quand une nouvelle version est disponible.
+**Contenu.** vite-plugin-pwa (Workbox) avec précache de tous les assets, dont toutes les grammaires Shiki (~1,3 Mo en gzip avec F18, D63), write-excel-file, le chunk d'icônes Tabler (F07) et le chunk de graphiques des stats (F15). Scope du service worker réglé pour le sous-chemin GitHub Pages. Indication discrète quand une nouvelle version est disponible.
 - Mise à jour proposée, jamais imposée (`registerType: 'prompt'`) : indicateur « Nouvelle version disponible — Recharger » dans la vue examinateur uniquement. Aucun rechargement automatique pendant une session.
 - La vue projetée n'affiche jamais l'indicateur. Si une nouvelle version ouvre la base avec un schéma Dexie plus récent, la vue projetée (lecture seule, reconstruite depuis la base) se recharge d'elle-même à l'événement `versionchange`.
 - Application installable : manifeste avec icônes carrées 192 et 512 px (recadrage d'un élément de la bannière, sinon monogramme aux couleurs Synthwave), `display: standalone`.
 - Critère réseau coupé vérifié par Playwright (mode hors ligne du contexte).
 
 **Critères d'acceptation.** Après un chargement en ligne, l'application permet, réseau coupé, de créer une session, de faire passer un étudiant, d'ouvrir la vue projetée et d'exporter un Excel.
+
+### F18 — Coloration de tous les langages
+
+**Objectif.** Colorer n'importe quel langage connu de Shiki, et plus seulement les six de D27.
+
+**Contenu.**
+- Catalogue `shiki/langs` (identifiants et alias, insensibles à la casse), chaque grammaire chargée à la demande au premier bloc qui l'utilise ; moteur JavaScript, pas de WASM. `text`, `txt`, `plain` et `plaintext` restent du texte brut.
+- Même reconnaissance des langages pour le rendu et pour la validation de config.
+- Création de session : avertissement non bloquant pour un bloc de code dont le langage n'est pas reconnu (il s'affichera en texte brut).
+- Hors ligne : toutes les grammaires sont pré-cachées par F17 (D63).
+
+**Critères d'acceptation.**
+- Un bloc ```` ```python ```` ou ```` ```yaml ```` est coloré, et seule sa grammaire est téléchargée.
+- Un langage inconnu s'affiche en texte brut et est signalé à la création de session.
+- Après F17, un bloc `python` est coloré hors ligne.
 
 ## 9. Stack technique
 

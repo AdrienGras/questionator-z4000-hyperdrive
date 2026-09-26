@@ -32,7 +32,7 @@ La revue finale n'a trouvé que 4 mineurs. Les ancres en nouvel onglet et les li
 
 `pnpm check` est vert (534 tests) et `pnpm build` ne donne aucun avertissement.
 
-**Trucs en suspens** : PR à ouvrir en brouillon, puis SonarQube (`sonar-check.sh --pr <n> --wait`) avant « Ready for review ». Aucun écran ne monte encore `<Markdown>` : pas de vérification visuelle possible avant F09. Toujours non vérifié depuis F04 : la survie des données à un vrai redémarrage du navigateur.
+**Trucs en suspens** : PR #37 mergée, #8 fermé, SonarQube : gate OK, 0 issue, 0 hotspot. F18 (#36, coloration de tous les langages Shiki, D63) est spécifiée (`docs/superpowers/specs/2026-09-26-f18-langages-design.md`), pas implémentée. Aucun écran ne monte encore `<Markdown>` : pas de vérification visuelle possible avant F09. Toujours non vérifié depuis F04 : la survie des données à un vrai redémarrage du navigateur.
 
 **Prochaine chose à creuser** : F09 (écran de passage), qui remplace le corps de `ExaminerView` et monte `<Markdown source={question.prompt} ui={ui} />` ; y trancher le fond des blocs `.shiki` en clair (BACKLOG § « Rendu markdown »).
 
