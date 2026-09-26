@@ -130,3 +130,22 @@
     @apply font-sans;
   }
 }
+
+/* Blocs Shiki (F08, D27) : chaque token porte --shiki-light et --shiki-dark (defaultColor: false),
+   ces règles choisissent la variable selon .dark, sans re-rendu React. Hors @layer : elles doivent
+   l'emporter sur les couleurs de pre/code de @tailwindcss/typography. */
+.shiki {
+  background-color: var(--shiki-light-bg);
+}
+
+.shiki span {
+  color: var(--shiki-light);
+}
+
+.dark .shiki {
+  background-color: var(--shiki-dark-bg);
+}
+
+.dark .shiki span {
+  color: var(--shiki-dark);
+}
