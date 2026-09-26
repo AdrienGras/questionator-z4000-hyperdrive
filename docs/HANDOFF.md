@@ -20,6 +20,24 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-26 — F08 implémenté : rendu markdown
+
+**Dernière chose faite** : F08 (#8) implémenté sur `feat/f08-markdown` en subagent-driven development. Spec et D62 d'abord (composant seul, sans branchement dans un écran ; rangement D59), puis un plan en 3 tâches, une revue par tâche, une revue finale et une vague de correction.
+- `src/lib/markdown/highlighter.ts` : `resolveLanguage` (6 langages + alias), `createHighlightLoader(loadCore, languages)` (cache par fermeture, nouvel essai après échec, comme `createIconLoader`), tokens réduits à `offset`/`content`/`style` ; Shiki uniquement par `import()`, moteur JavaScript, pas de WASM.
+- `src/components/markdown/code-block.tsx` : texte brut, puis tokens en `<span>` React (pas de `dangerouslySetInnerHTML`). Double thème par `--shiki-light`/`--shiki-dark` et les règles `.shiki` / `.dark .shiki` de `index.css`, hors `@layer`.
+- `src/components/markdown/markdown.tsx` : `<Markdown source ui size>`, react-markdown + remark-gfm, sans `rehype-raw`. Liens externes en nouvel onglet, ancres `#…` dans la page. Libellés des notes GFM traduits (`markdown_footnotes`, `markdown_footnote_back`).
+- `@tailwindcss/typography` : `.prose` branché sur les tokens shadcn, sans `prose-invert` (QUIRKS).
+
+La revue finale n'a trouvé que 4 mineurs. Les ancres en nouvel onglet et les libellés anglais des notes ont été corrigés ; le fond des blocs et la taille de projection sont au BACKLOG ; la spec a été alignée sur l'API livrée. La revue a aussi monté `<Markdown>` temporairement dans la route de session et construit : Shiki forme ses chunks (noyau 94 kB, moteur 58 kB, php 146 kB…), le chunk d'entrée n'y fait pas référence, aucun `.wasm`, aucun avertissement.
+
+`pnpm check` est vert (534 tests) et `pnpm build` ne donne aucun avertissement.
+
+**Trucs en suspens** : PR à ouvrir en brouillon, puis SonarQube (`sonar-check.sh --pr <n> --wait`) avant « Ready for review ». Aucun écran ne monte encore `<Markdown>` : pas de vérification visuelle possible avant F09. Toujours non vérifié depuis F04 : la survie des données à un vrai redémarrage du navigateur.
+
+**Prochaine chose à creuser** : F09 (écran de passage), qui remplace le corps de `ExaminerView` et monte `<Markdown source={question.prompt} ui={ui} />` ; y trancher le fond des blocs `.shiki` en clair (BACKLOG § « Rendu markdown »).
+
+**Notes pour future Claude** : `rootStyle` de Shiki est une chaîne, pas un objet. Avec pnpm, importer `shiki/langs/*.mjs` et `shiki/themes/*.mjs`, jamais `@shikijs/*` (QUIRKS). Charger `php` enregistre aussi html, css, javascript, sql, json et xml. Les tests qui montent un bloc `php` réel chargent Shiki en arrière-plan : attendre `data-highlighted="true"` avec `waitFor` pour garder une sortie propre. `<Markdown>` exige `ui` (convention « Composant d'écran traduit »).
+
 ## 2026-09-25 — F07 implémenté : thème et langue
 
 **Dernière chose faite** : F07 (#7) implémenté sur `feat/f07-theme` en subagent-driven development. D'abord la spec, avec D60 (F07 avant F09 : écrans de session provisoires et apparence par portées), puis un plan en 6 tâches, une revue finale et une vague de correction.

@@ -83,6 +83,8 @@ const SAMPLE: UiMessageParams = {
   preview_rounding: { mode: 'nearest', step: 0.5, decimals: 2 },
   preview_skips_disabled: {},
   preview_skips: { max: 1 },
+  markdown_footnotes: {},
+  markdown_footnote_back: { n: '1' },
 }
 
 function isUiMessageKey(key: string): key is keyof UiMessageParams {

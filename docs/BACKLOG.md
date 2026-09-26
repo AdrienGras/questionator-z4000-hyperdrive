@@ -61,3 +61,11 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Tests manquants de `LocaleProvider` : changement de la locale du propriétaire avec une déclaration active, deux imbriqués frères de même locale.
 - [ ] `isIconComponent` accepte tout objet non nul : vérifier `$$typeof` si Tabler exporte un jour autre chose que des composants sous un nom `Icon…`.
 - [ ] Faire disparaître l'avertissement `missing-typescript-transpiler` de `pnpm deps`, quand dependency-cruiser gérera typescript@7.
+
+## Rendu markdown
+
+- [ ] Fond des blocs colorés : `github-light` a un fond `#fff`, invisible sur une page blanche, alors que les blocs en texte brut (langage inconnu, chargement) gardent `--muted`. Le fond saute donc à la fin de la coloration. À trancher à l'écran en F09 : bordure sur `.shiki`, ou fond clair surchargé.
+- [ ] Taille de projection : `prose-2xl` est provisoire, à caler sur un vrai vidéoprojecteur en F14 (D62).
+- [ ] Régression des chunks : vérifier en F09 que le build garde Shiki hors du chunk d'entrée (vérifié en F08 par un montage temporaire : noyau 94 kB, moteur 58 kB, php 146 kB…).
+- [ ] Test de régression multi-ligne des offsets de `toHighlightedCode` (clés React), vérifié à la main par la revue finale.
+- [ ] Test du libellé de retour d'une note citée deux fois (suffixe `-2` de `footnoteBackLabel`, calqué sur `mdast-util-to-hast`, où `rereferenceIndex` commence à 1).

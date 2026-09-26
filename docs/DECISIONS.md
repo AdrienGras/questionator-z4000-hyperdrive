@@ -923,3 +923,17 @@ autre encodage 8 bits.
 **Pourquoi** : les dictionnaires `fr` et `en` se reflètent par construction, car `Dictionary<P>` impose la parité des clés. La détection de Sonar ignore les littéraux et y voit donc toujours un bloc copié. Chaque nouvelle chaîne d'interface aggravait la mesure sans qu'il existe de code à factoriser.
 
 **Reporté dans** : `.sonarcloud.properties`. Impacte toutes les features qui ajoutent des chaînes d'interface.
+
+## D62 — F08 livré en composant seul, rangé selon D59 (2026-09-26)
+
+**Question** : F08 exige qu'un bloc `php` soit « coloré dans les deux vues », alors qu'aucune vue n'affiche encore de question : les écrans de F07 sont provisoires. Le ticket range aussi le code dans `src/markdown/`, un emplacement antérieur à l'arborescence de D59.
+
+**Décision** :
+- F08 livre `<Markdown source size>` et ses tests, sans le brancher dans un écran, sans aperçu provisoire et sans page de démo. F09 vérifie la coloration dans la vue examinateur, F14 dans la vue projetée, F17 hors ligne.
+- Le composant va dans `src/components/markdown/` (partagé par deux features), le highlighter Shiki dans `src/lib/markdown/` (technique).
+- Les blocs sont colorés à partir des tokens (`codeToTokens`, `defaultColor: false`), rendus en `<span>` React : pas de `dangerouslySetInnerHTML`.
+- `size="projection"` vaut `prose-2xl` à titre provisoire, à caler sur un vrai écran en F14.
+
+**Pourquoi** : un aperçu provisoire serait du code jetable, que F09 remplacerait dès sa première tâche. Le rendu par tokens garde le composant sans injection HTML, et donc sans hotspot SonarQube.
+
+**Reporté dans** : spec F08. Impacte F08, F09, F14, F17.

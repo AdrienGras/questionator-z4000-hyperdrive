@@ -305,3 +305,19 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : `vi.resetModules()` réinstancie le module testé, et donc son cache au niveau du module. Le test simule un rechargement de page, pas un remontage dans la même session.
 **Workaround** : extraire la logique de cache dans une fabrique injectable (`createIconLoader(importIcons)`) et la tester directement avec un faux importeur. Vérifier que le test devient rouge quand on retire le correctif.
 **Référence** : `src/components/category-icon.loader.test.tsx`.
+
+## `@shikijs/langs` et `@shikijs/themes` introuvables avec pnpm : passer par `shiki/langs/*.mjs` (2026-09-26)
+
+**Découvert** : F08, sondage avant le plan.
+**Symptôme** : `import('@shikijs/themes/github-light')`, l'exemple de la doc Shiki, échoue avec `ERR_MODULE_NOT_FOUND`.
+**Cause** : ce sont des dépendances transitives de `shiki`, que pnpm (isolation stricte) ne rend pas résolubles depuis le projet.
+**Workaround** : importer les sous-chemins réexportés par `shiki` : `import('shiki/langs/php.mjs')`, `import('shiki/themes/github-dark.mjs')`. `rootStyle` de `codeToTokens` est par ailleurs une **chaîne** (`--shiki-light:#24292e;…`), pas un objet : `parseCssVariables` la découpe.
+**Référence** : `src/lib/markdown/highlighter.ts`.
+
+## `prose-invert` écrase les couleurs du thème de la config en mode sombre (2026-09-26)
+
+**Découvert** : F08, plan.
+**Symptôme** : avec `dark:prose-invert`, le texte markdown reprend les gris de Tailwind en sombre, quel que soit le thème de la config.
+**Cause** : `prose-invert` réaffecte les variables `--tw-prose-*` à ses propres couleurs `--tw-prose-invert-*`.
+**Workaround** : brancher `--tw-prose-*` sur les tokens shadcn (qui basculent déjà sous `.dark`) dans un bloc `.prose` **hors `@layer`**, pour qu'il l'emporte sur la couche `utilities` de `@tailwindcss/typography` ; pas de `prose-invert`.
+**Référence** : `src/index.css` (bloc `.prose`).
