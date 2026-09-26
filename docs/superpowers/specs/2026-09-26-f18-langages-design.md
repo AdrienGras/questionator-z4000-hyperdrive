@@ -1,7 +1,7 @@
 # F18 — Coloration de tous les langages — Design
 
 - **Date** : 2026-09-26
-- **Ticket** : à créer (F18)
+- **Ticket** : [#36](https://github.com/AdrienGras/questionator-z4000-hyperdrive/issues/36)
 - **Branche** : à créer à l'implémentation (`feat/f18-langages`)
 - **Statut** : spec validée en conversation, figée ici avant le plan d'implémentation.
 
