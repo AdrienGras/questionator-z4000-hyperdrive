@@ -937,3 +937,17 @@ autre encodage 8 bits.
 **Pourquoi** : un aperçu provisoire serait du code jetable, que F09 remplacerait dès sa première tâche. Le rendu par tokens garde le composant sans injection HTML, et donc sans hotspot SonarQube.
 
 **Reporté dans** : spec F08. Impacte F08, F09, F14, F17.
+
+## D63 — Coloration ouverte à tout le catalogue Shiki, pré-caché en entier (2026-09-26)
+
+**Question** : D27 limite la coloration à six langages (PHP, SQL, HTML, JS, JSON, bash). Un auteur de config qui écrit en Python, YAML ou Dockerfile obtient du texte brut, sans aucun signal. Peut-on ouvrir tout le catalogue Shiki sans perdre le hors-ligne ?
+
+**Décision** :
+- Tous les langages de `shiki/langs` (242 langages, 346 identifiants et alias), chacun chargé à la demande au premier bloc qui le demande. Un seul catalogue, celui de Shiki, lu par le highlighter et par le validateur de config ; pas de liste statique.
+- F17 pré-cache toutes les grammaires (~1,3 Mo en gzip, ~9 Mo en cache, mesuré sur shiki 4.4.3). Ni préchargement selon la config, ni cache runtime.
+- Langage inconnu : texte brut au rendu, et avertissement `unknown_code_language` (non bloquant) à la création de session. `text`, `txt`, `plain` et `plaintext` restent du texte brut, sans avertissement.
+- Le moteur JavaScript reste (pas de WASM) : les 346 entrées se chargent et tokenisent sans erreur, et le repli en texte brut couvre une incompatibilité future.
+
+**Pourquoi** : le pré-cache complet coûte moins de trois fois le chunk d'icônes Tabler déjà pré-caché. Il couvre aussi une session restaurée hors ligne sur une autre machine, ce qu'un préchargement selon la config ne couvrirait pas. L'avertissement attrape les fautes de frappe avant le jour de l'oral sans bloquer un pseudo-langage volontaire.
+
+**Reporté dans** : `PRODUCT.md` F08, F17, F18 ; spec F18. Amende D27 (liste des langages). Impacte F08, F17, F18.
