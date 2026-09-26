@@ -1,6 +1,7 @@
 import ReactMarkdown, { type Components, type ExtraProps } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { CodeBlock } from '@/components/markdown/code-block'
+import type { Ui } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
 
 type HastElement = NonNullable<ExtraProps['node']>
@@ -51,12 +52,26 @@ const components: Components = {
  */
 export function Markdown({
   source,
+  ui,
   size = 'default',
   className,
-}: Readonly<{ source: string; size?: 'default' | 'projection'; className?: string }>) {
+}: Readonly<{ source: string; ui: Ui; size?: 'default' | 'projection'; className?: string }>) {
   return (
     <div className={cn('prose max-w-none', size === 'projection' && 'prose-2xl', className)}>
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        remarkRehypeOptions={{
+          footnoteLabel: ui.text('markdown_footnotes', {}),
+          footnoteBackLabel: (referenceIndex, rereferenceIndex) =>
+            ui.text('markdown_footnote_back', {
+              n:
+                rereferenceIndex > 1
+                  ? `${referenceIndex + 1}-${rereferenceIndex}`
+                  : `${referenceIndex + 1}`,
+            }),
+        }}
+        components={components}
+      >
         {source}
       </ReactMarkdown>
     </div>

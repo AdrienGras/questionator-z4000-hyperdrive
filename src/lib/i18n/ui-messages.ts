@@ -84,6 +84,9 @@ export type UiMessageParams = {
   preview_rounding: RoundingParams
   preview_skips_disabled: NoParams
   preview_skips: { max: number }
+  markdown_footnotes: NoParams
+  /** `n` : numéro de la référence (1-based), avec suffixe `-n` de la re-référence si > 1. */
+  markdown_footnote_back: { n: string }
 }
 
 type RoundingMode = 'nearest' | 'up' | 'down'
@@ -211,6 +214,8 @@ const fr: Dictionary<UiMessageParams> = {
   preview_rounding: roundingFr,
   preview_skips_disabled: () => 'Skips désactivés',
   preview_skips: ({ max }) => `Skips autorisés : ${max} par étudiant`,
+  markdown_footnotes: () => 'Notes',
+  markdown_footnote_back: ({ n }) => `Revenir à la référence ${n}`,
 }
 
 const en: Dictionary<UiMessageParams> = {
@@ -301,6 +306,8 @@ const en: Dictionary<UiMessageParams> = {
   preview_rounding: roundingEn,
   preview_skips_disabled: () => 'Skips disabled',
   preview_skips: ({ max }) => `Skips allowed: ${max} per student`,
+  markdown_footnotes: () => 'Footnotes',
+  markdown_footnote_back: ({ n }) => `Back to reference ${n}`,
 }
 
 export const UI_MESSAGES: Record<Locale, Dictionary<UiMessageParams>> = { fr, en }
