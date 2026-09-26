@@ -44,14 +44,16 @@ export type SupportedLanguage = 'php' | 'sql' | 'html' | 'javascript' | 'json' |
 export function resolveLanguage(lang: string | undefined): SupportedLanguage | null
 // alias : js → javascript, sh / shell → bash ; insensible à la casse ; inconnu ou absent → null
 
-export type HighlightedToken = { content: string; style: Readonly<Record<string, string>> }
-export type HighlightedCode = {
-  lines: readonly (readonly HighlightedToken[])[]
-  rootStyle: Readonly<Record<string, string>>
-}
+export type CssVariables = Readonly<Record<`--${string}`, string>>
+export type HighlightedToken = Readonly<{ offset: number; content: string; style: CssVariables }>
+export type HighlightedLine = Readonly<{ offset: number; tokens: readonly HighlightedToken[] }>
+export type HighlightedCode = Readonly<{ lines: readonly HighlightedLine[]; rootStyle: CssVariables }>
 export type Highlight = (code: string, lang: SupportedLanguage) => Promise<HighlightedCode | null>
 
-export function createHighlightLoader(importShiki: () => Promise<ShikiModules>): Highlight
+export function createHighlightLoader(
+  loadCore: () => Promise<HighlighterLike>,
+  languages: Readonly<Record<SupportedLanguage, () => LanguageInput>>,
+): Highlight // `offset` sert de clé React stable
 export const highlight: Highlight // instance réelle, imports dynamiques
 ```
 
@@ -75,12 +77,13 @@ export const highlight: Highlight // instance réelle, imports dynamiques
 ### `<Markdown source size>`
 
 ```tsx
-export function Markdown(props: Readonly<{ source: string; size?: 'default' | 'projection'; className?: string }>): JSX.Element
+export function Markdown(props: Readonly<{ source: string; ui: Ui; size?: 'default' | 'projection'; className?: string }>): JSX.Element
+// `ui` : libellés traduits des notes GFM (footnoteLabel, footnoteBackLabel), convention « Composant d'écran traduit »
 ```
 
 - `react-markdown` avec `remarkPlugins={[remarkGfm]}`, **sans `rehype-raw`** : le HTML brut est affiché comme du texte. L'`urlTransform` par défaut est conservé, ce qui neutralise les URL `javascript:`.
 - Composants surchargés :
-  - `a` : `target="_blank"` et `rel="noopener noreferrer"` ;
+  - `a` : `target="_blank"` et `rel="noopener noreferrer"`, sauf pour les ancres internes (`#…`, notes GFM comprises) ;
   - `img` : `loading="lazy"`, `alt` conservé ;
   - `pre` et `code` : un bloc (un `code` dans un `pre`, identifié par `language-xxx`) va vers `<CodeBlock>`, qui prend le texte sans le `\n` final. Le code inline reste un `<code>` stylé par `prose`, sans coloration.
 - Taille :

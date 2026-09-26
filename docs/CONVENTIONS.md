@@ -360,3 +360,27 @@ export function XPage() {
 - Bascule de mode : `<ColorModeToggle ui={ui} />` dans l'en-tête de chaque écran.
 - Tests : `src/testing/setup.ts` simule `matchMedia` (`setSystemDark(true)` de `@/testing/match-media` pour simuler un système sombre) et vide `localStorage` après chaque test.
 - Vue projetée : ses composants ne reçoivent jamais la `Session` (`usePresentedConfig`, puis `toProjectedView` en F14).
+
+## Markdown et bloc de code — squelette
+
+Arbitrage : D27, D62 (F08).
+
+```tsx
+// src/features/<x>/components/question-prompt.tsx
+import { Markdown } from '@/components/markdown/markdown'
+import type { Ui } from '@/lib/i18n/use-ui'
+
+export function QuestionPrompt({ prompt, ui }: Readonly<{ prompt: string; ui: Ui }>) {
+  return <Markdown source={prompt} ui={ui} />            // vue examinateur
+  // vue projetée : <Markdown source={prompt} ui={ui} size="projection" />
+}
+```
+
+### Règles tacites
+
+- Tout markdown de la config passe par `<Markdown>` : jamais `rehype-raw`, jamais `dangerouslySetInnerHTML`. Le HTML brut s'affiche en texte, l'`urlTransform` par défaut neutralise `javascript:`.
+- Liens externes en nouvel onglet (`target="_blank" rel="noopener noreferrer"`), ancres `#…` (notes GFM) dans la page.
+- Couleurs : `.prose` est branché sur les tokens shadcn dans `src/index.css`. Ne pas ajouter `dark:prose-invert`, qui écraserait le thème de la config en sombre (QUIRKS).
+- Blocs de code : `CodeBlock` rend les tokens en `<span>` React ; chaque token porte `--shiki-light` / `--shiki-dark` (`defaultColor: false`) et les règles `.shiki` / `.dark .shiki` de `index.css` (hors `@layer`) choisissent la variable. La bascule de mode ne refait aucun rendu.
+- Ajouter un langage : l'ajouter à `SupportedLanguage`, à `LANGUAGE_ALIASES` et à `LANGUAGE_IMPORTS` dans `src/lib/markdown/highlighter.ts`, via `import('shiki/langs/<lang>.mjs')` (jamais `@shikijs/langs`, QUIRKS). Aucun `import` de valeur statique depuis `shiki`.
+- Tests : `CodeBlock` accepte `highlight` en prop (défaut : l'instance réelle) pour simuler échec et course sans `vi.mock` ; `createHighlightLoader(loadCore, languages)` se teste avec un faux highlighter.
