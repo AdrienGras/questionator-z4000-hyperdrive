@@ -20,11 +20,20 @@ function languageOf(code: HastElement): string | undefined {
 }
 
 const components: Components = {
-  a: ({ node: _node, children, ...props }) => (
-    <a {...props} target="_blank" rel="noopener noreferrer">
-      {children}
-    </a>
-  ),
+  // Les ancres internes (notes GFM, `#ancre`) restent dans la page : pas de nouvel onglet.
+  a: ({ node: _node, children, href, ...props }) => {
+    const isInternal = typeof href === 'string' && href.startsWith('#')
+    return (
+      <a
+        {...props}
+        href={href}
+        target={isInternal ? undefined : '_blank'}
+        rel={isInternal ? undefined : 'noopener noreferrer'}
+      >
+        {children}
+      </a>
+    )
+  },
   img: ({ node: _node, alt, ...props }) => <img {...props} alt={alt ?? ''} loading="lazy" />,
   // Un bloc de code est un `<code>` seul enfant d'un `<pre>` : il part vers CodeBlock. Le code
   // inline (`<code>` hors `<pre>`) garde le rendu par défaut, stylé par `prose`.

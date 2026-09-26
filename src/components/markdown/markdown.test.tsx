@@ -34,6 +34,27 @@ describe('Markdown', () => {
     expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   })
 
+  test('une ancre interne ne s’ouvre pas dans un nouvel onglet', () => {
+    render(<Markdown source="[x](#ancre)" />)
+
+    const link = screen.getByRole('link', { name: 'x' })
+    expect(link).toHaveAttribute('href', '#ancre')
+    expect(link).not.toHaveAttribute('target')
+    expect(link).not.toHaveAttribute('rel')
+  })
+
+  test('une note GFM : ni la référence ni le retour ne s’ouvrent dans un nouvel onglet', () => {
+    const { container } = render(<Markdown source={'Texte[^1]\n\n[^1]: La note.'} />)
+
+    const reference = container.querySelector('a[data-footnote-ref]')
+    expect(reference).not.toHaveAttribute('target')
+    expect(reference).not.toHaveAttribute('rel')
+
+    const back = container.querySelector('a[data-footnote-backref]')
+    expect(back).not.toHaveAttribute('target')
+    expect(back).not.toHaveAttribute('rel')
+  })
+
   test('une image est chargée paresseusement et garde son alt', () => {
     render(<Markdown source="![schéma MVC](https://example.org/mvc.png)" />)
 
