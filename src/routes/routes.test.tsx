@@ -75,6 +75,7 @@ test('la route /session/$sessionId affiche la session thémée', async () => {
   renderAt('/session/session-1')
   expect(await screen.findByRole('heading', { name: 'Oral de PHP' })).toBeInTheDocument()
   expect(screen.getByText('Question 1 / 1')).toBeInTheDocument()
+  expect(screen.getByText('Bases')).toBeInTheDocument()
   expect(document.documentElement.style.getPropertyValue('--primary')).toBe('rgb(1, 2, 3)')
 })
 

@@ -87,6 +87,14 @@ export type UiMessageParams = {
   passage_question_index: { current: number; total: number }
   /** `score` : score brut déjà mis en forme par l'appelant (`formatScore(raw, 'raw', config, locale)`). */
   passage_raw_score: { score: string }
+  passage_categories: NoParams
+  /** `max` : plus grande valeur du barème, déjà mise en forme par l'appelant. */
+  passage_category_max: { max: string }
+  passage_category_exhausted: NoParams
+  passage_answer: NoParams
+  passage_score_heading: NoParams
+  /** `value` : valeur du barème déjà mise en forme par l'appelant. */
+  passage_score_button: { value: string }
   passage_student_picker: NoParams
   passage_student_option: { name: string; status: string }
   passage_status_todo: NoParams
@@ -228,6 +236,12 @@ const fr: Dictionary<UiMessageParams> = {
   markdown_footnote_back: ({ n }) => `Revenir à la référence ${n}`,
   passage_question_index: ({ current, total }) => `Question ${current} / ${total}`,
   passage_raw_score: ({ score }) => `Score brut : ${score}`,
+  passage_categories: () => 'Choisir une catégorie',
+  passage_category_max: ({ max }) => `max ${max}`,
+  passage_category_exhausted: () => 'Plus de question disponible dans cette catégorie',
+  passage_answer: () => 'Éléments de réponse',
+  passage_score_heading: () => 'Note',
+  passage_score_button: ({ value }) => `Noter ${value}`,
   passage_student_picker: () => 'Étudiant',
   passage_student_option: ({ name, status }) => `${name} — ${status}`,
   passage_status_todo: () => 'à passer',
@@ -333,6 +347,12 @@ const en: Dictionary<UiMessageParams> = {
   markdown_footnote_back: ({ n }) => `Back to reference ${n}`,
   passage_question_index: ({ current, total }) => `Question ${current} / ${total}`,
   passage_raw_score: ({ score }) => `Raw score: ${score}`,
+  passage_categories: () => 'Choose a category',
+  passage_category_max: ({ max }) => `max ${max}`,
+  passage_category_exhausted: () => 'No questions left in this category',
+  passage_answer: () => 'Answer notes',
+  passage_score_heading: () => 'Score',
+  passage_score_button: ({ value }) => `Score ${value}`,
   passage_student_picker: () => 'Student',
   passage_student_option: ({ name, status }) => `${name} — ${status}`,
   passage_status_todo: () => 'to do',

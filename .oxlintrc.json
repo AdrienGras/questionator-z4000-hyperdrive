@@ -30,7 +30,10 @@
       "rules": { "unicorn/filename-case": "off" }
     },
     {
-      "files": ["src/domain/config/example.test.ts"],
+      "files": [
+        "src/domain/config/example.test.ts",
+        "src/features/session/passage-example.test.tsx"
+      ],
       "rules": { "no-restricted-imports": "off" }
     }
   ],
