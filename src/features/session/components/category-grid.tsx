@@ -64,10 +64,14 @@ export function CategoryGrid({ ui, config, student, disabled, onDraw }: Category
           onDraw(category.id)
         }
 
+        // `dark:` répété : sinon `dark:border-input` du variant outline l'emporte en sombre.
+        // Pas de `pointer-events-none` sur `aria-disabled` : le survol doit ouvrir l'infobulle,
+        // le clic est déjà neutralisé par `handleClick` (QUIRKS).
         const buttonClassName =
           'flex h-full w-full flex-col items-center gap-2 p-4 text-center whitespace-normal ' +
           'data-[colored=true]:border-[var(--category-color)] ' +
-          'aria-disabled:pointer-events-none aria-disabled:opacity-50'
+          'dark:data-[colored=true]:border-[var(--category-color)] ' +
+          'aria-disabled:cursor-not-allowed aria-disabled:opacity-50'
 
         return (
           <li key={category.id}>

@@ -345,3 +345,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : `findByText('Score brut : 0')` réussissait immédiatement sur l'état initial (déjà 0), avant que la note soit écrite et relue.
 **Workaround** : attendre un changement qui n'existe qu'après l'écriture (`waitForElementToBeRemoved` du panneau de question, nouvelle valeur différente de l'ancienne). Note : `toBeVisible()` de jest-dom sait qu'un contenu de `<details>` fermé est invisible, l'assertion est fiable.
 **Référence** : `src/features/session/passage-example.test.tsx`.
+
+## Les variantes `dark:` du `Button` outline écrasent un accent `data-[…]:border-*`, et `pointer-events-none` tue l'infobulle (2026-09-27)
+
+**Découvert** : F09, validation dans le navigateur (invisible en jsdom, qui ne calcule ni la cascade CSS ni `pointer-events`).
+**Symptôme** : en mode sombre, les cartes de catégorie gardaient toutes la bordure `--input` au lieu de leur couleur ; l'infobulle d'une catégorie épuisée ne s'ouvrait qu'au focus clavier, jamais au survol.
+**Cause** : `dark:border-input` du variant `outline` a la même spécificité que `data-[colored=true]:border-[…]` et vient après dans la feuille. `aria-disabled:pointer-events-none` empêchait la souris d'atteindre le déclencheur.
+**Workaround** : répéter l'accent sous `dark:` (`dark:data-[colored=true]:border-[var(--category-color)]`) ; sur un bouton `aria-disabled` porteur d'infobulle, `cursor-not-allowed` et clic neutralisé dans le handler, jamais `pointer-events-none`. Toute retouche visuelle de la grille se vérifie dans un vrai navigateur, dans les deux modes.
+**Référence** : `src/features/session/components/category-grid.tsx`.
