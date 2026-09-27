@@ -37,13 +37,13 @@ test(
     fireEvent.click(await categoryButton('Cauchemar'))
     await screen.findByText('Éléments de réponse')
     fireEvent.click(screen.getByRole('button', { name: 'Noter 0' }))
-    await waitForElementToBeRemoved(() => screen.getByText('Éléments de réponse'))
+    await waitForElementToBeRemoved(() => screen.queryByText('Éléments de réponse'))
 
     // Second tirage puis note : les deux questions de la catégorie sont épuisées.
     fireEvent.click(await categoryButton('Cauchemar'))
     await screen.findByText('Éléments de réponse')
     fireEvent.click(screen.getByRole('button', { name: 'Noter 1' }))
-    await waitForElementToBeRemoved(() => screen.getByText('Éléments de réponse'))
+    await waitForElementToBeRemoved(() => screen.queryByText('Éléments de réponse'))
     await screen.findByText('Score brut : 1')
 
     // `questionsPerStudent` vaut 3 : le passage n'est pas terminé après 2 questions notées.

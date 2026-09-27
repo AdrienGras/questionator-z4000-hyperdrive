@@ -353,3 +353,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : `dark:border-input` du variant `outline` a la même spécificité que `data-[colored=true]:border-[…]` et vient après dans la feuille. `aria-disabled:pointer-events-none` empêchait la souris d'atteindre le déclencheur.
 **Workaround** : répéter l'accent sous `dark:` (`dark:data-[colored=true]:border-[var(--category-color)]`) ; sur un bouton `aria-disabled` porteur d'infobulle, `cursor-not-allowed` et clic neutralisé dans le handler, jamais `pointer-events-none`. Toute retouche visuelle de la grille se vérifie dans un vrai navigateur, dans les deux modes.
 **Référence** : `src/features/session/components/category-grid.tsx`.
+
+## SonarQube (S9153) exige un callback `queryBy*` dans `waitForElementToBeRemoved` (2026-09-27)
+
+**Découvert** : F09, gate SonarQube de la PR #39 (2 bugs « Major », fiabilité notée C).
+**Symptôme** : `waitForElementToBeRemoved(() => screen.getByText(…))` passe en local mais fait échouer le gate.
+**Cause** : avec `getBy*`, un élément déjà absent lève une erreur de requête au lieu du message clair de `waitForElementToBeRemoved`.
+**Workaround** : toujours `waitForElementToBeRemoved(() => screen.queryBy…(…))`.
+**Référence** : `src/features/session/passage-example.test.tsx`.
