@@ -6,7 +6,11 @@ import { availableQuestions, currentPending, isCategoryExhausted } from './selec
 
 export type DrawDeps = { random: (n: number) => number; newId: () => string; now: () => Date }
 
-/** Tire une question dans une catégorie pour un étudiant (§7). Ordre des refus : voir brief. */
+/**
+ * Tire une question dans une catégorie pour un étudiant (§7). Ordre des refus : l'étudiant
+ * d'abord (introuvable, absent, passage terminé, question déjà en cours), la catégorie ensuite
+ * (introuvable, épuisée) — voir docs/superpowers/specs/2026-09-27-f09-passage-design.md §7.
+ */
 export function drawQuestion(
   session: Session,
   input: { studentId: string; categoryId: string },

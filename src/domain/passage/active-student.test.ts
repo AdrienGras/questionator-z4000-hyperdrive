@@ -1,21 +1,7 @@
 import { describe, expect, test } from 'vitest'
+import { expectPassageError } from '@/testing/passage-assertions'
 import { makeSession } from '@/testing/session-fixtures'
 import { setActiveStudent } from './active-student'
-import { PassageError, type PassageErrorCode } from './errors'
-
-function expectPassageError(fn: () => unknown, code: PassageErrorCode): void {
-  let caught: unknown
-  expect(() => {
-    try {
-      fn()
-    } catch (error) {
-      caught = error
-      throw error
-    }
-  }).toThrow(PassageError)
-  if (!(caught instanceof PassageError)) throw new Error('Erreur inattendue')
-  expect(caught.code).toBe(code)
-}
 
 describe('setActiveStudent', () => {
   test("nominal : change l'étudiant actif, le reste est intact", () => {

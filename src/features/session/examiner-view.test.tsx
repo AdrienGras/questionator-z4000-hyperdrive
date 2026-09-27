@@ -1,8 +1,9 @@
 import 'fake-indexeddb/auto'
 import { fireEvent, screen, within } from '@testing-library/react'
-import { beforeEach, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
+import { categoryButton } from '@/testing/passage-assertions'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, type AttemptSpec, makeStudent } from '@/testing/student-fixtures'
 import { renderAt } from '@/testing/render-at'
@@ -11,6 +12,10 @@ import type { Session, Student } from '@/domain/session/types'
 
 beforeEach(async () => {
   await db.sessions.clear()
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 
 function twoStudents(
@@ -129,20 +134,6 @@ function passageSession(overrides: Partial<Session> = {}): Session {
     activeStudentId: 'student-1',
     ...overrides,
   })
-}
-
-/**
- * Bouton de catégorie, retrouvé via son libellé, dans la grille de tirage seule (`QuestionPanel`
- * affiche aussi le libellé de la catégorie, donc une recherche non bornée à la grille matche les
- * deux). `findByRole` (async) : le premier montage passe par le découpage de route à la demande
- * (`autoCodeSplitting`), qui n'est jamais synchrone (`src/testing/setup.ts`).
- */
-async function categoryButton(label: string): Promise<HTMLElement> {
-  const grid = await screen.findByRole('list', { name: 'Choisir une catégorie' })
-  const span = within(grid).getByText(label)
-  const button = span.closest('button')
-  if (button === null) throw new Error(`bouton de catégorie « ${label} » introuvable`)
-  return button
 }
 
 async function pendingAttempt() {
@@ -337,5 +328,103 @@ test('config minimale (sans couleur ni icône) : le bouton de catégorie s’aff
 
   expect(await categoryButton('A')).toBeInTheDocument()
   expect(consoleError).not.toHaveBeenCalled()
-  consoleError.mockRestore()
+})
+
+test('key={attempt.id} : changer d’étudiant vers un autre pending referme le bloc réponse (D28)', async () => {
+  const config = makeConfig({ questionsPerStudent: 2 })
+  const students: Student[] = [
+    makeStudent([], {
+      id: 'student-1',
+      lastName: 'Durand',
+      firstName: 'Alice',
+      order: 1,
+      attempts: [
+        {
+          id: 'attempt-1',
+          categoryId: 'a',
+          questionId: 'a-1',
+          drawnAt: '2026-09-25T09:00:00.000Z',
+          outcome: 'pending',
+        },
+      ],
+    }),
+    makeStudent([], {
+      id: 'student-2',
+      lastName: 'Martin',
+      firstName: 'Bob',
+      order: 2,
+      attempts: [
+        {
+          id: 'attempt-2',
+          categoryId: 'a',
+          questionId: 'a-2',
+          drawnAt: '2026-09-25T09:00:00.000Z',
+          outcome: 'pending',
+        },
+      ],
+    }),
+  ]
+  await putSession(
+    makeSession({
+      config: { ...config, categories: [answeredCategory] },
+      students,
+      activeStudentId: 'student-1',
+    }),
+  )
+  renderAt('/session/session-1')
+
+  await screen.findByRole('heading', { name: 'Q1' })
+  fireEvent.click(screen.getByText('Éléments de réponse'))
+  expect(screen.getByText('Éléments de réponse').closest('details')).toHaveAttribute('open')
+
+  fireEvent.change(screen.getByLabelText('Étudiant'), { target: { value: 'student-2' } })
+
+  await screen.findByRole('heading', { name: 'Q2' })
+  expect(screen.getByText('Éléments de réponse').closest('details')).not.toHaveAttribute('open')
+})
+
+test('barème décimal en locale « en » : le bouton de note et le score suivent le point décimal', async () => {
+  const config: NormalizedConfig = {
+    ...makeConfig({ questionsPerStudent: 2 }),
+    categories: [answeredCategory],
+    locale: 'en',
+  }
+  await putSession(makeSession({ config, students: [makeStudent()], activeStudentId: 'student-1' }))
+  renderAt('/session/session-1')
+
+  fireEvent.click(await categoryButton('A'))
+  await screen.findByText('Answer notes')
+
+  expect(screen.getByRole('button', { name: 'Score 0.5' })).toBeInTheDocument()
+
+  fireEvent.click(screen.getByRole('button', { name: 'Score 0.5' }))
+
+  expect(await screen.findByText('Raw score: 0.5')).toBeInTheDocument()
+})
+
+test('erreur affichée même hors du panneau de passage (étudiant retiré entre le rendu et la sélection)', async () => {
+  const config = makeConfig({ questionsPerStudent: 3 })
+  await putSession(sessionWith(config, twoStudents(), undefined))
+  renderAt('/session/session-1')
+
+  await screen.findByRole('heading', { name: 'Aucun étudiant sélectionné' })
+  const select = screen.getByLabelText('Étudiant')
+
+  const stored = await db.sessions.get('session-1')
+  if (stored === undefined) throw new Error('session introuvable en base')
+  const withoutBob = { ...stored, students: stored.students.filter((s) => s.id !== 'student-2') }
+
+  // Écriture concurrente non attendue avant le clic (aucun `await` entre les deux, donc aucun
+  // rendu ne peut s'intercaler) : reproduit un id encore listé côté examinateur mais déjà retiré
+  // en base au moment où `updateSession` relit la session fraîche (Review Focus 2).
+  const removal = db.sessions.put(withoutBob)
+  fireEvent.change(select, { target: { value: 'student-2' } })
+  await removal
+
+  expect(await screen.findByRole('alert')).toHaveTextContent(
+    'Cet étudiant n’existe plus dans la session.',
+  )
+  // Toujours dans l'état « aucun étudiant sélectionné » : l'erreur ne dépend pas du panneau de
+  // passage pour s'afficher.
+  expect(screen.getByRole('heading', { name: 'Aucun étudiant sélectionné' })).toBeInTheDocument()
 })

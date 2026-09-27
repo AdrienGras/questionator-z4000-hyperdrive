@@ -15,31 +15,39 @@ export type PassageActions = {
 }
 
 /**
- * Applique les transitions de passage via `updateSession` (F09 tâche 3). Garde `useRef`
+ * Applique les transitions de passage via `updateSession` (spec F09 §7). Garde `useRef`
  * synchrone en plus de `busy` : un second appel pendant le premier est ignoré avant même de
  * partir en base, un double-clic rapide ne peut donc jamais afficher `pending_exists`.
+ *
+ * `busy` reste vrai après la résolution de l'écriture tant que `sessionUpdatedAt` (dérivé du
+ * `useLiveQuery` de l'appelant) n'a pas rattrapé l'horodatage renvoyé par `updateSession` :
+ * sans ça, un clic dans cette fenêtre agirait sur la session encore périmée et afficherait une
+ * erreur fantôme (`pending_exists` / `not_pending`, Review Focus 1).
  */
 export function usePassageActions(
   sessionId: string,
   studentId: string | undefined,
+  sessionUpdatedAt: string,
 ): PassageActions {
-  const [busy, setBusy] = useState(false)
+  const [busyState, setBusyState] = useState(false)
   const [error, setError] = useState<Error | null>(null)
+  const [lastWritten, setLastWritten] = useState<string | undefined>(undefined)
   const inFlight = useRef(false)
 
   const run = useCallback(
     async (mutator: (session: Session) => Session) => {
       if (inFlight.current) return
       inFlight.current = true
-      setBusy(true)
+      setBusyState(true)
       setError(null)
       try {
-        await updateSession(sessionId, mutator)
+        const written = await updateSession(sessionId, mutator)
+        setLastWritten(written.updatedAt)
       } catch (e) {
         setError(e instanceof Error ? e : new Error(String(e)))
       } finally {
         inFlight.current = false
-        setBusy(false)
+        setBusyState(false)
       }
     },
     [sessionId],
@@ -77,6 +85,8 @@ export function usePassageActions(
     },
     [run],
   )
+
+  const busy = busyState || (lastWritten !== undefined && sessionUpdatedAt < lastWritten)
 
   return { draw, score, selectStudent, busy, error }
 }

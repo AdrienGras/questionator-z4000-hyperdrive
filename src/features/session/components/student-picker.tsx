@@ -23,7 +23,9 @@ type StudentPickerProps = Readonly<{
   onSelect: (studentId: string) => void
 }>
 
-/** Sélecteur provisoire de l'étudiant actif (F09 tâche 4) ; option triées par `order` (§7). */
+/**
+ * Sélecteur provisoire de l'étudiant actif (spec F09 §7) ; options triées par `order`.
+ */
 export function StudentPicker({
   ui,
   students,

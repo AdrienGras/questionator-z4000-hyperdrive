@@ -1,23 +1,9 @@
 import { describe, expect, test } from 'vitest'
 import type { Session } from '@/domain/session/types'
+import { expectPassageError } from '@/testing/passage-assertions'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
-import { PassageError, type PassageErrorCode } from './errors'
 import { scoreAttempt } from './score'
-
-function expectPassageError(fn: () => unknown, code: PassageErrorCode): void {
-  let caught: unknown
-  expect(() => {
-    try {
-      fn()
-    } catch (error) {
-      caught = error
-      throw error
-    }
-  }).toThrow(PassageError)
-  if (!(caught instanceof PassageError)) throw new Error('Erreur inattendue')
-  expect(caught.code).toBe(code)
-}
 
 function makeScoreSession(
   student: ReturnType<typeof makeStudent> = makeStudent(['pending']),

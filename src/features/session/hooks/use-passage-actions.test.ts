@@ -14,24 +14,37 @@ beforeEach(async () => {
 })
 
 describe('usePassageActions', () => {
-  test('draw écrit un attempt pending sur l’étudiant, busy repasse à false', async () => {
-    await putSession(makeSession())
-    const { result } = renderHook(() => usePassageActions('session-1', 'student-1'))
+  test('draw écrit un attempt pending ; busy reste verrouillé jusqu’à ce que sessionUpdatedAt rattrape l’écriture', async () => {
+    const initialSession = makeSession()
+    await putSession(initialSession)
+    const { result, rerender } = renderHook(
+      ({ sessionUpdatedAt }: { sessionUpdatedAt: string }) =>
+        usePassageActions('session-1', 'student-1', sessionUpdatedAt),
+      { initialProps: { sessionUpdatedAt: initialSession.updatedAt } },
+    )
 
     await act(async () => {
       await result.current.draw('a')
     })
 
-    expect(result.current.busy).toBe(false)
     expect(result.current.error).toBeNull()
+    // Le prop `sessionUpdatedAt` (encore celui d'avant l'écriture) n'a pas rattrapé l'écriture :
+    // le verrou reste actif tant que l'appelant ne re-rend pas avec la session fraîche.
+    expect(result.current.busy).toBe(true)
     const session = await getSession('session-1')
     expect(session?.students[0]?.attempts).toHaveLength(1)
     expect(session?.students[0]?.attempts[0]?.outcome).toBe('pending')
+
+    rerender({ sessionUpdatedAt: session?.updatedAt ?? initialSession.updatedAt })
+    expect(result.current.busy).toBe(false)
   })
 
   test('score passe l’attempt en scored', async () => {
-    await putSession(makeSession({ students: [makeStudent(['pending'])] }))
-    const { result } = renderHook(() => usePassageActions('session-1', 'student-1'))
+    const initialSession = makeSession({ students: [makeStudent(['pending'])] })
+    await putSession(initialSession)
+    const { result } = renderHook(() =>
+      usePassageActions('session-1', 'student-1', initialSession.updatedAt),
+    )
 
     await act(async () => {
       await result.current.score('attempt-1', 1)
@@ -43,12 +56,13 @@ describe('usePassageActions', () => {
   })
 
   test('selectStudent change activeStudentId', async () => {
-    await putSession(
-      makeSession({
-        students: [makeStudent(), makeStudent([], { id: 'student-2', order: 2 })],
-      }),
+    const initialSession = makeSession({
+      students: [makeStudent(), makeStudent([], { id: 'student-2', order: 2 })],
+    })
+    await putSession(initialSession)
+    const { result } = renderHook(() =>
+      usePassageActions('session-1', 'student-1', initialSession.updatedAt),
     )
-    const { result } = renderHook(() => usePassageActions('session-1', 'student-1'))
 
     await act(async () => {
       await result.current.selectStudent('student-2')
@@ -75,9 +89,14 @@ describe('usePassageActions', () => {
     expect(results.some((r) => r instanceof PassageError && r.code === 'pending_exists')).toBe(true)
   })
 
-  test('double appel dans le même act : un seul tirage, aucune erreur affichée', async () => {
-    await putSession(makeSession())
-    const { result } = renderHook(() => usePassageActions('session-1', 'student-1'))
+  test('double appel dans le même act : un seul tirage, aucune erreur affichée, busy reste verrouillé jusqu’au rattrapage', async () => {
+    const initialSession = makeSession()
+    await putSession(initialSession)
+    const { result, rerender } = renderHook(
+      ({ sessionUpdatedAt }: { sessionUpdatedAt: string }) =>
+        usePassageActions('session-1', 'student-1', sessionUpdatedAt),
+      { initialProps: { sessionUpdatedAt: initialSession.updatedAt } },
+    )
 
     await act(async () => {
       const first = result.current.draw('a')
@@ -88,12 +107,18 @@ describe('usePassageActions', () => {
     const session = await getSession('session-1')
     expect(session?.students[0]?.attempts).toHaveLength(1)
     expect(result.current.error).toBeNull()
+    expect(result.current.busy).toBe(true)
+
+    rerender({ sessionUpdatedAt: session?.updatedAt ?? initialSession.updatedAt })
     expect(result.current.busy).toBe(false)
   })
 
-  test('refus métier : draw alors qu’un pending existe déjà, rien n’est écrit', async () => {
-    await putSession(makeSession({ students: [makeStudent(['pending'])] }))
-    const { result } = renderHook(() => usePassageActions('session-1', 'student-1'))
+  test('refus métier : draw alors qu’un pending existe déjà, rien n’est écrit, le verrou est relâché', async () => {
+    const initialSession = makeSession({ students: [makeStudent(['pending'])] })
+    await putSession(initialSession)
+    const { result } = renderHook(() =>
+      usePassageActions('session-1', 'student-1', initialSession.updatedAt),
+    )
 
     await act(async () => {
       await result.current.draw('a')
@@ -103,13 +128,18 @@ describe('usePassageActions', () => {
     expect(error).toBeInstanceOf(PassageError)
     if (!(error instanceof PassageError)) throw new Error('error devrait être une PassageError')
     expect(error.code).toBe('pending_exists')
+    // Une écriture refusée ne verrouille rien : `busy` est relâché immédiatement (Review Focus 1).
+    expect(result.current.busy).toBe(false)
     const session = await getSession('session-1')
     expect(session?.students[0]?.attempts).toHaveLength(1)
   })
 
   test('studentId indéfini : draw et score ne font rien', async () => {
-    await putSession(makeSession())
-    const { result } = renderHook(() => usePassageActions('session-1', undefined))
+    const initialSession = makeSession()
+    await putSession(initialSession)
+    const { result } = renderHook(() =>
+      usePassageActions('session-1', undefined, initialSession.updatedAt),
+    )
 
     await act(async () => {
       await result.current.draw('a')
@@ -123,8 +153,11 @@ describe('usePassageActions', () => {
   })
 
   test('une action réussie après une erreur remet error à null', async () => {
-    await putSession(makeSession({ students: [makeStudent(['pending'])] }))
-    const { result } = renderHook(() => usePassageActions('session-1', 'student-1'))
+    const initialSession = makeSession({ students: [makeStudent(['pending'])] })
+    await putSession(initialSession)
+    const { result } = renderHook(() =>
+      usePassageActions('session-1', 'student-1', initialSession.updatedAt),
+    )
 
     await act(async () => {
       await result.current.draw('a')
