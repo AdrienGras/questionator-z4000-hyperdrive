@@ -1,58 +1,76 @@
-import { Link } from '@tanstack/react-router'
-import type { CSSProperties } from 'react'
-import { CategoryIcon } from '@/components/category-icon'
-import { ColorModeToggle } from '@/components/color-mode-toggle'
-import { Button } from '@/components/ui/button'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { PassageError } from '@/domain/passage/errors'
+import { passageErrorMessage } from '@/domain/passage/messages'
+import { formatScore } from '@/domain/scoring/format'
+import { computeScores } from '@/domain/scoring/score'
+import { studentStatus } from '@/domain/scoring/status'
 import type { Session } from '@/domain/session/types'
+import { usePassageActions } from '@/features/session/hooks/use-passage-actions'
 import { useUi } from '@/lib/i18n/use-ui'
+import { AbsentState } from './absent-state'
+import { DoneState } from './done-state'
+import { PassageHeader } from './passage-header'
+import { StudentPicker } from './student-picker'
 
-/** Corps provisoire de la vue examinateur : en-tête, catégories, action principale à venir (F09). */
+/**
+ * Écran de passage (§7) : en-tête, sélecteur provisoire d'étudiant, aiguillage par statut de
+ * l'étudiant actif. La zone de passage (`todo` / `in_progress`) reste un emplacement pour la
+ * tâche 5 (grille de catégories + panneau de question) ; `<aside>` vide réservé F12.
+ */
 export function ExaminerView({ session }: Readonly<{ session: Session }>) {
   const ui = useUi()
-  const { text } = ui
+  const { text, locale } = ui
   const { config } = session
+  const student = session.students.find((s) => s.id === session.activeStudentId)
+  const actions = usePassageActions(session.id, student?.id)
+  const status = student === undefined ? undefined : studentStatus(student, config)
+
+  const picker = (
+    <StudentPicker
+      ui={ui}
+      students={session.students}
+      config={config}
+      activeStudentId={session.activeStudentId}
+      disabled={actions.busy}
+      onSelect={(studentId) => void actions.selectStudent(studentId)}
+    />
+  )
+
+  const errorMessage =
+    actions.error === null
+      ? undefined
+      : actions.error instanceof PassageError
+        ? passageErrorMessage(actions.error, locale)
+        : text('passage_error_generic', {})
+
   return (
-    <main className="mx-auto flex min-h-svh max-w-5xl flex-col gap-6 p-4 sm:p-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <Link to="/" className="self-start text-sm text-primary underline underline-offset-4">
-            {text('back_home', {})}
-          </Link>
-          <h1 className="text-2xl font-bold tracking-tight">{config.exam.title}</h1>
-          <p className="text-muted-foreground">{session.name}</p>
+    <TooltipProvider>
+      <main className="mx-auto flex min-h-svh max-w-6xl flex-col gap-6 p-4 sm:p-6">
+        <PassageHeader ui={ui} config={config} student={student} picker={picker} />
+        <div className="flex flex-1 flex-col gap-3 lg:grid lg:grid-cols-[1fr_auto] lg:items-start">
+          <div className="flex flex-col gap-4">
+            {student === undefined ? (
+              <div className="flex flex-col gap-2">
+                <h2 className="text-lg font-semibold">{text('passage_no_student_title', {})}</h2>
+                <p className="text-muted-foreground">{text('passage_no_student_body', {})}</p>
+              </div>
+            ) : status === 'absent' ? (
+              <AbsentState ui={ui} />
+            ) : status === 'done' ? (
+              <DoneState
+                ui={ui}
+                rawScore={formatScore(computeScores(student, config).raw, 'raw', config, locale)}
+              />
+            ) : (
+              <>
+                {errorMessage !== undefined && <p role="alert">{errorMessage}</p>}
+                {/* passage */}
+              </>
+            )}
+          </div>
+          <aside aria-hidden="true" />
         </div>
-        <ColorModeToggle ui={ui} />
-      </header>
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">{text('session_categories', {})}</h2>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {config.categories.map((category) => {
-            const { color } = category
-            const accent: (CSSProperties & Record<'--category-color', string>) | undefined =
-              color === undefined ? undefined : { '--category-color': color }
-            return (
-              <li
-                key={category.id}
-                style={accent}
-                className="flex items-center gap-3 rounded-lg border p-4 data-[colored=true]:border-[var(--category-color)]"
-                data-colored={color !== undefined}
-              >
-                {category.icon !== undefined && (
-                  <CategoryIcon
-                    name={category.icon}
-                    className="size-6 shrink-0 text-[var(--category-color,currentColor)]"
-                  />
-                )}
-                <span>{category.label}</span>
-              </li>
-            )
-          })}
-        </ul>
-      </section>
-      <div className="flex flex-col items-start gap-2">
-        <p className="text-muted-foreground">{text('coming_soon_body', {})}</p>
-        <Button disabled>{text('coming_soon_title', {})}</Button>
-      </div>
-    </main>
+      </main>
+    </TooltipProvider>
   )
 }

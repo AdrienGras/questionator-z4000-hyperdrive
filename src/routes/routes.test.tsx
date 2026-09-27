@@ -37,6 +37,7 @@ function themedSession(locale?: 'fr' | 'en') {
   const config = makeConfig()
   return makeSession({
     id: 'session-1',
+    activeStudentId: 'student-1',
     config: {
       ...config,
       ...(locale !== undefined && { locale }),
@@ -69,12 +70,11 @@ test("la route /new affiche l'écran de création", async () => {
   expect(await screen.findByRole('heading', { name: 'Nouvelle session' })).toBeInTheDocument()
 })
 
-test('la route /session/$sessionId affiche la session thémée et ses catégories', async () => {
+test('la route /session/$sessionId affiche la session thémée', async () => {
   await putSession(themedSession())
   renderAt('/session/session-1')
   expect(await screen.findByRole('heading', { name: 'Oral de PHP' })).toBeInTheDocument()
-  expect(screen.getByText('Bases')).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: 'Bientôt disponible' })).toBeDisabled()
+  expect(screen.getByText('Question 1 / 1')).toBeInTheDocument()
   expect(document.documentElement.style.getPropertyValue('--primary')).toBe('rgb(1, 2, 3)')
 })
 
@@ -87,7 +87,7 @@ test('une session inconnue affiche « Session introuvable » avec un lien de ret
 test('une config en anglais donne une vue examinateur entièrement en anglais', async () => {
   await putSession(themedSession('en'))
   renderAt('/session/session-1')
-  expect(await screen.findByRole('button', { name: 'Coming soon' })).toBeInTheDocument()
+  expect(await screen.findByText('Question 1 / 1')).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'Back to home' })).toBeInTheDocument()
   expect(screen.getByRole('button', { name: /^Display mode:/ })).toBeInTheDocument()
   expect(document.documentElement.lang).toBe('en')
