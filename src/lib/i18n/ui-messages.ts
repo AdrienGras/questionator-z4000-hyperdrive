@@ -6,8 +6,6 @@ export type UiMessageParams = {
   app_title: NoParams
   not_found_title: NoParams
   back_home: NoParams
-  coming_soon_title: NoParams
-  coming_soon_body: NoParams
   home_create: NoParams
   home_import: NoParams
   persistence_warning_label: NoParams
@@ -21,7 +19,6 @@ export type UiMessageParams = {
   color_mode_system: NoParams
   session_loading: NoParams
   session_not_found: NoParams
-  session_categories: NoParams
   present_waiting: NoParams
   empty_title: NoParams
   empty_body: NoParams
@@ -87,6 +84,30 @@ export type UiMessageParams = {
   markdown_footnotes: NoParams
   /** `n` : numéro de la référence (1-based), avec suffixe `-n` de la re-référence si > 1. */
   markdown_footnote_back: { n: string }
+  passage_question_index: { current: number; total: number }
+  /** `score` : score brut déjà mis en forme par l'appelant (`formatScore(raw, 'raw', config, locale)`). */
+  passage_raw_score: { score: string }
+  passage_categories: NoParams
+  /** `max` : plus grande valeur du barème, déjà mise en forme par l'appelant. */
+  passage_category_max: { max: string }
+  passage_category_exhausted: NoParams
+  passage_answer: NoParams
+  passage_score_heading: NoParams
+  /** `value` : valeur du barème déjà mise en forme par l'appelant. */
+  passage_score_button: { value: string }
+  passage_student_picker: NoParams
+  passage_student_option: { name: string; status: string }
+  passage_status_todo: NoParams
+  passage_status_in_progress: NoParams
+  passage_status_done: NoParams
+  passage_status_absent: NoParams
+  passage_no_student_title: NoParams
+  passage_no_student_body: NoParams
+  passage_absent_title: NoParams
+  passage_absent_body: NoParams
+  passage_done_title: NoParams
+  passage_done_body: NoParams
+  passage_error_generic: NoParams
 }
 
 type RoundingMode = 'nearest' | 'up' | 'down'
@@ -127,8 +148,6 @@ const fr: Dictionary<UiMessageParams> = {
   app_title: () => 'Questionator Z-4000 Hyperdrive',
   not_found_title: () => 'Page introuvable',
   back_home: () => "Retour à l'accueil",
-  coming_soon_title: () => 'Bientôt disponible',
-  coming_soon_body: () => "Cet écran arrive dans une prochaine version de l'application.",
   home_create: () => 'Créer une session',
   home_import: () => 'Importer un backup',
   persistence_warning_label: () => 'Stockage non garanti',
@@ -145,7 +164,6 @@ const fr: Dictionary<UiMessageParams> = {
   color_mode_system: () => 'Système',
   session_loading: () => 'Chargement de la session…',
   session_not_found: () => 'Session introuvable',
-  session_categories: () => 'Catégories',
   present_waiting: () => "L'épreuve va bientôt commencer.",
   empty_title: () => 'Aucune session',
   empty_body: () =>
@@ -216,14 +234,34 @@ const fr: Dictionary<UiMessageParams> = {
   preview_skips: ({ max }) => `Skips autorisés : ${max} par étudiant`,
   markdown_footnotes: () => 'Notes',
   markdown_footnote_back: ({ n }) => `Revenir à la référence ${n}`,
+  passage_question_index: ({ current, total }) => `Question ${current} / ${total}`,
+  passage_raw_score: ({ score }) => `Score brut : ${score}`,
+  passage_categories: () => 'Choisir une catégorie',
+  passage_category_max: ({ max }) => `max ${max}`,
+  passage_category_exhausted: () => 'Plus de question disponible dans cette catégorie',
+  passage_answer: () => 'Éléments de réponse',
+  passage_score_heading: () => 'Note',
+  passage_score_button: ({ value }) => `Noter ${value}`,
+  passage_student_picker: () => 'Étudiant',
+  passage_student_option: ({ name, status }) => `${name} — ${status}`,
+  passage_status_todo: () => 'à passer',
+  passage_status_in_progress: () => 'en cours',
+  passage_status_done: () => 'terminé',
+  passage_status_absent: () => 'absent',
+  passage_no_student_title: () => 'Aucun étudiant sélectionné',
+  passage_no_student_body: () => 'Choisissez un étudiant pour commencer le passage.',
+  passage_absent_title: () => 'Étudiant absent',
+  passage_absent_body: () =>
+    'L’absence s’annulera depuis le panneau « Étudiant », bientôt disponible.',
+  passage_done_title: () => 'Passage terminé',
+  passage_done_body: () => 'L’écran final arrive dans une prochaine version de l’app.',
+  passage_error_generic: () => 'L’action n’a pas pu être enregistrée. Rechargez la page.',
 }
 
 const en: Dictionary<UiMessageParams> = {
   app_title: () => 'Questionator Z-4000 Hyperdrive',
   not_found_title: () => 'Page not found',
   back_home: () => 'Back to home',
-  coming_soon_title: () => 'Coming soon',
-  coming_soon_body: () => 'This screen is coming in a future version of the app.',
   home_create: () => 'Create a session',
   home_import: () => 'Import a backup',
   persistence_warning_label: () => 'Storage not guaranteed',
@@ -239,7 +277,6 @@ const en: Dictionary<UiMessageParams> = {
   color_mode_system: () => 'System',
   session_loading: () => 'Loading session…',
   session_not_found: () => 'Session not found',
-  session_categories: () => 'Categories',
   present_waiting: () => 'The exam will start soon.',
   empty_title: () => 'No sessions yet',
   empty_body: () =>
@@ -308,6 +345,27 @@ const en: Dictionary<UiMessageParams> = {
   preview_skips: ({ max }) => `Skips allowed: ${max} per student`,
   markdown_footnotes: () => 'Footnotes',
   markdown_footnote_back: ({ n }) => `Back to reference ${n}`,
+  passage_question_index: ({ current, total }) => `Question ${current} / ${total}`,
+  passage_raw_score: ({ score }) => `Raw score: ${score}`,
+  passage_categories: () => 'Choose a category',
+  passage_category_max: ({ max }) => `max ${max}`,
+  passage_category_exhausted: () => 'No questions left in this category',
+  passage_answer: () => 'Answer notes',
+  passage_score_heading: () => 'Score',
+  passage_score_button: ({ value }) => `Score ${value}`,
+  passage_student_picker: () => 'Student',
+  passage_student_option: ({ name, status }) => `${name} — ${status}`,
+  passage_status_todo: () => 'to do',
+  passage_status_in_progress: () => 'in progress',
+  passage_status_done: () => 'done',
+  passage_status_absent: () => 'absent',
+  passage_no_student_title: () => 'No student selected',
+  passage_no_student_body: () => 'Choose a student to start.',
+  passage_absent_title: () => 'Student absent',
+  passage_absent_body: () => 'The absence can be cancelled from the “Student” panel, coming soon.',
+  passage_done_title: () => 'Exam complete',
+  passage_done_body: () => 'The final screen is coming in a future version of the app.',
+  passage_error_generic: () => 'The action could not be saved. Reload the page.',
 }
 
 export const UI_MESSAGES: Record<Locale, Dictionary<UiMessageParams>> = { fr, en }

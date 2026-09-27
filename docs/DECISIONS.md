@@ -951,3 +951,17 @@ autre encodage 8 bits.
 **Pourquoi** : le pré-cache complet coûte moins de trois fois le chunk d'icônes Tabler déjà pré-caché. Il couvre aussi une session restaurée hors ligne sur une autre machine, ce qu'un préchargement selon la config ne couvrirait pas. L'avertissement attrape les fautes de frappe avant le jour de l'oral sans bloquer un pseudo-langage volontaire.
 
 **Reporté dans** : `PRODUCT.md` F08, F17, F18 ; spec F18. Amende D27 (liste des langages). Impacte F08, F17, F18.
+
+## D64 — F09 : transitions pures dans `domain/passage/`, trois écrans provisoires (2026-09-27)
+
+**Question** : le ticket F09 place la logique dans `src/passage/` et décrit des mutations `drawQuestion(sessionId, …)`, alors que D59 interdit à `domain/` d'importer `lib/db/`. Livré seul, F09 ne ferait aussi passer que le premier étudiant : rien ne change `activeStudentId` avant F11 ou F13.
+
+**Décision** :
+- Transitions pures `(session, input, deps) → session` dans `src/domain/passage/` (`drawQuestion`, `scoreAttempt`, `setActiveStudent`), qui lèvent une `PassageError` à code typé. Un hook de la feature les passe à `updateSession` : les invariants sont vérifiés dans la transaction, sur la session fraîche. Aléa et identifiant sont calculés dans le mutator, de façon synchrone.
+- Sélecteur d'étudiant provisoire (`<select>` dans l'en-tête), retiré par F13.
+- Side panel : structure seule (colonne `aside` vide), le panneau et son repli arrivent en F12.
+- État « terminé » provisoire (score brut), remplacé par l'écran final de F11.
+
+**Pourquoi** : même modèle que `buildSession` (dépendances injectées, testable sans IndexedDB) et sens des imports D59 respecté. Le sélecteur rend F09 vérifiable de bout en bout sur plusieurs étudiants pour un coût minime. Un panneau vide avec un bouton de repli inutile n'apporterait rien.
+
+**Reporté dans** : spec F09. Impacte F09, F10, F11, F12, F13.

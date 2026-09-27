@@ -321,3 +321,43 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : `prose-invert` réaffecte les variables `--tw-prose-*` à ses propres couleurs `--tw-prose-invert-*`.
 **Workaround** : brancher `--tw-prose-*` sur les tokens shadcn (qui basculent déjà sous `.dark`) dans un bloc `.prose` **hors `@layer`**, pour qu'il l'emporte sur la couche `utilities` de `@tailwindcss/typography` ; pas de `prose-invert`.
 **Référence** : `src/index.css` (bloc `.prose`).
+
+## `updateSession` se résout avant que `useLiveQuery` livre la session écrite (2026-09-27)
+
+**Découvert** : F09, revue finale.
+**Symptôme** : juste après un tirage, un clic tombant avant le rafraîchissement de la liveQuery trouvait la grille réactivée et affichait « Une question est déjà en cours » (la transaction refusait correctement le second tirage).
+**Cause** : la promesse de `updateSession` se résout à la fin de la transaction ; la liveQuery relit ensuite IndexedDB et ne pousse la nouvelle session que quelques millisecondes plus tard. Un `busy` remis à `false` dans le `finally` rouvre l'écran sur des données périmées.
+**Workaround** : garder `busy` vrai tant que `session.updatedAt` (prop) est antérieur à l'`updatedAt` renvoyé par l'écriture (chaînes ISO, comparaison lexicale). Hypothèse : horloge unique et liveQuery qui finit par livrer ; une liveQuery figée laisserait l'écran verrouillé jusqu'au rechargement.
+**Référence** : `src/features/session/hooks/use-passage-actions.ts`.
+
+## Un bouton `disabled` ne déclenche pas d'infobulle ; l'envelopper dans un `span tabIndex` fait tomber Sonar (2026-09-27)
+
+**Découvert** : F09, tâche 5 et revue finale.
+**Symptôme** : l'infobulle « Plus de question disponible » d'une catégorie épuisée ne s'ouvrait ni au survol ni au focus ; le contournement par `<span tabIndex={0}>` exigeait de désactiver `jsx-a11y/no-noninteractive-tabindex`, règle que SonarQube (S6845) signale malgré le commentaire oxlint.
+**Cause** : un `<button disabled>` n'émet ni événement de pointeur ni focus.
+**Workaround** : le `Button` est lui-même le déclencheur (`TooltipTrigger render={<Button …/>}`), avec `aria-disabled="true"`, un clic neutralisé dans le handler et le motif en `aria-describedby` vers un `span sr-only`. Si une montée de Base UI se met à gérer `aria-describedby` sur le déclencheur, revérifier que le motif n'est ni perdu ni annoncé deux fois.
+**Référence** : `src/features/session/components/category-grid.tsx`.
+
+## Attendre un texte déjà présent laisse un test d'écran continuer avant l'écriture (2026-09-27)
+
+**Découvert** : F09, tâche 5.
+**Symptôme** : `passage-example.test.tsx` échouait par intermittence après une note de `0`.
+**Cause** : `findByText('Score brut : 0')` réussissait immédiatement sur l'état initial (déjà 0), avant que la note soit écrite et relue.
+**Workaround** : attendre un changement qui n'existe qu'après l'écriture (`waitForElementToBeRemoved` du panneau de question, nouvelle valeur différente de l'ancienne). Note : `toBeVisible()` de jest-dom sait qu'un contenu de `<details>` fermé est invisible, l'assertion est fiable.
+**Référence** : `src/features/session/passage-example.test.tsx`.
+
+## Les variantes `dark:` du `Button` outline écrasent un accent `data-[…]:border-*`, et `pointer-events-none` tue l'infobulle (2026-09-27)
+
+**Découvert** : F09, validation dans le navigateur (invisible en jsdom, qui ne calcule ni la cascade CSS ni `pointer-events`).
+**Symptôme** : en mode sombre, les cartes de catégorie gardaient toutes la bordure `--input` au lieu de leur couleur ; l'infobulle d'une catégorie épuisée ne s'ouvrait qu'au focus clavier, jamais au survol.
+**Cause** : `dark:border-input` du variant `outline` a la même spécificité que `data-[colored=true]:border-[…]` et vient après dans la feuille. `aria-disabled:pointer-events-none` empêchait la souris d'atteindre le déclencheur.
+**Workaround** : répéter l'accent sous `dark:` (`dark:data-[colored=true]:border-[var(--category-color)]`) ; sur un bouton `aria-disabled` porteur d'infobulle, `cursor-not-allowed` et clic neutralisé dans le handler, jamais `pointer-events-none`. Toute retouche visuelle de la grille se vérifie dans un vrai navigateur, dans les deux modes.
+**Référence** : `src/features/session/components/category-grid.tsx`.
+
+## SonarQube (S9153) exige un callback `queryBy*` dans `waitForElementToBeRemoved` (2026-09-27)
+
+**Découvert** : F09, gate SonarQube de la PR #39 (2 bugs « Major », fiabilité notée C).
+**Symptôme** : `waitForElementToBeRemoved(() => screen.getByText(…))` passe en local mais fait échouer le gate.
+**Cause** : avec `getBy*`, un élément déjà absent lève une erreur de requête au lieu du message clair de `waitForElementToBeRemoved`.
+**Workaround** : toujours `waitForElementToBeRemoved(() => screen.queryBy…(…))`.
+**Référence** : `src/features/session/passage-example.test.tsx`.

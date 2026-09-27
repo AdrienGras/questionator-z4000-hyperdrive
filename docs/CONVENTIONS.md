@@ -384,3 +384,35 @@ export function QuestionPrompt({ prompt, ui }: Readonly<{ prompt: string; ui: Ui
 - Blocs de code : `CodeBlock` rend les tokens en `<span>` React ; chaque token porte `--shiki-light` / `--shiki-dark` (`defaultColor: false`) et les règles `.shiki` / `.dark .shiki` de `index.css` (hors `@layer`) choisissent la variable. La bascule de mode ne refait aucun rendu.
 - Ajouter un langage : l'ajouter à `SupportedLanguage`, à `LANGUAGE_ALIASES` et à `LANGUAGE_IMPORTS` dans `src/lib/markdown/highlighter.ts`, via `import('shiki/langs/<lang>.mjs')` (jamais `@shikijs/langs`, QUIRKS). Aucun `import` de valeur statique depuis `shiki`.
 - Tests : `CodeBlock` accepte `highlight` en prop (défaut : l'instance réelle) pour simuler échec et course sans `vi.mock` ; `createHighlightLoader(loadCore, languages)` se teste avec un faux highlighter.
+
+## Transition de passage — squelette
+
+Arbitrage : D22, D28, D64 (F09). Toute action d'examen (tirer, noter, et en F10/F11 skipper, ajuster) est une transition **pure** de `src/domain/passage/`, appliquée par un hook de la feature.
+
+```ts
+// src/domain/passage/skip.ts (F10, par exemple)
+export function skipAttempt(session: Session, input: { studentId: string; attemptId: string; reason: string }): Session {
+  const student = session.students.find((s) => s.id === input.studentId)
+  if (student === undefined) throw new PassageError('student_not_found')
+  // … contrôles sur la session reçue, un code PassageError par refus (+ message fr/en dans messages.ts)
+  return { ...session, students: session.students.map((s) => (s.id === student.id ? { ...s, attempts: … } : s)) }
+}
+
+// src/features/session/hooks/use-passage-actions.ts : une action de plus
+const skip = useCallback(
+  async (attemptId: string, reason: string) => {
+    if (studentId === undefined) return
+    await run((session) => skipAttempt(session, { studentId, attemptId, reason }))
+  },
+  [run, studentId],
+)
+```
+
+### Règles tacites
+
+- La transition ne mute jamais son entrée (copie du seul chemin modifié) ; chaque test de refus vérifie la session d'entrée intacte (`structuredClone` avant, `toEqual` après). Helper `expectPassageError(fn, code)` dans `src/testing/passage-assertions.ts`.
+- Aléa, identifiant et date sont des dépendances injectées (`DrawDeps`) et appelés **dans** le mutator, de façon synchrone : le tirage porte sur la session fraîche de la transaction.
+- `run` du hook : garde `useRef` synchrone (un double appel ne part jamais en base) **et** `busy` maintenu tant que `sessionUpdatedAt` n'a pas rattrapé l'`updatedAt` écrit (QUIRKS). L'écran désactive ses boutons sur `busy`.
+- Erreur : `PassageError` → `passageErrorMessage(error, locale)`, toute autre → `passage_error_generic`, dans un seul `<p role="alert">` affiché quel que soit l'état de l'écran.
+- Pas d'aléa non injectable : `cryptoRandomInt(n)` (rejet, sans biais de modulo) et `pickUniform(items, random)`.
+- Bouton indisponible avec infobulle : `TooltipTrigger render={<Button aria-disabled="true" aria-describedby={id} …/>}` + texte `sr-only`, clic neutralisé dans le handler ; jamais `disabled` natif (pas de survol ni de focus), jamais de `span tabIndex={0}` (Sonar S6845).

@@ -1,58 +1,75 @@
-import { Link } from '@tanstack/react-router'
-import type { CSSProperties } from 'react'
-import { CategoryIcon } from '@/components/category-icon'
-import { ColorModeToggle } from '@/components/color-mode-toggle'
-import { Button } from '@/components/ui/button'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { PassageError } from '@/domain/passage/errors'
+import { passageErrorMessage } from '@/domain/passage/messages'
+import { currentPending } from '@/domain/passage/selectors'
+import { studentStatus } from '@/domain/scoring/status'
 import type { Session } from '@/domain/session/types'
-import { useUi } from '@/lib/i18n/use-ui'
+import { usePassageActions } from '@/features/session/hooks/use-passage-actions'
+import { useUi, type Ui } from '@/lib/i18n/use-ui'
+import { PassageBody } from './passage-body'
+import { PassageHeader } from './passage-header'
+import { StudentPicker } from './student-picker'
 
-/** Corps provisoire de la vue examinateur : en-tête, catégories, action principale à venir (F09). */
+/**
+ * Message de la dernière action refusée, ou `undefined` (spec F09 §7). En if/return plutôt qu'en
+ * ternaires imbriqués (Sonar S3358).
+ */
+function errorText(error: Error | null, ui: Ui): string | undefined {
+  if (error === null) return undefined
+  if (error instanceof PassageError) return passageErrorMessage(error, ui.locale)
+  return ui.text('passage_error_generic', {})
+}
+
+/**
+ * Écran de passage (§7) : en-tête, sélecteur provisoire d'étudiant, aiguillage par statut de
+ * l'étudiant actif, grille de tirage et panneau de la question en cours. `<aside>` vide réservé F12.
+ */
 export function ExaminerView({ session }: Readonly<{ session: Session }>) {
   const ui = useUi()
-  const { text } = ui
   const { config } = session
+  const student = session.students.find((s) => s.id === session.activeStudentId)
+  const actions = usePassageActions(session.id, student?.id, session.updatedAt)
+  const status = student === undefined ? undefined : studentStatus(student, config)
+  const pending = student === undefined ? undefined : currentPending(student)
+  const errorMessage = errorText(actions.error, ui)
+
+  const picker = (
+    <StudentPicker
+      ui={ui}
+      students={session.students}
+      config={config}
+      // Id résolu (et non `session.activeStudentId` brut) : un id qui ne désigne plus d'étudiant
+      // (backup restauré, étudiant retiré) doit afficher « Aucun étudiant sélectionné » et une
+      // valeur vide, jamais présélectionner le premier étudiant de la liste (spec F09 §7).
+      activeStudentId={student?.id}
+      disabled={actions.busy}
+      onSelect={(studentId) => void actions.selectStudent(studentId)}
+    />
+  )
+
   return (
-    <main className="mx-auto flex min-h-svh max-w-5xl flex-col gap-6 p-4 sm:p-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <Link to="/" className="self-start text-sm text-primary underline underline-offset-4">
-            {text('back_home', {})}
-          </Link>
-          <h1 className="text-2xl font-bold tracking-tight">{config.exam.title}</h1>
-          <p className="text-muted-foreground">{session.name}</p>
+    <TooltipProvider>
+      <main className="mx-auto flex min-h-svh max-w-6xl flex-col gap-6 p-4 sm:p-6">
+        <PassageHeader ui={ui} config={config} student={student} picker={picker} />
+        <div className="flex flex-1 flex-col gap-3 lg:grid lg:grid-cols-[1fr_auto] lg:items-start">
+          <div className="flex flex-col gap-4">
+            {/* Rendu une seule fois, au-dessus de l'aiguillage par statut : une erreur touchant
+                un état sans passage (aucun étudiant, absent, terminé) doit rester visible. */}
+            {errorMessage !== undefined && <p role="alert">{errorMessage}</p>}
+            <PassageBody
+              ui={ui}
+              config={config}
+              student={student}
+              status={status}
+              pending={pending}
+              disabled={actions.busy}
+              onDraw={(categoryId) => void actions.draw(categoryId)}
+              onScore={(attemptId, value) => void actions.score(attemptId, value)}
+            />
+          </div>
+          <aside aria-hidden="true" />
         </div>
-        <ColorModeToggle ui={ui} />
-      </header>
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">{text('session_categories', {})}</h2>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {config.categories.map((category) => {
-            const { color } = category
-            const accent: (CSSProperties & Record<'--category-color', string>) | undefined =
-              color === undefined ? undefined : { '--category-color': color }
-            return (
-              <li
-                key={category.id}
-                style={accent}
-                className="flex items-center gap-3 rounded-lg border p-4 data-[colored=true]:border-[var(--category-color)]"
-                data-colored={color !== undefined}
-              >
-                {category.icon !== undefined && (
-                  <CategoryIcon
-                    name={category.icon}
-                    className="size-6 shrink-0 text-[var(--category-color,currentColor)]"
-                  />
-                )}
-                <span>{category.label}</span>
-              </li>
-            )
-          })}
-        </ul>
-      </section>
-      <div className="flex flex-col items-start gap-2">
-        <p className="text-muted-foreground">{text('coming_soon_body', {})}</p>
-        <Button disabled>{text('coming_soon_title', {})}</Button>
-      </div>
-    </main>
+      </main>
+    </TooltipProvider>
   )
 }

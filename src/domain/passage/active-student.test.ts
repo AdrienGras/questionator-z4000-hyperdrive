@@ -1,0 +1,24 @@
+import { describe, expect, test } from 'vitest'
+import { expectPassageError } from '@/testing/passage-assertions'
+import { makeSession } from '@/testing/session-fixtures'
+import { setActiveStudent } from './active-student'
+
+describe('setActiveStudent', () => {
+  test("nominal : change l'étudiant actif, le reste est intact", () => {
+    const session = makeSession()
+
+    const result = setActiveStudent(session, 'student-1')
+
+    expect(result.activeStudentId).toBe('student-1')
+    expect(result.students).toEqual(session.students)
+    expect(result.config).toEqual(session.config)
+  })
+
+  test('student_not_found', () => {
+    const session = makeSession()
+    const snapshot = structuredClone(session)
+
+    expectPassageError(() => setActiveStudent(session, 'nope'), 'student_not_found')
+    expect(session).toEqual(snapshot)
+  })
+})
