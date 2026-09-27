@@ -18,10 +18,16 @@ type CategoryGridProps = Readonly<{
 }>
 
 /**
- * Grille de tirage (§7) : un bouton pleine hauteur par catégorie, dans l'ordre de la config,
- * accent couleur en bordure/icône seulement (D26). Catégorie épuisée pour l'étudiant actif :
- * bouton désactivé, enveloppé d'un `<span tabIndex={0}>` qui porte l'infobulle, car un bouton
- * désactivé n'émet pas d'événement de survol ni de focus (D06).
+ * Grille de tirage (spec F09 §7) : un bouton pleine hauteur par catégorie, dans l'ordre de la
+ * config, accent couleur en bordure/icône seulement (D26).
+ *
+ * Catégorie épuisée pour l'étudiant actif : le bouton lui-même porte l'infobulle
+ * (`TooltipTrigger render={<Button …/>}`, comme `src/features/home/components/home-header.tsx`)
+ * et reste `aria-disabled`, jamais `disabled` — un bouton HTML nativement désactivé n'émet ni
+ * `focus` ni `mouseenter`, l'infobulle ne s'ouvrirait jamais (D06). Le clic est alors un no-op ;
+ * le motif est en plus exposé via `aria-describedby` vers un texte visually-hidden, indépendant
+ * de l'ouverture de l'infobulle. Le verrou de grille entière (question en cours / écriture en
+ * base) reste un vrai `disabled` : dans cet état, aucune catégorie n'est actionnable.
  */
 export function CategoryGrid({ ui, config, student, disabled, onDraw }: CategoryGridProps) {
   const { text, locale } = ui
@@ -36,16 +42,10 @@ export function CategoryGrid({ ui, config, student, disabled, onDraw }: Category
         const accent: (CSSProperties & Record<'--category-color', string>) | undefined =
           color === undefined ? undefined : { '--category-color': color }
         const max = formatScore(toMilli(Math.max(...category.scale)), 'raw', config, locale)
-        const button = (
-          <Button
-            type="button"
-            variant="outline"
-            disabled={disabled || exhausted}
-            onClick={() => onDraw(category.id)}
-            style={accent}
-            data-colored={color !== undefined}
-            className="flex h-full w-full flex-col items-center gap-2 p-4 text-center whitespace-normal data-[colored=true]:border-[var(--category-color)]"
-          >
+        const reasonId = `passage-category-exhausted-${category.id}`
+
+        const content = (
+          <>
             {category.icon !== undefined && (
               <CategoryIcon
                 name={category.icon}
@@ -56,20 +56,59 @@ export function CategoryGrid({ ui, config, student, disabled, onDraw }: Category
             <span className="text-xs text-muted-foreground">
               {text('passage_category_max', { max })}
             </span>
-          </Button>
+          </>
         )
+
+        const handleClick = () => {
+          if (exhausted) return
+          onDraw(category.id)
+        }
+
+        const buttonClassName =
+          'flex h-full w-full flex-col items-center gap-2 p-4 text-center whitespace-normal ' +
+          'data-[colored=true]:border-[var(--category-color)] ' +
+          'aria-disabled:pointer-events-none aria-disabled:opacity-50'
+
         return (
           <li key={category.id}>
             {exhausted ? (
               <Tooltip>
-                {/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- span rendu focalisable exprès : porte l'infobulle quand le bouton qu'il enveloppe est désactivé, car un bouton désactivé n'émet aucun événement de survol ni de focus (D06). */}
-                <TooltipTrigger render={<span tabIndex={0} className="block h-full" />}>
-                  {button}
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={disabled}
+                      aria-disabled="true"
+                      aria-describedby={reasonId}
+                      onClick={handleClick}
+                      style={accent}
+                      data-colored={color !== undefined}
+                      className={buttonClassName}
+                    />
+                  }
+                >
+                  {content}
                 </TooltipTrigger>
                 <TooltipContent>{text('passage_category_exhausted', {})}</TooltipContent>
               </Tooltip>
             ) : (
-              button
+              <Button
+                type="button"
+                variant="outline"
+                disabled={disabled}
+                onClick={handleClick}
+                style={accent}
+                data-colored={color !== undefined}
+                className={buttonClassName}
+              >
+                {content}
+              </Button>
+            )}
+            {exhausted && (
+              <span id={reasonId} className="sr-only">
+                {text('passage_category_exhausted', {})}
+              </span>
             )}
           </li>
         )

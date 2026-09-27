@@ -1,10 +1,11 @@
 import 'fake-indexeddb/auto'
-import { fireEvent, screen, waitForElementToBeRemoved, within } from '@testing-library/react'
+import { fireEvent, screen, waitForElementToBeRemoved } from '@testing-library/react'
 import { beforeEach, expect, test } from 'vitest'
 import exampleText from '../../../examples/config.example.json?raw'
 import { validateConfig } from '@/domain/config/validate'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
+import { categoryButton } from '@/testing/passage-assertions'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
 import { renderAt } from '@/testing/render-at'
@@ -12,19 +13,6 @@ import { renderAt } from '@/testing/render-at'
 beforeEach(async () => {
   await db.sessions.clear()
 })
-
-/**
- * Bouton de catégorie, dans la grille de tirage seule (`QuestionPanel` affiche aussi le libellé
- * de la catégorie). `findByRole` (async) : le premier montage passe par le découpage de route à
- * la demande.
- */
-async function categoryButton(label: string): Promise<HTMLElement> {
-  const grid = await screen.findByRole('list', { name: 'Choisir une catégorie' })
-  const span = within(grid).getByText(label)
-  const button = span.closest('button')
-  if (button === null) throw new Error(`bouton de catégorie « ${label} » introuvable`)
-  return button
-}
 
 /** Config d'exemple normalisée (`questionsPerStudent: 3`, « Cauchemar » à 2 questions). */
 function exampleConfig() {
@@ -62,13 +50,28 @@ test(
     expect(screen.queryByRole('heading', { name: 'Passage terminé' })).not.toBeInTheDocument()
 
     const button = await categoryButton('Cauchemar')
-    expect(button).toBeDisabled()
+    // `aria-disabled`, pas `disabled` : un bouton nativement désactivé n'émettrait ni `focus` ni
+    // `mouseenter`, l'infobulle ne s'ouvrirait jamais (D06).
+    expect(button).not.toBeDisabled()
+    expect(button).toHaveAttribute('aria-disabled', 'true')
 
-    const wrapper = button.parentElement
-    if (wrapper === null) throw new Error('enveloppe du bouton « Cauchemar » introuvable')
-    fireEvent.focus(wrapper)
+    // Le motif est exposé de façon accessible indépendamment de l'ouverture de l'infobulle.
+    expect(screen.getAllByText('Plus de question disponible dans cette catégorie')).toHaveLength(1)
+    const describedBy = button.getAttribute('aria-describedby')
+    if (describedBy === null) throw new Error('aria-describedby manquant sur le bouton épuisé')
+    expect(document.getElementById(describedBy)).toHaveTextContent(
+      'Plus de question disponible dans cette catégorie',
+    )
+
+    // Le clic sur une catégorie épuisée est un no-op : rien n'est écrit en base.
+    const before = (await db.sessions.get('session-1'))?.students[0]?.attempts.length
+    fireEvent.click(button)
+    expect((await db.sessions.get('session-1'))?.students[0]?.attempts.length).toBe(before)
+
+    // L'infobulle s'ouvre toujours au focus (un second texte identique apparaît, celui du popup).
+    fireEvent.focus(button)
     expect(
-      await screen.findByText('Plus de question disponible dans cette catégorie'),
-    ).toBeInTheDocument()
+      await screen.findAllByText('Plus de question disponible dans cette catégorie'),
+    ).toHaveLength(2)
   },
 )
