@@ -35,6 +35,9 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 ## Écran de passage
 
 - [ ] Raccourcis clavier : chiffres pour les valeurs du barème, touches pour les catégories, raccourci de skip.
+- [ ] Helper `requireStudent(session, studentId)` dans `domain/passage/` : la recherche + `student_not_found` est copiée dans `drawQuestion`, `scoreAttempt`, `setActiveStudent` ; F10 et F11 en ajouteront deux copies.
+- [ ] Test de la branche défensive `category_not_found` de `scoreAttempt` (inatteignable avec une config figée valide).
+- [ ] `studentStatus` et `computeScores` calculés deux fois (`ExaminerView` et `PassageHeader`) : passer le statut en prop si l'écran grossit.
 
 ## Accueil et backup
 
@@ -64,8 +67,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Rendu markdown
 
-- [ ] Fond des blocs colorés : `github-light` a un fond `#fff`, invisible sur une page blanche, alors que les blocs en texte brut (langage inconnu, chargement) gardent `--muted`. Le fond saute donc à la fin de la coloration. À trancher à l'écran en F09 : bordure sur `.shiki`, ou fond clair surchargé.
+- [ ] Fond des blocs colorés : `github-light` a un fond `#fff`, invisible sur une page blanche, alors que les blocs en texte brut (langage inconnu, chargement) gardent `--muted`. Le fond saute donc à la fin de la coloration. À trancher à l'écran (F09 monte désormais `<Markdown>`, pas encore vérifié visuellement) : bordure sur `.shiki`, ou fond clair surchargé.
 - [ ] Taille de projection : `prose-2xl` est provisoire, à caler sur un vrai vidéoprojecteur en F14 (D62).
-- [ ] Régression des chunks : vérifier en F09 que le build garde Shiki hors du chunk d'entrée (vérifié en F08 par un montage temporaire : noyau 94 kB, moteur 58 kB, php 146 kB…).
 - [ ] Test de régression multi-ligne des offsets de `toHighlightedCode` (clés React), vérifié à la main par la revue finale.
 - [ ] Test du libellé de retour d'une note citée deux fois (suffixe `-2` de `footnoteBackLabel`, calqué sur `mdast-util-to-hast`, où `rereferenceIndex` commence à 1).

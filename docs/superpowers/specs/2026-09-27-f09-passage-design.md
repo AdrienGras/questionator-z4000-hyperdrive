@@ -141,7 +141,7 @@ Contrôles : étudiant introuvable, attempt introuvable (`attempt_not_found`), a
 | Terminé | `studentStatus = 'done'` | `DoneState` : score brut, « écran final à venir » |
 | En passage | `todo` ou `in_progress` | grille, puis `QuestionPanel` si un attempt est `pending` |
 
-L'en-tête est affiché dans tous les états où un étudiant est actif. Le sélecteur l'est dans tous les états.
+L'en-tête est affiché dans tous les états où un étudiant est actif ; en états absent et terminé, il ne montre que le nom (ni `2 / 3` ni score brut : `DoneState` affiche déjà le score, et le compteur n'a pas de sens pour un absent). Le sélecteur l'est dans tous les états.
 
 ### Mise en page
 
@@ -159,7 +159,7 @@ Lien de retour à l'accueil, titre de l'examen, nom et prénom de l'étudiant, `
 
 Un bouton par catégorie, dans l'ordre de `config.categories` (déjà trié par `order`) : icône (`CategoryIcon`), libellé, « max N » avec `N = max(scale)` formaté, couleur en accent par `--category-color` (D26, jamais en fond sous du texte).
 
-- Catégorie épuisée pour cet étudiant : bouton `disabled`, grisé, avec infobulle « Plus de question disponible dans cette catégorie » (D06). Le déclencheur de l'infobulle est un `span` focalisable qui enveloppe le bouton, car un bouton désactivé n'émet pas d'événement de survol.
+- Catégorie épuisée pour cet étudiant : bouton `aria-disabled="true"` (clic neutralisé), grisé, avec infobulle « Plus de question disponible dans cette catégorie » (D06). Le bouton est lui-même le déclencheur de l'infobulle et porte le motif en `aria-describedby` vers un texte `sr-only` : un bouton nativement `disabled` n'émet ni survol ni focus, et un `span` focalisable enveloppant tomberait sous Sonar S6845.
 - Toute la grille est désactivée si un attempt est `pending` ou si `busy`.
 - Clic : `draw(category.id)`.
 
@@ -177,7 +177,7 @@ Pas d'animation de tirage (réservée à la vue projetée, F14).
 ### `use-passage-actions.ts`
 
 ```ts
-function usePassageActions(sessionId: string, studentId: string | undefined): {
+function usePassageActions(sessionId: string, studentId: string | undefined, sessionUpdatedAt: string): {
   draw: (categoryId: string) => Promise<void>
   score: (attemptId: string, value: number) => Promise<void>
   selectStudent: (studentId: string) => Promise<void>
@@ -188,7 +188,7 @@ function usePassageActions(sessionId: string, studentId: string | undefined): {
 
 - Chaque action efface l'erreur, passe `busy` à `true`, appelle `updateSession(sessionId, (s) => transition(s, …))`, puis remet `busy` à `false`.
 - `draw` passe `{ random: (n) => cryptoRandomInt(n), newId: () => crypto.randomUUID(), now: () => new Date() }`. Ces appels sont synchrones et se font **dans** le mutator, donc sur la liste fraîche des questions disponibles, sans `await` étranger à Dexie.
-- `busy` protège contre le double-clic dans l'interface ; la garantie reste la transaction (`pending_exists` au second tirage).
+- `busy` protège contre le double-clic dans l'interface : garde `useRef` synchrone, et `busy` reste vrai tant que `sessionUpdatedAt` n'a pas rattrapé l'`updatedAt` renvoyé par l'écriture (la liveQuery livre la session écrite quelques millisecondes après la fin de la transaction, QUIRKS). La garantie reste la transaction (`pending_exists` au second tirage).
 - Erreur : une `PassageError` s'affiche avec son message traduit, les autres (`SessionNotFoundError`, base indisponible) avec un message générique, dans un `<p role="alert">` au-dessus de la grille.
 
 ### Traductions

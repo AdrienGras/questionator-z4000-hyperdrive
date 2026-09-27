@@ -20,6 +20,22 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-27 — F09 implémenté : écran de passage
+
+**Dernière chose faite** : F09 (#9) implémenté sur `feat/f09-passage` en subagent-driven development. Spec et D64 d'abord, puis un plan en 5 tâches de code, une revue par tâche, une revue finale sur Opus et une vague de correctifs, relue elle aussi.
+- `src/domain/passage/` : `cryptoRandomInt` (rejet, sans biais de modulo) et `pickUniform` ; sélecteurs (`availableQuestions` exclut tout attempt de l'étudiant, y compris les skips ; `questionIndex` = `min(notées + 1, total)`) ; transitions pures `drawQuestion`, `scoreAttempt`, `setActiveStudent`, qui lèvent une `PassageError` à 9 codes, traduits dans `messages.ts`.
+- `src/features/session/hooks/use-passage-actions.ts` : applique les transitions dans `updateSession`. Une garde `useRef` bloque le double appel, et `busy` reste vrai jusqu'à ce que la liveQuery livre l'`updatedAt` écrit (QUIRKS).
+- Écran : `ExaminerView` → `PassageBody` (états sans étudiant / absent / terminé / en passage), `PassageHeader`, `StudentPicker` provisoire, `CategoryGrid` (catégorie épuisée en `aria-disabled` + infobulle), `QuestionPanel` (`<Markdown>`, `<details key={attempt.id}>` replié, un bouton par valeur du barème, emplacement vide pour le skip F10). `aside` vide réservé à F12.
+- La revue finale a trouvé 2 points qui auraient fait tomber Sonar (ternaires imbriqués S3358, `span tabIndex` S6845) et 8 mineurs : tous corrigés. Helpers de test partagés dans `src/testing/passage-assertions.ts`.
+
+`pnpm check` est vert (611 tests) et `pnpm build` ne donne aucun avertissement ; Shiki reste hors du chunk d'entrée, sans `.wasm`.
+
+**Trucs en suspens** : PR pas encore ouverte, donc SonarQube pas encore passé (`sonar-check.sh --pr <n> --wait` après l'ouverture en brouillon). Rien n'a été vérifié à l'écran dans un vrai navigateur : fond des blocs `.shiki` en clair (BACKLOG), rendu de la grille et de l'infobulle. F18 (#36) toujours spécifiée, pas implémentée. Toujours non vérifié depuis F04 : la survie des données à un vrai redémarrage du navigateur.
+
+**Prochaine chose à creuser** : ouvrir la PR en brouillon, passer le gate Sonar, puis vérifier le passage à la main avec `examples/config.example.json`. Ensuite F10 (skip), qui ajoute `skipAttempt` à côté des transitions et remplit l'emplacement réservé de `QuestionPanel` ; puis F11, qui remplace `DoneState`.
+
+**Notes pour future Claude** : une nouvelle action d'examen s'écrit comme transition pure dans `domain/passage/` + une action dans `usePassageActions` (CONVENTIONS « Transition de passage »). Le hook prend `session.updatedAt` en 3ᵉ argument : ne pas le retirer, c'est le verrou contre la fenêtre de données périmées. Pas de ternaire imbriqué ni de `disabled` natif sous une infobulle (QUIRKS). Les tests d'écran qui attendent un score doivent attendre une valeur **différente** de l'état initial. Le sélecteur d'étudiant, le side panel vide et `DoneState` sont provisoires (D64) : F11, F12 et F13 les remplacent.
+
 ## 2026-09-26 — F08 implémenté : rendu markdown
 
 **Dernière chose faite** : F08 (#8) implémenté sur `feat/f08-markdown` en subagent-driven development. Spec et D62 d'abord (composant seul, sans branchement dans un écran ; rangement D59), puis un plan en 3 tâches, une revue par tâche, une revue finale et une vague de correction.
