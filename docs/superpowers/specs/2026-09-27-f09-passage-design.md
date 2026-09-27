@@ -96,7 +96,7 @@ export class PassageError extends Error {
 }
 ```
 
-`messages.ts` traduit un code avec `t` de `@/lib/i18n/i18n`, comme `domain/config/messages.ts`. Clés `passage_error_<code>` en `fr` et `en`.
+`messages.ts` traduit un code avec `t` de `@/lib/i18n/i18n`, dans son propre dictionnaire `fr` et `en` indexé par code, comme `domain/config/messages.ts`.
 
 ### `draw.ts`
 
@@ -193,7 +193,7 @@ function usePassageActions(sessionId: string, studentId: string | undefined): {
 
 ### Traductions
 
-Nouvelles clés dans `src/lib/i18n/ui-messages.ts`, en `fr` et en `en` : `passage_*` pour l'écran (compteur, score, max, infobulle, réponse, états, sélecteur, statuts) et `passage_error_*` pour les codes. Les clés `coming_soon_*` et `session_categories` sont supprimées si plus rien ne les utilise.
+Nouvelles clés `passage_*` dans `src/lib/i18n/ui-messages.ts`, en `fr` et en `en`, pour l'écran (compteur, score, max, infobulle, réponse, états, sélecteur, statuts). Les messages des codes d'erreur vivent dans le dictionnaire propre de `domain/passage/messages.ts`. Les clés `coming_soon_*` et `session_categories` sont supprimées si plus rien ne les utilise.
 
 ## Tests
 
