@@ -51,4 +51,8 @@ describe('pickUniform', () => {
   test('liste vide lève', () => {
     expect(() => pickUniform([], () => 0)).toThrow(RangeError)
   })
+
+  test('random renvoyant un index hors limites lève', () => {
+    expect(() => pickUniform(['a', 'b', 'c'], () => 3)).toThrow(RangeError)
+  })
 })

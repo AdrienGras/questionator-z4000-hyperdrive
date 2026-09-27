@@ -11,7 +11,9 @@ export function cryptoRandomInt(n: number, fill: RandomFill = defaultFill): numb
   const limit = 2 ** 32 - (2 ** 32 % n)
   let value: number
   do {
-    value = fill(new Uint32Array(1))[0]!
+    const drawn = fill(new Uint32Array(1))[0]
+    if (drawn === undefined) throw new Error('Buffer vide : aucune valeur tirée')
+    value = drawn
   } while (value >= limit)
   return value % n
 }
@@ -19,5 +21,7 @@ export function cryptoRandomInt(n: number, fill: RandomFill = defaultFill): numb
 /** Tire un élément uniformément, via `random(items.length)`. */
 export function pickUniform<T>(items: readonly T[], random: (n: number) => number): T {
   if (items.length === 0) throw new RangeError('Liste vide')
-  return items[random(items.length)]!
+  const picked = items[random(items.length)]
+  if (picked === undefined) throw new RangeError('Index hors limites renvoyé par random')
+  return picked
 }
