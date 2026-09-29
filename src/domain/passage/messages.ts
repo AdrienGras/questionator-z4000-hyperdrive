@@ -22,6 +22,7 @@ const fr: Dictionary<PassageErrorParams> = {
     'L’ajustement doit être un multiple du pas d’arrondi, au plus la note maximale.',
   no_next_student: () => 'Tous les étudiants sont passés.',
   not_scored: () => 'Seule une question notée peut être corrigée.',
+  student_name_required: () => 'Le nom et le prénom sont obligatoires.',
 }
 
 const en: Dictionary<PassageErrorParams> = {
@@ -42,6 +43,7 @@ const en: Dictionary<PassageErrorParams> = {
     'The adjustment must be a multiple of the rounding step, at most the maximum score.',
   no_next_student: () => 'All students have been examined.',
   not_scored: () => 'Only a scored question can be corrected.',
+  student_name_required: () => 'Last name and first name are required.',
 }
 
 export const PASSAGE_ERROR_MESSAGES: Record<Locale, Dictionary<PassageErrorParams>> = { fr, en }

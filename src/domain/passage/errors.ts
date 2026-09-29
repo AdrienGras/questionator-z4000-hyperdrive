@@ -16,6 +16,7 @@ export type PassageErrorCode =
   | 'adjustment_invalid'
   | 'no_next_student'
   | 'not_scored'
+  | 'student_name_required'
 
 /** Erreur levée par une transition refusée ; la session d'entrée n'est jamais modifiée. */
 export class PassageError extends Error {

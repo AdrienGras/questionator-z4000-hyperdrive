@@ -19,6 +19,7 @@ const codes: PassageErrorCode[] = [
   'adjustment_invalid',
   'no_next_student',
   'not_scored',
+  'student_name_required',
 ]
 
 describe('passageErrorMessage', () => {
@@ -33,5 +34,11 @@ describe('passageErrorMessage', () => {
     expect(passageErrorMessage(error, 'fr')).toBe(
       'Une question est déjà en cours : notez-la d’abord.',
     )
+  })
+
+  test('student_name_required : messages exacts', () => {
+    const error = new PassageError('student_name_required')
+    expect(passageErrorMessage(error, 'fr')).toBe('Le nom et le prénom sont obligatoires.')
+    expect(passageErrorMessage(error, 'en')).toBe('Last name and first name are required.')
   })
 })
