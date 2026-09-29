@@ -168,6 +168,19 @@ test('commentaire tapé puis changement d’étudiant avant le délai : enregist
   await mount([makeStudent([]), bob()])
 
   fireEvent.change(commentBox(), { target: { value: 'Pour Alice' } })
+  // L'onglet « Étudiant » reste monté : seul le changement d'étudiant démonte `CommentField`
+  // (clé par étudiant), comme lors d'une écriture venue d'un autre onglet du navigateur.
+  await updateSession('session-1', (s) => setActiveStudent(s, 'student-2'))
+
+  await waitFor(async () => expect((await storedStudent('student-1')).comment).toBe('Pour Alice'))
+  expect((await storedStudent('student-2')).comment).toBeUndefined()
+  await waitFor(() => expect(commentBox()).toHaveValue(''))
+})
+
+test('commentaire tapé puis passage à l’onglet « Étudiants » : enregistré, étudiant suivant vide', async () => {
+  await mount([makeStudent([]), bob()])
+
+  fireEvent.change(commentBox(), { target: { value: 'Pour Alice' } })
   fireEvent.click(within(panel()).getByRole('tab', { name: 'Étudiants' }))
   fireEvent.click(within(panel()).getByRole('button', { name: /Martin Bob/ }))
 
@@ -278,8 +291,8 @@ test('dialogue d’absence ouvert pour Alice, Bob devient actif ailleurs : c’e
   const dialog = await screen.findByRole('alertdialog', { name: 'Déclarer Durand Alice absent ?' })
   // Un autre onglet change l'étudiant actif pendant que le dialogue est ouvert.
   await updateSession('session-1', (s) => setActiveStudent(s, 'student-2'))
-  // Le dialogue modal masque le reste de la page : `hidden` pour atteindre la liste. Les onglets
-  // inactifs sont démontés, donc on passe par la base puis par la ligne surlignée de la liste.
+  // Le dialogue modal masque le reste de la page et les onglets inactifs sont démontés : on
+  // vérifie le changement d'étudiant actif en base puis dans l'en-tête.
   await waitFor(async () => expect((await stored()).activeStudentId).toBe('student-2'))
   // L'en-tête (masqué par le dialogue mais présent) montre bien Bob comme étudiant actif.
   await waitFor(() => expect(screen.getByText('Martin Bob')).toBeInTheDocument())

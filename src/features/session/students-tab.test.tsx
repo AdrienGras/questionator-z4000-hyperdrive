@@ -120,8 +120,8 @@ test('cliquer un étudiant l’active sans toucher à la projection ni à l’on
 
   await waitFor(async () => expect((await stored()).activeStudentId).toBe('s-b'))
   expect((await stored()).projection).toEqual(projection)
-  expect(screen.getByRole('tab', { name: 'Étudiants' })).toHaveAttribute('aria-selected', 'true')
   await waitFor(() => expect(rowOf('Bec')).toHaveAttribute('aria-current', 'true'))
+  expect(screen.getByRole('tab', { name: 'Étudiants' })).toHaveAttribute('aria-selected', 'true')
 })
 
 test('cliquer l’étudiant déjà actif n’écrit rien', async () => {
