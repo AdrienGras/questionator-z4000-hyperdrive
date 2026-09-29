@@ -44,7 +44,7 @@ src/features/stats/
                         adjustment-card
 src/routes/session.$sessionId_.stats.tsx
 src/components/ui/chart.tsx          (shadcn add chart)
-scripts/check-initial-bundle.mjs
+scripts/check-initial-bundle.ts   (+ .test.ts ; lancé par `node`, types retirés)
 e2e/pages/stats-page.ts, e2e/stats.spec.ts
 ```
 
@@ -131,7 +131,12 @@ Les moyennes, médianes et écarts-types se calculent sur les millièmes entiers
 
 - `recharts` et `@/components/ui/chart` ne s'importent que depuis `src/features/stats/` : règle `dependency-cruiser` dédiée.
 - `shadcn add chart` : vérifier ensuite l'import de `cn` et l'absence de dépendance `cn` (QUIRKS 2026-09-25).
-- `scripts/check-initial-bundle.mjs` : `build.manifest: true` ; le script lit `dist/.vite/manifest.json`, part de l'entrée `index.html`, suit les `imports` **statiques** (pas les `dynamicImports`) et échoue si un fichier source du graphe se trouve sous `node_modules/recharts/` (ou si le chunk de `chart.tsx` y figure). Script `pnpm check:bundle`, lancé en CI après `pnpm build`. Un test Vitest du script, sur des manifestes jouets, vérifie qu'il détecte une fuite et accepte un import dynamique.
+- Découpage (`vite.config.ts`, `build.rolldownOptions.output.codeSplitting.groups`) : un groupe nommé `recharts` (recharts, victory-vendor, d3-*) force un chunk `_recharts-<hash>.js` visible dans le manifeste ; sans lui, Rolldown inline Recharts dans le chunk qui l'importe. Un groupe `vendor` en **liste blanche** (react, react-dom, scheduler, clsx, tiny-invariant, use-sync-external-store) le précède : `includeDependenciesRecursively` vaut `true` par défaut, et sans lui le groupe `recharts` avalerait React, que l'entrée importerait alors statiquement. La variante `{ test: /node_modules/, tags: ['$initial'] }` est écartée : elle absorberait un Recharts qui fuit dans `vendor` et aveuglerait le contrôle.
+- `scripts/check-initial-bundle.ts`, exécuté par `node` (types retirés), script `pnpm check:bundle`, lancé en CI après `pnpm build` (`build.manifest: true`). Il lit `dist/.vite/manifest.json` et :
+  1. **non-vacuité** (`findVacuityProblems`) : échoue si aucune clé ne correspond à `^_recharts[.-]`, si l'entrée `src/routes/session.$sessionId_.stats.tsx?tsr-split=component` manque, ou si elle n'atteint pas le chunk `_recharts-*` par imports statiques ; sinon le contrôle passerait sans rien vérifier ;
+  2. **fuite** (`findInitialLeaks`) : part des entrées `isEntry`, suit les `imports` **statiques** (pas les `dynamicImports`) et échoue si une clé du graphe est le chunk `_recharts-*` (repli : chemin source sous `node_modules/recharts/` ou chunk de `chart.tsx`).
+  Tests Vitest (`scripts/check-initial-bundle.test.ts`) sur des manifestes jouets et un extrait réaliste, avec le motif livré (`FORBIDDEN`).
+- `errorComponent` gardé dans le fichier de route chargé d'emblée : `codeSplitGroupings: [['component']]` dans les options de la route. Par défaut, `autoCodeSplitting` le met dans son propre chunk paresseux (`?tsr-split=errorComponent`), qui ne se chargerait pas non plus quand le chunk des statistiques échoue (hors ligne, après un redéploiement).
 
 ## Erreurs et cas limites
 
