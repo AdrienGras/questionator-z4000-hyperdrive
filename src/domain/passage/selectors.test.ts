@@ -1,8 +1,16 @@
 import { describe, expect, test } from 'vitest'
+import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
 import type { NormalizedCategory } from '@/domain/config/normalize'
 import type { Attempt } from '@/domain/session/types'
-import { availableQuestions, currentPending, isCategoryExhausted, questionIndex } from './selectors'
+import {
+  availableQuestions,
+  currentPending,
+  isCategoryExhausted,
+  nextStudent,
+  questionIndex,
+  shouldAutoOpenAdjustment,
+} from './selectors'
 
 const config = makeConfig({ questionsPerStudent: 3 })
 const category: NormalizedCategory = {
@@ -98,5 +106,60 @@ describe('questionIndex', () => {
     [[1, 1, 1], { current: 3, total: 3 }],
   ])('%j → %j', (attempts, expected) => {
     expect(questionIndex(makeStudent(attempts), indexConfig)).toEqual(expected)
+  })
+})
+
+describe('nextStudent', () => {
+  const one = makeConfig({ questionsPerStudent: 1 })
+  const s1 = makeStudent([10], { id: 's1', order: 1 })
+  const s2 = makeStudent([], { id: 's2', order: 2, absent: true })
+  const s3 = makeStudent([], { id: 's3', order: 3 })
+  const s4 = makeStudent(['pending'], { id: 's4', order: 4 })
+  const s5 = makeStudent([12], { id: 's5', order: 5 })
+  const sorted = makeSession({ config: one, students: [s1, s2, s3, s4, s5] })
+  const unsorted = makeSession({ config: one, students: [s3, s1, s5, s4, s2] })
+
+  test.each([
+    ['s1', 's3'],
+    ['s3', 's4'],
+    ['s4', 's3'],
+    ['s5', 's3'],
+    ['inconnu', 's3'],
+    [undefined, 's3'],
+  ])('depuis %s → %s', (currentId, expected) => {
+    expect(nextStudent(sorted, currentId)).toBe(expected)
+    expect(nextStudent(unsorted, currentId)).toBe(expected)
+  })
+
+  test('seul candidat = courant → null', () => {
+    const session = makeSession({ config: one, students: [s1, s2, s3, s5] })
+    expect(nextStudent(session, 's3')).toBeNull()
+  })
+
+  test('tous done ou absents → null', () => {
+    const session = makeSession({ config: one, students: [s1, s2, s5] })
+    expect(nextStudent(session, 's1')).toBeNull()
+    expect(nextStudent(session, undefined)).toBeNull()
+  })
+})
+
+describe('shouldAutoOpenAdjustment', () => {
+  const one = makeConfig({ questionsPerStudent: 1 })
+
+  test('done sans finalRevealedAt → vrai', () => {
+    expect(shouldAutoOpenAdjustment(makeStudent([10]), one)).toBe(true)
+  })
+
+  test('done avec finalRevealedAt → faux', () => {
+    const student = makeStudent([10], { finalRevealedAt: '2026-09-25T10:00:00.000Z' })
+    expect(shouldAutoOpenAdjustment(student, one)).toBe(false)
+  })
+
+  test('en cours → faux', () => {
+    expect(shouldAutoOpenAdjustment(makeStudent(['pending']), one)).toBe(false)
+  })
+
+  test('absent → faux', () => {
+    expect(shouldAutoOpenAdjustment(makeStudent([], { absent: true }), one)).toBe(false)
   })
 })
