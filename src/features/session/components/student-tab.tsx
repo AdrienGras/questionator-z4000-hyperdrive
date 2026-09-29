@@ -10,9 +10,9 @@ type StudentTabProps = Readonly<{
   student: Student | undefined
   disabled: boolean
   onEditScore: (attemptId: string, score: number) => void
-  /** Emplacement du commentaire (rempli par la tâche suivante). */
+  /** `CommentField` de l'étudiant, monté par l'appelant avec `key={student.id}`. */
   commentSlot?: ReactNode
-  /** Emplacement de la case « absent » (rempli par la tâche suivante). */
+  /** `AbsentToggle` de l'étudiant. */
   absentSlot?: ReactNode
 }>
 

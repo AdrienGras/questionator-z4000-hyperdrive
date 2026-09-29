@@ -6,6 +6,8 @@ import { studentStatus } from '@/domain/scoring/status'
 import type { Session } from '@/domain/session/types'
 import { usePassageActions } from '@/features/session/hooks/use-passage-actions'
 import { useUi, type Ui } from '@/lib/i18n/use-ui'
+import { AbsentToggle } from './absent-toggle'
+import { CommentField } from './comment-field'
 import { PassageBody } from './passage-body'
 import { PassageHeader } from './passage-header'
 import { SidePanel } from './side-panel'
@@ -84,6 +86,28 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
                 student={student}
                 disabled={actions.busy}
                 onEditScore={(attemptId, score) => void actions.editScore(attemptId, score)}
+                commentSlot={
+                  student && (
+                    // `key` : un montage par étudiant, dont le démontage flushe le commentaire
+                    // tapé sur CET étudiant (Review Focus 1).
+                    <CommentField
+                      key={student.id}
+                      ui={ui}
+                      student={student}
+                      onSave={actions.setComment}
+                    />
+                  )
+                }
+                absentSlot={
+                  student && (
+                    <AbsentToggle
+                      ui={ui}
+                      student={student}
+                      disabled={actions.busy}
+                      onChange={actions.setAbsent}
+                    />
+                  )
+                }
               />
             }
           />
