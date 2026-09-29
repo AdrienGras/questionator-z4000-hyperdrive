@@ -965,3 +965,17 @@ autre encodage 8 bits.
 **Pourquoi** : même modèle que `buildSession` (dépendances injectées, testable sans IndexedDB) et sens des imports D59 respecté. Le sélecteur rend F09 vérifiable de bout en bout sur plusieurs étudiants pour un coût minime. Un panneau vide avec un bouton de repli inutile n'apporterait rien.
 
 **Reporté dans** : spec F09. Impacte F09, F10, F11, F12, F13.
+
+## D65 — F10 : motif de skip revérifié dans la transaction, borné à 200 caractères (2026-09-29)
+
+**Question** : le ticket F10 fixe les refus de `skipAttempt` (attempt non `pending`, skips désactivés, quota atteint) mais rien sur le motif lui-même : ni ce que vaut un motif libre quand `skips.allowFreeText` est faux, ni sa longueur.
+
+**Décision** :
+- Un motif hors de `skips.reasons` est refusé (`reason_not_allowed`) si `allowFreeText` est faux. Un motif vide reste toujours accepté (le motif est facultatif).
+- Le motif est trimé, puis tronqué à 200 caractères (`MAX_SKIP_REASON_LENGTH`) ; le champ libre porte le même `maxLength`. Vide après trim, il n'est pas enregistré (`skipReason` absent).
+- Sans motif prédéfini ni champ libre, le dialogue ne fait que confirmer.
+- F10 livré sans spec ni plan séparés (tâche délimitée) : le ticket #10 et ce D65 font foi.
+
+**Pourquoi** : même principe que `score_not_in_scale` pour la note : l'interface ne peut pas produire ce cas, mais le domaine ne dépend pas d'elle (deux onglets, backup importé). La borne protège l'export (F16) et le side panel (F12) d'un texte sans fin.
+
+**Reporté dans** : `src/domain/passage/skip.ts`. Impacte F10, F12, F16.

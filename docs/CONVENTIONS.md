@@ -391,16 +391,15 @@ Arbitrage : D22, D28, D64 (F09). Toute action d'examen (tirer, noter, et en F10/
 
 ```ts
 // src/domain/passage/skip.ts (F10, par exemple)
-export function skipAttempt(session: Session, input: { studentId: string; attemptId: string; reason: string }): Session {
-  const student = session.students.find((s) => s.id === input.studentId)
-  if (student === undefined) throw new PassageError('student_not_found')
+export function skipAttempt(session: Session, input: { studentId: string; attemptId: string; reason?: string }): Session {
+  const student = requireStudent(session, input.studentId) // `student_not_found` si absent
   // … contrôles sur la session reçue, un code PassageError par refus (+ message fr/en dans messages.ts)
   return { ...session, students: session.students.map((s) => (s.id === student.id ? { ...s, attempts: … } : s)) }
 }
 
 // src/features/session/hooks/use-passage-actions.ts : une action de plus
 const skip = useCallback(
-  async (attemptId: string, reason: string) => {
+  async (attemptId: string, reason: string | undefined) => {
     if (studentId === undefined) return
     await run((session) => skipAttempt(session, { studentId, attemptId, reason }))
   },
