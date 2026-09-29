@@ -1,38 +1,13 @@
 import 'fake-indexeddb/auto'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, expect, test, vi } from 'vitest'
-import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import type { Session, Student } from '@/domain/session/types'
 import { db } from '@/lib/db/db'
-import { putSession } from '@/lib/db/sessions'
 import { AddStudentDialog } from './components/add-student-dialog'
 import { makeUi } from '@/testing/make-ui'
-import { renderAt } from '@/testing/render-at'
 import { makeSession } from '@/testing/session-fixtures'
-import { makeConfig, makeStudent } from '@/testing/student-fixtures'
-
-const category: NormalizedCategory = {
-  id: 'a',
-  label: 'A',
-  scale: [0, 1, 2, 3],
-  order: 1,
-  questions: ['a-1', 'a-2', 'a-3'].map((id) => ({
-    id,
-    title: `Titre ${id}`,
-    tags: [],
-    prompt: id,
-  })),
-}
-
-const config: NormalizedConfig = {
-  ...makeConfig({
-    questionsPerStudent: 2,
-    maxRawScore: 20,
-    finalScale: 20,
-    rounding: { mode: 'nearest', decimals: 2, step: 0.5 },
-  }),
-  categories: [category],
-}
+import { makeStudent } from '@/testing/student-fixtures'
+import { config, mountStudentsTab } from '@/testing/students-tab-harness'
 
 const alice = makeStudent([], {
   id: 's-a',
@@ -52,12 +27,7 @@ const alice = makeStudent([], {
 const durand = makeStudent([], { id: 's-d', lastName: 'Durand', firstName: 'Élodie', order: 2 })
 
 async function mount(students: Student[] = [alice, durand], overrides: Partial<Session> = {}) {
-  await putSession(
-    makeSession({ config, students, activeStudentId: students[0]?.id, ...overrides }),
-  )
-  renderAt('/session/session-1')
-  await screen.findByRole('complementary', { name: 'Panneau latéral' })
-  fireEvent.click(screen.getByRole('tab', { name: 'Étudiants' }))
+  await mountStudentsTab(students, overrides)
 }
 
 function openDialog() {

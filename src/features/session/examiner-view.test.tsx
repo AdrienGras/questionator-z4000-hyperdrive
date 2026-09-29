@@ -18,6 +18,15 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
+/** Aucune ligne de la liste des étudiants n'est marquée comme courante. */
+function expectNoCurrentStudent() {
+  for (const button of within(
+    screen.getByRole('list', { name: 'Étudiants de la session' }),
+  ).getAllByRole('button')) {
+    expect(button).not.toHaveAttribute('aria-current')
+  }
+}
+
 function twoStudents(
   aliceAttempts: AttemptSpec[] = [],
   bobAttempts: AttemptSpec[] = [],
@@ -91,11 +100,7 @@ test('activeStudentId inconnu affiche « Aucun étudiant sélectionné » sans p
   ).toBeInTheDocument()
   expect(screen.queryByRole('combobox', { name: 'Étudiant' })).not.toBeInTheDocument()
   studentButton('Durand Alice')
-  for (const button of within(
-    screen.getByRole('list', { name: 'Étudiants de la session' }),
-  ).getAllByRole('button')) {
-    expect(button).not.toHaveAttribute('aria-current')
-  }
+  expectNoCurrentStudent()
   expect(screen.queryByText(/^Question /)).not.toBeInTheDocument()
 })
 
@@ -109,11 +114,7 @@ test('sans activeStudentId, « Aucun étudiant sélectionné »', async () => {
   ).toBeInTheDocument()
   expect(screen.queryByRole('combobox', { name: 'Étudiant' })).not.toBeInTheDocument()
   studentButton('Durand Alice')
-  for (const button of within(
-    screen.getByRole('list', { name: 'Étudiants de la session' }),
-  ).getAllByRole('button')) {
-    expect(button).not.toHaveAttribute('aria-current')
-  }
+  expectNoCurrentStudent()
   expect(screen.queryByText(/^Question /)).not.toBeInTheDocument()
 })
 
