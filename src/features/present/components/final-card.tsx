@@ -12,6 +12,10 @@ export function FinalCard({
   detail: ProjectedStudentView['detail']
 }>) {
   const format = new Intl.NumberFormat(ui.locale, { maximumFractionDigits: 2 })
+  // Rien à afficher (ex. note convertie non calculable) : pas de section vide.
+  if (final.final === undefined && final.raw === undefined) {
+    return <p className="text-4xl font-semibold">{ui.text('present_finished', {})}</p>
+  }
   return (
     <section className="flex flex-col items-center gap-6">
       {final.final !== undefined && (
@@ -29,8 +33,11 @@ export function FinalCard({
       )}
       {detail !== undefined && (
         <ul className="w-full max-w-2xl divide-y text-2xl">
-          {detail.map((row, index) => (
-            <li key={index} className="flex items-baseline justify-between gap-4 py-2">
+          {detail.map((row) => (
+            <li
+              key={`${row.categoryLabel}\u0000${row.title}`}
+              className="flex items-baseline justify-between gap-4 py-2"
+            >
               <span>
                 <span className="text-muted-foreground">{row.categoryLabel}</span> {row.title}
               </span>

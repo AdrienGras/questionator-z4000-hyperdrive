@@ -139,12 +139,13 @@ export function toProjectedView(session: Session): ProjectedView {
         },
       }),
     questionIndex: questionIndex(student, config),
-    ...(presentation.showCumulativeScore && {
-      cumulativeRaw: fromMilli(computeScores(student, config).raw),
-    }),
+    ...(presentation.showCumulativeScore &&
+      !finished && {
+        cumulativeRaw: fromMilli(computeScores(student, config).raw),
+      }),
     ...(revealed && { final: finalOf(student, config) }),
     finished,
     drawAnimation: presentation.drawAnimation,
-    ...(presentation.showStatsOnFinal && finished && { detail: detailOf(student, config) }),
+    ...(presentation.showStatsOnFinal && revealed && { detail: detailOf(student, config) }),
   }
 }

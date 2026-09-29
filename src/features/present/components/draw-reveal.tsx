@@ -1,11 +1,12 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
+import { REDUCED_MOTION_QUERY } from '@/lib/appearance/reduced-motion'
 import { cn } from '@/lib/utils'
 
 const SHUFFLE_MS = 1500
 const CARDS = [0, 1, 2]
 
 function prefersReducedMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  return window.matchMedia(REDUCED_MOTION_QUERY).matches
 }
 
 /**

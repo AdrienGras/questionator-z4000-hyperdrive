@@ -132,10 +132,23 @@ describe('toProjectedView', () => {
 
   test('cumul : absent sans showCumulativeScore, somme des points notés sinon', () => {
     const student = makeStudent([1.5, 2])
-    const off = studentView(sessionOf(student, { presentation: { showCumulativeScore: false } }))
+    const scoring = { questionsPerStudent: 3 } // passage en cours : le cumul reste affiché
+    const off = studentView(
+      sessionOf(student, { scoring, presentation: { showCumulativeScore: false } }),
+    )
     expect('cumulativeRaw' in off).toBe(false)
-    const on = studentView(sessionOf(student, { presentation: { showCumulativeScore: true } }))
+    const on = studentView(
+      sessionOf(student, { scoring, presentation: { showCumulativeScore: true } }),
+    )
     expect(on.cumulativeRaw).toBe(3.5)
+  })
+
+  test('cumul : masqué une fois le passage terminé', () => {
+    const view = studentView(
+      sessionOf(makeStudent([1, 2]), { presentation: { showCumulativeScore: true } }),
+    )
+    expect(view.finished).toBe(true)
+    expect('cumulativeRaw' in view).toBe(false)
   })
 
   test('terminé sans révélation : finished, pas de final, catégories désactivées', () => {
@@ -183,7 +196,7 @@ describe('toProjectedView', () => {
   })
 
   test('detail : dans l’ordre du tirage, passe sans points', () => {
-    const student = makeStudent([1, { skipped: 'Hors sujet' }, 2])
+    const student = makeStudent([1, { skipped: 'Hors sujet' }, 2], { finalRevealedAt: revealed })
     const view = studentView(
       sessionOf(student, {
         scoring: { questionsPerStudent: 2 },
@@ -198,9 +211,19 @@ describe('toProjectedView', () => {
     expect('points' in view.detail![1]!).toBe(false)
   })
 
+  test('detail : absent tant que la note n’est pas révélée', () => {
+    const view = studentView(
+      sessionOf(makeStudent([1, 2]), { presentation: { showStatsOnFinal: true } }),
+    )
+    expect(view.finished).toBe(true)
+    expect('detail' in view).toBe(false)
+  })
+
   test('detail : absent sans showStatsOnFinal', () => {
     const view = studentView(
-      sessionOf(makeStudent([1, 2]), { presentation: { showStatsOnFinal: false } }),
+      sessionOf(makeStudent([1, 2], { finalRevealedAt: revealed }), {
+        presentation: { showStatsOnFinal: false },
+      }),
     )
     expect('detail' in view).toBe(false)
   })

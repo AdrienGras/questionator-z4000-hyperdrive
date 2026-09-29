@@ -4,7 +4,22 @@ import type { ProjectedStudentView } from '@/domain/presentation/projected-view'
 import { CategoryTiles } from '@/features/present/components/category-tiles'
 import { DrawReveal } from '@/features/present/components/draw-reveal'
 import { FinalCard } from '@/features/present/components/final-card'
-import { useUi } from '@/lib/i18n/use-ui'
+import { useUi, type Ui } from '@/lib/i18n/use-ui'
+
+/** Bas d'écran : progression en cours de passage, « Passage terminé » ou note finale une fois terminé. */
+function Progress({ ui, view }: Readonly<{ ui: Ui; view: ProjectedStudentView }>) {
+  if (!view.finished) {
+    return (
+      <p className="text-2xl text-muted-foreground">
+        {ui.text('present_question_index', view.questionIndex)}
+      </p>
+    )
+  }
+  if (view.final === undefined) {
+    return <p className="text-4xl font-semibold">{ui.text('present_finished', {})}</p>
+  }
+  return <FinalCard ui={ui} final={view.final} detail={view.detail} />
+}
 
 /** Écran étudiant de la vue projetée : nom, catégories, énoncé en cours, progression, note finale. */
 export function StudentScreen({ view }: Readonly<{ view: ProjectedStudentView }>) {
@@ -12,7 +27,7 @@ export function StudentScreen({ view }: Readonly<{ view: ProjectedStudentView }>
   // `drawnAt` présent au montage (ouverture, réouverture, changement d'étudiant) : jamais animé.
   const [initialDrawnAt] = useState(view.current?.drawnAt)
   const format = new Intl.NumberFormat(ui.locale, { maximumFractionDigits: 2 })
-  const { student, current, questionIndex, cumulativeRaw, final, finished, detail } = view
+  const { student, current, cumulativeRaw } = view
   return (
     <div className="flex min-h-svh flex-col gap-8 p-6 sm:p-10">
       <header className="flex flex-col gap-1">
@@ -33,17 +48,7 @@ export function StudentScreen({ view }: Readonly<{ view: ProjectedStudentView }>
           </section>
         </DrawReveal>
       )}
-      {finished ? (
-        final === undefined ? (
-          <p className="text-4xl font-semibold">{ui.text('present_finished', {})}</p>
-        ) : (
-          <FinalCard ui={ui} final={final} detail={detail} />
-        )
-      ) : (
-        <p className="text-2xl text-muted-foreground">
-          {ui.text('present_question_index', questionIndex)}
-        </p>
-      )}
+      <Progress ui={ui} view={view} />
       {cumulativeRaw !== undefined && (
         <p className="text-2xl">
           {ui.text('present_cumulative', { score: format.format(cumulativeRaw) })}

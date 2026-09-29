@@ -25,7 +25,8 @@ export function PresentControls({ idle }: Readonly<{ idle: boolean }>) {
     const request = fullscreen
       ? document.exitFullscreen()
       : document.documentElement.requestFullscreen()
-    request.catch(() => {})
+    // `requestFullscreen()` renvoie `undefined` sur d'anciens WebKit ; un refus est sans conséquence.
+    Promise.resolve(request).catch(() => undefined)
   }
 
   return (

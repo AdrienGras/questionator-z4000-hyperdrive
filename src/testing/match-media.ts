@@ -1,8 +1,8 @@
+import { REDUCED_MOTION_QUERY } from '@/lib/appearance/reduced-motion'
+
 export const DARK_QUERY = '(prefers-color-scheme: dark)'
 
 type ChangeListener = (event: { matches: boolean; media: string }) => void
-
-export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
 
 let systemDark = false
 let reducedMotion = false

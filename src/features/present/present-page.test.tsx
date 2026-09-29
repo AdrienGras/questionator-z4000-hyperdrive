@@ -93,7 +93,7 @@ test('question en cours : énoncé affiché, réponse absente', async () => {
 })
 
 test('terminé : pas de note tant que non révélé, puis note, puis correction visible', async () => {
-  const session = await seed(makeStudent([2, 1, 3]))
+  await seed(makeStudent([2, 1, 3]))
   renderAt('/present/session-1')
 
   expect(await screen.findByText('Passage terminé')).toBeInTheDocument()
@@ -114,7 +114,6 @@ test('terminé : pas de note tant que non révélé, puis note, puis correction 
     ),
   )
   await waitFor(() => expect(screen.getByText(/Note : .* \/ 20/).textContent).not.toBe(before))
-  expect(session.id).toBe('session-1')
 })
 
 test('score cumulé affiché avec le format de la locale', async () => {

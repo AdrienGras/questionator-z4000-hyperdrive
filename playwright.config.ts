@@ -3,6 +3,7 @@ import { defineConfig, devices } from '@playwright/test'
 /** Tests de bout en bout (F14, D33) : Chromium seul, contre le build de production servi par `vite preview`. */
 export default defineConfig({
   testDir: 'e2e',
+  forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
