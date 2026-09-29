@@ -111,8 +111,8 @@ export function usePassageActions(
 
   // Enregistrer en fin de passage = ajustement + révélation dans UNE écriture (D66).
   const adjust = useCallback(
-    async (value: number, reason: string | undefined, options: { reveal: boolean }) => {
-      if (studentId === undefined) return false
+    (value: number, reason: string | undefined, options: { reveal: boolean }) => {
+      if (studentId === undefined) return Promise.resolve(false)
       return run((session) => {
         const adjusted = setAdjustment(session, { studentId, value, reason })
         if (!options.reveal) return adjusted
@@ -122,15 +122,15 @@ export function usePassageActions(
     [run, studentId],
   )
 
-  const revealFinal = useCallback(async () => {
-    if (studentId === undefined) return false
+  const revealFinal = useCallback(() => {
+    if (studentId === undefined) return Promise.resolve(false)
     return run((session) =>
       revealFinalTransition(session, { studentId }, { now: () => new Date() }),
     )
   }, [run, studentId])
 
-  const reset = useCallback(async () => {
-    if (studentId === undefined) return false
+  const reset = useCallback(() => {
+    if (studentId === undefined) return Promise.resolve(false)
     return run((session) => resetStudent(session, studentId))
   }, [run, studentId])
 

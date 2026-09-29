@@ -12,7 +12,7 @@ import { PassageError, type PassageErrorCode } from '@/domain/passage/errors'
  * (`src/testing/setup.ts`), d'où l'attente. Pas de filtre sur le nom de la liste : il suit la
  * locale de la session (« Choisir une catégorie » / « Choose a category », Review Focus 5).
  */
-export async function categoryButton(label: string): Promise<HTMLElement> {
+export function categoryButton(label: string): Promise<HTMLElement> {
   return waitFor(() => {
     for (const grid of screen.queryAllByRole('list')) {
       if (grid.tagName !== 'UL') continue
