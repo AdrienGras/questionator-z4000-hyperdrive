@@ -124,6 +124,10 @@ export type UiMessageParams = {
   final_reset: NoParams
   final_next: NoParams
   final_no_next: NoParams
+  attempt_pending: NoParams
+  attempt_score_label: { rank: number }
+  attempt_out_of: { max: string }
+  score_not_computed: NoParams
   reset_title: { name: string }
   reset_body: NoParams
   reset_confirm: NoParams
@@ -314,6 +318,10 @@ const fr: Dictionary<UiMessageParams> = {
   final_reset: () => 'Réinitialiser l’étudiant',
   final_next: () => 'Étudiant suivant',
   final_no_next: () => 'Tous les étudiants sont passés',
+  attempt_pending: () => 'En cours',
+  attempt_score_label: ({ rank }) => `Note de la question ${rank}`,
+  attempt_out_of: ({ max }) => `/ ${max}`,
+  score_not_computed: () => '—',
   reset_title: ({ name }) => `Réinitialiser ${name} ?`,
   reset_body: () =>
     'Les questions tirées, les notes et l’ajustement seront supprimés. Le commentaire est conservé.',
@@ -461,6 +469,10 @@ const en: Dictionary<UiMessageParams> = {
   final_reset: () => 'Reset student',
   final_next: () => 'Next student',
   final_no_next: () => 'All students have been examined',
+  attempt_pending: () => 'In progress',
+  attempt_score_label: ({ rank }) => `Score for question ${rank}`,
+  attempt_out_of: ({ max }) => `/ ${max}`,
+  score_not_computed: () => '—',
   reset_title: ({ name }) => `Reset ${name}?`,
   reset_body: () =>
     'Drawn questions, scores and the adjustment will be deleted. The comment is kept.',
