@@ -18,7 +18,11 @@ function isSidePanelTab(value: unknown): value is SidePanelTab {
  * Panneau latéral de l'écran de passage : deux onglets, repliable. L'état (ouvert, onglet) est
  * mémorisé dans `localStorage` par `side-panel-state` ; le panneau replié ne rend que le bouton.
  */
-export function SidePanel({ ui, studentTab }: Readonly<{ ui: Ui; studentTab: ReactNode }>) {
+export function SidePanel({
+  ui,
+  studentTab,
+  studentsTab,
+}: Readonly<{ ui: Ui; studentTab: ReactNode; studentsTab: ReactNode }>) {
   const { text } = ui
   const contentId = useId()
   const [open, setOpen] = useState(readSidePanelOpen)
@@ -58,9 +62,7 @@ export function SidePanel({ ui, studentTab }: Readonly<{ ui: Ui; studentTab: Rea
               <TabsTrigger value="students">{text('side_panel_tab_students', {})}</TabsTrigger>
             </TabsList>
             <TabsContent value="student">{studentTab}</TabsContent>
-            <TabsContent value="students">
-              <p className="text-muted-foreground">{text('side_panel_students_soon', {})}</p>
-            </TabsContent>
+            <TabsContent value="students">{studentsTab}</TabsContent>
           </Tabs>
         </div>
       )}

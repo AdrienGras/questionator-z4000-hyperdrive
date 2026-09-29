@@ -4,7 +4,10 @@ import type {
   NormalizedQuestion,
 } from '@/domain/config/normalize'
 import type { Attempt, Session, Student } from '@/domain/session/types'
+import type { Milli } from '@/domain/scoring/milli'
+import { computeScores } from '@/domain/scoring/score'
 import { studentStatus } from '@/domain/scoring/status'
+import { identityKey } from '@/domain/students/identity'
 
 /** Questions de la catégorie non encore tirées par cet étudiant (tout `outcome` confondu). */
 export function availableQuestions(
@@ -59,4 +62,27 @@ export function nextStudent(session: Session, currentId: string | undefined): st
 /** La popup d'ajustement s'ouvre d'elle-même quand la note finale n'a pas encore été révélée. */
 export function shouldAutoOpenAdjustment(student: Student, config: NormalizedConfig): boolean {
   return studentStatus(student, config) === 'done' && student.finalRevealedAt === undefined
+}
+
+/** Premier étudiant (par `order`) de même identité que ces noms, ou `undefined` si l'un est vide. */
+export function findDuplicate(
+  session: Session,
+  names: { lastName: string; firstName: string },
+): Student | undefined {
+  const lastName = names.lastName.trim()
+  const firstName = names.firstName.trim()
+  if (lastName === '' || firstName === '') return undefined
+  const key = identityKey(lastName, firstName)
+  return session.students
+    .filter((student) => identityKey(student.lastName.trim(), student.firstName.trim()) === key)
+    .toSorted((a, b) => a.order - b.order)[0]
+}
+
+/** Note affichée dans la liste : brute en cours de route, finale une fois `done`. */
+export type RosterScore = { kind: 'absent' } | { kind: 'scored'; raw: Milli; final: Milli | null }
+
+export function rosterScore(student: Student, config: NormalizedConfig): RosterScore {
+  if (student.absent) return { kind: 'absent' }
+  const { raw, final } = computeScores(student, config)
+  return { kind: 'scored', raw, final }
 }

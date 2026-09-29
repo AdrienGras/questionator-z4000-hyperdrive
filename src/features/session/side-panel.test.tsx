@@ -88,11 +88,11 @@ test('replier retire le contenu et le repli survit au remontage', async () => {
   expect(within(panel()).getByRole('button', { name: 'Afficher le panneau' })).toBeInTheDocument()
 })
 
-test('l’onglet « Étudiants » est mémorisé et affiche le texte provisoire', async () => {
+test('l’onglet « Étudiants » est mémorisé et affiche la liste', async () => {
   const { unmount } = await mount(makeStudent([2, 1], { finalRevealedAt: REVEALED }))
 
   fireEvent.click(within(panel()).getByRole('tab', { name: 'Étudiants' }))
-  expect(screen.getByText('Liste des étudiants — bientôt disponible.')).toBeVisible()
+  expect(screen.getByRole('list', { name: 'Étudiants de la session' })).toBeVisible()
   unmount()
   await mount(makeStudent([2, 1], { finalRevealedAt: REVEALED }))
 
@@ -100,7 +100,7 @@ test('l’onglet « Étudiants » est mémorisé et affiche le texte provisoire'
     'aria-selected',
     'true',
   )
-  expect(screen.getByText('Liste des étudiants — bientôt disponible.')).toBeVisible()
+  expect(screen.getByRole('list', { name: 'Étudiants de la session' })).toBeVisible()
 })
 
 test('localStorage inaccessible : panneau ouvert, repli possible', async () => {

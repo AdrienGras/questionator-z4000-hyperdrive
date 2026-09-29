@@ -3,9 +3,13 @@ import { PassageError } from './errors'
 import { requireStudent } from './require-student'
 import { nextStudent } from './selectors'
 
-/** Change l'étudiant ouvert dans la vue examinateur (§7). */
+/**
+ * Change l'étudiant ouvert dans la vue examinateur (§7). Déjà actif : session renvoyée telle quelle
+ * (pas d'écriture inutile). La projection n'est jamais touchée.
+ */
 export function setActiveStudent(session: Session, studentId: string): Session {
   requireStudent(session, studentId)
+  if (session.activeStudentId === studentId) return session
 
   return { ...session, activeStudentId: studentId }
 }

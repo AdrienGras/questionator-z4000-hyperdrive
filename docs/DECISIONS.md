@@ -1008,3 +1008,18 @@ autre encodage 8 bits.
 
 **Reporté dans** : spec F12, CONVENTIONS « Mutation de session ». Impacte F12, F13, F14, F16.
 
+
+## D68 — F13 : note finale dans la liste, navigation sans changement d'onglet, clé de doublon partagée (2026-09-29)
+
+**Question** : le ticket F13 affiche une « note convertie » dans la liste des étudiants, alors que F14 appelle « converti » la note finale ajustement comprise. Faut-il aussi basculer sur l'onglet « Étudiant » quand l'examinateur choisit un étudiant, et comment détecter un doublon à l'ajout ?
+
+**Décision** :
+- La liste affiche la note brute, puis la **note finale** (`computeScores(...).final`, ajustement compris), « — » tant que le passage n'est pas terminé, `absent.label` pour un absent.
+- Choisir un étudiant, ou « Ajouter et faire passer », laisse le panneau sur l'onglet « Étudiants ».
+- La liste est une `<ul>` de `<button aria-current>`, pas un tableau ni une listbox ARIA.
+- `identityKey` sort de `parse-csv.ts` dans `domain/students/identity.ts` ; le dialogue d'ajout s'en sert pour avertir d'un doublon, sans bloquer.
+- `setActiveStudent` renvoie son entrée quand l'étudiant est déjà actif (D67).
+
+**Pourquoi** : la note finale est celle qui sort à l'export ; une note sans ajustement tromperait l'examinateur. Le corps de l'écran montre déjà l'étudiant choisi, changer d'onglet casserait l'enchaînement des clics. Un doublon doit être reconnu de la même façon dans le CSV et à la main.
+
+**Reporté dans** : spec F13. Impacte F13, F15, F16.

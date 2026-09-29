@@ -40,7 +40,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] `studentStatus` et `computeScores` calculés deux fois (`ExaminerView` et `PassageHeader`) : passer le statut en prop si l'écran grossit.
 - [ ] `passage-example.test.tsx` : ~1,2 s seul, au-delà de 5 s sous la charge de la suite complète ; délai porté à 15 s en F12. Trouver où part le temps (le panneau n'en explique que ~12 %).
 - [ ] Panneau latéral : la zone `aria-live` du commentaire annonce « Enregistrement… » puis « Enregistré » à chaque pause de frappe ; n'annoncer que « Enregistré » / « Échec ».
-- [ ] `AbsentState` renvoie au panneau alors qu'il peut être replié ou sur l'onglet « Étudiants » : proposer « Afficher le panneau » (F13).
+- [ ] `AbsentState` renvoie au panneau alors qu'il peut être replié ou sur l'onglet « Étudiants » : proposer « Afficher le panneau ». Même chose pour l'état « aucun étudiant » depuis F13, qui renvoie à l'onglet « Étudiants » sans l'ouvrir.
 - [ ] Fermer l'onglet dans les 500 ms qui suivent une frappe perd le commentaire non enregistré (pas de flush sur `pagehide`).
 - [ ] Fixtures de tests d'écran (`category` à trois questions, `REVEALED`, `mount`, `panel`) copiées entre `side-panel.test.tsx`, `student-tab.test.tsx`, `final-screen.test.tsx`, `adjustment.test.tsx`, `skip.test.tsx` : à sortir dans `src/testing/`.
 - [ ] Popup d'ajustement : focus initial sur le champ plutôt que sur le bouton « − » (vu dans le navigateur, F11).
@@ -48,6 +48,9 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Boutons − / + de l'ajustement : s'arrêter à ±`finalScale` au lieu de laisser le message d'erreur apparaître.
 - [ ] Tests d'écran F11 : fixtures (`category` à trois questions, `config()`, `stored()`) copiées entre `adjustment.test.tsx` et `final-screen.test.tsx`, à sortir dans `src/testing/` pour F12/F14 ; cas `decimals: 0` (pas de 1) jamais testé à l'écran.
 - [ ] Un backup édité à la main avec `adjustment: { value: 0 }` affiche « 0,00 » au lieu de « aucun ».
+- [ ] Dialogue d'ajout d'étudiant : une erreur antérieure (tirage, note) encore dans le hook s'affiche dans le dialogue dès son ouverture ; ne l'y montrer qu'après un échec d'ajout dans ce dialogue (flag local remis à zéro à l'ouverture) (F13).
+- [ ] Onglet « Étudiants » (montage partagé dans `src/testing/students-tab-harness.tsx` depuis la PR #45) : le test de double clic ne distingue pas la garde `submitting` du verrou `run` ; pas de test `rosterScore` d'un absent qui a des notes (F13).
+- [ ] Onglet « Étudiants » : l'icône de l'étudiant projeté n'est vérifiable qu'en test tant que F14 ne permet pas de projeter depuis l'interface.
 - [ ] `categoryButton` (`src/testing/passage-assertions.ts`) : `waitFor` au délai par défaut (1 s), à allonger si la CI devient lente.
 
 ## Accueil et backup

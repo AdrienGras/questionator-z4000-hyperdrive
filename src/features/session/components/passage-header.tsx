@@ -1,5 +1,4 @@
 import { Link } from '@tanstack/react-router'
-import type { ReactNode } from 'react'
 import { ColorModeToggle } from '@/components/color-mode-toggle'
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import { questionIndex } from '@/domain/passage/selectors'
@@ -13,7 +12,6 @@ type PassageHeaderProps = Readonly<{
   ui: Ui
   config: NormalizedConfig
   student: Student | undefined
-  picker: ReactNode
 }>
 
 /**
@@ -21,7 +19,7 @@ type PassageHeaderProps = Readonly<{
  * position dans le passage et score brut courant. La progression n'est affichée que pendant
  * le passage (`todo` / `in_progress`) : le score final se lit dans `FinalScreen` (pas de doublon).
  */
-export function PassageHeader({ ui, config, student, picker }: PassageHeaderProps) {
+export function PassageHeader({ ui, config, student }: PassageHeaderProps) {
   const { text, locale } = ui
   const status = student === undefined ? undefined : studentStatus(student, config)
   const showProgress = status === 'todo' || status === 'in_progress'
@@ -49,7 +47,6 @@ export function PassageHeader({ ui, config, student, picker }: PassageHeaderProp
         )}
       </div>
       <div className="flex items-center gap-3">
-        {picker}
         <ColorModeToggle ui={ui} />
       </div>
     </header>

@@ -1,5 +1,6 @@
 import Papa from 'papaparse'
 import { classifyHeaderCell } from './header'
+import { identityKey } from './identity'
 import { csvError, csvWarning, type CsvIssue } from './issues'
 
 export type CsvStudent = { lastName: string; firstName: string; line: number }
@@ -19,18 +20,6 @@ function findHeader(rows: readonly Row[]): { index: number; columns: Columns } |
     if (lastName !== -1 && firstName !== -1) return { index, columns: { lastName, firstName } }
   }
   return undefined
-}
-
-function fold(value: string): string {
-  return value
-    .normalize('NFD')
-    .replaceAll(/\p{Diacritic}/gu, '')
-    .toLowerCase()
-}
-
-/** Clé de doublon : trim, sans diacritiques, sans casse. */
-function identityKey(lastName: string, firstName: string): string {
-  return `${fold(lastName)}\u0000${fold(firstName)}`
 }
 
 function nonEmptyCellCount(cells: readonly string[]): number {

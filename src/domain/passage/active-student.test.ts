@@ -15,6 +15,25 @@ describe('setActiveStudent', () => {
     expect(result.config).toEqual(session.config)
   })
 
+  test("laisse la projection intacte quand l'étudiant actif change", () => {
+    const session = makeSession({
+      activeStudentId: 'student-1',
+      projection: { mode: 'student', studentId: 'autre' },
+      students: [makeStudent([], { id: 'student-1' }), makeStudent([], { id: 'autre' })],
+    })
+
+    const result = setActiveStudent(session, 'autre')
+
+    expect(result.activeStudentId).toBe('autre')
+    expect(result.projection).toEqual({ mode: 'student', studentId: 'autre' })
+  })
+
+  test("déjà actif : session renvoyée telle quelle (pas d'écriture inutile)", () => {
+    const session = makeSession({ activeStudentId: 'student-1' })
+
+    expect(setActiveStudent(session, 'student-1')).toBe(session)
+  })
+
   test('student_not_found', () => {
     const session = makeSession()
     const snapshot = structuredClone(session)

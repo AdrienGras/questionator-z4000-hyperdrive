@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { goToNextStudent, setActiveStudent } from '@/domain/passage/active-student'
 import { setAdjustment } from '@/domain/passage/adjust'
+import { addStudent as addStudentTransition } from '@/domain/passage/add-student'
 import { setAbsent as setAbsentTransition } from '@/domain/passage/absent'
 import { setComment as setCommentTransition } from '@/domain/passage/comment'
 import { drawQuestion } from '@/domain/passage/draw'
@@ -28,6 +29,10 @@ export type PassageActions = {
   editScore: (attemptId: string, score: number) => Promise<void>
   setComment: (studentId: string, comment: string) => Promise<boolean>
   setAbsent: (studentId: string, absent: boolean) => Promise<boolean>
+  addStudent: (
+    names: { lastName: string; firstName: string },
+    options: { activate: boolean },
+  ) => Promise<boolean>
   next: () => Promise<void>
   busy: boolean
   error: Error | null
@@ -182,6 +187,18 @@ export function usePassageActions(
     [run],
   )
 
+  const addStudent = useCallback(
+    (names: { lastName: string; firstName: string }, options: { activate: boolean }) =>
+      run((session) =>
+        addStudentTransition(
+          session,
+          { ...names, ...options },
+          { newId: () => crypto.randomUUID() },
+        ),
+      ),
+    [run],
+  )
+
   const busy = busyState || (lastWritten !== undefined && sessionUpdatedAt < lastWritten)
 
   return {
@@ -195,6 +212,7 @@ export function usePassageActions(
     editScore,
     setComment,
     setAbsent,
+    addStudent,
     next,
     busy,
     error,

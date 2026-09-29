@@ -95,8 +95,6 @@ export type UiMessageParams = {
   passage_score_heading: NoParams
   /** `value` : valeur du barème déjà mise en forme par l'appelant. */
   passage_score_button: { value: string }
-  passage_student_picker: NoParams
-  passage_student_option: { name: string; status: string }
   passage_status_todo: NoParams
   passage_status_in_progress: NoParams
   passage_status_done: NoParams
@@ -133,7 +131,16 @@ export type UiMessageParams = {
   side_panel_show: NoParams
   side_panel_tab_student: NoParams
   side_panel_tab_students: NoParams
-  side_panel_students_soon: NoParams
+  students_list_label: NoParams
+  students_projected: NoParams
+  students_row_scores: { raw: string; final: string }
+  students_add: NoParams
+  students_add_title: NoParams
+  students_add_last_name: NoParams
+  students_add_first_name: NoParams
+  students_add_submit: NoParams
+  students_add_and_start: NoParams
+  students_add_duplicate: { name: string }
   student_tab_questions: NoParams
   student_tab_totals: NoParams
   student_tab_no_student: NoParams
@@ -309,14 +316,13 @@ const fr: Dictionary<UiMessageParams> = {
   passage_answer: () => 'Éléments de réponse',
   passage_score_heading: () => 'Note',
   passage_score_button: ({ value }) => `Noter ${value}`,
-  passage_student_picker: () => 'Étudiant',
-  passage_student_option: ({ name, status }) => `${name} — ${status}`,
   passage_status_todo: () => 'à passer',
   passage_status_in_progress: () => 'en cours',
   passage_status_done: () => 'terminé',
   passage_status_absent: () => 'absent',
   passage_no_student_title: () => 'Aucun étudiant sélectionné',
-  passage_no_student_body: () => 'Choisissez un étudiant pour commencer le passage.',
+  passage_no_student_body: () =>
+    'Choisissez un étudiant dans l’onglet « Étudiants » du panneau pour commencer le passage.',
   passage_absent_title: () => 'Étudiant absent',
   passage_absent_body: () => 'Décochez « Absent » dans le panneau pour le faire passer.',
   passage_done_title: () => 'Passage terminé',
@@ -345,7 +351,16 @@ const fr: Dictionary<UiMessageParams> = {
   side_panel_show: () => 'Afficher le panneau',
   side_panel_tab_student: () => 'Étudiant',
   side_panel_tab_students: () => 'Étudiants',
-  side_panel_students_soon: () => 'Liste des étudiants — bientôt disponible.',
+  students_list_label: () => 'Étudiants de la session',
+  students_projected: () => 'Projeté',
+  students_row_scores: ({ raw, final }) => `${raw} · ${final}`,
+  students_add: () => 'Ajouter un étudiant',
+  students_add_title: () => 'Ajouter un étudiant',
+  students_add_last_name: () => 'Nom',
+  students_add_first_name: () => 'Prénom',
+  students_add_submit: () => 'Ajouter',
+  students_add_and_start: () => 'Ajouter et faire passer',
+  students_add_duplicate: ({ name }) => `${name} est déjà dans la liste.`,
   student_tab_questions: () => 'Questions',
   student_tab_totals: () => 'Totaux',
   student_tab_no_student: () => 'Aucun étudiant sélectionné.',
@@ -479,14 +494,12 @@ const en: Dictionary<UiMessageParams> = {
   passage_answer: () => 'Answer notes',
   passage_score_heading: () => 'Score',
   passage_score_button: ({ value }) => `Score ${value}`,
-  passage_student_picker: () => 'Student',
-  passage_student_option: ({ name, status }) => `${name} — ${status}`,
   passage_status_todo: () => 'to do',
   passage_status_in_progress: () => 'in progress',
   passage_status_done: () => 'done',
   passage_status_absent: () => 'absent',
   passage_no_student_title: () => 'No student selected',
-  passage_no_student_body: () => 'Choose a student to start.',
+  passage_no_student_body: () => 'Pick a student in the panel’s “Students” tab to start.',
   passage_absent_title: () => 'Student absent',
   passage_absent_body: () => 'Uncheck “Absent” in the panel to examine them.',
   passage_done_title: () => 'Exam complete',
@@ -515,7 +528,16 @@ const en: Dictionary<UiMessageParams> = {
   side_panel_show: () => 'Show panel',
   side_panel_tab_student: () => 'Student',
   side_panel_tab_students: () => 'Students',
-  side_panel_students_soon: () => 'Student list — coming soon.',
+  students_list_label: () => 'Session students',
+  students_projected: () => 'Projected',
+  students_row_scores: ({ raw, final }) => `${raw} · ${final}`,
+  students_add: () => 'Add a student',
+  students_add_title: () => 'Add a student',
+  students_add_last_name: () => 'Last name',
+  students_add_first_name: () => 'First name',
+  students_add_submit: () => 'Add',
+  students_add_and_start: () => 'Add and start',
+  students_add_duplicate: ({ name }) => `${name} is already in the list.`,
   student_tab_questions: () => 'Questions',
   student_tab_totals: () => 'Totals',
   student_tab_no_student: () => 'No student selected.',
