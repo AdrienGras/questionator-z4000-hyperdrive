@@ -43,6 +43,47 @@ export function findInitialLeaks(
   return leaks
 }
 
+/** Clés atteintes par imports statiques depuis `start` (inclus). */
+function staticClosure(manifest: Record<string, ManifestChunk>, start: string): Set<string> {
+  const visited = new Set<string>()
+  const queue = [start]
+  for (const key of queue) {
+    if (visited.has(key) || manifest[key] === undefined) continue
+    visited.add(key)
+    queue.push(...(manifest[key].imports ?? []))
+  }
+  return visited
+}
+
+/**
+ * Garde-fou de non-vacuité : sans chunk `recharts` nommé, ou si l'écran des statistiques ne
+ * l'atteint plus, `findInitialLeaks` passerait sans rien vérifier (Recharts inliné ailleurs,
+ * groupe renommé, route déplacée). Renvoie les problèmes constatés, [] si le contrôle a du sens.
+ */
+export function findVacuityProblems(
+  manifest: Record<string, ManifestChunk>,
+  chunkPattern: RegExp,
+  routeKey: string,
+): string[] {
+  const chunkKeys = Object.keys(manifest).filter((key) => chunkPattern.test(key))
+  if (chunkKeys.length === 0) {
+    return [`aucun chunk ${String(chunkPattern)} dans le manifeste (groupe \`recharts\` disparu ?)`]
+  }
+  if (manifest[routeKey] === undefined) {
+    return [`entrée ${routeKey} absente du manifeste (route renommée ou découpage changé ?)`]
+  }
+  const reachable = staticClosure(manifest, routeKey)
+  if (!chunkKeys.some((key) => reachable.has(key))) {
+    return [`${routeKey} n'importe pas statiquement ${chunkKeys.join(', ')}`]
+  }
+  return []
+}
+
+/** Clé du chunk produit par le groupe `recharts` de `vite.config.ts` (`_recharts-<hash>.js`). */
+export const RECHARTS_CHUNK = /^_recharts[.-]/
+/** Chunk paresseux du composant de l'écran des statistiques (autoCodeSplitting TanStack). */
+export const STATS_ROUTE_KEY = 'src/routes/session.$sessionId_.stats.tsx?tsr-split=component'
+
 // Chunk `recharts` (vite.config.ts, codeSplitting) : clé `_recharts-<hash>.js` dans le manifeste.
 // Repli : chemins sources (pnpm : node_modules/.pnpm/recharts@x/node_modules/recharts/…) et wrapper.
 export const FORBIDDEN =
@@ -51,6 +92,12 @@ const MANIFEST_PATH = 'dist/.vite/manifest.json'
 
 function main(): void {
   const manifest = manifestSchema.parse(JSON.parse(readFileSync(MANIFEST_PATH, 'utf8')))
+  const problems = findVacuityProblems(manifest, RECHARTS_CHUNK, STATS_ROUTE_KEY)
+  if (problems.length > 0) {
+    console.error('Contrôle du bundle initial sans objet, Recharts introuvable :')
+    for (const problem of problems) console.error(`  - ${problem}`)
+    process.exit(1)
+  }
   const leaks = findInitialLeaks(manifest, FORBIDDEN)
   if (leaks.length > 0) {
     console.error('Recharts fuit dans le bundle initial :')
