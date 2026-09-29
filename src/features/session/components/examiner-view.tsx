@@ -59,6 +59,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
             <PassageBody
               ui={ui}
               config={config}
+              session={session}
               student={student}
               status={status}
               pending={pending}
@@ -66,6 +67,10 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
               onDraw={(categoryId) => void actions.draw(categoryId)}
               onScore={(attemptId, value) => void actions.score(attemptId, value)}
               onSkip={(attemptId, reason) => void actions.skip(attemptId, reason)}
+              // Provisoire : la popup d'ajustement est branchée en Task 5.
+              onAdjust={() => undefined}
+              onReset={() => actions.reset()}
+              onNext={() => void actions.next()}
             />
           </div>
           <aside aria-hidden="true" />

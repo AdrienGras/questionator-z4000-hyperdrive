@@ -106,7 +106,27 @@ export type UiMessageParams = {
   passage_absent_title: NoParams
   passage_absent_body: NoParams
   passage_done_title: NoParams
-  passage_done_body: NoParams
+  final_scores_heading: NoParams
+  final_detail_heading: NoParams
+  final_raw: NoParams
+  final_capped: NoParams
+  final_converted: NoParams
+  final_adjustment: NoParams
+  final_final: NoParams
+  final_no_adjustment: NoParams
+  /** `value` : note formatée ; `scale` : échelle finale. */
+  final_score: { value: string; scale: string }
+  /** `score` / `max` : points de la question et maximum du barème, déjà formatés. */
+  final_points: { score: string; max: string }
+  final_skipped: NoParams
+  final_skipped_reason: { reason: string }
+  final_adjust: NoParams
+  final_reset: NoParams
+  final_next: NoParams
+  final_no_next: NoParams
+  reset_title: { name: string }
+  reset_body: NoParams
+  reset_confirm: NoParams
   passage_error_generic: NoParams
   /** `remaining` : passes restantes pour l'étudiant (`skipsRemaining`). */
   passage_skip_button: { remaining: number }
@@ -262,7 +282,26 @@ const fr: Dictionary<UiMessageParams> = {
   passage_absent_body: () =>
     'L’absence s’annulera depuis le panneau « Étudiant », bientôt disponible.',
   passage_done_title: () => 'Passage terminé',
-  passage_done_body: () => 'L’écran final arrive dans une prochaine version de l’app.',
+  final_scores_heading: () => 'Notes',
+  final_detail_heading: () => 'Détail du passage',
+  final_raw: () => 'Note brute',
+  final_capped: () => 'Note plafonnée',
+  final_converted: () => 'Note convertie',
+  final_adjustment: () => 'Ajustement',
+  final_final: () => 'Note finale',
+  final_no_adjustment: () => 'aucun',
+  final_score: ({ value, scale }) => `${value} / ${scale}`,
+  final_points: ({ score, max }) => `${score} / ${max}`,
+  final_skipped: () => 'Passée',
+  final_skipped_reason: ({ reason }) => `Passée — ${reason}`,
+  final_adjust: () => 'Ajuster',
+  final_reset: () => 'Réinitialiser l’étudiant',
+  final_next: () => 'Étudiant suivant',
+  final_no_next: () => 'Tous les étudiants sont passés',
+  reset_title: ({ name }) => `Réinitialiser ${name} ?`,
+  reset_body: () =>
+    'Les questions tirées, les notes et l’ajustement seront supprimés. Le commentaire est conservé.',
+  reset_confirm: () => 'Réinitialiser',
   passage_error_generic: () => 'L’action n’a pas pu être enregistrée. Rechargez la page.',
   passage_skip_button: ({ remaining }) =>
     `Passer la question (${remaining} ${plural(remaining, 'passe restante', 'passes restantes')})`,
@@ -381,7 +420,26 @@ const en: Dictionary<UiMessageParams> = {
   passage_absent_title: () => 'Student absent',
   passage_absent_body: () => 'The absence can be cancelled from the “Student” panel, coming soon.',
   passage_done_title: () => 'Exam complete',
-  passage_done_body: () => 'The final screen is coming in a future version of the app.',
+  final_scores_heading: () => 'Scores',
+  final_detail_heading: () => 'Exam breakdown',
+  final_raw: () => 'Raw score',
+  final_capped: () => 'Capped score',
+  final_converted: () => 'Converted score',
+  final_adjustment: () => 'Adjustment',
+  final_final: () => 'Final score',
+  final_no_adjustment: () => 'none',
+  final_score: ({ value, scale }) => `${value} / ${scale}`,
+  final_points: ({ score, max }) => `${score} / ${max}`,
+  final_skipped: () => 'Skipped',
+  final_skipped_reason: ({ reason }) => `Skipped — ${reason}`,
+  final_adjust: () => 'Adjust',
+  final_reset: () => 'Reset student',
+  final_next: () => 'Next student',
+  final_no_next: () => 'All students have been examined',
+  reset_title: ({ name }) => `Reset ${name}?`,
+  reset_body: () =>
+    'Drawn questions, scores and the adjustment will be deleted. The comment is kept.',
+  reset_confirm: () => 'Reset',
   passage_error_generic: () => 'The action could not be saved. Reload the page.',
   passage_skip_button: ({ remaining }) =>
     `Skip question (${remaining} ${pluralEn(remaining, 'skip', 'skips')} left)`,

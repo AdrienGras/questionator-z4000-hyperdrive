@@ -19,7 +19,7 @@ type PassageHeaderProps = Readonly<{
 /**
  * En-tête de l'écran de passage (§7) : titre de l'examen, identité de l'étudiant actif,
  * position dans le passage et score brut courant. La progression n'est affichée que pendant
- * le passage (`todo` / `in_progress`) : le score final se lit dans `DoneState` (pas de doublon).
+ * le passage (`todo` / `in_progress`) : le score final se lit dans `FinalScreen` (pas de doublon).
  */
 export function PassageHeader({ ui, config, student, picker }: PassageHeaderProps) {
   const { text, locale } = ui

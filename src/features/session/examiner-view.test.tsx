@@ -102,13 +102,13 @@ test('étudiant actif absent affiche « Étudiant absent »', async () => {
   expect(await screen.findByRole('heading', { name: 'Étudiant absent' })).toBeInTheDocument()
 })
 
-test('étudiant ayant terminé son passage affiche le score brut', async () => {
+test('étudiant ayant terminé son passage affiche l’écran final', async () => {
   const config = makeConfig({ questionsPerStudent: 3 })
   await putSession(sessionWith(config, twoStudents([1, 1, 0.5]), 'student-1'))
   renderAt('/session/session-1')
 
   expect(await screen.findByRole('heading', { name: 'Passage terminé' })).toBeInTheDocument()
-  expect(screen.getByText('Score brut : 2,5')).toBeInTheDocument()
+  expect(screen.getByText('Note brute').parentElement).toHaveTextContent('2,5')
 })
 
 // --- Tâche 5 : grille de catégories et panneau de la question en cours ---
@@ -233,7 +233,7 @@ test('la note qui atteint questionsPerStudent affiche « Passage terminé »', a
   fireEvent.click(screen.getByRole('button', { name: 'Noter 0,5' }))
 
   expect(await screen.findByRole('heading', { name: 'Passage terminé' })).toBeInTheDocument()
-  expect(screen.getByText('Score brut : 1,5')).toBeInTheDocument()
+  expect(screen.getByText('Note brute').parentElement).toHaveTextContent('1,5')
 })
 
 test('question sans « answer » n’affiche aucun bloc de réponse', async () => {
