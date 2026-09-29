@@ -27,7 +27,7 @@ export type PassageActions = {
   reset: () => Promise<boolean>
   editScore: (attemptId: string, score: number) => Promise<void>
   setComment: (studentId: string, comment: string) => Promise<boolean>
-  setAbsent: (absent: boolean) => Promise<boolean>
+  setAbsent: (studentId: string, absent: boolean) => Promise<boolean>
   next: () => Promise<void>
   busy: boolean
   error: Error | null
@@ -160,18 +160,26 @@ export function usePassageActions(
   )
 
   // L'étudiant est explicite : la sauvegarde différée peut partir après un changement d'étudiant.
+  // Hors de `run` : un commentaire ne touche ni aux attempts ni à l'étudiant actif, il n'a donc rien
+  // à craindre d'une action en vol ; passer par le verrou le ferait refuser en silence pendant un
+  // tirage (valeur perdue), et `busy`/`error` gêneraient la vue sans raison (D67).
   const setComment = useCallback(
     (targetStudentId: string, comment: string) =>
-      run((session) => setCommentTransition(session, { studentId: targetStudentId, comment })),
-    [run],
+      updateSession(sessionId, (session) =>
+        setCommentTransition(session, { studentId: targetStudentId, comment }),
+      ).then(
+        () => true,
+        () => false,
+      ),
+    [sessionId],
   )
 
+  // L'étudiant est explicite : le dialogue d'absence le capture à l'ouverture, un changement
+  // d'étudiant actif pendant qu'il est ouvert ne détourne donc pas la déclaration (D67).
   const setAbsent = useCallback(
-    (absent: boolean) => {
-      if (studentId === undefined) return Promise.resolve(false)
-      return run((session) => setAbsentTransition(session, { studentId, absent }))
-    },
-    [run, studentId],
+    (targetStudentId: string, absent: boolean) =>
+      run((session) => setAbsentTransition(session, { studentId: targetStudentId, absent })),
+    [run],
   )
 
   const busy = busyState || (lastWritten !== undefined && sessionUpdatedAt < lastWritten)

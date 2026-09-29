@@ -381,17 +381,81 @@ describe('actions du panneau (F12)', () => {
   test('busy redevient faux après une écriture sans changement, sans nouvel updatedAt', async () => {
     const { result, rerender } = await setupPanel()
     await act(async () => {
-      await result.current.setComment('student-1', 'x')
+      await result.current.setAbsent('student-1', true)
     })
     const written = await getSession('session-1')
     rerender({ sessionUpdatedAt: written?.updatedAt ?? '' })
     expect(result.current.busy).toBe(false)
 
     await act(async () => {
-      await result.current.setComment('student-1', 'x')
+      await result.current.setAbsent('student-1', true)
     })
 
     expect(result.current.busy).toBe(false)
+  })
+
+  test('setComment s’écrit même quand une autre action est en vol', async () => {
+    const { result } = await setupPanel()
+
+    let ok: boolean | undefined
+    await act(async () => {
+      const selecting = result.current.selectStudent('student-2')
+      ok = await result.current.setComment('student-1', 'x')
+      await selecting
+    })
+
+    expect(ok).toBe(true)
+    const session = await getSession('session-1')
+    expect(session?.students[0]?.comment).toBe('x')
+    expect(session?.activeStudentId).toBe('student-2')
+  })
+
+  test('setComment ne verrouille jamais busy, même avant que sessionUpdatedAt rattrape', async () => {
+    const seen: boolean[] = []
+    const initialSession = makeSession({
+      students: [makeStudent([13.5]), makeStudent([], { id: 'student-2', order: 2 })],
+    })
+    await putSession(initialSession)
+    const { result } = renderHook(() => {
+      const actions = usePassageActions('session-1', 'student-1', initialSession.updatedAt)
+      seen.push(actions.busy)
+      return actions
+    })
+
+    await act(async () => {
+      await result.current.setComment('student-1', 'x')
+    })
+
+    expect((await getSession('session-1'))?.students[0]?.comment).toBe('x')
+    expect(seen).not.toContain(true)
+    expect(result.current.busy).toBe(false)
+  })
+
+  test('setComment n’efface pas une erreur de passage affichée', async () => {
+    const { result } = await setupPanel()
+    await act(async () => {
+      await result.current.selectStudent('inconnu')
+    })
+    const error = result.current.error
+    expect(error).not.toBeNull()
+
+    await act(async () => {
+      await result.current.setComment('student-1', 'x')
+    })
+
+    expect(result.current.error).toBe(error)
+  })
+
+  test('setComment résout false en cas d’échec, sans toucher à error', async () => {
+    const { result } = await setupPanel()
+
+    let ok: boolean | undefined
+    await act(async () => {
+      ok = await result.current.setComment('inconnu', 'x')
+    })
+
+    expect(ok).toBe(false)
+    expect(result.current.error).toBeNull()
   })
 
   test('setAbsent(true) vide les attempts et renvoie true', async () => {
@@ -399,7 +463,7 @@ describe('actions du panneau (F12)', () => {
 
     let ok: boolean | undefined
     await act(async () => {
-      ok = await result.current.setAbsent(true)
+      ok = await result.current.setAbsent('student-1', true)
     })
 
     expect(ok).toBe(true)
@@ -408,16 +472,28 @@ describe('actions du panneau (F12)', () => {
     expect(student?.attempts).toEqual([])
   })
 
-  test('studentId indéfini : editScore ne fait rien, setAbsent renvoie false', async () => {
-    const { initialSession, result } = await setupPanel(false)
+  test('setAbsent vise l’étudiant explicite, pas l’étudiant actif du hook', async () => {
+    const { result } = await setupPanel()
 
     let ok: boolean | undefined
     await act(async () => {
-      await result.current.editScore('attempt-1', 2)
-      ok = await result.current.setAbsent(true)
+      ok = await result.current.setAbsent('student-2', true)
     })
 
-    expect(ok).toBe(false)
+    expect(ok).toBe(true)
+    const session = await getSession('session-1')
+    expect(session?.students[1]?.absent).toBe(true)
+    expect(session?.students[0]?.absent).toBe(false)
+    expect(session?.students[0]?.attempts).toHaveLength(1)
+  })
+
+  test('studentId indéfini : editScore ne fait rien', async () => {
+    const { initialSession, result } = await setupPanel(false)
+
+    await act(async () => {
+      await result.current.editScore('attempt-1', 2)
+    })
+
     expect((await getSession('session-1'))?.updatedAt).toBe(initialSession.updatedAt)
   })
 })

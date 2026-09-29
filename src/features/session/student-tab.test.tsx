@@ -2,9 +2,10 @@ import 'fake-indexeddb/auto'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import type { NormalizedCategory } from '@/domain/config/normalize'
+import { setActiveStudent } from '@/domain/passage/active-student'
 import type { Student } from '@/domain/session/types'
 import { db } from '@/lib/db/db'
-import { putSession } from '@/lib/db/sessions'
+import { putSession, updateSession } from '@/lib/db/sessions'
 import { categoryButton } from '@/testing/passage-assertions'
 import { renderAt } from '@/testing/render-at'
 import { makeSession } from '@/testing/session-fixtures'
@@ -107,6 +108,21 @@ test('commentaire : la sortie du champ écrit tout de suite', async () => {
   await waitFor(async () => expect((await storedStudent()).comment).toBe('Très clair'), {
     timeout: 300,
   })
+})
+
+test('commentaire : taper puis revenir au texte d’origine et sortir n’écrit rien', async () => {
+  await mount([makeStudent([], { comment: 'Déjà là' })])
+  const before = (await stored()).updatedAt
+  const put = vi.spyOn(db.sessions, 'put')
+
+  fireEvent.change(commentBox(), { target: { value: 'Déjà là !' } })
+  fireEvent.change(commentBox(), { target: { value: 'Déjà là' } })
+  fireEvent.blur(commentBox())
+
+  // La sauvegarde est bien partie (indicateur), mais sans changement : rien n'est écrit.
+  expect(await within(panel()).findByText('Enregistré')).toBeInTheDocument()
+  expect(put).not.toHaveBeenCalled()
+  expect((await stored()).updatedAt).toBe(before)
 })
 
 test('commentaire : entrer et sortir sans frappe n’écrit rien', async () => {
@@ -245,4 +261,29 @@ test('échec d’écriture sur « Déclarer absent » : dialogue ouvert avec le 
   const student = await storedStudent()
   expect(student.absent).toBe(false)
   expect(student.attempts).toHaveLength(2)
+})
+
+test('dialogue d’absence ouvert pour Alice, Bob devient actif ailleurs : c’est Alice qui est absente', async () => {
+  await mount([makeStudent([2, 1]), { ...bob(), attempts: makeStudent([1]).attempts }])
+  await categoryButton('A')
+
+  fireEvent.click(absentBox())
+  const dialog = await screen.findByRole('alertdialog', { name: 'Déclarer Durand Alice absent ?' })
+  // Un autre onglet change l'étudiant actif pendant que le dialogue est ouvert.
+  await updateSession('session-1', (s) => setActiveStudent(s, 'student-2'))
+  // Le dialogue modal masque le reste de la page : `hidden` pour atteindre le sélecteur.
+  await waitFor(() =>
+    expect(screen.getByRole('combobox', { name: 'Étudiant', hidden: true })).toHaveValue(
+      'student-2',
+    ),
+  )
+  expect(screen.getByRole('alertdialog', { name: 'Déclarer Durand Alice absent ?' })).toBe(dialog)
+
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Déclarer absent' }))
+
+  await waitFor(async () => expect((await storedStudent('student-1')).absent).toBe(true))
+  expect((await storedStudent('student-1')).attempts).toEqual([])
+  const other = await storedStudent('student-2')
+  expect(other.absent).toBe(false)
+  expect(other.attempts).toHaveLength(1)
 })

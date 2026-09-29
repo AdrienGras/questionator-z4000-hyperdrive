@@ -93,6 +93,8 @@ Aucun contrôle de statut : un étudiant terminé se corrige (sa finale est reca
 - `flush()` annule le minuteur et sauvegarde tout de suite la dernière valeur programmée, s'il y en a une ;
 - au démontage, `flush()` ;
 - `status` : `'idle' | 'saving' | 'saved' | 'error'` ; `saving` pendant l'écriture, `saved` si `save` résout vrai, `error` sinon.
+- échec (`save` résout `false`, rejette ou lève) : la valeur redevient en attente, sauf si une plus récente a été programmée entre-temps ; le prochain `flush()` (blur, démontage) la retente ;
+- seule la dernière sauvegarde lancée fixe `status` : une plus ancienne qui se résout tard ne l'écrase pas.
 
 ## Écran — `src/features/session/`
 
@@ -121,7 +123,7 @@ Props : `ui`, `config`, `student`. Les cinq notes de l'écran final ; convertie 
 
 ### `AbsentToggle`
 
-Case à cocher « Absent ». Cocher sans attempt → `setAbsent(true)` direct. Cocher avec attempts → `AlertDialog` « Déclarer {Nom Prénom} absent ? », corps « Ce passage contient {n} question(s) tirée(s). Déclarer l'étudiant absent les supprime. Le commentaire est conservé. », boutons « Annuler » / « Déclarer absent » (destructif) ; succès → fermeture, échec → `write_error`, dialogue ouvert, boutons désactivés pendant l'écriture (motif F11). Décocher → `setAbsent(false)` direct.
+Case à cocher « Absent ». Cocher sans attempt → `setAbsent(student.id, true)` direct. Cocher avec attempts → `AlertDialog` « Déclarer {Nom Prénom} absent ? », corps « Ce passage contient {n} question(s) tirée(s). Déclarer l'étudiant absent les supprime. Le commentaire est conservé. », boutons « Annuler » / « Déclarer absent » (destructif) ; succès → fermeture, échec → `write_error`, dialogue ouvert, boutons désactivés pendant l'écriture (motif F11). Décocher → `setAbsent(student.id, false)` direct. L'étudiant, son nom et le nombre de questions sont figés à l'ouverture du dialogue.
 
 ### `AbsentState`
 
@@ -129,9 +131,11 @@ Corps : « Décochez « Absent » dans le panneau pour le faire passer. »
 
 ### `use-passage-actions.ts`
 
-`editScore(attemptId, score): Promise<void>`, `setComment(comment): Promise<boolean>`, `setAbsent(absent): Promise<boolean>`, via `run` (garde, `busy`, erreur). Pour une écriture sans changement, `updateSession` renvoie l'`updatedAt` déjà connu : `busy` retombe aussitôt.
+`editScore(attemptId, score): Promise<void>` et `setAbsent(studentId, absent): Promise<boolean>` passent par `run` (garde, `busy`, erreur). Pour une écriture sans changement, `updateSession` renvoie l'`updatedAt` déjà connu : `busy` retombe aussitôt. `setAbsent` prend l'étudiant en paramètre : `AbsentToggle` le fige à l'ouverture du dialogue, un changement d'étudiant actif pendant qu'il est ouvert (autre onglet) ne détourne pas la déclaration.
 
-**Note** : la sauvegarde du commentaire passe par `run` ; pendant qu'une autre action est en vol, la garde l'ignore (résout `false`) et l'indicateur passe à « Échec de l'enregistrement ». `useAutosave` garde alors la valeur et la resauvegarde au prochain `schedule` ou au blur.
+`setComment(studentId, comment): Promise<boolean>` appelle `updateSession` **directement**, hors de `run` : résout `true`, ou `false` en cas d'erreur, sans toucher à la garde, à `busy` ni à `error`.
+
+**Note** : le commentaire ne passe pas par `run`. Il ne touche ni aux attempts ni à l'étudiant actif, il n'a donc rien à craindre d'une action en vol ; passé par la garde, il serait ignoré pendant un tirage ou une correction (écriture perdue), verrouillerait les boutons de passage le temps de chaque sauvegarde différée et effacerait une erreur de passage affichée. Les écritures concurrentes restent sérialisées par la transaction Dexie de `updateSession`.
 
 ### Traductions
 

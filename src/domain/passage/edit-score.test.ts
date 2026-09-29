@@ -68,6 +68,25 @@ describe('editScore', () => {
     expect(session).toEqual(snapshot)
   })
 
+  test('category_not_found', () => {
+    const student = makeStudent([1, 2])
+    const session = makeSession({
+      config,
+      students: [
+        {
+          ...student,
+          attempts: student.attempts.map((a, i) => (i === 0 ? { ...a, categoryId: 'nope' } : a)),
+        },
+      ],
+    })
+    const snapshot = structuredClone(session)
+    expectPassageError(
+      () => editScore(session, { studentId: 'student-1', attemptId: 'attempt-1', score: 1 }, deps),
+      'category_not_found',
+    )
+    expect(session).toEqual(snapshot)
+  })
+
   test('student_not_found', () => {
     const session = makeSession({ config, students: [makeStudent([1, 2])] })
     const snapshot = structuredClone(session)

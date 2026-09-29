@@ -120,4 +120,87 @@ describe('useAutosave', () => {
     expect(first).not.toHaveBeenCalled()
     expect(second).toHaveBeenCalledWith('a')
   })
+
+  it('garde la valeur en attente après un échec : flush la retente', async () => {
+    const save = vi.fn<Save>().mockResolvedValueOnce(false).mockResolvedValue(true)
+    const { result } = renderHook(() => useAutosave(save))
+    act(() => result.current.schedule('a'))
+    await advance(500)
+    expect(result.current.status).toBe('error')
+
+    act(() => result.current.flush())
+    expect(save).toHaveBeenCalledTimes(2)
+    expect(save).toHaveBeenLastCalledWith('a')
+    await advance(0)
+    expect(result.current.status).toBe('saved')
+  })
+
+  it("ne remet pas l'ancienne valeur en attente si une plus récente a été programmée", async () => {
+    const resolvers: ((ok: boolean) => void)[] = []
+    const save = vi.fn<Save>().mockImplementation(
+      () =>
+        new Promise<boolean>((r) => {
+          resolvers.push(r)
+        }),
+    )
+    const { result } = renderHook(() => useAutosave(save))
+    act(() => result.current.schedule('a'))
+    act(() => result.current.flush())
+    act(() => result.current.schedule('b'))
+    await act(async () => {
+      resolvers[0]?.(false)
+      await Promise.resolve()
+    })
+
+    act(() => result.current.flush())
+    expect(save).toHaveBeenCalledTimes(2)
+    expect(save).toHaveBeenLastCalledWith('b')
+    act(() => result.current.flush())
+    expect(save).toHaveBeenCalledTimes(2)
+  })
+
+  it('traite un save qui lève de façon synchrone comme un échec, puis le retente', async () => {
+    const save = vi
+      .fn<Save>()
+      .mockImplementationOnce(() => {
+        throw new Error('boom')
+      })
+      .mockResolvedValue(true)
+    const { result } = renderHook(() => useAutosave(save))
+    act(() => result.current.schedule('a'))
+    await advance(500)
+    expect(result.current.status).toBe('error')
+
+    act(() => result.current.flush())
+    expect(save).toHaveBeenCalledTimes(2)
+    expect(save).toHaveBeenLastCalledWith('a')
+    await advance(0)
+    expect(result.current.status).toBe('saved')
+  })
+
+  it('seule la dernière sauvegarde lancée fixe le statut', async () => {
+    const resolvers: ((ok: boolean) => void)[] = []
+    const save = vi.fn<Save>().mockImplementation(
+      () =>
+        new Promise<boolean>((r) => {
+          resolvers.push(r)
+        }),
+    )
+    const { result } = renderHook(() => useAutosave(save))
+    act(() => result.current.schedule('a'))
+    act(() => result.current.flush())
+    act(() => result.current.schedule('ab'))
+    act(() => result.current.flush())
+
+    await act(async () => {
+      resolvers[1]?.(true)
+      await Promise.resolve()
+    })
+    expect(result.current.status).toBe('saved')
+    await act(async () => {
+      resolvers[0]?.(false)
+      await Promise.resolve()
+    })
+    expect(result.current.status).toBe('saved')
+  })
 })

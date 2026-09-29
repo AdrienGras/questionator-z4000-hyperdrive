@@ -2,9 +2,19 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 export type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
+/** Appelle `save` et ramène tout échec (`false`, rejet, levée synchrone) à `false`. */
+function attempt(save: (value: string) => Promise<boolean>, value: string): Promise<boolean> {
+  try {
+    return save(value).catch(() => false)
+  } catch {
+    return Promise.resolve(false)
+  }
+}
+
 /**
  * Sauvegarde différée : `schedule` repousse le délai à chaque appel, `flush` écrit tout de suite la
- * dernière valeur programmée, et le démontage la flushe (Review Focus 1).
+ * dernière valeur programmée, et le démontage la flushe (Review Focus 1). Une sauvegarde en échec
+ * remet sa valeur en attente : le prochain `flush` (sortie du champ, démontage) la retente.
  */
 export function useAutosave(
   save: (value: string) => Promise<boolean>,
@@ -15,6 +25,7 @@ export function useAutosave(
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const pendingRef = useRef<{ value: string } | undefined>(undefined)
   const mountedRef = useRef(true)
+  const seqRef = useRef(0)
 
   useEffect(() => {
     saveRef.current = save
@@ -26,15 +37,16 @@ export function useAutosave(
     const pending = pendingRef.current
     if (!pending) return
     pendingRef.current = undefined
+    seqRef.current += 1
+    const seq = seqRef.current
     if (mountedRef.current) setStatus('saving')
-    void saveRef.current(pending.value).then(
-      (ok) => {
-        if (mountedRef.current) setStatus(ok ? 'saved' : 'error')
-      },
-      () => {
-        if (mountedRef.current) setStatus('error')
-      },
-    )
+    void attempt(saveRef.current, pending.value).then((ok) => {
+      // Échec : la valeur redevient en attente, sauf si une plus récente a été programmée entre-temps,
+      // pour que la sortie du champ ou le démontage la retente.
+      if (!ok && pendingRef.current === undefined) pendingRef.current = pending
+      // Seule la dernière sauvegarde lancée fixe le statut.
+      if (mountedRef.current && seq === seqRef.current) setStatus(ok ? 'saved' : 'error')
+    })
   }, [])
 
   const schedule = useCallback(
