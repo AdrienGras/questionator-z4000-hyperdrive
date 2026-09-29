@@ -20,6 +20,22 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-29 — F11 implémenté : écran final et ajustement
+
+**Dernière chose faite** : F10 mergé (PR #41), puis F11 (#11) sur `feat/f11-final` en processus complet : brainstorming, spec `docs/superpowers/specs/2026-09-29-f11-final-design.md` et D66, plan en 5 tâches, subagent-driven development (une revue par tâche, revue finale sur Opus, une vague de correctifs relue).
+- Domaine : `normalizeReason` partagé avec le skip (D65) ; `setAdjustment` (refus `student_not_done`, `adjustment_invalid` ; 0 supprime ajustement et justification), `revealFinal` (idempotent), `resetStudent` (garde `comment` et `absent`), `goToNextStudent` (suivant calculé dans la transaction, `no_next_student`) ; sélecteurs `nextStudent`, `shouldAutoOpenAdjustment` ; `parseAdjustmentInput` (virgule, point, `−`, espaces) et `previewFinal` (drapeau de bornage).
+- Hook : `adjust(value, reason, { reveal })`, `revealFinal`, `reset` renvoient `Promise<boolean>` (le dialogue sait s'il peut se fermer) ; `next`. Enregistrer en fin de passage = `revealFinal(setAdjustment(…))` en une écriture.
+- Écran : `FinalScreen` remplace `DoneState` (notes au format du pas, détail du passage avec rang des seules questions notées et « Passée — motif », actions). `AdjustmentDialog` s'ouvre d'office tant que l'étudiant est `done` sans `finalRevealedAt` (D66, survit au rechargement) ; enregistrer ou annuler révèle la note ; « Ajuster » la rouvre sans effet sur la révélation. `ResetDialog` reste ouvert en cas d'échec.
+- Ruling de l'exécution : convertie, ajustement et finale passent par `formatScore(…, 'final')`, donc à décimales fixes (« +1,50 », « 7,50 / 20 » avec la config d'exemple).
+
+`pnpm check` est vert (747 tests), `pnpm build` sans avertissement.
+
+**Trucs en suspens** : PR F11 à ouvrir en brouillon et à passer dans SonarQube. Vérifié dans Chromium sur la session d'exemple : Lefèvre Chloé (terminée avant F11) ouvre la popup d'office ; calcul en direct « 6,00 + 1,50 = 7,50 / 20 » ; enregistrement (ajustement, justification et `finalRevealedAt` écrits ensemble) ; pas de réouverture au rechargement ; « Étudiant suivant » passe à Martin Bruno sans toucher la projection ; écran final en clair et en sombre. Réinitialisation non jouée dans le navigateur, pour ne pas effacer la session d'exemple : couverte par les tests d'intégration. Petits défauts notés au BACKLOG (focus initial sur « − », double alerte en cas d'échec, − / + non bornés). Toujours ouverts : les deux points de F08 (backticks du code en ligne, fond `.shiki` en clair), F18 (#36), la survie des données à un vrai redémarrage du navigateur.
+
+**Prochaine chose à creuser** : F12 (side panel, onglet « Étudiant ») : bascule d'absence via `resetStudent` (D08), modification d'une note saisie, affichage du motif de skip ; il remplace l'`aside` vide de F09. F13 retirera ensuite le sélecteur d'étudiant provisoire.
+
+**Notes pour future Claude** : une action appelée par un dialogue renvoie `run(...)` (`Promise<boolean>`) ; le dialogue ferme sur `true`, affiche `write_error` sur `false`, et bloque ses boutons, Échap compris, pendant l'écriture (CONVENTIONS « Transition de passage »). Un étudiant `done` sans `finalRevealedAt` ouvre toujours la popup : dans un test d'écran qui veut voir l'écran final nu, poser `finalRevealedAt`. `categoryButton` vise la `<ul>` de la grille (QUIRKS) ; un nouvel helper de requête doit viser son conteneur précis. Le registre SDD de F11 a été supprimé après la revue finale : l'historique est dans git.
+
 ## 2026-09-29 — F10 implémenté : skip de question
 
 **Dernière chose faite** : F10 (#10) implémenté sur `feat/f10-skip`, en tâche délimitée : design court validé en chat, pas de spec ni de plan (le ticket #10 et D65 font foi), TDD.
