@@ -100,14 +100,21 @@ test('commentaire : rien en base avant le délai, enregistré après, indicateur
 
 test('commentaire : la sortie du champ écrit tout de suite', async () => {
   await mount([makeStudent([])])
+  const put = vi.spyOn(db.sessions, 'put')
+  // Le temps est figé : le délai de 500 ms ne peut pas partir, seule la sortie du champ peut écrire.
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+  try {
+    fireEvent.change(commentBox(), { target: { value: 'Très clair' } })
+    await Promise.resolve()
+    expect(put).not.toHaveBeenCalled()
 
-  fireEvent.change(commentBox(), { target: { value: 'Très clair' } })
-  fireEvent.blur(commentBox())
+    fireEvent.blur(commentBox())
 
-  // Bien en deçà des 500 ms du délai : seule la sortie du champ a pu écrire.
-  await waitFor(async () => expect((await storedStudent()).comment).toBe('Très clair'), {
-    timeout: 300,
-  })
+    await vi.waitFor(async () => expect((await storedStudent()).comment).toBe('Très clair'))
+    expect(put).toHaveBeenCalledTimes(1)
+  } finally {
+    vi.useRealTimers()
+  }
 })
 
 test('commentaire : taper puis revenir au texte d’origine et sortir n’écrit rien', async () => {
