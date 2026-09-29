@@ -3,14 +3,15 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 export type AutosaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
 /**
- * Appelle `save` et ramène tout échec (`false`, rejet, levée synchrone) à `false`. L'exécuteur de
- * `new Promise` appelle `save` tout de suite et change une levée synchrone en rejet, que `.catch`
- * rattrape avec le reste.
+ * Appelle `save` (tout de suite : le corps d'une fonction `async` s'exécute jusqu'au premier
+ * `await`) et ramène tout échec (`false`, rejet, levée synchrone) à `false`.
  */
-function attempt(save: (value: string) => Promise<boolean>, value: string): Promise<boolean> {
-  return new Promise<boolean>((resolve) => {
-    resolve(save(value))
-  }).catch(() => false)
+async function attempt(save: (value: string) => Promise<boolean>, value: string): Promise<boolean> {
+  try {
+    return await save(value)
+  } catch {
+    return false
+  }
 }
 
 /**
