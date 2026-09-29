@@ -1,14 +1,19 @@
+import { REDUCED_MOTION_QUERY } from '@/lib/appearance/reduced-motion'
+
 export const DARK_QUERY = '(prefers-color-scheme: dark)'
 
 type ChangeListener = (event: { matches: boolean; media: string }) => void
 
 let systemDark = false
+let reducedMotion = false
 const listeners = new Set<ChangeListener>()
 
 function mediaQueryList(query: string): MediaQueryList {
   const list = {
     get matches() {
-      return query === DARK_QUERY && systemDark
+      return (
+        (query === DARK_QUERY && systemDark) || (query === REDUCED_MOTION_QUERY && reducedMotion)
+      )
     },
     media: query,
     onchange: null,
@@ -31,7 +36,12 @@ export function setSystemDark(value: boolean): void {
   for (const listener of listeners) listener({ matches: value, media: DARK_QUERY })
 }
 
+export function setReducedMotion(value: boolean): void {
+  reducedMotion = value
+}
+
 export function resetMatchMedia(): void {
   systemDark = false
+  reducedMotion = false
   listeners.clear()
 }

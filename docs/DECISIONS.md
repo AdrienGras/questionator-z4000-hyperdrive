@@ -1023,3 +1023,19 @@ autre encodage 8 bits.
 **Pourquoi** : la note finale est celle qui sort à l'export ; une note sans ajustement tromperait l'examinateur. Le corps de l'écran montre déjà l'étudiant choisi, changer d'onglet casserait l'enchaînement des clics. Un doublon doit être reconnu de la même façon dans le CSV et à la main.
 
 **Reporté dans** : spec F13. Impacte F13, F15, F16.
+
+## D69 — F14 : vue projetée dans `domain/presentation/`, attente pour un absent, animation décidée côté projection, e2e en Page Object Model (2026-09-29)
+
+**Question** : le ticket F14 place `toProjectedView` dans `src/present/` et ne dit rien d'un étudiant projeté absent. Il faut aussi distinguer un nouveau tirage (animation) d'un rechargement de la fenêtre projetée, et poser l'organisation des premiers tests Playwright, que F17 réutilisera.
+
+**Décision** :
+- `toProjectedView` et le type `ProjectedView` vivent dans `src/domain/presentation/` ; `setProjection` dans `domain/passage/`.
+- Un étudiant projeté absent ou introuvable donne l'écran d'attente.
+- `ProjectedView` est construite par liste blanche, sans étalement d'objet du modèle ; elle porte sa propre apparence (langue, thème, mode par défaut), la route `present` ne reçoit jamais la config.
+- L'animation se décide dans la fenêtre projetée : le `drawnAt` présent au montage est retenu, seul un `drawnAt` nouveau anime ; rien n'est écrit en base.
+- Tests e2e en Page Object Model : un objet par écran, locators par rôle accessible, assertions dans les specs seulement ; `deploy` dépend du job `e2e`.
+- Une seule PR pour F14, Playwright compris.
+
+**Pourquoi** : D59 range les règles pures dans `domain/`. Afficher une absence devant la salle n'apporte rien et un identifiant orphelin ne doit pas devenir une erreur. Une liste blanche rend l'étanchéité robuste aux évolutions du modèle. La vue projetée reste en lecture seule (D30) sans second canal de synchronisation. Des pages par écran rendent les scénarios lisibles et réutilisables en F17.
+
+**Reporté dans** : spec F14. Impacte F14, F17.

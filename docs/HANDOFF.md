@@ -20,6 +20,26 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-29 — F14 implémenté : mode présentateur
+
+**Dernière chose faite** : F13 mergé (PR #45), puis F14 (#14, « In progress ») sur `feat/f14-presenter`, en processus complet : brainstorming (une seule PR avec Playwright, absent projeté → attente, animation décidée côté projection, e2e en Page Object Model), spec `docs/superpowers/specs/2026-09-29-f14-presenter-design.md` et D69, plan en 5 tâches, subagent-driven development (revue par tâche, revue finale sur Opus, une vague de correctifs relue).
+- Domaine : `toProjectedView` (liste blanche, points décimaux, cumul masqué une fois terminé, note et détail seulement après révélation) dans `domain/presentation/` ; `setProjection` dans `domain/passage/`.
+- Vue projetée : `useProjectedView` (seule frontière avec la `Session`, test d'architecture), écrans d'attente et étudiant, `DrawReveal` (`drawnAt` retenu au montage de `StudentScreen`, remonté par étudiant), `PresentControls` + `useIdle`.
+- Pilotage : `ProjectionControls` dans l'en-tête, `ProjectionBanner`, action `project`.
+- e2e : `@playwright/test`, `e2e/pages/` (POM), `e2e/present.spec.ts` (deux fenêtres, synchro, étanchéité vérifiée pendant la question et à la réouverture), job CI `e2e` dont dépend `deploy`.
+- Revues : animation d'abord inatteignable dans l'application (QUIRKS), test d'étanchéité sans marqueur sur la question en cours, aiguille de réponse en bloc de code introuvable, trois risques Sonar (ternaire imbriqué, `key` par index, `catch` vide).
+
+`pnpm check` vert (925 tests), `pnpm e2e` vert (répété 20 fois).
+
+
+**Trucs en suspens** : PR pas encore ouverte (brouillon, `sonar-check.sh --pr <n> --wait`, puis « Ready for review ») ; le job CI `e2e` n'a jamais tourné, à vérifier sur la PR (version de Playwright, cache, `--with-deps`). Rendre `e2e` obligatoire dans la protection de branche GitHub reste à faire par le propriétaire du dépôt. Vérifié dans Chromium (Playwright MCP) sur la session jetable « Vérif F13 (jetable) » : popup, projection, animation au vrai tirage, énoncé sans réponse, pas de rejeu au rechargement ; « petit ELODIE » y a maintenant une question en cours. Non vérifiés à l'écran : plein écran, thème clair, écran final révélé (couverts en Vitest et, pour la synchro, en e2e). Points mineurs reportés au BACKLOG.
+
+
+**Prochaine chose à creuser** : ouvrir la PR F14 et passer le gate SonarQube ; ensuite F15 (statistiques de session), dont le bouton va dans la zone d'actions de l'onglet « Étudiants ».
+
+
+**Notes pour future Claude** : un composant rendu seulement quand une question existe ne voit jamais de « nouveau » tirage : retenir l'état initial plus haut et tester par le vrai parcours en base (QUIRKS). `pnpm preview` en `webServer` laisse un serveur orphelin réutilisé avec un vieux build : `exec node_modules/.bin/vite preview` (QUIRKS) ; vérifier le port 4173 après un e2e interrompu. La vue projetée affiche « Prénom Nom », la vue examinateur « Nom Prénom ».
+
 ## 2026-09-29 — F13 implémenté : onglet « Étudiants »
 
 **Dernière chose faite** : F13 (#13, passé en « In progress » sur le Project) sur `feat/f13-students-tab`, en processus complet : brainstorming (note finale dans la liste, pas de changement d'onglet au clic, `<ul>` de boutons), spec `docs/superpowers/specs/2026-09-29-f13-students-tab-design.md` et D68, plan en 4 tâches, subagent-driven development (revue par tâche, revue finale sur Opus, une vague de correctifs relue).
@@ -33,7 +53,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 **Trucs en suspens** : PR #45 ouverte ; gate SonarQube d’abord refusé pour duplication (5,2 % > 3 %, fixtures copiées entre tests d’écran), réglé en partageant le montage dans `src/testing/students-tab-harness.tsx` ; ensuite gate OK, 0 issue, 0 hotspot. Vérifié dans Chromium (Playwright) sur une session jetable « Vérif F13 (jetable) » créée depuis les exemples : focus conservé sur la ligne après Entrée, A → B → A avec question en cours, doublon « Petit Élodie » signalé, « Ajouter et faire passer » active le nouvel étudiant sans quitter l'onglet, contraste en sombre. Non vérifiés à l'écran : l'icône de l'étudiant projeté (F14 ne permet pas encore de projeter) et le thème clair. La session « Oral PHP » n'a pas été touchée ; la session jetable peut être supprimée depuis l'accueil. Points mis au BACKLOG : erreur antérieure visible dans le dialogue d'ajout, fixtures de tests copiées. Toujours ouverts : F08 (backticks, fond `.shiki`), F18 (#36), survie des données à un vrai redémarrage.
 
 
-**Prochaine chose à creuser** : merger la PR #45 une fois relue ; ensuite F14 (mode présentateur : `toProjectedView`, fenêtre `present`, « Projeter cet étudiant »), qui rendra l'icône de projection vérifiable.
+**Prochaine chose à creuser** : PR #45 mergée (F13 livré) ; ensuite F14 (mode présentateur : `toProjectedView`, fenêtre `present`, « Projeter cet étudiant »), qui rendra l'icône de projection vérifiable.
 
 
 **Notes pour future Claude** : oxlint (`prefer-tag-over-role`) refuse `role="status"` et `role="img"` : `<output>` et `aria-label` seul sur le `<svg>` Tabler (QUIRKS). Ne pas désactiver sur `busy` un contrôle activé au clavier en série, et vérifier le focus dans un vrai navigateur : jsdom ne le reproduit pas (QUIRKS). L'extension Chrome était déconnectée cette session : le MCP Playwright fait l'affaire, mais il ne peut écrire ses captures que sous le dépôt (`.playwright-mcp/`). Le profil Playwright contient la session d'exemple : ne pas y ajouter d'étudiant, faute de suppression.

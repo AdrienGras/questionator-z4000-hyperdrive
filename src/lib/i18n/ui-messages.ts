@@ -20,6 +20,16 @@ export type UiMessageParams = {
   session_loading: NoParams
   session_not_found: NoParams
   present_waiting: NoParams
+  present_prompt_label: NoParams
+  present_question_index: { current: number; total: number }
+  present_cumulative: { score: string }
+  present_finished: NoParams
+  present_final: { value: string; scale: string }
+  present_raw: { value: string }
+  present_category_exhausted: NoParams
+  present_skipped: NoParams
+  present_fullscreen: NoParams
+  present_exit_fullscreen: NoParams
   empty_title: NoParams
   empty_body: NoParams
   empty_example_link: NoParams
@@ -133,6 +143,11 @@ export type UiMessageParams = {
   side_panel_tab_students: NoParams
   students_list_label: NoParams
   students_projected: NoParams
+  projection_open: NoParams
+  projection_project: NoParams
+  projection_waiting: NoParams
+  projection_banner: { name: string }
+  projection_popup_blocked: NoParams
   students_row_scores: { raw: string; final: string }
   students_add: NoParams
   students_add_title: NoParams
@@ -239,6 +254,16 @@ const fr: Dictionary<UiMessageParams> = {
   session_loading: () => 'Chargement de la session…',
   session_not_found: () => 'Session introuvable',
   present_waiting: () => "L'épreuve va bientôt commencer.",
+  present_prompt_label: () => 'Question en cours',
+  present_question_index: ({ current, total }) => `Question ${current} / ${total}`,
+  present_cumulative: ({ score }) => `Score : ${score}`,
+  present_finished: () => 'Passage terminé',
+  present_final: ({ value, scale }) => `Note : ${value} / ${scale}`,
+  present_raw: ({ value }) => `Score brut : ${value}`,
+  present_category_exhausted: () => 'Épuisée',
+  present_skipped: () => 'Passée',
+  present_fullscreen: () => 'Plein écran',
+  present_exit_fullscreen: () => 'Quitter le plein écran',
   empty_title: () => 'Aucune session',
   empty_body: () =>
     "Créez une session à partir d'une liste d'étudiants et d'un fichier de configuration, ou importez un backup.",
@@ -353,6 +378,12 @@ const fr: Dictionary<UiMessageParams> = {
   side_panel_tab_students: () => 'Étudiants',
   students_list_label: () => 'Étudiants de la session',
   students_projected: () => 'Projeté',
+  projection_open: () => 'Ouvrir la vue projetée',
+  projection_project: () => 'Projeter cet étudiant',
+  projection_waiting: () => 'Écran d’attente',
+  projection_banner: ({ name }) => `La vue projetée montre ${name}.`,
+  projection_popup_blocked: () =>
+    'Autorisez les fenêtres pop-up pour ce site pour ouvrir la vue projetée.',
   students_row_scores: ({ raw, final }) => `${raw} · ${final}`,
   students_add: () => 'Ajouter un étudiant',
   students_add_title: () => 'Ajouter un étudiant',
@@ -419,6 +450,16 @@ const en: Dictionary<UiMessageParams> = {
   session_loading: () => 'Loading session…',
   session_not_found: () => 'Session not found',
   present_waiting: () => 'The exam will start soon.',
+  present_prompt_label: () => 'Current question',
+  present_question_index: ({ current, total }) => `Question ${current} / ${total}`,
+  present_cumulative: ({ score }) => `Score: ${score}`,
+  present_finished: () => 'Exam complete',
+  present_final: ({ value, scale }) => `Grade: ${value} / ${scale}`,
+  present_raw: ({ value }) => `Raw score: ${value}`,
+  present_category_exhausted: () => 'Exhausted',
+  present_skipped: () => 'Skipped',
+  present_fullscreen: () => 'Full screen',
+  present_exit_fullscreen: () => 'Exit full screen',
   empty_title: () => 'No sessions yet',
   empty_body: () =>
     'Create a session from a student list and a configuration file, or import a backup.',
@@ -530,6 +571,11 @@ const en: Dictionary<UiMessageParams> = {
   side_panel_tab_students: () => 'Students',
   students_list_label: () => 'Session students',
   students_projected: () => 'Projected',
+  projection_open: () => 'Open the projected view',
+  projection_project: () => 'Project this student',
+  projection_waiting: () => 'Waiting screen',
+  projection_banner: ({ name }) => `The projected view shows ${name}.`,
+  projection_popup_blocked: () => 'Allow pop-ups for this site to open the projected view.',
   students_row_scores: ({ raw, final }) => `${raw} · ${final}`,
   students_add: () => 'Add a student',
   students_add_title: () => 'Add a student',

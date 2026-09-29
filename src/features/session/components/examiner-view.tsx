@@ -10,6 +10,7 @@ import { AbsentToggle } from './absent-toggle'
 import { CommentField } from './comment-field'
 import { PassageBody } from './passage-body'
 import { PassageHeader } from './passage-header'
+import { ProjectionBanner } from './projection-banner'
 import { SidePanel } from './side-panel'
 import { StudentTab } from './student-tab'
 import { StudentsTab } from './students-tab'
@@ -40,7 +41,16 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
   return (
     <TooltipProvider>
       <main className="mx-auto flex min-h-svh max-w-6xl flex-col gap-6 p-4 sm:p-6">
-        <PassageHeader ui={ui} config={config} student={student} />
+        <PassageHeader
+          ui={ui}
+          config={config}
+          student={student}
+          sessionId={session.id}
+          projection={session.projection}
+          disabled={actions.busy}
+          onProject={actions.project}
+        />
+        <ProjectionBanner ui={ui} session={session} activeStudentId={student?.id} />
         <div className="flex flex-1 flex-col gap-3 lg:grid lg:grid-cols-[1fr_auto] lg:items-start">
           <div className="flex flex-col gap-4">
             {/* Rendu une seule fois, au-dessus de l'aiguillage par statut : une erreur touchant

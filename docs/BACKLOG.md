@@ -51,6 +51,11 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Dialogue d'ajout d'étudiant : une erreur antérieure (tirage, note) encore dans le hook s'affiche dans le dialogue dès son ouverture ; ne l'y montrer qu'après un échec d'ajout dans ce dialogue (flag local remis à zéro à l'ouverture) (F13).
 - [ ] Onglet « Étudiants » (montage partagé dans `src/testing/students-tab-harness.tsx` depuis la PR #45) : le test de double clic ne distingue pas la garde `submitting` du verrou `run` ; pas de test `rosterScore` d'un absent qui a des notes (F13).
 - [ ] Onglet « Étudiants » : l'icône de l'étudiant projeté n'est vérifiable qu'en test tant que F14 ne permet pas de projeter depuis l'interface.
+- [ ] Vue projetée (F14) : catégorie « indisponible » visuellement identique à « épuisée » (même atténuation, sans libellé) ; séparateur entre catégorie et titre dans le détail, `points ?? 0` pour une question notée sans note.
+- [ ] Vue projetée (F14) : `animate` non figé au montage de `DrawReveal` (basculer `drawAnimation` pendant une question rejoue le mélange) ; `cursor-none` non testé au niveau page ; test de réinitialisation qui n'attend pas la disparition de l'énoncé.
+- [ ] Vue projetée (F14) : écran étudiant remonté par une `key` sur le nom affiché, deux homonymes partagent un montage ; `key` du détail (catégorie + titre) non garantie unique.
+- [ ] Pilotage (F14) : la référence de la fenêtre projetée n'est pas liée à la session ; `?search` conservé dans l'URL ; message de popup bloquée persistant jusqu'au clic suivant ; tests manquants (boutons pendant `busy`, bandeau quand l'étudiant projeté a disparu).
+- [ ] Tests F14 : marqueur `0.37` du test d'étanchéité en sous-chaîne (échec bruyant si un score le contient) ; pas de mutation vérifiée pour `editedAt` et le montant d'ajustement ; test d'architecture aveugle aux réexports de `Session` ; `computeScores` appelé deux fois dans `toProjectedView`.
 - [ ] `categoryButton` (`src/testing/passage-assertions.ts`) : `waitFor` au délai par défaut (1 s), à allonger si la CI devient lente.
 
 ## Accueil et backup
