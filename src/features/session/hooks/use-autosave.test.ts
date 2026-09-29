@@ -178,7 +178,7 @@ describe('useAutosave', () => {
     expect(result.current.status).toBe('saved')
   })
 
-  it('seule la dernière sauvegarde lancée fixe le statut', async () => {
+  it('seule la dernière sauvegarde lancée fixe le statut et peut être remise en attente', async () => {
     const resolvers: ((ok: boolean) => void)[] = []
     const save = vi.fn<Save>().mockImplementation(
       () =>
@@ -202,5 +202,8 @@ describe('useAutosave', () => {
       await Promise.resolve()
     })
     expect(result.current.status).toBe('saved')
+    // L'ancienne, en échec tardif, n'est pas remise en attente : elle écraserait la plus récente.
+    act(() => result.current.flush())
+    expect(save).toHaveBeenCalledTimes(2)
   })
 })

@@ -41,11 +41,13 @@ export function useAutosave(
     const seq = seqRef.current
     if (mountedRef.current) setStatus('saving')
     void attempt(saveRef.current, pending.value).then((ok) => {
+      // Une sauvegarde dépassée par une plus récente ne touche à rien : ni au statut, ni à la valeur
+      // en attente (remise, elle écraserait la plus récente au prochain flush).
+      if (seq !== seqRef.current) return
       // Échec : la valeur redevient en attente, sauf si une plus récente a été programmée entre-temps,
       // pour que la sortie du champ ou le démontage la retente.
       if (!ok && pendingRef.current === undefined) pendingRef.current = pending
-      // Seule la dernière sauvegarde lancée fixe le statut.
-      if (mountedRef.current && seq === seqRef.current) setStatus(ok ? 'saved' : 'error')
+      if (mountedRef.current) setStatus(ok ? 'saved' : 'error')
     })
   }, [])
 
