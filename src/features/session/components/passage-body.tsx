@@ -19,7 +19,12 @@ type PassageBodyProps = Readonly<{
   onDraw: (categoryId: string) => void
   onScore: (attemptId: string, value: number) => void
   onSkip: (attemptId: string, reason: string | undefined) => void
-  onAdjust: () => void
+  onAdjust: (
+    value: number,
+    reason: string | undefined,
+    options: { reveal: boolean },
+  ) => Promise<boolean>
+  onRevealFinal: () => Promise<boolean>
   onReset: () => Promise<void>
   onNext: () => void
 }>
@@ -40,6 +45,7 @@ export function PassageBody({
   onScore,
   onSkip,
   onAdjust,
+  onRevealFinal,
   onReset,
   onNext,
 }: PassageBodyProps) {
@@ -59,11 +65,14 @@ export function PassageBody({
   if (status === 'done') {
     return (
       <FinalScreen
+        // Un autre étudiant terminé repart sans popup ouverte à la main.
+        key={student.id}
         ui={ui}
         session={session}
         student={student}
         disabled={disabled}
         onAdjust={onAdjust}
+        onRevealFinal={onRevealFinal}
         onReset={onReset}
         onNext={onNext}
       />

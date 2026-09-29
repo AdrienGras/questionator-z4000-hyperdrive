@@ -67,8 +67,8 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
               onDraw={(categoryId) => void actions.draw(categoryId)}
               onScore={(attemptId, value) => void actions.score(attemptId, value)}
               onSkip={(attemptId, reason) => void actions.skip(attemptId, reason)}
-              // Provisoire : la popup d'ajustement est branchée en Task 5.
-              onAdjust={() => undefined}
+              onAdjust={(value, reason, options) => actions.adjust(value, reason, options)}
+              onRevealFinal={() => actions.revealFinal()}
               onReset={() => actions.reset()}
               onNext={() => void actions.next()}
             />

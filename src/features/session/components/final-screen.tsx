@@ -1,12 +1,13 @@
 import { useState, type CSSProperties } from 'react'
 import { Button } from '@/components/ui/button'
 import type { NormalizedConfig } from '@/domain/config/normalize'
-import { nextStudent } from '@/domain/passage/selectors'
+import { nextStudent, shouldAutoOpenAdjustment } from '@/domain/passage/selectors'
 import { formatScore } from '@/domain/scoring/format'
 import { asMilli, toMilli, type Milli } from '@/domain/scoring/milli'
 import { computeScores } from '@/domain/scoring/score'
 import type { Attempt, Session, Student } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
+import { AdjustmentDialog } from './adjustment-dialog'
 import { ResetDialog } from './reset-dialog'
 
 type FinalScreenProps = Readonly<{
@@ -14,7 +15,12 @@ type FinalScreenProps = Readonly<{
   session: Session
   student: Student
   disabled: boolean
-  onAdjust: () => void
+  onAdjust: (
+    value: number,
+    reason: string | undefined,
+    options: { reveal: boolean },
+  ) => Promise<boolean>
+  onRevealFinal: () => Promise<boolean>
   onReset: () => Promise<void>
   onNext: () => void
 }>
@@ -87,12 +93,18 @@ export function FinalScreen({
   student,
   disabled,
   onAdjust,
+  onRevealFinal,
   onReset,
   onNext,
 }: FinalScreenProps) {
   const { text, locale } = ui
   const { config } = session
   const [resetOpen, setResetOpen] = useState(false)
+  const [adjustOpen, setAdjustOpen] = useState(false)
+  // Ouverture automatique déduite de la base (D66) : tant que la note n'est pas révélée, la popup
+  // de fin de passage reste ouverte ; l'enregistrer ou l'annuler renseigne `finalRevealedAt`.
+  const autoOpen = shouldAutoOpenAdjustment(student, config)
+  const adjustMode = autoOpen ? 'final' : 'adjust'
   const scores = computeScores(student, config)
   const hasNext = nextStudent(session, student.id) !== null
   const fmtRaw = (value: Milli) => formatScore(value, 'raw', config, locale)
@@ -143,7 +155,12 @@ export function FinalScreen({
 
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" disabled={disabled} onClick={onAdjust}>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={disabled}
+            onClick={() => setAdjustOpen(true)}
+          >
             {text('final_adjust', {})}
           </Button>
           <Button
@@ -161,6 +178,16 @@ export function FinalScreen({
         {!hasNext && <p className="text-sm text-muted-foreground">{text('final_no_next', {})}</p>}
       </div>
 
+      <AdjustmentDialog
+        ui={ui}
+        config={config}
+        student={student}
+        open={autoOpen || adjustOpen}
+        mode={adjustMode}
+        onSave={(value, reason) => onAdjust(value, reason, { reveal: adjustMode === 'final' })}
+        onCancel={onRevealFinal}
+        onClose={() => setAdjustOpen(false)}
+      />
       <ResetDialog
         ui={ui}
         studentName={`${student.lastName} ${student.firstName}`}

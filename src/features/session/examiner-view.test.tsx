@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto'
-import { fireEvent, screen, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
@@ -104,7 +104,11 @@ test('étudiant actif absent affiche « Étudiant absent »', async () => {
 
 test('étudiant ayant terminé son passage affiche l’écran final', async () => {
   const config = makeConfig({ questionsPerStudent: 3 })
-  await putSession(sessionWith(config, twoStudents([1, 1, 0.5]), 'student-1'))
+  const [alice, bob] = twoStudents([1, 1, 0.5])
+  if (alice === undefined || bob === undefined) throw new Error('fixture incomplète')
+  // Note déjà révélée : sinon la popup de fin de passage s'ouvre par-dessus l'écran (D66).
+  const revealed = { ...alice, finalRevealedAt: '2026-09-25T10:00:00.000Z' }
+  await putSession(sessionWith(config, [revealed, bob], 'student-1'))
   renderAt('/session/session-1')
 
   expect(await screen.findByRole('heading', { name: 'Passage terminé' })).toBeInTheDocument()
@@ -231,6 +235,11 @@ test('la note qui atteint questionsPerStudent affiche « Passage terminé »', a
   fireEvent.click(await categoryButton('A'))
   await screen.findByText('Éléments de réponse')
   fireEvent.click(screen.getByRole('button', { name: 'Noter 0,5' }))
+
+  // La popup de fin de passage s'ouvre d'abord (D66) ; l'annuler révèle l'écran final.
+  const dialog = await screen.findByRole('dialog', { name: 'Ajuster la note' })
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Annuler' }))
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
 
   expect(await screen.findByRole('heading', { name: 'Passage terminé' })).toBeInTheDocument()
   expect(screen.getByText('Note brute').parentElement).toHaveTextContent('1,5')

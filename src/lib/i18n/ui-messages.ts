@@ -127,6 +127,22 @@ export type UiMessageParams = {
   reset_title: { name: string }
   reset_body: NoParams
   reset_confirm: NoParams
+  adjust_title: NoParams
+  adjust_field: NoParams
+  adjust_decrement: NoParams
+  adjust_increment: NoParams
+  /** `step` / `max` : pas d'arrondi et échelle finale, déjà formatés. */
+  adjust_invalid: { step: string; max: string }
+  /** Notes déjà formatées ; `sign` : « + » ou « − », `adjustment` en valeur absolue. */
+  adjust_preview: {
+    converted: string
+    sign: string
+    adjustment: string
+    final: string
+    scale: string
+  }
+  adjust_clamped: { bound: string }
+  adjust_reason: NoParams
   passage_error_generic: NoParams
   /** `remaining` : passes restantes pour l'étudiant (`skipsRemaining`). */
   passage_skip_button: { remaining: number }
@@ -302,6 +318,15 @@ const fr: Dictionary<UiMessageParams> = {
   reset_body: () =>
     'Les questions tirées, les notes et l’ajustement seront supprimés. Le commentaire est conservé.',
   reset_confirm: () => 'Réinitialiser',
+  adjust_title: () => 'Ajuster la note',
+  adjust_field: () => 'Ajustement',
+  adjust_decrement: () => 'Retirer un pas',
+  adjust_increment: () => 'Ajouter un pas',
+  adjust_invalid: ({ step, max }) => `Saisissez un multiple de ${step}, entre −${max} et ${max}.`,
+  adjust_preview: ({ converted, sign, adjustment, final, scale }) =>
+    `${converted} ${sign} ${adjustment} = ${final} / ${scale}`,
+  adjust_clamped: ({ bound }) => `(bornée à ${bound})`,
+  adjust_reason: () => 'Justification (facultative)',
   passage_error_generic: () => 'L’action n’a pas pu être enregistrée. Rechargez la page.',
   passage_skip_button: ({ remaining }) =>
     `Passer la question (${remaining} ${plural(remaining, 'passe restante', 'passes restantes')})`,
@@ -440,6 +465,15 @@ const en: Dictionary<UiMessageParams> = {
   reset_body: () =>
     'Drawn questions, scores and the adjustment will be deleted. The comment is kept.',
   reset_confirm: () => 'Reset',
+  adjust_title: () => 'Adjust the score',
+  adjust_field: () => 'Adjustment',
+  adjust_decrement: () => 'Remove one step',
+  adjust_increment: () => 'Add one step',
+  adjust_invalid: ({ step, max }) => `Enter a multiple of ${step}, between −${max} and ${max}.`,
+  adjust_preview: ({ converted, sign, adjustment, final, scale }) =>
+    `${converted} ${sign} ${adjustment} = ${final} / ${scale}`,
+  adjust_clamped: ({ bound }) => `(capped at ${bound})`,
+  adjust_reason: () => 'Justification (optional)',
   passage_error_generic: () => 'The action could not be saved. Reload the page.',
   passage_skip_button: ({ remaining }) =>
     `Skip question (${remaining} ${pluralEn(remaining, 'skip', 'skips')} left)`,
