@@ -2,6 +2,7 @@ import { getRouteApi } from '@tanstack/react-router'
 import { DbStatusBanner } from '@/components/db-status-banner'
 import { SessionAppearance } from '@/components/session-appearance'
 import { SessionFallback } from '@/components/session-fallback'
+import { PresentControls } from '@/features/present/components/present-controls'
 import { StudentScreen } from '@/features/present/components/student-screen'
 import { WaitingScreen } from '@/features/present/components/waiting-screen'
 import { useProjectedView } from '@/features/present/hooks/use-projected-view'
@@ -26,15 +27,18 @@ export function PresentPage() {
   if (view === null) return <SessionFallback ui={ui} kind="not-found" />
   return (
     <SessionAppearance sessionId={sessionId} view="present" config={view.appearance}>
-      {view.mode === 'student' ? (
-        // `key` : un autre étudiant projeté repart d'un premier rendu (pas d'animation, Task 3).
-        <StudentScreen
-          key={`${view.student.lastName}\u0000${view.student.firstName}`}
-          view={view}
-        />
-      ) : (
-        <WaitingScreen title={view.examTitle} />
-      )}
+      <main className="relative">
+        <PresentControls />
+        {view.mode === 'student' ? (
+          // `key` : un autre étudiant projeté repart d'un premier rendu (pas d'animation, Task 3).
+          <StudentScreen
+            key={`${view.student.lastName}\u0000${view.student.firstName}`}
+            view={view}
+          />
+        ) : (
+          <WaitingScreen title={view.examTitle} />
+        )}
+      </main>
     </SessionAppearance>
   )
 }

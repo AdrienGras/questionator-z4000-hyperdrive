@@ -27,6 +27,8 @@ const SAMPLE: UiMessageParams = {
   present_raw: { value: '7' },
   present_category_exhausted: {},
   present_skipped: {},
+  present_fullscreen: {},
+  present_exit_fullscreen: {},
   empty_title: {},
   empty_body: {},
   empty_example_link: {},

@@ -27,6 +27,8 @@ export type UiMessageParams = {
   present_raw: { value: string }
   present_category_exhausted: NoParams
   present_skipped: NoParams
+  present_fullscreen: NoParams
+  present_exit_fullscreen: NoParams
   empty_title: NoParams
   empty_body: NoParams
   empty_example_link: NoParams
@@ -253,6 +255,8 @@ const fr: Dictionary<UiMessageParams> = {
   present_raw: ({ value }) => `Score brut : ${value}`,
   present_category_exhausted: () => 'Épuisée',
   present_skipped: () => 'Passée',
+  present_fullscreen: () => 'Plein écran',
+  present_exit_fullscreen: () => 'Quitter le plein écran',
   empty_title: () => 'Aucune session',
   empty_body: () =>
     "Créez une session à partir d'une liste d'étudiants et d'un fichier de configuration, ou importez un backup.",
@@ -440,6 +444,8 @@ const en: Dictionary<UiMessageParams> = {
   present_raw: ({ value }) => `Raw score: ${value}`,
   present_category_exhausted: () => 'Exhausted',
   present_skipped: () => 'Skipped',
+  present_fullscreen: () => 'Full screen',
+  present_exit_fullscreen: () => 'Exit full screen',
   empty_title: () => 'No sessions yet',
   empty_body: () =>
     'Create a session from a student list and a configuration file, or import a backup.',

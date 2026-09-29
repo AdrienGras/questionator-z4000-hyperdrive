@@ -1,7 +1,7 @@
-import { ColorModeToggle } from '@/components/color-mode-toggle'
 import { Markdown } from '@/components/markdown/markdown'
 import type { ProjectedStudentView } from '@/domain/presentation/projected-view'
 import { CategoryTiles } from '@/features/present/components/category-tiles'
+import { DrawReveal } from '@/features/present/components/draw-reveal'
 import { FinalCard } from '@/features/present/components/final-card'
 import { useUi } from '@/lib/i18n/use-ui'
 
@@ -11,10 +11,7 @@ export function StudentScreen({ view }: Readonly<{ view: ProjectedStudentView }>
   const format = new Intl.NumberFormat(ui.locale, { maximumFractionDigits: 2 })
   const { student, current, questionIndex, cumulativeRaw, final, finished, detail } = view
   return (
-    <main className="relative flex min-h-svh flex-col gap-8 p-6 sm:p-10">
-      <div className="absolute top-4 right-4">
-        <ColorModeToggle ui={ui} />
-      </div>
+    <div className="flex min-h-svh flex-col gap-8 p-6 sm:p-10">
       <header className="flex flex-col gap-1">
         <p className="text-xl text-muted-foreground">{view.examTitle}</p>
         <h1 className="text-5xl font-bold tracking-tight">
@@ -22,7 +19,15 @@ export function StudentScreen({ view }: Readonly<{ view: ProjectedStudentView }>
         </h1>
       </header>
       <CategoryTiles ui={ui} categories={view.categories} />
-      {current !== undefined && <Markdown source={current.prompt} ui={ui} size="projection" />}
+      {current !== undefined && (
+        <DrawReveal
+          drawnAt={current.drawnAt}
+          color={view.categories.find((category) => category.id === current.categoryId)?.color}
+          animate={view.drawAnimation}
+        >
+          <Markdown source={current.prompt} ui={ui} size="projection" />
+        </DrawReveal>
+      )}
       {finished ? (
         final === undefined ? (
           <p className="text-4xl font-semibold">{ui.text('present_finished', {})}</p>
@@ -39,6 +44,6 @@ export function StudentScreen({ view }: Readonly<{ view: ProjectedStudentView }>
           {ui.text('present_cumulative', { score: format.format(cumulativeRaw) })}
         </p>
       )}
-    </main>
+    </div>
   )
 }
