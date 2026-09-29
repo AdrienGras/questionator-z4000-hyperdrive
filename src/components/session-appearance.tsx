@@ -4,10 +4,17 @@ import { colorModeKey, type ColorModeView } from '@/lib/appearance/color-mode'
 import { useAppearanceScope, type AppearanceScope } from '@/lib/appearance/appearance-context'
 import { LocaleProvider, resolveSessionLocale } from '@/lib/i18n/locale-context'
 
+/** Le strict nécessaire à l'apparence : `NormalizedConfig` (examinateur) et `ProjectedAppearance` (projeté) le satisfont. */
+export type AppearanceConfig = {
+  locale?: NormalizedConfig['locale']
+  theme: NormalizedConfig['theme']
+  presentation: { defaultColorMode: NormalizedConfig['presentation']['defaultColorMode'] }
+}
+
 type SessionAppearanceProps = Readonly<{
   sessionId: string
   view: ColorModeView
-  config: NormalizedConfig
+  config: AppearanceConfig
   children: ReactNode
 }>
 

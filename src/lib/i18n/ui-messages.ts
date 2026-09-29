@@ -20,6 +20,13 @@ export type UiMessageParams = {
   session_loading: NoParams
   session_not_found: NoParams
   present_waiting: NoParams
+  present_question_index: { current: number; total: number }
+  present_cumulative: { score: string }
+  present_finished: NoParams
+  present_final: { value: string; scale: string }
+  present_raw: { value: string }
+  present_category_exhausted: NoParams
+  present_skipped: NoParams
   empty_title: NoParams
   empty_body: NoParams
   empty_example_link: NoParams
@@ -239,6 +246,13 @@ const fr: Dictionary<UiMessageParams> = {
   session_loading: () => 'Chargement de la session…',
   session_not_found: () => 'Session introuvable',
   present_waiting: () => "L'épreuve va bientôt commencer.",
+  present_question_index: ({ current, total }) => `Question ${current} / ${total}`,
+  present_cumulative: ({ score }) => `Score : ${score}`,
+  present_finished: () => 'Passage terminé',
+  present_final: ({ value, scale }) => `Note : ${value} / ${scale}`,
+  present_raw: ({ value }) => `Score brut : ${value}`,
+  present_category_exhausted: () => 'Épuisée',
+  present_skipped: () => 'Passée',
   empty_title: () => 'Aucune session',
   empty_body: () =>
     "Créez une session à partir d'une liste d'étudiants et d'un fichier de configuration, ou importez un backup.",
@@ -419,6 +433,13 @@ const en: Dictionary<UiMessageParams> = {
   session_loading: () => 'Loading session…',
   session_not_found: () => 'Session not found',
   present_waiting: () => 'The exam will start soon.',
+  present_question_index: ({ current, total }) => `Question ${current} / ${total}`,
+  present_cumulative: ({ score }) => `Score: ${score}`,
+  present_finished: () => 'Exam complete',
+  present_final: ({ value, scale }) => `Score: ${value} / ${scale}`,
+  present_raw: ({ value }) => `Raw score: ${value}`,
+  present_category_exhausted: () => 'Exhausted',
+  present_skipped: () => 'Skipped',
   empty_title: () => 'No sessions yet',
   empty_body: () =>
     'Create a session from a student list and a configuration file, or import a backup.',
