@@ -463,3 +463,12 @@ test('erreur affichée même hors du panneau de passage (étudiant retiré entre
   // passage pour s'afficher.
   expect(screen.getByRole('heading', { name: 'Aucun étudiant sélectionné' })).toBeInTheDocument()
 })
+
+test("onglet « Étudiants » : bouton-lien « Statistiques » vers l'écran des statistiques", async () => {
+  await putSession(sessionWith(makeConfig(), twoStudents(), 'student-1'))
+  renderAt('/session/session-1')
+
+  fireEvent.click(await screen.findByRole('tab', { name: 'Étudiants' }))
+  const link = screen.getByRole('link', { name: 'Statistiques' })
+  expect(link.getAttribute('href')).toMatch(/\/session\/session-1\/stats$/u)
+})
