@@ -3,7 +3,7 @@ import { fileURLToPath, URL } from 'node:url'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vitest/config'
+import { configDefaults, defineConfig } from 'vitest/config'
 import { configSchemaPlugin } from './vite/config-schema-plugin.ts'
 
 /** Lit la version de `package.json` sans passer par un cast (oxlint `no-unsafe-type-assertion`). */
@@ -51,6 +51,8 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/testing/setup.ts'],
+    // Les specs Playwright (`pnpm e2e`) ne sont pas des tests Vitest.
+    exclude: [...configDefaults.exclude, 'e2e/**'],
     // Sans cela, `import css from '../index.css?raw'` renvoie '' sous Vitest (test des THEME_TOKENS).
     css: { include: [/index\.css/] },
   },

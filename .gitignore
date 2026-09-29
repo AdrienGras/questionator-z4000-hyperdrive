@@ -9,3 +9,7 @@ coverage
 
 # Captures et journaux du MCP Playwright (vérifications dans le navigateur)
 .playwright-mcp/
+
+# Sorties de Playwright (F14)
+test-results/
+playwright-report/

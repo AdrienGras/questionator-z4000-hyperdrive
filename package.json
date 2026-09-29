@@ -13,6 +13,7 @@
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "test": "vitest run",
+    "e2e": "playwright test",
     "lint": "oxlint --type-aware --deny-warnings",
     "deps": "depcruise src --config .dependency-cruiser.cjs",
     "format": "prettier --write .",
@@ -42,6 +43,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@swc/core": "^1.16.2",
     "@tanstack/router-plugin": "^1.168.40",
     "@testing-library/dom": "^10.4.2",
