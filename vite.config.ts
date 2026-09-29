@@ -43,9 +43,14 @@ export default defineConfig({
       output: {
         codeSplitting: {
           groups: [
-            // Socle partagé par l'application ET par Recharts (React, son runtime, `clsx`, `tiny-invariant`, `use-sync-external-store`) : sans ce
-            // groupe Rolldown le range dans le chunk `recharts`, et l'entrée importerait alors
-            // Recharts statiquement. À compléter si `check:bundle` signale de nouveau une fuite.
+            // Socle partagé par l'application ET par Recharts (React, son runtime, `clsx`,
+            // `tiny-invariant`, `use-sync-external-store`). Cause : `includeDependenciesRecursively`
+            // vaut `true` par défaut, donc le groupe `recharts` avale aussi les dépendances qu'il
+            // partage avec l'appli ; sans ce groupe, React finit dans `_recharts-*` et l'entrée
+            // l'importe statiquement. Variante tentante écartée : `{ test: /node_modules[\\/]/,
+            // tags: ['$initial'] }` absorberait un Recharts qui fuit dans `vendor` et aveuglerait
+            // `check:bundle`. La liste blanche échoue du bon côté : si elle dérive, la CI rougit ;
+            // la compléter quand `check:bundle` signale une fuite.
             {
               name: 'vendor',
               test: /node_modules[\\/](?:\.pnpm[\\/][^\\/]+[\\/]node_modules[\\/])?(?:react|react-dom|scheduler|clsx|tiny-invariant|use-sync-external-store)[\\/]/,
