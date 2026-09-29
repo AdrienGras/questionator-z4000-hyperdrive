@@ -384,3 +384,10 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : Vite découvre `@base-ui/react/tabs`, l'optimise et recharge ; pendant ce court instant, deux copies de React (hachages `?v=` différents) cohabitent.
 **Workaround** : aucun en production (build statique). En dev, recharger ; si ça gêne, ajouter le sous-chemin à `optimizeDeps.include`.
 
+## Intercepter une levée synchrone et un rejet : ni `try` + `.catch`, ni `new Promise` (2026-09-29)
+
+**Découvert** : F12, gate SonarQube de la PR #43 (`use-autosave.ts`).
+**Symptôme** : `try { return save(v).catch(() => false) } catch { return Promise.resolve(false) }` fait tomber le gate (S4822, « bug » majeur : le `try` serait redondant avec `.catch`, alors qu'il attrape la levée synchrone) ; le contournement `new Promise((resolve) => resolve(save(v))).catch(() => false)` est ensuite signalé S4634 (« promesse triviale »).
+**Workaround** : une fonction `async` : `try { return await save(v) } catch { return false }`. Le corps s'exécute jusqu'au premier `await`, donc `save` est appelé tout de suite ; `return await` n'est pas redondant dans un `try` (S4326 ne s'applique pas).
+**Référence** : `src/features/session/hooks/use-autosave.ts`.
+
