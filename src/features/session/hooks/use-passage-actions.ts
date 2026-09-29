@@ -1,8 +1,11 @@
 import { useCallback, useRef, useState } from 'react'
 import { goToNextStudent, setActiveStudent } from '@/domain/passage/active-student'
 import { setAdjustment } from '@/domain/passage/adjust'
+import { setAbsent as setAbsentTransition } from '@/domain/passage/absent'
+import { setComment as setCommentTransition } from '@/domain/passage/comment'
 import { drawQuestion } from '@/domain/passage/draw'
 import { cryptoRandomInt } from '@/domain/passage/random'
+import { editScore as editScoreTransition } from '@/domain/passage/edit-score'
 import { resetStudent } from '@/domain/passage/reset'
 import { revealFinal as revealFinalTransition } from '@/domain/passage/reveal'
 import { scoreAttempt } from '@/domain/passage/score'
@@ -22,6 +25,9 @@ export type PassageActions = {
   ) => Promise<boolean>
   revealFinal: () => Promise<boolean>
   reset: () => Promise<boolean>
+  editScore: (attemptId: string, score: number) => Promise<void>
+  setComment: (studentId: string, comment: string) => Promise<boolean>
+  setAbsent: (absent: boolean) => Promise<boolean>
   next: () => Promise<void>
   busy: boolean
   error: Error | null
@@ -139,7 +145,50 @@ export function usePassageActions(
     await run((session) => goToNextStudent(session, studentId))
   }, [run, studentId])
 
+  const editScore = useCallback(
+    async (attemptId: string, value: number) => {
+      if (studentId === undefined) return
+      await run((session) =>
+        editScoreTransition(
+          session,
+          { studentId, attemptId, score: value },
+          { now: () => new Date() },
+        ),
+      )
+    },
+    [run, studentId],
+  )
+
+  // L'étudiant est explicite : la sauvegarde différée peut partir après un changement d'étudiant.
+  const setComment = useCallback(
+    (targetStudentId: string, comment: string) =>
+      run((session) => setCommentTransition(session, { studentId: targetStudentId, comment })),
+    [run],
+  )
+
+  const setAbsent = useCallback(
+    (absent: boolean) => {
+      if (studentId === undefined) return Promise.resolve(false)
+      return run((session) => setAbsentTransition(session, { studentId, absent }))
+    },
+    [run, studentId],
+  )
+
   const busy = busyState || (lastWritten !== undefined && sessionUpdatedAt < lastWritten)
 
-  return { draw, score, skip, selectStudent, adjust, revealFinal, reset, next, busy, error }
+  return {
+    draw,
+    score,
+    skip,
+    selectStudent,
+    adjust,
+    revealFinal,
+    reset,
+    editScore,
+    setComment,
+    setAbsent,
+    next,
+    busy,
+    error,
+  }
 }
