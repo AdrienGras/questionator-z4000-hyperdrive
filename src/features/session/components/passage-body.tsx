@@ -1,4 +1,5 @@
 import type { NormalizedConfig } from '@/domain/config/normalize'
+import { skipsRemaining } from '@/domain/passage/skip'
 import { formatScore } from '@/domain/scoring/format'
 import { computeScores } from '@/domain/scoring/score'
 import type { StudentStatus } from '@/domain/scoring/status'
@@ -18,6 +19,7 @@ type PassageBodyProps = Readonly<{
   disabled: boolean
   onDraw: (categoryId: string) => void
   onScore: (attemptId: string, value: number) => void
+  onSkip: (attemptId: string, reason: string | undefined) => void
 }>
 
 /**
@@ -33,6 +35,7 @@ export function PassageBody({
   disabled,
   onDraw,
   onScore,
+  onSkip,
 }: PassageBodyProps) {
   const { text, locale } = ui
 
@@ -64,7 +67,9 @@ export function PassageBody({
           config={config}
           attempt={pending}
           disabled={disabled}
+          skipsRemaining={skipsRemaining(student, config)}
           onScore={onScore}
+          onSkip={onSkip}
         />
       )}
       <CategoryGrid

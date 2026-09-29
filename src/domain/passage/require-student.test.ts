@@ -11,6 +11,10 @@ describe('requireStudent', () => {
   })
 
   test('student_not_found', () => {
-    expectPassageError(() => requireStudent(makeSession(), 'nope'), 'student_not_found')
+    const session = makeSession()
+    const snapshot = structuredClone(session)
+
+    expectPassageError(() => requireStudent(session, 'nope'), 'student_not_found')
+    expect(session).toEqual(snapshot)
   })
 })

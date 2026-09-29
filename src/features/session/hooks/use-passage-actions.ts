@@ -3,12 +3,14 @@ import { setActiveStudent } from '@/domain/passage/active-student'
 import { drawQuestion } from '@/domain/passage/draw'
 import { cryptoRandomInt } from '@/domain/passage/random'
 import { scoreAttempt } from '@/domain/passage/score'
+import { skipAttempt } from '@/domain/passage/skip'
 import type { Session } from '@/domain/session/types'
 import { updateSession } from '@/lib/db/sessions'
 
 export type PassageActions = {
   draw: (categoryId: string) => Promise<void>
   score: (attemptId: string, value: number) => Promise<void>
+  skip: (attemptId: string, reason: string | undefined) => Promise<void>
   selectStudent: (studentId: string) => Promise<void>
   busy: boolean
   error: Error | null
@@ -79,6 +81,14 @@ export function usePassageActions(
     [run, studentId],
   )
 
+  const skip = useCallback(
+    async (attemptId: string, reason: string | undefined) => {
+      if (studentId === undefined) return
+      await run((session) => skipAttempt(session, { studentId, attemptId, reason }))
+    },
+    [run, studentId],
+  )
+
   const selectStudent = useCallback(
     async (targetStudentId: string) => {
       await run((session) => setActiveStudent(session, targetStudentId))
@@ -88,5 +98,5 @@ export function usePassageActions(
 
   const busy = busyState || (lastWritten !== undefined && sessionUpdatedAt < lastWritten)
 
-  return { draw, score, selectStudent, busy, error }
+  return { draw, score, skip, selectStudent, busy, error }
 }

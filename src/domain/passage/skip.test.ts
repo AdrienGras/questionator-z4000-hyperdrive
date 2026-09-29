@@ -104,23 +104,29 @@ describe('skipAttempt', () => {
 
     const result = skipAttempt(makeSkipSession(), { ...input, reason })
 
-    expect(result.students[0]?.attempts[0]?.skipReason).toBe(
-      'x'.repeat(MAX_SKIP_REASON_LENGTH),
-    )
+    expect(result.students[0]?.attempts[0]?.skipReason).toBe('x'.repeat(MAX_SKIP_REASON_LENGTH))
   })
 
   test('student_not_found', () => {
+    const session = makeSkipSession()
+    const snapshot = structuredClone(session)
+
     expectPassageError(
-      () => skipAttempt(makeSkipSession(), { ...input, studentId: 'nope' }),
+      () => skipAttempt(session, { ...input, studentId: 'nope' }),
       'student_not_found',
     )
+    expect(session).toEqual(snapshot)
   })
 
   test('attempt_not_found', () => {
+    const session = makeSkipSession()
+    const snapshot = structuredClone(session)
+
     expectPassageError(
-      () => skipAttempt(makeSkipSession(), { ...input, attemptId: 'nope' }),
+      () => skipAttempt(session, { ...input, attemptId: 'nope' }),
       'attempt_not_found',
     )
+    expect(session).toEqual(snapshot)
   })
 
   test('not_pending (attempt déjà scored)', () => {
@@ -132,10 +138,11 @@ describe('skipAttempt', () => {
   })
 
   test('not_pending (attempt déjà skipped)', () => {
-    expectPassageError(
-      () => skipAttempt(makeSkipSession(makeStudent([{ skipped: '' }])), input),
-      'not_pending',
-    )
+    const session = makeSkipSession(makeStudent([{ skipped: '' }]))
+    const snapshot = structuredClone(session)
+
+    expectPassageError(() => skipAttempt(session, input), 'not_pending')
+    expect(session).toEqual(snapshot)
   })
 
   test('skips_disabled', () => {
@@ -158,10 +165,11 @@ describe('skipAttempt', () => {
   })
 
   test('skip_quota_reached avec maxPerStudent = 0', () => {
-    expectPassageError(
-      () => skipAttempt(makeSkipSession(undefined, { maxPerStudent: 0 }), input),
-      'skip_quota_reached',
-    )
+    const session = makeSkipSession(undefined, { maxPerStudent: 0 })
+    const snapshot = structuredClone(session)
+
+    expectPassageError(() => skipAttempt(session, input), 'skip_quota_reached')
+    expect(session).toEqual(snapshot)
   })
 
   test('reason_not_allowed : motif libre refusé si allowFreeText est faux', () => {

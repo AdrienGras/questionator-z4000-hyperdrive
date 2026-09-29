@@ -103,6 +103,13 @@ const SAMPLE: UiMessageParams = {
   passage_done_title: {},
   passage_done_body: {},
   passage_error_generic: {},
+  passage_skip_button: { remaining: 1 },
+  passage_skip_quota_reached: {},
+  passage_skip_title: {},
+  passage_skip_body: {},
+  passage_skip_reasons: {},
+  passage_skip_free_text: {},
+  passage_skip_confirm: {},
 }
 
 function isUiMessageKey(key: string): key is keyof UiMessageParams {

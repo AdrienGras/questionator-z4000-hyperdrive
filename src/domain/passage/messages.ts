@@ -15,7 +15,7 @@ const fr: Dictionary<PassageErrorParams> = {
   not_pending: () => 'Cette question n’est plus en cours.',
   score_not_in_scale: () => 'Cette note ne fait pas partie du barème.',
   skips_disabled: () => 'Les passes sont désactivées pour cet oral.',
-  skip_quota_reached: () => 'Plus aucune passe disponible pour cet étudiant.',
+  skip_quota_reached: () => 'Plus de passe disponible pour cet étudiant.',
   reason_not_allowed: () => 'Ce motif ne fait pas partie des motifs proposés.',
 }
 
