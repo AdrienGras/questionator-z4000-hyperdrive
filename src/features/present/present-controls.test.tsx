@@ -2,34 +2,46 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { AppearanceProvider } from '@/app/appearance-provider'
 import { PresentControls } from '@/features/present/components/present-controls'
+import { useIdle } from '@/features/present/hooks/use-idle'
+
+function Harness() {
+  const idle = useIdle(3000)
+  return (
+    <main data-testid="main">
+      <PresentControls idle={idle} />
+    </main>
+  )
+}
 
 function mount() {
   return render(
     <AppearanceProvider>
-      <main data-testid="main">
-        <PresentControls />
-      </main>
+      <Harness />
     </AppearanceProvider>,
   )
 }
 
-// jsdom n'implémente pas l'API plein écran : on la simule.
+// jsdom n'implémente pas l'API plein écran : on la simule et on restaure après chaque test.
 let current: Element | null = null
-Object.defineProperty(document, 'fullscreenElement', { get: () => current, configurable: true })
-
 const request = vi.fn<() => Promise<void>>()
 const exit = vi.fn<() => Promise<void>>()
 
 beforeEach(() => {
-  request.mockReset().mockResolvedValue(undefined)
-  exit.mockReset().mockResolvedValue(undefined)
   vi.useFakeTimers()
   current = null
-  document.documentElement.requestFullscreen = request
-  document.exitFullscreen = exit
+  request.mockReset().mockResolvedValue(undefined)
+  exit.mockReset().mockResolvedValue(undefined)
+  Object.defineProperty(document, 'fullscreenElement', { get: () => current, configurable: true })
+  Object.defineProperty(document, 'exitFullscreen', { value: exit, configurable: true })
+  Object.defineProperty(document.documentElement, 'requestFullscreen', {
+    value: request,
+    configurable: true,
+  })
 })
 afterEach(() => {
   vi.useRealTimers()
+  Reflect.deleteProperty(document, 'fullscreenElement')
+  Reflect.deleteProperty(document, 'exitFullscreen')
   Reflect.deleteProperty(document.documentElement, 'requestFullscreen')
 })
 
@@ -55,7 +67,7 @@ test('en plein écran : libellé « Quitter le plein écran », clic ferme', () 
   expect(exit).toHaveBeenCalledTimes(1)
 })
 
-test('3 s sans événement : commandes masquées et curseur caché, un mouvement les ramène', () => {
+test('3 s sans événement : commandes masquées, un mouvement les ramène', () => {
   const { container } = mount()
   const controls = container.querySelector('[data-controls]')
   expect(controls).not.toHaveClass('opacity-0')
@@ -64,11 +76,9 @@ test('3 s sans événement : commandes masquées et curseur caché, un mouvement
     vi.advanceTimersByTime(3000)
   })
   expect(controls).toHaveClass('opacity-0')
-  expect(screen.getByTestId('main')).toHaveClass('cursor-none')
 
   act(() => {
     fireEvent.mouseMove(window)
   })
   expect(controls).not.toHaveClass('opacity-0')
-  expect(screen.getByTestId('main')).not.toHaveClass('cursor-none')
 })

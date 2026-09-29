@@ -9,28 +9,25 @@ function prefersReducedMotion(): boolean {
 }
 
 /**
- * Révélation du tirage (F14). Le `drawnAt` du premier rendu est retenu : énoncé direct (ouverture,
- * réouverture, changement d'étudiant). Un `drawnAt` différent reçu ensuite, avec `animate`, montre
- * trois cartes neutres (aucun texte, l'énoncé n'est pas dans le DOM) puis l'énoncé. Avec
- * `prefers-reduced-motion`, un fondu remplace le mélange.
+ * Révélation du tirage (F14), à monter avec `key={drawnAt}` : chaque tirage est un nouveau montage
+ * qui décide seul. `animate` : trois cartes neutres (aucun texte, l'énoncé n'est pas dans le DOM)
+ * se mélangent puis l'énoncé se retourne ; avec `prefers-reduced-motion`, un fondu remplace le
+ * mélange. Sinon (ouverture, réouverture, animation coupée) l'énoncé s'affiche directement.
  */
 export function DrawReveal({
-  drawnAt,
   color,
   animate,
   children,
-}: Readonly<{ drawnAt: string; color?: string; animate: boolean; children: ReactNode }>) {
-  const [initial] = useState(drawnAt)
-  const [revealedFor, setRevealedFor] = useState(drawnAt)
-  const fresh = animate && drawnAt !== initial
-  const reduced = fresh && prefersReducedMotion()
-  const shuffling = fresh && !reduced && revealedFor !== drawnAt
+}: Readonly<{ color?: string; animate: boolean; children: ReactNode }>) {
+  const [reduced] = useState(() => animate && prefersReducedMotion())
+  const [done, setDone] = useState(false)
+  const shuffling = animate && !reduced && !done
 
   useEffect(() => {
     if (!shuffling) return undefined
-    const timer = setTimeout(() => setRevealedFor(drawnAt), SHUFFLE_MS)
+    const timer = setTimeout(() => setDone(true), SHUFFLE_MS)
     return () => clearTimeout(timer)
-  }, [shuffling, drawnAt])
+  }, [shuffling])
 
   if (shuffling)
     return (
@@ -56,7 +53,7 @@ export function DrawReveal({
       </div>
     )
   return (
-    <div className={cn(fresh && (reduced ? 'animate-in duration-300 fade-in' : 'draw-reveal'))}>
+    <div className={cn(animate && (reduced ? 'animate-in duration-300 fade-in' : 'draw-reveal'))}>
       {children}
     </div>
   )

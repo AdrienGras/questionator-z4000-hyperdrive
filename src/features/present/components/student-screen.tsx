@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Markdown } from '@/components/markdown/markdown'
 import type { ProjectedStudentView } from '@/domain/presentation/projected-view'
 import { CategoryTiles } from '@/features/present/components/category-tiles'
@@ -8,6 +9,8 @@ import { useUi } from '@/lib/i18n/use-ui'
 /** Écran étudiant de la vue projetée : nom, catégories, énoncé en cours, progression, note finale. */
 export function StudentScreen({ view }: Readonly<{ view: ProjectedStudentView }>) {
   const ui = useUi()
+  // `drawnAt` présent au montage (ouverture, réouverture, changement d'étudiant) : jamais animé.
+  const [initialDrawnAt] = useState(view.current?.drawnAt)
   const format = new Intl.NumberFormat(ui.locale, { maximumFractionDigits: 2 })
   const { student, current, questionIndex, cumulativeRaw, final, finished, detail } = view
   return (
@@ -21,9 +24,9 @@ export function StudentScreen({ view }: Readonly<{ view: ProjectedStudentView }>
       <CategoryTiles ui={ui} categories={view.categories} />
       {current !== undefined && (
         <DrawReveal
-          drawnAt={current.drawnAt}
+          key={current.drawnAt}
           color={view.categories.find((category) => category.id === current.categoryId)?.color}
-          animate={view.drawAnimation}
+          animate={view.drawAnimation && current.drawnAt !== initialDrawnAt}
         >
           <Markdown source={current.prompt} ui={ui} size="projection" />
         </DrawReveal>
