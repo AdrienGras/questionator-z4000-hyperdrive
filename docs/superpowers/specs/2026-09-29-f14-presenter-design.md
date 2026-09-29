@@ -75,6 +75,7 @@ type ProjectedView =
       cumulativeRaw?: number
       final?: { raw?: number; final?: number; scale: number }
       finished: boolean
+      drawAnimation: boolean
       detail?: {
         categoryLabel: string
         title: string
@@ -85,7 +86,7 @@ type ProjectedView =
     }
 ```
 
-Les nombres sont des décimaux (points), pas des millièmes : la conversion `Milli` → nombre se fait dans `toProjectedView`, pour que les composants se contentent de formater.
+Les nombres sont des décimaux (points), pas des millièmes : la conversion `Milli` → nombre se fait dans `toProjectedView`, pour que les composants se contentent de formater. La vue les affiche avec `Intl.NumberFormat(appearance.locale, { maximumFractionDigits: 2 })`.
 
 ### `toProjectedView(session): ProjectedView`
 
@@ -115,6 +116,7 @@ La prop `config` prend le type `AppearanceConfig` (`locale`, `theme`, `presentat
 - `PresentPage` : bannière d'état de la base comme aujourd'hui, `SessionFallback` pour chargement et introuvable, puis `SessionAppearance` (`view="present"`) et `WaitingScreen` ou `StudentScreen`. `PresentControls` est rendu dans les deux modes.
 - `StudentScreen` : nom de l'étudiant ; `CategoryTiles` ; si `current`, `DrawReveal` autour de l'énoncé (`Markdown` en taille `projection`) ; « 2 / 3 » ; score cumulé si présent ; si `finished` : « Passage terminé » tant que `final` est absent, sinon `FinalCard` (note(s) sur l'échelle, et le détail si présent).
 - `CategoryTiles` : des `<div>` (rien de focusable ni de cliquable), couleur et icône de la catégorie, état « épuisée » et « indisponible » visibles.
+- `PresentPage` remonte `StudentScreen` par une `key` sur le nom affiché de l'étudiant : un changement d'étudiant projeté repart d'un premier rendu et ne joue pas l'animation (seul un nouveau tirage du même étudiant anime).
 - `DrawReveal` : un `useRef` retient le `drawnAt` présent au premier rendu. Un `drawnAt` différent reçu ensuite déclenche l'animation, si `drawAnimation` est vrai : trois cartes face cachée aux couleurs de la catégorie, sans texte, se mélangent en CSS (~1,5 s), puis l'une se retourne sur l'énoncé. Avec `prefers-reduced-motion` (lu par `matchMedia`), un fondu court remplace le mélange. `drawAnimation` faux, ou premier rendu : l'énoncé s'affiche directement.
 - `PresentControls` : bouton plein écran (`document.documentElement.requestFullscreen()` au clic, masqué si l'API manque ; libellé « Quitter le plein écran » quand `document.fullscreenElement` est posé) et `ColorModeToggle`. `useIdle(3000)` : vrai après 3 s sans `mousemove`, `keydown` ni `pointerdown` ; les commandes passent alors en `opacity-0` et la page en `cursor-none`, un mouvement les fait revenir.
 - Réouverture : tout est relu depuis la base au montage, rien n'est gardé en local ; fermer puis rouvrir restitue l'état exact, sans rejouer l'animation.
