@@ -370,3 +370,17 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Workaround** : le helper attend (`waitFor`) une `<ul>` contenant un bouton au libellé voulu. Tout helper de requête de l'écran de passage doit viser son conteneur précis, jamais le premier élément d'un rôle générique.
 **Référence** : `src/testing/passage-assertions.ts`.
 
+## Une action de fond qui passe par le verrou `busy` fait perdre le clic suivant (2026-09-29)
+
+**Découvert** : F12, revue finale (sauvegarde différée du commentaire).
+**Symptôme** : l'examinateur tape un commentaire puis clique aussitôt sur une note ou une catégorie : le clic est parfois ignoré, et l'écran clignote désactivé à chaque pause de frappe.
+**Cause** : le `mousedown` retire le focus du champ, le blur lance la sauvegarde, `run` passe `busy` à vrai de façon synchrone ; le bouton est `disabled` au moment où le `click` arrive.
+**Workaround** : une action qui ne change aucun état de passage n'utilise pas `run` (`setComment` appelle `updateSession` directement). Voir CONVENTIONS « Transition de passage ».
+
+## Nouveau sous-module base-ui : « Invalid hook call » au premier chargement en dev (2026-09-29)
+
+**Découvert** : F12, vérification dans Chromium après l'ajout de `tabs`.
+**Symptôme** : au premier chargement de l'écran après l'ajout d'un composant shadcn, la console montre « Invalid hook call » / « Cannot read properties of null (reading 'useRef') » dans `TabsRoot`, puis la page se recharge seule.
+**Cause** : Vite découvre `@base-ui/react/tabs`, l'optimise et recharge ; pendant ce court instant, deux copies de React (hachages `?v=` différents) cohabitent.
+**Workaround** : aucun en production (build statique). En dev, recharger ; si ça gêne, ajouter le sous-chemin à `optimizeDeps.include`.
+

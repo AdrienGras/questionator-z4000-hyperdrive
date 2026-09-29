@@ -74,13 +74,15 @@ describe('updateSession', () => {
     expect(await getSession('session-1')).toEqual(written)
   })
 
-  test('accepte une modification en place', async () => {
+  test('un mutator qui renvoie la session reçue n’écrit rien', async () => {
     await createSession(makeSession())
-    await updateSession('session-1', (session) => {
-      session.examiner = 'M. Martin'
-      return session
-    })
-    expect((await getSession('session-1'))?.examiner).toBe('M. Martin')
+    const put = vi.spyOn(db.sessions, 'put')
+    const stored = await getSession('session-1')
+    const result = await updateSession('session-1', (session) => session)
+    expect(put).not.toHaveBeenCalled()
+    expect(result).toEqual(stored)
+    expect((await getSession('session-1'))?.updatedAt).toBe(stored?.updatedAt)
+    put.mockRestore()
   })
 
   test('SessionNotFoundError sur une session absente', async () => {

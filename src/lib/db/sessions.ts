@@ -36,7 +36,9 @@ export function deleteSession(id: string): Promise<void> {
  * Seule voie d'écriture des mutations métier (D22, D46). Lecture, mutation et écriture dans une
  * seule transaction `rw` : deux onglets examinateur ne perdent aucune écriture. Le mutator est
  * synchrone et reçoit la session fraîche (copie issue d'IndexedDB) : c'est là que se font les
- * contrôles métier. S'il lève, rien n'est écrit et l'erreur remonte telle quelle.
+ * contrôles métier. S'il lève, rien n'est écrit et l'erreur remonte telle quelle. Le mutator est
+ * immuable (il renvoie une nouvelle session) ; s'il renvoie la session reçue, rien n'a changé :
+ * pas d'écriture, `updatedAt` intact, la session lue est renvoyée.
  */
 export function updateSession(
   id: string,
@@ -51,6 +53,7 @@ export function updateSession(
         `Un mutator ne peut pas changer l'id de la session (« ${id} » → « ${next.id} »).`,
       )
     }
+    if (next === current) return current
     const written = { ...next, updatedAt: new Date().toISOString() }
     await db.sessions.put(written)
     return written

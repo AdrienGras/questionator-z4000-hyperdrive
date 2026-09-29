@@ -117,6 +117,28 @@ const SAMPLE: UiMessageParams = {
   final_reset: {},
   final_next: {},
   final_no_next: {},
+  attempt_pending: {},
+  attempt_score_label: { rank: 1 },
+  attempt_out_of: { max: '2' },
+  score_not_computed: {},
+  side_panel_label: {},
+  side_panel_hide: {},
+  side_panel_show: {},
+  side_panel_tab_student: {},
+  side_panel_tab_students: {},
+  side_panel_students_soon: {},
+  student_tab_questions: {},
+  student_tab_totals: {},
+  student_tab_no_student: {},
+  student_tab_no_attempts: {},
+  comment_label: {},
+  comment_saving: {},
+  comment_saved: {},
+  comment_error: {},
+  absent_label: {},
+  absent_title: { name: 'Durand Alice' },
+  absent_body: { count: 2 },
+  absent_confirm: {},
   reset_title: { name: 'Durand Alice' },
   reset_body: {},
   reset_confirm: {},
@@ -205,5 +227,12 @@ describe('UI_MESSAGES', () => {
     expect(t(UI_MESSAGES, 'en', 'preview_rounding', { mode: 'up', step: null, decimals: 2 })).toBe(
       'Rounded up, 2 decimals',
     )
+  })
+
+  test('absent_body accorde le singulier et le pluriel', () => {
+    expect(t(UI_MESSAGES, 'fr', 'absent_body', { count: 1 })).toContain('1 question tirée.')
+    expect(t(UI_MESSAGES, 'fr', 'absent_body', { count: 2 })).toContain('2 questions tirées.')
+    expect(t(UI_MESSAGES, 'en', 'absent_body', { count: 1 })).toContain('1 drawn question.')
+    expect(t(UI_MESSAGES, 'en', 'absent_body', { count: 2 })).toContain('2 drawn questions.')
   })
 })

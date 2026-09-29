@@ -5,7 +5,7 @@ import type { NormalizedCategory } from '@/domain/config/normalize'
 import type { Student } from '@/domain/session/types'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
-import { categoryButton } from '@/testing/passage-assertions'
+import { categoryButton, outsidePanel } from '@/testing/passage-assertions'
 import { renderAt } from '@/testing/render-at'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
@@ -78,7 +78,7 @@ function bob(attempts: Parameters<typeof makeStudent>[0] = [], overrides: Partia
 }
 
 function row(label: string): HTMLElement {
-  const parent = screen.getByText(label).parentElement
+  const parent = outsidePanel(label).parentElement
   if (parent === null) throw new Error(`ligne « ${label} » introuvable`)
   return parent
 }
@@ -125,7 +125,12 @@ test('détail du passage : rangs des questions notées, passée sans rang', asyn
     2,
   )
 
-  const items = within(screen.getByRole('list')).getAllByRole('listitem')
+  const lists = screen.getAllByRole('list').filter((list) => list.closest('aside') === null)
+  const [detail] = lists
+  if (lists.length !== 1 || detail === undefined) {
+    throw new Error(`${lists.length} listes hors panneau, une seule attendue`)
+  }
+  const items = within(detail).getAllByRole('listitem')
   expect(items).toHaveLength(3)
   expect(items[0]).toHaveTextContent(/^1\.\s*ATitre a-12 \/ 3$/)
   expect(items[1]).toHaveTextContent(/^ATitre a-2Passée — Hors programme$/)

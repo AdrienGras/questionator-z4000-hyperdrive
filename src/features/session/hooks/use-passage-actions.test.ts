@@ -313,3 +313,187 @@ describe('usePassageActions', () => {
     })
   })
 })
+
+async function setupPanel(withStudent = true) {
+  const initialSession = makeSession({
+    config: makeConfig({
+      questionsPerStudent: 1,
+      maxRawScore: 20,
+      finalScale: 20,
+      rounding: { mode: 'nearest', decimals: 2, step: 0.5 },
+    }),
+    students: [makeStudent([13.5]), makeStudent([], { id: 'student-2', order: 2 })],
+    activeStudentId: 'student-1',
+    projection: { mode: 'student', studentId: 'student-1' },
+  })
+  await putSession(initialSession)
+  const hook = renderHook(
+    ({ sessionUpdatedAt }: { sessionUpdatedAt: string }) =>
+      usePassageActions('session-1', withStudent ? 'student-1' : undefined, sessionUpdatedAt),
+    { initialProps: { sessionUpdatedAt: initialSession.updatedAt } },
+  )
+  return { initialSession, ...hook }
+}
+
+describe('actions du panneau (F12)', () => {
+  test('editScore écrit score et editedAt', async () => {
+    const { result } = await setupPanel()
+
+    await act(async () => {
+      await result.current.editScore('attempt-1', 2)
+    })
+
+    const attempt = (await getSession('session-1'))?.students[0]?.attempts[0]
+    expect(attempt?.score).toBe(2)
+    expect(attempt?.editedAt).toBeDefined()
+  })
+
+  test('setComment vise l’étudiant explicite et renvoie true', async () => {
+    const { result } = await setupPanel()
+
+    let ok: boolean | undefined
+    await act(async () => {
+      ok = await result.current.setComment('student-2', 'x')
+    })
+
+    expect(ok).toBe(true)
+    const session = await getSession('session-1')
+    expect(session?.students[1]?.comment).toBe('x')
+    expect(session?.students[0]?.comment).toBeUndefined()
+  })
+
+  test('setComment identique : true et updatedAt inchangé', async () => {
+    const { result } = await setupPanel()
+    await act(async () => {
+      await result.current.setComment('student-1', 'x')
+    })
+    const written = await getSession('session-1')
+
+    let ok: boolean | undefined
+    await act(async () => {
+      ok = await result.current.setComment('student-1', 'x')
+    })
+
+    expect(ok).toBe(true)
+    expect((await getSession('session-1'))?.updatedAt).toBe(written?.updatedAt)
+  })
+
+  test('busy redevient faux après une écriture sans changement, sans nouvel updatedAt', async () => {
+    const { result, rerender } = await setupPanel()
+    await act(async () => {
+      await result.current.setAbsent('student-1', true)
+    })
+    const written = await getSession('session-1')
+    rerender({ sessionUpdatedAt: written?.updatedAt ?? '' })
+    expect(result.current.busy).toBe(false)
+
+    await act(async () => {
+      await result.current.setAbsent('student-1', true)
+    })
+
+    expect(result.current.busy).toBe(false)
+  })
+
+  test('setComment s’écrit même quand une autre action est en vol', async () => {
+    const { result } = await setupPanel()
+
+    let ok: boolean | undefined
+    await act(async () => {
+      const selecting = result.current.selectStudent('student-2')
+      ok = await result.current.setComment('student-1', 'x')
+      await selecting
+    })
+
+    expect(ok).toBe(true)
+    const session = await getSession('session-1')
+    expect(session?.students[0]?.comment).toBe('x')
+    expect(session?.activeStudentId).toBe('student-2')
+  })
+
+  test('setComment ne verrouille jamais busy, même avant que sessionUpdatedAt rattrape', async () => {
+    const seen: boolean[] = []
+    const initialSession = makeSession({
+      students: [makeStudent([13.5]), makeStudent([], { id: 'student-2', order: 2 })],
+    })
+    await putSession(initialSession)
+    const { result } = renderHook(() => {
+      const actions = usePassageActions('session-1', 'student-1', initialSession.updatedAt)
+      seen.push(actions.busy)
+      return actions
+    })
+
+    await act(async () => {
+      await result.current.setComment('student-1', 'x')
+    })
+
+    expect((await getSession('session-1'))?.students[0]?.comment).toBe('x')
+    expect(seen).not.toContain(true)
+    expect(result.current.busy).toBe(false)
+  })
+
+  test('setComment n’efface pas une erreur de passage affichée', async () => {
+    const { result } = await setupPanel()
+    await act(async () => {
+      await result.current.selectStudent('inconnu')
+    })
+    const error = result.current.error
+    expect(error).not.toBeNull()
+
+    await act(async () => {
+      await result.current.setComment('student-1', 'x')
+    })
+
+    expect(result.current.error).toBe(error)
+  })
+
+  test('setComment résout false en cas d’échec, sans toucher à error', async () => {
+    const { result } = await setupPanel()
+
+    let ok: boolean | undefined
+    await act(async () => {
+      ok = await result.current.setComment('inconnu', 'x')
+    })
+
+    expect(ok).toBe(false)
+    expect(result.current.error).toBeNull()
+  })
+
+  test('setAbsent(true) vide les attempts et renvoie true', async () => {
+    const { result } = await setupPanel()
+
+    let ok: boolean | undefined
+    await act(async () => {
+      ok = await result.current.setAbsent('student-1', true)
+    })
+
+    expect(ok).toBe(true)
+    const student = (await getSession('session-1'))?.students[0]
+    expect(student?.absent).toBe(true)
+    expect(student?.attempts).toEqual([])
+  })
+
+  test('setAbsent vise l’étudiant explicite, pas l’étudiant actif du hook', async () => {
+    const { result } = await setupPanel()
+
+    let ok: boolean | undefined
+    await act(async () => {
+      ok = await result.current.setAbsent('student-2', true)
+    })
+
+    expect(ok).toBe(true)
+    const session = await getSession('session-1')
+    expect(session?.students[1]?.absent).toBe(true)
+    expect(session?.students[0]?.absent).toBe(false)
+    expect(session?.students[0]?.attempts).toHaveLength(1)
+  })
+
+  test('studentId indéfini : editScore ne fait rien', async () => {
+    const { initialSession, result } = await setupPanel(false)
+
+    await act(async () => {
+      await result.current.editScore('attempt-1', 2)
+    })
+
+    expect((await getSession('session-1'))?.updatedAt).toBe(initialSession.updatedAt)
+  })
+})

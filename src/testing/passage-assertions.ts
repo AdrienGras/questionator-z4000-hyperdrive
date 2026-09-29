@@ -37,3 +37,16 @@ export function expectPassageError(fn: () => unknown, code: PassageErrorCode): v
   if (!(caught instanceof PassageError)) throw new Error('Erreur inattendue')
   expect(caught.code).toBe(code)
 }
+
+/**
+ * Élément portant ce texte, hors du panneau latéral : le panneau répète les notes et les listes
+ * de l'écran final, une requête d'écran non bornée y trouverait plusieurs éléments (F12).
+ */
+export function outsidePanel(label: string): HTMLElement {
+  const found = screen.getAllByText(label).filter((element) => element.closest('aside') === null)
+  const [first] = found
+  if (found.length !== 1 || first === undefined) {
+    throw new Error(`« ${label} » : ${found.length} éléments hors panneau, un seul attendu`)
+  }
+  return first
+}

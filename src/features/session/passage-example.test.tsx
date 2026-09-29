@@ -9,8 +9,13 @@ import { categoryButton } from '@/testing/passage-assertions'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
 import { renderAt } from '@/testing/render-at'
+import { writeSidePanelOpen } from '@/features/session/side-panel-state'
 
 beforeEach(async () => {
+  // Panneau latéral replié : il n'apporte rien à ce test et double le coût de chaque rendu, ce qui
+  // faisait dépasser les 5 s à ce long scénario sous la charge de la suite complète.
+  localStorage.clear()
+  writeSidePanelOpen(false)
   await db.sessions.clear()
 })
 
@@ -74,4 +79,6 @@ test(
       await screen.findAllByText('Plus de question disponible dans cette catégorie'),
     ).toHaveLength(2)
   },
+  // Scénario long (deux tirages, deux notes) : ~1,2 s seul, au-delà des 5 s par défaut sous charge.
+  15_000,
 )

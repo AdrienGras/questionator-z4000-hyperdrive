@@ -994,3 +994,17 @@ autre encodage 8 bits.
 
 **Reporté dans** : spec F11. Impacte F11, F14.
 
+## D67 — F12 : composants partagés avec l'écran final, absence garantie par la transition, pas d'écriture sans changement (2026-09-29)
+
+**Question** : pour un étudiant terminé, l'onglet « Étudiant » du panneau reprend le détail et les notes de l'écran final (F11). Le ticket confie l'enchaînement « réinitialiser puis marquer absent » à l'écran. La sauvegarde automatique du commentaire (délai et sortie du champ) réécrirait la session à chaque blur, même sans changement.
+
+**Décision** :
+- La liste des questions et la liste des notes sortent de `FinalScreen` en composants partagés (`AttemptList`, `ScoreList`) ; l'écran final reste complet, le panneau est la surface de correction.
+- `setAbsent(…, { absent: true })` réinitialise et marque absent dans la même transition : l'invariant de D08 est garanti par le domaine.
+- `updateSession` n'écrit rien si le mutator renvoie la session reçue (même référence) ; les transitions sans effet renvoient leur entrée. Un mutator ne modifie donc jamais la session en place.
+- La sauvegarde du commentaire sort du verrou de passage (`run`) : elle appelle `updateSession` directement et ne touche ni à `busy` ni à l'erreur affichée. Passée par la garde, elle était ignorée pendant un tirage ou une correction en vol. `useAutosave` remet une valeur en échec en attente pour que la sortie du champ ou le démontage la retente ; `setAbsent` prend l'étudiant en paramètre, figé à l'ouverture du dialogue.
+
+**Pourquoi** : pas de code dupliqué entre deux écrans qui doivent rester cohérents ; un invariant métier ne doit pas dépendre de l'ordre d'appels de l'interface ; `updatedAt` et `editedAt` ne bougent que sur un vrai changement (export F16, vue projetée F14).
+
+**Reporté dans** : spec F12, CONVENTIONS « Mutation de session ». Impacte F12, F13, F14, F16.
+

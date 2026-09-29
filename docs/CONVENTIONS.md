@@ -214,13 +214,14 @@ await updateSession(sessionId, (session) => {
   const student = session.students.find((s) => s.id === studentId)
   if (!student) throw new Error(`Étudiant « ${studentId} » introuvable`)
   if (student.attempts.some((a) => a.outcome === 'pending')) throw new Error('Une question est déjà en cours')
-  student.attempts.push(newAttempt) // modification en place autorisée : la session est une copie
-  return session
+  const updated = { ...student, attempts: [...student.attempts, newAttempt] }
+  return { ...session, students: session.students.map((s) => (s.id === studentId ? updated : s)) }
 })
 ```
 
 ### Règles tacites
 
+- Le mutator est immuable : il renvoie une nouvelle session, jamais l'entrée modifiée en place (les transitions de `src/domain/passage/` en sont l'exemple). Un mutator sans effet renvoie la session reçue ; `updateSession` ne l'écrit pas (pas de `put`, `updatedAt` inchangé).
 - Jamais d'`await` étranger à Dexie dans un mutator (le typage refuse un mutator `async`) : préparer les données avant l'appel.
 - Un mutator qui lève annule tout ; l'erreur remonte telle quelle à la feature, qui l'affiche.
 - Lecture : `useSession(id)` / `useSessions()` ; `undefined` = chargement, `null` = absente. Afficher un message si `useDbStatus()` vaut `'outdated'` (recharger) ou `'unavailable'` (stockage bloqué).
@@ -415,5 +416,7 @@ const skip = useCallback(
 - Erreur : `PassageError` → `passageErrorMessage(error, locale)`, toute autre → `passage_error_generic`, dans un seul `<p role="alert">` affiché quel que soit l'état de l'écran.
 - Motif ou justification saisis librement : `normalizeReason` (`src/domain/passage/reason.ts`, trim, `MAX_REASON_LENGTH` = 200, vide → clé omise) dans la transition, et `maxLength={MAX_REASON_LENGTH}` sur le champ (D65).
 - Action appelée par un dialogue qui doit savoir s'il peut se fermer : elle renvoie `run(...)` (`Promise<boolean>`, faux si ignorée par la garde ou en erreur). Le dialogue fait `if (await action()) fermer(); else setFailed(true)` et désactive ses boutons, Échap et clic extérieur compris, pendant l'écriture. Plusieurs transitions d'une même action se composent dans **un seul** mutator (`revealFinal(setAdjustment(s, …))`).
+- Action qui ne change aucun état de passage (commentaire) : `updateSession` directement, hors `run` — ni garde `inFlight`, ni `busy`, ni `error` —, sinon une sauvegarde de fond verrouille l'écran entre `mousedown` et `click` et fait perdre le clic (D67, QUIRKS). Toute action vise l'étudiant **explicitement** (`studentId` en argument) dès qu'elle peut partir après un changement d'étudiant (sauvegarde différée, dialogue de confirmation).
+- Sauvegarde automatique d'un champ : `useAutosave(save, 500)` (`schedule` à la frappe, `flush` au blur et au démontage ; un échec remet la valeur en attente si rien de plus récent n'a été programmé) ; composant monté avec `key={student.id}` et `save` qui capture cet id.
 - Pas d'aléa non injectable : `cryptoRandomInt(n)` (rejet, sans biais de modulo) et `pickUniform(items, random)`.
 - Bouton indisponible avec infobulle : `TooltipTrigger render={<Button aria-disabled="true" aria-describedby={id} …/>}` + texte `sr-only`, clic neutralisé dans le handler ; jamais `disabled` natif (pas de survol ni de focus), jamais de `span tabIndex={0}` (Sonar S6845).

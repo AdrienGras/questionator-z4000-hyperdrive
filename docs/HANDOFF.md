@@ -20,6 +20,22 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-29 — F12 implémenté : side panel, onglet « Étudiant »
+
+**Dernière chose faite** : F11 mergé (PR #42), puis F12 (#12) sur `feat/f12-side-panel` en processus complet : brainstorming (choix A : composants partagés avec l'écran final), spec `docs/superpowers/specs/2026-09-29-f12-side-panel-design.md` et D67, plan en 6 tâches, subagent-driven development (revue par tâche, revue finale sur Opus, vague de correctifs relue).
+- `updateSession` n'écrit plus rien quand le mutator renvoie la session reçue ; toute transition sans effet renvoie son entrée (D67) ; le squelette CONVENTIONS « Mutation de session » interdit désormais la modification en place.
+- Domaine : `editScore` (refus `not_scored`, `editedAt` sur vrai changement), `setComment` (trim, vide → clé omise), `setAbsent` (réinitialise via `resetStudent` et marque absent dans la même transition, commentaire conservé).
+- `AttemptList` / `ScoreList` extraits de `FinalScreen` (« En cours », « — », sélecteur natif de note) ; `SidePanel` repliable, onglets `tabs` shadcn, état en `localStorage` (`questionator:side-panel:open` / `:tab`) ; `StudentTab` : questions, totaux, `CommentField` (`useAutosave` 500 ms + blur + flush au démontage, relance après échec), `AbsentToggle` (confirmation avec le nombre de questions, motif F11).
+- Rulings d'exécution : `setComment(studentId, …)` et `setAbsent(studentId, …)` visent l'étudiant explicitement ; `setComment` n'utilise pas `run` (clics perdus sinon, QUIRKS).
+
+`pnpm check` est vert (825 tests, suite complète trois fois de suite), `pnpm build` sans avertissement.
+
+**Trucs en suspens** : PR F12 à ouvrir en brouillon et à passer dans SonarQube. Vérifié dans Chromium sur la session d'exemple : panneau et onglets, « — » pour un étudiant en cours, commentaire saisi puis clic immédiat sur « Noter 1,5 » (les deux écrits, aucune alerte), note corrigée depuis le panneau (finale de Chloé 7,50 → 11,50, puis remise à 0), repli mémorisé au rechargement, clair et sombre. « Absent » non joué dans le navigateur pour ne pas effacer la session d'exemple (couvert par les tests). Martin Bruno a maintenant un commentaire et une question notée 1,5 ; la question 1 de Chloé porte un `editedAt`. `passage-example.test.tsx` a reçu un délai de 15 s (BACKLOG). Toujours ouverts : points F08 (backticks, fond `.shiki`), F18 (#36), survie des données à un vrai redémarrage du navigateur.
+
+**Prochaine chose à creuser** : F13 (onglet « Étudiants ») : liste des étudiants avec statut, choix de l'étudiant actif ; il retire le sélecteur provisoire de l'en-tête (D64) et remplit l'onglet vide du panneau.
+
+**Notes pour future Claude** : un mutator ne modifie jamais la session en place (sinon rien n'est écrit, D67). Une action de fond (commentaire) ne passe pas par `run`. Les tests d'écran voient maintenant le panneau : viser les régions (`within(aside)`, `outsidePanel`), jamais « le premier élément de tel rôle » ; replier le panneau (`writeSidePanelOpen(false)`) dans les longs scénarios qui n'en ont pas besoin. Le registre SDD de F12 a été supprimé après la revue finale.
+
 ## 2026-09-29 — F11 implémenté : écran final et ajustement
 
 **Dernière chose faite** : F10 mergé (PR #41), puis F11 (#11) sur `feat/f11-final` en processus complet : brainstorming, spec `docs/superpowers/specs/2026-09-29-f11-final-design.md` et D66, plan en 5 tâches, subagent-driven development (une revue par tâche, revue finale sur Opus, une vague de correctifs relue).

@@ -124,6 +124,29 @@ export type UiMessageParams = {
   final_reset: NoParams
   final_next: NoParams
   final_no_next: NoParams
+  attempt_pending: NoParams
+  attempt_score_label: { rank: number }
+  attempt_out_of: { max: string }
+  score_not_computed: NoParams
+  side_panel_label: NoParams
+  side_panel_hide: NoParams
+  side_panel_show: NoParams
+  side_panel_tab_student: NoParams
+  side_panel_tab_students: NoParams
+  side_panel_students_soon: NoParams
+  student_tab_questions: NoParams
+  student_tab_totals: NoParams
+  student_tab_no_student: NoParams
+  student_tab_no_attempts: NoParams
+  comment_label: NoParams
+  comment_saving: NoParams
+  comment_saved: NoParams
+  comment_error: NoParams
+  absent_label: NoParams
+  absent_title: { name: string }
+  /** `count` : nombre de questions tirées que la déclaration d'absence supprime. */
+  absent_body: { count: number }
+  absent_confirm: NoParams
   reset_title: { name: string }
   reset_body: NoParams
   reset_confirm: NoParams
@@ -295,8 +318,7 @@ const fr: Dictionary<UiMessageParams> = {
   passage_no_student_title: () => 'Aucun étudiant sélectionné',
   passage_no_student_body: () => 'Choisissez un étudiant pour commencer le passage.',
   passage_absent_title: () => 'Étudiant absent',
-  passage_absent_body: () =>
-    'L’absence s’annulera depuis le panneau « Étudiant », bientôt disponible.',
+  passage_absent_body: () => 'Décochez « Absent » dans le panneau pour le faire passer.',
   passage_done_title: () => 'Passage terminé',
   final_scores_heading: () => 'Notes',
   final_detail_heading: () => 'Détail du passage',
@@ -314,6 +336,29 @@ const fr: Dictionary<UiMessageParams> = {
   final_reset: () => 'Réinitialiser l’étudiant',
   final_next: () => 'Étudiant suivant',
   final_no_next: () => 'Tous les étudiants sont passés',
+  attempt_pending: () => 'En cours',
+  attempt_score_label: ({ rank }) => `Note de la question ${rank}`,
+  attempt_out_of: ({ max }) => `/ ${max}`,
+  score_not_computed: () => '—',
+  side_panel_label: () => 'Panneau latéral',
+  side_panel_hide: () => 'Masquer le panneau',
+  side_panel_show: () => 'Afficher le panneau',
+  side_panel_tab_student: () => 'Étudiant',
+  side_panel_tab_students: () => 'Étudiants',
+  side_panel_students_soon: () => 'Liste des étudiants — bientôt disponible.',
+  student_tab_questions: () => 'Questions',
+  student_tab_totals: () => 'Totaux',
+  student_tab_no_student: () => 'Aucun étudiant sélectionné.',
+  student_tab_no_attempts: () => 'Aucune question tirée.',
+  comment_label: () => 'Commentaire',
+  comment_saving: () => 'Enregistrement…',
+  comment_saved: () => 'Enregistré',
+  comment_error: () => 'Échec de l’enregistrement',
+  absent_label: () => 'Absent',
+  absent_title: ({ name }) => `Déclarer ${name} absent ?`,
+  absent_body: ({ count }) =>
+    `Ce passage contient ${count} ${plural(count, 'question tirée', 'questions tirées')}. Déclarer l’étudiant absent les supprime. Le commentaire est conservé.`,
+  absent_confirm: () => 'Déclarer absent',
   reset_title: ({ name }) => `Réinitialiser ${name} ?`,
   reset_body: () =>
     'Les questions tirées, les notes et l’ajustement seront supprimés. Le commentaire est conservé.',
@@ -443,7 +488,7 @@ const en: Dictionary<UiMessageParams> = {
   passage_no_student_title: () => 'No student selected',
   passage_no_student_body: () => 'Choose a student to start.',
   passage_absent_title: () => 'Student absent',
-  passage_absent_body: () => 'The absence can be cancelled from the “Student” panel, coming soon.',
+  passage_absent_body: () => 'Uncheck “Absent” in the panel to examine them.',
   passage_done_title: () => 'Exam complete',
   final_scores_heading: () => 'Scores',
   final_detail_heading: () => 'Exam breakdown',
@@ -461,6 +506,29 @@ const en: Dictionary<UiMessageParams> = {
   final_reset: () => 'Reset student',
   final_next: () => 'Next student',
   final_no_next: () => 'All students have been examined',
+  attempt_pending: () => 'In progress',
+  attempt_score_label: ({ rank }) => `Score for question ${rank}`,
+  attempt_out_of: ({ max }) => `/ ${max}`,
+  score_not_computed: () => '—',
+  side_panel_label: () => 'Side panel',
+  side_panel_hide: () => 'Hide panel',
+  side_panel_show: () => 'Show panel',
+  side_panel_tab_student: () => 'Student',
+  side_panel_tab_students: () => 'Students',
+  side_panel_students_soon: () => 'Student list — coming soon.',
+  student_tab_questions: () => 'Questions',
+  student_tab_totals: () => 'Totals',
+  student_tab_no_student: () => 'No student selected.',
+  student_tab_no_attempts: () => 'No question drawn.',
+  comment_label: () => 'Comment',
+  comment_saving: () => 'Saving…',
+  comment_saved: () => 'Saved',
+  comment_error: () => 'Saving failed',
+  absent_label: () => 'Absent',
+  absent_title: ({ name }) => `Mark ${name} as absent?`,
+  absent_body: ({ count }) =>
+    `This exam has ${count} ${pluralEn(count, 'drawn question', 'drawn questions')}. Marking the student absent deletes them. The comment is kept.`,
+  absent_confirm: () => 'Mark absent',
   reset_title: ({ name }) => `Reset ${name}?`,
   reset_body: () =>
     'Drawn questions, scores and the adjustment will be deleted. The comment is kept.',

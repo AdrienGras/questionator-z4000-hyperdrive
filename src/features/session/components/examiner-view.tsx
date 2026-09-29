@@ -6,8 +6,12 @@ import { studentStatus } from '@/domain/scoring/status'
 import type { Session } from '@/domain/session/types'
 import { usePassageActions } from '@/features/session/hooks/use-passage-actions'
 import { useUi, type Ui } from '@/lib/i18n/use-ui'
+import { AbsentToggle } from './absent-toggle'
+import { CommentField } from './comment-field'
 import { PassageBody } from './passage-body'
 import { PassageHeader } from './passage-header'
+import { SidePanel } from './side-panel'
+import { StudentTab } from './student-tab'
 import { StudentPicker } from './student-picker'
 
 /**
@@ -22,7 +26,7 @@ function errorText(error: Error | null, ui: Ui): string | undefined {
 
 /**
  * Écran de passage (§7) : en-tête, sélecteur provisoire d'étudiant, aiguillage par statut de
- * l'étudiant actif, grille de tirage et panneau de la question en cours. `<aside>` vide réservé F12.
+ * l'étudiant actif, grille de tirage, panneau de la question en cours et panneau latéral (F12).
  */
 export function ExaminerView({ session }: Readonly<{ session: Session }>) {
   const ui = useUi()
@@ -73,7 +77,40 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
               onNext={() => void actions.next()}
             />
           </div>
-          <aside aria-hidden="true" />
+          <SidePanel
+            ui={ui}
+            studentTab={
+              <StudentTab
+                ui={ui}
+                session={session}
+                student={student}
+                disabled={actions.busy}
+                onEditScore={(attemptId, score) => void actions.editScore(attemptId, score)}
+                commentSlot={
+                  student && (
+                    // `key` : un montage par étudiant, dont le démontage flushe le commentaire
+                    // tapé sur CET étudiant (Review Focus 1).
+                    <CommentField
+                      key={student.id}
+                      ui={ui}
+                      student={student}
+                      onSave={actions.setComment}
+                    />
+                  )
+                }
+                absentSlot={
+                  student && (
+                    <AbsentToggle
+                      ui={ui}
+                      student={student}
+                      disabled={actions.busy}
+                      onChange={actions.setAbsent}
+                    />
+                  )
+                }
+              />
+            }
+          />
         </div>
       </main>
     </TooltipProvider>
