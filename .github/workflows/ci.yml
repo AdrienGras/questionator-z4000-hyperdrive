@@ -52,7 +52,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Version de Playwright
         id: playwright
-        run: echo "version=$(pnpm list @playwright/test --depth 0 --json | jq -r '.[0].devDependencies["@playwright/test"].version')" >> "$GITHUB_OUTPUT"
+        run: |
+          set -o pipefail
+          version="$(pnpm list @playwright/test --json | jq -r '.[0].devDependencies["@playwright/test"].version')"
+          test -n "$version" && test "$version" != null
+          echo "version=$version" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/ms-playwright

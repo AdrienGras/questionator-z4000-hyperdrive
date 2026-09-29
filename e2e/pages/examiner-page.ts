@@ -17,7 +17,7 @@ export class ExaminerPage {
   async draw(categoryLabel: string): Promise<void> {
     await this.page
       .getByRole('list', { name: 'Choisir une catégorie' })
-      .getByRole('button', { name: categoryLabel })
+      .getByRole('button', { name: new RegExp(`^${categoryLabel}\\b`) })
       .click()
   }
 

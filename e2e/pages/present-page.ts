@@ -4,12 +4,15 @@ import type { Locator, Page } from '@playwright/test'
 export class PresentPage {
   readonly waitingMessage: Locator
   readonly questionIndex: Locator
+  /** Région de l'énoncé en cours ; absente tant que l'animation de tirage n'est pas terminée. */
+  readonly prompt: Locator
 
   private readonly page: Page
 
   constructor(page: Page) {
     this.page = page
     this.waitingMessage = page.getByText("L'épreuve va bientôt commencer.")
+    this.prompt = page.getByRole('region', { name: 'Question en cours' })
     this.questionIndex = page.getByText(/^Question \d+ \/ \d+$/)
   }
 

@@ -28,7 +28,9 @@ export function StudentScreen({ view }: Readonly<{ view: ProjectedStudentView }>
           color={view.categories.find((category) => category.id === current.categoryId)?.color}
           animate={view.drawAnimation && current.drawnAt !== initialDrawnAt}
         >
-          <Markdown source={current.prompt} ui={ui} size="projection" />
+          <section aria-label={ui.text('present_prompt_label', {})}>
+            <Markdown source={current.prompt} ui={ui} size="projection" />
+          </section>
         </DrawReveal>
       )}
       {finished ? (

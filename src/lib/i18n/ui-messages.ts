@@ -20,6 +20,7 @@ export type UiMessageParams = {
   session_loading: NoParams
   session_not_found: NoParams
   present_waiting: NoParams
+  present_prompt_label: NoParams
   present_question_index: { current: number; total: number }
   present_cumulative: { score: string }
   present_finished: NoParams
@@ -253,6 +254,7 @@ const fr: Dictionary<UiMessageParams> = {
   session_loading: () => 'Chargement de la session…',
   session_not_found: () => 'Session introuvable',
   present_waiting: () => "L'épreuve va bientôt commencer.",
+  present_prompt_label: () => 'Question en cours',
   present_question_index: ({ current, total }) => `Question ${current} / ${total}`,
   present_cumulative: ({ score }) => `Score : ${score}`,
   present_finished: () => 'Passage terminé',
@@ -448,6 +450,7 @@ const en: Dictionary<UiMessageParams> = {
   session_loading: () => 'Loading session…',
   session_not_found: () => 'Session not found',
   present_waiting: () => 'The exam will start soon.',
+  present_prompt_label: () => 'Current question',
   present_question_index: ({ current, total }) => `Question ${current} / ${total}`,
   present_cumulative: ({ score }) => `Score: ${score}`,
   present_finished: () => 'Exam complete',

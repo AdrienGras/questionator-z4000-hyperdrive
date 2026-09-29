@@ -20,6 +20,7 @@ const SAMPLE: UiMessageParams = {
   session_loading: {},
   session_not_found: {},
   present_waiting: {},
+  present_prompt_label: {},
   present_question_index: { current: 1, total: 3 },
   present_cumulative: { score: '3,5' },
   present_finished: {},
