@@ -1,6 +1,6 @@
 # F14 — Mode présentateur — Design
 
-- **Date** : 2026-09-30
+- **Date** : 2026-09-29
 - **Ticket** : [#14](https://github.com/AdrienGras/questionator-z4000-hyperdrive/issues/14)
 - **Branche** : `feat/f14-presenter`
 - **Statut** : spec validée en conversation, figée ici avant le plan d'implémentation.

@@ -1024,7 +1024,7 @@ autre encodage 8 bits.
 
 **Reporté dans** : spec F13. Impacte F13, F15, F16.
 
-## D69 — F14 : vue projetée dans `domain/presentation/`, attente pour un absent, animation décidée côté projection, e2e en Page Object Model (2026-09-30)
+## D69 — F14 : vue projetée dans `domain/presentation/`, attente pour un absent, animation décidée côté projection, e2e en Page Object Model (2026-09-29)
 
 **Question** : le ticket F14 place `toProjectedView` dans `src/present/` et ne dit rien d'un étudiant projeté absent. Il faut aussi distinguer un nouveau tirage (animation) d'un rechargement de la fenêtre projetée, et poser l'organisation des premiers tests Playwright, que F17 réutilisera.
 
