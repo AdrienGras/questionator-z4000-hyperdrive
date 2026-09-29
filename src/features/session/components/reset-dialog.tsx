@@ -16,16 +16,21 @@ type ResetDialogProps = Readonly<{
   studentName: string
   open: boolean
   onOpenChange: (open: boolean) => void
-  onConfirm: () => Promise<void>
+  onConfirm: () => Promise<boolean>
 }>
 
-/** Confirmation de réinitialisation d'un étudiant (F11) ; en cas d'échec, le dialogue reste ouvert. */
+/**
+ * Confirmation de réinitialisation d'un étudiant (F11). `onConfirm` renvoie `false` si l'écriture
+ * a échoué : le dialogue reste alors ouvert avec `write_error`. Pendant l'écriture, ni « Annuler »
+ * ni Échap ne ferment le dialogue.
+ */
 export function ResetDialog({ ui, studentName, open, onOpenChange, onConfirm }: ResetDialogProps) {
   const { text } = ui
   const [pending, setPending] = useState(false)
   const [failed, setFailed] = useState(false)
 
   function changeOpen(next: boolean) {
+    if (pending) return
     setFailed(false)
     onOpenChange(next)
   }
@@ -34,14 +39,10 @@ export function ResetDialog({ ui, studentName, open, onOpenChange, onConfirm }: 
     if (pending) return
     setPending(true)
     setFailed(false)
-    try {
-      await onConfirm()
-      onOpenChange(false)
-    } catch {
-      setFailed(true)
-    } finally {
-      setPending(false)
-    }
+    const succeeded = await onConfirm()
+    setPending(false)
+    if (succeeded) onOpenChange(false)
+    else setFailed(true)
   }
 
   return (
@@ -57,7 +58,7 @@ export function ResetDialog({ ui, studentName, open, onOpenChange, onConfirm }: 
           </p>
         )}
         <AlertDialogFooter>
-          <AlertDialogCancel>{text('dialog_cancel', {})}</AlertDialogCancel>
+          <AlertDialogCancel disabled={pending}>{text('dialog_cancel', {})}</AlertDialogCancel>
           <Button variant="destructive" disabled={pending} onClick={() => void confirm()}>
             {text('reset_confirm', {})}
           </Button>

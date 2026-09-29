@@ -270,6 +270,35 @@ test('double-clic sur « Annuler » en fin de passage : une seule écriture, auc
   expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 })
 
+/**
+ * Rafale d'Échap, un par tour de boucle, tant que la popup est là : l'un d'eux tombe après la fin
+ * de l'écriture, avant que la liveQuery ne ferme la popup.
+ */
+function escapeBurst(dialog: HTMLElement, remaining: number): void {
+  if (remaining === 0 || !document.contains(dialog)) return
+  fireEvent.keyDown(dialog, { key: 'Escape' })
+  setImmediate(() => escapeBurst(dialog, remaining - 1))
+}
+
+test('Échap juste après un enregistrement réussi en fin de passage : pas de seconde écriture', async () => {
+  await mount(makeStudent([13.5]))
+  const dialog = await findDialog()
+  type(dialog, '1')
+  const realPut = db.sessions.put.bind(db.sessions)
+  const put = vi.spyOn(db.sessions, 'put').mockImplementation((...args) =>
+    realPut(...args).then((key) => {
+      setImmediate(() => escapeBurst(dialog, 300))
+      return key
+    }),
+  )
+
+  fireEvent.click(button(dialog, 'Enregistrer'))
+
+  await dialogClosed()
+  expect(put).toHaveBeenCalledTimes(1)
+  expect((await stored()).student.adjustment).toEqual({ value: 1 })
+})
+
 test('écriture en échec : popup ouverte avec le message d’erreur', async () => {
   await mount(makeStudent([13.5]))
   const dialog = await findDialog()

@@ -18,7 +18,7 @@ const NUMBER_SHAPE = /^[+-]?(\d+([.,]\d*)?|[.,]\d+)$/
 
 /** Saisie d'un ajustement : virgule ou point, signe « − » typographique, espaces tolérés. */
 export function parseAdjustmentInput(text: string): number | null {
-  const cleaned = text.replaceAll('\u2212', '-').replaceAll(/[\s\u00A0\u202F]/g, '')
+  const cleaned = text.replaceAll('\u2212', '-').replaceAll(/\s/g, '')
   if (!NUMBER_SHAPE.test(cleaned)) return null
   const value = Number(cleaned.replace(',', '.'))
   if (!Number.isFinite(value) || !hasAtMostThreeDecimals(value)) return null

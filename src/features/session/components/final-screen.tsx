@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from 'react'
 import { Button } from '@/components/ui/button'
-import type { NormalizedConfig } from '@/domain/config/normalize'
+import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import { nextStudent, shouldAutoOpenAdjustment } from '@/domain/passage/selectors'
 import { formatScore } from '@/domain/scoring/format'
 import { asMilli, toMilli, type Milli } from '@/domain/scoring/milli'
@@ -21,7 +21,7 @@ type FinalScreenProps = Readonly<{
     options: { reveal: boolean },
   ) => Promise<boolean>
   onRevealFinal: () => Promise<boolean>
-  onReset: () => Promise<void>
+  onReset: () => Promise<boolean>
   onNext: () => void
 }>
 
@@ -48,26 +48,33 @@ type AttemptRowProps = Readonly<{
   rank: number | undefined
 }>
 
-function AttemptRow({ ui, config, attempt, rank }: AttemptRowProps) {
+/** Résultat d'une question : points obtenus sur le maximum du barème, ou « passée » avec motif. */
+function outcomeText(
+  ui: Ui,
+  config: NormalizedConfig,
+  attempt: Attempt,
+  category: NormalizedCategory | undefined,
+): string {
   const { text, locale } = ui
+  if (attempt.outcome === 'scored' && attempt.score !== undefined) {
+    const max = category === undefined ? 0 : Math.max(...category.scale)
+    return text('final_points', {
+      score: formatScore(toMilli(attempt.score), 'raw', config, locale),
+      max: formatScore(toMilli(max), 'raw', config, locale),
+    })
+  }
+  if (attempt.skipReason === undefined || attempt.skipReason === '') {
+    return text('final_skipped', {})
+  }
+  return text('final_skipped_reason', { reason: attempt.skipReason })
+}
+
+function AttemptRow({ ui, config, attempt, rank }: AttemptRowProps) {
   const category = config.categories.find((c) => c.id === attempt.categoryId)
   const question = category?.questions.find((q) => q.id === attempt.questionId)
   const color = category?.color
   const accent: (CSSProperties & Record<'--category-color', string>) | undefined =
     color === undefined ? undefined : { '--category-color': color }
-
-  let outcome = ''
-  if (attempt.outcome === 'scored' && attempt.score !== undefined) {
-    const max = category === undefined ? 0 : Math.max(...category.scale)
-    outcome = text('final_points', {
-      score: formatScore(toMilli(attempt.score), 'raw', config, locale),
-      max: formatScore(toMilli(max), 'raw', config, locale),
-    })
-  } else if (attempt.skipReason === undefined || attempt.skipReason === '') {
-    outcome = text('final_skipped', {})
-  } else {
-    outcome = text('final_skipped_reason', { reason: attempt.skipReason })
-  }
 
   return (
     <li
@@ -78,7 +85,7 @@ function AttemptRow({ ui, config, attempt, rank }: AttemptRowProps) {
       {rank !== undefined && <span className="tabular-nums">{`${rank}.`}</span>}
       <span className="font-medium">{category?.label ?? attempt.categoryId}</span>
       <span className="flex-1">{question?.title ?? attempt.questionId}</span>
-      <span className="tabular-nums">{outcome}</span>
+      <span className="tabular-nums">{outcomeText(ui, config, attempt, category)}</span>
     </li>
   )
 }

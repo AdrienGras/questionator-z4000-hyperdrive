@@ -259,10 +259,12 @@ describe('usePassageActions', () => {
     test('reset vide les attempts', async () => {
       const { result } = await setup()
 
+      let ok: boolean | undefined
       await act(async () => {
-        await result.current.reset()
+        ok = await result.current.reset()
       })
 
+      expect(ok).toBe(true)
       expect((await getSession('session-1'))?.students[0]?.attempts).toEqual([])
     })
 

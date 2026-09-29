@@ -25,7 +25,7 @@ type PassageBodyProps = Readonly<{
     options: { reveal: boolean },
   ) => Promise<boolean>
   onRevealFinal: () => Promise<boolean>
-  onReset: () => Promise<void>
+  onReset: () => Promise<boolean>
   onNext: () => void
 }>
 

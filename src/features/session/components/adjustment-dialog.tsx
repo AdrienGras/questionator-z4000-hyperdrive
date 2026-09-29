@@ -1,4 +1,4 @@
-import { useId, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { IconMinus, IconPlus } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -29,7 +29,7 @@ type AdjustmentDialogProps = Readonly<{
   /** `final` : ouverture automatique de fin de passage, annuler révèle la note (D66). */
   mode: AdjustmentMode
   onSave: (value: number, reason: string | undefined) => Promise<boolean>
-  onCancel: () => Promise<boolean> | void
+  onCancel: () => Promise<boolean>
   onClose: () => void
 }>
 
@@ -65,19 +65,25 @@ export function AdjustmentDialog({
     }
   }
 
-  async function write(action: () => Promise<boolean> | void) {
+  // Une écriture réussie laisse `inFlight` levé (la popup se ferme via la liveQuery) : seule une
+  // réouverture le rebaisse, sinon Échap ou un clic extérieur relancerait une écriture inutile.
+  useEffect(() => {
+    if (open) inFlight.current = false
+  }, [open])
+
+  async function write(action: () => Promise<boolean>) {
     if (inFlight.current) return
     inFlight.current = true
     setPending(true)
     setFailed(false)
     let succeeded = false
     try {
-      succeeded = (await action()) !== false
+      succeeded = await action()
     } catch {
       succeeded = false
     }
-    inFlight.current = false
     if (!succeeded) {
+      inFlight.current = false
       setPending(false)
       setFailed(true)
       return

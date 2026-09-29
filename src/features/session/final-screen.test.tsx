@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { beforeEach, expect, test } from 'vitest'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import type { NormalizedCategory } from '@/domain/config/normalize'
 import type { Student } from '@/domain/session/types'
 import { db } from '@/lib/db/db'
@@ -40,6 +40,10 @@ function config(questionsPerStudent = 1) {
 
 beforeEach(async () => {
   await db.sessions.clear()
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 
 async function openFinal(
@@ -142,6 +146,19 @@ test('réinitialiser : confirmation, attempts vidés, commentaire conservé, gri
   const student = (await stored()).students[0]
   expect(student?.attempts).toEqual([])
   expect(student?.comment).toBe('À revoir')
+})
+
+test('réinitialisation en échec : dialogue ouvert avec le message d’erreur, attempts intacts', async () => {
+  await openFinal(done())
+  fireEvent.click(screen.getByRole('button', { name: 'Réinitialiser l’étudiant' }))
+  const dialog = await screen.findByRole('alertdialog')
+  vi.spyOn(db.sessions, 'put').mockRejectedValueOnce(new Error('disque plein'))
+
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Réinitialiser' }))
+
+  expect(await within(dialog).findByRole('alert')).toHaveTextContent("L'enregistrement a échoué")
+  expect(screen.getByRole('alertdialog')).toBeInTheDocument()
+  expect((await stored()).students[0]?.attempts).toHaveLength(1)
 })
 
 test('annuler la réinitialisation n’écrit rien', async () => {

@@ -21,7 +21,7 @@ export type PassageActions = {
     options: { reveal: boolean },
   ) => Promise<boolean>
   revealFinal: () => Promise<boolean>
-  reset: () => Promise<void>
+  reset: () => Promise<boolean>
   next: () => Promise<void>
   busy: boolean
   error: Error | null
@@ -130,8 +130,8 @@ export function usePassageActions(
   }, [run, studentId])
 
   const reset = useCallback(async () => {
-    if (studentId === undefined) return
-    await run((session) => resetStudent(session, studentId))
+    if (studentId === undefined) return false
+    return run((session) => resetStudent(session, studentId))
   }, [run, studentId])
 
   const next = useCallback(async () => {
