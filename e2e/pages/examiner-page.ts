@@ -1,15 +1,20 @@
 import type { Locator, Page } from '@playwright/test'
 import { PresentPage } from './present-page.ts'
+import { StatsPage } from './stats-page.ts'
 
 /** Écran examinateur (`#/session/<id>`). */
 export class ExaminerPage {
   /** Rappel « La vue projetée montre … » (rôle `status`), visible quand l'étudiant projeté n'est pas l'actif. */
   readonly banner: Locator
 
+  /** Titre de l'écran de fin de passage. */
+  readonly passageDone: Locator
+
   private readonly page: Page
 
   constructor(page: Page) {
     this.page = page
+    this.passageDone = page.getByRole('heading', { level: 2, name: 'Passage terminé' })
     this.banner = page.getByRole('status').filter({ hasText: 'La vue projetée montre' })
   }
 
@@ -48,5 +53,20 @@ export class ExaminerPage {
 
   async showWaiting(): Promise<void> {
     await this.page.getByRole('button', { name: 'Écran d’attente' }).click()
+  }
+
+  /** Valide la boîte « Ajuster la note » qui s'ouvre d'elle-même à la fin du passage (ajustement 0). */
+  async confirmAdjustment(): Promise<void> {
+    await this.page
+      .getByRole('dialog', { name: 'Ajuster la note' })
+      .getByRole('button', { name: 'Enregistrer' })
+      .click()
+  }
+
+  /** Ouvre l'écran des statistiques (bouton de l'onglet « Étudiants » du panneau latéral). */
+  async openStats(): Promise<StatsPage> {
+    await this.page.getByRole('tab', { name: 'Étudiants' }).click()
+    await this.page.getByRole('link', { name: 'Statistiques' }).click()
+    return new StatsPage(this.page)
   }
 }
