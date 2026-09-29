@@ -198,6 +198,8 @@ const SAMPLE: UiMessageParams = {
   stats_grades_median: {},
   stats_grades_std_dev: {},
   stats_histogram: {},
+  stats_histogram_empty: {},
+  stats_col_range: {},
   stats_categories: {},
   stats_tags: {},
   stats_tags_empty: {},

@@ -9,6 +9,8 @@ import { AdjustmentCard } from './adjustment-card'
 import { CategoryTable } from './category-table'
 import { GradesCard } from './grades-card'
 import { HeadcountCard } from './headcount-card'
+import { HistogramChart } from './histogram-chart'
+import { HistogramTable } from './histogram-table'
 import { QuestionTables } from './question-tables'
 import { StatsSection } from './stats-section'
 import { StrategyTable } from './strategy-table'
@@ -41,9 +43,17 @@ export function StatsView({ session }: Readonly<{ session: Session }>) {
       <div className="grid gap-4 md:grid-cols-2">
         <HeadcountCard ui={ui} headcount={stats.headcount} />
         <GradesCard ui={ui} config={config} grades={stats.grades} />
-        {/* Tâche 6 : graphique et tableau de secours. */}
         <StatsSection title={text('stats_histogram', {})} className="md:col-span-2">
-          {() => null}
+          {(headingId) => (
+            <>
+              {stats.grades.count === 0 ? (
+                <p className="text-muted-foreground">{text('stats_histogram_empty', {})}</p>
+              ) : (
+                <HistogramChart ui={ui} bins={stats.histogram} />
+              )}
+              <HistogramTable ui={ui} bins={stats.histogram} labelledBy={headingId} />
+            </>
+          )}
         </StatsSection>
         <CategoryTable ui={ui} config={config} categories={stats.categories} />
         <TagTable ui={ui} tags={stats.tags} />

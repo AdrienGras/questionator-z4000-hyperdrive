@@ -215,6 +215,8 @@ export type UiMessageParams = {
   stats_grades_median: NoParams
   stats_grades_std_dev: NoParams
   stats_histogram: NoParams
+  stats_histogram_empty: NoParams
+  stats_col_range: NoParams
   stats_categories: NoParams
   stats_tags: NoParams
   stats_tags_empty: NoParams
@@ -492,6 +494,8 @@ const fr: Dictionary<UiMessageParams> = {
   stats_grades_median: () => 'Médiane',
   stats_grades_std_dev: () => 'Écart-type',
   stats_histogram: () => 'Histogramme',
+  stats_histogram_empty: () => "Aucun étudiant n'a terminé.",
+  stats_col_range: () => 'Intervalle de notes',
   stats_categories: () => 'Catégories',
   stats_tags: () => 'Tags',
   stats_tags_empty: () => "Aucune question n'a de tag.",
@@ -729,6 +733,8 @@ const en: Dictionary<UiMessageParams> = {
   stats_grades_median: () => 'Median',
   stats_grades_std_dev: () => 'Standard deviation',
   stats_histogram: () => 'Histogram',
+  stats_histogram_empty: () => 'No student has finished.',
+  stats_col_range: () => 'Score range',
   stats_categories: () => 'Categories',
   stats_tags: () => 'Tags',
   stats_tags_empty: () => 'No question has a tag.',
@@ -745,7 +751,7 @@ const en: Dictionary<UiMessageParams> = {
   stats_col_category: () => 'Category',
   stats_col_tag: () => 'Tag',
   stats_col_question: () => 'Question',
-  stats_col_choices: () => 'Draws',
+  stats_col_choices: () => 'Picks',
   stats_col_scored: () => 'Scored questions',
   stats_col_success_rate: () => 'Success rate',
   stats_col_draws: () => 'Draws',

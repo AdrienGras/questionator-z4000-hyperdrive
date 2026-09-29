@@ -43,6 +43,13 @@ export default defineConfig({
       output: {
         codeSplitting: {
           groups: [
+            // Socle partagé par l'application ET par Recharts (React, son runtime, `clsx`, `tiny-invariant`, `use-sync-external-store`) : sans ce
+            // groupe Rolldown le range dans le chunk `recharts`, et l'entrée importerait alors
+            // Recharts statiquement. À compléter si `check:bundle` signale de nouveau une fuite.
+            {
+              name: 'vendor',
+              test: /node_modules[\\/](?:\.pnpm[\\/][^\\/]+[\\/]node_modules[\\/])?(?:react|react-dom|scheduler|clsx|tiny-invariant|use-sync-external-store)[\\/]/,
+            },
             {
               name: 'recharts',
               test: /node_modules[\\/](?:\.pnpm[\\/][^\\/]+[\\/]node_modules[\\/])?(?:recharts|victory-vendor|d3-[^\\/]+)[\\/]/,
