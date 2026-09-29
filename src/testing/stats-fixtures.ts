@@ -5,12 +5,14 @@ import { minimalConfig } from './config-fixtures'
 import { makeSession } from './session-fixtures'
 import { makeStudent } from './student-fixtures'
 
+let attemptCounter = 0
+
 /** Attempt explicite (catégorie et question au choix) ; `score` seul → `scored`, `skipReason` → `skipped`. */
 export function attemptOf(
   categoryId: string,
   questionId: string,
   result: number | 'pending' | { skipped?: string },
-  id = `${categoryId}-${questionId}-${Math.random()}`,
+  id = `${categoryId}-${questionId}-${++attemptCounter}`,
 ): Attempt {
   const base = { id, categoryId, questionId, drawnAt: '2026-09-25T09:00:00.000Z' }
   if (result === 'pending') return { ...base, outcome: 'pending' }
