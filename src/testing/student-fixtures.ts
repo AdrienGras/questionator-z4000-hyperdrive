@@ -3,14 +3,16 @@ import type { ParsedConfig } from '@/domain/config/schema'
 import type { Attempt, Student } from '@/domain/session/types'
 import { minimalConfig } from './config-fixtures'
 
-/** Config normalisée de test : `minimalConfig` avec `scoring` et `absent` surchargés. */
+/** Config normalisée de test : `minimalConfig` avec `scoring`, `absent` et `skips` surchargés. */
 export function makeConfig(
   scoring: Partial<ParsedConfig['scoring']> = {},
   absent?: ParsedConfig['absent'],
+  skips?: ParsedConfig['skips'],
 ): NormalizedConfig {
   const config = minimalConfig()
   config.scoring = { ...config.scoring, ...scoring }
   if (absent !== undefined) config.absent = absent
+  if (skips !== undefined) config.skips = skips
   return normalize(config)
 }
 

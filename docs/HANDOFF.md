@@ -20,6 +20,23 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-29 — F10 implémenté : skip de question
+
+**Dernière chose faite** : F10 (#10) implémenté sur `feat/f10-skip`, en tâche délimitée : design court validé en chat, pas de spec ni de plan (le ticket #10 et D65 font foi), TDD.
+- `requireStudent` (BACKLOG) factorise la recherche d'étudiant dans les trois transitions existantes.
+- `src/domain/passage/skip.ts` : `skipsRemaining(student, config)` (0 si skips désactivés) et `skipAttempt`, qui refuse `student_not_found`, `attempt_not_found`, `not_pending`, `skips_disabled`, `skip_quota_reached`, `reason_not_allowed` (motif libre alors que `allowFreeText` est faux, D65). Motif trimé, tronqué à 200 caractères, absent s'il est vide. Message de `not_pending` reformulé (« n'est plus en cours ») : il couvre aussi un attempt passé.
+- `usePassageActions` gagne `skip(attemptId, reason)`, via le même `run`.
+- `SkipButton` (dans l'emplacement réservé de `QuestionPanel`) : absent si skips désactivés, libellé « Passer la question (n passe(s) restante(s)) », `aria-disabled` + infobulle au quota, même motif que la catégorie épuisée. `SkipDialog` : motifs en boutons `aria-pressed` dans un `fieldset`, champ libre qui désélectionne le motif et inversement, état remis à zéro à chaque ouverture.
+- `makeConfig` des fixtures accepte un 3ᵉ argument `skips`.
+
+`pnpm check` est vert (647 tests), `pnpm build` sans avertissement.
+
+**Trucs en suspens** : PR à ouvrir en brouillon et à passer dans SonarQube. Validé dans Chromium (Playwright) sur la session d'exemple restée en base depuis F09 : skip avec motif libre puis prédéfini, persistance (`skipReason`, compteur `Question 1 / 3` inchangé), quota épuisé en `aria-disabled` avec infobulle au survol, dialogue en clair et en sombre, Annuler sans écriture. Les deux points de F08 vus à l'écran (backticks du code en ligne, fond des blocs `.shiki` en clair) et F18 (#36) restent ouverts ; la survie des données à un vrai redémarrage du navigateur n'est toujours pas vérifiée.
+
+**Prochaine chose à creuser** : F11, qui remplace `DoneState` par l'écran final et apporte « Réinitialiser l'étudiant » (seul recours après un skip par erreur) ; `requireStudent` est prêt pour ses transitions. Ensuite F12 (side panel), qui affichera le motif de skip.
+
+**Notes pour future Claude** : `minimalConfig` n'a qu'une question par catégorie ; un test qui fabrique `attempt-2` doit fournir une catégorie à plusieurs questions, sinon `QuestionPanel` lève « donnée corrompue » et le test expire sans message clair. oxlint `expect-expect` ne compte pas `expectPassageError` : garder le `expect(session).toEqual(snapshot)` après chaque refus, comme la convention le demande. En Playwright, le menu « Mode d'affichage » reste ouvert après un choix et son overlay `inert` intercepte les clics suivants : `Escape` avant de continuer.
+
 ## 2026-09-27 — F09 implémenté : écran de passage
 
 **Dernière chose faite** : F09 (#9) implémenté sur `feat/f09-passage` en subagent-driven development. Spec et D64 d'abord, puis un plan en 5 tâches de code, une revue par tâche, une revue finale sur Opus et une vague de correctifs, relue elle aussi.

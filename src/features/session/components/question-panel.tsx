@@ -5,23 +5,34 @@ import { formatScore } from '@/domain/scoring/format'
 import { toMilli } from '@/domain/scoring/milli'
 import type { Attempt } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
+import { SkipButton } from './skip-button'
 
 type QuestionPanelProps = Readonly<{
   ui: Ui
   config: NormalizedConfig
   attempt: Attempt
   disabled: boolean
+  skipsRemaining: number
   onScore: (attemptId: string, value: number) => void
+  onSkip: (attemptId: string, reason: string | undefined) => void
 }>
 
 /**
  * Panneau de la question `pending` (§7) : catégorie, titre, énoncé, éléments de réponse repliés
  * (`key={attempt.id}` remet le `<details>` à zéro à chaque nouvelle question, D28) et un bouton
- * par valeur du barème. `attempt` désigne toujours une catégorie et une question de la config
+ * par valeur du barème, puis le bouton de skip (F10). `attempt` désigne toujours une catégorie et une question de la config
  * figée dans la session : si l'une des deux est introuvable, la donnée est corrompue (comme
  * `scoreOf` du moteur de notation).
  */
-export function QuestionPanel({ ui, config, attempt, disabled, onScore }: QuestionPanelProps) {
+export function QuestionPanel({
+  ui,
+  config,
+  attempt,
+  disabled,
+  skipsRemaining,
+  onScore,
+  onSkip,
+}: QuestionPanelProps) {
   const { text, locale } = ui
   const category = config.categories.find((c) => c.id === attempt.categoryId)
   if (category === undefined) {
@@ -69,7 +80,13 @@ export function QuestionPanel({ ui, config, attempt, disabled, onScore }: Questi
           })}
         </div>
       </div>
-      <div data-slot="skip" />
+      <SkipButton
+        ui={ui}
+        skips={config.skips}
+        remaining={skipsRemaining}
+        disabled={disabled}
+        onSkip={(reason) => onSkip(attempt.id, reason)}
+      />
     </section>
   )
 }

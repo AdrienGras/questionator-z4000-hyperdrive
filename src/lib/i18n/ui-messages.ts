@@ -108,6 +108,14 @@ export type UiMessageParams = {
   passage_done_title: NoParams
   passage_done_body: NoParams
   passage_error_generic: NoParams
+  /** `remaining` : passes restantes pour l'étudiant (`skipsRemaining`). */
+  passage_skip_button: { remaining: number }
+  passage_skip_quota_reached: NoParams
+  passage_skip_title: NoParams
+  passage_skip_body: NoParams
+  passage_skip_reasons: NoParams
+  passage_skip_free_text: NoParams
+  passage_skip_confirm: NoParams
 }
 
 type RoundingMode = 'nearest' | 'up' | 'down'
@@ -256,6 +264,15 @@ const fr: Dictionary<UiMessageParams> = {
   passage_done_title: () => 'Passage terminé',
   passage_done_body: () => 'L’écran final arrive dans une prochaine version de l’app.',
   passage_error_generic: () => 'L’action n’a pas pu être enregistrée. Rechargez la page.',
+  passage_skip_button: ({ remaining }) =>
+    `Passer la question (${remaining} ${plural(remaining, 'passe restante', 'passes restantes')})`,
+  passage_skip_quota_reached: () => 'Plus de passe disponible pour cet étudiant.',
+  passage_skip_title: () => 'Passer la question ?',
+  passage_skip_body: () =>
+    'La question sera exclue pour cet étudiant et ne comptera pas dans son passage. Un skip ne s’annule pas.',
+  passage_skip_reasons: () => 'Motif (facultatif)',
+  passage_skip_free_text: () => 'Autre motif',
+  passage_skip_confirm: () => 'Passer',
 }
 
 const en: Dictionary<UiMessageParams> = {
@@ -366,6 +383,15 @@ const en: Dictionary<UiMessageParams> = {
   passage_done_title: () => 'Exam complete',
   passage_done_body: () => 'The final screen is coming in a future version of the app.',
   passage_error_generic: () => 'The action could not be saved. Reload the page.',
+  passage_skip_button: ({ remaining }) =>
+    `Skip question (${remaining} ${pluralEn(remaining, 'skip', 'skips')} left)`,
+  passage_skip_quota_reached: () => 'No skips left for this student.',
+  passage_skip_title: () => 'Skip this question?',
+  passage_skip_body: () =>
+    'The question will be excluded for this student and will not count towards their exam. A skip cannot be undone.',
+  passage_skip_reasons: () => 'Reason (optional)',
+  passage_skip_free_text: () => 'Other reason',
+  passage_skip_confirm: () => 'Skip',
 }
 
 export const UI_MESSAGES: Record<Locale, Dictionary<UiMessageParams>> = { fr, en }

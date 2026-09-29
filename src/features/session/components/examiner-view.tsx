@@ -65,6 +65,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
               disabled={actions.busy}
               onDraw={(categoryId) => void actions.draw(categoryId)}
               onScore={(attemptId, value) => void actions.score(attemptId, value)}
+              onSkip={(attemptId, reason) => void actions.skip(attemptId, reason)}
             />
           </div>
           <aside aria-hidden="true" />

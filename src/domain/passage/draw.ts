@@ -1,6 +1,7 @@
 import type { Session } from '@/domain/session/types'
 import { studentStatus } from '@/domain/scoring/status'
 import { PassageError } from './errors'
+import { requireStudent } from './require-student'
 import { pickUniform } from './random'
 import { availableQuestions, currentPending, isCategoryExhausted } from './selectors'
 
@@ -16,8 +17,7 @@ export function drawQuestion(
   input: { studentId: string; categoryId: string },
   deps: DrawDeps,
 ): Session {
-  const student = session.students.find((s) => s.id === input.studentId)
-  if (student === undefined) throw new PassageError('student_not_found')
+  const student = requireStudent(session, input.studentId)
   if (student.absent) throw new PassageError('student_absent')
   if (studentStatus(student, session.config) === 'done') throw new PassageError('student_done')
   if (currentPending(student) !== undefined) throw new PassageError('pending_exists')
