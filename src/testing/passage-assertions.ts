@@ -1,21 +1,26 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { expect } from 'vitest'
 import { PassageError, type PassageErrorCode } from '@/domain/passage/errors'
 
 /**
  * Bouton de catégorie, dans la grille de tirage seule (`QuestionPanel` affiche aussi le libellé
- * de la catégorie, donc une recherche non bornée à la grille matche les deux). `findByRole`
- * (async) : le premier montage passe par le découpage de route à la demande
- * (`autoCodeSplitting`), qui n'est jamais synchrone (`src/testing/setup.ts`). Pas de filtre de
- * nom sur la liste : son libellé suit la locale de la session (« Choisir une catégorie » /
- * « Choose a category », Review Focus 5) et une seule `<ul>` existe sur cet écran.
+ * de la catégorie, et le détail de l'écran final est une `<ol>` qui le contient aussi : une
+ * recherche non bornée matche ces éléments). On retente jusqu'à trouver une `<ul>` (la grille ;
+ * l'écran final n'utilise que des `<ol>`) qui contient un bouton portant ce libellé : juste après
+ * une réinitialisation, l'écran final périmé est encore là quelques instants. Le premier montage
+ * passe par le découpage de route à la demande (`autoCodeSplitting`), jamais synchrone
+ * (`src/testing/setup.ts`), d'où l'attente. Pas de filtre sur le nom de la liste : il suit la
+ * locale de la session (« Choisir une catégorie » / « Choose a category », Review Focus 5).
  */
 export async function categoryButton(label: string): Promise<HTMLElement> {
-  const grid = await screen.findByRole('list')
-  const span = within(grid).getByText(label)
-  const button = span.closest('button')
-  if (button === null) throw new Error(`bouton de catégorie « ${label} » introuvable`)
-  return button
+  return waitFor(() => {
+    for (const grid of screen.queryAllByRole('list')) {
+      if (grid.tagName !== 'UL') continue
+      const button = within(grid).queryByText(label)?.closest('button')
+      if (button) return button
+    }
+    throw new Error(`bouton de catégorie « ${label} » introuvable`)
+  })
 }
 
 /** `fn` doit lever une `PassageError` de ce `code`, rien d'autre. */
