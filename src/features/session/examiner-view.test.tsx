@@ -3,7 +3,7 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
-import { categoryButton } from '@/testing/passage-assertions'
+import { categoryButton, outsidePanel } from '@/testing/passage-assertions'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, type AttemptSpec, makeStudent } from '@/testing/student-fixtures'
 import { renderAt } from '@/testing/render-at'
@@ -52,7 +52,7 @@ test("en-tête et sélecteur pour l'étudiant actif par défaut", async () => {
   expect(screen.getByText('Score brut : 0')).toBeInTheDocument()
   expect(screen.getByRole('link', { name: "Retour à l'accueil" })).toHaveAttribute('href', '/')
 
-  const select = screen.getByLabelText('Étudiant')
+  const select = screen.getByRole('combobox', { name: 'Étudiant' })
   const options = within(select).getAllByRole('option')
   expect(options.map((option) => option.textContent)).toEqual([
     'Durand Alice — à passer',
@@ -74,8 +74,8 @@ test('activeStudentId inconnu affiche « Aucun étudiant sélectionné » sans p
   expect(
     await screen.findByRole('heading', { name: 'Aucun étudiant sélectionné' }),
   ).toBeInTheDocument()
-  expect(screen.getByLabelText('Étudiant')).toBeInTheDocument()
-  expect(screen.getByLabelText('Étudiant')).toHaveValue('')
+  expect(screen.getByRole('combobox', { name: 'Étudiant' })).toBeInTheDocument()
+  expect(screen.getByRole('combobox', { name: 'Étudiant' })).toHaveValue('')
   expect(screen.queryByText(/^Question /)).not.toBeInTheDocument()
 })
 
@@ -87,7 +87,7 @@ test('sans activeStudentId, « Aucun étudiant sélectionné »', async () => {
   expect(
     await screen.findByRole('heading', { name: 'Aucun étudiant sélectionné' }),
   ).toBeInTheDocument()
-  expect(screen.getByLabelText('Étudiant')).toBeInTheDocument()
+  expect(screen.getByRole('combobox', { name: 'Étudiant' })).toBeInTheDocument()
   expect(screen.queryByText(/^Question /)).not.toBeInTheDocument()
 })
 
@@ -112,7 +112,7 @@ test('étudiant ayant terminé son passage affiche l’écran final', async () =
   renderAt('/session/session-1')
 
   expect(await screen.findByRole('heading', { name: 'Passage terminé' })).toBeInTheDocument()
-  expect(screen.getByText('Note brute').parentElement).toHaveTextContent('2,5')
+  expect(outsidePanel('Note brute').parentElement).toHaveTextContent('2,5')
 })
 
 // --- Tâche 5 : grille de catégories et panneau de la question en cours ---
@@ -242,7 +242,7 @@ test('la note qui atteint questionsPerStudent affiche « Passage terminé »', a
   await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
 
   expect(await screen.findByRole('heading', { name: 'Passage terminé' })).toBeInTheDocument()
-  expect(screen.getByText('Note brute').parentElement).toHaveTextContent('1,5')
+  expect(outsidePanel('Note brute').parentElement).toHaveTextContent('1,5')
 })
 
 test('question sans « answer » n’affiche aucun bloc de réponse', async () => {
@@ -320,7 +320,7 @@ test('changer d’étudiant pendant un pending puis revenir réaffiche la même 
   if (question === undefined) throw new Error('question introuvable dans la fixture')
   await screen.findByRole('heading', { name: question.title })
 
-  const select = screen.getByLabelText('Étudiant')
+  const select = screen.getByRole('combobox', { name: 'Étudiant' })
   fireEvent.change(select, { target: { value: 'student-2' } })
   await screen.findByText('Martin Bob')
   expect(screen.queryByRole('heading', { name: question.title })).not.toBeInTheDocument()
@@ -386,7 +386,9 @@ test('key={attempt.id} : changer d’étudiant vers un autre pending referme le 
   fireEvent.click(screen.getByText('Éléments de réponse'))
   expect(screen.getByText('Éléments de réponse').closest('details')).toHaveAttribute('open')
 
-  fireEvent.change(screen.getByLabelText('Étudiant'), { target: { value: 'student-2' } })
+  fireEvent.change(screen.getByRole('combobox', { name: 'Étudiant' }), {
+    target: { value: 'student-2' },
+  })
 
   await screen.findByRole('heading', { name: 'Q2' })
   expect(screen.getByText('Éléments de réponse').closest('details')).not.toHaveAttribute('open')
@@ -417,7 +419,7 @@ test('erreur affichée même hors du panneau de passage (étudiant retiré entre
   renderAt('/session/session-1')
 
   await screen.findByRole('heading', { name: 'Aucun étudiant sélectionné' })
-  const select = screen.getByLabelText('Étudiant')
+  const select = screen.getByRole('combobox', { name: 'Étudiant' })
 
   const stored = await db.sessions.get('session-1')
   if (stored === undefined) throw new Error('session introuvable en base')

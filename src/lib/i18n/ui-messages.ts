@@ -128,6 +128,16 @@ export type UiMessageParams = {
   attempt_score_label: { rank: number }
   attempt_out_of: { max: string }
   score_not_computed: NoParams
+  side_panel_label: NoParams
+  side_panel_hide: NoParams
+  side_panel_show: NoParams
+  side_panel_tab_student: NoParams
+  side_panel_tab_students: NoParams
+  side_panel_students_soon: NoParams
+  student_tab_questions: NoParams
+  student_tab_totals: NoParams
+  student_tab_no_student: NoParams
+  student_tab_no_attempts: NoParams
   reset_title: { name: string }
   reset_body: NoParams
   reset_confirm: NoParams
@@ -322,6 +332,16 @@ const fr: Dictionary<UiMessageParams> = {
   attempt_score_label: ({ rank }) => `Note de la question ${rank}`,
   attempt_out_of: ({ max }) => `/ ${max}`,
   score_not_computed: () => '—',
+  side_panel_label: () => 'Panneau latéral',
+  side_panel_hide: () => 'Masquer le panneau',
+  side_panel_show: () => 'Afficher le panneau',
+  side_panel_tab_student: () => 'Étudiant',
+  side_panel_tab_students: () => 'Étudiants',
+  side_panel_students_soon: () => 'Liste des étudiants — bientôt disponible.',
+  student_tab_questions: () => 'Questions',
+  student_tab_totals: () => 'Totaux',
+  student_tab_no_student: () => 'Aucun étudiant sélectionné.',
+  student_tab_no_attempts: () => 'Aucune question tirée.',
   reset_title: ({ name }) => `Réinitialiser ${name} ?`,
   reset_body: () =>
     'Les questions tirées, les notes et l’ajustement seront supprimés. Le commentaire est conservé.',
@@ -473,6 +493,16 @@ const en: Dictionary<UiMessageParams> = {
   attempt_score_label: ({ rank }) => `Score for question ${rank}`,
   attempt_out_of: ({ max }) => `/ ${max}`,
   score_not_computed: () => '—',
+  side_panel_label: () => 'Side panel',
+  side_panel_hide: () => 'Hide panel',
+  side_panel_show: () => 'Show panel',
+  side_panel_tab_student: () => 'Student',
+  side_panel_tab_students: () => 'Students',
+  side_panel_students_soon: () => 'Student list — coming soon.',
+  student_tab_questions: () => 'Questions',
+  student_tab_totals: () => 'Totals',
+  student_tab_no_student: () => 'No student selected.',
+  student_tab_no_attempts: () => 'No question drawn.',
   reset_title: ({ name }) => `Reset ${name}?`,
   reset_body: () =>
     'Drawn questions, scores and the adjustment will be deleted. The comment is kept.',
