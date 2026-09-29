@@ -3,6 +3,7 @@ import { fireEvent, screen, within } from '@testing-library/react'
 import { beforeEach, expect, test } from 'vitest'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
+import { minimalConfig } from '@/testing/config-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
 import { attemptOf, sessionWith } from '@/testing/stats-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
@@ -80,6 +81,22 @@ test('un étudiant terminé : moyenne à 2 décimales, taux de catégorie en pou
   const strategies = screen.getByRole('table', { name: 'Stratégies' })
   expect(within(strategies).getByText('A ×1')).toBeInTheDocument()
   expect(within(strategies).getByText('10,00')).toBeInTheDocument()
+})
+
+test('stratégie à deux catégories : pastilles séparées dans le nom accessible', async () => {
+  const config = minimalConfig()
+  config.scoring.questionsPerStudent = 2
+  config.categories.push({
+    id: 'b',
+    label: 'B',
+    scale: [0, 1, 2],
+    questions: [{ id: 'b-1', prompt: 'Question B1' }],
+  })
+  await putSession(sessionWith([[attemptOf('a', 'a-1', 2), attemptOf('b', 'b-1', 1)]], config))
+  renderAt('/session/session-1/stats')
+
+  const table = await screen.findByRole('table', { name: 'Stratégies' })
+  expect(within(table).getByRole('rowheader', { name: 'A ×1, B ×1' })).toBeInTheDocument()
 })
 
 /** Skip de la question `a-1`, avec ou sans motif. */

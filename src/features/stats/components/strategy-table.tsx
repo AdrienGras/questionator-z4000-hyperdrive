@@ -33,24 +33,34 @@ export function StrategyTable({ ui, config, strategies }: StrategyTableProps) {
               { label: text('stats_col_mean_final', {}), numeric: true },
             ]}
           >
-            {strategies.map((strategy) => (
-              <tr key={compositionKey(strategy)} className="border-b last:border-0">
-                <th scope="row" className={ROW_HEADER}>
-                  <span className="flex flex-wrap items-center gap-1">
-                    {strategy.composition.map(({ categoryId, count }, index) => (
-                      <Fragment key={categoryId}>
-                        {index > 0 && <span aria-hidden> · </span>}
-                        <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
-                          {text('stats_times', { label: categoryLabel(config, categoryId), count })}
-                        </span>
-                      </Fragment>
-                    ))}
-                  </span>
-                </th>
-                <td className={NUMERIC_CELL}>{strategy.students}</td>
-                <td className={NUMERIC_CELL}>{formatDecimal(strategy.meanFinal, locale)}</td>
-              </tr>
-            ))}
+            {strategies.map((strategy) => {
+              const pills = strategy.composition.map(({ categoryId, count }) => ({
+                categoryId,
+                label: text('stats_times', { label: categoryLabel(config, categoryId), count }),
+              }))
+              return (
+                <tr key={compositionKey(strategy)} className="border-b last:border-0">
+                  {/* Nom accessible explicite : les pastilles sont des éléments flex, le texte collé
+                      donnerait « A ×2B ×1 » (le « · » visuel est masqué, un espace sr-only serait rogné). */}
+                  <th
+                    scope="row"
+                    className={ROW_HEADER}
+                    aria-label={pills.map((pill) => pill.label).join(', ')}
+                  >
+                    <span className="flex flex-wrap items-center gap-1">
+                      {pills.map(({ categoryId, label }, index) => (
+                        <Fragment key={categoryId}>
+                          {index > 0 && <span aria-hidden> · </span>}
+                          <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{label}</span>
+                        </Fragment>
+                      ))}
+                    </span>
+                  </th>
+                  <td className={NUMERIC_CELL}>{strategy.students}</td>
+                  <td className={NUMERIC_CELL}>{formatDecimal(strategy.meanFinal, locale)}</td>
+                </tr>
+              )
+            })}
           </StatsTable>
         )
       }
