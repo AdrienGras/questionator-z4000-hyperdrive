@@ -405,3 +405,17 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : une ligne `disabled={busy}` devient désactivée juste après Entrée ; le navigateur renvoie alors le focus sur `<body>` et la tabulation repart du haut de la page. jsdom ne reproduit pas ce retour du focus : un test ne peut vérifier que `toBeEnabled()`.
 **Workaround** : ne pas désactiver sur `busy` un contrôle qu'on active au clavier en série (lignes de liste, déclencheur de dialogue) ; le verrou `inFlight` de `run` écarte déjà les appels concurrents. Vérifier le focus dans un vrai navigateur.
 **Référence** : `src/features/session/components/student-row.tsx`, `students-tab.tsx`.
+
+## Un composant monté à l'arrivée de la question ne voit jamais de « nouveau » tirage (2026-09-29)
+
+**Découvert** : F14, revue de l'animation de tirage.
+**Symptôme** : `DrawReveal` retenait le `drawnAt` de son premier rendu et n'animait qu'un `drawnAt` différent : l'animation ne se jouait jamais dans l'application. Un tirage passe toujours de « aucune question en cours » à « une question » (on ne tire pas par-dessus une question `pending`), donc le composant, rendu seulement quand une question existe, est monté à neuf avec le nouveau `drawnAt` comme valeur initiale. Les tests unitaires passaient parce qu'ils changeaient `drawnAt` sans démonter le composant, ce que le domaine n'autorise pas.
+**Workaround** : retenir la valeur initiale au niveau qui reste monté pour l'étudiant (`StudentScreen`, remonté par `key` à chaque changement d'étudiant) et tester par le vrai parcours (session sans question → ajout d'une question `pending` en base).
+**Référence** : `src/features/present/components/student-screen.tsx`, `draw-reveal.tsx`.
+
+## `pnpm preview` en `webServer` Playwright laisse un serveur orphelin, réutilisé avec un vieux build (2026-09-29)
+
+**Découvert** : F14, mise en place de l'e2e.
+**Symptôme** : après un `pnpm e2e`, un `vite preview` restait sur le port 4173 ; le run suivant, avec `reuseExistingServer`, testait l'ancien build sans prévenir (échecs inexpliqués, ou succès sur du code qui n'était plus le bon). Playwright tue le processus `pnpm`, pas son enfant `vite`.
+**Workaround** : `webServer.command` = `pnpm build && exec node_modules/.bin/vite preview --port 4173 --strictPort` : `exec` fait du serveur le processus suivi par Playwright. En cas de doute, `ss -ltnp | grep 4173` avant de relancer.
+**Référence** : `playwright.config.ts`.

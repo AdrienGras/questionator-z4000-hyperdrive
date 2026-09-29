@@ -420,3 +420,32 @@ const skip = useCallback(
 - Sauvegarde automatique d'un champ : `useAutosave(save, 500)` (`schedule` à la frappe, `flush` au blur et au démontage ; un échec remet la valeur en attente si rien de plus récent n'a été programmé) ; composant monté avec `key={student.id}` et `save` qui capture cet id.
 - Pas d'aléa non injectable : `cryptoRandomInt(n)` (rejet, sans biais de modulo) et `pickUniform(items, random)`.
 - Bouton indisponible avec infobulle : `TooltipTrigger render={<Button aria-disabled="true" aria-describedby={id} …/>}` + texte `sr-only`, clic neutralisé dans le handler ; jamais `disabled` natif (pas de survol ni de focus), jamais de `span tabIndex={0}` (Sonar S6845).
+
+## Test e2e Playwright — squelette (Page Object Model)
+
+Arbitrage : D33, D69 (F14). Un objet par écran dans `e2e/pages/`, construit sur une `Page` ; les specs n'enchaînent que des appels de pages et des `expect`.
+
+```ts
+// e2e/pages/<écran>-page.ts
+export class ExaminerPage {
+  constructor(readonly page: Page) {}
+  // Locators par rôle et nom accessible, jamais de sélecteur CSS ni de data-testid.
+  readonly banner = this.page.getByRole('status')
+  async draw(label: string) {
+    await this.page.getByRole('button', { name: new RegExp(`^${label}\\b`) }).click()
+  }
+  // Une action qui mène à un autre écran renvoie l'objet de cet écran.
+  async openPresentView(): Promise<PresentPage> {
+    const [popup] = await Promise.all([
+      this.page.waitForEvent('popup'),
+      this.page.getByRole('button', { name: 'Ouvrir la vue projetée' }).click(),
+    ])
+    return new PresentPage(popup)
+  }
+}
+```
+
+- Jamais d'`expect` dans `e2e/pages/` : un échec désigne l'étape du scénario.
+- Élément inatteignable par rôle ou nom : défaut d'accessibilité à corriger dans l'application (ex. région `aria-label` « Question en cours »), pas de `data-testid`.
+- `e2e/fixtures.ts` : contexte neuf par test (IndexedDB vide), session créée depuis `examples/`.
+- Pas d'attente fixe : assertions auto-attendantes (`expect(...).toBeVisible()`, `expect.poll`).

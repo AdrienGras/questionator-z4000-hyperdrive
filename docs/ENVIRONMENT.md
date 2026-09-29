@@ -19,7 +19,8 @@ Carte des paths, services, accès, commandes. À jour au fil des découvertes.
 - **Installé (F01)** : Vite 8, React 19, TypeScript 7 (natif), TanStack Router (hash, file-based), Tailwind 4, shadcn v4 (base-ui, preset Nova, icônes Tabler), Vitest 5 + jsdom, oxlint + oxlint-tsgolint, Prettier.
 - **Ajouté (F02)** : Zod 4.6, jsonc-parser (localisation des erreurs JSON), ajv 8 (dev, test du JSON Schema).
 - **Ajouté (F04–F06)** : Dexie 4 + dexie-react-hooks, `fake-indexeddb` (dev), PapaParse 5 (lecture du CSV d'étudiants).
-- **Prévu** (`PRODUCT.md` §9) : write-excel-file, react-markdown + Shiki, vite-plugin-pwa, Playwright.
+- **Ajouté (F14)** : `@playwright/test` (dev, Chromium seul ; navigateur installé par `pnpm exec playwright install chromium`, dans `~/.cache/ms-playwright`).
+- **Prévu** (`PRODUCT.md` §9) : write-excel-file, vite-plugin-pwa.
 - **Commandes principales** :
   - `nvm use && corepack pnpm install`
   - `pnpm dev` — serveur de dev (régénère `src/routeTree.gen.ts`)
@@ -27,6 +28,7 @@ Carte des paths, services, accès, commandes. À jour au fil des découvertes.
   - `pnpm deps` — dependency-cruiser sur `src/` (`.dependency-cruiser.cjs`, parseur swc) ; vérifier que « N modules » n'est pas 0
   - `pnpm build` / `pnpm preview` — build de prod dans `dist/` et prévisualisation sous `/questionator-z4000-hyperdrive/`
   - `pnpm test` — tests (régénère aussi l'arbre de routes)
+  - `pnpm e2e` — Playwright (`e2e/`, pages POM dans `e2e/pages/`) : build puis `vite preview` sur le port 4173 ; job CI `e2e`, dont dépend `deploy`
   - `.claude/scripts/sonar-check.sh --pr <n> --wait` — état SonarQube Cloud d'une PR
 
 ## Services

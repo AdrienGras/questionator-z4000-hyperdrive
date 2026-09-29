@@ -95,10 +95,10 @@ Les nombres sont des décimaux (points), pas des millièmes : la conversion `Mil
   - `categories` dans l'ordre de la config ; `maxPoints` = max du barème ; `exhausted` via `isCategoryExhausted` ; `disabled` vrai si une question est en cours (`currentPending`) ou si l'étudiant est terminé ; `color` et `icon` seulement s'ils existent.
   - `current` : la question `pending`, réduite à `categoryId`, `prompt` (énoncé seul) et `drawnAt`.
   - `questionIndex` via `questionIndex`.
-  - `cumulativeRaw` seulement si `showCumulativeScore`.
+  - `cumulativeRaw` seulement si `showCumulativeScore` et que le passage n'est pas terminé (sur l'écran final, la note prend le relais).
   - `finished` = statut `done`.
   - `final` seulement si `finished` **et** `finalRevealedAt` renseigné : `raw` si `finalScoreDisplay` vaut `raw` ou `both`, `final` (note finale ajustement compris, D31) si `converted` ou `both`, `scale` = `finalScale`. Si la note finale n'est pas calculable (`null`), `final.final` est omis.
-  - `detail` seulement si `showStatsOnFinal` et `finished` : une entrée par attempt `scored` ou `skipped`, dans l'ordre du tirage, `points` omis pour une passe.
+  - `detail` seulement si `showStatsOnFinal`, `finished` et `finalRevealedAt` renseigné (les points additionnés donneraient la note brute avant la révélation) : une entrée par attempt `scored` ou `skipped`, dans l'ordre du tirage, `points` omis pour une passe.
 - Jamais : `answer`, `tags`, commentaire, montant ou justification d'ajustement, motif de passe, `editedAt`, identifiants d'étudiants, données d'un autre étudiant.
 
 ### `setProjection(session, projection): Session`
@@ -166,7 +166,7 @@ e2e/
 
 ## Erreurs et cas limites
 
-- **Popup bloquée** (`window.open` renvoie `null`) : message dans la vue examinateur par le `role="alert"` existant (« Autorisez les fenêtres pop-up pour ce site »).
+- **Popup bloquée** (`window.open` renvoie `null`) : message en `role="alert"` à côté des boutons de projection (« Autorisez les fenêtres pop-up pour ce site… ») ; ce n'est pas une erreur de transition, il ne passe donc pas par l'alerte d'erreur de passage.
 - **Session supprimée pendant que la vue est ouverte** : `SessionFallback` « introuvable ».
 - **Étudiant projeté réinitialisé** (F11) : la vue repasse à « 1 / 3 », sans animation tant qu'aucun nouveau tirage n'arrive.
 - **Passe** : la question en cours disparaît de la vue ; aucun motif n'est affiché.
