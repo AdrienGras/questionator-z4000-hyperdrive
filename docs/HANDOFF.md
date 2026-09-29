@@ -20,6 +20,24 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-29 — F13 implémenté : onglet « Étudiants »
+
+**Dernière chose faite** : F13 (#13, passé en « In progress » sur le Project) sur `feat/f13-students-tab`, en processus complet : brainstorming (note finale dans la liste, pas de changement d'onglet au clic, `<ul>` de boutons), spec `docs/superpowers/specs/2026-09-29-f13-students-tab-design.md` et D68, plan en 4 tâches, subagent-driven development (revue par tâche, revue finale sur Opus, une vague de correctifs relue).
+- Domaine : `identityKey` sortie de `parse-csv.ts` dans `domain/students/identity.ts` ; `findDuplicate`, `rosterScore` ; `addStudent` (trim, `student_name_required`, `order` max + 1, `activate` dans la même transition) ; `setActiveStudent` renvoie son entrée si l'étudiant est déjà actif.
+- Écran : `StudentsTab`, `StudentRow`, `AddStudentDialog` ; `StudentPicker` supprimé, `PassageHeader` sans `picker` ; `passage_no_student_body` renvoie à l'onglet « Étudiants ».
+- Correctifs de revue finale : lignes et déclencheur plus désactivés sur `busy` (perte du focus clavier), erreur d'ajout affichée dans le dialogue, noms longs qui passent à la ligne, garde « déjà actif » prouvée par un test de composant. Correctif de contraste de la ligne active (texte `accent-foreground`) trouvé dans le navigateur.
+
+`pnpm check` est vert (869 tests). `.playwright-mcp/` ajouté au `.gitignore`.
+
+
+**Trucs en suspens** : PR pas encore ouverte (brouillon, puis `sonar-check.sh --pr <n> --wait`, puis « Ready for review »). Vérifié dans Chromium (Playwright) sur une session jetable « Vérif F13 (jetable) » créée depuis les exemples : focus conservé sur la ligne après Entrée, A → B → A avec question en cours, doublon « Petit Élodie » signalé, « Ajouter et faire passer » active le nouvel étudiant sans quitter l'onglet, contraste en sombre. Non vérifiés à l'écran : l'icône de l'étudiant projeté (F14 ne permet pas encore de projeter) et le thème clair. La session « Oral PHP » n'a pas été touchée ; la session jetable peut être supprimée depuis l'accueil. Points mis au BACKLOG : erreur antérieure visible dans le dialogue d'ajout, fixtures de tests copiées. Toujours ouverts : F08 (backticks, fond `.shiki`), F18 (#36), survie des données à un vrai redémarrage.
+
+
+**Prochaine chose à creuser** : ouvrir la PR F13 et passer le gate SonarQube ; ensuite F14 (mode présentateur : `toProjectedView`, fenêtre `present`, « Projeter cet étudiant »), qui rendra l'icône de projection vérifiable.
+
+
+**Notes pour future Claude** : oxlint (`prefer-tag-over-role`) refuse `role="status"` et `role="img"` : `<output>` et `aria-label` seul sur le `<svg>` Tabler (QUIRKS). Ne pas désactiver sur `busy` un contrôle activé au clavier en série, et vérifier le focus dans un vrai navigateur : jsdom ne le reproduit pas (QUIRKS). L'extension Chrome était déconnectée cette session : le MCP Playwright fait l'affaire, mais il ne peut écrire ses captures que sous le dépôt (`.playwright-mcp/`). Le profil Playwright contient la session d'exemple : ne pas y ajouter d'étudiant, faute de suppression.
+
 ## 2026-09-29 — F12 implémenté : side panel, onglet « Étudiant »
 
 **Dernière chose faite** : F11 mergé (PR #42), puis F12 (#12) sur `feat/f12-side-panel` en processus complet : brainstorming (choix A : composants partagés avec l'écran final), spec `docs/superpowers/specs/2026-09-29-f12-side-panel-design.md` et D67, plan en 6 tâches, subagent-driven development (revue par tâche, revue finale sur Opus, vague de correctifs relue).

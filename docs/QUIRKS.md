@@ -391,3 +391,17 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Workaround** : une fonction `async` : `try { return await save(v) } catch { return false }`. Le corps s'exécute jusqu'au premier `await`, donc `save` est appelé tout de suite ; `return await` n'est pas redondant dans un `try` (S4326 ne s'applique pas).
 **Référence** : `src/features/session/hooks/use-autosave.ts`.
 
+
+## oxlint refuse `role="status"` / `role="img"` : prendre la balise native (2026-09-29)
+
+**Découvert** : F13, dialogue d'ajout d'étudiant et icône de l'étudiant projeté.
+**Symptôme** : `<p role="status">` et `<svg role="img" aria-label="…">` font échouer `pnpm check` (règle jsx-a11y `prefer-tag-over-role`).
+**Workaround** : `<output>` porte le rôle implicite `status` (`getByRole('status')` le trouve) ; pour une icône Tabler, `aria-label` seul sur le `<svg>` suffit : le composant ne pose pas `aria-hidden`, le libellé entre dans le nom accessible du bouton parent.
+**Référence** : `src/features/session/components/add-student-dialog.tsx`, `student-row.tsx`.
+
+## Désactiver un bouton pendant l'écriture qu'il déclenche fait perdre le focus clavier (2026-09-29)
+
+**Découvert** : F13, revue finale (liste des étudiants).
+**Symptôme** : une ligne `disabled={busy}` devient désactivée juste après Entrée ; le navigateur renvoie alors le focus sur `<body>` et la tabulation repart du haut de la page. jsdom ne reproduit pas ce retour du focus : un test ne peut vérifier que `toBeEnabled()`.
+**Workaround** : ne pas désactiver sur `busy` un contrôle qu'on active au clavier en série (lignes de liste, déclencheur de dialogue) ; le verrou `inFlight` de `run` écarte déjà les appels concurrents. Vérifier le focus dans un vrai navigateur.
+**Référence** : `src/features/session/components/student-row.tsx`, `students-tab.tsx`.
