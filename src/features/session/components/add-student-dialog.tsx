@@ -20,15 +20,18 @@ type Names = { lastName: string; firstName: string }
 type AddStudentDialogProps = Readonly<{
   ui: Ui
   session: Session
+  /** Écriture en cours : verrouille les deux boutons d'envoi (pas le déclencheur). */
   disabled: boolean
+  /** Erreur de la dernière action, montrée ici car le `role="alert"` de l'écran est sous le modal. */
+  error?: string
   onAdd: (names: Names, options: { activate: boolean }) => Promise<boolean>
 }>
 
 /**
  * Dialogue d'ajout d'un étudiant en cours de session (F13). Succès : fermeture et champs vidés ;
- * échec : le dialogue reste ouvert, l'erreur s'affiche par le `role="alert"` d'`ExaminerView`.
+ * échec : le dialogue reste ouvert et affiche l'erreur reçue en `error`.
  */
-export function AddStudentDialog({ ui, session, disabled, onAdd }: AddStudentDialogProps) {
+export function AddStudentDialog({ ui, session, disabled, error, onAdd }: AddStudentDialogProps) {
   const { text } = ui
   const lastNameId = useId()
   const firstNameId = useId()
@@ -58,9 +61,8 @@ export function AddStudentDialog({ ui, session, disabled, onAdd }: AddStudentDia
     submitting.current = true
     let succeeded = false
     try {
+      // `run` ne lève jamais : un échec revient en `false`.
       succeeded = await onAdd({ lastName, firstName }, { activate })
-    } catch {
-      succeeded = false
     } finally {
       submitting.current = false
     }
@@ -74,7 +76,7 @@ export function AddStudentDialog({ ui, session, disabled, onAdd }: AddStudentDia
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger render={<Button variant="outline" disabled={disabled} />}>
+      <DialogTrigger render={<Button variant="outline" />}>
         <IconUserPlus />
         {text('students_add', {})}
       </DialogTrigger>
@@ -107,6 +109,11 @@ export function AddStudentDialog({ ui, session, disabled, onAdd }: AddStudentDia
                 name: `${duplicate.lastName} ${duplicate.firstName}`,
               })}
             </output>
+          )}
+          {error !== undefined && (
+            <p role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
           )}
           <DialogFooter>
             <Button

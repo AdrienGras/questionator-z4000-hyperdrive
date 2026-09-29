@@ -14,7 +14,6 @@ type StudentRowProps = Readonly<{
   student: Student
   active: boolean
   projected: boolean
-  disabled: boolean
   onSelect: (studentId: string) => void
 }>
 
@@ -32,32 +31,22 @@ function scoreText(student: Student, config: NormalizedConfig, ui: Ui): string {
 }
 
 /** Ligne de la liste des étudiants : identité, statut, projection, puis notes. */
-export function StudentRow({
-  ui,
-  config,
-  student,
-  active,
-  projected,
-  disabled,
-  onSelect,
-}: StudentRowProps) {
+export function StudentRow({ ui, config, student, active, projected, onSelect }: StudentRowProps) {
   const { text } = ui
   return (
     <li>
       <button
         type="button"
         aria-current={active ? 'true' : undefined}
-        disabled={disabled}
         onClick={() => onSelect(student.id)}
         className={cn(
           'flex w-full flex-col gap-1 rounded-lg border p-2 text-left text-sm transition-colors outline-none',
           'hover:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50',
-          'disabled:pointer-events-none disabled:opacity-50',
           active && 'border-primary bg-accent',
         )}
       >
         <span className="flex items-center gap-2">
-          <span className="font-medium">{`${student.lastName} ${student.firstName}`}</span>
+          <span className="min-w-0 font-medium break-words">{`${student.lastName} ${student.firstName}`}</span>
           <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
             {text(STATUS_KEY[studentStatus(student, config)], {})}
           </span>

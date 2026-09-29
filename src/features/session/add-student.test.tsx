@@ -1,10 +1,12 @@
 import 'fake-indexeddb/auto'
-import { fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { beforeEach, expect, test } from 'vitest'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { beforeEach, expect, test, vi } from 'vitest'
 import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import type { Session, Student } from '@/domain/session/types'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
+import { AddStudentDialog } from './components/add-student-dialog'
+import { makeUi } from '@/testing/make-ui'
 import { renderAt } from '@/testing/render-at'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
@@ -182,4 +184,33 @@ test('Échap après saisie puis réouverture : champs vides', async () => {
   openDialog()
   expect(screen.getByLabelText('Nom')).toHaveValue('')
   expect(screen.getByLabelText('Prénom')).toHaveValue('')
+})
+
+test('le déclencheur « Ajouter un étudiant » n’est pas désactivé pendant une écriture', async () => {
+  await mount()
+
+  expect(screen.getByRole('button', { name: 'Ajouter un étudiant' })).toBeEnabled()
+})
+
+test('échec de l’ajout : le dialogue reste ouvert, champs gardés, erreur visible dedans', async () => {
+  const onAdd = vi.fn<() => Promise<boolean>>().mockResolvedValue(false)
+  render(
+    <AddStudentDialog
+      ui={makeUi()}
+      session={makeSession({ config, students: [alice, durand] })}
+      disabled={false}
+      error="Écriture impossible."
+      onAdd={onAdd}
+    />,
+  )
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  openDialog()
+  fill('Martin', 'Zoé')
+  fireEvent.click(addButton())
+
+  await waitFor(() => expect(onAdd).toHaveBeenCalledTimes(1))
+  const dialog = screen.getByRole('dialog')
+  expect(within(dialog).getByRole('alert')).toHaveTextContent('Écriture impossible.')
+  expect(screen.getByLabelText('Nom')).toHaveValue('Martin')
+  expect(screen.getByLabelText('Prénom')).toHaveValue('Zoé')
 })

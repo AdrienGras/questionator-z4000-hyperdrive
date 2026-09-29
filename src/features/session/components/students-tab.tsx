@@ -9,7 +9,10 @@ type StudentsTabProps = Readonly<{
   session: Session
   /** Id résolu : un id qui ne désigne plus d'étudiant ne surligne aucune ligne. */
   activeStudentId: string | undefined
+  /** Verrouille les seuls boutons d'envoi du dialogue : les lignes gardent le focus clavier. */
   disabled: boolean
+  /** Message de la dernière action refusée, affiché dans le dialogue d'ajout. */
+  error?: string
   onSelect: (studentId: string) => void
   onAdd: (
     names: { lastName: string; firstName: string },
@@ -25,6 +28,7 @@ export function StudentsTab({
   session,
   activeStudentId,
   disabled,
+  error,
   onSelect,
   onAdd,
   actionsSlot,
@@ -33,7 +37,7 @@ export function StudentsTab({
   const sorted = session.students.toSorted((a, b) => a.order - b.order)
   return (
     <div className="flex flex-col gap-4">
-      <AddStudentDialog ui={ui} session={session} disabled={disabled} onAdd={onAdd} />
+      <AddStudentDialog ui={ui} session={session} disabled={disabled} error={error} onAdd={onAdd} />
       <ul aria-label={ui.text('students_list_label', {})} className="flex flex-col gap-2">
         {sorted.map((student) => (
           <StudentRow
@@ -43,7 +47,6 @@ export function StudentsTab({
             student={student}
             active={student.id === activeStudentId}
             projected={projection.mode === 'student' && projection.studentId === student.id}
-            disabled={disabled}
             // Garde : recliquer l'étudiant actif n'écrit rien.
             onSelect={(studentId) => {
               if (studentId !== activeStudentId) onSelect(studentId)

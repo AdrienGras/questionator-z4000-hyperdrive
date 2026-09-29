@@ -74,6 +74,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
                 // ni présélectionner le premier étudiant de la liste (spec F09 §7).
                 activeStudentId={student?.id}
                 disabled={actions.busy}
+                error={errorMessage}
                 onSelect={(studentId) => void actions.selectStudent(studentId)}
                 onAdd={actions.addStudent}
               />

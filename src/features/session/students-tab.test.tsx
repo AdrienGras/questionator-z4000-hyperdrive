@@ -1,12 +1,14 @@
 import 'fake-indexeddb/auto'
-import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import { formatScore } from '@/domain/scoring/format'
 import { computeScores } from '@/domain/scoring/score'
 import type { Session, Student } from '@/domain/session/types'
+import { StudentsTab } from './components/students-tab'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
+import { makeUi } from '@/testing/make-ui'
 import { renderAt } from '@/testing/render-at'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
@@ -124,13 +126,41 @@ test('cliquer un étudiant l’active sans toucher à la projection ni à l’on
   expect(screen.getByRole('tab', { name: 'Étudiants' })).toHaveAttribute('aria-selected', 'true')
 })
 
-test('cliquer l’étudiant déjà actif n’écrit rien', async () => {
-  await mount([student('s-a', 'Aba', 1), student('s-b', 'Bec', 2)], { activeStudentId: 's-a' })
-  const before = await stored()
+test('l’onglet ne relaie pas le clic sur l’étudiant actif, mais relaie celui d’un autre', () => {
+  const onSelect = vi.fn<(id: string) => void>()
+  render(
+    <StudentsTab
+      ui={makeUi()}
+      session={makeSession({
+        config,
+        students: [student('s-a', 'Aba', 1), student('s-b', 'Bec', 2)],
+        activeStudentId: 's-a',
+      })}
+      activeStudentId="s-a"
+      disabled={false}
+      onSelect={onSelect}
+      onAdd={vi.fn<() => Promise<boolean>>()}
+    />,
+  )
 
   fireEvent.click(rowOf('Aba'))
+  expect(onSelect).not.toHaveBeenCalled()
 
-  expect(await stored()).toEqual(before)
+  fireEvent.click(rowOf('Bec'))
+  expect(onSelect).toHaveBeenCalledExactlyOnceWith('s-b')
+})
+
+test('le bouton cliqué garde le focus clavier une fois l’écriture terminée', async () => {
+  await mount([student('s-a', 'Aba', 1), student('s-b', 'Bec', 2)], { activeStudentId: 's-a' })
+  const row = rowOf('Bec')
+  row.focus()
+
+  fireEvent.click(row)
+
+  await waitFor(() => expect(rowOf('Bec')).toHaveAttribute('aria-current', 'true'))
+  expect(rowOf('Bec')).toBe(row)
+  expect(row).toBeEnabled()
+  expect(document.activeElement).toBe(row)
 })
 
 test('aller-retour A → B → A avec une question en cours : rien n’est perdu', async () => {
