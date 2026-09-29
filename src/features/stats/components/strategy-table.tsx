@@ -4,7 +4,7 @@ import type { Strategy } from '@/domain/stats/types'
 import { categoryLabel } from '@/features/stats/config-lookup'
 import { formatDecimal } from '@/features/stats/format-stats'
 import type { Ui } from '@/lib/i18n/use-ui'
-import { CELL, NUMERIC_CELL, StatsSection, StatsTable } from './stats-section'
+import { NUMERIC_CELL, ROW_HEADER, StatsSection, StatsTable } from './stats-section'
 
 type StrategyTableProps = Readonly<{
   ui: Ui
@@ -35,7 +35,7 @@ export function StrategyTable({ ui, config, strategies }: StrategyTableProps) {
           >
             {strategies.map((strategy) => (
               <tr key={compositionKey(strategy)} className="border-b last:border-0">
-                <td className={CELL}>
+                <th scope="row" className={ROW_HEADER}>
                   <span className="flex flex-wrap items-center gap-1">
                     {strategy.composition.map(({ categoryId, count }, index) => (
                       <Fragment key={categoryId}>
@@ -46,7 +46,7 @@ export function StrategyTable({ ui, config, strategies }: StrategyTableProps) {
                       </Fragment>
                     ))}
                   </span>
-                </td>
+                </th>
                 <td className={NUMERIC_CELL}>{strategy.students}</td>
                 <td className={NUMERIC_CELL}>{formatDecimal(strategy.meanFinal, locale)}</td>
               </tr>

@@ -56,7 +56,11 @@ test('session sans terminé : les cinq indicateurs de notes affichent —', asyn
   expect(screen.getByRole('region', { name: 'Histogramme' })).toBeInTheDocument()
   expect(screen.getByText('Aucune question tirée.')).toBeInTheDocument()
   expect(screen.getByText('Aucune question passée.')).toBeInTheDocument()
-  expect(screen.getByText("Aucun étudiant n'a terminé.")).toBeInTheDocument()
+  // Histogramme et stratégies : la même phrase, chacune dans son bloc.
+  for (const name of ['Histogramme', 'Stratégies']) {
+    const region = screen.getByRole('region', { name })
+    expect(within(region).getByText("Aucun étudiant n'a terminé.")).toBeInTheDocument()
+  }
 })
 
 test('un étudiant terminé : moyenne à 2 décimales, taux de catégorie en pourcentage', async () => {
@@ -124,4 +128,22 @@ test('locale « en » : titres des blocs en anglais', async () => {
 test('session inconnue : « introuvable »', async () => {
   renderAt('/session/nope/stats')
   expect(await screen.findByRole('heading', { name: 'Session introuvable' })).toBeInTheDocument()
+})
+
+test('ajustements : nombre, somme signée et moyenne', async () => {
+  await putSession(
+    makeSession({
+      students: [
+        makeStudent([], { id: 'student-1', adjustment: { value: 1 } }),
+        makeStudent([], { id: 'student-2', order: 2, adjustment: { value: -0.5 } }),
+        makeStudent([], { id: 'student-3', order: 3 }),
+      ],
+    }),
+  )
+  renderAt('/session/session-1/stats')
+
+  const region = await screen.findByRole('region', { name: 'Ajustements' })
+  expect(indicator(region, 'Nombre')).toBe('2')
+  expect(indicator(region, 'Somme')).toBe('+0,50')
+  expect(indicator(region, 'Moyenne')).toBe('0,25')
 })
