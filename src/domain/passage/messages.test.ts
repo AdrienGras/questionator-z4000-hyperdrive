@@ -12,6 +12,9 @@ const codes: PassageErrorCode[] = [
   'category_exhausted',
   'not_pending',
   'score_not_in_scale',
+  'skips_disabled',
+  'skip_quota_reached',
+  'reason_not_allowed',
 ]
 
 describe('passageErrorMessage', () => {
