@@ -3,12 +3,15 @@ import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
 import type { NormalizedCategory } from '@/domain/config/normalize'
 import type { Attempt } from '@/domain/session/types'
+import { computeScores } from '@/domain/scoring/score'
 import {
   availableQuestions,
   currentPending,
+  findDuplicate,
   isCategoryExhausted,
   nextStudent,
   questionIndex,
+  rosterScore,
   shouldAutoOpenAdjustment,
 } from './selectors'
 
@@ -161,5 +164,67 @@ describe('shouldAutoOpenAdjustment', () => {
 
   test('absent → faux', () => {
     expect(shouldAutoOpenAdjustment(makeStudent([], { absent: true }), one)).toBe(false)
+  })
+})
+
+describe('findDuplicate', () => {
+  const durand = makeStudent([], { id: 'durand', lastName: 'Durand', firstName: 'Élodie' })
+  const session = makeSession({ students: [durand] })
+
+  test('trouve un doublon malgré casse, accents et espaces', () => {
+    expect(findDuplicate(session, { lastName: '  durand ', firstName: 'ELODIE' })).toBe(durand)
+  })
+
+  test('renvoie undefined si un nom est vide après trim', () => {
+    expect(findDuplicate(session, { lastName: '   ', firstName: 'Élodie' })).toBeUndefined()
+  })
+
+  test('renvoie undefined pour un nom absent de la session', () => {
+    expect(findDuplicate(session, { lastName: 'Martin', firstName: 'Léa' })).toBeUndefined()
+  })
+
+  test("renvoie l'étudiant d'order le plus petit parmi plusieurs doublons", () => {
+    const late = makeStudent([], { id: 'late', lastName: 'Durand', firstName: 'Élodie', order: 3 })
+    const early = makeStudent([], {
+      id: 'early',
+      lastName: 'DURAND',
+      firstName: 'elodie',
+      order: 1,
+    })
+    const both = makeSession({ students: [late, early] })
+    expect(findDuplicate(both, { lastName: 'Durand', firstName: 'Élodie' })).toBe(early)
+  })
+})
+
+describe('rosterScore', () => {
+  const one = makeConfig({ questionsPerStudent: 2, maxRawScore: 8 })
+
+  test('absent → absent', () => {
+    expect(rosterScore(makeStudent([], { absent: true }), one)).toEqual({ kind: 'absent' })
+  })
+
+  test('todo → raw 0 et final null', () => {
+    expect(rosterScore(makeStudent(), one)).toEqual({ kind: 'scored', raw: 0, final: null })
+  })
+
+  test('in_progress → raw = somme des notes, final null', () => {
+    expect(rosterScore(makeStudent([3]), one)).toEqual({ kind: 'scored', raw: 3000, final: null })
+  })
+
+  test('done sans ajustement → final calculé', () => {
+    const student = makeStudent([3, 4])
+    expect(rosterScore(student, one)).toEqual({
+      kind: 'scored',
+      raw: 7000,
+      final: computeScores(student, one).final,
+    })
+  })
+
+  test("done avec ajustement → final inclut l'ajustement", () => {
+    const student = makeStudent([1, 2], { adjustment: { value: 1 } })
+    const scores = computeScores(student, one)
+    const result = rosterScore(student, one)
+    expect(result).toEqual({ kind: 'scored', raw: 3000, final: scores.final })
+    expect(scores.final).not.toBe(scores.converted)
   })
 })
