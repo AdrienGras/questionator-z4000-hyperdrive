@@ -22,7 +22,7 @@ export class PresentPage {
   }
 
   /** Tout le texte affiché dans la fenêtre. */
-  async text(): Promise<string> {
+  text(): Promise<string> {
     return this.page.getByRole('main').innerText()
   }
 

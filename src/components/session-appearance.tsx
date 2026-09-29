@@ -6,7 +6,7 @@ import { LocaleProvider, resolveSessionLocale } from '@/lib/i18n/locale-context'
 
 /** Le strict nécessaire à l'apparence : `NormalizedConfig` (examinateur) et `ProjectedAppearance` (projeté) le satisfont. */
 export type AppearanceConfig = {
-  locale?: NormalizedConfig['locale']
+  locale?: NonNullable<NormalizedConfig['locale']>
   theme: NormalizedConfig['theme']
   presentation: { defaultColorMode: NormalizedConfig['presentation']['defaultColorMode'] }
 }
