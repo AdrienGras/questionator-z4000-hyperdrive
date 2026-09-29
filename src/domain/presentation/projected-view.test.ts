@@ -74,6 +74,12 @@ describe('toProjectedView', () => {
     })
   })
 
+  test('locale de la config reprise dans appearance', () => {
+    const session = makeSession({ projection: { mode: 'waiting' } })
+    session.config.locale = 'en'
+    expect(toProjectedView(session).appearance.locale).toBe('en')
+  })
+
   test('studentId inconnu : waiting', () => {
     const session = makeSession({ projection: { mode: 'student', studentId: 'inconnu' } })
     expect(toProjectedView(session).mode).toBe('waiting')
@@ -169,6 +175,13 @@ describe('toProjectedView', () => {
     })
   })
 
+  test('révélé mais note finale non calculable (pas terminé) : aucun final', () => {
+    const student = makeStudent([1], { finalRevealedAt: revealed })
+    const view = studentView(sessionOf(student, { presentation: { finalScoreDisplay: 'both' } }))
+    expect(view.finished).toBe(false)
+    expect('final' in view).toBe(false)
+  })
+
   test('detail : dans l’ordre du tirage, passe sans points', () => {
     const student = makeStudent([1, { skipped: 'Hors sujet' }, 2])
     const view = studentView(
@@ -194,6 +207,9 @@ describe('toProjectedView', () => {
 
   describe('étanchéité', () => {
     const markers = ['FUITE-ANSWER', 'FUITE-TAG', 'FUITE-COMMENT', 'FUITE-REASON', 'FUITE-SKIP']
+    // Montant d'ajustement et date d'édition improbables : ne doivent jamais apparaître tels quels.
+    const editedAt = '1999-12-31T23:59:59.999Z'
+    const adjustmentValue = 0.37
     const other = makeStudent([], {
       id: 'student-secret-2',
       firstName: 'FUITE-PRENOM',
@@ -206,9 +222,13 @@ describe('toProjectedView', () => {
         scoring: { maxRawScore: 4, finalScale: 20 },
         presentation: { finalScoreDisplay: 'both', showStatsOnFinal: true },
       })
-      const question = config.categories[0]!.questions[0]!
-      question.answer = 'FUITE-ANSWER'
-      question.tags = ['FUITE-TAG']
+      for (const category of config.categories) {
+        for (const question of category.questions) {
+          question.answer = 'FUITE-ANSWER'
+          question.tags = ['FUITE-TAG']
+        }
+      }
+      for (const attempt of student.attempts) attempt.editedAt = editedAt
       return makeSession({ config, students: [student, other], projection })
     }
 
@@ -219,6 +239,8 @@ describe('toProjectedView', () => {
         ...markers,
         'FUITE-PRENOM',
         'FUITE-NOM',
+        editedAt,
+        String(adjustmentValue),
         ...session.students.map((student) => student.id),
       ]
       return forbidden.filter((value) => json.includes(value))
@@ -226,8 +248,7 @@ describe('toProjectedView', () => {
 
     const base = {
       comment: 'FUITE-COMMENT',
-      adjustment: { value: 1, reason: 'FUITE-REASON' },
-      editedAt: '2026-09-29T09:00:00.000Z',
+      adjustment: { value: adjustmentValue, reason: 'FUITE-REASON' },
     }
 
     test('waiting', () => {
