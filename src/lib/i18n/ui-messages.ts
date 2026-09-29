@@ -142,6 +142,11 @@ export type UiMessageParams = {
   side_panel_tab_students: NoParams
   students_list_label: NoParams
   students_projected: NoParams
+  projection_open: NoParams
+  projection_project: NoParams
+  projection_waiting: NoParams
+  projection_banner: { name: string }
+  projection_popup_blocked: NoParams
   students_row_scores: { raw: string; final: string }
   students_add: NoParams
   students_add_title: NoParams
@@ -371,6 +376,12 @@ const fr: Dictionary<UiMessageParams> = {
   side_panel_tab_students: () => 'Étudiants',
   students_list_label: () => 'Étudiants de la session',
   students_projected: () => 'Projeté',
+  projection_open: () => 'Ouvrir la vue projetée',
+  projection_project: () => 'Projeter cet étudiant',
+  projection_waiting: () => 'Écran d’attente',
+  projection_banner: ({ name }) => `La vue projetée montre ${name}.`,
+  projection_popup_blocked: () =>
+    'Autorisez les fenêtres pop-up pour ce site pour ouvrir la vue projetée.',
   students_row_scores: ({ raw, final }) => `${raw} · ${final}`,
   students_add: () => 'Ajouter un étudiant',
   students_add_title: () => 'Ajouter un étudiant',
@@ -557,6 +568,11 @@ const en: Dictionary<UiMessageParams> = {
   side_panel_tab_students: () => 'Students',
   students_list_label: () => 'Session students',
   students_projected: () => 'Projected',
+  projection_open: () => 'Open the projected view',
+  projection_project: () => 'Project this student',
+  projection_waiting: () => 'Waiting screen',
+  projection_banner: ({ name }) => `The projected view shows ${name}.`,
+  projection_popup_blocked: () => 'Allow pop-ups for this site to open the projected view.',
   students_row_scores: ({ raw, final }) => `${raw} · ${final}`,
   students_add: () => 'Add a student',
   students_add_title: () => 'Add a student',

@@ -5,13 +5,19 @@ import { questionIndex } from '@/domain/passage/selectors'
 import { formatScore } from '@/domain/scoring/format'
 import { computeScores } from '@/domain/scoring/score'
 import { studentStatus } from '@/domain/scoring/status'
+import type { Projection, ProjectionRequest } from '@/domain/passage/projection'
 import type { Student } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
+import { ProjectionControls } from './projection-controls'
 
 type PassageHeaderProps = Readonly<{
   ui: Ui
   config: NormalizedConfig
   student: Student | undefined
+  sessionId: string
+  projection: Projection
+  disabled: boolean
+  onProject: (projection: ProjectionRequest) => Promise<boolean>
 }>
 
 /**
@@ -19,7 +25,15 @@ type PassageHeaderProps = Readonly<{
  * position dans le passage et score brut courant. La progression n'est affichée que pendant
  * le passage (`todo` / `in_progress`) : le score final se lit dans `FinalScreen` (pas de doublon).
  */
-export function PassageHeader({ ui, config, student }: PassageHeaderProps) {
+export function PassageHeader({
+  ui,
+  config,
+  student,
+  sessionId,
+  projection,
+  disabled,
+  onProject,
+}: PassageHeaderProps) {
   const { text, locale } = ui
   const status = student === undefined ? undefined : studentStatus(student, config)
   const showProgress = status === 'todo' || status === 'in_progress'
@@ -46,7 +60,15 @@ export function PassageHeader({ ui, config, student }: PassageHeaderProps) {
           </div>
         )}
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
+        <ProjectionControls
+          ui={ui}
+          sessionId={sessionId}
+          projection={projection}
+          activeStudentId={student?.id}
+          disabled={disabled}
+          onProject={onProject}
+        />
         <ColorModeToggle ui={ui} />
       </div>
     </header>

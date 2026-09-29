@@ -3,14 +3,14 @@ import { requireStudent } from './require-student'
 
 export type Projection = Session['projection']
 
+/** Ce que l'examinateur demande de projeter : l'attente, ou un étudiant précis. */
+export type ProjectionRequest = { mode: 'waiting' } | { mode: 'student'; studentId: string }
+
 /**
  * Choisit ce que la fenêtre projetée affiche (F14) : l'attente, ou un étudiant. Même projection :
  * session renvoyée telle quelle (D67). En mode `waiting`, la clé `studentId` n'est pas conservée.
  */
-export function setProjection(
-  session: Session,
-  projection: { mode: 'waiting' } | { mode: 'student'; studentId: string },
-): Session {
+export function setProjection(session: Session, projection: ProjectionRequest): Session {
   if (projection.mode === 'waiting') {
     if (session.projection.mode === 'waiting' && session.projection.studentId === undefined) {
       return session

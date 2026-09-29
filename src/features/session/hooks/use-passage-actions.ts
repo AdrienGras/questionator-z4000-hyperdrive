@@ -7,6 +7,7 @@ import { setComment as setCommentTransition } from '@/domain/passage/comment'
 import { drawQuestion } from '@/domain/passage/draw'
 import { cryptoRandomInt } from '@/domain/passage/random'
 import { editScore as editScoreTransition } from '@/domain/passage/edit-score'
+import { setProjection, type ProjectionRequest } from '@/domain/passage/projection'
 import { resetStudent } from '@/domain/passage/reset'
 import { revealFinal as revealFinalTransition } from '@/domain/passage/reveal'
 import { scoreAttempt } from '@/domain/passage/score'
@@ -33,6 +34,7 @@ export type PassageActions = {
     names: { lastName: string; firstName: string },
     options: { activate: boolean },
   ) => Promise<boolean>
+  project: (projection: ProjectionRequest) => Promise<boolean>
   next: () => Promise<void>
   busy: boolean
   error: Error | null
@@ -187,6 +189,12 @@ export function usePassageActions(
     [run],
   )
 
+  // Même projection : `setProjection` renvoie la même session, rien n'est écrit (D67).
+  const project = useCallback(
+    (projection: ProjectionRequest) => run((session) => setProjection(session, projection)),
+    [run],
+  )
+
   const addStudent = useCallback(
     (names: { lastName: string; firstName: string }, options: { activate: boolean }) =>
       run((session) =>
@@ -213,6 +221,7 @@ export function usePassageActions(
     setComment,
     setAbsent,
     addStudent,
+    project,
     next,
     busy,
     error,
