@@ -38,6 +38,12 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [x] Helper `requireStudent(session, studentId)` dans `domain/passage/` : la recherche + `student_not_found` est copiée dans `drawQuestion`, `scoreAttempt`, `setActiveStudent` ; F10 et F11 en ajouteront deux copies. *Fait en F10.*
 - [ ] Test de la branche défensive `category_not_found` de `scoreAttempt` (inatteignable avec une config figée valide).
 - [ ] `studentStatus` et `computeScores` calculés deux fois (`ExaminerView` et `PassageHeader`) : passer le statut en prop si l'écran grossit.
+- [ ] Popup d'ajustement : focus initial sur le champ plutôt que sur le bouton « − » (vu dans le navigateur, F11).
+- [ ] Popup d'ajustement : en cas d'échec d'écriture, l'alerte `write_error` du dialogue et l'alerte générique de la page (« Rechargez la page ») s'affichent ensemble ; effacer l'erreur du hook quand un dialogue la prend en charge.
+- [ ] Boutons − / + de l'ajustement : s'arrêter à ±`finalScale` au lieu de laisser le message d'erreur apparaître.
+- [ ] Tests d'écran F11 : fixtures (`category` à trois questions, `config()`, `stored()`) copiées entre `adjustment.test.tsx` et `final-screen.test.tsx`, à sortir dans `src/testing/` pour F12/F14 ; cas `decimals: 0` (pas de 1) jamais testé à l'écran.
+- [ ] Un backup édité à la main avec `adjustment: { value: 0 }` affiche « 0,00 » au lieu de « aucun ».
+- [ ] `categoryButton` (`src/testing/passage-assertions.ts`) : `waitFor` au délai par défaut (1 s), à allonger si la CI devient lente.
 
 ## Accueil et backup
 

@@ -1,10 +1,8 @@
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import type { Session, Student } from '@/domain/session/types'
 import { PassageError } from './errors'
+import { normalizeReason } from './reason'
 import { requireStudent } from './require-student'
-
-/** Longueur maximale d'un motif de skip, après trim (D65). */
-export const MAX_SKIP_REASON_LENGTH = 200
 
 /** Passes restantes pour cet étudiant ; 0 si les skips sont désactivés. */
 export function skipsRemaining(student: Student, config: NormalizedConfig): number {
@@ -15,7 +13,7 @@ export function skipsRemaining(student: Student, config: NormalizedConfig): numb
 
 /**
  * Abandonne un attempt `pending` sans pénalité (F10). Le motif est trimé puis tronqué à
- * `MAX_SKIP_REASON_LENGTH` ; vide, il n'est pas enregistré. Hors `skips.reasons`, il n'est
+ * `MAX_REASON_LENGTH` ; vide, il n'est pas enregistré. Hors `skips.reasons`, il n'est
  * accepté que si `skips.allowFreeText` (D65).
  */
 export function skipAttempt(
@@ -32,15 +30,15 @@ export function skipAttempt(
   if (!skips.enabled) throw new PassageError('skips_disabled')
   if (skipsRemaining(student, session.config) === 0) throw new PassageError('skip_quota_reached')
 
-  const reason = (input.reason ?? '').trim().slice(0, MAX_SKIP_REASON_LENGTH)
-  if (reason !== '' && !skips.allowFreeText && !skips.reasons.includes(reason)) {
+  const reason = normalizeReason(input.reason)
+  if (reason !== undefined && !skips.allowFreeText && !skips.reasons.includes(reason)) {
     throw new PassageError('reason_not_allowed')
   }
 
   const skipped = {
     ...attempt,
     outcome: 'skipped' as const,
-    ...(reason === '' ? {} : { skipReason: reason }),
+    ...(reason === undefined ? {} : { skipReason: reason }),
   }
 
   return {

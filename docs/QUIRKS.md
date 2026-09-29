@@ -361,3 +361,12 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : avec `getBy*`, un élément déjà absent lève une erreur de requête au lieu du message clair de `waitForElementToBeRemoved`.
 **Workaround** : toujours `waitForElementToBeRemoved(() => screen.queryBy…(…))`.
 **Référence** : `src/features/session/passage-example.test.tsx`.
+
+## Un helper de test qui prend « la » liste de l'écran casse dès qu'une deuxième liste apparaît (2026-09-29)
+
+**Découvert** : F11, revue finale (test « Review Focus 2 » en échec 5 fois sur 6).
+**Symptôme** : `categoryButton('A')` lève « bouton de catégorie « A » introuvable » de façon intermittente, juste après une réinitialisation.
+**Cause** : le helper faisait `findByRole('list')` en supposant une seule liste à l'écran. `FinalScreen` ajoute une `<ol>` (détail du passage) qui contient aussi le libellé de catégorie ; selon le moment du rendu, la requête attrapait l'`<ol>` encore montée, sans bouton.
+**Workaround** : le helper attend (`waitFor`) une `<ul>` contenant un bouton au libellé voulu. Tout helper de requête de l'écran de passage doit viser son conteneur précis, jamais le premier élément d'un rôle générique.
+**Référence** : `src/testing/passage-assertions.ts`.
+

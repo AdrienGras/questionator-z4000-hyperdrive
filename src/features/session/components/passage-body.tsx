@@ -1,18 +1,17 @@
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import { skipsRemaining } from '@/domain/passage/skip'
-import { formatScore } from '@/domain/scoring/format'
-import { computeScores } from '@/domain/scoring/score'
 import type { StudentStatus } from '@/domain/scoring/status'
-import type { Attempt, Student } from '@/domain/session/types'
+import type { Attempt, Session, Student } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { AbsentState } from './absent-state'
 import { CategoryGrid } from './category-grid'
-import { DoneState } from './done-state'
+import { FinalScreen } from './final-screen'
 import { QuestionPanel } from './question-panel'
 
 type PassageBodyProps = Readonly<{
   ui: Ui
   config: NormalizedConfig
+  session: Session
   student: Student | undefined
   status: StudentStatus | undefined
   pending: Attempt | undefined
@@ -20,6 +19,14 @@ type PassageBodyProps = Readonly<{
   onDraw: (categoryId: string) => void
   onScore: (attemptId: string, value: number) => void
   onSkip: (attemptId: string, reason: string | undefined) => void
+  onAdjust: (
+    value: number,
+    reason: string | undefined,
+    options: { reveal: boolean },
+  ) => Promise<boolean>
+  onRevealFinal: () => Promise<boolean>
+  onReset: () => Promise<boolean>
+  onNext: () => void
 }>
 
 /**
@@ -29,6 +36,7 @@ type PassageBodyProps = Readonly<{
 export function PassageBody({
   ui,
   config,
+  session,
   student,
   status,
   pending,
@@ -36,8 +44,12 @@ export function PassageBody({
   onDraw,
   onScore,
   onSkip,
+  onAdjust,
+  onRevealFinal,
+  onReset,
+  onNext,
 }: PassageBodyProps) {
-  const { text, locale } = ui
+  const { text } = ui
 
   if (student === undefined) {
     return (
@@ -52,9 +64,17 @@ export function PassageBody({
 
   if (status === 'done') {
     return (
-      <DoneState
+      <FinalScreen
+        // Un autre étudiant terminé repart sans popup ouverte à la main.
+        key={student.id}
         ui={ui}
-        rawScore={formatScore(computeScores(student, config).raw, 'raw', config, locale)}
+        session={session}
+        student={student}
+        disabled={disabled}
+        onAdjust={onAdjust}
+        onRevealFinal={onRevealFinal}
+        onReset={onReset}
+        onNext={onNext}
       />
     )
   }

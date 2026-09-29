@@ -979,3 +979,18 @@ autre encodage 8 bits.
 **Pourquoi** : même principe que `score_not_in_scale` pour la note : l'interface ne peut pas produire ce cas, mais le domaine ne dépend pas d'elle (deux onglets, backup importé). La borne protège l'export (F16) et le side panel (F12) d'un texte sans fin.
 
 **Reporté dans** : `src/domain/passage/skip.ts`. Impacte F10, F12, F16.
+
+## D66 — F11 : ouverture de la popup de fin déduite de la base, suivant calculé dans la transaction (2026-09-29)
+
+**Question** : le ticket F11 ouvre la popup d'ajustement par un état local posé par la dernière note. Un rechargement avant sa fermeture, ou un étudiant terminé avant F11, laisserait `finalRevealedAt` vide pour toujours, puisque seule la fermeture de cette popup révèle la note (D31). Le ticket fait aussi calculer l'étudiant suivant par l'écran.
+
+**Décision** :
+- La popup s'ouvre en mode « fin de passage » tant que l'étudiant est `done` et que `finalRevealedAt` est vide (`shouldAutoOpenAdjustment`). Sa fermeture, enregistrer ou annuler, renseigne le champ. « Ajuster » la rouvre sans effet sur la révélation.
+- Enregistrer en fin de passage compose `revealFinal(setAdjustment(…))` en une seule écriture.
+- `goToNextStudent` calcule le suivant sur la session fraîche de la transaction et lève `no_next_student` s'il n'y a personne.
+- La justification d'ajustement suit la règle du motif de skip (D65) : `normalizeReason`, 200 caractères.
+
+**Pourquoi** : la révélation ne dépend plus d'un état perdu au rechargement, sans champ persisté de plus. Le calcul dans la transaction suit le principe de F09 (deux onglets examinateur).
+
+**Reporté dans** : spec F11. Impacte F11, F14.
+
