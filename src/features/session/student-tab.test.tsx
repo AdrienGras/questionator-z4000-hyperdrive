@@ -168,13 +168,13 @@ test('commentaire tapé puis changement d’étudiant avant le délai : enregist
   await mount([makeStudent([]), bob()])
 
   fireEvent.change(commentBox(), { target: { value: 'Pour Alice' } })
-  fireEvent.change(screen.getByRole('combobox', { name: 'Étudiant' }), {
-    target: { value: 'student-2' },
-  })
+  fireEvent.click(within(panel()).getByRole('tab', { name: 'Étudiants' }))
+  fireEvent.click(within(panel()).getByRole('button', { name: /Martin Bob/ }))
 
   await waitFor(async () => expect((await stored()).activeStudentId).toBe('student-2'))
   await waitFor(async () => expect((await storedStudent('student-1')).comment).toBe('Pour Alice'))
   expect((await storedStudent('student-2')).comment).toBeUndefined()
+  fireEvent.click(within(panel()).getByRole('tab', { name: 'Étudiant' }))
   await waitFor(() => expect(commentBox()).toHaveValue(''))
 })
 
@@ -278,12 +278,11 @@ test('dialogue d’absence ouvert pour Alice, Bob devient actif ailleurs : c’e
   const dialog = await screen.findByRole('alertdialog', { name: 'Déclarer Durand Alice absent ?' })
   // Un autre onglet change l'étudiant actif pendant que le dialogue est ouvert.
   await updateSession('session-1', (s) => setActiveStudent(s, 'student-2'))
-  // Le dialogue modal masque le reste de la page : `hidden` pour atteindre le sélecteur.
-  await waitFor(() =>
-    expect(screen.getByRole('combobox', { name: 'Étudiant', hidden: true })).toHaveValue(
-      'student-2',
-    ),
-  )
+  // Le dialogue modal masque le reste de la page : `hidden` pour atteindre la liste. Les onglets
+  // inactifs sont démontés, donc on passe par la base puis par la ligne surlignée de la liste.
+  await waitFor(async () => expect((await stored()).activeStudentId).toBe('student-2'))
+  // L'en-tête (masqué par le dialogue mais présent) montre bien Bob comme étudiant actif.
+  await waitFor(() => expect(screen.getByText('Martin Bob')).toBeInTheDocument())
   expect(screen.getByRole('alertdialog', { name: 'Déclarer Durand Alice absent ?' })).toBe(dialog)
 
   fireEvent.click(within(dialog).getByRole('button', { name: 'Déclarer absent' }))

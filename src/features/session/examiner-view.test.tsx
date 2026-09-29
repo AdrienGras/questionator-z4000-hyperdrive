@@ -33,6 +33,17 @@ function twoStudents(
   ]
 }
 
+/** Ouvre l'onglet « Étudiants » du panneau latéral et renvoie le bouton de l'étudiant. */
+function studentButton(name: string): HTMLElement {
+  const panel = screen.getByRole('complementary', { name: 'Panneau latéral' })
+  fireEvent.click(within(panel).getByRole('tab', { name: 'Étudiants' }))
+  const button = within(screen.getByRole('list', { name: 'Étudiants de la session' }))
+    .getAllByRole('button')
+    .find((b) => b.textContent.includes(name))
+  if (button === undefined) throw new Error(`bouton ${name} introuvable`)
+  return button
+}
+
 function sessionWith(
   config: NormalizedConfig,
   students: Student[],
@@ -41,7 +52,7 @@ function sessionWith(
   return makeSession({ config, students, activeStudentId })
 }
 
-test("en-tête et sélecteur pour l'étudiant actif par défaut", async () => {
+test("en-tête, liste des étudiants et changement d'étudiant actif", async () => {
   const config = makeConfig({ questionsPerStudent: 3 })
   await putSession(sessionWith(config, twoStudents(), 'student-1'))
   renderAt('/session/session-1')
@@ -52,14 +63,18 @@ test("en-tête et sélecteur pour l'étudiant actif par défaut", async () => {
   expect(screen.getByText('Score brut : 0')).toBeInTheDocument()
   expect(screen.getByRole('link', { name: "Retour à l'accueil" })).toHaveAttribute('href', '/')
 
-  const select = screen.getByRole('combobox', { name: 'Étudiant' })
-  const options = within(select).getAllByRole('option')
-  expect(options.map((option) => option.textContent)).toEqual([
-    'Durand Alice — à passer',
-    'Martin Bob — à passer',
-  ])
+  expect(screen.queryByRole('combobox', { name: 'Étudiant' })).not.toBeInTheDocument()
+  fireEvent.click(screen.getByRole('tab', { name: 'Étudiants' }))
+  const rows = within(screen.getByRole('list', { name: 'Étudiants de la session' })).getAllByRole(
+    'button',
+  )
+  expect(rows).toHaveLength(2)
+  expect(rows[0]).toHaveTextContent('Durand Alice')
+  expect(rows[0]).toHaveTextContent('à passer')
+  expect(rows[0]).toHaveAttribute('aria-current', 'true')
+  expect(rows[1]).toHaveTextContent('Martin Bob')
 
-  fireEvent.change(select, { target: { value: 'student-2' } })
+  fireEvent.click(studentButton('Martin Bob'))
 
   await screen.findByText('Martin Bob')
   const updated = await db.sessions.get('session-1')
@@ -74,8 +89,13 @@ test('activeStudentId inconnu affiche « Aucun étudiant sélectionné » sans p
   expect(
     await screen.findByRole('heading', { name: 'Aucun étudiant sélectionné' }),
   ).toBeInTheDocument()
-  expect(screen.getByRole('combobox', { name: 'Étudiant' })).toBeInTheDocument()
-  expect(screen.getByRole('combobox', { name: 'Étudiant' })).toHaveValue('')
+  expect(screen.queryByRole('combobox', { name: 'Étudiant' })).not.toBeInTheDocument()
+  studentButton('Durand Alice')
+  for (const button of within(
+    screen.getByRole('list', { name: 'Étudiants de la session' }),
+  ).getAllByRole('button')) {
+    expect(button).not.toHaveAttribute('aria-current')
+  }
   expect(screen.queryByText(/^Question /)).not.toBeInTheDocument()
 })
 
@@ -87,7 +107,13 @@ test('sans activeStudentId, « Aucun étudiant sélectionné »', async () => {
   expect(
     await screen.findByRole('heading', { name: 'Aucun étudiant sélectionné' }),
   ).toBeInTheDocument()
-  expect(screen.getByRole('combobox', { name: 'Étudiant' })).toBeInTheDocument()
+  expect(screen.queryByRole('combobox', { name: 'Étudiant' })).not.toBeInTheDocument()
+  studentButton('Durand Alice')
+  for (const button of within(
+    screen.getByRole('list', { name: 'Étudiants de la session' }),
+  ).getAllByRole('button')) {
+    expect(button).not.toHaveAttribute('aria-current')
+  }
   expect(screen.queryByText(/^Question /)).not.toBeInTheDocument()
 })
 
@@ -320,13 +346,12 @@ test('changer d’étudiant pendant un pending puis revenir réaffiche la même 
   if (question === undefined) throw new Error('question introuvable dans la fixture')
   await screen.findByRole('heading', { name: question.title })
 
-  const select = screen.getByRole('combobox', { name: 'Étudiant' })
-  fireEvent.change(select, { target: { value: 'student-2' } })
-  await screen.findByText('Martin Bob')
-  expect(screen.queryByRole('heading', { name: question.title })).not.toBeInTheDocument()
+  fireEvent.click(studentButton('Martin Bob'))
+  await waitFor(() =>
+    expect(screen.queryByRole('heading', { name: question.title })).not.toBeInTheDocument(),
+  )
 
-  fireEvent.change(select, { target: { value: 'student-1' } })
-  await screen.findByText('Durand Alice')
+  fireEvent.click(studentButton('Durand Alice'))
   expect(await screen.findByRole('heading', { name: question.title })).toBeInTheDocument()
 })
 
@@ -386,9 +411,7 @@ test('key={attempt.id} : changer d’étudiant vers un autre pending referme le 
   fireEvent.click(screen.getByText('Éléments de réponse'))
   expect(screen.getByText('Éléments de réponse').closest('details')).toHaveAttribute('open')
 
-  fireEvent.change(screen.getByRole('combobox', { name: 'Étudiant' }), {
-    target: { value: 'student-2' },
-  })
+  fireEvent.click(studentButton('Martin Bob'))
 
   await screen.findByRole('heading', { name: 'Q2' })
   expect(screen.getByText('Éléments de réponse').closest('details')).not.toHaveAttribute('open')
@@ -419,7 +442,7 @@ test('erreur affichée même hors du panneau de passage (étudiant retiré entre
   renderAt('/session/session-1')
 
   await screen.findByRole('heading', { name: 'Aucun étudiant sélectionné' })
-  const select = screen.getByRole('combobox', { name: 'Étudiant' })
+  const bobButton = studentButton('Martin Bob')
 
   const stored = await db.sessions.get('session-1')
   if (stored === undefined) throw new Error('session introuvable en base')
@@ -429,7 +452,7 @@ test('erreur affichée même hors du panneau de passage (étudiant retiré entre
   // rendu ne peut s'intercaler) : reproduit un id encore listé côté examinateur mais déjà retiré
   // en base au moment où `updateSession` relit la session fraîche (Review Focus 2).
   const removal = db.sessions.put(withoutBob)
-  fireEvent.change(select, { target: { value: 'student-2' } })
+  fireEvent.click(bobButton)
   await removal
 
   expect(await screen.findByRole('alert')).toHaveTextContent(

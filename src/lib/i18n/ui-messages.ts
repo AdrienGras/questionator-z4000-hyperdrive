@@ -95,8 +95,6 @@ export type UiMessageParams = {
   passage_score_heading: NoParams
   /** `value` : valeur du barème déjà mise en forme par l'appelant. */
   passage_score_button: { value: string }
-  passage_student_picker: NoParams
-  passage_student_option: { name: string; status: string }
   passage_status_todo: NoParams
   passage_status_in_progress: NoParams
   passage_status_done: NoParams
@@ -133,7 +131,9 @@ export type UiMessageParams = {
   side_panel_show: NoParams
   side_panel_tab_student: NoParams
   side_panel_tab_students: NoParams
-  side_panel_students_soon: NoParams
+  students_list_label: NoParams
+  students_projected: NoParams
+  students_row_scores: { raw: string; final: string }
   student_tab_questions: NoParams
   student_tab_totals: NoParams
   student_tab_no_student: NoParams
@@ -309,8 +309,6 @@ const fr: Dictionary<UiMessageParams> = {
   passage_answer: () => 'Éléments de réponse',
   passage_score_heading: () => 'Note',
   passage_score_button: ({ value }) => `Noter ${value}`,
-  passage_student_picker: () => 'Étudiant',
-  passage_student_option: ({ name, status }) => `${name} — ${status}`,
   passage_status_todo: () => 'à passer',
   passage_status_in_progress: () => 'en cours',
   passage_status_done: () => 'terminé',
@@ -345,7 +343,9 @@ const fr: Dictionary<UiMessageParams> = {
   side_panel_show: () => 'Afficher le panneau',
   side_panel_tab_student: () => 'Étudiant',
   side_panel_tab_students: () => 'Étudiants',
-  side_panel_students_soon: () => 'Liste des étudiants — bientôt disponible.',
+  students_list_label: () => 'Étudiants de la session',
+  students_projected: () => 'Projeté',
+  students_row_scores: ({ raw, final }) => `${raw} · ${final}`,
   student_tab_questions: () => 'Questions',
   student_tab_totals: () => 'Totaux',
   student_tab_no_student: () => 'Aucun étudiant sélectionné.',
@@ -479,8 +479,6 @@ const en: Dictionary<UiMessageParams> = {
   passage_answer: () => 'Answer notes',
   passage_score_heading: () => 'Score',
   passage_score_button: ({ value }) => `Score ${value}`,
-  passage_student_picker: () => 'Student',
-  passage_student_option: ({ name, status }) => `${name} — ${status}`,
   passage_status_todo: () => 'to do',
   passage_status_in_progress: () => 'in progress',
   passage_status_done: () => 'done',
@@ -515,7 +513,9 @@ const en: Dictionary<UiMessageParams> = {
   side_panel_show: () => 'Show panel',
   side_panel_tab_student: () => 'Student',
   side_panel_tab_students: () => 'Students',
-  side_panel_students_soon: () => 'Student list — coming soon.',
+  students_list_label: () => 'Session students',
+  students_projected: () => 'Projected',
+  students_row_scores: ({ raw, final }) => `${raw} · ${final}`,
   student_tab_questions: () => 'Questions',
   student_tab_totals: () => 'Totals',
   student_tab_no_student: () => 'No student selected.',
