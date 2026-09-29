@@ -134,6 +134,13 @@ export type UiMessageParams = {
   students_list_label: NoParams
   students_projected: NoParams
   students_row_scores: { raw: string; final: string }
+  students_add: NoParams
+  students_add_title: NoParams
+  students_add_last_name: NoParams
+  students_add_first_name: NoParams
+  students_add_submit: NoParams
+  students_add_and_start: NoParams
+  students_add_duplicate: { name: string }
   student_tab_questions: NoParams
   student_tab_totals: NoParams
   student_tab_no_student: NoParams
@@ -346,6 +353,13 @@ const fr: Dictionary<UiMessageParams> = {
   students_list_label: () => 'Étudiants de la session',
   students_projected: () => 'Projeté',
   students_row_scores: ({ raw, final }) => `${raw} · ${final}`,
+  students_add: () => 'Ajouter un étudiant',
+  students_add_title: () => 'Ajouter un étudiant',
+  students_add_last_name: () => 'Nom',
+  students_add_first_name: () => 'Prénom',
+  students_add_submit: () => 'Ajouter',
+  students_add_and_start: () => 'Ajouter et faire passer',
+  students_add_duplicate: ({ name }) => `${name} est déjà dans la liste.`,
   student_tab_questions: () => 'Questions',
   student_tab_totals: () => 'Totaux',
   student_tab_no_student: () => 'Aucun étudiant sélectionné.',
@@ -516,6 +530,13 @@ const en: Dictionary<UiMessageParams> = {
   students_list_label: () => 'Session students',
   students_projected: () => 'Projected',
   students_row_scores: ({ raw, final }) => `${raw} · ${final}`,
+  students_add: () => 'Add a student',
+  students_add_title: () => 'Add a student',
+  students_add_last_name: () => 'Last name',
+  students_add_first_name: () => 'First name',
+  students_add_submit: () => 'Add',
+  students_add_and_start: () => 'Add and start',
+  students_add_duplicate: ({ name }) => `${name} is already in the list.`,
   student_tab_questions: () => 'Questions',
   student_tab_totals: () => 'Totals',
   student_tab_no_student: () => 'No student selected.',

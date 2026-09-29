@@ -75,6 +75,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
                 activeStudentId={student?.id}
                 disabled={actions.busy}
                 onSelect={(studentId) => void actions.selectStudent(studentId)}
+                onAdd={actions.addStudent}
               />
             }
             studentTab={

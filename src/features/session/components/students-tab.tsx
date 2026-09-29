@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import type { Session } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
+import { AddStudentDialog } from './add-student-dialog'
 import { StudentRow } from './student-row'
 
 type StudentsTabProps = Readonly<{
@@ -10,6 +11,10 @@ type StudentsTabProps = Readonly<{
   activeStudentId: string | undefined
   disabled: boolean
   onSelect: (studentId: string) => void
+  onAdd: (
+    names: { lastName: string; firstName: string },
+    options: { activate: boolean },
+  ) => Promise<boolean>
   /** Pied de l'onglet, réservé aux actions de liste (F15, F16). */
   actionsSlot?: ReactNode
 }>
@@ -21,12 +26,14 @@ export function StudentsTab({
   activeStudentId,
   disabled,
   onSelect,
+  onAdd,
   actionsSlot,
 }: StudentsTabProps) {
   const { projection } = session
   const sorted = session.students.toSorted((a, b) => a.order - b.order)
   return (
     <div className="flex flex-col gap-4">
+      <AddStudentDialog ui={ui} session={session} disabled={disabled} onAdd={onAdd} />
       <ul aria-label={ui.text('students_list_label', {})} className="flex flex-col gap-2">
         {sorted.map((student) => (
           <StudentRow
