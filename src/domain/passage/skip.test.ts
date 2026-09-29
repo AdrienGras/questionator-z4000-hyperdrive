@@ -8,7 +8,8 @@ import { expectPassageError } from '@/testing/passage-assertions'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
 import { availableQuestions, questionIndex } from './selectors'
-import { MAX_SKIP_REASON_LENGTH, skipAttempt, skipsRemaining } from './skip'
+import { MAX_REASON_LENGTH } from './reason'
+import { skipAttempt, skipsRemaining } from './skip'
 
 function makeSkipConfig(skips: ParsedConfig['skips'] = {}): NormalizedConfig {
   const config = minimalConfig()
@@ -99,12 +100,12 @@ describe('skipAttempt', () => {
     expect(attempt !== undefined && 'skipReason' in attempt).toBe(false)
   })
 
-  test(`motif libre tronqué à ${MAX_SKIP_REASON_LENGTH} caractères`, () => {
-    const reason = 'x'.repeat(MAX_SKIP_REASON_LENGTH + 50)
+  test(`motif libre tronqué à ${MAX_REASON_LENGTH} caractères`, () => {
+    const reason = 'x'.repeat(MAX_REASON_LENGTH + 50)
 
     const result = skipAttempt(makeSkipSession(), { ...input, reason })
 
-    expect(result.students[0]?.attempts[0]?.skipReason).toBe('x'.repeat(MAX_SKIP_REASON_LENGTH))
+    expect(result.students[0]?.attempts[0]?.skipReason).toBe('x'.repeat(MAX_REASON_LENGTH))
   })
 
   test('student_not_found', () => {

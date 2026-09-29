@@ -11,7 +11,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { NormalizedConfig } from '@/domain/config/normalize'
-import { MAX_SKIP_REASON_LENGTH } from '@/domain/passage/skip'
+import { MAX_REASON_LENGTH } from '@/domain/passage/reason'
 import type { Ui } from '@/lib/i18n/use-ui'
 
 type SkipDialogProps = Readonly<{
@@ -99,7 +99,7 @@ function SkipForm({ ui, skips, onConfirm, onClose }: SkipFormProps) {
               <Input
                 id={freeTextId}
                 value={freeText}
-                maxLength={MAX_SKIP_REASON_LENGTH}
+                maxLength={MAX_REASON_LENGTH}
                 onChange={(event) => changeFreeText(event.target.value)}
               />
             </div>

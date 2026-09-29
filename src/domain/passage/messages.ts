@@ -17,6 +17,10 @@ const fr: Dictionary<PassageErrorParams> = {
   skips_disabled: () => 'Les passes sont désactivées pour cet oral.',
   skip_quota_reached: () => 'Plus de passe disponible pour cet étudiant.',
   reason_not_allowed: () => 'Ce motif ne fait pas partie des motifs proposés.',
+  student_not_done: () => 'Le passage de cet étudiant n’est pas terminé.',
+  adjustment_invalid: () =>
+    'L’ajustement doit être un multiple du pas d’arrondi, au plus la note maximale.',
+  no_next_student: () => 'Tous les étudiants sont passés.',
 }
 
 const en: Dictionary<PassageErrorParams> = {
@@ -32,6 +36,10 @@ const en: Dictionary<PassageErrorParams> = {
   skips_disabled: () => 'Skips are disabled for this exam.',
   skip_quota_reached: () => 'This student has no skips left.',
   reason_not_allowed: () => 'This reason is not one of the proposed reasons.',
+  student_not_done: () => 'This student’s exam is not complete.',
+  adjustment_invalid: () =>
+    'The adjustment must be a multiple of the rounding step, at most the maximum score.',
+  no_next_student: () => 'All students have been examined.',
 }
 
 export const PASSAGE_ERROR_MESSAGES: Record<Locale, Dictionary<PassageErrorParams>> = { fr, en }

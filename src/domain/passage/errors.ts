@@ -12,6 +12,9 @@ export type PassageErrorCode =
   | 'skips_disabled'
   | 'skip_quota_reached'
   | 'reason_not_allowed'
+  | 'student_not_done'
+  | 'adjustment_invalid'
+  | 'no_next_student'
 
 /** Erreur levée par une transition refusée ; la session d'entrée n'est jamais modifiée. */
 export class PassageError extends Error {
