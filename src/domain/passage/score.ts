@@ -1,13 +1,13 @@
 import type { Session } from '@/domain/session/types'
 import { PassageError } from './errors'
+import { requireStudent } from './require-student'
 
 /** Note un attempt `pending` (§7). La catégorie est retrouvée via `attempt.categoryId`. */
 export function scoreAttempt(
   session: Session,
   input: { studentId: string; attemptId: string; score: number },
 ): Session {
-  const student = session.students.find((s) => s.id === input.studentId)
-  if (student === undefined) throw new PassageError('student_not_found')
+  const student = requireStudent(session, input.studentId)
 
   const attempt = student.attempts.find((a) => a.id === input.attemptId)
   if (attempt === undefined) throw new PassageError('attempt_not_found')
