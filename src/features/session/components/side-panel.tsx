@@ -45,7 +45,7 @@ export function SidePanel({ ui, studentTab }: Readonly<{ ui: Ui; studentTab: Rea
         size="sm"
         className="self-end"
         aria-expanded={open}
-        aria-controls={contentId}
+        aria-controls={open ? contentId : undefined}
         onClick={toggle}
       >
         {text(open ? 'side_panel_hide' : 'side_panel_show', {})}

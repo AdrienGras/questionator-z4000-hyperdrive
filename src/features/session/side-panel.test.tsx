@@ -167,16 +167,17 @@ test('corriger une note depuis le panneau met à jour l’écran final', async (
 test('corriger une note pendant qu’une question est en cours ne la touche pas', async () => {
   await mount(makeStudent([1, 'pending']))
   expect(screen.getByRole('heading', { level: 2, name: 'Titre a-2' })).toBeInTheDocument()
+  const before = (await db.sessions.get('session-1'))?.students[0]?.attempts[1]
 
   fireEvent.change(within(panel()).getByRole('combobox', { name: 'Note de la question 1' }), {
     target: { value: '2' },
   })
 
-  await waitFor(async () => {
-    const stored = await db.sessions.get('session-1')
-    expect(stored?.students[0]?.attempts[0]?.score).toBe(2)
-  })
+  // Signe visible de la nouvelle session (liveQuery) avant toute assertion sur le DOM.
+  await waitFor(() => expect(screen.getByText('Score brut : 2')).toBeInTheDocument())
+  expect(within(panel()).getByRole('combobox', { name: 'Note de la question 1' })).toHaveValue('2')
   const stored = await db.sessions.get('session-1')
-  expect(stored?.students[0]?.attempts[1]?.outcome).toBe('pending')
+  expect(stored?.students[0]?.attempts[0]?.score).toBe(2)
+  expect(stored?.students[0]?.attempts[1]).toEqual(before)
   expect(screen.getByRole('heading', { level: 2, name: 'Titre a-2' })).toBeInTheDocument()
 })

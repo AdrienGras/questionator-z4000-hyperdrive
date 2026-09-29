@@ -125,8 +125,11 @@ test('détail du passage : rangs des questions notées, passée sans rang', asyn
     2,
   )
 
-  const detail = screen.getAllByRole('list').find((list) => list.closest('aside') === null)
-  if (detail === undefined) throw new Error('détail du passage introuvable')
+  const lists = screen.getAllByRole('list').filter((list) => list.closest('aside') === null)
+  const [detail] = lists
+  if (lists.length !== 1 || detail === undefined) {
+    throw new Error(`${lists.length} listes hors panneau, une seule attendue`)
+  }
   const items = within(detail).getAllByRole('listitem')
   expect(items).toHaveLength(3)
   expect(items[0]).toHaveTextContent(/^1\.\s*ATitre a-12 \/ 3$/)
