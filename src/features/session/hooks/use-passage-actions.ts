@@ -1,7 +1,10 @@
 import { useCallback, useRef, useState } from 'react'
-import { setActiveStudent } from '@/domain/passage/active-student'
+import { goToNextStudent, setActiveStudent } from '@/domain/passage/active-student'
+import { setAdjustment } from '@/domain/passage/adjust'
 import { drawQuestion } from '@/domain/passage/draw'
 import { cryptoRandomInt } from '@/domain/passage/random'
+import { resetStudent } from '@/domain/passage/reset'
+import { revealFinal as revealFinalTransition } from '@/domain/passage/reveal'
 import { scoreAttempt } from '@/domain/passage/score'
 import { skipAttempt } from '@/domain/passage/skip'
 import type { Session } from '@/domain/session/types'
@@ -12,6 +15,14 @@ export type PassageActions = {
   score: (attemptId: string, value: number) => Promise<void>
   skip: (attemptId: string, reason: string | undefined) => Promise<void>
   selectStudent: (studentId: string) => Promise<void>
+  adjust: (
+    value: number,
+    reason: string | undefined,
+    options: { reveal: boolean },
+  ) => Promise<boolean>
+  revealFinal: () => Promise<boolean>
+  reset: () => Promise<void>
+  next: () => Promise<void>
   busy: boolean
   error: Error | null
 }
@@ -37,16 +48,18 @@ export function usePassageActions(
   const inFlight = useRef(false)
 
   const run = useCallback(
-    async (mutator: (session: Session) => Session) => {
-      if (inFlight.current) return
+    async (mutator: (session: Session) => Session): Promise<boolean> => {
+      if (inFlight.current) return false
       inFlight.current = true
       setBusyState(true)
       setError(null)
       try {
         const written = await updateSession(sessionId, mutator)
         setLastWritten(written.updatedAt)
+        return true
       } catch (e) {
         setError(e instanceof Error ? e : new Error(String(e)))
+        return false
       } finally {
         inFlight.current = false
         setBusyState(false)
@@ -96,7 +109,37 @@ export function usePassageActions(
     [run],
   )
 
+  // Enregistrer en fin de passage = ajustement + révélation dans UNE écriture (D66).
+  const adjust = useCallback(
+    async (value: number, reason: string | undefined, options: { reveal: boolean }) => {
+      if (studentId === undefined) return false
+      return run((session) => {
+        const adjusted = setAdjustment(session, { studentId, value, reason })
+        if (!options.reveal) return adjusted
+        return revealFinalTransition(adjusted, { studentId }, { now: () => new Date() })
+      })
+    },
+    [run, studentId],
+  )
+
+  const revealFinal = useCallback(async () => {
+    if (studentId === undefined) return false
+    return run((session) =>
+      revealFinalTransition(session, { studentId }, { now: () => new Date() }),
+    )
+  }, [run, studentId])
+
+  const reset = useCallback(async () => {
+    if (studentId === undefined) return
+    await run((session) => resetStudent(session, studentId))
+  }, [run, studentId])
+
+  const next = useCallback(async () => {
+    if (studentId === undefined) return
+    await run((session) => goToNextStudent(session, studentId))
+  }, [run, studentId])
+
   const busy = busyState || (lastWritten !== undefined && sessionUpdatedAt < lastWritten)
 
-  return { draw, score, skip, selectStudent, busy, error }
+  return { draw, score, skip, selectStudent, adjust, revealFinal, reset, next, busy, error }
 }

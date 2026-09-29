@@ -6,7 +6,7 @@ import { PassageError } from '@/domain/passage/errors'
 import { db } from '@/lib/db/db'
 import { getSession, putSession, updateSession } from '@/lib/db/sessions'
 import { makeSession } from '@/testing/session-fixtures'
-import { makeStudent } from '@/testing/student-fixtures'
+import { makeConfig, makeStudent } from '@/testing/student-fixtures'
 import { usePassageActions } from './use-passage-actions'
 
 beforeEach(async () => {
@@ -168,5 +168,146 @@ describe('usePassageActions', () => {
       await result.current.score('attempt-1', 1)
     })
     expect(result.current.error).toBeNull()
+  })
+
+  describe('actions de fin de passage (F11)', () => {
+    const config = makeConfig({
+      questionsPerStudent: 1,
+      maxRawScore: 20,
+      finalScale: 20,
+      rounding: { mode: 'nearest', decimals: 2, step: 0.5 },
+    })
+
+    async function setup(withStudent = true) {
+      const initialSession = makeSession({
+        config,
+        students: [makeStudent([13.5]), makeStudent([], { id: 'student-2', order: 2 })],
+        activeStudentId: 'student-1',
+        projection: { mode: 'student', studentId: 'student-1' },
+      })
+      await putSession(initialSession)
+      const hook = renderHook(() =>
+        usePassageActions(
+          'session-1',
+          withStudent ? 'student-1' : undefined,
+          initialSession.updatedAt,
+        ),
+      )
+      return { initialSession, ...hook }
+    }
+
+    test('adjust avec reveal écrit ajustement et révélation dans la même écriture', async () => {
+      const { initialSession, result } = await setup()
+
+      let ok: boolean | undefined
+      await act(async () => {
+        ok = await result.current.adjust(1, 'r', { reveal: true })
+      })
+
+      expect(ok).toBe(true)
+      const session = await getSession('session-1')
+      const student = session?.students[0]
+      expect(student?.adjustment).toEqual({ value: 1, reason: 'r' })
+      expect(student?.finalRevealedAt).toBeDefined()
+      expect(session?.updatedAt).not.toBe(initialSession.updatedAt)
+    })
+
+    test('adjust sans reveal ne pose pas finalRevealedAt', async () => {
+      const { result } = await setup()
+
+      let ok: boolean | undefined
+      await act(async () => {
+        ok = await result.current.adjust(1, undefined, { reveal: false })
+      })
+
+      expect(ok).toBe(true)
+      const student = (await getSession('session-1'))?.students[0]
+      expect(student?.adjustment).toEqual({ value: 1 })
+      expect(student?.finalRevealedAt).toBeUndefined()
+    })
+
+    test('adjust invalide renvoie false avec une PassageError adjustment_invalid', async () => {
+      const { result } = await setup()
+
+      let ok: boolean | undefined
+      await act(async () => {
+        ok = await result.current.adjust(0.3, 'r', { reveal: true })
+      })
+
+      expect(ok).toBe(false)
+      const { error } = result.current
+      expect(error).toBeInstanceOf(PassageError)
+      if (!(error instanceof PassageError)) throw new Error('error devrait être une PassageError')
+      expect(error.code).toBe('adjustment_invalid')
+      const student = (await getSession('session-1'))?.students[0]
+      expect(student?.adjustment).toBeUndefined()
+      expect(student?.finalRevealedAt).toBeUndefined()
+    })
+
+    test('revealFinal écrit la date de révélation', async () => {
+      const { result } = await setup()
+
+      let ok: boolean | undefined
+      await act(async () => {
+        ok = await result.current.revealFinal()
+      })
+
+      expect(ok).toBe(true)
+      expect((await getSession('session-1'))?.students[0]?.finalRevealedAt).toBeDefined()
+    })
+
+    test('reset vide les attempts', async () => {
+      const { result } = await setup()
+
+      await act(async () => {
+        await result.current.reset()
+      })
+
+      expect((await getSession('session-1'))?.students[0]?.attempts).toEqual([])
+    })
+
+    test('next change activeStudentId sans toucher la projection', async () => {
+      const { result } = await setup()
+
+      await act(async () => {
+        await result.current.next()
+      })
+
+      const session = await getSession('session-1')
+      expect(session?.activeStudentId).toBe('student-2')
+      expect(session?.projection).toEqual({ mode: 'student', studentId: 'student-1' })
+    })
+
+    test('double adjust simultané : une seule écriture, le second renvoie false sans erreur', async () => {
+      const { result } = await setup()
+
+      let results: boolean[] = []
+      await act(async () => {
+        results = await Promise.all([
+          result.current.adjust(1, 'r', { reveal: true }),
+          result.current.adjust(1, 'r', { reveal: true }),
+        ])
+      })
+
+      expect(results).toEqual([true, false])
+      expect(result.current.error).toBeNull()
+    })
+
+    test('studentId indéfini : les quatre actions ne font rien', async () => {
+      const { initialSession, result } = await setup(false)
+
+      const results: boolean[] = []
+      await act(async () => {
+        results.push(await result.current.adjust(1, 'r', { reveal: true }))
+        results.push(await result.current.revealFinal())
+        await result.current.reset()
+        await result.current.next()
+      })
+
+      expect(results).toEqual([false, false])
+      expect(result.current.error).toBeNull()
+      const session = await getSession('session-1')
+      expect(session?.updatedAt).toBe(initialSession.updatedAt)
+    })
   })
 })
