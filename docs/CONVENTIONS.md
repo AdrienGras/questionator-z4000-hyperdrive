@@ -214,13 +214,14 @@ await updateSession(sessionId, (session) => {
   const student = session.students.find((s) => s.id === studentId)
   if (!student) throw new Error(`Étudiant « ${studentId} » introuvable`)
   if (student.attempts.some((a) => a.outcome === 'pending')) throw new Error('Une question est déjà en cours')
-  student.attempts.push(newAttempt) // modification en place autorisée : la session est une copie
-  return session
+  const updated = { ...student, attempts: [...student.attempts, newAttempt] }
+  return { ...session, students: session.students.map((s) => (s.id === studentId ? updated : s)) }
 })
 ```
 
 ### Règles tacites
 
+- Le mutator est immuable : il renvoie une nouvelle session, jamais l'entrée modifiée en place (les transitions de `src/domain/passage/` en sont l'exemple). Un mutator sans effet renvoie la session reçue ; `updateSession` ne l'écrit pas (pas de `put`, `updatedAt` inchangé).
 - Jamais d'`await` étranger à Dexie dans un mutator (le typage refuse un mutator `async`) : préparer les données avant l'appel.
 - Un mutator qui lève annule tout ; l'erreur remonte telle quelle à la feature, qui l'affiche.
 - Lecture : `useSession(id)` / `useSessions()` ; `undefined` = chargement, `null` = absente. Afficher un message si `useDbStatus()` vaut `'outdated'` (recharger) ou `'unavailable'` (stockage bloqué).

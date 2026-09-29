@@ -18,6 +18,7 @@ const codes: PassageErrorCode[] = [
   'student_not_done',
   'adjustment_invalid',
   'no_next_student',
+  'not_scored',
 ]
 
 describe('passageErrorMessage', () => {
