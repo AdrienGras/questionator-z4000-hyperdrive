@@ -137,6 +137,8 @@ corepack pnpm dlx shadcn@latest add <composant> -y
 - Un seul `cn`, dans `@/lib/utils`.
 - Après chaque `add` : vérifier que le CLI n'a pas réécrit l'import de `cn` ni ajouté la dépendance `cn` (QUIRKS 2026-09-25).
 - `DialogContent` du vendor affiche par défaut un bouton « Close » en anglais : toujours `showCloseButton={false}`, et fermer via un bouton traduit.
+- `Sheet` : même règle (`showCloseButton={false}` + bouton traduit). Les largeurs du vendor portent le préfixe `data-[side=right]:` : les surcharger avec le même préfixe (`data-[side=right]:w-full data-[side=right]:sm:max-w-md`), des classes nues perdent. Un tiroir ouvert par un bouton qui n'est pas son `SheetTrigger` doit recevoir `finalFocus` avec une ref vers ce bouton.
+- `shadcn add` peut demander d'écraser `button.tsx` : répondre Non (`printf 'n\n' | corepack pnpm dlx shadcn@latest add <composant>`), puis rétablir l'import de `cn` (`@/lib/utils`).
 - Couleurs uniquement via les tokens CSS (`bg-primary`, `text-foreground`…), jamais de couleur en dur : le thème de session (F07) surcharge ces tokens.
 
 ## oxlint — règles configurées

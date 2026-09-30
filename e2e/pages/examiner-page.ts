@@ -43,11 +43,14 @@ export class ExaminerPage {
     await this.page.getByRole('button', { name: `Noter ${value}`, exact: true }).click()
   }
 
-  /** Saisit le commentaire de l'étudiant actif, puis quitte le champ pour forcer l'enregistrement. */
+  /** Saisit le commentaire (onglet « Étudiant » du tiroir), quitte le champ pour forcer l'enregistrement, puis referme le tiroir. */
   async setComment(text: string): Promise<void> {
+    await this.openPanel('Étudiant')
     const field = this.page.getByRole('textbox', { name: 'Commentaire' })
     await field.fill(text)
     await field.blur()
+    await this.page.getByRole('button', { name: 'Fermer le panneau' }).click()
+    await this.page.getByRole('dialog', { name: 'Panneau latéral' }).waitFor({ state: 'hidden' })
   }
 
   /** Ouvre la vue projetée dans une nouvelle fenêtre et renvoie son écran. */
@@ -75,16 +78,23 @@ export class ExaminerPage {
       .click()
   }
 
+  /** Ouvre le tiroir « Panneau latéral » (fermé au chargement) et, si demandé, y choisit un onglet. */
+  async openPanel(tab?: 'Étudiant' | 'Étudiants'): Promise<void> {
+    await this.page.getByRole('button', { name: 'Panneau', exact: true }).click()
+    await this.page.getByRole('dialog', { name: 'Panneau latéral' }).waitFor()
+    if (tab) await this.page.getByRole('tab', { name: tab, exact: true }).click()
+  }
+
   /** Ouvre l'écran des statistiques (bouton de l'onglet « Étudiants » du panneau latéral). */
   async openStats(): Promise<StatsPage> {
-    await this.page.getByRole('tab', { name: 'Étudiants' }).click()
+    await this.openPanel('Étudiants')
     await this.page.getByRole('link', { name: 'Statistiques' }).click()
     return new StatsPage(this.page)
   }
 
   /** Clique « Exporter en Excel » (onglet « Étudiants ») et renvoie le téléchargement déclenché. */
   async exportWorkbook(): Promise<Download> {
-    await this.page.getByRole('tab', { name: 'Étudiants' }).click()
+    await this.openPanel('Étudiants')
     const [download] = await Promise.all([
       this.page.waitForEvent('download'),
       this.page.getByRole('button', { name: 'Exporter en Excel' }).click(),
