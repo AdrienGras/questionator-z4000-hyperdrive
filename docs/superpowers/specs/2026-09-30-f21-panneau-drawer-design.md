@@ -111,7 +111,7 @@ Le paragraphe de statut visible perd son `aria-live`. Une zone `<p className="sr
 - `examiner-view.test.tsx` (ou `students-tab.test.tsx`) : clic sur un autre étudiant → tiroir fermé et étudiant actif ; `add-student.test.tsx` : « Ajouter » → tiroir ouvert, « Ajouter et faire passer » → tiroir fermé.
 - États vides : « Afficher le panneau » depuis l'état absent ouvre l'onglet « Étudiant » ; depuis l'état « aucun étudiant », l'onglet « Étudiants ».
 - Commentaire : frappe, fermeture par Échap avant le délai d'autosave, commentaire présent en base.
-- `aria-live` : pendant l'enregistrement la zone annoncée est vide ; après, elle contient « Enregistré » ; en échec, « Échec » (libellé exact de `comment_error`).
+- `aria-live` : pendant l'enregistrement la zone annoncée est vide ; après, elle contient « Enregistré » ; en échec, « Échec de l’enregistrement » (libellé exact de `comment_error`).
 - e2e : `e2e/pages/examiner-page.ts` ouvre le tiroir avant de cliquer l'onglet « Étudiants » (stats, export) ; autres Page Objects vérifiés.
 
 ## Vérification visuelle (à consigner dans la PR)
@@ -134,7 +134,7 @@ Captures au navigateur à 1280 et 1920 px : tiroir ouvert sur chaque onglet, cla
 - [ ] Choisir un autre étudiant (liste, « Ajouter et faire passer ») referme le tiroir.
 - [ ] Depuis l'état absent ou « aucun étudiant », un bouton ouvre le panneau sur l'onglet utile.
 - [ ] Un commentaire en cours de saisie est enregistré si l'on ferme le panneau.
-- [ ] Le commentaire n'annonce que « Enregistré » ou « Échec ».
+- [ ] Le commentaire n'annonce que « Enregistré » ou « Échec de l’enregistrement ».
 - [ ] Tests d'écran et e2e adaptés.
 
 ## Hors périmètre
