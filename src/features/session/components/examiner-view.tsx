@@ -1,3 +1,6 @@
+import { IconChartBar } from '@tabler/icons-react'
+import { Link } from '@tanstack/react-router'
+import { buttonVariants } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { PassageError } from '@/domain/passage/errors'
 import { passageErrorMessage } from '@/domain/passage/messages'
@@ -87,6 +90,18 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
                 error={errorMessage}
                 onSelect={(studentId) => void actions.selectStudent(studentId)}
                 onAdd={actions.addStudent}
+                actionsSlot={
+                  // Lien stylé en bouton : l'écran des statistiques est une route (F15), et
+                  // `features/session` n'importe rien de `features/stats`.
+                  <Link
+                    to="/session/$sessionId/stats"
+                    params={{ sessionId: session.id }}
+                    className={buttonVariants({ variant: 'outline' })}
+                  >
+                    <IconChartBar aria-hidden />
+                    {ui.text('stats_open', {})}
+                  </Link>
+                }
               />
             }
             studentTab={

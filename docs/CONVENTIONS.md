@@ -294,6 +294,22 @@ try {
 - Les autres modules du dossier s'importent par chemin direct (`@/domain/backup/serialize`…), comme partout (pas de barrel) : un `index.ts` qui réexporterait le module lourd le remettrait dans le chunk principal.
 - `pnpm build` ne doit afficher aucun avertissement de taille de chunk.
 
+### Bibliothèque lourde confinée à une route (F15, Recharts)
+
+```ts
+// src/routes/<route>.tsx : seul le composant part en chunk paresseux
+export const Route = createFileRoute('/…')({
+  codeSplitGroupings: [['component']],
+  component: XPage,
+  errorComponent: XError,
+})
+```
+
+- Groupe nommé dans `vite.config.ts` (`build.rolldownOptions.output.codeSplitting.groups`) pour que la bibliothèque ait son chunk `_<nom>-<hash>.js` dans le manifeste ; sans lui Rolldown l'inline et aucun contrôle ne la voit. Le socle partagé (React…) va dans le groupe `vendor` en liste blanche, placé avant (QUIRKS 2026-09-30).
+- `pnpm check:bundle` (`scripts/check-initial-bundle.ts`, en CI après `pnpm build`) : aucune fuite depuis les entrées par imports statiques, et garde-fou de non-vacuité (le chunk existe et la route l'atteint). Pour une nouvelle bibliothèque, ajouter son motif et sa route au script, avec tests.
+- Règle `dependency-cruiser` de confinement (modèle : `recharts-only-in-stats`) : la bibliothèque et son wrapper `src/components/ui/` ne s'importent que depuis la feature.
+- `errorComponent` gardé dans le fichier de route (`codeSplitGroupings`) : découpé à part, il échouerait à se charger en même temps que le chunk qu'il doit couvrir. Il n'importe pas la bibliothèque.
+
 ## Fichier déposé et lu — squelette
 
 ```tsx

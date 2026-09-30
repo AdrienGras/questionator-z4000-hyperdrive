@@ -419,3 +419,24 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : après un `pnpm e2e`, un `vite preview` restait sur le port 4173 ; le run suivant, avec `reuseExistingServer`, testait l'ancien build sans prévenir (échecs inexpliqués, ou succès sur du code qui n'était plus le bon). Playwright tue le processus `pnpm`, pas son enfant `vite`.
 **Workaround** : `webServer.command` = `pnpm build && exec node_modules/.bin/vite preview --port 4173 --strictPort` : `exec` fait du serveur le processus suivi par Playwright. En cas de doute, `ss -ltnp | grep 4173` avant de relancer.
 **Référence** : `playwright.config.ts`.
+
+## Rolldown inline Recharts dans le chunk qui l'importe, invisible dans le manifeste (2026-09-30)
+
+**Découvert** : F15, contrôle du bundle initial.
+**Symptôme** : sans groupe `codeSplitting` nommé, Rolldown range Recharts et ses d3 dans le chunk de la route qui l'importe ; le manifeste Vite ne contient alors aucune clé `node_modules/recharts/…` ni chunk dédié, et un contrôle qui cherche Recharts dans le graphe initial passe sans rien voir, fuite ou pas.
+**Workaround** : groupe nommé `recharts` dans `build.rolldownOptions.output.codeSplitting.groups` (clé `_recharts-<hash>.js` dans le manifeste), et garde-fou de non-vacuité dans `check:bundle` : échec si ce chunk n'existe pas ou si la route des statistiques ne l'atteint plus.
+**Référence** : `vite.config.ts`, `scripts/check-initial-bundle.ts` (`findVacuityProblems`).
+
+## Un groupe `codeSplitting` embarque ses dépendances partagées : React finit dans `_recharts-*` (2026-09-30)
+
+**Découvert** : F15, contrôle du bundle initial.
+**Symptôme** : `includeDependenciesRecursively` vaut `true` par défaut ; le groupe `recharts` tire donc aussi React, `clsx`, `use-sync-external-store`…, que l'application partage avec Recharts. L'entrée importe alors `_recharts-*` statiquement pour obtenir React, et `check:bundle` échoue. La parade tentante `{ test: /node_modules[\\/]/, tags: ['$initial'] }` range tout le socle initial dans `vendor`, y compris un Recharts qui fuirait, et aveugle le contrôle.
+**Workaround** : groupe `vendor` en liste blanche (react, react-dom, scheduler, clsx, tiny-invariant, use-sync-external-store), placé avant `recharts`. Il échoue du bon côté : si la liste dérive, `check:bundle` rougit en CI et on la complète.
+**Référence** : `vite.config.ts`.
+
+## `autoCodeSplitting` met l'`errorComponent` dans un chunk paresseux (2026-09-30)
+
+**Découvert** : F15, revue finale.
+**Symptôme** : TanStack Router découpe par défaut `errorComponent` dans son propre chunk (`…stats.tsx?tsr-split=errorComponent` dans le manifeste). Quand le chunk de l'écran échoue à se charger (hors ligne, fichiers supprimés par un redéploiement), celui de l'`errorComponent` échoue aussi : l'écran d'erreur prévu ne s'affiche jamais. Les tests Vitest ne le voient pas (pas de découpage sous Vitest).
+**Workaround** : `codeSplitGroupings: [['component']]` dans les options de la route : seul le composant part en chunk paresseux, l'`errorComponent` reste dans le fichier de route chargé d'emblée. Vérifier après `pnpm build` qu'aucune clé `tsr-split=errorComponent` ne figure dans `dist/.vite/manifest.json` pour la route.
+**Référence** : `src/routes/session.$sessionId_.stats.tsx`.

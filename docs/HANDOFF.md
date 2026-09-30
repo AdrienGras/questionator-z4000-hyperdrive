@@ -20,6 +20,24 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-30 — F15 implémenté : statistiques de session
+
+**Dernière chose faite** : F14 était déjà mergé (PR #46) ; F15 (#15) sur `feat/f15-stats`, en processus complet : brainstorming (stratégie = multiensemble, contrôle du bundle sur le manifeste + e2e léger), spec `docs/superpowers/specs/2026-09-30-f15-stats-design.md` et D70, plan en 7 tâches, subagent-driven development (revue par tâche, revue finale sur Opus, une vague de correctifs relue).
+- Domaine `src/domain/stats/` : `computeStats(session): SessionStats`, sans texte, un fichier par bloc ; notes/histogramme/stratégies sur les terminés, catégories/tags/questions sur tous les attempts ; ex æquo par ordre de la config.
+- Écran `src/features/stats/` : cartes et tableaux, histogramme Recharts `aria-hidden` + tableau `sr-only`, `errorComponent` traduit gardé dans le chunk de la route (`codeSplitGroupings`).
+- Bundle : Rolldown inlinait Recharts (manifeste aveugle) → groupes `codeSplitting` `vendor` (liste blanche) puis `recharts` ; `pnpm check:bundle` (`scripts/check-initial-bundle.ts`) en CI après le build, avec garde de non-vacuité ; règle depcruise `recharts-only-in-stats`.
+- e2e `e2e/stats.spec.ts` (POM `StatsPage`).
+
+`pnpm check` vert (998 tests), `pnpm build` sans avertissement, `pnpm check:bundle` et `pnpm e2e` verts.
+
+**Trucs en suspens** : PR à ouvrir en brouillon, `sonar-check.sh --pr <n> --wait`, puis « Ready for review ». Écran non vérifié dans un vrai navigateur (mise en page, thème clair/sombre, histogramme) — seulement jsdom et l'e2e. Points mineurs reportés au BACKLOG § Statistiques.
+
+**Prochaine chose à creuser** : ouvrir la PR F15 et passer le gate SonarQube ; ensuite F16 (export Excel), qui reprend `computeStats` tel quel pour l'onglet « Statistiques » et dont le bouton va dans la même zone d'actions de l'onglet « Étudiants ».
+
+**Notes pour future Claude** : la variante `vendor` « tout `node_modules` tagué `$initial` » est tentante mais aveugle `check:bundle` (une fuite de Recharts part dans `vendor`) : garder la liste blanche, qui échoue bruyamment. `rtk vitest` ne sait pas lire la sortie ici : `rtk proxy npx vitest run <fichiers>`. À la fin d'un passage, le dialogue d'ajustement s'ouvre seul et bloque le side panel (à confirmer dans les e2e).
+
+---
+
 ## 2026-09-29 — F14 implémenté : mode présentateur
 
 **Dernière chose faite** : F13 mergé (PR #45), puis F14 (#14, « In progress ») sur `feat/f14-presenter`, en processus complet : brainstorming (une seule PR avec Playwright, absent projeté → attente, animation décidée côté projection, e2e en Page Object Model), spec `docs/superpowers/specs/2026-09-29-f14-presenter-design.md` et D69, plan en 5 tâches, subagent-driven development (revue par tâche, revue finale sur Opus, une vague de correctifs relue).

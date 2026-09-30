@@ -26,6 +26,8 @@ export default defineConfig({
   base: '/questionator-z4000-hyperdrive/',
   define: { __APP_VERSION__: JSON.stringify(readPackageVersion()) },
   build: {
+    // Manifeste lu par `scripts/check-initial-bundle.ts` (Recharts hors du bundle initial, D70).
+    manifest: true,
     // Limite GLOBALE (Vite l'applique à tous les chunks, pas seulement à celui-ci) : elle coupe
     // l'avertissement pour n'importe quel chunk jusqu'à 2,4 Mo. Elle est fixée ici pour couvrir le
     // seul chunk censé dépasser 500 kB, celui des icônes Tabler (chargé à la demande par
@@ -34,6 +36,33 @@ export default defineConfig({
     // 2 370,47 kB ; valeur fixée juste au-dessus). Effet de bord accepté : le budget des AUTRES
     // chunks n'est donc plus surveillé par Vite en dessous de 2,4 Mo (voir docs/BACKLOG.md).
     chunkSizeWarningLimit: 2400,
+    // Isole Recharts (et ses d3) dans un chunk nommé `recharts` : sans cela Rolldown l'inline dans le
+    // chunk qui l'importe et le manifeste ne le voit plus, donc `check:bundle` ne saurait pas
+    // détecter une fuite dans le bundle initial (D70).
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            // Socle partagé par l'application ET par Recharts (React, son runtime, `clsx`,
+            // `tiny-invariant`, `use-sync-external-store`). Cause : `includeDependenciesRecursively`
+            // vaut `true` par défaut, donc le groupe `recharts` avale aussi les dépendances qu'il
+            // partage avec l'appli ; sans ce groupe, React finit dans `_recharts-*` et l'entrée
+            // l'importe statiquement. Variante tentante écartée : `{ test: /node_modules[\\/]/,
+            // tags: ['$initial'] }` absorberait un Recharts qui fuit dans `vendor` et aveuglerait
+            // `check:bundle`. La liste blanche échoue du bon côté : si elle dérive, la CI rougit ;
+            // la compléter quand `check:bundle` signale une fuite.
+            {
+              name: 'vendor',
+              test: /node_modules[\\/](?:\.pnpm[\\/][^\\/]+[\\/]node_modules[\\/])?(?:react|react-dom|scheduler|clsx|tiny-invariant|use-sync-external-store)[\\/]/,
+            },
+            {
+              name: 'recharts',
+              test: /node_modules[\\/](?:\.pnpm[\\/][^\\/]+[\\/]node_modules[\\/])?(?:recharts|victory-vendor|d3-[^\\/]+)[\\/]/,
+            },
+          ],
+        },
+      },
+    },
   },
   plugins: [
     tanstackRouter({

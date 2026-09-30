@@ -1039,3 +1039,19 @@ autre encodage 8 bits.
 **Pourquoi** : D59 range les règles pures dans `domain/`. Afficher une absence devant la salle n'apporte rien et un identifiant orphelin ne doit pas devenir une erreur. Une liste blanche rend l'étanchéité robuste aux évolutions du modèle. La vue projetée reste en lecture seule (D30) sans second canal de synchronisation. Des pages par écran rendent les scénarios lisibles et réutilisables en F17.
 
 **Reporté dans** : spec F14. Impacte F14, F17.
+
+## D70 — F15 : stats dans `domain/stats/`, stratégie en multiensemble, périmètre des blocs, bundle vérifié sur le manifeste (2026-09-30)
+
+**Question** : le ticket F15 place `computeStats` dans `src/stats/` et laisse ouverts la nature d'une « combinaison » de catégories, le périmètre des blocs hors notes, le départage des ex æquo et la façon de prouver que Recharts reste hors du bundle initial.
+
+**Décision** :
+- `computeStats` et `SessionStats` vivent dans `src/domain/stats/`, un fichier par bloc.
+- Une stratégie est le **multiensemble** des catégories des questions notées (« Facile ×2 + Difficile ×1 ») ; l'ordre des choix est ignoré.
+- Notes, histogramme et stratégies : étudiants terminés. Catégories, tags et questions : tous les attempts (en cours compris).
+- Toutes les catégories et tous les tags de la config apparaissent, taux `null` sans attempt noté. Ex æquo départagés par l'ordre de la config.
+- Route non imbriquée `session.$sessionId_.stats.tsx`.
+- `recharts` et `components/ui/chart` confinés à `features/stats/` (dependency-cruiser) ; `pnpm check:bundle` lit le manifeste Vite et échoue si Recharts est atteint par les imports statiques depuis `index.html`.
+
+**Pourquoi** : D59 range les règles pures dans `domain/`. Avec `questionsPerStudent` fixé, seul le multiensemble distingue les stratégies. Les taux par catégorie décrivent les questions, pas les notes : un passage en cours les renseigne déjà. Un script sur le manifeste est déterministe et réutilisable par F17, là où un test réseau dépendrait des noms de chunks.
+
+**Reporté dans** : spec F15. Impacte F15, F16, F17.

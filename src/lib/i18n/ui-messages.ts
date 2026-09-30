@@ -197,6 +197,54 @@ export type UiMessageParams = {
   passage_skip_reasons: NoParams
   passage_skip_free_text: NoParams
   passage_skip_confirm: NoParams
+  stats_open: NoParams
+  stats_back: NoParams
+  stats_error: NoParams
+  stats_headcount: NoParams
+  stats_headcount_total: NoParams
+  stats_headcount_done: NoParams
+  stats_headcount_in_progress: NoParams
+  stats_headcount_todo: NoParams
+  stats_headcount_absent: NoParams
+  stats_headcount_added: NoParams
+  stats_grades: NoParams
+  stats_grades_count: NoParams
+  stats_grades_min: NoParams
+  stats_grades_max: NoParams
+  stats_grades_mean: NoParams
+  stats_grades_median: NoParams
+  stats_grades_std_dev: NoParams
+  stats_histogram: NoParams
+  stats_histogram_empty: NoParams
+  stats_col_range: NoParams
+  stats_categories: NoParams
+  stats_tags: NoParams
+  stats_tags_empty: NoParams
+  stats_top_drawn: NoParams
+  stats_top_drawn_empty: NoParams
+  stats_skipped: NoParams
+  stats_skipped_empty: NoParams
+  stats_strategies: NoParams
+  stats_strategies_empty: NoParams
+  stats_adjustments: NoParams
+  stats_adjustments_count: NoParams
+  stats_adjustments_sum: NoParams
+  stats_adjustments_mean: NoParams
+  stats_col_category: NoParams
+  stats_col_tag: NoParams
+  stats_col_question: NoParams
+  stats_col_choices: NoParams
+  stats_col_scored: NoParams
+  stats_col_success_rate: NoParams
+  stats_col_draws: NoParams
+  stats_col_skips: NoParams
+  stats_col_reasons: NoParams
+  stats_col_composition: NoParams
+  stats_col_students: NoParams
+  stats_col_mean_final: NoParams
+  /** Élément compté : motif de skip, catégorie d'une stratégie (« Facile ×2 »). */
+  stats_times: { label: string; count: number }
+  stats_no_reason: NoParams
 }
 
 type RoundingMode = 'nearest' | 'up' | 'down'
@@ -428,6 +476,53 @@ const fr: Dictionary<UiMessageParams> = {
   passage_skip_reasons: () => 'Motif (facultatif)',
   passage_skip_free_text: () => 'Autre motif',
   passage_skip_confirm: () => 'Passer',
+  stats_open: () => 'Statistiques',
+  stats_back: () => 'Retour au passage',
+  stats_error: () => "Les statistiques n'ont pas pu être chargées.",
+  stats_headcount: () => 'Effectifs',
+  stats_headcount_total: () => 'Étudiants',
+  stats_headcount_done: () => 'Terminés',
+  stats_headcount_in_progress: () => 'En cours',
+  stats_headcount_todo: () => 'À passer',
+  stats_headcount_absent: () => 'Absents',
+  stats_headcount_added: () => 'Ajoutés en séance',
+  stats_grades: () => 'Notes finales',
+  stats_grades_count: () => 'Étudiants notés',
+  stats_grades_min: () => 'Minimum',
+  stats_grades_max: () => 'Maximum',
+  stats_grades_mean: () => 'Moyenne',
+  stats_grades_median: () => 'Médiane',
+  stats_grades_std_dev: () => 'Écart-type',
+  stats_histogram: () => 'Histogramme',
+  stats_histogram_empty: () => "Aucun étudiant n'a terminé.",
+  stats_col_range: () => 'Intervalle de notes',
+  stats_categories: () => 'Catégories',
+  stats_tags: () => 'Tags',
+  stats_tags_empty: () => "Aucune question n'a de tag.",
+  stats_top_drawn: () => 'Questions les plus tirées',
+  stats_top_drawn_empty: () => 'Aucune question tirée.',
+  stats_skipped: () => 'Questions passées',
+  stats_skipped_empty: () => 'Aucune question passée.',
+  stats_strategies: () => 'Stratégies',
+  stats_strategies_empty: () => "Aucun étudiant n'a terminé.",
+  stats_adjustments: () => 'Ajustements',
+  stats_adjustments_count: () => 'Nombre',
+  stats_adjustments_sum: () => 'Somme',
+  stats_adjustments_mean: () => 'Moyenne',
+  stats_col_category: () => 'Catégorie',
+  stats_col_tag: () => 'Tag',
+  stats_col_question: () => 'Question',
+  stats_col_choices: () => 'Choix',
+  stats_col_scored: () => 'Questions notées',
+  stats_col_success_rate: () => 'Taux de réussite',
+  stats_col_draws: () => 'Tirages',
+  stats_col_skips: () => 'Passes',
+  stats_col_reasons: () => 'Motifs',
+  stats_col_composition: () => 'Composition',
+  stats_col_students: () => 'Étudiants',
+  stats_col_mean_final: () => 'Note finale moyenne',
+  stats_times: ({ label, count }) => `${label} ×${count}`,
+  stats_no_reason: () => 'sans motif',
 }
 
 const en: Dictionary<UiMessageParams> = {
@@ -620,6 +715,53 @@ const en: Dictionary<UiMessageParams> = {
   passage_skip_reasons: () => 'Reason (optional)',
   passage_skip_free_text: () => 'Other reason',
   passage_skip_confirm: () => 'Skip',
+  stats_open: () => 'Statistics',
+  stats_back: () => 'Back to the exam',
+  stats_error: () => 'The statistics could not be loaded.',
+  stats_headcount: () => 'Headcount',
+  stats_headcount_total: () => 'Students',
+  stats_headcount_done: () => 'Finished',
+  stats_headcount_in_progress: () => 'In progress',
+  stats_headcount_todo: () => 'Not started',
+  stats_headcount_absent: () => 'Absent',
+  stats_headcount_added: () => 'Added during the session',
+  stats_grades: () => 'Final scores',
+  stats_grades_count: () => 'Scored students',
+  stats_grades_min: () => 'Minimum',
+  stats_grades_max: () => 'Maximum',
+  stats_grades_mean: () => 'Mean',
+  stats_grades_median: () => 'Median',
+  stats_grades_std_dev: () => 'Standard deviation',
+  stats_histogram: () => 'Histogram',
+  stats_histogram_empty: () => 'No student has finished.',
+  stats_col_range: () => 'Score range',
+  stats_categories: () => 'Categories',
+  stats_tags: () => 'Tags',
+  stats_tags_empty: () => 'No question has a tag.',
+  stats_top_drawn: () => 'Most drawn questions',
+  stats_top_drawn_empty: () => 'No question drawn.',
+  stats_skipped: () => 'Skipped questions',
+  stats_skipped_empty: () => 'No question skipped.',
+  stats_strategies: () => 'Strategies',
+  stats_strategies_empty: () => 'No student has finished.',
+  stats_adjustments: () => 'Adjustments',
+  stats_adjustments_count: () => 'Count',
+  stats_adjustments_sum: () => 'Sum',
+  stats_adjustments_mean: () => 'Mean',
+  stats_col_category: () => 'Category',
+  stats_col_tag: () => 'Tag',
+  stats_col_question: () => 'Question',
+  stats_col_choices: () => 'Picks',
+  stats_col_scored: () => 'Scored questions',
+  stats_col_success_rate: () => 'Success rate',
+  stats_col_draws: () => 'Draws',
+  stats_col_skips: () => 'Skips',
+  stats_col_reasons: () => 'Reasons',
+  stats_col_composition: () => 'Composition',
+  stats_col_students: () => 'Students',
+  stats_col_mean_final: () => 'Mean final score',
+  stats_times: ({ label, count }) => `${label} ×${count}`,
+  stats_no_reason: () => 'no reason',
 }
 
 export const UI_MESSAGES: Record<Locale, Dictionary<UiMessageParams>> = { fr, en }

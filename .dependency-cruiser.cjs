@@ -100,6 +100,17 @@ module.exports = {
       from: { pathNot: ['^src/lib/db/', TEST, String.raw`^src/main\.tsx$`] },
       to: { path: String.raw`^src/lib/db/db\.ts$`, dependencyTypesNot: ['type-only'] },
     },
+    {
+      name: 'recharts-only-in-stats',
+      severity: 'error',
+      comment:
+        'Recharts et son wrapper shadcn (chart.tsx) restent confinés à features/stats/ pour rester hors du bundle initial (D70).',
+      from: { pathNot: ['^src/features/stats/', String.raw`^src/components/ui/chart\.tsx$`] },
+      to: {
+        // pnpm résout vers node_modules/.pnpm/recharts@<v>/node_modules/recharts/…
+        path: [String.raw`/node_modules/recharts/`, String.raw`^src/components/ui/chart\.tsx$`],
+      },
+    },
   ],
   options: {
     doNotFollow: { path: 'node_modules' },
