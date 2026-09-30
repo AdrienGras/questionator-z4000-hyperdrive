@@ -1,11 +1,11 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { beforeEach, expect, test, vi } from 'vitest'
 import { ExportButton } from '@/features/session/components/export-button'
-import { exportWorkbook } from '@/features/session/export-workbook'
+import { exportWorkbook } from '@/components/export/export-workbook'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeUi } from '@/testing/make-ui'
 
-vi.mock('@/features/session/export-workbook')
+vi.mock('@/components/export/export-workbook')
 
 beforeEach(() => {
   vi.mocked(exportWorkbook).mockReset()
