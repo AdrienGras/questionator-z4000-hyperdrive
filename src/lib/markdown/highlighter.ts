@@ -1,6 +1,6 @@
 import type { HighlighterCore, LanguageInput, TokensResult } from 'shiki/core'
+import { isPlainLanguage, normalizeLanguage } from '@/lib/markdown/languages'
 
-export type SupportedLanguage = 'php' | 'sql' | 'html' | 'javascript' | 'json' | 'bash'
 export type CssVariables = Readonly<Record<`--${string}`, string>>
 export type HighlightedToken = Readonly<{ offset: number; content: string; style: CssVariables }>
 export type HighlightedLine = Readonly<{ offset: number; tokens: readonly HighlightedToken[] }>
@@ -8,27 +8,9 @@ export type HighlightedCode = Readonly<{
   lines: readonly HighlightedLine[]
   rootStyle: CssVariables
 }>
-export type Highlight = (code: string, lang: SupportedLanguage) => Promise<HighlightedCode | null>
+export type Highlight = (code: string, lang: string) => Promise<HighlightedCode | null>
+export type LanguageCatalog = Readonly<Record<string, () => LanguageInput>>
 export type HighlighterLike = Pick<HighlighterCore, 'loadLanguage' | 'codeToTokens'>
-
-const LANGUAGE_ALIASES: Readonly<Record<string, SupportedLanguage>> = {
-  php: 'php',
-  sql: 'sql',
-  html: 'html',
-  javascript: 'javascript',
-  js: 'javascript',
-  json: 'json',
-  bash: 'bash',
-  sh: 'bash',
-  shell: 'bash',
-}
-
-/** Langage d'un bloc de code (`language-xxx` sans le préfixe) → langage chargé, ou `null` : texte brut. */
-export function resolveLanguage(lang: string | undefined): SupportedLanguage | null {
-  if (lang === undefined) return null
-  const key = lang.toLowerCase()
-  return Object.hasOwn(LANGUAGE_ALIASES, key) ? (LANGUAGE_ALIASES[key] ?? null) : null
-}
 
 function isCssVariable(name: string): name is `--${string}` {
   return name.startsWith('--')
@@ -76,18 +58,23 @@ function toHighlightedCode(result: TokensResult): HighlightedCode {
 }
 
 /**
- * Fabrique de la fonction de coloration, sur le modèle de `createIconLoader` (D37) : le highlighter
- * et chaque langage sont chargés une seule fois, et les promesses sont gardées dans la fermeture
- * pour rester testables avec des imports injectés, sans `vi.mock`. Un échec vide le cache fautif,
- * et l'appel suivant (donc le montage suivant d'un `CodeBlock`) réessaie. L'appel en échec renvoie
- * `null` : le bloc reste en texte brut.
+ * Fabrique de la fonction de coloration, sur le modèle de `createIconLoader` (D37) : le highlighter,
+ * le catalogue de grammaires et chaque grammaire sont chargés une seule fois, et les promesses sont
+ * gardées dans la fermeture pour rester testables avec des imports injectés, sans `vi.mock`. Un
+ * échec vide le cache fautif, et l'appel suivant (donc le montage suivant d'un `CodeBlock`)
+ * réessaie. L'appel en échec, un pseudo-langage ou un langage inconnu renvoient `null` : le bloc
+ * reste en texte brut.
+ *
+ * Le cache des grammaires est indexé par le module importé, pas par le nom demandé : un alias
+ * (`py`) et son identifiant (`python`) importent le même module ES, donc une seule grammaire.
  */
 export function createHighlightLoader(
   loadCore: () => Promise<HighlighterLike>,
-  languages: Readonly<Record<SupportedLanguage, () => LanguageInput>>,
+  loadCatalog: () => Promise<LanguageCatalog>,
 ): Highlight {
   let core: Promise<HighlighterLike> | undefined
-  const loadedLanguages = new Map<SupportedLanguage, Promise<void>>()
+  let catalog: Promise<LanguageCatalog> | undefined
+  const loadedLanguages = new Map<object, Promise<void>>()
 
   function getCore(): Promise<HighlighterLike> {
     core ??= loadCore().catch((error: unknown) => {
@@ -97,25 +84,43 @@ export function createHighlightLoader(
     return core
   }
 
-  function loadLanguage(highlighter: HighlighterLike, lang: SupportedLanguage): Promise<void> {
-    let loading = loadedLanguages.get(lang)
+  function getCatalog(): Promise<LanguageCatalog> {
+    catalog ??= loadCatalog().catch((error: unknown) => {
+      catalog = undefined
+      throw error
+    })
+    return catalog
+  }
+
+  async function loadLanguage(
+    highlighter: HighlighterLike,
+    grammar: () => LanguageInput,
+  ): Promise<void> {
+    const input = await grammar()
+    let loading = loadedLanguages.get(input)
     if (loading === undefined) {
-      loading = highlighter.loadLanguage(languages[lang]()).catch((error: unknown) => {
-        loadedLanguages.delete(lang)
+      loading = highlighter.loadLanguage(input).catch((error: unknown) => {
+        loadedLanguages.delete(input)
         throw error
       })
-      loadedLanguages.set(lang, loading)
+      loadedLanguages.set(input, loading)
     }
     return loading
   }
 
   return async function highlight(code, lang) {
+    const language = normalizeLanguage(lang)
+    if (isPlainLanguage(language)) return null
     try {
+      const languages = await getCatalog()
+      if (!Object.hasOwn(languages, language)) return null
+      const grammar = languages[language]
+      if (grammar === undefined) return null
       const highlighter = await getCore()
-      await loadLanguage(highlighter, lang)
+      await loadLanguage(highlighter, grammar)
       return toHighlightedCode(
         highlighter.codeToTokens(code, {
-          lang,
+          lang: language,
           themes: { light: 'github-light', dark: 'github-dark' },
           defaultColor: false,
         }),
@@ -126,15 +131,12 @@ export function createHighlightLoader(
   }
 }
 
-// Sous-chemins `shiki/langs/*.mjs` et `shiki/themes/*.mjs` : avec pnpm, `@shikijs/langs` n'est pas
-// résoluble depuis le projet. Tout passe par `import()` : Shiki reste hors du bundle initial.
-const LANGUAGE_IMPORTS: Readonly<Record<SupportedLanguage, () => LanguageInput>> = {
-  php: () => import('shiki/langs/php.mjs'),
-  sql: () => import('shiki/langs/sql.mjs'),
-  html: () => import('shiki/langs/html.mjs'),
-  javascript: () => import('shiki/langs/javascript.mjs'),
-  json: () => import('shiki/langs/json.mjs'),
-  bash: () => import('shiki/langs/bash.mjs'),
+// Catalogue complet de Shiki (identifiants et alias), chargé par `import()` : il reste dans le chunk
+// du highlighter, hors du bundle initial, et chaque grammaire n'est téléchargée qu'à la demande.
+// Sous-chemins `shiki/...` : avec pnpm, `@shikijs/*` n'est pas résoluble depuis le projet.
+async function loadShikiCatalog(): Promise<LanguageCatalog> {
+  const { bundledLanguages } = await import('shiki/langs')
+  return bundledLanguages
 }
 
 export const highlight: Highlight = createHighlightLoader(async () => {
@@ -147,4 +149,4 @@ export const highlight: Highlight = createHighlightLoader(async () => {
     langs: [],
     engine: createJavaScriptRegexEngine(),
   })
-}, LANGUAGE_IMPORTS)
+}, loadShikiCatalog)
