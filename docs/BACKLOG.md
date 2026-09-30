@@ -68,7 +68,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Dédoublonner les issues identiques avant affichage (clé React `chemin|message`).
 - [ ] Tests manquants : erreurs d'écriture (renommer, examinateur, suppression), réinitialisation du champ à la réouverture d'un dialogue, « toutes les issues » avec un décompte exact, `score` sur un attempt `skipped`, date locale vs UTC du nom de fichier (cas à 00:30).
 - [ ] Désactiver « Annuler » pendant un enregistrement en cours dans les dialogues de saisie.
-- [ ] Ajouter un favicon (404 sur `/favicon.ico` en preview et en prod). → #53
+- [x] Ajouter un favicon (404 sur `/favicon.ico` en preview et en prod). → #53 — réglé par F17 (D72), constaté en F19
 
 ## Création de session
 

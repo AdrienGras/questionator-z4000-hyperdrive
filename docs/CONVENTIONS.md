@@ -438,6 +438,40 @@ const skip = useCallback(
 - Pas d'aléa non injectable : `cryptoRandomInt(n)` (rejet, sans biais de modulo) et `pickUniform(items, random)`.
 - Bouton indisponible avec infobulle : `TooltipTrigger render={<Button aria-disabled="true" aria-describedby={id} …/>}` + texte `sr-only`, clic neutralisé dans le handler ; jamais `disabled` natif (pas de survol ni de focus), jamais de `span tabIndex={0}` (Sonar S6845).
 
+## Page examinateur — squelette
+
+Arbitrage : D75 (F19). Toute page examinateur (accueil, création, passage, stats) passe par `PageShell` (`src/components/page-shell.tsx`) : largeur, marges et barre de titre viennent de la coque, pas de la page.
+
+```tsx
+// src/features/<x>/<x>-page.tsx
+<PageShell
+  ui={ui}
+  title={t('ma_page_title')}
+  back={<Link to="/">{t('back_home')}</Link>} // optionnel
+  meta={<MaPageMeta />} // optionnel : ligne d'infos sous le titre
+  actions={<Button>…</Button>} // optionnel : à droite, avant le bouton de thème
+  onDrop={onDrop} // toute prop de <main> passe (`...rest`), `className` est fusionnée
+>
+  {contenu}
+</PageShell>
+
+// src/features/<x>/<x>-page.test.tsx
+import { expectColorModeToggleLast } from '@/testing/page-shell-assertions'
+
+test('le bouton de thème est le dernier de la barre de titre', async () => {
+  renderAt('/ma-page')
+  await screen.findByRole('heading', { name: 'Ma page' })
+  expectColorModeToggleLast()
+})
+```
+
+### Règles tacites
+
+- Jamais de `ColorModeToggle` dans une page ou un sous-composant d'en-tête : la coque le rend en dernier, c'est ce qui garantit sa place.
+- Pas de `<main>` ni de `<h1>` dans la page : la coque les fournit. Les boutons d'action vont dans `actions`, pas dans `children`.
+- Vue projetée, `DbStatusBanner`, `SessionFallback` et 404 restent hors coque (écrans d'état ou vue publique, sans titre ni actions).
+- Test de la page : `expectColorModeToggleLast()` ; `bannerInteractiveNames()` pour vérifier l'ordre des actions (`src/testing/page-shell-assertions.ts`).
+
 ## Test e2e Playwright — squelette (Page Object Model)
 
 Arbitrage : D33, D69 (F14). Un objet par écran dans `e2e/pages/`, construit sur une `Page` ; les specs n'enchaînent que des appels de pages et des `expect`.
