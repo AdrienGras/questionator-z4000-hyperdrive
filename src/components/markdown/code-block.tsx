@@ -17,7 +17,8 @@ function styleOf(variables: CssVariables): CSSProperties & CssVariables {
  * Bloc de code : texte brut tout de suite, puis tokens Shiki rendus en `<span>` React, sans
  * `dangerouslySetInnerHTML`. Chaque token porte `--shiki-light` et `--shiki-dark`, et les règles
  * `.shiki` de `index.css` choisissent l'une ou l'autre selon `.dark` : la bascule de mode ne refait
- * aucun rendu. Sans langage ou en pseudo-langage (`text`), pas d'appel à `highlight`. Langage inconnu ou coloration en échec : le texte brut reste (D27).
+ * aucun rendu. Sans langage ou en pseudo-langage (`text`), pas d'appel à `highlight`. Langage
+ * inconnu ou coloration en échec : le texte brut reste (D27).
  */
 export function CodeBlock({
   code,
