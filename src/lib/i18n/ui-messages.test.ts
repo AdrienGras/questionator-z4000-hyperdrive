@@ -142,6 +142,7 @@ const SAMPLE: UiMessageParams = {
   projection_open: {},
   projection_project: {},
   projection_waiting: {},
+  projection_preview_label: {},
   projection_banner: { name: 'Ada Lovelace' },
   projection_popup_blocked: {},
   students_row_scores: { raw: '2', final: '12,5' },
