@@ -1,13 +1,52 @@
 import 'fake-indexeddb/auto'
 import { screen } from '@testing-library/react'
-import { beforeEach, expect, test } from 'vitest'
+import { beforeEach, expect, test, vi } from 'vitest'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
+import { pwaUpdate, type PwaUpdate } from '@/lib/pwa/pwa-update'
+import { makeFakeContainer } from '@/testing/pwa-fixtures'
+import { renderAt } from '@/testing/render-at'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig } from '@/testing/student-fixtures'
-import { renderAt } from '@/testing/render-at'
+
+// Le singleton est remplacé par une instance neuve à chaque test : aucune fuite d'état.
+const pwa = vi.hoisted(() => ({ current: undefined as PwaUpdate | undefined }))
+vi.mock('@/lib/pwa/pwa-update', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/pwa/pwa-update')>()
+  return {
+    ...actual,
+    get pwaUpdate() {
+      pwa.current ??= new actual.PwaUpdate(() => undefined)
+      return pwa.current
+    },
+  }
+})
+
+// jsdom n'implémente pas `location.reload` : la vue projetée reçoit un rechargement espion.
+const reload = vi.hoisted(() => vi.fn<() => void>())
+vi.mock('@/lib/pwa/hooks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/pwa/hooks')>()
+  return {
+    ...actual,
+    useReloadOnUpdate: (dbOutdated: boolean, update?: PwaUpdate) =>
+      actual.useReloadOnUpdate(dbOutdated, update, reload),
+  }
+})
+
+/** Fait attendre une nouvelle version dans l'instance courante ; `activate()` simule sa prise de
+ * contrôle depuis un autre onglet. */
+function makeUpdateWaiting() {
+  const container = makeFakeContainer(true)
+  pwaUpdate.start((options) => {
+    options.onNeedRefresh?.()
+    return () => Promise.resolve()
+  }, container)
+  return { activate: () => container.dispatchEvent(new Event('controllerchange')) }
+}
 
 beforeEach(async () => {
+  pwa.current = undefined
+  reload.mockClear()
   await db.sessions.clear()
 })
 
@@ -151,4 +190,30 @@ test("d'une session à l'autre, --primary, la classe .dark et lang suivent la co
   expect(document.documentElement.style.getPropertyValue('--primary')).toBe('')
   expect(document.documentElement).not.toHaveClass('dark')
   expect(document.documentElement.lang).toBe('fr')
+})
+
+test('la pastille de mise à jour s’affiche sur l’accueil quand une version attend', async () => {
+  makeUpdateWaiting()
+  renderAt('/')
+  expect(await screen.findByRole('status')).toHaveTextContent('Nouvelle version disponible')
+})
+
+test('sur /present/…, une version en attente : ni pastille, ni rechargement', async () => {
+  await putSession(themedSession())
+  makeUpdateWaiting()
+  renderAt('/present/session-1')
+  await screen.findByRole('heading', { name: 'Oral de PHP' })
+  expect(screen.queryByRole('status')).toBeNull()
+  // Recharger ici ferait boucler la vue projetée : la version attend toujours après rechargement.
+  expect(reload).not.toHaveBeenCalled()
+})
+
+test('sur /present/…, une version activée ailleurs : rechargement unique, sans pastille', async () => {
+  await putSession(themedSession())
+  const { activate } = makeUpdateWaiting()
+  activate()
+  renderAt('/present/session-1')
+  await screen.findByRole('heading', { name: 'Oral de PHP' })
+  expect(screen.queryByRole('status')).toBeNull()
+  expect(reload).toHaveBeenCalledTimes(1)
 })

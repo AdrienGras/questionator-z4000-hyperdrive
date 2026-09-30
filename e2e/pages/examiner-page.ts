@@ -10,11 +10,15 @@ export class ExaminerPage {
   /** Titre de l'écran de fin de passage. */
   readonly passageDone: Locator
 
+  /** Un jeton de code colorié par Shiki (`span` aux variables `--shiki-*` dans un `pre`). */
+  readonly highlightedCode: Locator
+
   private readonly page: Page
 
   constructor(page: Page) {
     this.page = page
     this.passageDone = page.getByRole('heading', { level: 2, name: 'Passage terminé' })
+    this.highlightedCode = page.locator('pre span[style*="--shiki-"]').first()
     this.banner = page.getByRole('status').filter({ hasText: 'La vue projetée montre' })
   }
 

@@ -107,3 +107,12 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Autofiltre sur Synthèse et Détail (hors périmètre F16, D35) si la consolidation le demande.
 - [ ] Export depuis la carte de session de l'accueil (à côté du backup), sans ouvrir la vue examinateur.
 - [ ] Garde double-clic de `ExportButton` sur un `useRef` plutôt que sur l'état du rendu.
+
+## Hors ligne
+
+- [ ] Vérifier à la main l'installation dans Chrome et Edge, et la mise à jour au premier déploiement réel après F17 (critères de #17).
+- [ ] Vue projetée ouverte sans contrôleur (Shift+Reload) : son premier `controllerchange` réel est pris pour celui de `clientsClaim`, elle ne se recharge pas à l'activation d'une version (sans effet en ligne ; hors ligne, ses chunks à la demande manqueraient).
+- [ ] Plafond `maximumFileSizeToCacheInBytes` à ~31 kB du chunk Tabler : une montée de `@tabler/icons-react` fera rougir `check:precache`, relever alors la valeur.
+- [ ] Icônes du manifeste pré-cachées deux fois (motif glob + `includeManifestIcons`), sans effet ; `includeManifestIcons: false` pour un manifeste net.
+- [ ] Vérification périodique des mises à jour pendant la journée, message « prêt hors ligne » (hors périmètre F17).
+- [ ] e2e : `highlightedCode` (`.first()`) peut se satisfaire d'un bloc de la question précédente ; le scoper à la question courante.

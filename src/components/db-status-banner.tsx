@@ -7,7 +7,7 @@ type DbStatusBannerProps = Readonly<{
   status: DbStatus
 }>
 
-/** Bandeau d'état de la base (accueil, création) : recharger si `outdated`, alerte si `unavailable`. */
+/** Bandeau d'état de la base (accueil, création, vue projetée) : recharger si `outdated`, alerte si `unavailable`. */
 export function DbStatusBanner({ ui, status }: DbStatusBannerProps) {
   const { text } = ui
   if (status === 'outdated') {
