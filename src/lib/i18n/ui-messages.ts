@@ -8,6 +8,15 @@ export type UiMessageParams = {
   back_home: NoParams
   home_create: NoParams
   home_import: NoParams
+  home_actions_title: NoParams
+  home_sessions_title: NoParams
+  home_create_title: NoParams
+  home_create_body: NoParams
+  home_students_example_link: NoParams
+  home_config_example_link: NoParams
+  home_config_schema_link: NoParams
+  home_import_title: NoParams
+  home_import_body: NoParams
   persistence_warning_label: NoParams
   persistence_warning: NoParams
   db_outdated: NoParams
@@ -294,6 +303,17 @@ const fr: Dictionary<UiMessageParams> = {
   back_home: () => "Retour à l'accueil",
   home_create: () => 'Créer une session',
   home_import: () => 'Importer un backup',
+  home_actions_title: () => 'Actions',
+  home_sessions_title: () => 'Sessions',
+  home_create_title: () => 'Nouvelle session',
+  home_create_body: () =>
+    "Partez d'une liste d'étudiants (CSV nom / prénom) et d'un fichier de configuration (JSON : catégories, questions, barèmes).",
+  home_students_example_link: () => "Télécharger la liste d'étudiants d'exemple",
+  home_config_example_link: () => "Télécharger la config d'exemple",
+  home_config_schema_link: () => 'JSON Schema de la config',
+  home_import_title: () => 'Restaurer une session',
+  home_import_body: () =>
+    "Restaurez une session à partir d'un fichier .json créé par « Exporter un backup ». Vous pouvez aussi déposer le fichier n'importe où sur la page.",
   persistence_warning_label: () => 'Stockage non garanti',
   persistence_warning: () =>
     "Le navigateur n'a pas garanti la conservation des données : il peut effacer vos sessions s'il manque d'espace. Exportez régulièrement un backup.",
@@ -545,6 +565,17 @@ const en: Dictionary<UiMessageParams> = {
   back_home: () => 'Back to home',
   home_create: () => 'Create a session',
   home_import: () => 'Import a backup',
+  home_actions_title: () => 'Actions',
+  home_sessions_title: () => 'Sessions',
+  home_create_title: () => 'New session',
+  home_create_body: () =>
+    'Start from a student list (CSV, last name / first name) and a configuration file (JSON: categories, questions, scales).',
+  home_students_example_link: () => 'Download the example student list',
+  home_config_example_link: () => 'Download the example config',
+  home_config_schema_link: () => 'Config JSON Schema',
+  home_import_title: () => 'Restore a session',
+  home_import_body: () =>
+    'Restore a session from a .json file made with “Export a backup”. You can also drop the file anywhere on the page.',
   persistence_warning_label: () => 'Storage not guaranteed',
   persistence_warning: () =>
     'The browser did not guarantee data retention: it may erase your sessions when space runs low. Export a backup regularly.',
