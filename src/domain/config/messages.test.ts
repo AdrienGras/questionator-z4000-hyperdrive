@@ -112,4 +112,19 @@ describe('formatConfigIssue', () => {
       }
     }
   })
+
+  test('unknown_code_language : textes fr et en', () => {
+    const issue: ConfigIssue = {
+      severity: 'warning',
+      code: 'unknown_code_language',
+      path: ['categories', 0, 'questions', 0, 'prompt'],
+      params: { language: 'pyhton', questionId: 'q1' },
+    }
+    expect(formatConfigIssue(issue, 'fr')).toBe(
+      "Le langage « pyhton » d'un bloc de code de la question q1 n'est pas reconnu : il s'affichera en texte brut.",
+    )
+    expect(formatConfigIssue(issue, 'en')).toBe(
+      'The language “pyhton” of a code block in question q1 is not recognized: it will be shown as plain text.',
+    )
+  })
 })
