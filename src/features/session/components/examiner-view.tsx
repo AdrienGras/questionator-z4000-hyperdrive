@@ -37,7 +37,7 @@ function errorText(error: Error | null, ui: Ui): string | undefined {
  * Écran de passage (§7) : coque commune (titre, projection, thème), aiguillage par statut de
  * l'étudiant actif, grille de tirage, panneau de la question en cours et panneau latéral (F12),
  * en tiroir ouvert par le bouton « Panneau » de la barre de titre (F21). Le tiroir se ferme après
- * un changement d'étudiant actif réussi ; il reste ouvert sinon, erreur visible dans l'onglet.
+ * un changement d'étudiant actif réussi ; il reste ouvert sinon, erreur visible dans le tiroir, au-dessus des onglets.
  */
 export function ExaminerView({ session }: Readonly<{ session: Session }>) {
   const ui = useUi()

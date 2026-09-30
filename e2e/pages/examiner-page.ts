@@ -105,6 +105,8 @@ export class ExaminerPage {
       this.page.waitForEvent('download'),
       this.page.getByRole('button', { name: 'Exporter en Excel' }).click(),
     ])
+    await this.page.getByRole('button', { name: 'Fermer le panneau' }).click()
+    await this.page.getByRole('dialog', { name: 'Panneau latéral' }).waitFor({ state: 'hidden' })
     return download
   }
 }

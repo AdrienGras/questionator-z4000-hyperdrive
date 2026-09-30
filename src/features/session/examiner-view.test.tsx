@@ -555,7 +555,7 @@ test('échec du changement d’étudiant : le tiroir reste ouvert', async () => 
   const stored = await db.sessions.get('session-1')
   if (stored === undefined) throw new Error('session introuvable en base')
   const withoutBob = { ...stored, students: stored.students.filter((s) => s.id !== 'student-2') }
-  // Même écriture concurrente que ci-dessous : l'id cliqué n'existe plus en base.
+  // Même écriture concurrente que ci-dessus : l'id cliqué n'existe plus en base.
   const removal = db.sessions.put(withoutBob)
   fireEvent.click(bobButton)
   await removal

@@ -378,5 +378,8 @@ test('commentaire tapé puis tiroir fermé par Échap avant le délai : enregist
   fireEvent.change(commentBox(), { target: { value: 'Avant fermeture' } })
   await closePanel()
 
-  await waitFor(async () => expect((await storedStudent()).comment).toBe('Avant fermeture'))
+  // Délai borné sous les 500 ms d'autosave : seule l'écriture au démontage peut arriver à temps.
+  await waitFor(async () => expect((await storedStudent()).comment).toBe('Avant fermeture'), {
+    timeout: 250,
+  })
 })
