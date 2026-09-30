@@ -9,6 +9,7 @@ import { useIdle } from '@/features/present/hooks/use-idle'
 import { useProjectedView } from '@/features/present/hooks/use-projected-view'
 import { useDbStatus } from '@/lib/db/hooks'
 import { useUi } from '@/lib/i18n/use-ui'
+import { useReloadOnUpdate } from '@/lib/pwa/hooks'
 import { cn } from '@/lib/utils'
 
 const IDLE_DELAY_MS = 3000
@@ -22,6 +23,8 @@ export function PresentPage() {
   const status = useDbStatus()
   const ui = useUi()
   const idle = useIdle(IDLE_DELAY_MS)
+  // Avant les retours anticipés (règle des hooks) : la vue projetée se recharge seule (D72).
+  useReloadOnUpdate(status === 'outdated')
   if (status !== 'open')
     return (
       <main className="mx-auto flex min-h-svh max-w-3xl flex-col gap-6 p-4 sm:p-6">

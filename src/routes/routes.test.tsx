@@ -1,13 +1,37 @@
 import 'fake-indexeddb/auto'
 import { screen } from '@testing-library/react'
-import { beforeEach, expect, test } from 'vitest'
+import { beforeEach, expect, test, vi } from 'vitest'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig } from '@/testing/student-fixtures'
+import { pwaUpdate, type PwaUpdate } from '@/lib/pwa/pwa-update'
+import { makeFakeContainer } from '@/testing/pwa-fixtures'
 import { renderAt } from '@/testing/render-at'
 
+// Le singleton est remplacé par une instance neuve à chaque test : aucune fuite d'état.
+const pwa = vi.hoisted(() => ({ current: undefined as PwaUpdate | undefined }))
+vi.mock('@/lib/pwa/pwa-update', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/pwa/pwa-update')>()
+  return {
+    ...actual,
+    get pwaUpdate() {
+      pwa.current ??= new actual.PwaUpdate(() => undefined)
+      return pwa.current
+    },
+  }
+})
+
+/** Fait attendre une nouvelle version dans l'instance courante. */
+function makeUpdateReady() {
+  pwaUpdate.start((options) => {
+    options.onNeedRefresh?.()
+    return () => Promise.resolve()
+  }, makeFakeContainer(true))
+}
+
 beforeEach(async () => {
+  pwa.current = undefined
   await db.sessions.clear()
 })
 
@@ -151,4 +175,18 @@ test("d'une session à l'autre, --primary, la classe .dark et lang suivent la co
   expect(document.documentElement.style.getPropertyValue('--primary')).toBe('')
   expect(document.documentElement).not.toHaveClass('dark')
   expect(document.documentElement.lang).toBe('fr')
+})
+
+test('la pastille de mise à jour s’affiche sur l’accueil quand une version attend', async () => {
+  makeUpdateReady()
+  renderAt('/')
+  expect(await screen.findByRole('status')).toHaveTextContent('Nouvelle version disponible')
+})
+
+test('la pastille n’est jamais rendue sur /present/…', async () => {
+  await putSession(themedSession())
+  makeUpdateReady()
+  renderAt('/present/session-1')
+  await screen.findByRole('heading', { name: 'Oral de PHP' })
+  expect(screen.queryByRole('status')).toBeNull()
 })

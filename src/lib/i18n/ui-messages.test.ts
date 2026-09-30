@@ -13,6 +13,8 @@ const SAMPLE: UiMessageParams = {
   db_outdated: {},
   db_reload: {},
   db_unavailable: {},
+  update_available: {},
+  update_reload: {},
   color_mode_label: { mode: 'Clair' },
   color_mode_light: {},
   color_mode_dark: {},
