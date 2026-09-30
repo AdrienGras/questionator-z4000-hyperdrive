@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { exportWorkbook } from '@/components/export/export-workbook'
 import { getSession, putSession } from '@/lib/db/sessions'
 import type { PersistenceStatus } from '@/lib/db/persistence'
 import { db, type DbStatus } from '@/lib/db/db'
@@ -24,6 +25,7 @@ vi.mock('@/lib/db/persistence', async (importOriginal) => ({
   usePersistenceStatus: () => persistence.status,
 }))
 vi.mock('@/lib/download', () => ({ downloadText: download }))
+vi.mock('@/components/export/export-workbook')
 
 const ACTIONS = 'Actions pour « Oral de test »'
 
@@ -44,6 +46,7 @@ beforeEach(async () => {
   dbState.status = 'open'
   persistence.status = 'persisted'
   download.mockClear()
+  vi.mocked(exportWorkbook).mockReset()
 })
 
 describe('accueil', () => {
@@ -210,6 +213,36 @@ describe('accueil', () => {
     renderAt('/')
     await chooseAction('Exporter un backup')
     expect(download).toHaveBeenCalledTimes(1)
+  })
+
+  test('« Exporter en Excel » exporte la session dans la langue de l’interface', async () => {
+    vi.mocked(exportWorkbook).mockResolvedValue()
+    await putSession(makeSession())
+    renderAt('/')
+    fireEvent.click(await screen.findByRole('button', { name: ACTIONS }))
+    const names = (await screen.findAllByRole('menuitem')).map((item) => item.textContent)
+    expect(names.indexOf('Exporter en Excel')).toBe(names.indexOf('Exporter un backup') + 1)
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Exporter en Excel' }))
+    await waitFor(() => expect(exportWorkbook).toHaveBeenCalledTimes(1))
+    expect(exportWorkbook).toHaveBeenCalledWith(expect.objectContaining({ id: 'session-1' }), 'fr')
+  })
+
+  test('export Excel en échec : alerte sur la carte', async () => {
+    vi.mocked(exportWorkbook).mockRejectedValue(new Error('boom'))
+    await putSession(makeSession())
+    renderAt('/')
+    await chooseAction('Exporter en Excel')
+    expect(await screen.findByRole('alert')).toHaveTextContent("L'export a échoué. Réessayez.")
+  })
+
+  test('item désactivé pendant l’export', async () => {
+    vi.mocked(exportWorkbook).mockReturnValue(new Promise<void>(() => undefined))
+    await putSession(makeSession())
+    renderAt('/')
+    await chooseAction('Exporter en Excel')
+    fireEvent.click(await screen.findByRole('button', { name: ACTIONS }))
+    const busy = await screen.findByRole('menuitem', { name: 'Export en cours…' })
+    expect(busy).toHaveAttribute('aria-disabled', 'true')
   })
 
   test('« Reprendre » mène à la session', async () => {
