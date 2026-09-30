@@ -20,6 +20,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-30 — F19 : mise en page commune des pages examinateur
+
+**Dernière chose faite** : #53 (F19) livré sur `feat/f19-mise-en-page` (PR à ouvrir, pas de merge sans go). Brainstorming → spec → plan → exécution en subagents (5 tâches, une relecture par tâche, revue finale sur le modèle le plus capable, une vague de correction). `PageShell` (`src/components/page-shell.tsx`) porte `<main>` (1536 px max, marges `px-4 sm:px-6 lg:px-10`) et la barre de titre (retour, `h1`, infos à gauche ; actions puis bouton de thème, toujours dernier, à droite). Accueil (`HomeActions`), création, passage (`PassageMeta`) et stats passent par la coque ; vue projetée et écrans d'état en retour anticipé restent hors coque. Favicon : rien à faire, réglé par F17 (constaté en preview et en prod). D75, `PRODUCT.md` F19, CONVENTIONS « Page examinateur — squelette », QUIRKS (rôle `banner` en jsdom). Captures vérifiées à 1280, 1366, 1920, 2560, 420 px et en sombre.
+
+**Trucs en suspens** : PR F19 à relire et merger (go de l'utilisateur). Vérifications manuelles de F16, F17, F18 toujours sans retour.
+
+**Prochaine chose à creuser** : après merge, #55 (F21, panneau latéral en `Sheet`) ou #54 (F20, accueil sur deux colonnes), tous deux débloqués par F19 ; puis #56 → #58, #60.
+
+**Notes pour future Claude** : toute nouvelle page examinateur passe par `PageShell` et son test appelle `expectColorModeToggleLast()` (`src/testing/page-shell-assertions.ts`). La revue visuelle a trouvé un défaut que jsdom ne voyait pas (titre long : groupe de droite replié à gauche) : garder l'étape de captures au navigateur pour tout ticket de mise en page. Arbitrages de l'exécution : `getByRole('banner')` sur un header dans main conservé (QUIRKS) ; `items-start` conservé dans la barre.
+
 ## 2026-09-30 — F25 : disposition des tuiles de catégorie selon leur nombre
 
 **Dernière chose faite** : #59 (F25) implémenté sur `feat/f25-disposition-tuiles`, rebasé sur `main` après le merge de F23 (PR #62) ; désormais une PR mergée avant d'ouvrir le ticket suivant, pour éviter les conflits sur `docs/`. `categoryRows(n)` dans `domain/presentation/category-rows.ts` (tests de 0 à 16 et invariants jusqu'à 40) ; `CategoryLayout` dans `components/category-layout.tsx`, utilisé par `CategoryGrid` (examinateur) et `CategoryTiles` (projetée) : une seule `<ul>` en grille de `2c` colonnes, tuiles sur deux colonnes, première tuile d'une ligne courte décalée d'une demi-tuile (`data-row-start` → `col-start-2`). Une colonne sous `sm` (640 px), validé par l'utilisateur. D74 ; `PRODUCT.md` F09, F14. Rendu vérifié au navigateur (dev + Playwright MCP) : 13 → 5 + 4 + 4, 7 → 4 + 3 centrés, repli à 420 px.
