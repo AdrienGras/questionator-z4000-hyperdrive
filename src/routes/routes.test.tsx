@@ -33,12 +33,15 @@ vi.mock('@/lib/pwa/hooks', async (importOriginal) => {
   }
 })
 
-/** Fait attendre une nouvelle version dans l'instance courante. */
-function makeUpdateReady() {
+/** Fait attendre une nouvelle version dans l'instance courante ; `activate()` simule sa prise de
+ * contrôle depuis un autre onglet. */
+function makeUpdateWaiting() {
+  const container = makeFakeContainer(true)
   pwaUpdate.start((options) => {
     options.onNeedRefresh?.()
     return () => Promise.resolve()
-  }, makeFakeContainer(true))
+  }, container)
+  return { activate: () => container.dispatchEvent(new Event('controllerchange')) }
 }
 
 beforeEach(async () => {
@@ -190,17 +193,27 @@ test("d'une session à l'autre, --primary, la classe .dark et lang suivent la co
 })
 
 test('la pastille de mise à jour s’affiche sur l’accueil quand une version attend', async () => {
-  makeUpdateReady()
+  makeUpdateWaiting()
   renderAt('/')
   expect(await screen.findByRole('status')).toHaveTextContent('Nouvelle version disponible')
 })
 
-test('la pastille n’est jamais rendue sur /present/…', async () => {
+test('sur /present/…, une version en attente : ni pastille, ni rechargement', async () => {
   await putSession(themedSession())
-  makeUpdateReady()
+  makeUpdateWaiting()
   renderAt('/present/session-1')
   await screen.findByRole('heading', { name: 'Oral de PHP' })
   expect(screen.queryByRole('status')).toBeNull()
-  // La vue projetée se recharge seule, une fois, au lieu d'afficher la pastille.
+  // Recharger ici ferait boucler la vue projetée : la version attend toujours après rechargement.
+  expect(reload).not.toHaveBeenCalled()
+})
+
+test('sur /present/…, une version activée ailleurs : rechargement unique, sans pastille', async () => {
+  await putSession(themedSession())
+  const { activate } = makeUpdateWaiting()
+  activate()
+  renderAt('/present/session-1')
+  await screen.findByRole('heading', { name: 'Oral de PHP' })
+  expect(screen.queryByRole('status')).toBeNull()
   expect(reload).toHaveBeenCalledTimes(1)
 })

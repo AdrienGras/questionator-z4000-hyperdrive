@@ -23,7 +23,7 @@ function readPackageVersion(): string {
   return parsed.version
 }
 
-/** Violet nuit du fond de l'icône (`public/icons/icon.svg`), repris tel quel par `index.html` (D72). */
+/** Violet nuit du fond de l'icône (D72) : littéral répété dans `index.html` et `public/icons/icon.svg`. */
 const NIGHT = '#1a1033'
 
 export default defineConfig({

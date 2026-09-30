@@ -475,3 +475,10 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : un dictionnaire `Dictionary<P>` fr + en (ex. `src/domain/export/messages.ts`) a deux blocs de même structure ; le CPD de Sonar ignore les littéraux et signale tout le fichier.
 **Workaround** : ajouter le fichier à `sonar.cpd.exclusions` dans `.sonarcloud.properties` (D61), comme `src/lib/i18n/ui-messages.ts`. Un petit dictionnaire de domaine (quelques clés) passe sous le seuil sans exclusion.
 **Référence** : `.sonarcloud.properties`.
+
+## `registerSW` en mode `prompt` recharge chaque onglet sans `onNeedReload`, et réémet `waiting` à chaque chargement (2026-09-30)
+
+**Découvert** : revue finale F17, mesuré dans Chromium (copie de `dist/`, `sw.js` modifié d'un octet).
+**Symptôme** : (1) sans `onNeedReload`, `registerSW` (vite-plugin-pwa 1.3.0) ajoute après `onNeedRefresh` un écouteur `controlling` qui fait `window.location.reload()` dans **chaque** onglet quand un autre onglet active la version ; (2) tant qu'une version attend, workbox-window réémet `waiting` à chaque chargement, donc `onNeedRefresh` revient : recharger sur « version en attente » boucle (259 chargements en 8 s) ; (3) `updateSW(true)` ne recharge jamais : il n'envoie que `SKIP_WAITING`, et rien du tout s'il n'y a plus de worker en attente.
+**Workaround** : passer `onNeedReload: () => {}` ; distinguer `waiting` (rien à recharger) et `activated` (`controllerchange` venu d'un autre onglet) ; recharger l'onglet demandeur sur le `controllerchange` qui suit, ou tout de suite si `registration.waiting` est nul. Couvert par `e2e/update.spec.ts`.
+**Référence** : `src/lib/pwa/pwa-update.ts`, D72, `node_modules/vite-plugin-pwa/dist/client/build/register.js`.

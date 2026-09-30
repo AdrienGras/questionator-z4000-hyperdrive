@@ -5,8 +5,8 @@ import { usePwaUpdate } from '@/lib/pwa/hooks'
 import { pwaUpdate, type PwaUpdate } from '@/lib/pwa/pwa-update'
 
 /**
- * Pastille « Nouvelle version disponible » (D72). Absente si rien n'attend, et quand la base est
- * `outdated` : le bandeau D45 propose déjà de recharger.
+ * Pastille « Nouvelle version disponible » (D72), en `waiting` comme en `activated`. Absente en
+ * `current`, et quand la base est `outdated` : le bandeau D45 propose déjà de recharger.
  */
 export function UpdatePrompt({ update = pwaUpdate }: Readonly<{ update?: PwaUpdate }>) {
   const { text } = useUi()

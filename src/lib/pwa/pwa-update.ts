@@ -3,26 +3,39 @@
  * observable, consommé par `useSyncExternalStore`, qui ne dépend d'aucun module virtuel.
  */
 
-/** `update-ready` : une nouvelle version est prête, la page doit être rechargée pour l'activer. */
-export type PwaStatus = 'current' | 'update-ready'
+/**
+ * `waiting` : une nouvelle version est installée et attend ; rien n'a changé pour cet onglet.
+ * `activated` : une nouvelle version a pris le contrôle depuis un autre onglet ; l'ancien pré-cache
+ * est supprimé. Les confondre fait boucler la vue projetée : après rechargement, la version attend
+ * toujours et `onNeedRefresh` est réémis.
+ */
+export type PwaStatus = 'current' | 'waiting' | 'activated'
 
 /** Forme compatible avec `registerSW` de `virtual:pwa-register`, sans l'importer. */
 export type RegisterSW = (options: {
   onNeedRefresh?: () => void
+  onNeedReload?: () => void
+  onRegisteredSW?: (swUrl: string, registration: ServiceWorkerRegistration | undefined) => void
   onRegisterError?: (error: unknown) => void
 }) => (reloadPage?: boolean) => Promise<void>
 
 export type ControllerSource = Pick<ServiceWorkerContainer, 'controller' | 'addEventListener'>
 
+function reloadPage(): void {
+  window.location.reload()
+}
+
 export class PwaUpdate {
   #status: PwaStatus = 'current'
   readonly #listeners = new Set<() => void>()
   readonly #reload: () => void
+  #started = false
   #updateSW: ((reloadPage?: boolean) => Promise<void>) | undefined
-  // Une version attend l'activation (onNeedRefresh reçu) et aucun changement de contrôleur depuis.
-  #waiting = false
+  #registration: ServiceWorkerRegistration | undefined
+  // Cet onglet a cliqué « Recharger » : le `controllerchange` qui suit doit le recharger.
+  #applying = false
 
-  constructor(reload: () => void = () => window.location.reload()) {
+  constructor(reload: () => void = reloadPage) {
     this.#reload = reload
   }
 
@@ -38,17 +51,31 @@ export class PwaUpdate {
   }
 
   start(register: RegisterSW, container: ControllerSource = navigator.serviceWorker): void {
-    // Lu avant tout : au premier chargement, clientsClaim déclenche aussi `controllerchange`.
-    const hadController = container.controller !== null
+    // Un second appel doublerait l'écouteur et l'enregistrement.
+    if (this.#started) return
+    this.#started = true
+    // Lu avant tout : au premier chargement, clientsClaim déclenche un `controllerchange` qui
+    // n'annonce aucune nouvelle version. Il est ignoré, une seule fois.
+    let ignoreNextControllerChange = container.controller === null
     container.addEventListener('controllerchange', () => {
-      if (!hadController) return
-      this.#waiting = false
-      this.#setStatus('update-ready')
+      const ignored = ignoreNextControllerChange
+      ignoreNextControllerChange = false
+      // L'onglet qui a demandé l'activation se recharge, quel que soit son passé.
+      if (this.#applying) {
+        this.#reload()
+        return
+      }
+      if (!ignored) this.#setStatus('activated')
     })
     this.#updateSW = register({
       onNeedRefresh: () => {
-        this.#waiting = true
-        this.#setStatus('update-ready')
+        if (this.#status !== 'activated') this.#setStatus('waiting')
+      },
+      // Obligatoire : sans lui, `registerSW` en mode `prompt` recharge d'office chaque onglet au
+      // changement de contrôleur, examinateurs compris.
+      onNeedReload: () => {},
+      onRegisteredSW: (_swUrl, registration) => {
+        this.#registration = registration
       },
       onRegisterError: (error) => {
         console.warn('Service worker indisponible', error)
@@ -57,7 +84,11 @@ export class PwaUpdate {
   }
 
   async applyUpdate(): Promise<void> {
-    if (this.#waiting && this.#updateSW) {
+    // `updateSW(true)` ne recharge jamais lui-même : il envoie `skipWaiting` au worker en attente,
+    // s'il y en a un. Sans worker en attente, aucun `controllerchange` ne viendra : on recharge.
+    const nothingWaiting = this.#registration !== undefined && this.#registration.waiting === null
+    if (this.#status === 'waiting' && this.#updateSW && !nothingWaiting) {
+      this.#applying = true
       await this.#updateSW(true)
       return
     }
@@ -66,6 +97,7 @@ export class PwaUpdate {
   }
 
   #setStatus(status: PwaStatus): void {
+    if (this.#status === status) return
     this.#status = status
     for (const listener of this.#listeners) listener()
   }

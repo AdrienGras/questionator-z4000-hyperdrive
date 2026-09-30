@@ -11,19 +11,24 @@ export function usePwaUpdate(update: PwaUpdate = pwaUpdate): {
   return { status, applyUpdate }
 }
 
+function reloadPage(): void {
+  window.location.reload()
+}
+
 /**
- * Recharge la page une seule fois dès qu'une nouvelle version est prête ou que la base est
- * `outdated` ; les deux signaux peuvent arriver ensemble (D72).
+ * Recharge la page une seule fois dès qu'une nouvelle version a pris le contrôle (`activated`) ou
+ * que la base est `outdated` ; les deux signaux peuvent arriver ensemble (D72). Jamais sur
+ * `waiting` : la version attend toujours après rechargement, la page bouclerait.
  */
 export function useReloadOnUpdate(
   dbOutdated: boolean,
   update: PwaUpdate = pwaUpdate,
-  reload: () => void = () => window.location.reload(),
+  reload: () => void = reloadPage,
 ): void {
   const { status } = usePwaUpdate(update)
   const reloaded = useRef(false)
   useEffect(() => {
-    if (reloaded.current || (status !== 'update-ready' && !dbOutdated)) return
+    if (reloaded.current || (status !== 'activated' && !dbOutdated)) return
     reloaded.current = true
     reload()
   }, [status, dbOutdated, reload])
