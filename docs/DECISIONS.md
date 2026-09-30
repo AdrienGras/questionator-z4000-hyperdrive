@@ -1123,10 +1123,10 @@ autre encodage 8 bits.
 
 **Décision** :
 - `PageShell` (`components/page-shell.tsx`), composant appelé par chaque page : props `ui`, `title`, `back?`, `meta?`, `actions?`, plus celles du `<main>`.
-- Largeur : plafond `max-w-(--breakpoint-2xl)` (96 rem = 1536 px CSS), centré ; marges `px-4`, `sm:px-6`, `lg:px-10`, `py-4`, `sm:py-6`.
+- Largeur : plafond `max-w-(--breakpoint-2xl)` (96 rem = 1536 px CSS, Tailwind 4 n'a plus `max-w-screen-*`), centré ; marges `px-4`, `sm:px-6`, `lg:px-10`, `py-4`, `sm:py-6`.
 - Barre de titre : retour, titre et ligne d'infos à gauche ; actions à droite, **bouton de thème toujours en dernier** (ce n'est pas une prop, une page ne peut pas le déplacer). Barre non sticky, sans bordure.
-- Écrans d'état (`DbStatusBanner`, `SessionFallback`, 404) et vue projetée : hors coque, inchangés.
-- Favicon : rien à coder. Déjà réglé par F17 (D72) (`<link rel="icon">` vers `icons/icon.svg`) ; constaté le 2026-09-30 en preview et en prod (200, aucune requête `/favicon.ico`).
+- Hors coque, inchangés : les écrans d'état rendus en retour anticipé (`DbStatusBanner` de la session et des stats, `SessionFallback`, erreur des stats, 404) et la vue projetée (sa propre mise en page). `DbStatusBanner` affiché dans l'accueil et la création reste du contenu de la coque.
+- Favicon : rien à coder. Déjà réglé par F17 (D72), avec `<link rel="icon">` vers `icons/icon.svg` ; constaté le 2026-09-30 en preview et en prod (200, aucune requête `/favicon.ico`).
 
 **Pourquoi** : un composant appelé par la page est rendu sous `SessionAppearance` là où la page l'est déjà, donc langue et thème de la config sans tuyauterie. Une route de mise en page TanStack aurait dû remonter titre et actions par contexte ou portail, et aurait rendu la barre hors du thème de session. Une simple classe partagée ne garantit pas la place du bouton de thème. 1536 px : pleine largeur sur un portable HDPI (≈ 1280 à 1440 px CSS) et sur un MDPI 1366, marge pour #54 et #56 sur un 1920 ou un 2560 à 100 %. Sans barre sticky : seules les stats sont longues, et une barre collée prend de la hauteur sur 1366 × 768.
 

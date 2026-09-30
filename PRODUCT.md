@@ -604,7 +604,7 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 - Composant `PageShell` (D75) pour l'accueil, la création de session, le passage et les stats.
 - Largeur utile plafonnée à 1536 px CSS, centrée ; marges latérales de 16, 24 puis 40 px selon la largeur.
 - Barre de titre : retour, titre et ligne d'infos à gauche ; actions puis bouton de thème à droite. Non sticky.
-- La vue projetée n'est pas dans la coque. Les écrans d'état (bandeau de base de données, repli de session, 404) non plus.
+- La vue projetée n'est pas dans la coque. Les écrans d'état rendus en retour anticipé (bandeau de base de données, repli de session, erreur des stats, 404) non plus.
 - Favicon : déjà servi depuis F17 (D72), aucun changement.
 
 **Critères d'acceptation.**

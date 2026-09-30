@@ -468,8 +468,8 @@ test('le bouton de thème est le dernier de la barre de titre', async () => {
 ### Règles tacites
 
 - Jamais de `ColorModeToggle` dans une page ou un sous-composant d'en-tête : la coque le rend en dernier, c'est ce qui garantit sa place.
-- Pas de `<main>` ni de `<h1>` dans la page : la coque les fournit. Les boutons d'action vont dans `actions`, pas dans `children`.
-- Vue projetée, `DbStatusBanner`, `SessionFallback` et 404 restent hors coque (écrans d'état ou vue publique, sans titre ni actions).
+- Dans une page qui passe par `PageShell`, pas de `<main>` ni de `<h1>` : la coque les fournit. Les boutons d'action vont dans `actions`, pas dans `children`.
+- Restent hors coque : les écrans d'état rendus en retour anticipé (`DbStatusBanner` de `session-page.tsx` et `stats-page.tsx`, `SessionFallback`, `stats-error.tsx`, 404) et la vue projetée (mise en page propre, avec son `<h1>`). `DbStatusBanner` affiché en contenu d'une page (accueil, création) reste dans la coque.
 - Test de la page : `expectColorModeToggleLast()` ; `bannerInteractiveNames()` pour vérifier l'ordre des actions (`src/testing/page-shell-assertions.ts`).
 
 ## Test e2e Playwright — squelette (Page Object Model)
