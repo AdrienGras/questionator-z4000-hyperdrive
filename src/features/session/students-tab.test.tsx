@@ -80,16 +80,31 @@ test('projection en attente : aucune icône « Projeté »', async () => {
   expect(screen.queryByLabelText('Projeté')).not.toBeInTheDocument()
 })
 
-test('cliquer un étudiant l’active sans toucher à la projection ni à l’onglet', async () => {
+test('cliquer un autre étudiant l’active et remet la projection en attente (D73)', async () => {
   const projection = { mode: 'student', studentId: 's-a' } as const
   await mount([student('s-a', 'Aba', 1), student('s-b', 'Bec', 2)], { projection })
 
   fireEvent.click(rowOf('Bec'))
 
   await waitFor(async () => expect((await stored()).activeStudentId).toBe('s-b'))
-  expect((await stored()).projection).toEqual(projection)
+  expect((await stored()).projection).toEqual({ mode: 'waiting' })
   await waitFor(() => expect(rowOf('Bec')).toHaveAttribute('aria-current', 'true'))
   expect(screen.getByRole('tab', { name: 'Étudiants' })).toHaveAttribute('aria-selected', 'true')
+
+  fireEvent.click(rowOf('Aba'))
+
+  await waitFor(async () => expect((await stored()).activeStudentId).toBe('s-a'))
+  expect((await stored()).projection).toEqual({ mode: 'waiting' })
+})
+
+test('cliquer l’étudiant déjà projeté l’active sans toucher à la projection', async () => {
+  const projection = { mode: 'student', studentId: 's-b' } as const
+  await mount([student('s-a', 'Aba', 1), student('s-b', 'Bec', 2)], { projection })
+
+  fireEvent.click(rowOf('Bec'))
+
+  await waitFor(async () => expect((await stored()).activeStudentId).toBe('s-b'))
+  expect((await stored()).projection).toEqual(projection)
 })
 
 test('l’onglet ne relaie pas le clic sur l’étudiant actif, mais relaie celui d’un autre', () => {

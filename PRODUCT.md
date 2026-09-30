@@ -466,7 +466,7 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 - Affichage de toutes les notes (brute, plafonnée, convertie, ajustement, finale) et du détail du passage (questions, catégories, points, skips). `presentation.finalScoreDisplay` ne s'applique qu'à la vue projetée (F14) : l'examinateur voit toujours tout.
 - Popup d'ajustement réservée à l'examinateur, ouverte automatiquement **une seule fois**, au moment où la dernière note termine le passage, puis rouvrable par un bouton « Ajuster » : valeur positive ou négative, en points de l'échelle finale, saisie par multiples du pas d'arrondi (§5), et justification facultative. La note finale recalculée est affichée en direct, bornée entre 0 et `finalScale`. Champ numérique avec boutons − / + d'un pas ; une valeur hors pas bloque l'enregistrement. Calcul affiché en direct (« 13,5 + 1 = 14,5 / 20 », mention « bornée à 20 » si le bornage intervient). Un ajustement de 0 supprime l'ajustement et sa justification. La fermeture de la popup ouverte en fin de passage (enregistrer ou annuler) renseigne `finalRevealedAt` si ce n'est pas déjà fait (F14).
 - Bouton « Réinitialiser l'étudiant » avec confirmation : supprime tous les attempts, l'ajustement et `finalRevealedAt`, et remet l'étudiant à « à passer ». Le commentaire est conservé : il porte sur l'étudiant, pas sur son passage.
-- Bouton « Étudiant suivant » : l'étudiant actif devient le prochain étudiant non terminé et non absent (à passer ou en cours) dans l'ordre de passage, en reprenant au début si besoin. La vue projetée n'est pas modifiée. S'il ne reste personne : bouton désactivé, « Tous les étudiants sont passés ».
+- Bouton « Étudiant suivant » : l'étudiant actif devient le prochain étudiant non terminé et non absent (à passer ou en cours) dans l'ordre de passage, en reprenant au début si besoin. Si la vue projetée montrait un autre étudiant, elle repasse en attente (D73) ; le nouvel étudiant n'est pas projeté d'office. S'il ne reste personne : bouton désactivé, « Tous les étudiants sont passés ».
 
 **Critères d'acceptation.**
 - Un étudiant à 20/20 avec un ajustement de +1 reste à 20.
@@ -493,9 +493,9 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 
 **Contenu.**
 - Liste dans l'ordre de passage : nom, prénom, statut, note brute, note convertie ou « ABS ».
-- Clic sur un étudiant : il devient l'étudiant actif de la vue examinateur. On reprend son passage s'il n'est pas terminé, sinon on affiche son écran final. Cela ne change pas la vue projetée (voir F14).
+- Clic sur un étudiant : il devient l'étudiant actif de la vue examinateur. On reprend son passage s'il n'est pas terminé, sinon on affiche son écran final. Si la vue projetée montrait un autre étudiant, elle repasse en attente (voir F14, D73).
 - L'étudiant actif est surligné, l'étudiant projeté porte une icône d'écran.
-- Ajout d'un étudiant en cours de session (nom, prénom), placé en fin de liste et marqué `addedDuringSession`. Doublon : avertissement sans blocage. Deux boutons : « Ajouter » et « Ajouter et faire passer » (il devient aussi l'étudiant actif).
+- Ajout d'un étudiant en cours de session (nom, prénom), placé en fin de liste et marqué `addedDuringSession`. Doublon : avertissement sans blocage. Deux boutons : « Ajouter » et « Ajouter et faire passer » (il devient aussi l'étudiant actif, et la projection repasse en attente, D73).
 - Pas de suppression d'étudiant (l'absence couvre le cas).
 - Bouton d'export Excel (F16).
 - Bouton « Statistiques », qui ouvre l'écran de F15.
@@ -511,7 +511,7 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 - Bouton « Ouvrir la vue projetée » : `window.open(url, 'questionator-present')` sur la route `#/present/:sessionId` ; un second clic remet la fenêtre existante au premier plan.
 - **Étanchéité** : la vue projetée ne rend jamais l'objet `Session`. Une fonction pure `toProjectedView(session)` produit un type `ProjectedView` limité à l'affichable (titre, catégories, énoncé de la question en cours, scores autorisés par la config) ; les composants de la route `present` ne reçoivent que ce type.
 - La vue projetée est en lecture seule. Ses seules commandes sont le plein écran (l'API Fullscreen exige un geste utilisateur dans cette fenêtre) et la bascule de mode (F07) ; curseur et commandes masqués après quelques secondes d'inactivité.
-- Elle n'affiche que l'étudiant projeté (`projection`), jamais l'étudiant actif par défaut.
+- Elle n'affiche que l'étudiant projeté (`projection`), jamais l'étudiant actif par défaut. Tout changement d'étudiant actif (liste, « Étudiant suivant », « Ajouter et faire passer ») remet la projection en attente si elle montrait un autre étudiant ; projection en attente ou déjà sur le nouvel actif : inchangée (D73).
 - Dans la vue examinateur, un bouton « Projeter cet étudiant » pousse l'étudiant actif, et un bouton « Écran d'attente » repasse en attente. Si l'étudiant actif n'est pas celui qui est projeté, un bandeau le signale.
 - Écran d'attente : titre de l'épreuve et message d'attente.
 - Écran étudiant : grille des catégories, question tirée (énoncé seul), score cumulé si `showCumulativeScore`, note finale selon `finalScoreDisplay`, détail du passage si `showStatsOnFinal`. `converted` désigne ici la **note finale, ajustement compris** (« Note : 14,5 / 20 ») ; le montant et la justification de l'ajustement ne sont jamais affichés.

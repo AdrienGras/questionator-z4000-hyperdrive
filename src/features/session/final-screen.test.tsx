@@ -178,7 +178,7 @@ test('annuler la réinitialisation n’écrit rien', async () => {
   expect(await stored()).toEqual(before)
 })
 
-test('« Étudiant suivant » change l’étudiant actif sans toucher à la projection', async () => {
+test('« Étudiant suivant » change l’étudiant actif et remet la projection en attente (D73)', async () => {
   await openFinal(done(), 1, [bob()])
 
   fireEvent.click(screen.getByRole('button', { name: 'Étudiant suivant' }))
@@ -186,7 +186,7 @@ test('« Étudiant suivant » change l’étudiant actif sans toucher à la proj
   expect(await screen.findByText('Martin Bob')).toBeInTheDocument()
   const session = await stored()
   expect(session.activeStudentId).toBe('student-2')
-  expect(session.projection).toEqual({ mode: 'student', studentId: 'student-1' })
+  expect(session.projection).toEqual({ mode: 'waiting' })
 })
 
 test('dernier étudiant restant : bouton désactivé et mention visible', async () => {

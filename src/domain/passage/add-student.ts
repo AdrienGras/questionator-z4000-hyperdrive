@@ -1,10 +1,11 @@
 import type { Session } from '@/domain/session/types'
+import { withActiveStudent } from './active-student'
 import { PassageError } from './errors'
 
 /**
  * Ajoute un étudiant en cours de session (F13) : dernier de la liste, `order` = max + 1 (0 si la
  * session est vide), passage vierge. Noms rognés, refusés s'ils sont vides. `activate` le rend
- * étudiant actif ; la projection n'est jamais touchée (D67).
+ * étudiant actif ; la projection repasse alors en attente si elle montrait un autre étudiant (D73).
  */
 export function addStudent(
   session: Session,
@@ -27,9 +28,6 @@ export function addStudent(
     attempts: [],
   }
 
-  return {
-    ...session,
-    students: [...session.students, student],
-    ...(input.activate ? { activeStudentId: id } : {}),
-  }
+  const withStudent = { ...session, students: [...session.students, student] }
+  return input.activate ? withActiveStudent(withStudent, id) : withStudent
 }
