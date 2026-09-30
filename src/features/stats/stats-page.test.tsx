@@ -41,7 +41,7 @@ test('titre = nom de la session, retour au passage vers la vue examinateur', asy
 
   fireEvent.click(back)
   expect(await screen.findByRole('heading', { name: 'Oral de test' })).toBeInTheDocument()
-  expect(screen.getByRole('complementary', { name: 'Panneau latéral' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Panneau' })).toBeInTheDocument()
 })
 
 test('barre de titre : « Retour au passage », nom de la session, thème dernier', async () => {

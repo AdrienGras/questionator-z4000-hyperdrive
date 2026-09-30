@@ -20,6 +20,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-30 — F21 : panneau latéral en tiroir
+
+**Dernière chose faite** : #55 (F21) livré sur `feat/f21-panneau-lateral` (PR à ouvrir, pas de merge sans go). Brainstorming → spec → plan → subagents (5 tâches, une relecture par tâche dont deux avec un tour de correction, revue finale opus, une vague de correction). Le panneau de la vue de passage est un `Sheet` modal à droite (28 rem), fermé au chargement, ouvert par « Panneau » (premier bouton des actions de la barre de titre) ; seul l'onglet est mémorisé ; il se referme après un changement d'étudiant réussi ; « Afficher le panneau » dans les états absent et aucun étudiant ; le commentaire n'annonce plus que « Enregistré » ou « Échec de l’enregistrement ». D76, `PRODUCT.md` F12, F13, F21, CONVENTIONS (`Sheet`, `shadcn add` qui veut écraser `button.tsx`), BACKLOG. `pnpm check` 1227 tests, `pnpm e2e` 10/10, captures 1280 et 1920 px clair/sombre.
+
+**Trucs en suspens** : PR F21 à relire et merger (go de l'utilisateur). Deux suites notées au BACKLOG : erreur périmée réannoncée à l'ouverture du tiroir ; menu du thème qui reste ouvert après un choix. Vérifications manuelles de F16, F17, F18 toujours sans retour.
+
+**Prochaine chose à creuser** : après merge, #56 (F22, aperçu de la vue projetée, débloqué) ou #54 (F20, accueil sur deux colonnes) ; puis #58, #60.
+
+**Notes pour future Claude** : les tests d'écran ouvrent le tiroir par `openSidePanel(tab?)` (`src/testing/side-panel-assertions.ts`) ; base-ui garde le `dialog` monté pendant sa sortie, donc « tiroir ouvert » se vérifie par `expectPanelStaysOpen()` (attributs `data-open`), jamais par la seule présence du rôle. `shadcn add` : répondre « n » à l'écrasement des fichiers existants, puis retirer la dépendance `cn` ajoutée. Un bouton qui ouvre un `Sheet` sans en être le `SheetTrigger` doit passer sa ref à `finalFocus`. Un test d'enregistrement « au démontage » doit borner son attente sous le délai de l'autosave (500 ms), sinon il passe sans le flush.
+
 ## 2026-09-30 — F19 : mise en page commune des pages examinateur
 
 **Dernière chose faite** : #53 (F19) livré sur `feat/f19-mise-en-page` (PR à ouvrir, pas de merge sans go). Brainstorming → spec → plan → exécution en subagents (5 tâches, une relecture par tâche, revue finale sur le modèle le plus capable, une vague de correction). `PageShell` (`src/components/page-shell.tsx`) porte `<main>` (1536 px max, marges `px-4 sm:px-6 lg:px-10`) et la barre de titre (retour, `h1`, infos à gauche ; actions puis bouton de thème, toujours dernier, à droite). Accueil (`HomeActions`), création, passage (`PassageMeta`) et stats passent par la coque ; vue projetée et écrans d'état en retour anticipé restent hors coque. Favicon : rien à faire, réglé par F17 (constaté en preview et en prod). D75, `PRODUCT.md` F19, CONVENTIONS « Page examinateur — squelette », QUIRKS (rôle `banner` en jsdom). Captures vérifiées à 1280, 1366, 1920, 2560, 420 px et en sombre.

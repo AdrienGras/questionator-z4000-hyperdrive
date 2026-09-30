@@ -1,8 +1,8 @@
-import { fireEvent, screen } from '@testing-library/react'
 import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import type { Session, Student } from '@/domain/session/types'
 import { putSession } from '@/lib/db/sessions'
 import { renderAt } from './render-at'
+import { openSidePanel, panelButton } from './side-panel-assertions'
 import { makeSession } from './session-fixtures'
 import { makeConfig } from './student-fixtures'
 
@@ -32,14 +32,25 @@ export const config: NormalizedConfig = {
 }
 
 /**
- * Enregistre une session (premier étudiant actif par défaut), monte l'écran d'examen
- * puis ouvre l'onglet « Étudiants » du panneau latéral.
+ * Enregistre une session (premier étudiant actif par défaut) et monte l'écran d'examen, tiroir
+ * latéral fermé.
  */
-export async function mountStudentsTab(students: Student[], overrides: Partial<Session> = {}) {
+export async function mountSession(students: Student[], overrides: Partial<Session> = {}) {
   await putSession(
     makeSession({ config, students, activeStudentId: students[0]?.id, ...overrides }),
   )
   renderAt('/session/session-1')
-  await screen.findByRole('complementary', { name: 'Panneau latéral' })
-  fireEvent.click(screen.getByRole('tab', { name: 'Étudiants' }))
+  await panelButton()
+}
+
+/**
+ * Comme `mountSession`, puis ouvre le tiroir latéral sur l'onglet « Étudiants » ; renvoie le
+ * `dialog` du tiroir.
+ */
+export async function mountStudentsTab(
+  students: Student[],
+  overrides: Partial<Session> = {},
+): Promise<HTMLElement> {
+  await mountSession(students, overrides)
+  return openSidePanel('Étudiants')
 }

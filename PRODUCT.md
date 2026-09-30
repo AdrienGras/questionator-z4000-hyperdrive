@@ -479,7 +479,7 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 **Contenu.**
 - Liste des questions tirées : ordre, catégorie, titre, points obtenus sur points max, ou motif de skip.
 - Modification d'une note déjà saisie (sélection parmi les valeurs du barème), avec recalcul immédiat. La date de modification est conservée pour l'export. Uniquement sur un attempt `scored` : ni un skip ni une question en cours ne se modifient ici.
-- Panneau repliable à deux onglets (« Étudiant », « Étudiants ») ; état ouvert / fermé et onglet actif mémorisés en `localStorage`.
+- Panneau en tiroir à deux onglets (« Étudiant », « Étudiants »), ouvert par le bouton « Panneau » de la barre de titre (F21, D76) ; fermé à chaque chargement, onglet actif mémorisé en `localStorage`.
 - Totaux : brute, plafonnée, convertie, ajustement, finale.
 - Commentaire libre sur l'étudiant, sauvegardé automatiquement (délai d'environ 500 ms et à la sortie du champ), avec un indicateur « Enregistré ».
 - Bascule du statut absent, réversible. Sans attempt, elle est directe. Si le passage est entamé, une confirmation indique le nombre de questions tirées qui seront supprimées ; l'accepter réinitialise l'étudiant (comme F11, commentaire conservé) puis le marque absent. Un étudiant absent n'a donc jamais d'attempt.
@@ -493,9 +493,9 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 
 **Contenu.**
 - Liste dans l'ordre de passage : nom, prénom, statut, note brute, note convertie ou « ABS ».
-- Clic sur un étudiant : il devient l'étudiant actif de la vue examinateur. On reprend son passage s'il n'est pas terminé, sinon on affiche son écran final. Si la vue projetée montrait un autre étudiant, elle repasse en attente (voir F14, D73).
+- Clic sur un étudiant : il devient l'étudiant actif de la vue examinateur et le tiroir se referme (F21). On reprend son passage s'il n'est pas terminé, sinon on affiche son écran final. Si la vue projetée montrait un autre étudiant, elle repasse en attente (voir F14, D73).
 - L'étudiant actif est surligné, l'étudiant projeté porte une icône d'écran.
-- Ajout d'un étudiant en cours de session (nom, prénom), placé en fin de liste et marqué `addedDuringSession`. Doublon : avertissement sans blocage. Deux boutons : « Ajouter » et « Ajouter et faire passer » (il devient aussi l'étudiant actif, et la projection repasse en attente, D73).
+- Ajout d'un étudiant en cours de session (nom, prénom), placé en fin de liste et marqué `addedDuringSession`. Doublon : avertissement sans blocage. Deux boutons : « Ajouter » et « Ajouter et faire passer » (il devient aussi l'étudiant actif, et la projection repasse en attente, D73) ; ce second bouton referme le tiroir.
 - Pas de suppression d'étudiant (l'absence couvre le cas).
 - Bouton d'export Excel (F16).
 - Bouton « Statistiques », qui ouvre l'écran de F15.
@@ -614,6 +614,28 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 - La vue projetée n'est pas modifiée.
 - Favicon servi sans 404.
 - Mise en page utilisable à 1280 px de large.
+
+### F21 — Panneau latéral en tiroir
+
+**Objectif.** Rendre toute la largeur de la coque à la vue de passage : le panneau latéral devient un tiroir modal ouvert à la demande.
+
+**Contenu.**
+- `Sheet` modal à droite (D76), fermé à chaque chargement, ouvert par le bouton « Panneau » placé en premier dans la barre de titre ; onglet choisi mémorisé.
+- Fermeture par Échap, par le bouton « Fermer le panneau » et par un clic à l'extérieur ; le focus revient au bouton « Panneau ».
+- Les deux onglets se partagent toute la largeur du panneau (28 rem au-delà de 640 px, pleine largeur en dessous).
+- Choisir un autre étudiant (liste, « Ajouter et faire passer ») referme le tiroir.
+- États « étudiant absent » et « aucun étudiant » : bouton « Afficher le panneau » qui ouvre l'onglet utile.
+- Un commentaire en cours de saisie est enregistré à la fermeture du panneau ; la zone `aria-live` n'annonce que « Enregistré » ou « Échec de l’enregistrement ».
+
+**Critères d'acceptation.**
+- Le panneau s'ouvre par-dessus la vue depuis le bouton « Panneau », se ferme par Échap, par le bouton de fermeture et par un clic à l'extérieur, et rend le focus au bouton d'ouverture.
+- Fermé à chaque chargement ; l'onglet choisi est mémorisé.
+- Les deux onglets se partagent toute la largeur du panneau.
+- Choisir un autre étudiant (liste, « Ajouter et faire passer ») referme le tiroir.
+- Depuis l'état absent ou « aucun étudiant », un bouton ouvre le panneau sur l'onglet utile.
+- Un commentaire en cours de saisie est enregistré si l'on ferme le panneau.
+- Le commentaire n'annonce que « Enregistré » ou « Échec de l’enregistrement ».
+- Tests d'écran et e2e adaptés.
 
 ## 9. Stack technique
 

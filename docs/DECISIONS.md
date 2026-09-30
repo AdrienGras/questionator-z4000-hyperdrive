@@ -1132,3 +1132,23 @@ autre encodage 8 bits.
 **Pourquoi** : un composant appelé par la page est rendu sous `SessionAppearance` là où la page l'est déjà, donc langue et thème de la config sans tuyauterie. Une route de mise en page TanStack aurait dû remonter titre et actions par contexte ou portail, et aurait rendu la barre hors du thème de session. Une simple classe partagée ne garantit pas la place du bouton de thème. 1536 px : pleine largeur sur un portable HDPI (≈ 1280 à 1440 px CSS) et sur un MDPI 1366, marge pour #54 et #56 sur un 1920 ou un 2560 à 100 %. Sans barre sticky : seules les stats sont longues, et une barre collée prend de la hauteur sur 1366 × 768.
 
 **Reporté dans** : `PRODUCT.md` F19, `docs/CONVENTIONS.md` § « Page examinateur — squelette ». Impacte F19 ; prépare #54, #55, #56.
+
+## D76 — F21 : panneau latéral en tiroir modal `Sheet`, fermé au chargement (2026-09-30)
+
+**Question** : le panneau latéral (`SidePanel`) était une `<aside>` dans le flux, repliable, qui retirait 22 rem à la grille de tirage et dont les onglets n'occupaient pas toute la largeur. Comment le rendre moins encombrant sans perdre ses gestes (changer d'étudiant, corriger une note, exporter) ?
+
+**Décision** :
+- Modalité : tiroir **modal** `Sheet` à droite (`role=dialog` nommé « Panneau latéral »), avec voile, focus piégé, fermeture par Échap, clic sur le voile ou bouton traduit, focus rendu au bouton d'ouverture.
+- Largeur : 28 rem (448 px) au-delà de 640 px, pleine largeur en dessous. Classes `data-[side=right]:w-full data-[side=right]:sm:max-w-md` : les largeurs du vendor portent le préfixe `data-[side=right]:`, des classes nues perdraient.
+- Bouton d'ouverture : « Panneau » (icône + texte), premier élément des `actions` de `PageShell`, avant `ProjectionControls` ; le thème reste dernier (D75).
+- État : hook `useSidePanel()` dans `ExaminerView`, `SidePanel` contrôlé. Fermé à chaque chargement ; seul l'onglet reste mémorisé (`localStorage`), la clé de l'état ouvert n'est plus lue ni écrite (une valeur orpheline peut subsister dans le `localStorage` des navigateurs existants).
+- Fermeture automatique quand un **autre** étudiant devient actif avec succès (clic dans la liste, « Ajouter et faire passer »). Le tiroir reste ouvert pour « Ajouter » seul, le commentaire, la correction de note, absent, export, stats et en cas d'échec.
+- États vides (étudiant absent, aucun étudiant) : bouton « Afficher le panneau » qui ouvre l'onglet utile (« Étudiant » pour l'absence, « Étudiants » sinon). Après l'ouverture depuis un état vide, le focus revient au bouton « Panneau ».
+- Commentaire : statut visible inchangé ; la zone `sr-only` `aria-live="polite"` n'annonce que « Enregistré » ou « Échec de l’enregistrement ».
+- Le bouton « Close » anglais du vendor est désactivé (`showCloseButton={false}`), remplacé par un bouton traduit « Fermer le panneau ».
+- Le bouton « Panneau » n'est pas un `SheetTrigger` : le retour du focus passe par une ref explicite donnée à `finalFocus`.
+- L'erreur de passage est aussi affichée dans le tiroir (prop `error` de `SidePanel`), car le modal masque l'alerte de la page.
+
+**Pourquoi** : le panneau sert à des gestes ponctuels, pas à rester ouvert pendant un tirage ; un tiroir modal rend toute la largeur à la vue et donne l'accessibilité (piège de focus, Échap, retour du focus) sans code maison. Un tiroir non modal aurait dû renoncer à la fermeture au clic extérieur (chaque tirage le fermerait). 28 rem : la ligne d'étudiant (nom, statut, note brute, note convertie) tient, et il reste plus de 800 px de vue à 1280 px ; 24 rem est trop serré, 32 rem couvre 40 % d'un écran de 1280 px. Un hook local suffit pour trois consommateurs (barre de titre, états vides, onglet « Étudiants ») : un contexte serait de la plomberie. La modalité cache la page, donc l'erreur de passage doit être visible dans le tiroir.
+
+**Reporté dans** : `PRODUCT.md` F12, F13, F21 ; `docs/CONVENTIONS.md` § « Composant shadcn — ajout » ; `docs/BACKLOG.md` (deux items livrés). Impacte F12, F13, F19 ; prépare #56 (aperçu de la vue projetée, plus de largeur libre côté examinateur).

@@ -8,11 +8,18 @@ import { StudentsTab } from './components/students-tab'
 import { db } from '@/lib/db/db'
 import { makeUi } from '@/testing/make-ui'
 import { makeSession } from '@/testing/session-fixtures'
+import { openSidePanel, panelButton } from '@/testing/side-panel-assertions'
 import { makeStudent } from '@/testing/student-fixtures'
 import { config, mountStudentsTab as mount } from '@/testing/students-tab-harness'
 
 function student(id: string, lastName: string, order: number, overrides: Partial<Student> = {}) {
   return makeStudent([], { id, lastName, firstName: 'X', order, ...overrides })
+}
+
+async function expectPanelClosed() {
+  await waitFor(() =>
+    expect(screen.queryByRole('dialog', { name: 'Panneau latéral' })).not.toBeInTheDocument(),
+  )
 }
 
 function list(): HTMLElement {
@@ -88,8 +95,14 @@ test('cliquer un autre étudiant l’active et remet la projection en attente (D
 
   await waitFor(async () => expect((await stored()).activeStudentId).toBe('s-b'))
   expect((await stored()).projection).toEqual({ mode: 'waiting' })
-  await waitFor(() => expect(rowOf('Bec')).toHaveAttribute('aria-current', 'true'))
-  expect(screen.getByRole('tab', { name: 'Étudiants' })).toHaveAttribute('aria-selected', 'true')
+  await expectPanelClosed()
+  // Rouvert sur l'onglet mémorisé.
+  const dialog = await openSidePanel()
+  expect(within(dialog).getByRole('tab', { name: 'Étudiants' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  )
+  expect(rowOf('Bec')).toHaveAttribute('aria-current', 'true')
 
   fireEvent.click(rowOf('Aba'))
 
@@ -131,17 +144,15 @@ test('l’onglet ne relaie pas le clic sur l’étudiant actif, mais relaie celu
   expect(onSelect).toHaveBeenCalledExactlyOnceWith('s-b')
 })
 
-test('le bouton cliqué garde le focus clavier une fois l’écriture terminée', async () => {
+test('après le changement d’étudiant, le focus revient au bouton « Panneau »', async () => {
   await mount([student('s-a', 'Aba', 1), student('s-b', 'Bec', 2)], { activeStudentId: 's-a' })
   const row = rowOf('Bec')
   row.focus()
 
   fireEvent.click(row)
 
-  await waitFor(() => expect(rowOf('Bec')).toHaveAttribute('aria-current', 'true'))
-  expect(rowOf('Bec')).toBe(row)
-  expect(row).toBeEnabled()
-  expect(document.activeElement).toBe(row)
+  await expectPanelClosed()
+  await waitFor(async () => expect(await panelButton()).toHaveFocus())
 })
 
 test('aller-retour A → B → A avec une question en cours : rien n’est perdu', async () => {
@@ -161,12 +172,16 @@ test('aller-retour A → B → A avec une question en cours : rien n’est perdu
     ],
   })
   await mount([alice, student('s-b', 'Bec', 2)])
-  await screen.findByRole('heading', { level: 2, name: 'Titre a-1' })
+  // `hidden` : le tiroir modal ouvert masque le reste de la page aux requêtes par rôle.
+  await screen.findByRole('heading', { level: 2, name: 'Titre a-1', hidden: true })
   const initial = (await stored()).students[0]?.attempts
 
   fireEvent.click(rowOf('Bec'))
-  await waitFor(() => expect(rowOf('Bec')).toHaveAttribute('aria-current', 'true'))
-  expect(screen.queryByRole('heading', { level: 2, name: 'Titre a-1' })).not.toBeInTheDocument()
+  await expectPanelClosed()
+  await waitFor(() =>
+    expect(screen.queryByRole('heading', { level: 2, name: 'Titre a-1' })).not.toBeInTheDocument(),
+  )
+  await openSidePanel()
   fireEvent.click(rowOf('Aba'))
 
   expect(await screen.findByRole('heading', { level: 2, name: 'Titre a-1' })).toBeInTheDocument()

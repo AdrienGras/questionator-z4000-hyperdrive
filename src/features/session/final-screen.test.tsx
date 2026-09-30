@@ -125,7 +125,10 @@ test('détail du passage : rangs des questions notées, passée sans rang', asyn
     2,
   )
 
-  const lists = screen.getAllByRole('list').filter((list) => list.closest('aside') === null)
+  // Le tiroir (Sheet) peut contenir ses propres listes : on ne garde que celles hors du tiroir.
+  const lists = screen
+    .getAllByRole('list')
+    .filter((list) => list.closest('[data-slot="sheet-content"]') === null)
   const [detail] = lists
   if (lists.length !== 1 || detail === undefined) {
     throw new Error(`${lists.length} listes hors panneau, une seule attendue`)

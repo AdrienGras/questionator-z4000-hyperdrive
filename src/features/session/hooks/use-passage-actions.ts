@@ -19,7 +19,7 @@ export type PassageActions = {
   draw: (categoryId: string) => Promise<void>
   score: (attemptId: string, value: number) => Promise<void>
   skip: (attemptId: string, reason: string | undefined) => Promise<void>
-  selectStudent: (studentId: string) => Promise<void>
+  selectStudent: (studentId: string) => Promise<boolean>
   adjust: (
     value: number,
     reason: string | undefined,
@@ -115,10 +115,10 @@ export function usePassageActions(
     [run, studentId],
   )
 
+  // Le booléen de succès permet à la vue de fermer le tiroir latéral seulement si le changement
+  // d'étudiant a été écrit (F21).
   const selectStudent = useCallback(
-    async (targetStudentId: string) => {
-      await run((session) => setActiveStudent(session, targetStudentId))
-    },
+    (targetStudentId: string) => run((session) => setActiveStudent(session, targetStudentId)),
     [run],
   )
 
