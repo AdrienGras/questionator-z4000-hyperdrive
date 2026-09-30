@@ -227,6 +227,9 @@ const SAMPLE: UiMessageParams = {
   stats_col_mean_final: {},
   stats_times: { label: 'Facile', count: 2 },
   stats_no_reason: {},
+  export_button: {},
+  export_busy: {},
+  export_error: {},
 }
 
 function isUiMessageKey(key: string): key is keyof UiMessageParams {

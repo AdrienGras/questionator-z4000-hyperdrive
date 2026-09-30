@@ -15,6 +15,9 @@ export class CreateSessionPage {
 
   async uploadConfig(path: string): Promise<void> {
     await this.upload('Configuration (JSON)', path)
+    // La validation est asynchrone et pré-remplit le nom si personne ne l'a édité : attendre
+    // qu'elle ait fini (les deux fichiers valides), sinon `fillName` court contre elle.
+    await this.page.getByText('Fichier valide').nth(1).waitFor()
   }
 
   async fillName(name: string): Promise<void> {

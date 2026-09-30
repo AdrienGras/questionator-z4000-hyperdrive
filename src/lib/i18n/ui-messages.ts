@@ -198,6 +198,9 @@ export type UiMessageParams = {
   passage_skip_free_text: NoParams
   passage_skip_confirm: NoParams
   stats_open: NoParams
+  export_button: NoParams
+  export_busy: NoParams
+  export_error: NoParams
   stats_back: NoParams
   stats_error: NoParams
   stats_headcount: NoParams
@@ -477,6 +480,9 @@ const fr: Dictionary<UiMessageParams> = {
   passage_skip_free_text: () => 'Autre motif',
   passage_skip_confirm: () => 'Passer',
   stats_open: () => 'Statistiques',
+  export_button: () => 'Exporter en Excel',
+  export_busy: () => 'Export en cours…',
+  export_error: () => "L'export a échoué. Réessayez.",
   stats_back: () => 'Retour au passage',
   stats_error: () => "Les statistiques n'ont pas pu être chargées.",
   stats_headcount: () => 'Effectifs',
@@ -716,6 +722,9 @@ const en: Dictionary<UiMessageParams> = {
   passage_skip_free_text: () => 'Other reason',
   passage_skip_confirm: () => 'Skip',
   stats_open: () => 'Statistics',
+  export_button: () => 'Export to Excel',
+  export_busy: () => 'Exporting…',
+  export_error: () => 'Export failed. Try again.',
   stats_back: () => 'Back to the exam',
   stats_error: () => 'The statistics could not be loaded.',
   stats_headcount: () => 'Headcount',

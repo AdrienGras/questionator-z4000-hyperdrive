@@ -117,13 +117,8 @@ export const BUNDLE_TARGETS: BundleTarget[] = [
   { name: 'xlsx', chunk: XLSX_CHUNK, importer: XLSX_IMPORTER, forbidden: XLSX_FORBIDDEN },
 ]
 
-/**
- * Cibles réellement contrôlées. `xlsx` n'y figure pas encore : rien n'importe `lib/xlsx` avant le
- * bouton d'export (F16 tâche 5), la garde de non-vacuité échouerait. Y ajouter `xlsx` à ce moment.
- */
-export const ACTIVE_TARGETS: BundleTarget[] = BUNDLE_TARGETS.filter(
-  (target) => target.name === 'recharts',
-)
+/** Cibles réellement contrôlées : chacune est chargée en dynamique par l'application. */
+export const ACTIVE_TARGETS: BundleTarget[] = BUNDLE_TARGETS
 
 /** Problèmes (vacuité puis fuites) de chaque cible ; [] si le bundle initial est propre. */
 export function checkTargets(
