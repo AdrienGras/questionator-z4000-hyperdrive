@@ -101,6 +101,8 @@ export type BundleTarget = {
   importer: string
   /** Motif interdit dans le graphe statique depuis les entrées. */
   forbidden: RegExp
+  /** Piste ajoutée aux problèmes de vacuité quand la cause probable diffère du message générique. */
+  vacuityHint?: string
 }
 
 export const XLSX_CHUNK = /^_xlsx[.-]/
@@ -124,7 +126,14 @@ export const BUNDLE_TARGETS: BundleTarget[] = [
     forbidden: RECHARTS_FORBIDDEN,
   },
   { name: 'xlsx', chunk: XLSX_CHUNK, importer: XLSX_IMPORTER, forbidden: XLSX_FORBIDDEN },
-  { name: 'shiki', chunk: SHIKI_CHUNK, importer: SHIKI_IMPORTER, forbidden: SHIKI_FORBIDDEN },
+  {
+    name: 'shiki',
+    chunk: SHIKI_CHUNK,
+    importer: SHIKI_IMPORTER,
+    forbidden: SHIKI_FORBIDDEN,
+    vacuityHint:
+      ' (cause probable : un import statique de `shiki/langs` inline le catalogue dans l’entrée)',
+  },
 ]
 
 /** Problèmes (vacuité puis fuites) de chaque cible ; [] si le bundle initial est propre. */
@@ -134,7 +143,7 @@ export function checkTargets(
 ): string[] {
   return targets.flatMap((target) => [
     ...findVacuityProblems(manifest, target.chunk, target.importer).map(
-      (problem) => `${target.name} : contrôle sans objet, ${problem}`,
+      (problem) => `${target.name} : contrôle sans objet, ${problem}${target.vacuityHint ?? ''}`,
     ),
     // Contrôlées même si la garde échoue : une fuite explique souvent l'absence de l'importeur.
     ...findInitialLeaks(manifest, target.forbidden).map(

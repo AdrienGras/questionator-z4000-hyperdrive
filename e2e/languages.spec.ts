@@ -16,22 +16,73 @@ test.use({ serviceWorkers: 'block' })
 
 const manifestSchema = z.record(
   z.string(),
-  z.object({ file: z.string(), src: z.string().optional() }),
+  z.object({
+    file: z.string(),
+    src: z.string().optional(),
+    isEntry: z.boolean().optional(),
+    imports: z.array(z.string()).optional(),
+    dynamicImports: z.array(z.string()).optional(),
+  }),
 )
+type Manifest = z.infer<typeof manifestSchema>
 
-/** Noms de fichier (`assets/<nom>-<hash>.js`) du catalogue `shiki/langs` et de chaque grammaire, lus dans le build. */
-function shikiChunkFiles(): { catalog: string; grammars: Map<string, string> } {
+/** Entrée du manifeste, ou erreur : une recherche qui ne trouve rien rendrait les assertions vides. */
+function entryOf(manifest: Manifest, key: string): Manifest[string] {
+  const entry = manifest[key]
+  if (entry === undefined) throw new Error(`clé absente du manifeste : ${key}`)
+  return entry
+}
+
+/** Fichiers d'une clé et de tous ses imports statiques. */
+function staticFiles(manifest: Manifest, start: string): Set<string> {
+  const keys = new Set<string>()
+  const queue = [start]
+  for (const key of queue) {
+    if (keys.has(key)) continue
+    keys.add(key)
+    queue.push(...(entryOf(manifest, key).imports ?? []))
+  }
+  return new Set([...keys].map((key) => entryOf(manifest, key).file))
+}
+
+/**
+ * Lu dans `dist/.vite/manifest.json` : fichier du catalogue `shiki/langs`, fichiers de toutes les
+ * grammaires (ceux que le catalogue importe dynamiquement, dépendances partagées comprises) et
+ * fichiers propres à une grammaire donnée (elle-même et ses imports statiques).
+ */
+function shikiChunkFiles(): {
+  catalog: string
+  allGrammars: Set<string>
+  grammarFiles: (language: string) => Set<string>
+} {
   const manifest = manifestSchema.parse(
     JSON.parse(readFileSync('dist/.vite/manifest.json', 'utf8')),
   )
-  const catalog = Object.entries(manifest).find(([key]) => /^_langs[.-]/.test(key))?.[1].file
-  if (catalog === undefined) throw new Error('chunk du catalogue absent du manifeste')
-  const grammars = new Map<string, string>()
-  for (const entry of Object.values(manifest)) {
-    const name = /@shikijs\/langs\/dist\/([^/]+)\.mjs$/.exec(entry.src ?? '')?.[1]
-    if (name !== undefined) grammars.set(name, entry.file)
+  const catalogKey = Object.keys(manifest).find((key) => /^_langs[.-]/.test(key))
+  if (catalogKey === undefined) throw new Error('chunk du catalogue absent du manifeste')
+  const catalogEntry = entryOf(manifest, catalogKey)
+  const grammarKeys = catalogEntry.dynamicImports ?? []
+  if (grammarKeys.length < 100) throw new Error('le catalogue n’importe presque aucune grammaire')
+  // Les fichiers déjà dans le bundle initial (runtime de Rolldown, vendor) ne comptent pas comme grammaires.
+  const initial = new Set(
+    Object.keys(manifest)
+      .filter((key) => manifest[key]?.isEntry === true)
+      .flatMap((key) => [...staticFiles(manifest, key)]),
+  )
+  const grammarOnly = (files: Set<string>): Set<string> =>
+    new Set([...files].filter((file) => !initial.has(file)))
+  const allGrammars = grammarOnly(
+    new Set(grammarKeys.flatMap((key) => [...staticFiles(manifest, key)])),
+  )
+  return {
+    catalog: catalogEntry.file,
+    allGrammars,
+    grammarFiles(language) {
+      const key = grammarKeys.find((candidate) => candidate.endsWith(`/dist/${language}.mjs`))
+      if (key === undefined) throw new Error(`grammaire absente du manifeste : ${language}`)
+      return grammarOnly(staticFiles(manifest, key))
+    },
   }
-  return { catalog, grammars }
 }
 
 /** Fichiers JS demandés par la page, tous noms confondus (`assets/…`). */
@@ -48,11 +99,11 @@ test("l'accueil ne charge ni le catalogue ni aucune grammaire", async ({ page })
   const requested = trackAssetRequests(page)
   await new HomePage(page).goto()
   await page.waitForLoadState('networkidle')
-  const { catalog, grammars } = shikiChunkFiles()
+  const { catalog, allGrammars } = shikiChunkFiles()
 
   expect(requested.length).toBeGreaterThan(0)
   expect(requested).not.toContain(catalog)
-  expect(requested.filter((file) => [...grammars.values()].includes(file))).toEqual([])
+  expect(requested.filter((file) => allGrammars.has(file))).toEqual([])
 })
 
 test('seul le chunk de la grammaire python est chargé', async ({ page }) => {
@@ -68,12 +119,13 @@ test('seul le chunk de la grammaire python est chargé', async ({ page }) => {
   await examiner.draw('Facile')
   await expect(examiner.highlightedCode).toBeAttached()
 
-  const { catalog, grammars } = shikiChunkFiles()
+  const { catalog, allGrammars, grammarFiles } = shikiChunkFiles()
+  const python = grammarFiles('python')
   expect(requested).toContain(catalog)
-  expect(requested).toContain(grammars.get('python'))
-  for (const other of ['yaml', 'dockerfile', 'emacs-lisp']) {
-    expect(requested, other).not.toContain(grammars.get(other))
-  }
+  // Toutes les grammaires demandées sont celles de python (et ses dépendances), aucune autre.
+  expect(requested.filter((file) => allGrammars.has(file)).toSorted()).toEqual(
+    [...python].toSorted(),
+  )
 })
 
 test('un langage inconnu reste en texte brut et est signalé', async ({ page }) => {
@@ -92,5 +144,7 @@ test('un langage inconnu reste en texte brut et est signalé', async ({ page }) 
 
   await examiner.draw('Facile')
   await expect(examiner.plainCode).toBeAttached()
+  // Laisse le temps à une éventuelle coloration tardive avant d'affirmer que le bloc reste brut.
+  await page.waitForLoadState('networkidle')
   await expect(examiner.highlightedCode).toHaveCount(0)
 })

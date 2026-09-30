@@ -131,8 +131,8 @@ describe('findVacuityProblems', () => {
 const PYTHON_KEY =
   'node_modules/.pnpm/@shikijs+langs@4.4.3/node_modules/@shikijs/langs/dist/python.mjs'
 
-/** Manifeste à trois cibles : Recharts (route des stats) et xlsx (écriture du classeur). */
-const TWO_TARGETS: Record<string, ManifestChunk> = {
+/** Manifeste à trois cibles : Recharts (route des stats), xlsx (écriture du classeur) et Shiki (validateur). */
+const THREE_TARGETS: Record<string, ManifestChunk> = {
   ...REAL_MANIFEST,
   'index.html': {
     ...REAL_MANIFEST['index.html'],
@@ -162,12 +162,12 @@ describe('cibles multiples', () => {
     expect(BUNDLE_TARGETS[1]).toMatchObject({ chunk: XLSX_CHUNK, importer: XLSX_IMPORTER })
   })
 
-  it('ne trouve aucun problème sur un manifeste propre à deux cibles', () => {
-    expect(problemsOf(TWO_TARGETS)).toEqual([])
+  it('ne trouve aucun problème sur un manifeste propre aux trois cibles', () => {
+    expect(problemsOf(THREE_TARGETS)).toEqual([])
   })
 
   it('signale la vacuité de xlsx quand son chunk est absent', () => {
-    const manifest = { ...TWO_TARGETS }
+    const manifest = { ...THREE_TARGETS }
     delete manifest['_xlsx-Ab12Cd34.js']
     manifest[XLSX_IMPORTER] = { file: 'assets/write-workbook.js', isDynamicEntry: true }
     const problems = problemsOf(manifest)
@@ -177,9 +177,9 @@ describe('cibles multiples', () => {
 
   it('signale une fuite quand xlsx est atteint statiquement depuis l’entrée', () => {
     const manifest: Record<string, ManifestChunk> = {
-      ...TWO_TARGETS,
+      ...THREE_TARGETS,
       'index.html': {
-        ...TWO_TARGETS['index.html'],
+        ...THREE_TARGETS['index.html'],
         imports: ['_vendor-DqVrg90E.js', '_xlsx-Ab12Cd34.js'],
       },
     }
@@ -187,15 +187,11 @@ describe('cibles multiples', () => {
     expect(findInitialLeaks(manifest, RECHARTS_FORBIDDEN)).toEqual([])
   })
 
-  it('accepte le catalogue Shiki chargé seulement dynamiquement', () => {
-    expect(problemsOf(TWO_TARGETS)).toEqual([])
-  })
-
   it('signale le catalogue Shiki importé statiquement par l’entrée', () => {
     const manifest: Record<string, ManifestChunk> = {
-      ...TWO_TARGETS,
+      ...THREE_TARGETS,
       'index.html': {
-        ...TWO_TARGETS['index.html'],
+        ...THREE_TARGETS['index.html'],
         imports: ['_vendor-DqVrg90E.js', '_langs-WOor098P.js'],
       },
     }
@@ -205,9 +201,9 @@ describe('cibles multiples', () => {
 
   it('signale une grammaire importée statiquement par l’entrée', () => {
     const manifest: Record<string, ManifestChunk> = {
-      ...TWO_TARGETS,
+      ...THREE_TARGETS,
       'index.html': {
-        ...TWO_TARGETS['index.html'],
+        ...THREE_TARGETS['index.html'],
         imports: ['_vendor-DqVrg90E.js', PYTHON_KEY],
       },
     }
@@ -216,11 +212,22 @@ describe('cibles multiples', () => {
 
   it('signale la vacuité de shiki quand le catalogue n’est plus atteint par le validateur', () => {
     const manifest: Record<string, ManifestChunk> = {
-      ...TWO_TARGETS,
+      ...THREE_TARGETS,
       [SHIKI_IMPORTER]: { file: 'assets/validate.js', isDynamicEntry: true },
     }
     expect(findVacuityProblems(manifest, SHIKI_CHUNK, SHIKI_IMPORTER)[0]).toMatch(
       /n'importe pas statiquement _langs-WOor098P\.js/,
     )
+  })
+
+  it('explique la vacuité de shiki par l’inlining du catalogue dans l’entrée', () => {
+    const manifest = { ...THREE_TARGETS }
+    delete manifest['_langs-WOor098P.js']
+    manifest[SHIKI_IMPORTER] = { file: 'assets/validate.js', isDynamicEntry: true }
+    expect(problemsOf(manifest)).toEqual([
+      expect.stringMatching(
+        /^shiki : contrôle sans objet, aucun chunk .*import statique de `shiki\/langs`/,
+      ),
+    ])
   })
 })
