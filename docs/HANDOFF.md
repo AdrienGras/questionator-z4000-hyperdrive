@@ -20,6 +20,26 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-30 — F16 implémenté : export Excel
+
+**Dernière chose faite** : F15 mergé (PR #47, #15 fermé à la main : la PR n'y était pas liée). F16 (#16) sur `feat/f16-excel-export`, en processus complet : brainstorming, spec `docs/superpowers/specs/2026-09-30-f16-excel-export-design.md` et D71, plan en 5 tâches, subagent-driven development (revue par tâche, deux tours de correctifs, revue finale sur Opus, une vague de correctifs relue). La session a été interrompue pendant la tâche 2, reprise sans perte (rien n'avait été commité).
+- Domaine `src/domain/export/` : `buildWorkbook` pur → `WorkbookSpec` neutre ; un fichier par onglet ; dictionnaire `exportText` fr/en complet ; absent : brute, plafonnée, convertie, ajustement vides, finale selon `absent.export`.
+- `src/lib/xlsx/write-workbook.ts` : seul importeur de write-excel-file 4.1.1 ; `toSheets`/`toSheetData` purs ; dates décalées de leur propre `getTimezoneOffset()`.
+- `features/session/export-workbook.ts` + `ExportButton` (import dynamique, occupé, erreur) dans l'`actionsSlot` à côté de « Statistiques ».
+- Bundle : `check:bundle` multi-cibles (Recharts, xlsx), groupe `codeSplitting` `xlsx` ; depcruise : confinement, import dynamique seul, exception type-only étroite `lib/xlsx → domain/export/types.ts`.
+- Partagés : libellés des stats (`domain/stats/labels.ts`), recherche dans la config (`domain/config/lookup.ts`), slug et date (`domain/session/file-name.ts`).
+- e2e `e2e/export.spec.ts` (téléchargement, `PK`) ; course de `uploadConfig` corrigée dans le POM.
+
+Vérifié à la main : export réel ouvert dans LibreOffice headless (5 onglets, formats appliqués, volets figés, heure locale juste, motif et justification présents).
+
+**Trucs en suspens** : PR à ouvrir en brouillon, `sonar-check.sh --pr <n> --wait`, puis « Ready for review ». Ouverture dans Excel à faire par le propriétaire du dépôt et à consigner dans la PR (critère d'acceptation). Points mineurs au BACKLOG § Export Excel.
+
+**Prochaine chose à creuser** : ouvrir la PR F16 et passer le gate SonarQube ; ensuite F17 (hors ligne), qui pré-cache les chunks `_recharts-*` et `_xlsx-*` que `check:bundle` isole déjà.
+
+**Notes pour future Claude** : une PR avec `Closes #n` peut ne pas lier le ticket (cas de #47) : vérifier `gh pr view <n> --json closingIssuesReferences` avant le merge. write-excel-file écrit les dates en UTC ; la conversion LibreOffice en CSV n'applique les formats qu'avec le 9e jeton de filtre à `true`. Les agents lancés en arrière-plan ne survivent pas à la fin d'une session : vérifier `git log` et le ledger avant de relancer.
+
+---
+
 ## 2026-09-30 — F15 implémenté : statistiques de session
 
 **Dernière chose faite** : F14 était déjà mergé (PR #46) ; F15 (#15) sur `feat/f15-stats`, en processus complet : brainstorming (stratégie = multiensemble, contrôle du bundle sur le manifeste + e2e léger), spec `docs/superpowers/specs/2026-09-30-f15-stats-design.md` et D70, plan en 7 tâches, subagent-driven development (revue par tâche, revue finale sur Opus, une vague de correctifs relue).
