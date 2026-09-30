@@ -153,6 +153,11 @@ describe('summarySheet', () => {
     expect(rows[4]?.[11]).toEqual(num(5.5, '0.0'))
   })
 
+  test('absent en mode value plus fine que le pas : format de la valeur', () => {
+    const rows = summarySheet(sessionFor({ export: 'value', value: 5.25 }), 'fr').rows
+    expect(rows[4]?.[11]).toEqual(num(5.25, '0.00'))
+  })
+
   test('en-têtes et statuts en anglais', () => {
     const sheet = summarySheet(sessionFor(), 'en')
     expect(sheet.name).toBe('Summary')

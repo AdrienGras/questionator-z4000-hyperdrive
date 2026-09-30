@@ -6,7 +6,7 @@ import { studentStatus, type StudentStatus } from '@/domain/scoring/status'
 import type { Session, Student } from '@/domain/session/types'
 import type { Locale } from '@/lib/i18n/i18n'
 import { header, num, optionalText, text } from './cells'
-import { scoreFormat } from './formats'
+import { scoreFormat, valueFormat } from './formats'
 import { exportText, type ExportMessageKey } from './messages'
 import type { Cell, SheetSpec } from './types'
 
@@ -35,10 +35,10 @@ const STATUS_KEYS: Record<StudentStatus, ExportMessageKey> = {
 }
 
 /** Finale exportée : libellé d'absent en texte, nombre au format du pas, vide si non terminé. */
-function finalCell(student: Student, config: NormalizedConfig, format: string): Cell {
+function finalCell(student: Student, config: NormalizedConfig): Cell {
   const value = exportedFinal(student, config)
   if (value === null) return null
-  return typeof value === 'string' ? text(value) : num(value, format)
+  return typeof value === 'string' ? text(value) : num(value, valueFormat(config, value))
 }
 
 function studentRow(session: Session, student: Student, locale: Locale): Cell[] {
@@ -60,7 +60,7 @@ function studentRow(session: Session, student: Student, locale: Locale): Cell[] 
     scores.converted === null ? null : num(fromMilli(scores.converted), format),
     adjustment === undefined ? null : num(fromMilli(scores.adjustment), format),
     optionalText(adjustment?.reason),
-    finalCell(student, config, format),
+    finalCell(student, config),
     optionalText(student.comment),
   ]
 }
