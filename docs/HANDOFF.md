@@ -20,6 +20,20 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-30 — F18 mergé : tous les tickets V1 livrés
+
+**Dernière chose faite** : PR #51 (F18) passée au gate SonarQube du premier coup (0 issue, 0 hotspot), mergée ; #36 fermé à la main (PR encore non liée au ticket malgré `Closes #36`, comme #47, #48 et #50). Plus aucun ticket ouvert : F01 à F18 sont livrés.
+
+**Trucs en suspens** : vérifications manuelles, que l'utilisateur fera en début de prochaine session :
+- F16 : ouvrir un export dans Excel (pas d'invite de réparation, volet figé) ;
+- F17 : installer la PWA dans Chrome et dans Edge ; suivre la première mise à jour réelle (pastille dans la vue examinateur, rechargement seul de l'onglet qui clique, vue projetée rechargée) ;
+- F18 : blocs `python`, `yaml` et `dockerfile` colorés, langage inconnu signalé à la création.
+Cause de la non-liaison PR → ticket jamais cherchée.
+
+**Prochaine chose à creuser** : à partir des retours des tests manuels, rédiger avec l'utilisateur les tickets d'ajustement (`.claude/scripts/gh-ticket.sh`), puis traiter les points du BACKLOG (§ Rendu markdown : fond des blocs `.shiki`, code en ligne, taille de projection ; § Hors ligne ; § Export Excel) et itérer, un ticket et une PR à la fois.
+
+**Notes pour future Claude** : fermer le ticket à la main après chaque merge tant que la liaison `Closes #n` ne marche pas (`gh pr view <n> --json closingIssuesReferences` est vide). Ne fermer le ticket qu'une fois le merge confirmé (`gh pr view <n> --json state` = `MERGED`) : un merge peut être refusé tant qu'un job CI du dernier push tourne.
+
 ## 2026-09-30 — F17 mergé, F18 implémenté : tous les langages Shiki
 
 **Dernière chose faite** : PR #50 (F17) mergée, #17 fermé à la main (encore une PR non liée au ticket). F18 (#36) sur `feat/f18-langages` : spec du 26/09 actualisée après F17, plan en 4 tâches, subagent-driven development (revue par tâche, deux tours de correctifs mineurs, revue finale Opus sans défaut de code).
