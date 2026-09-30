@@ -134,7 +134,7 @@ export function CreateSessionPage() {
               download
               className={EXAMPLE_LINK_CLASS}
             >
-              {text('home_config_example_link', {})}
+              {text('create_config_example_link', {})}
             </a>
           </div>
           <div className="flex flex-col gap-2">

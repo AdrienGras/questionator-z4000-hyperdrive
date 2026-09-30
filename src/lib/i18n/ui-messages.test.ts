@@ -14,6 +14,7 @@ const SAMPLE: UiMessageParams = {
   home_create_body: {},
   home_students_example_link: {},
   home_config_example_link: {},
+  create_config_example_link: {},
   home_config_schema_link: {},
   home_import_title: {},
   home_import_body: {},

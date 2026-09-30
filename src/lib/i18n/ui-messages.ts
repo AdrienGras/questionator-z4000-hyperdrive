@@ -83,6 +83,7 @@ export type UiMessageParams = {
   create_file_status_errors: NoParams
   create_file_status_reading: NoParams
   create_students_example_link: NoParams
+  create_config_example_link: NoParams
   create_validator_load_error: NoParams
   create_submit: NoParams
   create_write_error: NoParams
@@ -384,6 +385,7 @@ const fr: Dictionary<UiMessageParams> = {
   create_file_status_errors: () => 'Fichier invalide',
   create_file_status_reading: () => 'Lecture en cours…',
   create_students_example_link: () => "Télécharger la liste d'exemple",
+  create_config_example_link: () => "Télécharger la config d'exemple",
   create_validator_load_error: () => "La validation n'a pas pu démarrer. Rechargez la page.",
   create_submit: () => 'Créer la session',
   create_write_error: () => 'La création a échoué. Réessayez.',
@@ -641,6 +643,7 @@ const en: Dictionary<UiMessageParams> = {
   create_file_status_errors: () => 'Invalid file',
   create_file_status_reading: () => 'Reading…',
   create_students_example_link: () => 'Download the example list',
+  create_config_example_link: () => 'Download the example config',
   create_validator_load_error: () => 'Validation could not start. Reload the page.',
   create_submit: () => 'Create session',
   create_write_error: () => 'Creation failed. Please try again.',

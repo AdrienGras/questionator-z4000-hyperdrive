@@ -50,7 +50,7 @@ export function SessionCard({ ui, session }: SessionCardProps) {
     <Card>
       <CardHeader>
         <CardTitle>
-          <h2 className="text-lg font-semibold">{session.name}</h2>
+          <h3 className="text-lg font-semibold">{session.name}</h3>
         </CardTitle>
         <CardDescription>{session.config.exam.title}</CardDescription>
         <CardAction>

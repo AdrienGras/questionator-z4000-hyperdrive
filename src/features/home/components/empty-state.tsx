@@ -9,7 +9,7 @@ export function EmptyState({ ui }: EmptyStateProps) {
   return (
     <Card>
       <CardContent className="flex flex-col items-center gap-4 py-6 text-center">
-        <h2 className="text-xl font-semibold">{text('empty_title', {})}</h2>
+        <h3 className="text-xl font-semibold">{text('empty_title', {})}</h3>
         <p className="max-w-md text-muted-foreground">{text('empty_body', {})}</p>
       </CardContent>
     </Card>
