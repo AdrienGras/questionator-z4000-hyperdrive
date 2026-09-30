@@ -20,6 +20,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-30 — Fin de session : F23, F25, F19, F21 mergés
+
+**Dernière chose faite** : quatre tickets de la série V1 mergés dans `main`, dans l'ordre : #57 F23 (PR #62, changer d'étudiant remet la projection en attente), #59 F25 (PR #63, tuiles de catégorie selon leur nombre), #53 F19 (PR #65, coque `PageShell`), #55 F21 (PR #66, panneau latéral en tiroir). Règle ajoutée à `CLAUDE.md` (PR #64) : tickets en séquence, merge seulement sur go explicite de l'utilisateur. Deux pièges ajoutés à QUIRKS (dialog base-ui monté pendant sa sortie, test de flush au démontage trop patient).
+
+**Trucs en suspens** : vérifications manuelles de F16 (Excel), F17 (PWA) et F18 (langages) toujours sans retour. BACKLOG : erreur périmée réannoncée à l'ouverture du tiroir, menu du thème qui reste ouvert après un choix, seuil de repli des tuiles à revoir avec #56.
+
+**Prochaine chose à creuser** : #56 (F22, aperçu réduit de la vue projetée en haut à droite de la vue de passage, contrôles de projection en dessous ; débloqué par F21), puis #54 (F20, accueil sur deux colonnes), #58 (F24, fond des blocs de code), #60 (F26, éditeur de config, bloqué par #54 et #56). Chaque ticket : brainstorming → spec → plan → subagents → PR brouillon → Sonar → « Ready for review » → go de l'utilisateur.
+
+**Notes pour future Claude** : cycle rodé sur F19 et F21 : spec validée section par section, plan en tâches, exécution en subagents avec un registre dans `.superpowers/sdd/<plan>/` (ignoré par git, supprimé en fin de cycle), revue finale sur le modèle le plus capable, puis captures au navigateur (`pnpm dev` + Playwright MCP, sessions de démo importées depuis `src/testing/*-fixtures.ts`, captures sous `.playwright-mcp/`). Les captures ont trouvé des défauts que jsdom ne voit pas (titre long qui repliait les actions à gauche en F19) : les garder pour tout ticket d'interface. #56 réutilise `PageShell` (actions) et `ProjectionControls` ; l'aperçu réduit la largeur des tuiles côté examinateur (BACKLOG F25).
+
 ## 2026-09-30 — F21 : panneau latéral en tiroir
 
 **Dernière chose faite** : #55 (F21) livré sur `feat/f21-panneau-lateral` (PR à ouvrir, pas de merge sans go). Brainstorming → spec → plan → subagents (5 tâches, une relecture par tâche dont deux avec un tour de correction, revue finale opus, une vague de correction). Le panneau de la vue de passage est un `Sheet` modal à droite (28 rem), fermé au chargement, ouvert par « Panneau » (premier bouton des actions de la barre de titre) ; seul l'onglet est mémorisé ; il se referme après un changement d'étudiant réussi ; « Afficher le panneau » dans les états absent et aucun étudiant ; le commentaire n'annonce plus que « Enregistré » ou « Échec de l’enregistrement ». D76, `PRODUCT.md` F12, F13, F21, CONVENTIONS (`Sheet`, `shadcn add` qui veut écraser `button.tsx`), BACKLOG. `pnpm check` 1227 tests, `pnpm e2e` 10/10, captures 1280 et 1920 px clair/sombre.
