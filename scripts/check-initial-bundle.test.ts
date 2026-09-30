@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
+  ACTIVE_TARGETS,
   BUNDLE_TARGETS,
+  checkTargets,
   findInitialLeaks,
   findVacuityProblems,
-  FORBIDDEN,
+  RECHARTS_FORBIDDEN,
   RECHARTS_CHUNK,
   STATS_ROUTE_KEY,
   XLSX_CHUNK,
@@ -20,7 +22,7 @@ describe('findInitialLeaks', () => {
       'index.html': { file: 'assets/index.js', isEntry: true, imports: [RECHARTS_KEY] },
       [RECHARTS_KEY]: { file: 'assets/recharts.js' },
     }
-    expect(findInitialLeaks(manifest, FORBIDDEN)).toEqual([RECHARTS_KEY])
+    expect(findInitialLeaks(manifest, RECHARTS_FORBIDDEN)).toEqual([RECHARTS_KEY])
   })
 
   it('accepte recharts atteint seulement par import dynamique', () => {
@@ -29,7 +31,7 @@ describe('findInitialLeaks', () => {
       'src/stats.tsx': { file: 'assets/stats.js', isDynamicEntry: true, imports: [RECHARTS_KEY] },
       [RECHARTS_KEY]: { file: 'assets/recharts.js' },
     }
-    expect(findInitialLeaks(manifest, FORBIDDEN)).toEqual([])
+    expect(findInitialLeaks(manifest, RECHARTS_FORBIDDEN)).toEqual([])
   })
 
   it('détecte une fuite indirecte (entrée, a.js, recharts)', () => {
@@ -38,7 +40,7 @@ describe('findInitialLeaks', () => {
       '_a.js': { file: 'assets/a.js', imports: [RECHARTS_KEY] },
       [RECHARTS_KEY]: { file: 'assets/recharts.js' },
     }
-    expect(findInitialLeaks(manifest, FORBIDDEN)).toEqual([RECHARTS_KEY])
+    expect(findInitialLeaks(manifest, RECHARTS_FORBIDDEN)).toEqual([RECHARTS_KEY])
   })
 
   it('signale le chunk de chart.tsx et supporte les cycles', () => {
@@ -47,14 +49,14 @@ describe('findInitialLeaks', () => {
       '_a.js': { file: 'assets/a.js', imports: ['_a.js', 'src/components/ui/chart.tsx'] },
       'src/components/ui/chart.tsx': { file: 'assets/chart.js' },
     }
-    expect(findInitialLeaks(manifest, FORBIDDEN)).toEqual(['src/components/ui/chart.tsx'])
+    expect(findInitialLeaks(manifest, RECHARTS_FORBIDDEN)).toEqual(['src/components/ui/chart.tsx'])
   })
 
   it('renvoie [] quand rien n’est interdit', () => {
     const manifest: Record<string, ManifestChunk> = {
       'index.html': { file: 'assets/index.js', isEntry: true },
     }
-    expect(findInitialLeaks(manifest, FORBIDDEN)).toEqual([])
+    expect(findInitialLeaks(manifest, RECHARTS_FORBIDDEN)).toEqual([])
   })
 
   it('le motif réel reconnaît le chunk recharts du manifeste Vite', () => {
@@ -62,7 +64,7 @@ describe('findInitialLeaks', () => {
       'index.html': { file: 'assets/index.js', isEntry: true, imports: ['_recharts-CK6PldPx.js'] },
       '_recharts-CK6PldPx.js': { file: 'assets/recharts-CK6PldPx.js' },
     }
-    expect(findInitialLeaks(manifest, FORBIDDEN)).toEqual(['_recharts-CK6PldPx.js'])
+    expect(findInitialLeaks(manifest, RECHARTS_FORBIDDEN)).toEqual(['_recharts-CK6PldPx.js'])
   })
 })
 
@@ -89,7 +91,7 @@ const REAL_MANIFEST: Record<string, ManifestChunk> = {
 describe('findVacuityProblems', () => {
   it('passe sur un manifeste réaliste (recharts atteint par la route des stats)', () => {
     expect(findVacuityProblems(REAL_MANIFEST, RECHARTS_CHUNK, STATS_ROUTE_KEY)).toEqual([])
-    expect(findInitialLeaks(REAL_MANIFEST, FORBIDDEN)).toEqual([])
+    expect(findInitialLeaks(REAL_MANIFEST, RECHARTS_FORBIDDEN)).toEqual([])
   })
 
   it('échoue sans chunk recharts dans le manifeste', () => {
@@ -139,19 +141,17 @@ const TWO_TARGETS: Record<string, ManifestChunk> = {
   '_xlsx-Ab12Cd34.js': { file: 'assets/xlsx-Ab12Cd34.js' },
 }
 
-function problemsOf(manifest: Record<string, ManifestChunk>): string[] {
-  return BUNDLE_TARGETS.flatMap((target) => [
-    ...findVacuityProblems(manifest, target.chunk, target.importer).map(
-      (problem) => `${target.name}: ${problem}`,
-    ),
-    ...findInitialLeaks(manifest, target.forbidden).map((leak) => `${target.name}: fuite ${leak}`),
-  ])
-}
+const problemsOf = (manifest: Record<string, ManifestChunk>): string[] =>
+  checkTargets(manifest, BUNDLE_TARGETS)
 
 describe('cibles multiples', () => {
   it('déclare recharts et xlsx', () => {
     expect(BUNDLE_TARGETS.map((target) => target.name)).toEqual(['recharts', 'xlsx'])
     expect(BUNDLE_TARGETS[1]).toMatchObject({ chunk: XLSX_CHUNK, importer: XLSX_IMPORTER })
+  })
+
+  it('n’active que recharts pour l’instant', () => {
+    expect(ACTIVE_TARGETS.map((target) => target.name)).toEqual(['recharts'])
   })
 
   it('ne trouve aucun problème sur un manifeste propre à deux cibles', () => {
@@ -164,7 +164,7 @@ describe('cibles multiples', () => {
     manifest[XLSX_IMPORTER] = { file: 'assets/write-workbook.js', isDynamicEntry: true }
     const problems = problemsOf(manifest)
     expect(problems).toHaveLength(1)
-    expect(problems[0]).toMatch(/^xlsx: aucun chunk/)
+    expect(problems[0]).toMatch(/^xlsx : contrôle sans objet, aucun chunk/)
   })
 
   it('signale une fuite quand xlsx est atteint statiquement depuis l’entrée', () => {
@@ -176,6 +176,6 @@ describe('cibles multiples', () => {
       },
     }
     expect(findInitialLeaks(manifest, XLSX_FORBIDDEN)).toEqual(['_xlsx-Ab12Cd34.js'])
-    expect(findInitialLeaks(manifest, FORBIDDEN)).toEqual([])
+    expect(findInitialLeaks(manifest, RECHARTS_FORBIDDEN)).toEqual([])
   })
 })

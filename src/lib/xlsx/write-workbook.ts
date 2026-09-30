@@ -4,7 +4,7 @@
  * Toujours chargé en `import()` dynamique pour rester hors du bundle initial.
  */
 import writeXlsxFile from 'write-excel-file/browser'
-import type { SheetData } from 'write-excel-file/browser'
+import type { Sheet, SheetData } from 'write-excel-file/browser'
 import type { Cell, SheetSpec, WorkbookSpec } from '@/domain/export/types'
 
 /** Décalage UTC (minutes, positif à l'ouest de Greenwich) du fuseau local à la date donnée. */
@@ -40,14 +40,17 @@ export function toSheetData(
   return sheet.rows.map((row) => row.map((cell) => toCell(cell, offsetOf)))
 }
 
+/** Onglets au format `write-excel-file` (exportée pour les tests). */
+export function toSheets(spec: WorkbookSpec): Sheet<Blob>[] {
+  return spec.map((sheet) => ({
+    sheet: sheet.name,
+    data: toSheetData(sheet),
+    columns: sheet.columns,
+    ...(sheet.stickyRows === undefined ? {} : { stickyRowsCount: sheet.stickyRows }),
+  }))
+}
+
 /** Écrit le classeur et déclenche son téléchargement sous `fileName`. */
 export async function writeWorkbook(spec: WorkbookSpec, fileName: string): Promise<void> {
-  await writeXlsxFile(
-    spec.map((sheet) => ({
-      sheet: sheet.name,
-      data: toSheetData(sheet),
-      columns: sheet.columns,
-      ...(sheet.stickyRows === undefined ? {} : { stickyRowsCount: sheet.stickyRows }),
-    })),
-  ).toFile(fileName)
+  await writeXlsxFile(toSheets(spec)).toFile(fileName)
 }

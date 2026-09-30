@@ -59,10 +59,28 @@ module.exports = {
     {
       name: 'lib-no-domain',
       severity: 'error',
+      comment: 'Hors lib/db/ et lib/xlsx/, lib/ ignore le métier.',
+      from: { path: '^src/lib/', pathNot: ['^src/lib/db/', '^src/lib/xlsx/', TEST] },
+      to: { path: '^src/domain/' },
+    },
+    {
+      name: 'lib-xlsx-domain-types-only',
+      severity: 'error',
       comment:
-        'Hors lib/db/, lib/ ignore le métier (sauf les types : lib/xlsx/ consomme WorkbookSpec, sans dépendance à l’exécution).',
-      from: { path: '^src/lib/', pathNot: ['^src/lib/db/', TEST] },
-      to: { path: '^src/domain/', dependencyTypesNot: ['type-only'] },
+        'lib/xlsx/ ne lit du métier que les types du classeur neutre (domain/export/types.ts), en `import type` : aucune dépendance à l’exécution.',
+      from: { path: '^src/lib/xlsx/', pathNot: TEST },
+      to: {
+        path: '^src/domain/',
+        pathNot: String.raw`^src/domain/export/types\.ts$`,
+      },
+    },
+    {
+      name: 'lib-xlsx-domain-type-only',
+      severity: 'error',
+      comment:
+        'Le seul fichier de domain/ que lib/xlsx/ peut lire l’est en `import type` uniquement.',
+      from: { path: '^src/lib/xlsx/', pathNot: TEST },
+      to: { path: String.raw`^src/domain/export/types\.ts$`, dependencyTypesNot: ['type-only'] },
     },
     {
       name: 'components-are-shared',

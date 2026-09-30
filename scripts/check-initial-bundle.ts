@@ -89,7 +89,7 @@ export const STATS_ROUTE_KEY = 'src/routes/session.$sessionId_.stats.tsx?tsr-spl
 
 // Chunk `recharts` (vite.config.ts, codeSplitting) : clé `_recharts-<hash>.js` dans le manifeste.
 // Repli : chemins sources (pnpm : node_modules/.pnpm/recharts@x/node_modules/recharts/…) et wrapper.
-export const FORBIDDEN =
+export const RECHARTS_FORBIDDEN =
   /(?:^_recharts[.-])|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?recharts\/)|(?:src\/components\/ui\/chart\.tsx)/
 /** Une bibliothèque lourde à garder hors du bundle initial. */
 export type BundleTarget = {
@@ -108,7 +108,12 @@ export const XLSX_FORBIDDEN =
   /(?:^_xlsx[.-])|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?(?:write-excel-file|fflate)\/)|(?:^src\/lib\/xlsx\/)/
 
 export const BUNDLE_TARGETS: BundleTarget[] = [
-  { name: 'recharts', chunk: RECHARTS_CHUNK, importer: STATS_ROUTE_KEY, forbidden: FORBIDDEN },
+  {
+    name: 'recharts',
+    chunk: RECHARTS_CHUNK,
+    importer: STATS_ROUTE_KEY,
+    forbidden: RECHARTS_FORBIDDEN,
+  },
   { name: 'xlsx', chunk: XLSX_CHUNK, importer: XLSX_IMPORTER, forbidden: XLSX_FORBIDDEN },
 ]
 
@@ -120,27 +125,32 @@ export const ACTIVE_TARGETS: BundleTarget[] = BUNDLE_TARGETS.filter(
   (target) => target.name === 'recharts',
 )
 
+/** Problèmes (vacuité puis fuites) de chaque cible ; [] si le bundle initial est propre. */
+export function checkTargets(
+  manifest: Record<string, ManifestChunk>,
+  targets: BundleTarget[],
+): string[] {
+  return targets.flatMap((target) => [
+    ...findVacuityProblems(manifest, target.chunk, target.importer).map(
+      (problem) => `${target.name} : contrôle sans objet, ${problem}`,
+    ),
+    // Contrôlées même si la garde échoue : une fuite explique souvent l'absence de l'importeur.
+    ...findInitialLeaks(manifest, target.forbidden).map(
+      (leak) => `${target.name} fuit dans le bundle initial : ${leak}`,
+    ),
+  ])
+}
+
 const MANIFEST_PATH = 'dist/.vite/manifest.json'
 
 function main(): void {
   const manifest = manifestSchema.parse(JSON.parse(readFileSync(MANIFEST_PATH, 'utf8')))
-  let failed = false
-  for (const target of ACTIVE_TARGETS) {
-    const problems = findVacuityProblems(manifest, target.chunk, target.importer)
-    if (problems.length > 0) {
-      console.error(`Contrôle du bundle initial sans objet, ${target.name} introuvable :`)
-      for (const problem of problems) console.error(`  - ${problem}`)
-      failed = true
-    }
-    // Contrôlée même si la garde échoue : une fuite explique souvent l'absence de l'importeur.
-    const leaks = findInitialLeaks(manifest, target.forbidden)
-    if (leaks.length > 0) {
-      console.error(`${target.name} fuit dans le bundle initial :`)
-      for (const leak of leaks) console.error(`  - ${leak}`)
-      failed = true
-    }
+  const problems = checkTargets(manifest, ACTIVE_TARGETS)
+  if (problems.length > 0) {
+    console.error('Contrôle du bundle initial en échec :')
+    for (const problem of problems) console.error(`  - ${problem}`)
+    process.exit(1)
   }
-  if (failed) process.exit(1)
   console.log(`Bundle initial sans ${ACTIVE_TARGETS.map((target) => target.name).join(', ')}.`)
 }
 

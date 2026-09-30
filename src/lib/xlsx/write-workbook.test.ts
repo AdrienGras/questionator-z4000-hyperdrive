@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { SheetSpec } from '@/domain/export/types'
-import { toSheetData } from '@/lib/xlsx/write-workbook'
+import { toSheetData, toSheets } from '@/lib/xlsx/write-workbook'
 
 function sheet(rows: SheetSpec['rows']): SheetSpec {
   return { name: 'Test', columns: [], rows }
@@ -88,5 +88,24 @@ describe('toSheetData', () => {
     )
     expect(a).toHaveProperty('value', new Date('2026-03-29T00:30:00Z'))
     expect(b).toHaveProperty('value', new Date('2026-03-29T14:00:00Z'))
+  })
+})
+
+describe('toSheets', () => {
+  it('reporte nom, colonnes et lignes figées quand elles sont définies', () => {
+    const [first] = toSheets([
+      { name: 'A', columns: [{ width: 10 }], rows: [[null]], stickyRows: 2 },
+    ])
+    expect(first).toEqual({
+      sheet: 'A',
+      data: [[null]],
+      columns: [{ width: 10 }],
+      stickyRowsCount: 2,
+    })
+  })
+
+  it('omet stickyRowsCount quand stickyRows est absent', () => {
+    const [first] = toSheets([{ name: 'B', columns: [], rows: [] }])
+    expect(first).not.toHaveProperty('stickyRowsCount')
   })
 })
