@@ -504,3 +504,19 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : le mapping d'`aria-query` / dom-accessibility-api utilisé par Testing Library ne tient pas compte de l'ancêtre sectionnant.
 **Workaround** : aucun, les tests s'appuient sur le mapping jsdom (`expectColorModeToggleLast`, `bannerInteractiveNames` dans `src/testing/page-shell-assertions.ts`, `add-student.test.tsx`…). Si Testing Library s'aligne sur HTML-AAM, ces tests échoueront d'un coup : passer l'aide sur `main > header`.
 **Référence** : `src/components/page-shell.tsx`, `src/testing/page-shell-assertions.ts`, D75.
+
+## base-ui garde un `dialog` fermé dans le DOM pendant son animation de sortie (2026-09-30)
+
+**Découvert** : F21, relecture de la tâche 2.
+**Symptôme** : un test « le tiroir reste ouvert » qui vérifie `getByRole('dialog', …)` passe même si le code ferme le tiroir : juste après la fermeture, le popup est toujours là, avec `role="dialog"`.
+**Cause** : le `Dialog` base-ui (et donc le `Sheet` shadcn) garde le popup monté le temps de sa sortie, marqué `data-closed` / `data-ending-style`, puis le démonte.
+**Workaround** : pour « ouvert », laisser passer la fenêtre de fermeture puis vérifier l'état (`data-open` présent, `data-closed` et `data-ending-style` absents) : `expectPanelStaysOpen()` dans `src/testing/side-panel-assertions.ts`. Pour « fermé », attendre la disparition (`waitFor(() => expect(…).not.toBeInTheDocument())`). Ne pas passer par les faux timers : base-ui ne termine alors jamais sa fermeture.
+**Référence** : `src/features/session/examiner-view.test.tsx`, `add-student.test.tsx`, D76.
+
+## Un test « enregistré au démontage » passe sans le flush si son attente dépasse le délai d'autosave (2026-09-30)
+
+**Découvert** : F21, revue finale.
+**Symptôme** : le test « commentaire tapé puis tiroir fermé avant le délai : enregistré en base » restait vert après la suppression du `flush()` de démontage de `use-autosave`.
+**Cause** : `waitFor` attend 1000 ms par défaut, plus que le délai de l'autosave (500 ms) : le minuteur, jamais annulé, enregistre de lui-même pendant l'attente.
+**Workaround** : borner l'attente sous le délai (`waitFor(…, { timeout: 250 })`) et le dire en commentaire ; vérifier par mutation (retirer le flush → le test doit échouer).
+**Référence** : `src/features/session/student-tab.test.tsx`, `src/features/session/hooks/use-autosave.ts`.
