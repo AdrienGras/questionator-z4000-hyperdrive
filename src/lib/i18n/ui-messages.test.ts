@@ -133,6 +133,8 @@ const SAMPLE: UiMessageParams = {
   score_not_computed: {},
   side_panel_label: {},
   side_panel_hide: {},
+  side_panel_open: {},
+  side_panel_close: {},
   side_panel_show: {},
   side_panel_tab_student: {},
   side_panel_tab_students: {},

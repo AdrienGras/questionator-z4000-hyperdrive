@@ -72,8 +72,8 @@ test('ouvert par défaut, onglet « Étudiant » sélectionné', async () => {
   )
 })
 
-test('replier retire le contenu et le repli survit au remontage', async () => {
-  const { unmount } = await mount(makeStudent([2, 1], { finalRevealedAt: REVEALED }))
+test('replier retire le contenu', async () => {
+  await mount(makeStudent([2, 1], { finalRevealedAt: REVEALED }))
 
   fireEvent.click(within(panel()).getByRole('button', { name: 'Masquer le panneau' }))
 
@@ -82,10 +82,6 @@ test('replier retire le contenu et le repli survit au remontage', async () => {
     'aria-expanded',
     'false',
   )
-  unmount()
-  await mount(makeStudent([2, 1], { finalRevealedAt: REVEALED }))
-  expect(within(panel()).queryByRole('tab', { name: 'Étudiant' })).not.toBeInTheDocument()
-  expect(within(panel()).getByRole('button', { name: 'Afficher le panneau' })).toBeInTheDocument()
 })
 
 test('l’onglet « Étudiants » est mémorisé et affiche la liste', async () => {

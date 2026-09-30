@@ -2,9 +2,7 @@ import { useId, useState, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
-  readSidePanelOpen,
   readSidePanelTab,
-  writeSidePanelOpen,
   writeSidePanelTab,
   type SidePanelTab,
 } from '@/features/session/side-panel-state'
@@ -25,11 +23,10 @@ export function SidePanel({
 }: Readonly<{ ui: Ui; studentTab: ReactNode; studentsTab: ReactNode }>) {
   const { text } = ui
   const contentId = useId()
-  const [open, setOpen] = useState(readSidePanelOpen)
+  const [open, setOpen] = useState(true)
   const [tab, setTab] = useState<SidePanelTab>(readSidePanelTab)
 
   const toggle = () => {
-    writeSidePanelOpen(!open)
     setOpen(!open)
   }
   const changeTab = (value: unknown) => {
