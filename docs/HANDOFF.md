@@ -20,6 +20,25 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-30 — Retours des tests manuels V1 : huit tickets F19 à F26
+
+**Dernière chose faite** : retours de l'utilisateur sur l'interface croisés avec le BACKLOG, puis huit tickets rédigés un par un avec lui et créés par `.claude/scripts/gh-ticket.sh` (tous en Ready) :
+- #53 F19 — mise en page commune pleine largeur (toutes les pages examinateur), thème à droite de la barre de titre, favicon (P1 · M) ;
+- #54 F20 — accueil sur deux colonnes (cartes d'action descriptives avec liens vers les exemples à gauche, sessions à droite), export Excel depuis la carte de session (P1 · M, bloqué par #53) ;
+- #55 F21 — panneau latéral en `Sheet` shadcn à droite, par-dessus la vue, fermé au chargement, onglets pleine largeur (P1 · M, bloqué par #53) ;
+- #56 F22 — aperçu réduit de la vue projetée en haut à droite de la vue de passage, contrôles de projection en dessous ; extraction des composants de `features/present/` (P1 · L, bloqué par #55) ;
+- #57 F23 — tout changement d'étudiant actif (liste ou « Étudiant suivant ») remet la projection en attente, l'examinateur projette explicitement : nouvelle décision D à écrire, qui remplace « ne touche pas à la projection » (P1 · S) ;
+- #58 F24 — fond des blocs `.shiki` et code en ligne (P2 · S) ;
+- #59 F25 — tuiles de catégorie selon leur nombre : 1 ligne jusqu'à 3, 2 lignes jusqu'à 10, 3 au-delà, lignes les plus longues en premier, mêmes règles pour les deux vues (P1 · S) ;
+- #60 F26 — éditeur de config : CodeMirror 6, validation en direct reliée aux lignes, aperçu de toutes les questions et de l'écran final factice, téléchargement et « Créer une session avec cette config » (P2 · L, bloqué par #54 et #56).
+BACKLOG : items repris annotés du numéro de leur ticket (ils restent en place jusqu'à livraison).
+
+**Trucs en suspens** : vérifications manuelles de F16 (Excel), F17 (PWA Chrome/Edge, première mise à jour) et F18 (blocs `python`, `yaml`, `dockerfile`) toujours sans retour de l'utilisateur ; items du BACKLOG correspondants non cochés. F26 : liaison éditeur → création de session et stockage du brouillon (`localStorage` proposé) à trancher dans sa spec.
+
+**Prochaine chose à creuser** : ordre conseillé : #57 et #59 (petits, indépendants) ou #53 (débloque #54 et #55), puis #55 → #56, puis #54, #58, #60. Chaque ticket : brainstorming → spec → plan → une branche et une PR.
+
+**Notes pour future Claude** : les tickets ne portent pas de section Design (contrairement à #36) : la conception se fait à la prise du ticket. #59 et #56 se touchent (l'aperçu réduit la largeur des tuiles dans la vue examinateur) ; #54 et #56 déplacent chacun un composant hors de sa feature (D59), l'emplacement est à fixer au design.
+
 ## 2026-09-30 — F18 mergé : tous les tickets V1 livrés
 
 **Dernière chose faite** : PR #51 (F18) passée au gate SonarQube du premier coup (0 issue, 0 hotspot), mergée ; #36 fermé à la main (PR encore non liée au ticket malgré `Closes #36`, comme #47, #48 et #50). Plus aucun ticket ouvert : F01 à F18 sont livrés.
