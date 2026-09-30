@@ -1055,3 +1055,17 @@ autre encodage 8 bits.
 **Pourquoi** : D59 range les règles pures dans `domain/`. Avec `questionsPerStudent` fixé, seul le multiensemble distingue les stratégies. Les taux par catégorie décrivent les questions, pas les notes : un passage en cours les renseigne déjà. Un script sur le manifeste est déterministe et réutilisable par F17, là où un test réseau dépendrait des noms de chunks.
 
 **Reporté dans** : spec F15. Impacte F15, F16, F17.
+
+## D71 — F16 : description neutre dans `domain/export/`, dates en heure locale, formats par type, `check:bundle` multi-cibles (2026-09-30)
+
+**Question** : le ticket F16 place la génération dans `src/export/` ; il ne dit ni comment rester testable sans générer de fichier, ni comment write-excel-file écrit les dates, ni quel format donner aux notes brutes à 3 décimales, ni comment garder la bibliothèque hors du bundle initial.
+
+**Décision** :
+- `buildWorkbook(session, stats, locale, now)` pur dans `src/domain/export/` renvoie une description neutre (`WorkbookSpec`, cellules texte, nombre, date ou vide) ; `lib/xlsx/write-workbook.ts`, seul importeur de `write-excel-file/browser`, la traduit ; `features/session/export-workbook.ts` orchestre et charge `lib/xlsx` en `import()` dynamique.
+- Dates décalées de `getTimezoneOffset()` à l'écriture : write-excel-file suit les composantes UTC, l'examinateur doit lire son heure murale.
+- Convertie, ajustement, finale au format du pas ; brute, plafonnée, points au format général ; taux en `0.0%` ; moyennes en `0.00`.
+- `check:bundle` porte une liste de cibles (Recharts, write-excel-file), chacune avec son garde de non-vacuité ; groupe `codeSplitting` `xlsx` ; règle dependency-cruiser `xlsx-only-in-lib-xlsx`.
+
+**Pourquoi** : D59 range les règles pures dans `domain/` et le technique dans `lib/`. Une description neutre se teste cellule par cellule sans ZIP. Une heure décalée de deux heures fausserait la lecture du déroulé. `0.###` afficherait « 12. » pour un entier. Le patron F15 (D70) se généralise sans nouveau mécanisme.
+
+**Reporté dans** : spec F16. Impacte F16, F17.
