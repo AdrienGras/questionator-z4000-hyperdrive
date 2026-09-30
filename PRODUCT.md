@@ -573,9 +573,9 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 
 **Objectif.** Fonctionner sans réseau après un premier chargement.
 
-**Contenu.** vite-plugin-pwa (Workbox) avec précache de tous les assets, dont toutes les grammaires Shiki (~1,3 Mo en gzip avec F18, D63), write-excel-file, le chunk d'icônes Tabler (F07) et le chunk de graphiques des stats (F15). Scope du service worker réglé pour le sous-chemin GitHub Pages. Indication discrète quand une nouvelle version est disponible.
+**Contenu.** vite-plugin-pwa (Workbox) avec précache de tous les assets, dont toutes les grammaires Shiki (~1,3 Mo en gzip avec F18, D63), write-excel-file, le chunk d'icônes Tabler (F07) et le chunk de graphiques des stats (F15). Scope du service worker réglé pour le sous-chemin GitHub Pages. Indication discrète quand une nouvelle version est disponible. La page qui installe le service worker passe sous son contrôle sans rechargement (`clientsClaim`, D72).
 - Mise à jour proposée, jamais imposée (`registerType: 'prompt'`) : indicateur « Nouvelle version disponible — Recharger » dans la vue examinateur uniquement. Aucun rechargement automatique pendant une session.
-- La vue projetée n'affiche jamais l'indicateur. Si une nouvelle version ouvre la base avec un schéma Dexie plus récent, la vue projetée (lecture seule, reconstruite depuis la base) se recharge d'elle-même à l'événement `versionchange`.
+- La vue projetée n'affiche jamais l'indicateur. Si une nouvelle version ouvre la base avec un schéma Dexie plus récent, la vue projetée (lecture seule, reconstruite depuis la base) se recharge d'elle-même à l'événement `versionchange`, et de même quand une nouvelle version est activée depuis un autre onglet (`controllerchange`, D72) ; les autres onglets examinateur affichent alors l'indicateur.
 - Application installable : manifeste avec icônes carrées 192 et 512 px (recadrage d'un élément de la bannière, sinon monogramme aux couleurs Synthwave), `display: standalone`.
 - Critère réseau coupé vérifié par Playwright (mode hors ligne du contexte).
 
