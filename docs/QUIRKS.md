@@ -489,3 +489,10 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : avec `const { registerSW } = await import('virtual:pwa-register')` au niveau de l'entrée, Rolldown émet 9 chunks de plus (`hooks-*`, `route-*`, `useNavigate-*`, `validate-*`…), et le pré-cache passe de 68 à 77 entrées. Le chargement initial fait donc plus de requêtes pour rien.
 **Workaround** : garder l'entrée synchrone. L'import dynamique vit dans une fonction `async` d'un autre module (`src/lib/pwa/register-service-worker.ts`), appelée par `void registerServiceWorker()`. Sonar ne signale plus de chaîne de promesse, et le découpage ne bouge pas. Comparer le nombre d'entrées du pré-cache avant/après toute retouche de `main.tsx`.
 **Référence** : `src/main.tsx`, `src/lib/pwa/register-service-worker.ts`, PR #50.
+
+## L'avertissement `unknown_code_language` lit le texte brut, pas l'arbre markdown (2026-09-30)
+
+**Découvert** : revue finale F18.
+**Symptôme** : `fenceLanguages` (heuristique ligne par ligne) ne voit pas les blocs dans une citation (`> ```js`) ni dans une liste indentée de 4 espaces ou plus : pas d'avertissement pour eux. À l'inverse, une info string échappée (```` ```c\+\+ ````) ou avec entité (`c&#43;&#43;`) est décodée en `c++` par remark, donc colorée, mais l'heuristique voit le texte brut et avertit à tort.
+**Workaround** : aucun nécessaire, l'avertissement n'est jamais bloquant. Le rendu, lui, repose sur l'arbre de react-markdown. Si le cas devient courant, extraire les langages avec `mdast-util-from-markdown` au lieu de l'heuristique.
+**Référence** : `src/domain/config/code-fences.ts`, spec F18.

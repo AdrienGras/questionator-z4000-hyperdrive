@@ -35,27 +35,31 @@ Tout bloc dont le langage est connu de Shiki est coloré, y compris hors ligne. 
 ## Architecture
 
 ```
-src/domain/config/code-languages.ts   catalogue des langages (identifiants + alias) et reconnaissance, fonction pure
+src/lib/markdown/languages.ts         normalizeLanguage, pseudo-langages (sans Shiki ; partagé par le highlighter, CodeBlock et le domaine)
+src/domain/config/code-languages.ts   isKnownLanguage sur le catalogue shiki/langs (import statique, chunk du validateur seulement)
 src/domain/config/code-fences.ts      extraction des langages des blocs d'un texte markdown, ligne par ligne
 src/domain/config/rules.ts            + règle unknown_code_language (configWarning)
 src/domain/config/issues.ts           + code unknown_code_language
 src/domain/config/messages.ts         + message fr / en
 src/lib/markdown/highlighter.ts       résolution asynchrone sur le catalogue ; fin de la liste fermée
 src/components/markdown/code-block.tsx  tout bloc avec langage appelle highlight
-.dependency-cruiser.cjs               exception domain-no-ui-packages pour code-languages.ts (comme icon-names.ts, D37)
 ```
 
 ### `domain/config/code-languages.ts`
 
 ```ts
+// src/lib/markdown/languages.ts
 export const PLAIN_LANGUAGES: ReadonlySet<string> // 'text', 'txt', 'plain', 'plaintext'
 export function normalizeLanguage(info: string): string // premier mot de l'info string, en minuscules
-export function isKnownLanguage(language: string): boolean // identifiant ou alias du catalogue
 export function isPlainLanguage(language: string): boolean
+// src/domain/config/code-languages.ts
+export function isKnownLanguage(language: string): boolean // identifiant ou alias du catalogue
 ```
 
+Écart au premier jet de la spec, tranché à l'implémentation : la normalisation et les pseudo-langages vivent dans `lib/markdown/languages.ts`, car `lib/` n'importe pas `domain/` (D59) et `CodeBlock` ne doit pas tirer `shiki/langs` statiquement avec la vue de session.
+
 - Ce module lit les clés de `bundledLanguages` (ou `bundledLanguagesInfo` et `bundledLanguagesAlias`) de `shiki/langs`. L'import de ce module n'amène que des références `import()` vers les grammaires, pas leur contenu.
-- Il faut une exception dans la règle `domain-no-ui-packages` de `.dependency-cruiser.cjs`, écrite dans la règle avec sa raison, sur le modèle de `icon-names.ts`.
+- Aucune exception dependency-cruiser : la règle `domain-no-ui-packages` ne vise pas Shiki.
 - La même reconnaissance sert au validateur et au highlighter : un langage que le validateur accepte est toujours un langage que le rendu sait colorer, et réciproquement.
 
 ### `domain/config/code-fences.ts`
