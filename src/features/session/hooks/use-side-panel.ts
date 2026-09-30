@@ -11,20 +11,21 @@ import {
  */
 export function useSidePanel() {
   const [open, setOpen] = useState(false)
-  const [tab, setTabState] = useState<SidePanelTab>(readSidePanelTab)
+  const [tab, setTab] = useState<SidePanelTab>(readSidePanelTab)
 
-  const setTab = useCallback((next: SidePanelTab) => {
+  // Change l'onglet et le mémorise ; exposé sous le nom `setTab`.
+  const selectTab = useCallback((next: SidePanelTab) => {
     writeSidePanelTab(next)
-    setTabState(next)
+    setTab(next)
   }, [])
 
   const show = useCallback(
     (next: SidePanelTab) => {
-      setTab(next)
+      selectTab(next)
       setOpen(true)
     },
-    [setTab],
+    [selectTab],
   )
 
-  return { open, tab, setOpen, setTab, show }
+  return { open, tab, setOpen, setTab: selectTab, show }
 }
