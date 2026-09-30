@@ -34,10 +34,10 @@ scripts/render-icons.ts           SVG → PNG (lancé à la main, pas en CI)
 scripts/check-precache.ts         pnpm check:precache
 scripts/check-precache.test.ts
 src/lib/pwa/pwa-update.ts         PwaUpdate (état observable, start, applyUpdate), singleton pwaUpdate
-src/lib/pwa/hooks.ts              usePwaUpdate(), useReloadOnUpdate(dbStatus)
+src/lib/pwa/hooks.ts              usePwaUpdate(), useReloadOnUpdate(dbOutdated)
 src/components/update-prompt.tsx  pastille « Nouvelle version disponible — Recharger »
 src/routes/__root.tsx             monte <UpdatePrompt /> hors /present/*
-src/features/present/present-page.tsx   useReloadOnUpdate(status)
+src/features/present/present-page.tsx   useReloadOnUpdate(status === 'outdated')
 src/main.tsx                      démarre pwaUpdate en prod (import dynamique de virtual:pwa-register)
 index.html                        favicon SVG, theme-color, apple-touch-icon
 e2e/offline.spec.ts
@@ -51,7 +51,7 @@ e2e/fixtures/offline-php.config.json
 - `workbox.maximumFileSizeToCacheInBytes` : juste au-dessus du plus gros fichier mesuré au build (~3 Mo attendus pour Tabler) ; la mesure est consignée dans la PR et en commentaire.
 - `workbox.clientsClaim: true`, `workbox.cleanupOutdatedCaches: true` ; pas de `skipWaiting` (mode `prompt`), pas de cache à l'exécution, pas de `navigateFallback`.
 - Aucun WASM (D27).
-- Manifeste : `name` « Questionator Z-4000 Hyperdrive », `short_name` « Questionator », `display: standalone`, `theme_color` et `background_color` tirés des jetons Synthwave du thème sombre, `lang: 'fr'`, icônes 192, 512 et 512 `purpose: 'maskable'`.
+- Manifeste : `name` « Questionator Z-4000 Hyperdrive », `short_name` « Questionator », `display: standalone`, `theme_color` et `background_color` au violet nuit du fond de l'icône (le thème de l'app est le neutre de shadcn, sans couleur de marque), `lang: 'fr'`, icônes 192, 512 et 512 `purpose: 'maskable'`.
 
 ## Store `PwaUpdate`
 
@@ -62,15 +62,15 @@ e2e/fixtures/offline-php.config.json
   - `container.addEventListener('controllerchange', …)` : → `update-ready` seulement si `hadController` (le premier chargement déclenche aussi `controllerchange` à cause de `clientsClaim`).
 - `applyUpdate()` : si `onNeedRefresh` a été reçu et qu'aucun `controllerchange` n'est encore arrivé, `updateSW(true)` (envoi de `skipWaiting`, rechargement au changement de contrôleur) ; sinon (version déjà activée par un autre onglet) `location.reload()`.
 - Singleton `pwaUpdate` ; `main.tsx` fait, en prod seulement, `void import('virtual:pwa-register').then(({ registerSW }) => pwaUpdate.start(registerSW))`, hors du bundle initial.
-- `lib/pwa/` n'importe rien de `domain/` ni de `lib/db/` : `useReloadOnUpdate` reçoit `dbStatus` en paramètre.
+- `lib/pwa/` n'importe rien de `domain/` ni de `lib/db/` : `useReloadOnUpdate` reçoit un booléen `dbOutdated`.
 
 ## Hooks et UI
 
 - `usePwaUpdate(update = pwaUpdate): { status, applyUpdate }`.
-- `useReloadOnUpdate(dbStatus, update = pwaUpdate, reload = () => location.reload())` : recharge **une seule fois** (drapeau en `useRef`) dès que `status === 'update-ready'` ou `dbStatus === 'outdated'` ; les deux signaux peuvent arriver ensemble.
+- `useReloadOnUpdate(dbOutdated: boolean, update = pwaUpdate, reload = () => location.reload())` : recharge **une seule fois** (drapeau en `useRef`) dès que `status === 'update-ready'` ou `dbOutdated` ; les deux signaux peuvent arriver ensemble.
 - `UpdatePrompt` : ne rend rien si `status === 'current'` ou si `useDbStatus() === 'outdated'` ; sinon une pastille fixe en bas à droite (`role="status"`), texte « Nouvelle version disponible » et bouton « Recharger » → `applyUpdate()`. Libellés dans le dictionnaire d'UI (`update_available`, `update_reload`, fr/en).
 - `__root.tsx` : `<UpdatePrompt />` rendu sauf quand la route active est `/present/$sessionId`.
-- `PresentPage` : `useReloadOnUpdate(status)` ; le bandeau `outdated` reste affiché comme repli le temps du rechargement.
+- `PresentPage` : `useReloadOnUpdate(status === 'outdated')` ; le bandeau `outdated` reste affiché comme repli le temps du rechargement.
 
 ## Flux
 
