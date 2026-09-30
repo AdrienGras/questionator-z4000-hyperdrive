@@ -58,6 +58,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Pilotage (F14) : la référence de la fenêtre projetée n'est pas liée à la session ; `?search` conservé dans l'URL ; message de popup bloquée persistant jusqu'au clic suivant ; tests manquants (boutons pendant `busy`, bandeau quand l'étudiant projeté a disparu). → #56 (popup bloquée, référence de fenêtre)
 - [ ] Tests F14 : marqueur `0.37` du test d'étanchéité en sous-chaîne (échec bruyant si un score le contient) ; pas de mutation vérifiée pour `editedAt` et le montant d'ajustement ; test d'architecture aveugle aux réexports de `Session` ; `computeScores` appelé deux fois dans `toProjectedView`.
 - [ ] `categoryButton` (`src/testing/passage-assertions.ts`) : `waitFor` au délai par défaut (1 s), à allonger si la CI devient lente.
+- [ ] Tuiles de catégorie (F25, D74) : jusqu'à 5 tuiles par ligne au-dessus de 640 px ; avec l'aperçu de #56 (F22) la largeur côté examinateur baisse, revoir le seuil du repli sur une colonne (ou un seuil par conteneur, `@container`) une fois F22 livré. → #56
 
 ## Accueil et backup
 

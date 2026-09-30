@@ -1102,3 +1102,17 @@ autre encodage 8 bits.
 **Pourquoi** : afficher par défaut l'étudiant précédent n'a aucun usage et l'expose à toute la salle ; projeter d'office le nouveau ferait apparaître un étudiant avant qu'il ne soit prêt. « Ajouter et faire passer » est un changement d'actif comme un autre, l'en exclure aurait laissé le même trou.
 
 **Reporté dans** : `PRODUCT.md` F11, F13, F14. Remplace D29 (« ne touche pas à la projection »). Impacte F11, F13, F14.
+
+## D74 — F25 : disposition des tuiles de catégorie selon leur nombre, grille à demi-colonnes, repli sous `sm` (2026-09-30)
+
+**Question** : les tuiles de catégorie suivaient une grille fonction de la largeur d'écran (`sm:grid-cols-2 lg:grid-cols-3`) : 4 catégories donnaient 3 + 1. Il faut une disposition fonction du nombre de catégories, la même dans les deux vues, et choisir comment centrer une ligne plus courte sans changer la largeur des tuiles.
+
+**Décision** :
+- `categoryRows(n)` (`domain/presentation/category-rows.ts`) : `r` = 1 ligne si `n ≤ 3`, 2 si `n ≤ 10`, 3 au-delà ; les `n mod r` premières lignes comptent `⌈n/r⌉` tuiles, les autres `⌊n/r⌋`.
+- Rendu par `CategoryLayout` (`components/category-layout.tsx`), partagé par `CategoryGrid` (examinateur) et `CategoryTiles` (projetée) : une seule `<ul>` en grille de `2c` colonnes (`c` = longueur de la première ligne, variable `--cols`), chaque tuile sur deux colonnes, la première tuile de chaque ligne courte marquée `data-row-start` et démarrée à la colonne 2. Une ligne courte n'a qu'une tuile de moins : ce décalage d'une demi-tuile la centre exactement.
+- Toutes les catégories comptent (épuisées, indisponibles) : `n` ne change pas pendant un passage.
+- Sous `sm` (640 px) : une seule colonne, décalage neutralisé.
+
+**Pourquoi** : un flex à retour à la ligne donne 5 + 5 + 3 pour 13 au lieu de 5 + 4 + 4 ; des lignes rendues séparément casseraient la liste unique (sémantique, tests par rôle). La fonction de domaine se teste sans navigateur ; jsdom ne calculant pas de mise en page, les tests de composant vérifient `--cols` et `data-row-start`, le rendu réel a été contrôlé au navigateur (4, 7, 13 catégories, 420 px).
+
+**Reporté dans** : `PRODUCT.md` F09, F14. Impacte F09, F14, F22 (#56 : l'aperçu réduit la largeur disponible côté examinateur).

@@ -159,3 +159,14 @@ test('aucun import du modèle de session dans src/features/present', () => {
   })
   expect(offenders).toEqual([])
 })
+
+test('tuiles : même disposition que la vue examinateur, 2 catégories sur une ligne (D74)', async () => {
+  await seed(makeStudent())
+  renderAt('/present/session-1')
+
+  const tile = await screen.findByText('Algorithmique')
+  const list = tile.closest('ul')
+
+  expect(list?.style.getPropertyValue('--cols')).toBe('4')
+  expect(list?.querySelectorAll('li[data-row-start="true"]')).toHaveLength(0)
+})

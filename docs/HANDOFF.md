@@ -20,11 +20,21 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-30 — F25 : disposition des tuiles de catégorie selon leur nombre
+
+**Dernière chose faite** : #59 (F25) implémenté sur `feat/f25-disposition-tuiles`, rebasé sur `main` après le merge de F23 (PR #62) ; désormais une PR mergée avant d'ouvrir le ticket suivant, pour éviter les conflits sur `docs/`. `categoryRows(n)` dans `domain/presentation/category-rows.ts` (tests de 0 à 16 et invariants jusqu'à 40) ; `CategoryLayout` dans `components/category-layout.tsx`, utilisé par `CategoryGrid` (examinateur) et `CategoryTiles` (projetée) : une seule `<ul>` en grille de `2c` colonnes, tuiles sur deux colonnes, première tuile d'une ligne courte décalée d'une demi-tuile (`data-row-start` → `col-start-2`). Une colonne sous `sm` (640 px), validé par l'utilisateur. D74 ; `PRODUCT.md` F09, F14. Rendu vérifié au navigateur (dev + Playwright MCP) : 13 → 5 + 4 + 4, 7 → 4 + 3 centrés, repli à 420 px.
+
+**Trucs en suspens** : Vérifications manuelles de F16, F17, F18 toujours sans retour. Seuil du repli à revoir avec #56 (BACKLOG).
+
+**Prochaine chose à creuser** : #53 (F19, mise en page commune, débloque #54 et #55), puis #55 → #56, #54, #58, #60.
+
+**Notes pour future Claude** : pour contrôler un rendu sans passer par l'interface de création, en `pnpm dev` on peut importer les fixtures depuis la page (`await import('/questionator-z4000-hyperdrive/src/testing/session-fixtures.ts')`, idem `student-fixtures.ts` et `lib/db/sessions.ts`) et `putSession` des sessions de démo, puis naviguer sur `#/session/<id>` ou `#/present/<id>`. Les captures du MCP Playwright doivent être écrites sous `.playwright-mcp/` (ignoré par git), pas dans le scratchpad. Piège vitest ajouté à QUIRKS : le rapport JSON reste périmé quand le fichier de test ne s'importe pas.
+
 ## 2026-09-30 — F23 : changer d'étudiant remet la projection en attente
 
-**Dernière chose faite** : #57 (F23) implémenté sur `feat/f23-projection-changement-etudiant`. Helper `withActiveStudent` dans `domain/passage/active-student.ts` : si la projection montre un autre étudiant que le nouvel actif, elle passe à `{ mode: 'waiting' }` dans la même `Session` renvoyée (une seule écriture via `run`) ; attente ou nouvel actif déjà projeté : projection inchangée (même référence). Appliqué à `setActiveStudent`, `goToNextStudent` et, au-delà du ticket, à `addStudent` avec `activate` (« Ajouter et faire passer »). D73 remplace D29 sur ce point ; `PRODUCT.md` F11, F13, F14 mis à jour. Tests : domaine (trois cas par fonction), et intégration liste, « Étudiant suivant », hook, ajout inversés vers l'attente.
+**Dernière chose faite** : #57 (F23) implémenté et mergé (PR #62). Helper `withActiveStudent` dans `domain/passage/active-student.ts` : si la projection montre un autre étudiant que le nouvel actif, elle passe à `{ mode: 'waiting' }` dans la même `Session` renvoyée (une seule écriture via `run`) ; attente ou nouvel actif déjà projeté : projection inchangée (même référence). Appliqué à `setActiveStudent`, `goToNextStudent` et, au-delà du ticket, à `addStudent` avec `activate` (« Ajouter et faire passer »). D73 remplace D29 sur ce point ; `PRODUCT.md` F11, F13, F14 mis à jour. Tests : domaine (trois cas par fonction), et intégration liste, « Étudiant suivant », hook, ajout inversés vers l'attente.
 
-**Trucs en suspens** : vérifications manuelles de F16, F17, F18 toujours sans retour. PR F23 à passer par Sonar puis en revue.
+**Trucs en suspens** : vérifications manuelles de F16, F17, F18 toujours sans retour. 
 
 **Prochaine chose à creuser** : #59 (F25, tuiles de catégorie) ou #53 (F19, mise en page commune, débloque #54 et #55), puis #55 → #56, #54, #58, #60.
 

@@ -143,7 +143,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Découvert** : F03, implémentation en subagents.
 **Symptôme** : `pnpm vitest run <fichier>` (ou `rtk proxy pnpm vitest`) ne rend aucune sortie lisible, puis `pnpm check` échoue à l'étape Prettier sur `.vitest/json/output.json`.
 **Cause** : le hook Claude Code RTK réécrit la commande vers son filtre vitest, qui écrit un rapport JSON dans `.vitest/` à la racine.
-**Workaround** : lancer un test ciblé avec `./node_modules/.bin/vitest run <fichier>` ; `pnpm test` / `pnpm check` restent sûrs. `.vitest/` est désormais dans `.gitignore` ; supprimer le dossier s'il traîne.
+**Workaround** : lancer un test ciblé avec `./node_modules/.bin/vitest run <fichier>` ; `pnpm test` / `pnpm check` restent sûrs. `.vitest/` est désormais dans `.gitignore` ; supprimer le dossier s'il traîne. Autre forme lisible : `rtk proxy pnpm exec vitest run <fichier>` (sans `pnpm vitest`). **Ne pas lire `.vitest/json/output.json` pour conclure** : si le fichier de test échoue à l'import (module absent, phase rouge du TDD), le rapport n'est pas réécrit et montre encore le « passed » du lancement précédent (vu en F25, 2026-09-30).
 **Référence** : `.gitignore`, `docs/superpowers/plans/2026-09-25-f03-scoring.md`.
 
 ## Un littéral décimal « à 3 décimales » peut tomber sous la demie une fois ×1000, et `Math.round(-0)` vaut `-0` (2026-09-25)

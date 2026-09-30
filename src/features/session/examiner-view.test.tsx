@@ -472,3 +472,33 @@ test("onglet « Étudiants » : bouton-lien « Statistiques » vers l'écran des
   const link = screen.getByRole('link', { name: 'Statistiques' })
   expect(link.getAttribute('href')).toMatch(/\/session\/session-1\/stats$/u)
 })
+
+/** Colonnes de la grille et premières tuiles des lignes courtes (D74). */
+function gridLayout() {
+  const grid = screen.getByRole('list', { name: 'Choisir une catégorie' })
+  const starts = within(grid)
+    .getAllByRole('listitem')
+    .filter((li) => li.dataset.rowStart === 'true')
+    .map((li) => within(li).getByRole('button').textContent)
+  return { cols: grid.style.getPropertyValue('--cols'), starts }
+}
+
+test('grille de 5 catégories : 3 + 2, disposition inchangée après un tirage (D74)', async () => {
+  const categories = ['A', 'B', 'C', 'D', 'E'].map((label, i): NormalizedCategory => ({
+    ...answeredCategory,
+    id: label.toLowerCase(),
+    label,
+    order: i + 1,
+    questions: [{ id: `${label}-1`, title: `T${label}`, tags: [], prompt: `P${label}` }],
+  }))
+  const config = makeConfig({ questionsPerStudent: 2 })
+  await putSession(passageSession({ config: { ...config, categories } }))
+  renderAt('/session/session-1')
+  const expected = { cols: '6', starts: [expect.stringMatching(/^D/)] }
+
+  fireEvent.click(await categoryButton('A'))
+  expect(gridLayout()).toEqual(expected)
+  await screen.findByText('PA')
+
+  expect(gridLayout()).toEqual(expected)
+})
