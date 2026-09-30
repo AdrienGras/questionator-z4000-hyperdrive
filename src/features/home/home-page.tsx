@@ -1,7 +1,8 @@
+import { PageShell } from '@/components/page-shell'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useDbStatus, useSessions } from '@/lib/db/hooks'
 import { useUi } from '@/lib/i18n/use-ui'
-import { HomeHeader } from '@/features/home/components/home-header'
+import { HomeActions } from '@/features/home/components/home-actions'
 import { ImportController } from '@/features/home/components/import-controller'
 import { SessionList } from '@/features/home/components/session-list'
 
@@ -15,15 +16,20 @@ export function HomePage() {
     <TooltipProvider>
       <ImportController ui={ui} disabled={importDisabled}>
         {(openPicker) => (
-          <main className="mx-auto flex min-h-svh max-w-3xl flex-col gap-6 p-4 sm:p-6">
-            <HomeHeader
-              ui={ui}
-              storageAvailable={status !== 'unavailable'}
-              importDisabled={importDisabled}
-              onImport={openPicker}
-            />
+          <PageShell
+            ui={ui}
+            title={ui.text('app_title', {})}
+            actions={
+              <HomeActions
+                ui={ui}
+                storageAvailable={status !== 'unavailable'}
+                importDisabled={importDisabled}
+                onImport={openPicker}
+              />
+            }
+          >
             <SessionList ui={ui} status={status} sessions={sessions} onImport={openPicker} />
-          </main>
+          </PageShell>
         )}
       </ImportController>
     </TooltipProvider>
