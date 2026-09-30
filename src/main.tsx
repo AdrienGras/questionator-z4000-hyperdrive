@@ -3,10 +3,19 @@ import { createHashHistory, RouterProvider } from '@tanstack/react-router'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createAppRouter } from '@/app/router'
+import { pwaUpdate } from '@/lib/pwa/pwa-update'
 
 // Dev uniquement (D23) : sans cet import rien n'évaluerait src/db/db.ts tant qu'aucune feature ne
 // l'utilise, et window.__questionatorDb resterait undefined. Vite élimine la branche en prod.
 if (import.meta.env.DEV) void import('@/lib/db/db')
+
+// Service worker en prod seulement (D72). Import dynamique : l'enregistrement (workbox-window) reste
+// hors du bundle initial.
+if (import.meta.env.PROD) {
+  void import('virtual:pwa-register').then(({ registerSW }) => {
+    pwaUpdate.start(registerSW)
+  })
+}
 
 const router = createAppRouter(createHashHistory())
 

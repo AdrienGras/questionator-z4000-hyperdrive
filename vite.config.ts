@@ -3,6 +3,7 @@ import { fileURLToPath, URL } from 'node:url'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
 import { configDefaults, defineConfig } from 'vitest/config'
 import { configSchemaPlugin } from './vite/config-schema-plugin.ts'
 
@@ -21,6 +22,9 @@ function readPackageVersion(): string {
   }
   return parsed.version
 }
+
+/** Violet nuit du fond de l'icône (`public/icons/icon.svg`), repris tel quel par `index.html` (D72). */
+const NIGHT = '#1a1033'
 
 export default defineConfig({
   base: '/questionator-z4000-hyperdrive/',
@@ -80,6 +84,45 @@ export default defineConfig({
     react(),
     tailwindcss(),
     configSchemaPlugin(),
+    // PWA hors ligne (F17, D72). Mode `prompt` : le nouveau service worker attend que l'utilisateur
+    // accepte la mise à jour (`src/lib/pwa/pwa-update.ts`) ; l'enregistrement est fait à la main par
+    // `src/main.tsx`, en prod seulement. `scope` et `start_url` héritent de `base`.
+    VitePWA({
+      registerType: 'prompt',
+      injectRegister: false,
+      devOptions: { enabled: false },
+      manifest: {
+        name: 'Questionator Z-4000 Hyperdrive',
+        short_name: 'Questionator',
+        description: 'Faire passer des oraux notés par tirage de questions.',
+        lang: 'fr',
+        display: 'standalone',
+        theme_color: NIGHT,
+        background_color: NIGHT,
+        icons: [
+          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+          {
+            src: 'icons/icon-maskable-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+        ],
+      },
+      workbox: {
+        // Tout ce que le build émet, chunks à la demande compris (Shiki, Tabler, Recharts, xlsx),
+        // polices Geist et fichiers de `configSchemaPlugin`. `dist/.vite/` (caché) reste dehors.
+        globPatterns: ['**/*.{js,css,html,json,csv,svg,png,webp,woff2}'],
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
+        // Plafond par fichier (défaut Workbox : 2 Mio), fixé juste au-dessus du plus gros fichier du
+        // build, le chunk des icônes Tabler (D37, mesuré à 2 368,52 kB), comme `chunkSizeWarningLimit`.
+        // Au-delà, Workbox l'exclurait du pré-cache (« will not be precached ») et le choix d'une
+        // icône casserait hors ligne.
+        maximumFileSizeToCacheInBytes: 2_400_000,
+      },
+    }),
   ],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
