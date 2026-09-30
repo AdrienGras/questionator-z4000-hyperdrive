@@ -17,6 +17,10 @@ Tout tourne dans le navigateur : aucune donnée ne quitte la machine de l'examin
 3. Faire passer chaque étudiant, avec une vue projetée pour l'étudiant et une vue de pilotage pour l'examinateur.
 4. Exporter les résultats en Excel.
 
+## Hors ligne et installation
+
+Après un premier chargement en ligne, l'application fonctionne sans réseau : créer une session, faire passer, projeter, exporter. Elle s'installe comme une application (Chrome, Edge : icône d'installation dans la barre d'adresse). Quand une nouvelle version est publiée, un bouton « Recharger » la propose ; elle n'est jamais appliquée d'office. Seule exception hors ligne : une image distante dans une question (URL externe) ne s'affiche pas.
+
 ## Écrire une config
 
 Partir du [fichier d'exemple](https://adriengras.github.io/questionator-z4000-hyperdrive/config.example.json) (aussi dans [`examples/config.example.json`](examples/config.example.json)). Sa première ligne pointe vers le JSON Schema publié :
@@ -38,7 +42,8 @@ pnpm install
 pnpm dev        # serveur de développement
 pnpm check      # format, lint, dépendances, types, tests (comme la CI, hors build)
 pnpm deps       # sens des imports entre dossiers (dependency-cruiser)
-pnpm build      # build de production dans dist/
+pnpm build      # build de production dans dist/ (avec le service worker)
+pnpm preview    # sert dist/ pour tester le hors ligne
 ```
 
 ## Conventions

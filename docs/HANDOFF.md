@@ -20,6 +20,23 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-30 — F17 implémenté : hors ligne et PWA installable
+
+**Dernière chose faite** : F17 (#17) sur `feat/f17-offline`, processus complet : brainstorming (quatre choix tranchés avec l'utilisateur : rechargement de la vue projetée aussi sur `controllerchange`, icône SVG du soleil rayé, pastille fixe globale, store dans `lib/pwa/`), spec `docs/superpowers/specs/2026-09-30-f17-offline-design.md` et D72 (amende D36), plan en 5 tâches, subagent-driven development (une revue par tâche, un seul tour de correctifs en tâche 3), revue finale sur Opus, une vague de correctifs relue.
+- Build : vite-plugin-pwa 1.3.0 `generateSW`, `prompt`, `clientsClaim`, `cleanupOutdatedCaches`, pré-cache de tout `dist/` (68 entrées, ~5 Mo), plafond 2 400 000 o (chunk Tabler 2 368 523 o). Manifeste `standalone`, couleur `NIGHT` `#1a1033` (constante dans `vite.config.ts`, littéral répété dans `index.html` et `icon.svg`).
+- `src/lib/pwa/pwa-update.ts` : états `current` / `waiting` / `activated` ; `onNeedReload: () => {}` obligatoire ; premier `controllerchange` ignoré une seule fois s'il n'y avait pas de contrôleur ; seul l'onglet qui a cliqué se recharge. `hooks.ts` : `usePwaUpdate`, `useReloadOnUpdate(dbOutdated)`.
+- `components/update-prompt.tsx` (un `<output>`, oxlint refuse `div role="status"`) monté dans `__root.tsx` hors `/present` ; `PresentPage` se recharge sur `activated` ou base `outdated`.
+- `scripts/check-precache.ts` (`pnpm check:precache`, CI) ; `scripts/render-icons.ts` (`pnpm icons`).
+- e2e : `offline.spec.ts` (tout le parcours réseau coupé, PHP coloré dans les deux vues, stats, export ; manifeste et icônes) et `update.spec.ts` (copie de `dist/` servie par le test, `sw.js` modifié d'un octet).
+
+La revue finale a trouvé en Chromium réel ce que les tests à faux `registerSW` ne voyaient pas : la vue projetée bouclait (259 chargements en 8 s) et un clic rechargeait tous les onglets. Cause : mon design confondait version en attente et version activée, et `registerSW` recharge de lui-même sans `onNeedReload`. Corrigé, spec et D72 amendées, QUIRKS ajouté.
+
+**Trucs en suspens** : PR pas encore ouverte (brouillon, puis `.claude/scripts/sonar-check.sh --pr <n> --wait`, puis « Ready for review »). Vérifications manuelles à consigner dans la PR : installation Chrome et Edge, aperçu des icônes, taille du pré-cache. Points mineurs au BACKLOG § Hors ligne. Reste de F16 : ouvrir un export dans Excel.
+
+**Prochaine chose à creuser** : F18 (#36, tous les langages Shiki) : le motif de pré-cache couvre déjà les grammaires chargées à la demande ; surveiller `check:precache` et le plafond de taille.
+
+**Notes pour future Claude** : pour tester un service worker, ne pas se fier aux faux : `e2e/update.spec.ts` sert une copie de `dist/` sur un port libre et simule un déploiement en modifiant `sw.js`. Un « break-it » par défaut réintroduit prouve que ce test sert. Le service worker n'existe qu'en build de prod (`pnpm preview`, port 4173) ; un `preview` resté ouvert sur un vieux `dist/` fausse Playwright en local (`reuseExistingServer`).
+
 ## 2026-09-30 — F16 livré : export Excel
 
 **Dernière chose faite** : F15 mergé (PR #47, #15 fermé à la main : la PR n'y était pas liée). F16 (#16) sur `feat/f16-excel-export`, en processus complet : brainstorming, spec `docs/superpowers/specs/2026-09-30-f16-excel-export-design.md` et D71, plan en 5 tâches, subagent-driven development (revue par tâche, deux tours de correctifs, revue finale sur Opus, une vague de correctifs relue). La session a été interrompue pendant la tâche 2, reprise sans perte (rien n'avait été commité).
