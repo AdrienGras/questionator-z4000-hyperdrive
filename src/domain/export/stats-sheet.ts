@@ -1,4 +1,4 @@
-import type { NormalizedConfig } from '@/domain/config/normalize'
+import { categoryLabel, questionTitle } from '@/domain/config/lookup'
 import { fromMilli, type Milli } from '@/domain/scoring/milli'
 import type { Session } from '@/domain/session/types'
 import { binLabel, compositionLabel, reasonsLabel } from '@/domain/stats/labels'
@@ -8,17 +8,6 @@ import { header, num, text } from './cells'
 import { DECIMAL_2_FORMAT, RATE_FORMAT, scoreFormat } from './formats'
 import { exportText, type ExportMessageKey } from './messages'
 import type { Cell, SheetSpec } from './types'
-
-/** Libellé de la catégorie ; son id si elle n'existe plus dans la config. */
-function categoryName(config: NormalizedConfig, categoryId: string): string {
-  return config.categories.find(({ id }) => id === categoryId)?.label ?? categoryId
-}
-
-/** Titre de la question ; son id si elle n'existe plus dans la config. */
-function questionName(config: NormalizedConfig, categoryId: string, questionId: string): string {
-  const category = config.categories.find(({ id }) => id === categoryId)
-  return category?.questions.find(({ id }) => id === questionId)?.title ?? questionId
-}
 
 /** Nombre facultatif : `null` → cellule vide. */
 const optionalNum = (value: number | null, format?: string): Cell =>
@@ -97,7 +86,7 @@ export function statsSheet(session: Session, stats: SessionStats, locale: Locale
       'stats_categories',
       ['col_category', 'stats_col_choices', 'stats_col_scored', 'stats_col_success_rate'],
       stats.categories.map((category) => [
-        text(categoryName(config, category.categoryId)),
+        text(categoryLabel(config, category.categoryId)),
         num(category.choices),
         num(category.scored),
         optionalNum(category.successRate, RATE_FORMAT),
@@ -116,8 +105,8 @@ export function statsSheet(session: Session, stats: SessionStats, locale: Locale
       'stats_top_drawn',
       ['stats_col_question', 'col_category', 'stats_col_draws'],
       stats.topDrawn.map((drawn) => [
-        text(questionName(config, drawn.categoryId, drawn.questionId)),
-        text(categoryName(config, drawn.categoryId)),
+        text(questionTitle(config, drawn.categoryId, drawn.questionId)),
+        text(categoryLabel(config, drawn.categoryId)),
         num(drawn.count),
       ]),
     ),
@@ -125,8 +114,8 @@ export function statsSheet(session: Session, stats: SessionStats, locale: Locale
       'stats_skipped',
       ['stats_col_question', 'col_category', 'stats_col_skips', 'stats_col_reasons'],
       stats.skipped.map((skipped) => [
-        text(questionName(config, skipped.categoryId, skipped.questionId)),
-        text(categoryName(config, skipped.categoryId)),
+        text(questionTitle(config, skipped.categoryId, skipped.questionId)),
+        text(categoryLabel(config, skipped.categoryId)),
         num(skipped.total),
         text(reasonsLabel(skipped.reasons, label('no_reason'), times)),
       ]),
@@ -138,7 +127,7 @@ export function statsSheet(session: Session, stats: SessionStats, locale: Locale
         text(
           compositionLabel(
             strategy.composition.map(({ categoryId, count }) => ({
-              label: categoryName(config, categoryId),
+              label: categoryLabel(config, categoryId),
               count,
             })),
             times,

@@ -1,3 +1,4 @@
+import { findCategory } from '@/domain/config/lookup'
 import type { NormalizedCategory, NormalizedQuestion } from '@/domain/config/normalize'
 import type { Attempt, AttemptOutcome, Session } from '@/domain/session/types'
 import type { Locale } from '@/lib/i18n/i18n'
@@ -42,9 +43,7 @@ function attemptRow(
   { session, locale, studentName, rank }: AttemptContext,
 ): Cell[] {
   const format = dateFormat(locale)
-  const category: NormalizedCategory | undefined = session.config.categories.find(
-    ({ id }) => id === attempt.categoryId,
-  )
+  const category: NormalizedCategory | undefined = findCategory(session.config, attempt.categoryId)
   const question: NormalizedQuestion | undefined = category?.questions.find(
     ({ id }) => id === attempt.questionId,
   )

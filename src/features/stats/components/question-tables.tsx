@@ -1,7 +1,7 @@
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import type { DrawnQuestion, SkippedQuestion } from '@/domain/stats/types'
 import { reasonsLabel } from '@/domain/stats/labels'
-import { questionTitle } from '@/features/stats/config-lookup'
+import { questionTitle } from '@/domain/config/lookup'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { CategoryLabel } from './category-label'
 import { CELL, NUMERIC_CELL, ROW_HEADER, StatsSection, StatsTable } from './stats-section'
