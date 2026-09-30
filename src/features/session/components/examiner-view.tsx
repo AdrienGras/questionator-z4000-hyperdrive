@@ -107,6 +107,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
             session={session}
             student={student}
             status={status}
+            onShowPanel={panel.show}
             pending={pending}
             disabled={actions.busy}
             onDraw={(categoryId) => void actions.draw(categoryId)}

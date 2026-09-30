@@ -141,6 +141,61 @@ test('étudiant actif absent affiche « Étudiant absent »', async () => {
   expect(await screen.findByRole('heading', { name: 'Étudiant absent' })).toBeInTheDocument()
 })
 
+async function absentAliceSession() {
+  const config = makeConfig({ questionsPerStudent: 3 })
+  const [alice, bob] = twoStudents()
+  if (alice === undefined || bob === undefined) throw new Error('fixture incomplète')
+  await putSession(sessionWith(config, [{ ...alice, absent: true }, bob], 'student-1'))
+}
+
+test('étudiant absent : « Afficher le panneau » ouvre l’onglet « Étudiant »', async () => {
+  localStorage.clear()
+  await absentAliceSession()
+  renderAt('/session/session-1')
+
+  await screen.findByRole('heading', { name: 'Étudiant absent' })
+  fireEvent.click(screen.getByRole('button', { name: 'Afficher le panneau' }))
+
+  const dialog = await screen.findByRole('dialog', { name: 'Panneau latéral' })
+  expect(within(dialog).getByRole('tab', { name: 'Étudiant' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  )
+  expect(within(dialog).getByRole('checkbox', { name: 'Absent' })).toBeVisible()
+})
+
+test('aucun étudiant : « Afficher le panneau » ouvre l’onglet « Étudiants »', async () => {
+  localStorage.clear()
+  await putSession(sessionWith(makeConfig({ questionsPerStudent: 3 }), twoStudents(), undefined))
+  renderAt('/session/session-1')
+
+  await screen.findByRole('heading', { name: 'Aucun étudiant sélectionné' })
+  fireEvent.click(screen.getByRole('button', { name: 'Afficher le panneau' }))
+
+  const dialog = await screen.findByRole('dialog', { name: 'Panneau latéral' })
+  expect(within(dialog).getByRole('tab', { name: 'Étudiants' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  )
+})
+
+test('onglet « Étudiants » mémorisé, état absent : ouvert sur « Étudiant » et ce choix est mémorisé', async () => {
+  localStorage.setItem('questionator:side-panel:tab', 'students')
+  await absentAliceSession()
+  renderAt('/session/session-1')
+
+  await screen.findByRole('heading', { name: 'Étudiant absent' })
+  fireEvent.click(screen.getByRole('button', { name: 'Afficher le panneau' }))
+
+  const dialog = await screen.findByRole('dialog', { name: 'Panneau latéral' })
+  expect(within(dialog).getByRole('tab', { name: 'Étudiant' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  )
+  expect(localStorage.getItem('questionator:side-panel:tab')).toBe('student')
+  localStorage.clear()
+})
+
 test('étudiant ayant terminé son passage affiche l’écran final', async () => {
   const config = makeConfig({ questionsPerStudent: 3 })
   const [alice, bob] = twoStudents([1, 1, 0.5])

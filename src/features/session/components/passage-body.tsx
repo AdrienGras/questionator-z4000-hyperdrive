@@ -1,7 +1,9 @@
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import { skipsRemaining } from '@/domain/passage/skip'
+import { Button } from '@/components/ui/button'
 import type { StudentStatus } from '@/domain/scoring/status'
 import type { Attempt, Session, Student } from '@/domain/session/types'
+import type { SidePanelTab } from '@/features/session/side-panel-state'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { AbsentState } from './absent-state'
 import { CategoryGrid } from './category-grid'
@@ -27,6 +29,7 @@ type PassageBodyProps = Readonly<{
   onRevealFinal: () => Promise<boolean>
   onReset: () => Promise<boolean>
   onNext: () => void
+  onShowPanel: (tab: SidePanelTab) => void
 }>
 
 /**
@@ -48,6 +51,7 @@ export function PassageBody({
   onRevealFinal,
   onReset,
   onNext,
+  onShowPanel,
 }: PassageBodyProps) {
   const { text } = ui
 
@@ -56,11 +60,14 @@ export function PassageBody({
       <div className="flex flex-col gap-2">
         <h2 className="text-lg font-semibold">{text('passage_no_student_title', {})}</h2>
         <p className="text-muted-foreground">{text('passage_no_student_body', {})}</p>
+        <Button variant="outline" className="self-start" onClick={() => onShowPanel('students')}>
+          {text('side_panel_show', {})}
+        </Button>
       </div>
     )
   }
 
-  if (status === 'absent') return <AbsentState ui={ui} />
+  if (status === 'absent') return <AbsentState ui={ui} onShowPanel={onShowPanel} />
 
   if (status === 'done') {
     return (
