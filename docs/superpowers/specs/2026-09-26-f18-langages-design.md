@@ -2,7 +2,7 @@
 
 - **Date** : 2026-09-26
 - **Ticket** : [#36](https://github.com/AdrienGras/questionator-z4000-hyperdrive/issues/36)
-- **Branche** : à créer à l'implémentation (`feat/f18-langages`)
+- **Branche** : `feat/f18-langages`
 - **Statut** : spec validée en conversation, figée ici avant le plan d'implémentation.
 
 ## Contexte
@@ -115,11 +115,11 @@ export function createHighlightLoader(
 | Échec du catalogue, de la grammaire ou de la tokenisation | texte brut ; nouvel essai au montage suivant |
 | Grammaire qui embarque d'autres langages (`php` → html, css, javascript…) | Shiki charge les dépendances, pré-cachées comme le reste |
 
-## Impact sur F17 (#17)
+## Hors ligne (F17 livré, PR #50)
 
-- Le pré-cache de « tous les assets émis » couvre les grammaires : aucun réglage de `maximumFileSizeToCacheInBytes` pour elles.
-- La PR de F17 consigne le coût mesuré : nombre de chunks de grammaire, poids en gzip, taille en cache.
-- Le test Playwright hors ligne ajoute, à côté du bloc `php`, un bloc dans un langage hors des six de D27 (`python`).
+- Le motif de pré-cache de F17 (`**/*.{js,…}`) couvre les chunks de grammaire sans réglage. La plus grosse grammaire (776 kB) reste sous `maximumFileSizeToCacheInBytes` (2 400 000 o). `pnpm check:precache` échoue en CI si un chunk manque.
+- La PR de F18 consigne le coût mesuré : nombre de chunks de grammaire, poids en gzip, taille totale du pré-cache (68 entrées et ~5 Mo avant F18).
+- Le test Playwright hors ligne (`e2e/offline.spec.ts`, fixture `e2e/fixtures/offline-php.config.json`) ajoute, à côté du bloc `php`, un bloc `python` (hors des six langages de D27), coloré dans les deux vues réseau coupé.
 
 ## Tests (Vitest)
 
@@ -153,7 +153,7 @@ export function createHighlightLoader(
 ## Vérification au build (à consigner dans la PR)
 
 - Nombre de chunks de grammaire et leur poids total en gzip.
-- Le chunk d'entrée ne référence ni le catalogue ni aucune grammaire. Tant que F09 n'a pas monté `<Markdown>`, faire la vérification par un montage temporaire, comme en F08.
+- Le chunk d'entrée ne référence ni le catalogue ni aucune grammaire (vérifiable dans le manifeste Vite, sur le modèle de `pnpm check:bundle`).
 - Aucun `.wasm`, et `pnpm build` n'affiche aucun avertissement. Si le nombre de chunks rallonge le build de façon notable, consigner la durée.
 
 ## Documentation
@@ -168,7 +168,7 @@ export function createHighlightLoader(
 - [ ] Un langage inconnu s'affiche en texte brut, sans erreur, et la création de session le signale par un avertissement non bloquant.
 - [ ] Les alias (`py`, `yml`, `sh`) et la casse (`PHP`) sont reconnus de la même façon par le validateur et par le rendu.
 - [ ] L'accueil ne charge ni le catalogue ni aucune grammaire.
-- [ ] Une fois F17 livrée, un bloc `python` est coloré hors ligne (critère ajouté au test Playwright de F17).
+- [ ] Un bloc `python` est coloré hors ligne (test Playwright de F17).
 
 ## Hors périmètre
 
