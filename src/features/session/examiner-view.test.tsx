@@ -8,7 +8,7 @@ import { expectColorModeToggleLast, bannerInteractiveNames } from '@/testing/pag
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, type AttemptSpec, makeStudent } from '@/testing/student-fixtures'
 import { renderAt } from '@/testing/render-at'
-import { openSidePanel } from '@/testing/side-panel-assertions'
+import { expectPanelStaysOpen, openSidePanel } from '@/testing/side-panel-assertions'
 import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import type { Session, Student } from '@/domain/session/types'
 
@@ -509,7 +509,7 @@ test('échec du changement d’étudiant : le tiroir reste ouvert', async () => 
   expect(await within(dialog).findByRole('alert')).toHaveTextContent(
     'Cet étudiant n’existe plus dans la session.',
   )
-  expect(screen.getByRole('dialog', { name: 'Panneau latéral' })).toBe(dialog)
+  await expectPanelStaysOpen()
 })
 
 test("onglet « Étudiants » : bouton-lien « Statistiques » vers l'écran des statistiques", async () => {

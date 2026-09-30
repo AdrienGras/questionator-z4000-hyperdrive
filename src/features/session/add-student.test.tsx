@@ -7,7 +7,7 @@ import { AddStudentDialog } from './components/add-student-dialog'
 import { makeUi } from '@/testing/make-ui'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
-import { openSidePanel } from '@/testing/side-panel-assertions'
+import { expectPanelStaysOpen, openSidePanel } from '@/testing/side-panel-assertions'
 import { config, mountStudentsTab } from '@/testing/students-tab-harness'
 
 const alice = makeStudent([], {
@@ -111,7 +111,7 @@ test('« Ajouter » laisse le tiroir ouvert', async () => {
 
   await waitFor(() => expect(addDialog()).not.toBeInTheDocument())
   expect((await stored()).students).toHaveLength(3)
-  expect(drawer()).toBeInTheDocument()
+  await expectPanelStaysOpen()
   expect(
     within(screen.getByRole('list', { name: 'Étudiants de la session' })).getByText(/Martin Zoé/),
   ).toBeInTheDocument()

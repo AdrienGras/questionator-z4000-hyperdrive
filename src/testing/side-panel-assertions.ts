@@ -1,4 +1,5 @@
-import { fireEvent, screen, within } from '@testing-library/react'
+import { act, fireEvent, screen, within } from '@testing-library/react'
+import { expect } from 'vitest'
 
 /**
  * Bouton « Panneau » de la barre de titre de l'écran de passage (F21). Attendu : le premier
@@ -19,4 +20,18 @@ export async function openSidePanel(tab?: 'Étudiant' | 'Étudiants'): Promise<H
   const dialog = await screen.findByRole('dialog', { name: 'Panneau latéral' })
   if (tab !== undefined) fireEvent.click(within(dialog).getByRole('tab', { name: tab }))
   return dialog
+}
+
+/**
+ * Le tiroir est toujours ouvert après l'action en cours. On laisse d'abord passer les
+ * continuations en attente (la vue ne ferme le tiroir qu'après la résolution de l'écriture),
+ * puis on vérifie l'état et non la seule présence : base-ui garde le `dialog` monté pendant sa
+ * sortie, marqué `data-closed` / `data-ending-style` au lieu de `data-open`.
+ */
+export async function expectPanelStaysOpen(): Promise<void> {
+  await act(() => new Promise((resolve) => setTimeout(resolve, 50)))
+  const dialog = screen.getByRole('dialog', { name: 'Panneau latéral' })
+  expect(dialog).toHaveAttribute('data-open')
+  expect(dialog).not.toHaveAttribute('data-closed')
+  expect(dialog).not.toHaveAttribute('data-ending-style')
 }
