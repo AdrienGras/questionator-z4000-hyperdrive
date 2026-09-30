@@ -21,18 +21,20 @@ const TARGETS = [
 const svg = readFileSync(`${ICONS_DIR}icon.svg`, 'utf8')
 const browser = await chromium.launch()
 try {
-  const page = await browser.newPage()
-  for (const { file, size } of TARGETS) {
-    await page.setViewportSize({ width: size, height: size })
-    await page.setContent(
-      `<style>html,body{margin:0}svg{display:block;width:${size}px;height:${size}px}</style>${svg}`,
-    )
-    await page.screenshot({
-      path: `${ICONS_DIR}${file}`,
-      clip: { x: 0, y: 0, width: size, height: size },
-    })
-    console.log(`${file} (${size} px)`)
-  }
+  // Une page par taille, rendues en parallèle.
+  await Promise.all(
+    TARGETS.map(async ({ file, size }) => {
+      const page = await browser.newPage({ viewport: { width: size, height: size } })
+      await page.setContent(
+        `<style>html,body{margin:0}svg{display:block;width:${size}px;height:${size}px}</style>${svg}`,
+      )
+      await page.screenshot({
+        path: `${ICONS_DIR}${file}`,
+        clip: { x: 0, y: 0, width: size, height: size },
+      })
+      console.log(`${file} (${size} px)`)
+    }),
+  )
 } finally {
   await browser.close()
 }

@@ -32,7 +32,7 @@ export function listDistFiles(distDir: string): string[] {
     }
   }
   walk('')
-  return files.toSorted()
+  return files.toSorted((a, b) => a.localeCompare(b))
 }
 
 /** Fichiers émis absents du manifeste de pré-cache. */

@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { extname, join, normalize, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import type { Page } from '@playwright/test'
-import { examplePath, expect, test } from './fixtures.ts'
+import { examplePath, expect, test as base } from './fixtures.ts'
 import { HomePage } from './pages/home-page.ts'
 
 /**
@@ -70,7 +70,7 @@ type Site = { root: string; url: string }
  * libre ; `baseURL` pointe dessus. Chaque onglet compte ses chargements de document dans
  * `sessionStorage` (l'init script ne tourne pas aux navigations par ancre).
  */
-const updateTest = test.extend<{ site: Site }>({
+const test = base.extend<{ site: Site }>({
   // oxlint-disable-next-line no-empty-pattern -- Playwright exige un motif déstructuré, même vide.
   site: async ({}, use) => {
     const root = await mkdtemp(join(tmpdir(), 'questionator-update-'))
@@ -121,90 +121,91 @@ async function deploy(page: Page, site: Site): Promise<void> {
   })
 }
 
-updateTest(
-  'nouvelle version : pastille aux examinateurs, seul l’onglet qui clique se recharge',
-  async ({ page: tabA, context, site }) => {
-    // Installation, puis rechargement : l'onglet A démarre sous contrôle, comme B et la vue projetée.
-    const home = new HomePage(tabA)
-    await home.goto()
-    await waitForController(tabA)
-    await tabA.reload()
-    await waitForController(tabA)
+test('nouvelle version : pastille aux examinateurs, seul l’onglet qui clique se recharge', async ({
+  page: tabA,
+  context,
+  site,
+}) => {
+  // Installation, puis rechargement : l'onglet A démarre sous contrôle, comme B et la vue projetée.
+  const home = new HomePage(tabA)
+  await home.goto()
+  await waitForController(tabA)
+  await tabA.reload()
+  await waitForController(tabA)
 
-    const create = await home.createSession()
-    await create.uploadStudents(examplePath('students.example.csv'))
-    await create.uploadConfig(examplePath('config.example.json'))
-    await create.fillName('Session mise à jour')
-    await create.submit()
+  const create = await home.createSession()
+  await create.uploadStudents(examplePath('students.example.csv'))
+  await create.uploadConfig(examplePath('config.example.json'))
+  await create.fillName('Session mise à jour')
+  await create.submit()
 
-    const [present] = await Promise.all([
-      tabA.waitForEvent('popup'),
-      tabA.getByRole('button', { name: 'Ouvrir la vue projetée' }).click(),
-    ])
-    await expect(present.getByRole('main')).toBeVisible()
-    await waitForController(present)
+  const [present] = await Promise.all([
+    tabA.waitForEvent('popup'),
+    tabA.getByRole('button', { name: 'Ouvrir la vue projetée' }).click(),
+  ])
+  await expect(present.getByRole('main')).toBeVisible()
+  await waitForController(present)
 
-    const tabB = await context.newPage()
-    await tabB.goto(tabA.url())
-    await waitForController(tabB)
-    // Marqueur en mémoire du document : il disparaît si B est rechargé.
-    await tabB.evaluate(() => {
-      document.documentElement.dataset.marker = 'B'
-    })
+  const tabB = await context.newPage()
+  await tabB.goto(tabA.url())
+  await waitForController(tabB)
+  // Marqueur en mémoire du document : il disparaît si B est rechargé.
+  await tabB.evaluate(() => {
+    document.documentElement.dataset.marker = 'B'
+  })
 
-    const loadsA = await loads(tabA)
-    const loadsB = await loads(tabB)
-    const loadsPresent = await loads(present)
+  const loadsA = await loads(tabA)
+  const loadsB = await loads(tabB)
+  const loadsPresent = await loads(present)
 
-    await deploy(tabB, site)
+  await deploy(tabB, site)
 
-    // Une version attend : pastille dans les deux onglets examinateur, rien dans la vue projetée,
-    // qui ne se recharge pas tant que personne ne clique.
-    await expect(pill(tabA)).toBeVisible()
-    await expect(pill(tabB)).toBeVisible()
-    await expect
-      .poll(() =>
-        present.evaluate(async () => (await navigator.serviceWorker.ready).waiting !== null),
-      )
-      .toBe(true)
-    await expect(pill(present)).toHaveCount(0)
-    expect(await loads(present)).toBe(loadsPresent)
-    expect(await loads(tabA)).toBe(loadsA)
-    expect(await loads(tabB)).toBe(loadsB)
+  // Une version attend : pastille dans les deux onglets examinateur, rien dans la vue projetée,
+  // qui ne se recharge pas tant que personne ne clique.
+  await expect(pill(tabA)).toBeVisible()
+  await expect(pill(tabB)).toBeVisible()
+  await expect
+    .poll(() =>
+      present.evaluate(async () => (await navigator.serviceWorker.ready).waiting !== null),
+    )
+    .toBe(true)
+  await expect(pill(present)).toHaveCount(0)
+  expect(await loads(present)).toBe(loadsPresent)
+  expect(await loads(tabA)).toBe(loadsA)
+  expect(await loads(tabB)).toBe(loadsB)
 
-    await pill(tabA).getByRole('button', { name: 'Recharger' }).click()
+  await pill(tabA).getByRole('button', { name: 'Recharger' }).click()
 
-    // A se recharge une fois et repart à jour ; la vue projetée se recharge une fois.
-    await expect.poll(() => loads(tabA)).toBe(loadsA + 1)
-    await expect.poll(() => loads(present)).toBe(loadsPresent + 1)
-    await expect(tabA.getByRole('button', { name: 'Ouvrir la vue projetée' })).toBeVisible()
-    await expect(pill(tabA)).toHaveCount(0)
-    await expect(present.getByRole('main')).toBeVisible()
-    await expect(pill(present)).toHaveCount(0)
+  // A se recharge une fois et repart à jour ; la vue projetée se recharge une fois.
+  await expect.poll(() => loads(tabA)).toBe(loadsA + 1)
+  await expect.poll(() => loads(present)).toBe(loadsPresent + 1)
+  await expect(tabA.getByRole('button', { name: 'Ouvrir la vue projetée' })).toBeVisible()
+  await expect(pill(tabA)).toHaveCount(0)
+  await expect(present.getByRole('main')).toBeVisible()
+  await expect(pill(present)).toHaveCount(0)
 
-    // B garde son état (marqueur) et sa pastille : son « Recharger » ne ferait plus que recharger.
-    await expect(pill(tabB)).toBeVisible()
-    expect(await tabB.evaluate(() => document.documentElement.dataset.marker)).toBe('B')
-    expect(await loads(tabB)).toBe(loadsB)
-    expect(await loads(tabA)).toBe(loadsA + 1)
-    expect(await loads(present)).toBe(loadsPresent + 1)
-  },
-)
+  // B garde son état (marqueur) et sa pastille : son « Recharger » ne ferait plus que recharger.
+  await expect(pill(tabB)).toBeVisible()
+  expect(await tabB.evaluate(() => document.documentElement.dataset.marker)).toBe('B')
+  expect(await loads(tabB)).toBe(loadsB)
+  expect(await loads(tabA)).toBe(loadsA + 1)
+  expect(await loads(present)).toBe(loadsPresent + 1)
+})
 
-updateTest(
-  'l’onglet du tout premier chargement (sans contrôleur initial) se recharge à son clic',
-  async ({ page, site }) => {
-    await new HomePage(page).goto()
-    await waitForController(page)
-    const before = await loads(page)
+test('l’onglet du tout premier chargement (sans contrôleur initial) se recharge à son clic', async ({
+  page,
+  site,
+}) => {
+  await new HomePage(page).goto()
+  await waitForController(page)
+  const before = await loads(page)
 
-    await deploy(page, site)
-    await expect(pill(page)).toBeVisible()
-    expect(await loads(page)).toBe(before)
+  await deploy(page, site)
+  await expect(pill(page)).toBeVisible()
+  expect(await loads(page)).toBe(before)
 
-    await pill(page).getByRole('button', { name: 'Recharger' }).click()
-    await expect.poll(() => loads(page)).toBe(before + 1)
-    await expect(page.getByRole('link', { name: 'Créer une session' }).first()).toBeVisible()
-    await expect(pill(page)).toHaveCount(0)
-  },
-)
+  await pill(page).getByRole('button', { name: 'Recharger' }).click()
+  await expect.poll(() => loads(page)).toBe(before + 1)
+  await expect(page.getByRole('link', { name: 'Créer une session' }).first()).toBeVisible()
+  await expect(pill(page)).toHaveCount(0)
+})
