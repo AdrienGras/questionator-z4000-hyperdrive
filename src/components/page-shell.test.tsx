@@ -73,3 +73,19 @@ test('contenu rendu après la barre', () => {
   expect(screen.getByRole('main')).toContainElement(p)
   expect(screen.getByRole('banner')).not.toContainElement(p)
 })
+
+test('titre long : le bloc titre se replie, le groupe de droite reste aligné à droite', () => {
+  mount(
+    <Harness
+      title={'Examen de fin de semestre '.repeat(4)}
+      actions={<button type="button">Projeter</button>}
+    >
+      x
+    </Harness>,
+  )
+  // jsdom ne fait pas de mise en page : on fige les classes qui la portent.
+  const h1 = screen.getByRole('heading', { level: 1 })
+  expect(h1.parentElement).toHaveClass('flex-[1_1_20rem]', 'min-w-0')
+  const toggle = screen.getByRole('button', { name: /^(Mode d'affichage|Display mode)/ })
+  expect(toggle.parentElement).toHaveClass('ml-auto', 'justify-end')
+})

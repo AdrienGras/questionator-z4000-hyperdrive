@@ -17,7 +17,7 @@ import { StrategyTable } from './strategy-table'
 import { TagTable } from './tag-table'
 
 /**
- * Écran des statistiques (F15) : en-tête, puis les blocs sur une colonne en mobile, en grille
+ * Écran des statistiques (F15) : barre de titre de la coque (`PageShell`), puis les blocs sur une colonne en mobile, en grille
  * au-delà. Appelé sous `SessionAppearance` : `useUi()` suit la langue de la config.
  */
 export function StatsView({ session }: Readonly<{ session: Session }>) {

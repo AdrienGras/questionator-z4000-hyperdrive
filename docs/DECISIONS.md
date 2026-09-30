@@ -1125,6 +1125,7 @@ autre encodage 8 bits.
 - `PageShell` (`components/page-shell.tsx`), composant appelé par chaque page : props `ui`, `title`, `back?`, `meta?`, `actions?`, plus celles du `<main>`.
 - Largeur : plafond `max-w-(--breakpoint-2xl)` (96 rem = 1536 px CSS, Tailwind 4 n'a plus `max-w-screen-*`), centré ; marges `px-4`, `sm:px-6`, `lg:px-10`, `py-4`, `sm:py-6`.
 - Barre de titre : retour, titre et ligne d'infos à gauche ; actions à droite, **bouton de thème toujours en dernier** (ce n'est pas une prop, une page ne peut pas le déplacer). Barre non sticky, sans bordure.
+- Repli d'un titre long : bloc titre en `flex-[1_1_20rem]`, groupe de droite en `ml-auto justify-end` ; un titre long se replie dans sa colonne sans faire passer le bouton de thème à gauche.
 - Hors coque, inchangés : les écrans d'état rendus en retour anticipé (`DbStatusBanner` de la session et des stats, `SessionFallback`, erreur des stats, 404) et la vue projetée (sa propre mise en page). `DbStatusBanner` affiché dans l'accueil et la création reste du contenu de la coque.
 - Favicon : rien à coder. Déjà réglé par F17 (D72), avec `<link rel="icon">` vers `icons/icon.svg` ; constaté le 2026-09-30 en preview et en prod (200, aucune requête `/favicon.ico`).
 
