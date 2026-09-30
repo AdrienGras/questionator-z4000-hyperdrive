@@ -117,8 +117,8 @@ describe('summarySheet', () => {
         num(4),
         text('Absent'),
         text('Non'),
-        num(0),
-        num(0),
+        null,
+        null,
         null,
         null,
         null,
@@ -136,6 +136,11 @@ describe('summarySheet', () => {
   test('examinateur absent : colonne vide', () => {
     const rows = summarySheet(sessionFor(), 'fr').rows.slice(1)
     expect(rows.map((row) => row[0])).toEqual([null, null, null, null])
+  })
+
+  test('absent en mode label avec libellé personnalisé : texte du libellé', () => {
+    const rows = summarySheet(sessionFor({ export: 'label', label: 'Non présenté' }), 'fr').rows
+    expect(rows[4]?.[11]).toEqual(text('Non présenté'))
   })
 
   test('absent en mode zero : nombre au format du pas', () => {

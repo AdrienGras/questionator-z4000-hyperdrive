@@ -54,8 +54,9 @@ function studentRow(session: Session, student: Student, locale: Locale): Cell[] 
     num(student.order),
     text(exportText(locale, STATUS_KEYS[studentStatus(student, config)], {})),
     text(exportText(locale, student.addedDuringSession ? 'yes' : 'no', {})),
-    num(fromMilli(scores.raw)),
-    num(fromMilli(scores.capped)),
+    // Absent : brute et plafonnée vides aussi, seule la finale porte la valeur d'absent.
+    student.absent ? null : num(fromMilli(scores.raw)),
+    student.absent ? null : num(fromMilli(scores.capped)),
     scores.converted === null ? null : num(fromMilli(scores.converted), format),
     adjustment === undefined ? null : num(fromMilli(scores.adjustment), format),
     optionalText(adjustment?.reason),
