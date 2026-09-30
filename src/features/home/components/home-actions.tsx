@@ -1,19 +1,13 @@
 import { IconAlertTriangle } from '@tabler/icons-react'
-import { Link } from '@tanstack/react-router'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { usePersistenceStatus } from '@/lib/db/persistence'
 import type { Ui } from '@/lib/i18n/use-ui'
 
-type HomeActionsProps = Readonly<{
-  ui: Ui
-  storageAvailable: boolean
-  importDisabled: boolean
-  onImport: () => void
-}>
+type HomeActionsProps = Readonly<{ ui: Ui }>
 
-/** Actions de la barre de titre de l'accueil : alerte de persistance, import, création (le thème vient de `PageShell`). */
-export function HomeActions({ ui, storageAvailable, importDisabled, onImport }: HomeActionsProps) {
+/** Actions de la barre de titre de l'accueil : alerte de persistance seule (création et import sont dans `ActionCards`; le thème vient de `PageShell`). */
+export function HomeActions({ ui }: HomeActionsProps) {
   const { text } = ui
   const persistence = usePersistenceStatus()
   return (
@@ -34,14 +28,6 @@ export function HomeActions({ ui, storageAvailable, importDisabled, onImport }: 
           </TooltipTrigger>
           <TooltipContent>{text('persistence_warning', {})}</TooltipContent>
         </Tooltip>
-      )}
-      <Button variant="outline" disabled={importDisabled} onClick={onImport}>
-        {text('home_import', {})}
-      </Button>
-      {storageAvailable && (
-        <Link to="/new" className={buttonVariants()}>
-          {text('home_create', {})}
-        </Link>
       )}
     </>
   )

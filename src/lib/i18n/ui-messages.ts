@@ -43,8 +43,6 @@ export type UiMessageParams = {
   present_exit_fullscreen: NoParams
   empty_title: NoParams
   empty_body: NoParams
-  empty_example_link: NoParams
-  empty_students_example_link: NoParams
   card_examiner: { name: string }
   card_updated: { date: string }
   card_progress: { done: number; absent: number; remaining: number }
@@ -342,10 +340,7 @@ const fr: Dictionary<UiMessageParams> = {
   present_fullscreen: () => 'Plein écran',
   present_exit_fullscreen: () => 'Quitter le plein écran',
   empty_title: () => 'Aucune session',
-  empty_body: () =>
-    "Créez une session à partir d'une liste d'étudiants et d'un fichier de configuration, ou importez un backup.",
-  empty_example_link: () => "Télécharger la config d'exemple",
-  empty_students_example_link: () => "Télécharger la liste d'étudiants d'exemple",
+  empty_body: () => 'Créez une session ou importez un backup depuis les actions.',
   card_examiner: ({ name }) => `Jury : ${name}`,
   card_updated: ({ date }) => `Modifiée le ${date}`,
   card_progress: ({ done, absent, remaining }) =>
@@ -603,10 +598,7 @@ const en: Dictionary<UiMessageParams> = {
   present_fullscreen: () => 'Full screen',
   present_exit_fullscreen: () => 'Exit full screen',
   empty_title: () => 'No sessions yet',
-  empty_body: () =>
-    'Create a session from a student list and a configuration file, or import a backup.',
-  empty_example_link: () => 'Download the example config',
-  empty_students_example_link: () => 'Download the example student list',
+  empty_body: () => 'Create a session or import a backup from the actions.',
   card_examiner: ({ name }) => `Examiner: ${name}`,
   card_updated: ({ date }) => `Updated ${date}`,
   card_progress: ({ done, absent, remaining }) =>
