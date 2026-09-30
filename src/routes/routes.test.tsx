@@ -3,11 +3,11 @@ import { screen } from '@testing-library/react'
 import { beforeEach, expect, test, vi } from 'vitest'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
-import { makeSession } from '@/testing/session-fixtures'
-import { makeConfig } from '@/testing/student-fixtures'
 import { pwaUpdate, type PwaUpdate } from '@/lib/pwa/pwa-update'
 import { makeFakeContainer } from '@/testing/pwa-fixtures'
 import { renderAt } from '@/testing/render-at'
+import { makeSession } from '@/testing/session-fixtures'
+import { makeConfig } from '@/testing/student-fixtures'
 
 // Le singleton est remplacé par une instance neuve à chaque test : aucune fuite d'état.
 const pwa = vi.hoisted(() => ({ current: undefined as PwaUpdate | undefined }))
@@ -22,6 +22,17 @@ vi.mock('@/lib/pwa/pwa-update', async (importOriginal) => {
   }
 })
 
+// jsdom n'implémente pas `location.reload` : la vue projetée reçoit un rechargement espion.
+const reload = vi.hoisted(() => vi.fn<() => void>())
+vi.mock('@/lib/pwa/hooks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/pwa/hooks')>()
+  return {
+    ...actual,
+    useReloadOnUpdate: (dbOutdated: boolean, update?: PwaUpdate) =>
+      actual.useReloadOnUpdate(dbOutdated, update, reload),
+  }
+})
+
 /** Fait attendre une nouvelle version dans l'instance courante. */
 function makeUpdateReady() {
   pwaUpdate.start((options) => {
@@ -32,6 +43,7 @@ function makeUpdateReady() {
 
 beforeEach(async () => {
   pwa.current = undefined
+  reload.mockClear()
   await db.sessions.clear()
 })
 
@@ -189,4 +201,6 @@ test('la pastille n’est jamais rendue sur /present/…', async () => {
   renderAt('/present/session-1')
   await screen.findByRole('heading', { name: 'Oral de PHP' })
   expect(screen.queryByRole('status')).toBeNull()
+  // La vue projetée se recharge seule, une fois, au lieu d'afficher la pastille.
+  expect(reload).toHaveBeenCalledTimes(1)
 })
