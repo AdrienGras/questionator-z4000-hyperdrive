@@ -31,7 +31,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 La revue finale a trouvé en Chromium réel ce que les tests à faux `registerSW` ne voyaient pas : la vue projetée bouclait (259 chargements en 8 s) et un clic rechargeait tous les onglets. Cause : mon design confondait version en attente et version activée, et `registerSW` recharge de lui-même sans `onNeedReload`. Corrigé, spec et D72 amendées, QUIRKS ajouté.
 
-**Trucs en suspens** : PR pas encore ouverte (brouillon, puis `.claude/scripts/sonar-check.sh --pr <n> --wait`, puis « Ready for review »). Vérifications manuelles à consigner dans la PR : installation Chrome et Edge, aperçu des icônes, taille du pré-cache. Points mineurs au BACKLOG § Hors ligne. Reste de F16 : ouvrir un export dans Excel.
+**Trucs en suspens** : PR #50 en « Ready for review » (CI verte, gate SonarQube OK au second essai après correction de 6 issues, dont un `await` de haut niveau écarté, voir QUIRKS). La PR n'est pas liée à #17 malgré `Closes #17` : fermer #17 à la main après le merge. Vérifications manuelles à consigner dans la PR : installation Chrome et Edge, aperçu des icônes, taille du pré-cache. Points mineurs au BACKLOG § Hors ligne. Reste de F16 : ouvrir un export dans Excel.
 
 **Prochaine chose à creuser** : F18 (#36, tous les langages Shiki) : le motif de pré-cache couvre déjà les grammaires chargées à la demande ; surveiller `check:precache` et le plafond de taille.
 
