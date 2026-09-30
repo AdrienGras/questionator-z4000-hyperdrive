@@ -26,7 +26,7 @@ export default defineConfig({
   base: '/questionator-z4000-hyperdrive/',
   define: { __APP_VERSION__: JSON.stringify(readPackageVersion()) },
   build: {
-    // Manifeste lu par `scripts/check-initial-bundle.ts` (Recharts hors du bundle initial, D70).
+    // Manifeste lu par `scripts/check-initial-bundle.ts` (Recharts et xlsx hors du bundle initial, D70/D71).
     manifest: true,
     // Limite GLOBALE (Vite l'applique à tous les chunks, pas seulement à celui-ci) : elle coupe
     // l'avertissement pour n'importe quel chunk jusqu'à 2,4 Mo. Elle est fixée ici pour couvrir le
@@ -58,6 +58,13 @@ export default defineConfig({
             {
               name: 'recharts',
               test: /node_modules[\\/](?:\.pnpm[\\/][^\\/]+[\\/]node_modules[\\/])?(?:recharts|victory-vendor|d3-[^\\/]+)[\\/]/,
+            },
+            // Écriture xlsx (F16, D71) : `write-excel-file` et `fflate`, chargés en `import()` dynamique
+            // depuis `src/lib/xlsx/write-workbook.ts`. Même raison que `recharts` : sans groupe nommé,
+            // Rolldown l'inline dans le chunk appelant et `check:bundle` ne le voit plus.
+            {
+              name: 'xlsx',
+              test: /node_modules[\\/](?:\.pnpm[\\/][^\\/]+[\\/]node_modules[\\/])?(?:write-excel-file|fflate)[\\/]/,
             },
           ],
         },

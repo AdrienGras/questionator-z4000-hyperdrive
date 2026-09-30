@@ -59,9 +59,10 @@ module.exports = {
     {
       name: 'lib-no-domain',
       severity: 'error',
-      comment: 'Hors lib/db/, lib/ ignore le métier.',
+      comment:
+        'Hors lib/db/, lib/ ignore le métier (sauf les types : lib/xlsx/ consomme WorkbookSpec, sans dépendance à l’exécution).',
       from: { path: '^src/lib/', pathNot: ['^src/lib/db/', TEST] },
-      to: { path: '^src/domain/' },
+      to: { path: '^src/domain/', dependencyTypesNot: ['type-only'] },
     },
     {
       name: 'components-are-shared',
@@ -110,6 +111,14 @@ module.exports = {
         // pnpm résout vers node_modules/.pnpm/recharts@<v>/node_modules/recharts/…
         path: [String.raw`/node_modules/recharts/`, String.raw`^src/components/ui/chart\.tsx$`],
       },
+    },
+    {
+      name: 'xlsx-only-in-lib-xlsx',
+      severity: 'error',
+      comment:
+        'write-excel-file ne s’importe que depuis src/lib/xlsx/, chargé en dynamique pour rester hors du bundle initial (D71).',
+      from: { pathNot: '^src/lib/xlsx/' },
+      to: { path: [String.raw`/node_modules/write-excel-file/`] },
     },
   ],
   options: {

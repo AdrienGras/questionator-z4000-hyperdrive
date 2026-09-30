@@ -1,5 +1,6 @@
 /**
- * Vérifie que Recharts (et son wrapper shadcn) reste hors du bundle initial (F15, D70).
+ * Vérifie que les bibliothèques lourdes (Recharts et son wrapper shadcn, F15/D70 ; xlsx, F16/D71)
+ * restent hors du bundle initial.
  * Lancé par `pnpm check:bundle` après `pnpm build` ; nécessite `build.manifest: true`.
  * Exécuté par Node natif (types retirés) : imports avec extension `.ts`, syntaxe effaçable.
  */
@@ -56,9 +57,9 @@ function staticClosure(manifest: Record<string, ManifestChunk>, start: string): 
 }
 
 /**
- * Garde-fou de non-vacuité : sans chunk `recharts` nommé, ou si l'écran des statistiques ne
- * l'atteint plus, `findInitialLeaks` passerait sans rien vérifier (Recharts inliné ailleurs,
- * groupe renommé, route déplacée). Renvoie les problèmes constatés, [] si le contrôle a du sens.
+ * Garde-fou de non-vacuité : sans chunk nommé, ou si l'importeur (écran des statistiques,
+ * `write-workbook.ts`) ne l'atteint plus, `findInitialLeaks` passerait sans rien vérifier (chunk
+ * inliné ailleurs, groupe renommé, module déplacé). Renvoie les problèmes constatés, [] si le contrôle a du sens.
  */
 export function findVacuityProblems(
   manifest: Record<string, ManifestChunk>,
@@ -67,7 +68,9 @@ export function findVacuityProblems(
 ): string[] {
   const chunkKeys = Object.keys(manifest).filter((key) => chunkPattern.test(key))
   if (chunkKeys.length === 0) {
-    return [`aucun chunk ${String(chunkPattern)} dans le manifeste (groupe \`recharts\` disparu ?)`]
+    return [
+      `aucun chunk ${String(chunkPattern)} dans le manifeste (groupe \`codeSplitting\` disparu ?)`,
+    ]
   }
   if (manifest[routeKey] === undefined) {
     return [`entrée ${routeKey} absente du manifeste (route renommée ou découpage changé ?)`]
@@ -88,23 +91,57 @@ export const STATS_ROUTE_KEY = 'src/routes/session.$sessionId_.stats.tsx?tsr-spl
 // Repli : chemins sources (pnpm : node_modules/.pnpm/recharts@x/node_modules/recharts/…) et wrapper.
 export const FORBIDDEN =
   /(?:^_recharts[.-])|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?recharts\/)|(?:src\/components\/ui\/chart\.tsx)/
+/** Une bibliothèque lourde à garder hors du bundle initial. */
+export type BundleTarget = {
+  name: string
+  /** Clé du chunk produit par son groupe `codeSplitting` (`_<nom>-<hash>.js`). */
+  chunk: RegExp
+  /** Clé du manifeste du module qui doit l'atteindre statiquement (garde de non-vacuité). */
+  importer: string
+  /** Motif interdit dans le graphe statique depuis les entrées. */
+  forbidden: RegExp
+}
+
+export const XLSX_CHUNK = /^_xlsx[.-]/
+export const XLSX_IMPORTER = 'src/lib/xlsx/write-workbook.ts'
+export const XLSX_FORBIDDEN =
+  /(?:^_xlsx[.-])|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?(?:write-excel-file|fflate)\/)|(?:^src\/lib\/xlsx\/)/
+
+export const BUNDLE_TARGETS: BundleTarget[] = [
+  { name: 'recharts', chunk: RECHARTS_CHUNK, importer: STATS_ROUTE_KEY, forbidden: FORBIDDEN },
+  { name: 'xlsx', chunk: XLSX_CHUNK, importer: XLSX_IMPORTER, forbidden: XLSX_FORBIDDEN },
+]
+
+/**
+ * Cibles réellement contrôlées. `xlsx` n'y figure pas encore : rien n'importe `lib/xlsx` avant le
+ * bouton d'export (F16 tâche 5), la garde de non-vacuité échouerait. Y ajouter `xlsx` à ce moment.
+ */
+export const ACTIVE_TARGETS: BundleTarget[] = BUNDLE_TARGETS.filter(
+  (target) => target.name === 'recharts',
+)
+
 const MANIFEST_PATH = 'dist/.vite/manifest.json'
 
 function main(): void {
   const manifest = manifestSchema.parse(JSON.parse(readFileSync(MANIFEST_PATH, 'utf8')))
-  const problems = findVacuityProblems(manifest, RECHARTS_CHUNK, STATS_ROUTE_KEY)
-  if (problems.length > 0) {
-    console.error('Contrôle du bundle initial sans objet, Recharts introuvable :')
-    for (const problem of problems) console.error(`  - ${problem}`)
-    process.exit(1)
+  let failed = false
+  for (const target of ACTIVE_TARGETS) {
+    const problems = findVacuityProblems(manifest, target.chunk, target.importer)
+    if (problems.length > 0) {
+      console.error(`Contrôle du bundle initial sans objet, ${target.name} introuvable :`)
+      for (const problem of problems) console.error(`  - ${problem}`)
+      failed = true
+    }
+    // Contrôlée même si la garde échoue : une fuite explique souvent l'absence de l'importeur.
+    const leaks = findInitialLeaks(manifest, target.forbidden)
+    if (leaks.length > 0) {
+      console.error(`${target.name} fuit dans le bundle initial :`)
+      for (const leak of leaks) console.error(`  - ${leak}`)
+      failed = true
+    }
   }
-  const leaks = findInitialLeaks(manifest, FORBIDDEN)
-  if (leaks.length > 0) {
-    console.error('Recharts fuit dans le bundle initial :')
-    for (const leak of leaks) console.error(`  - ${leak}`)
-    process.exit(1)
-  }
-  console.log('Bundle initial sans Recharts.')
+  if (failed) process.exit(1)
+  console.log(`Bundle initial sans ${ACTIVE_TARGETS.map((target) => target.name).join(', ')}.`)
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main()
