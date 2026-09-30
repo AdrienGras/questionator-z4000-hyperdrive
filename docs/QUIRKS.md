@@ -440,3 +440,24 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : TanStack Router découpe par défaut `errorComponent` dans son propre chunk (`…stats.tsx?tsr-split=errorComponent` dans le manifeste). Quand le chunk de l'écran échoue à se charger (hors ligne, fichiers supprimés par un redéploiement), celui de l'`errorComponent` échoue aussi : l'écran d'erreur prévu ne s'affiche jamais. Les tests Vitest ne le voient pas (pas de découpage sous Vitest).
 **Workaround** : `codeSplitGroupings: [['component']]` dans les options de la route : seul le composant part en chunk paresseux, l'`errorComponent` reste dans le fichier de route chargé d'emblée. Vérifier après `pnpm build` qu'aucune clé `tsr-split=errorComponent` ne figure dans `dist/.vite/manifest.json` pour la route.
 **Référence** : `src/routes/session.$sessionId_.stats.tsx`.
+
+## write-excel-file sérialise une `Date` par ses composantes UTC (2026-09-30)
+
+**Découvert** : F16, écriture du classeur.
+**Symptôme** : une cellule `Date` s'ouvre dans Excel avec un décalage égal au fuseau local : la bibliothèque lit `getUTC*()` et non l'heure locale.
+**Workaround** : décaler chaque date de `getTimezoneOffset()` avant l'écriture, pour que les composantes UTC soient celles de l'heure locale voulue.
+**Référence** : `src/lib/xlsx/write-workbook.ts`.
+
+## dependency-cruiser affiche « no TypeScript compiler detected » avec TypeScript 7 (2026-09-30)
+
+**Découvert** : F16, règles `lib-xlsx-*`.
+**Symptôme** : `pnpm deps` termine par l'avertissement `missing-typescript-transpiler` (TypeScript 7 hors de la plage supportée), qui laisse craindre des dépendances manquées.
+**Workaround** : aucun besoin. Avec `parser: 'swc'`, les arêtes `import type` sont bien détectées (`type-only`), et les règles `lib-xlsx-only-export-types` et `lib-xlsx-export-types-import-type-only` s'appuient dessus. Ignorer l'avertissement.
+**Référence** : `.dependency-cruiser.cjs` (`options.parser`).
+
+## `check:bundle` ne garde que le graphe initial (2026-09-30)
+
+**Découvert** : F16, revue finale.
+**Symptôme** : un import statique d'une bibliothèque lourde depuis une route paresseuse (ex. `write-excel-file` via `lib/xlsx/`) n'entre pas dans le bundle initial : `check:bundle` reste vert, mais la bibliothèque est chargée avec la route au lieu de l'être à la demande.
+**Workaround** : règle dependency-cruiser `lib-xlsx-dynamic-import-only`, qui n'autorise que `import()` vers `src/lib/xlsx/` (D35, D71).
+**Référence** : `.dependency-cruiser.cjs`.

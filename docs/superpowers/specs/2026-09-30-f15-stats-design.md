@@ -135,7 +135,7 @@ Les moyennes, médianes et écarts-types se calculent sur les millièmes entiers
 - `scripts/check-initial-bundle.ts`, exécuté par `node` (types retirés), script `pnpm check:bundle`, lancé en CI après `pnpm build` (`build.manifest: true`). Il lit `dist/.vite/manifest.json` et :
   1. **non-vacuité** (`findVacuityProblems`) : échoue si aucune clé ne correspond à `^_recharts[.-]`, si l'entrée `src/routes/session.$sessionId_.stats.tsx?tsr-split=component` manque, ou si elle n'atteint pas le chunk `_recharts-*` par imports statiques ; sinon le contrôle passerait sans rien vérifier ;
   2. **fuite** (`findInitialLeaks`) : part des entrées `isEntry`, suit les `imports` **statiques** (pas les `dynamicImports`) et échoue si une clé du graphe est le chunk `_recharts-*` (repli : chemin source sous `node_modules/recharts/` ou chunk de `chart.tsx`).
-  Tests Vitest (`scripts/check-initial-bundle.test.ts`) sur des manifestes jouets et un extrait réaliste, avec le motif livré (`FORBIDDEN`).
+  Tests Vitest (`scripts/check-initial-bundle.test.ts`) sur des manifestes jouets et un extrait réaliste, avec le motif livré (`RECHARTS_FORBIDDEN`).
 - `errorComponent` gardé dans le fichier de route chargé d'emblée : `codeSplitGroupings: [['component']]` dans les options de la route. Par défaut, `autoCodeSplitting` le met dans son propre chunk paresseux (`?tsr-split=errorComponent`), qui ne se chargerait pas non plus quand le chunk des statistiques échoue (hors ligne, après un redéploiement).
 
 ## Erreurs et cas limites

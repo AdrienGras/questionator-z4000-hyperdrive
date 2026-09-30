@@ -67,7 +67,7 @@ Les lignes d'en-têtes et les titres de bloc sont en `bold`. `null` = cellule vi
 | Configuration | bloc Catégories (Libellé · Id · Ordre · Questions · Barème « 0 ; 0,5 ; 1 ») puis paires clé → valeur : questions par étudiant, note brute max, échelle finale, arrondi (mode, pas effectif), skips (activés, max par étudiant, motifs, texte libre), absent (mode, libellé, valeur), version du schéma | — |
 | Métadonnées | paires clé → valeur : nom de session, examinateur, titre de l'examen, matière, promo, créée le (date), exportée le (date), version de l'application | — |
 
-- **Notes** : `computeScores` pour brute, plafonnée, convertie, ajustement ; `exportedFinal` pour la finale. Absent : finale texte (`label`) ou nombre (`zero`, `value`), convertie vide, ajustement vide. Étudiant non terminé : convertie et finale vides. Ajustement vide si l'étudiant n'en a pas.
+- **Notes** : `computeScores` pour brute, plafonnée, convertie, ajustement ; `exportedFinal` pour la finale. Absent : brute, plafonnée, convertie et ajustement vides ; la finale porte la valeur d'absent, en texte (`label`) ou en nombre (`zero`, `value`). Une valeur d'absent numérique prend le format le plus fin entre les décimales du pas et celles de la valeur. Étudiant non terminé : convertie et finale vides. Ajustement vide si l'étudiant n'en a pas.
 - **Dates** : `drawnAt`, `editedAt`, `createdAt`, date d'export ; format `dd/mm/yyyy hh:mm` (fr) ou `yyyy-mm-dd hh:mm` (en). `editedAt` absent → vide.
 - **Largeurs** : ~12 pour les nombres et dates courtes, 16–18 pour les dates, 24–40 pour les textes.
 - **Noms d'onglets** : ≤ 31 caractères, sans `: \ / ? * [ ]` (contrainte Excel) ; les libellés fr/en le respectent, un test le vérifie.
