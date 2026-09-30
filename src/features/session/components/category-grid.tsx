@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import { CategoryIcon } from '@/components/category-icon'
+import { CategoryLayout } from '@/components/category-layout'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { NormalizedConfig } from '@/domain/config/normalize'
@@ -19,7 +20,8 @@ type CategoryGridProps = Readonly<{
 
 /**
  * Grille de tirage (spec F09 §7) : un bouton pleine hauteur par catégorie, dans l'ordre de la
- * config, accent couleur en bordure/icône seulement (D26).
+ * config, accent couleur en bordure/icône seulement (D26). Disposition selon le nombre de
+ * catégories, commune avec la vue projetée (`CategoryLayout`, D74).
  *
  * Catégorie épuisée pour l'étudiant actif : le bouton lui-même porte l'infobulle
  * (`TooltipTrigger render={<Button …/>}`, comme `src/features/home/components/home-header.tsx`)
@@ -32,11 +34,12 @@ type CategoryGridProps = Readonly<{
 export function CategoryGrid({ ui, config, student, disabled, onDraw }: CategoryGridProps) {
   const { text, locale } = ui
   return (
-    <ul
+    <CategoryLayout
       aria-label={text('passage_categories', {})}
-      className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
-    >
-      {config.categories.map((category) => {
+      className="gap-3"
+      items={config.categories}
+      itemKey={(category) => category.id}
+      renderItem={(category) => {
         const exhausted = isCategoryExhausted(student, category)
         const { color } = category
         const accent: (CSSProperties & Record<'--category-color', string>) | undefined =
@@ -74,7 +77,7 @@ export function CategoryGrid({ ui, config, student, disabled, onDraw }: Category
           'aria-disabled:cursor-not-allowed aria-disabled:opacity-50'
 
         return (
-          <li key={category.id}>
+          <>
             {exhausted ? (
               <Tooltip>
                 <TooltipTrigger
@@ -114,9 +117,9 @@ export function CategoryGrid({ ui, config, student, disabled, onDraw }: Category
                 {text('passage_category_exhausted', {})}
               </span>
             )}
-          </li>
+          </>
         )
-      })}
-    </ul>
+      }}
+    />
   )
 }
