@@ -268,7 +268,7 @@ describe('usePassageActions', () => {
       expect((await getSession('session-1'))?.students[0]?.attempts).toEqual([])
     })
 
-    test('next change activeStudentId sans toucher la projection', async () => {
+    test('next change activeStudentId et remet la projection en attente (D73)', async () => {
       const { result } = await setup()
 
       await act(async () => {
@@ -277,7 +277,7 @@ describe('usePassageActions', () => {
 
       const session = await getSession('session-1')
       expect(session?.activeStudentId).toBe('student-2')
-      expect(session?.projection).toEqual({ mode: 'student', studentId: 'student-1' })
+      expect(session?.projection).toEqual({ mode: 'waiting' })
     })
 
     test('double adjust simultané : une seule écriture, le second renvoie false sans erreur', async () => {

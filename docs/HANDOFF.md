@@ -20,6 +20,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-30 — F23 : changer d'étudiant remet la projection en attente
+
+**Dernière chose faite** : #57 (F23) implémenté sur `feat/f23-projection-changement-etudiant`. Helper `withActiveStudent` dans `domain/passage/active-student.ts` : si la projection montre un autre étudiant que le nouvel actif, elle passe à `{ mode: 'waiting' }` dans la même `Session` renvoyée (une seule écriture via `run`) ; attente ou nouvel actif déjà projeté : projection inchangée (même référence). Appliqué à `setActiveStudent`, `goToNextStudent` et, au-delà du ticket, à `addStudent` avec `activate` (« Ajouter et faire passer »). D73 remplace D29 sur ce point ; `PRODUCT.md` F11, F13, F14 mis à jour. Tests : domaine (trois cas par fonction), et intégration liste, « Étudiant suivant », hook, ajout inversés vers l'attente.
+
+**Trucs en suspens** : vérifications manuelles de F16, F17, F18 toujours sans retour. PR F23 à passer par Sonar puis en revue.
+
+**Prochaine chose à creuser** : #59 (F25, tuiles de catégorie) ou #53 (F19, mise en page commune, débloque #54 et #55), puis #55 → #56, #54, #58, #60.
+
+**Notes pour future Claude** : le bandeau « La vue projetée montre X » (`projection-banner.tsx`) est volontairement conservé même s'il ne peut plus survenir après un changement d'actif (session importée ou antérieure). Si l'utilisateur refuse l'élargissement à « Ajouter et faire passer », revenir sur `add-student.ts` et ses deux tests (domaine et `add-student.test.tsx`).
+
 ## 2026-09-30 — Retours des tests manuels V1 : huit tickets F19 à F26
 
 **Dernière chose faite** : retours de l'utilisateur sur l'interface croisés avec le BACKLOG, puis huit tickets rédigés un par un avec lui et créés par `.claude/scripts/gh-ticket.sh` (tous en Ready) :

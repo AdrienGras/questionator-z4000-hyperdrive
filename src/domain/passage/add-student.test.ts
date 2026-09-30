@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest'
+import type { Session } from '@/domain/session/types'
 import { expectPassageError } from '@/testing/passage-assertions'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
@@ -68,11 +69,25 @@ describe('addStudent', () => {
     expect(result.projection).toEqual(session.projection)
   })
 
-  test('activate: true rend le nouvel étudiant actif, sans toucher à la projection', () => {
-    const session = { ...twoStudents(), activeStudentId: 's1' }
+  test('activate: true rend le nouvel étudiant actif et remet la projection en attente (D73)', () => {
+    const session: Session = {
+      ...twoStudents(),
+      activeStudentId: 's1',
+      projection: { mode: 'student', studentId: 's1' },
+    }
     const result = addStudent(session, { ...input, activate: true }, deps)
     expect(result.activeStudentId).toBe('new-id')
-    expect(result.projection).toEqual(session.projection)
+    expect(result.projection).toEqual({ mode: 'waiting' })
+  })
+
+  test('activate: false laisse la projection sur l’étudiant projeté', () => {
+    const session: Session = {
+      ...twoStudents(),
+      activeStudentId: 's1',
+      projection: { mode: 'student', studentId: 's1' },
+    }
+    const result = addStudent(session, { ...input, activate: false }, deps)
+    expect(result.projection).toBe(session.projection)
   })
 
   test('la session reçue n’est pas modifiée', () => {

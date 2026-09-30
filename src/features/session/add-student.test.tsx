@@ -99,7 +99,7 @@ test('« Ajouter » ajoute en dernier sans changer l’actif, ferme et vide le d
   expect(screen.getByLabelText('Prénom')).toHaveValue('')
 })
 
-test('« Ajouter et faire passer » active le nouvel étudiant sans quitter l’onglet', async () => {
+test('« Ajouter et faire passer » active le nouvel étudiant, remet la projection en attente (D73), sans quitter l’onglet', async () => {
   const projection = { mode: 'student', studentId: 's-a' } as const
   await mount([alice, durand], { projection })
   openDialog()
@@ -110,7 +110,7 @@ test('« Ajouter et faire passer » active le nouvel étudiant sans quitter l’
   expect(await screen.findByRole('list', { name: 'Choisir une catégorie' })).toBeInTheDocument()
   expect(within(screen.getByRole('banner')).getByText('Martin Zoé')).toBeInTheDocument()
   expect(screen.getByRole('tab', { name: 'Étudiants' })).toHaveAttribute('aria-selected', 'true')
-  expect((await stored()).projection).toEqual(projection)
+  expect((await stored()).projection).toEqual({ mode: 'waiting' })
 
   fireEvent.click(screen.getByRole('button', { name: /Aba/ }))
   expect(await screen.findByRole('heading', { level: 2, name: 'Titre a-1' })).toBeInTheDocument()

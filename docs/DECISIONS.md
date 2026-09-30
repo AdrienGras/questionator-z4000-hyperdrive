@@ -435,7 +435,8 @@ double tirage possible ; la réponse ne s'affiche jamais sans action de l'examin
   passage ; ensuite bouton « Ajuster ». Ajustement 0 = suppression (justification
   comprise).
 - Bouton « Étudiant suivant » : prochain étudiant à passer ou en cours, dans l'ordre,
-  avec reprise au début ; ne touche pas à la projection.
+  avec reprise au début ; ~~ne touche pas à la projection~~ (remplacé par D73 : la
+  projection repasse en attente).
 
 **Pourquoi** : `presentation` règle ce que voit l'étudiant ; une popup qui surgit à
 chaque consultation gêne ; changer d'étudiant est le geste le plus fréquent. Les
@@ -1086,3 +1087,18 @@ autre encodage 8 bits.
 **Pourquoi** : sans `clientsClaim`, l'examinateur qui charge l'app puis perd le réseau n'a pas de hors-ligne ; le mode `prompt` rend l'option sans risque. La vue projetée, en lecture seule, se recharge sans perte ; un onglet examinateur peut être en pleine saisie. Workbox écarte un fichier trop gros par un simple avertissement. Recharger la vue projetée sur une version seulement en attente la ferait boucler (la version attend toujours après rechargement), mesuré à la revue finale.
 
 **Reporté dans** : `PRODUCT.md` F17, spec F17. Amende D36. Impacte F17, F18.
+
+## D73 — F23 : changer d'étudiant actif remet la projection en attente (remplace D29 sur ce point) (2026-09-30)
+
+**Question** : D29 laisse la vue projetée intacte quand l'étudiant actif change. En test manuel, l'étudiant précédent reste affiché devant la salle tant que l'examinateur ne pense pas à cliquer sur « Écran d'attente ».
+
+**Décision** :
+- Tout changement d'étudiant actif (clic dans la liste, « Étudiant suivant », « Ajouter et faire passer ») remet la projection en attente si elle montrait un autre étudiant, dans la même écriture que le changement d'actif.
+- Projection déjà en attente, ou déjà sur le nouvel actif : inchangée (même référence, pas d'écriture inutile, D67). Cliquer l'étudiant déjà actif ne change rien.
+- Le nouvel étudiant n'est jamais projeté d'office : l'examinateur projette explicitement.
+- Règle portée par le domaine (`withActiveStudent`, `domain/passage/active-student.ts`), appelée par `setActiveStudent`, `goToNextStudent` et `addStudent` avec `activate`.
+- Le bandeau « La vue projetée montre X » reste : il ne peut plus apparaître après un changement d'actif, mais il couvre une session importée ou antérieure dans cet état.
+
+**Pourquoi** : afficher par défaut l'étudiant précédent n'a aucun usage et l'expose à toute la salle ; projeter d'office le nouveau ferait apparaître un étudiant avant qu'il ne soit prêt. « Ajouter et faire passer » est un changement d'actif comme un autre, l'en exclure aurait laissé le même trou.
+
+**Reporté dans** : `PRODUCT.md` F11, F13, F14. Remplace D29 (« ne touche pas à la projection »). Impacte F11, F13, F14.

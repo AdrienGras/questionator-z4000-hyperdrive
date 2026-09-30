@@ -15,7 +15,30 @@ describe('setActiveStudent', () => {
     expect(result.config).toEqual(session.config)
   })
 
-  test("laisse la projection intacte quand l'étudiant actif change", () => {
+  test('un autre étudiant projeté : la projection repasse en attente (D73)', () => {
+    const session = makeSession({
+      activeStudentId: 'student-1',
+      projection: { mode: 'student', studentId: 'student-1' },
+      students: [makeStudent([], { id: 'student-1' }), makeStudent([], { id: 'autre' })],
+    })
+
+    const result = setActiveStudent(session, 'autre')
+
+    expect(result.activeStudentId).toBe('autre')
+    expect(result.projection).toEqual({ mode: 'waiting' })
+  })
+
+  test('projection en attente : inchangée', () => {
+    const session = makeSession({
+      activeStudentId: 'student-1',
+      projection: { mode: 'waiting' },
+      students: [makeStudent([], { id: 'student-1' }), makeStudent([], { id: 'autre' })],
+    })
+
+    expect(setActiveStudent(session, 'autre').projection).toBe(session.projection)
+  })
+
+  test('nouvel actif déjà projeté : projection inchangée', () => {
     const session = makeSession({
       activeStudentId: 'student-1',
       projection: { mode: 'student', studentId: 'autre' },
@@ -25,7 +48,7 @@ describe('setActiveStudent', () => {
     const result = setActiveStudent(session, 'autre')
 
     expect(result.activeStudentId).toBe('autre')
-    expect(result.projection).toEqual({ mode: 'student', studentId: 'autre' })
+    expect(result.projection).toBe(session.projection)
   })
 
   test("déjà actif : session renvoyée telle quelle (pas d'écriture inutile)", () => {
@@ -46,21 +69,48 @@ describe('setActiveStudent', () => {
 describe('goToNextStudent', () => {
   const config = makeConfig({ questionsPerStudent: 1 })
 
-  test("nominal : l'étudiant actif devient le suivant, projection intacte", () => {
+  const students = [
+    makeStudent([10], { id: 's1', order: 1 }),
+    makeStudent([], { id: 's2', order: 2 }),
+  ]
+
+  test("nominal : l'étudiant actif devient le suivant, attente intacte", () => {
     const session = makeSession({
       config,
       activeStudentId: 's1',
       projection: { mode: 'waiting' },
-      students: [
-        makeStudent([10], { id: 's1', order: 1 }),
-        makeStudent([], { id: 's2', order: 2 }),
-      ],
+      students,
     })
 
     const result = goToNextStudent(session, 's1')
 
     expect(result.activeStudentId).toBe('s2')
     expect(result.projection).toBe(session.projection)
+  })
+
+  test('étudiant précédent projeté : la projection repasse en attente (D73)', () => {
+    const session = makeSession({
+      config,
+      activeStudentId: 's1',
+      projection: { mode: 'student', studentId: 's1' },
+      students,
+    })
+
+    const result = goToNextStudent(session, 's1')
+
+    expect(result.activeStudentId).toBe('s2')
+    expect(result.projection).toEqual({ mode: 'waiting' })
+  })
+
+  test('suivant déjà projeté : projection inchangée', () => {
+    const session = makeSession({
+      config,
+      activeStudentId: 's1',
+      projection: { mode: 'student', studentId: 's2' },
+      students,
+    })
+
+    expect(goToNextStudent(session, 's1').projection).toBe(session.projection)
   })
 
   test('no_next_student : session intacte', () => {
