@@ -11,6 +11,7 @@ import { usePassageActions } from '@/features/session/hooks/use-passage-actions'
 import { useUi, type Ui } from '@/lib/i18n/use-ui'
 import { AbsentToggle } from './absent-toggle'
 import { CommentField } from './comment-field'
+import { ExportButton } from './export-button'
 import { PassageBody } from './passage-body'
 import { PassageHeader } from './passage-header'
 import { ProjectionBanner } from './projection-banner'
@@ -91,16 +92,19 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
                 onSelect={(studentId) => void actions.selectStudent(studentId)}
                 onAdd={actions.addStudent}
                 actionsSlot={
-                  // Lien stylé en bouton : l'écran des statistiques est une route (F15), et
-                  // `features/session` n'importe rien de `features/stats`.
-                  <Link
-                    to="/session/$sessionId/stats"
-                    params={{ sessionId: session.id }}
-                    className={buttonVariants({ variant: 'outline' })}
-                  >
-                    <IconChartBar aria-hidden />
-                    {ui.text('stats_open', {})}
-                  </Link>
+                  <div className="flex flex-wrap items-start gap-2">
+                    {/* Lien stylé en bouton : l'écran des statistiques est une route (F15), et
+                        `features/session` n'importe rien de `features/stats`. */}
+                    <Link
+                      to="/session/$sessionId/stats"
+                      params={{ sessionId: session.id }}
+                      className={buttonVariants({ variant: 'outline' })}
+                    >
+                      <IconChartBar aria-hidden />
+                      {ui.text('stats_open', {})}
+                    </Link>
+                    <ExportButton ui={ui} session={session} />
+                  </div>
                 }
               />
             }

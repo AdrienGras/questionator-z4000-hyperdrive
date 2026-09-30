@@ -6,7 +6,7 @@ import {
   type ChartConfig,
 } from '@/components/ui/chart'
 import type { HistogramBin } from '@/domain/stats/types'
-import { binLabel, binTick } from '@/features/stats/format-stats'
+import { binLabel, binTick } from '@/domain/stats/labels'
 import type { Ui } from '@/lib/i18n/use-ui'
 
 type HistogramChartProps = Readonly<{ ui: Ui; bins: HistogramBin[] }>

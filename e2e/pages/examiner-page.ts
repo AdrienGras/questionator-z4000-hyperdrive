@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test'
+import type { Download, Locator, Page } from '@playwright/test'
 import { PresentPage } from './present-page.ts'
 import { StatsPage } from './stats-page.ts'
 
@@ -68,5 +68,15 @@ export class ExaminerPage {
     await this.page.getByRole('tab', { name: 'Étudiants' }).click()
     await this.page.getByRole('link', { name: 'Statistiques' }).click()
     return new StatsPage(this.page)
+  }
+
+  /** Clique « Exporter en Excel » (onglet « Étudiants ») et renvoie le téléchargement déclenché. */
+  async exportWorkbook(): Promise<Download> {
+    await this.page.getByRole('tab', { name: 'Étudiants' }).click()
+    const [download] = await Promise.all([
+      this.page.waitForEvent('download'),
+      this.page.getByRole('button', { name: 'Exporter en Excel' }).click(),
+    ])
+    return download
   }
 }

@@ -307,7 +307,8 @@ export const Route = createFileRoute('/…')({
 
 - Groupe nommé dans `vite.config.ts` (`build.rolldownOptions.output.codeSplitting.groups`) pour que la bibliothèque ait son chunk `_<nom>-<hash>.js` dans le manifeste ; sans lui Rolldown l'inline et aucun contrôle ne la voit. Le socle partagé (React…) va dans le groupe `vendor` en liste blanche, placé avant (QUIRKS 2026-09-30).
 - `pnpm check:bundle` (`scripts/check-initial-bundle.ts`, en CI après `pnpm build`) : aucune fuite depuis les entrées par imports statiques, et garde-fou de non-vacuité (le chunk existe et la route l'atteint). Pour une nouvelle bibliothèque, ajouter son motif et sa route au script, avec tests.
-- Règle `dependency-cruiser` de confinement (modèle : `recharts-only-in-stats`) : la bibliothèque et son wrapper `src/components/ui/` ne s'importent que depuis la feature.
+- Règle `dependency-cruiser` de confinement (modèles : `recharts-only-in-stats`, `xlsx-only-in-lib-xlsx`) : la bibliothèque (et son wrapper `src/components/ui/`) ne s'importe que depuis la feature ou le module `lib/` prévu. Pour un module `lib/` chargé à la demande, `lib-xlsx-dynamic-import-only` interdit tout import statique (`check:bundle` ne garde que le graphe initial).
+- Le script gère une liste de cibles (`BUNDLE_TARGETS`, chacune : chunk, importeur, motif interdit) ; `BUNDLE_TARGETS` (`recharts` et `xlsx` depuis F16) ne doit contenir que des cibles dont l'importeur est réellement chargé en dynamique, sinon la garde de non-vacuité échoue.
 - `errorComponent` gardé dans le fichier de route (`codeSplitGroupings`) : découpé à part, il échouerait à se charger en même temps que le chunk qu'il doit couvrir. Il n'importe pas la bibliothèque.
 
 ## Fichier déposé et lu — squelette

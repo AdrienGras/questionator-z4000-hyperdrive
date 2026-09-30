@@ -1,6 +1,7 @@
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import type { DrawnQuestion, SkippedQuestion } from '@/domain/stats/types'
-import { questionTitle } from '@/features/stats/config-lookup'
+import { reasonsLabel } from '@/domain/stats/labels'
+import { questionTitle } from '@/domain/config/lookup'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { CategoryLabel } from './category-label'
 import { CELL, NUMERIC_CELL, ROW_HEADER, StatsSection, StatsTable } from './stats-section'
@@ -11,15 +12,6 @@ type QuestionTablesProps = Readonly<{
   topDrawn: DrawnQuestion[]
   skipped: SkippedQuestion[]
 }>
-
-/** « Hors programme ×2, sans motif ×1 » : motifs déjà triés par le domaine, « sans motif » en dernier. */
-function reasonsText(reasons: SkippedQuestion['reasons'], ui: Ui): string {
-  return reasons
-    .map(({ reason, count }) =>
-      ui.text('stats_times', { label: reason ?? ui.text('stats_no_reason', {}), count }),
-    )
-    .join(', ')
-}
 
 /** Clé de ligne : une question n'est unique qu'au sein de sa catégorie. */
 const rowKey = (q: { categoryId: string; questionId: string }) => `${q.categoryId}/${q.questionId}`
@@ -83,7 +75,11 @@ export function QuestionTables({ ui, config, topDrawn, skipped }: QuestionTables
                     <CategoryLabel config={config} categoryId={question.categoryId} />
                   </td>
                   <td className={NUMERIC_CELL}>{question.total}</td>
-                  <td className={CELL}>{reasonsText(question.reasons, ui)}</td>
+                  <td className={CELL}>
+                    {reasonsLabel(question.reasons, text('stats_no_reason', {}), (label, count) =>
+                      text('stats_times', { label, count }),
+                    )}
+                  </td>
                 </tr>
               ))}
             </StatsTable>

@@ -1,7 +1,7 @@
 import { Fragment } from 'react'
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import type { Strategy } from '@/domain/stats/types'
-import { categoryLabel } from '@/features/stats/config-lookup'
+import { categoryLabel } from '@/domain/config/lookup'
 import { formatDecimal } from '@/features/stats/format-stats'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { NUMERIC_CELL, ROW_HEADER, StatsSection, StatsTable } from './stats-section'

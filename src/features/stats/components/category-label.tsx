@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 import { CategoryIcon } from '@/components/category-icon'
 import type { NormalizedConfig } from '@/domain/config/normalize'
-import { findCategory } from '@/features/stats/config-lookup'
+import { findCategory } from '@/domain/config/lookup'
 import { cn } from '@/lib/utils'
 
 /**

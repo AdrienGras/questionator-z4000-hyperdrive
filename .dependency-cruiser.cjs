@@ -59,9 +59,28 @@ module.exports = {
     {
       name: 'lib-no-domain',
       severity: 'error',
-      comment: 'Hors lib/db/, lib/ ignore le métier.',
-      from: { path: '^src/lib/', pathNot: ['^src/lib/db/', TEST] },
+      comment: 'Hors lib/db/ et lib/xlsx/, lib/ ignore le métier.',
+      from: { path: '^src/lib/', pathNot: ['^src/lib/db/', '^src/lib/xlsx/', TEST] },
       to: { path: '^src/domain/' },
+    },
+    {
+      name: 'lib-xlsx-only-export-types',
+      severity: 'error',
+      comment:
+        'lib/xlsx/ ne lit du métier que les types du classeur neutre (domain/export/types.ts), en `import type` : aucune dépendance à l’exécution.',
+      from: { path: '^src/lib/xlsx/', pathNot: TEST },
+      to: {
+        path: '^src/domain/',
+        pathNot: String.raw`^src/domain/export/types\.ts$`,
+      },
+    },
+    {
+      name: 'lib-xlsx-export-types-import-type-only',
+      severity: 'error',
+      comment:
+        'Le seul fichier de domain/ que lib/xlsx/ peut lire l’est en `import type` uniquement.',
+      from: { path: '^src/lib/xlsx/', pathNot: TEST },
+      to: { path: String.raw`^src/domain/export/types\.ts$`, dependencyTypesNot: ['type-only'] },
     },
     {
       name: 'components-are-shared',
@@ -110,6 +129,22 @@ module.exports = {
         // pnpm résout vers node_modules/.pnpm/recharts@<v>/node_modules/recharts/…
         path: [String.raw`/node_modules/recharts/`, String.raw`^src/components/ui/chart\.tsx$`],
       },
+    },
+    {
+      name: 'lib-xlsx-dynamic-import-only',
+      severity: 'error',
+      comment:
+        'lib/xlsx/ ne s’importe qu’en `import()` : un import statique le ferait entrer dans le graphe de la route appelante (D35, D71). `check:bundle` ne garde que le graphe initial.',
+      from: { pathNot: ['^src/lib/xlsx/', TEST] },
+      to: { path: '^src/lib/xlsx/', dependencyTypesNot: ['dynamic-import'] },
+    },
+    {
+      name: 'xlsx-only-in-lib-xlsx',
+      severity: 'error',
+      comment:
+        'write-excel-file ne s’importe que depuis src/lib/xlsx/, chargé en dynamique pour rester hors du bundle initial (D71).',
+      from: { pathNot: '^src/lib/xlsx/' },
+      to: { path: [String.raw`/node_modules/write-excel-file/`] },
     },
   ],
   options: {

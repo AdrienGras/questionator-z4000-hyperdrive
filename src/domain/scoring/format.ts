@@ -7,7 +7,7 @@ import { stepMilli } from './rounding'
 export type ScoreKind = 'raw' | 'final'
 
 /** Décimales du pas : 500 → 1, 250 → 2, 1 → 3, 1 000 ou 2 000 → 0. */
-function stepDecimals(step: Milli): number {
+export function stepDecimals(step: Milli): number {
   let decimals = 3
   let remaining: number = step
   while (decimals > 0 && remaining % 10 === 0) {
