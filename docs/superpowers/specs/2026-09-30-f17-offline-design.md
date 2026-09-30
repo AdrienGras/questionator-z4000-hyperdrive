@@ -55,20 +55,20 @@ e2e/fixtures/offline-php.config.json
 
 ## Store `PwaUpdate`
 
-- État `PwaStatus = 'current' | 'update-ready'`, `status`, `onStatusChange(listener) → unsubscribe`.
+- État `PwaStatus = 'current' | 'waiting' | 'activated'`, `status`, `onStatusChange(listener) → unsubscribe`. `waiting` : une nouvelle version est installée et attend (rien n'a changé pour cet onglet) ; `activated` : une nouvelle version a pris le contrôle depuis un autre onglet (l'ancien pré-cache est supprimé). Les confondre fait boucler la vue projetée : après rechargement, la version attend toujours et `onNeedRefresh` est réémis.
 - `start(register, container = navigator.serviceWorker)` :
   - `hadController = container.controller !== null` au démarrage ;
-  - `register({ onNeedRefresh, onRegisterError })` : `onNeedRefresh` → `update-ready` ; `onRegisterError` → `console.warn`, état inchangé ; garde la fonction `updateSW` renvoyée ;
-  - `container.addEventListener('controllerchange', …)` : → `update-ready` seulement si `hadController` (le premier chargement déclenche aussi `controllerchange` à cause de `clientsClaim`).
-- `applyUpdate()` : si `onNeedRefresh` a été reçu et qu'aucun `controllerchange` n'est encore arrivé, `updateSW(true)` (envoi de `skipWaiting`, rechargement au changement de contrôleur) ; sinon (version déjà activée par un autre onglet) `location.reload()`.
+  - `register({ onNeedRefresh, onNeedReload, onRegisterError })` : `onNeedRefresh` → `waiting` (sauf si déjà `activated`) ; `onNeedReload: () => {}` **obligatoire** : sans lui, `registerSW` en mode `prompt` recharge de lui-même chaque onglet au changement de contrôleur ; `onRegisterError` → `console.warn`, état inchangé ; garde la fonction `updateSW` renvoyée ;
+  - `container.addEventListener('controllerchange', …)` : si la page n'avait pas de contrôleur au démarrage, le **premier** `controllerchange` (celui de `clientsClaim`) est ignoré, une seule fois ; ensuite, si cet onglet a appelé `applyUpdate` → `reload()`, sinon → `activated`.
+- `applyUpdate()` : en `waiting` avec un `updateSW`, marque l'onglet comme demandeur puis `updateSW(true)` (envoi de `skipWaiting`) ; le rechargement vient du `controllerchange` qui suit. En `activated`, ou sans enregistrement, `location.reload()`.
 - Singleton `pwaUpdate` ; `main.tsx` fait, en prod seulement, `void import('virtual:pwa-register').then(({ registerSW }) => pwaUpdate.start(registerSW))`, hors du bundle initial.
 - `lib/pwa/` n'importe rien de `domain/` ni de `lib/db/` : `useReloadOnUpdate` reçoit un booléen `dbOutdated`.
 
 ## Hooks et UI
 
 - `usePwaUpdate(update = pwaUpdate): { status, applyUpdate }`.
-- `useReloadOnUpdate(dbOutdated: boolean, update = pwaUpdate, reload = () => location.reload())` : recharge **une seule fois** (drapeau en `useRef`) dès que `status === 'update-ready'` ou `dbOutdated` ; les deux signaux peuvent arriver ensemble.
-- `UpdatePrompt` : ne rend rien si `status === 'current'` ou si `useDbStatus() === 'outdated'` ; sinon une pastille fixe en bas à droite (`role="status"`), texte « Nouvelle version disponible » et bouton « Recharger » → `applyUpdate()`. Libellés dans le dictionnaire d'UI (`update_available`, `update_reload`, fr/en).
+- `useReloadOnUpdate(dbOutdated: boolean, update = pwaUpdate, reload = () => location.reload())` : recharge **une seule fois** (drapeau en `useRef`) dès que `status === 'activated'` ou `dbOutdated` — **jamais** sur `waiting`, qui ne change rien pour la vue projetée ; les deux signaux peuvent arriver ensemble.
+- `UpdatePrompt` : visible en `waiting` et en `activated` ; ne rend rien si `status === 'current'` ou si `useDbStatus() === 'outdated'` ; sinon une pastille fixe en bas à droite (`role="status"`), texte « Nouvelle version disponible » et bouton « Recharger » → `applyUpdate()`. Libellés dans le dictionnaire d'UI (`update_available`, `update_reload`, fr/en).
 - `__root.tsx` : `<UpdatePrompt />` rendu sauf quand la route active est `/present/$sessionId`.
 - `PresentPage` : `useReloadOnUpdate(status === 'outdated')` ; le bandeau `outdated` reste affiché comme repli le temps du rechargement.
 
@@ -96,8 +96,8 @@ e2e/fixtures/offline-php.config.json
 ## Tests
 
 - **Vitest** (colocalisés) :
-  - `pwa-update.test.ts` (faux `register`, faux conteneur `EventTarget`) : `onNeedRefresh` → `update-ready` ; `controllerchange` sans contrôleur initial ignoré ; avec contrôleur initial → `update-ready` ; `applyUpdate` appelle `updateSW(true)` ou `reload` ; `onRegisterError` laisse `current`.
-  - `hooks.test.ts` : `useReloadOnUpdate` recharge une fois pour `update-ready`, une fois pour `outdated`, une seule fois pour les deux.
+  - `pwa-update.test.ts` (faux `register`, faux conteneur `EventTarget`) : `onNeedRefresh` → `waiting` ; `onNeedReload` toujours fourni ; premier `controllerchange` sans contrôleur initial ignoré, le suivant pris en compte ; `controllerchange` → `activated` sans `applyUpdate`, → `reload` après `applyUpdate` ; `applyUpdate` appelle `updateSW(true)` en `waiting`, `reload` en `activated` ; `onRegisterError` laisse `current`.
+  - `hooks.test.ts` : `useReloadOnUpdate` ne recharge pas en `waiting` ; recharge une fois pour `activated`, une fois pour `outdated`, une seule fois pour les deux (dans les deux ordres).
   - `update-prompt.test.tsx` : rien en `current`, rien en `outdated`, clic → `applyUpdate`, libellés fr et en.
   - `routes.test.tsx` : pastille absente sur `/present/…`, présente sur l'accueil.
   - `check-precache.test.ts` : `dist/` factice complet → succès ; fichier manquant → échec qui le nomme ; manifeste vide → échec.
@@ -108,8 +108,9 @@ e2e/fixtures/offline-php.config.json
   4. faire passer un étudiant jusqu'à l'écran final ; vérifier le bloc PHP coloré (spans portant des variables `--shiki-*`) ;
   5. ouvrir la vue projetée (nouvelle page du contexte hors ligne) et vérifier qu'elle suit ;
   6. ouvrir les statistiques (graphique affiché), exporter l'Excel (téléchargement, signature `PK`).
+- **Mise à jour** (Playwright, `e2e/update.spec.ts`, sans second build) : une copie de `dist/` servie par un petit serveur statique propre au test, `sw.js` modifié d'un octet pour simuler un déploiement. Deux onglets examinateur et une vue projetée ouverts avant le déploiement. Attendu : pastille dans les deux onglets examinateur, aucune dans la vue projetée, qui ne se recharge pas tant que personne ne clique ; clic dans l'onglet A → A se recharge une fois, B garde son état (marqueur conservé) et affiche la pastille, la vue projetée se recharge une fois. Même scénario pour un onglet ouvert au tout premier chargement (sans contrôleur initial) : son clic le recharge.
 - **Installabilité** (Playwright) : `index.html` lie `manifest.webmanifest`, qui est servi, et ses icônes répondent 200.
-- **À la main** (consigné dans la PR) : installation dans Chrome et Edge ; au premier déploiement après F17, une mise à jour proposée puis appliquée, vue projetée rechargée ; taille totale du pré-cache mesurée ; aperçu des icônes.
+- **À la main** (consigné dans la PR) : installation dans Chrome et Edge ; taille totale du pré-cache mesurée ; aperçu des icônes.
 
 ## Critères d'acceptation
 
@@ -123,4 +124,3 @@ e2e/fixtures/offline-php.config.json
 
 - Synchronisation entre machines (hors V1).
 - Vérification périodique des mises à jour pendant la journée, message « prêt hors ligne », cache à l'exécution des images distantes.
-- Test e2e du scénario de mise à jour (deux builds successifs).

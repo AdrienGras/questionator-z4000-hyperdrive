@@ -1079,9 +1079,10 @@ autre encodage 8 bits.
 - La vue projetée se recharge d'elle-même sur `controllerchange` (hors premier chargement) comme sur `versionchange`, une seule fois ; les autres onglets examinateur affichent l'indicateur, sans rechargement forcé.
 - Indicateur : pastille fixe en bas à droite, montée dans le layout racine, absente de `/present/*`, non fermable ; le bandeau `outdated` (D45) a la priorité.
 - Store `lib/pwa/pwa-update.ts` alimenté par `registerSW` (`virtual:pwa-register`), hooks par `useSyncExternalStore`, sur le modèle de `QuestionatorDb.status`.
+- Deux états distincts : `waiting` (une version attend : pastille, rien d'autre) et `activated` (une version a pris le contrôle depuis un autre onglet : pastille, rechargement de la vue projetée). `registerSW` reçoit `onNeedReload: () => {}` : sans lui, la bibliothèque recharge d'office chaque onglet au changement de contrôleur. Seul l'onglet qui a cliqué se recharge.
 - `pnpm check:precache` échoue en CI si un fichier de `dist/` manque au manifeste de pré-cache de `sw.js`.
 - Icônes : le soleil rayé de la bannière redessiné en SVG (favicon compris), PNG 192, 512 et `maskable` générés et commités.
 
-**Pourquoi** : sans `clientsClaim`, l'examinateur qui charge l'app puis perd le réseau n'a pas de hors-ligne ; le mode `prompt` rend l'option sans risque. La vue projetée, en lecture seule, se recharge sans perte ; un onglet examinateur peut être en pleine saisie. Workbox écarte un fichier trop gros par un simple avertissement.
+**Pourquoi** : sans `clientsClaim`, l'examinateur qui charge l'app puis perd le réseau n'a pas de hors-ligne ; le mode `prompt` rend l'option sans risque. La vue projetée, en lecture seule, se recharge sans perte ; un onglet examinateur peut être en pleine saisie. Workbox écarte un fichier trop gros par un simple avertissement. Recharger la vue projetée sur une version seulement en attente la ferait boucler (la version attend toujours après rechargement), mesuré à la revue finale.
 
 **Reporté dans** : `PRODUCT.md` F17, spec F17. Amende D36. Impacte F17, F18.
