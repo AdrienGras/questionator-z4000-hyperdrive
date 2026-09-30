@@ -8,6 +8,7 @@ import { db } from '@/lib/db/db'
 import { putSession, updateSession } from '@/lib/db/sessions'
 import { categoryButton } from '@/testing/passage-assertions'
 import { renderAt } from '@/testing/render-at'
+import { openSidePanel } from '@/testing/side-panel-assertions'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
 
@@ -42,12 +43,27 @@ async function mount(students: Student[], questionsPerStudent = 3) {
   }
   await putSession(makeSession({ config, students, activeStudentId: students[0]?.id }))
   const rendered = renderAt('/session/session-1')
-  await screen.findByRole('complementary', { name: 'Panneau latéral' })
+  await openSidePanel('Étudiant')
   return rendered
 }
 
 function panel(): HTMLElement {
-  return screen.getByRole('complementary', { name: 'Panneau latéral' })
+  return screen.getByRole('dialog', { name: 'Panneau latéral' })
+}
+
+/**
+ * Grille de tirage, attendue. `hidden` : le tiroir modal ouvert masque le reste de la page aux
+ * requêtes par rôle.
+ */
+function grid(): Promise<HTMLElement> {
+  return screen.findByRole('list', { name: 'Choisir une catégorie', hidden: true })
+}
+
+async function closePanel() {
+  fireEvent.keyDown(panel(), { key: 'Escape' })
+  await waitFor(() =>
+    expect(screen.queryByRole('dialog', { name: 'Panneau latéral' })).not.toBeInTheDocument(),
+  )
 }
 
 function commentBox(): HTMLElement {
@@ -153,7 +169,9 @@ test('commentaire : survit au rechargement et à la réinitialisation', async ()
 
   renderAt('/session/session-1')
   await screen.findByRole('heading', { name: 'Passage terminé' })
+  await openSidePanel()
   expect(commentBox()).toHaveValue('Bonne tenue')
+  await closePanel()
 
   fireEvent.click(screen.getByRole('button', { name: 'Réinitialiser l’étudiant' }))
   const dialog = await screen.findByRole('alertdialog', { name: 'Réinitialiser Durand Alice ?' })
@@ -161,6 +179,7 @@ test('commentaire : survit au rechargement et à la réinitialisation', async ()
 
   expect(await categoryButton('A')).toBeInTheDocument()
   expect((await storedStudent()).comment).toBe('Bonne tenue')
+  await openSidePanel()
   expect(commentBox()).toHaveValue('Bonne tenue')
 })
 
@@ -187,13 +206,17 @@ test('commentaire tapé puis passage à l’onglet « Étudiants » : enregistr�
   await waitFor(async () => expect((await stored()).activeStudentId).toBe('student-2'))
   await waitFor(async () => expect((await storedStudent('student-1')).comment).toBe('Pour Alice'))
   expect((await storedStudent('student-2')).comment).toBeUndefined()
-  fireEvent.click(within(panel()).getByRole('tab', { name: 'Étudiant' }))
+  // Le changement d'étudiant a fermé le tiroir : rouvert sur l'onglet « Étudiant ».
+  await waitFor(() =>
+    expect(screen.queryByRole('dialog', { name: 'Panneau latéral' })).not.toBeInTheDocument(),
+  )
+  await openSidePanel('Étudiant')
   await waitFor(() => expect(commentBox()).toHaveValue(''))
 })
 
 test('absent sans question tirée : écrit sans dialogue, écran d’absence', async () => {
   await mount([makeStudent([])])
-  await categoryButton('A')
+  await grid()
 
   fireEvent.click(absentBox())
 
@@ -205,7 +228,7 @@ test('absent sans question tirée : écrit sans dialogue, écran d’absence', a
 
 test('absent avec questions tirées : « Annuler » n’écrit rien', async () => {
   await mount([makeStudent([2, 1], { comment: 'À revoir' })])
-  await categoryButton('A')
+  await grid()
   const before = await stored()
 
   fireEvent.click(absentBox())
@@ -222,7 +245,7 @@ test('absent avec questions tirées : « Annuler » n’écrit rien', async () =
 
 test('absent avec questions tirées : « Déclarer absent » vide les attempts, garde le commentaire', async () => {
   await mount([makeStudent([2, 1], { comment: 'À revoir' })])
-  await categoryButton('A')
+  await grid()
 
   fireEvent.click(absentBox())
   const dialog = await screen.findByRole('alertdialog', { name: 'Déclarer Durand Alice absent ?' })
@@ -247,7 +270,7 @@ test('terminé, révélé et ajusté : absent puis décoché revient à la grill
     ],
     2,
   )
-  await screen.findByRole('heading', { name: 'Passage terminé' })
+  await screen.findByRole('heading', { name: 'Passage terminé', hidden: true })
 
   fireEvent.click(absentBox())
   const dialog = await screen.findByRole('alertdialog', { name: 'Déclarer Durand Alice absent ?' })
@@ -257,7 +280,7 @@ test('terminé, révélé et ajusté : absent puis décoché revient à la grill
 
   fireEvent.click(absentBox())
 
-  expect(await categoryButton('A')).toBeInTheDocument()
+  expect(await grid()).toBeInTheDocument()
   const student = await storedStudent()
   expect(student.absent).toBe(false)
   expect(student.attempts).toEqual([])
@@ -269,7 +292,7 @@ test('terminé, révélé et ajusté : absent puis décoché revient à la grill
 
 test('échec d’écriture sur « Déclarer absent » : dialogue ouvert avec le message d’erreur', async () => {
   await mount([makeStudent([2, 1])])
-  await categoryButton('A')
+  await grid()
 
   fireEvent.click(absentBox())
   const dialog = await screen.findByRole('alertdialog')
@@ -285,7 +308,7 @@ test('échec d’écriture sur « Déclarer absent » : dialogue ouvert avec le 
 
 test('dialogue d’absence ouvert pour Alice, Bob devient actif ailleurs : c’est Alice qui est absente', async () => {
   await mount([makeStudent([2, 1]), { ...bob(), attempts: makeStudent([1]).attempts }])
-  await categoryButton('A')
+  await grid()
 
   fireEvent.click(absentBox())
   const dialog = await screen.findByRole('alertdialog', { name: 'Déclarer Durand Alice absent ?' })

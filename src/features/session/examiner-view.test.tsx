@@ -8,6 +8,7 @@ import { expectColorModeToggleLast, bannerInteractiveNames } from '@/testing/pag
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, type AttemptSpec, makeStudent } from '@/testing/student-fixtures'
 import { renderAt } from '@/testing/render-at'
+import { openSidePanel } from '@/testing/side-panel-assertions'
 import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import type { Session, Student } from '@/domain/session/types'
 
@@ -43,15 +44,25 @@ function twoStudents(
   ]
 }
 
-/** Ouvre l'onglet « Étudiants » du panneau latéral et renvoie le bouton de l'étudiant. */
-function studentButton(name: string): HTMLElement {
-  const panel = screen.getByRole('complementary', { name: 'Panneau latéral' })
-  fireEvent.click(within(panel).getByRole('tab', { name: 'Étudiants' }))
-  const button = within(screen.getByRole('list', { name: 'Étudiants de la session' }))
+/**
+ * Ouvre le tiroir latéral (s'il est fermé) sur l'onglet « Étudiants » et renvoie le bouton de
+ * l'étudiant.
+ */
+async function studentButton(name: string): Promise<HTMLElement> {
+  const open = screen.queryByRole('dialog', { name: 'Panneau latéral' })
+  const dialog = open ?? (await openSidePanel())
+  fireEvent.click(within(dialog).getByRole('tab', { name: 'Étudiants' }))
+  const button = within(within(dialog).getByRole('list', { name: 'Étudiants de la session' }))
     .getAllByRole('button')
     .find((b) => b.textContent.includes(name))
   if (button === undefined) throw new Error(`bouton ${name} introuvable`)
   return button
+}
+
+async function expectPanelClosed() {
+  await waitFor(() =>
+    expect(screen.queryByRole('dialog', { name: 'Panneau latéral' })).not.toBeInTheDocument(),
+  )
 }
 
 function sessionWith(
@@ -74,17 +85,17 @@ test("en-tête, liste des étudiants et changement d'étudiant actif", async () 
   expect(screen.getByRole('link', { name: "Retour à l'accueil" })).toHaveAttribute('href', '/')
 
   expect(screen.queryByRole('combobox', { name: 'Étudiant' })).not.toBeInTheDocument()
-  fireEvent.click(screen.getByRole('tab', { name: 'Étudiants' }))
-  const rows = within(screen.getByRole('list', { name: 'Étudiants de la session' })).getAllByRole(
-    'button',
-  )
+  const dialog = await openSidePanel('Étudiants')
+  const rows = within(
+    within(dialog).getByRole('list', { name: 'Étudiants de la session' }),
+  ).getAllByRole('button')
   expect(rows).toHaveLength(2)
   expect(rows[0]).toHaveTextContent('Durand Alice')
   expect(rows[0]).toHaveTextContent('à passer')
   expect(rows[0]).toHaveAttribute('aria-current', 'true')
   expect(rows[1]).toHaveTextContent('Martin Bob')
 
-  fireEvent.click(studentButton('Martin Bob'))
+  fireEvent.click(await studentButton('Martin Bob'))
 
   await screen.findByText('Martin Bob')
   const updated = await db.sessions.get('session-1')
@@ -100,7 +111,7 @@ test('activeStudentId inconnu affiche « Aucun étudiant sélectionné » sans p
     await screen.findByRole('heading', { name: 'Aucun étudiant sélectionné' }),
   ).toBeInTheDocument()
   expect(screen.queryByRole('combobox', { name: 'Étudiant' })).not.toBeInTheDocument()
-  studentButton('Durand Alice')
+  await studentButton('Durand Alice')
   expectNoCurrentStudent()
   expect(screen.queryByText(/^Question /)).not.toBeInTheDocument()
 })
@@ -114,7 +125,7 @@ test('sans activeStudentId, « Aucun étudiant sélectionné »', async () => {
     await screen.findByRole('heading', { name: 'Aucun étudiant sélectionné' }),
   ).toBeInTheDocument()
   expect(screen.queryByRole('combobox', { name: 'Étudiant' })).not.toBeInTheDocument()
-  studentButton('Durand Alice')
+  await studentButton('Durand Alice')
   expectNoCurrentStudent()
   expect(screen.queryByText(/^Question /)).not.toBeInTheDocument()
 })
@@ -348,12 +359,13 @@ test('changer d’étudiant pendant un pending puis revenir réaffiche la même 
   if (question === undefined) throw new Error('question introuvable dans la fixture')
   await screen.findByRole('heading', { name: question.title })
 
-  fireEvent.click(studentButton('Martin Bob'))
+  fireEvent.click(await studentButton('Martin Bob'))
   await waitFor(() =>
     expect(screen.queryByRole('heading', { name: question.title })).not.toBeInTheDocument(),
   )
+  await expectPanelClosed()
 
-  fireEvent.click(studentButton('Durand Alice'))
+  fireEvent.click(await studentButton('Durand Alice'))
   expect(await screen.findByRole('heading', { name: question.title })).toBeInTheDocument()
 })
 
@@ -413,7 +425,7 @@ test('key={attempt.id} : changer d’étudiant vers un autre pending referme le 
   fireEvent.click(screen.getByText('Éléments de réponse'))
   expect(screen.getByText('Éléments de réponse').closest('details')).toHaveAttribute('open')
 
-  fireEvent.click(studentButton('Martin Bob'))
+  fireEvent.click(await studentButton('Martin Bob'))
 
   await screen.findByRole('heading', { name: 'Q2' })
   expect(screen.getByText('Éléments de réponse').closest('details')).not.toHaveAttribute('open')
@@ -444,7 +456,7 @@ test('erreur affichée même hors du panneau de passage (étudiant retiré entre
   renderAt('/session/session-1')
 
   await screen.findByRole('heading', { name: 'Aucun étudiant sélectionné' })
-  const bobButton = studentButton('Martin Bob')
+  const bobButton = await studentButton('Martin Bob')
 
   const stored = await db.sessions.get('session-1')
   if (stored === undefined) throw new Error('session introuvable en base')
@@ -457,20 +469,55 @@ test('erreur affichée même hors du panneau de passage (étudiant retiré entre
   fireEvent.click(bobButton)
   await removal
 
-  expect(await screen.findByRole('alert')).toHaveTextContent(
-    'Cet étudiant n’existe plus dans la session.',
-  )
+  const dialog = screen.getByRole('dialog', { name: 'Panneau latéral' })
+  await within(dialog).findByRole('alert')
+  fireEvent.keyDown(dialog, { key: 'Escape' })
+  await expectPanelClosed()
+  expect(screen.getByRole('alert')).toHaveTextContent('Cet étudiant n’existe plus dans la session.')
   // Toujours dans l'état « aucun étudiant sélectionné » : l'erreur ne dépend pas du panneau de
   // passage pour s'afficher.
   expect(screen.getByRole('heading', { name: 'Aucun étudiant sélectionné' })).toBeInTheDocument()
+})
+
+test('clic sur un autre étudiant : il devient actif et le tiroir se ferme', async () => {
+  await putSession(sessionWith(makeConfig(), twoStudents(), 'student-1'))
+  renderAt('/session/session-1')
+
+  fireEvent.click(await studentButton('Martin Bob'))
+
+  await waitFor(async () =>
+    expect((await db.sessions.get('session-1'))?.activeStudentId).toBe('student-2'),
+  )
+  await expectPanelClosed()
+  expect(within(screen.getByRole('banner')).getByText('Martin Bob')).toBeInTheDocument()
+})
+
+test('échec du changement d’étudiant : le tiroir reste ouvert', async () => {
+  await putSession(sessionWith(makeConfig(), twoStudents(), undefined))
+  renderAt('/session/session-1')
+
+  const bobButton = await studentButton('Martin Bob')
+  const stored = await db.sessions.get('session-1')
+  if (stored === undefined) throw new Error('session introuvable en base')
+  const withoutBob = { ...stored, students: stored.students.filter((s) => s.id !== 'student-2') }
+  // Même écriture concurrente que ci-dessous : l'id cliqué n'existe plus en base.
+  const removal = db.sessions.put(withoutBob)
+  fireEvent.click(bobButton)
+  await removal
+
+  const dialog = screen.getByRole('dialog', { name: 'Panneau latéral' })
+  expect(await within(dialog).findByRole('alert')).toHaveTextContent(
+    'Cet étudiant n’existe plus dans la session.',
+  )
+  expect(screen.getByRole('dialog', { name: 'Panneau latéral' })).toBe(dialog)
 })
 
 test("onglet « Étudiants » : bouton-lien « Statistiques » vers l'écran des statistiques", async () => {
   await putSession(sessionWith(makeConfig(), twoStudents(), 'student-1'))
   renderAt('/session/session-1')
 
-  fireEvent.click(await screen.findByRole('tab', { name: 'Étudiants' }))
-  const link = screen.getByRole('link', { name: 'Statistiques' })
+  const dialog = await openSidePanel('Étudiants')
+  const link = within(dialog).getByRole('link', { name: 'Statistiques' })
   expect(link.getAttribute('href')).toMatch(/\/session\/session-1\/stats$/u)
 })
 
@@ -513,6 +560,7 @@ test('barre de titre : retour, titre de l’examen, contrôles de projection pui
   expect(title).toHaveTextContent(session.config.exam.title)
   const names = bannerInteractiveNames()
   expect(names[0]).toBe("Retour à l'accueil")
+  expect(names[1]).toBe('Panneau')
   expect(
     within(screen.getByRole('banner')).getByRole('button', { name: 'Ouvrir la vue projetée' }),
   ).toBeInTheDocument()

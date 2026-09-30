@@ -7,6 +7,7 @@ import { AddStudentDialog } from './components/add-student-dialog'
 import { makeUi } from '@/testing/make-ui'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
+import { openSidePanel } from '@/testing/side-panel-assertions'
 import { config, mountStudentsTab } from '@/testing/students-tab-harness'
 
 const alice = makeStudent([], {
@@ -39,6 +40,8 @@ function fill(lastName: string, firstName: string) {
   fireEvent.change(screen.getByLabelText('Prénom'), { target: { value: firstName } })
 }
 
+const addDialog = () => screen.queryByRole('dialog', { name: 'Ajouter un étudiant' })
+const drawer = () => screen.queryByRole('dialog', { name: 'Panneau latéral' })
 const addButton = () => screen.getByRole('button', { name: 'Ajouter' })
 const startButton = () => screen.getByRole('button', { name: 'Ajouter et faire passer' })
 
@@ -92,14 +95,41 @@ test('« Ajouter » ajoute en dernier sans changer l’actif, ferme et vide le d
     addedDuringSession: true,
   })
   expect(session.activeStudentId).toBe('s-a')
-  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  await waitFor(() => expect(addDialog()).not.toBeInTheDocument())
 
   openDialog()
   expect(screen.getByLabelText('Nom')).toHaveValue('')
   expect(screen.getByLabelText('Prénom')).toHaveValue('')
 })
 
-test('« Ajouter et faire passer » active le nouvel étudiant, remet la projection en attente (D73), sans quitter l’onglet', async () => {
+test('« Ajouter » laisse le tiroir ouvert', async () => {
+  await mount()
+  openDialog()
+  fill('Martin', 'Zoé')
+
+  fireEvent.click(addButton())
+
+  await waitFor(() => expect(addDialog()).not.toBeInTheDocument())
+  expect((await stored()).students).toHaveLength(3)
+  expect(drawer()).toBeInTheDocument()
+  expect(
+    within(screen.getByRole('list', { name: 'Étudiants de la session' })).getByText(/Martin Zoé/),
+  ).toBeInTheDocument()
+})
+
+test('« Ajouter et faire passer » ferme le tiroir', async () => {
+  await mount()
+  openDialog()
+  fill('Martin', 'Zoé')
+
+  fireEvent.click(startButton())
+
+  await waitFor(() => expect(drawer()).not.toBeInTheDocument())
+  await waitFor(() => expect(addDialog()).not.toBeInTheDocument())
+  expect((await stored()).students).toHaveLength(3)
+})
+
+test('« Ajouter et faire passer » active le nouvel étudiant, remet la projection en attente (D73), onglet gardé', async () => {
   const projection = { mode: 'student', studentId: 's-a' } as const
   await mount([alice, durand], { projection })
   openDialog()
@@ -109,10 +139,14 @@ test('« Ajouter et faire passer » active le nouvel étudiant, remet la project
 
   expect(await screen.findByRole('list', { name: 'Choisir une catégorie' })).toBeInTheDocument()
   expect(within(screen.getByRole('banner')).getByText('Martin Zoé')).toBeInTheDocument()
-  expect(screen.getByRole('tab', { name: 'Étudiants' })).toHaveAttribute('aria-selected', 'true')
   expect((await stored()).projection).toEqual({ mode: 'waiting' })
 
-  fireEvent.click(screen.getByRole('button', { name: /Aba/ }))
+  const reopened = await openSidePanel()
+  expect(within(reopened).getByRole('tab', { name: 'Étudiants' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  )
+  fireEvent.click(within(reopened).getByRole('button', { name: /Aba/ }))
   expect(await screen.findByRole('heading', { level: 2, name: 'Titre a-1' })).toBeInTheDocument()
 })
 
@@ -126,7 +160,7 @@ test('double clic rapide sur « Ajouter et faire passer » : un seul étudiant a
   fireEvent.click(button)
 
   await waitFor(async () => expect((await stored()).students).toHaveLength(3))
-  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  await waitFor(() => expect(addDialog()).not.toBeInTheDocument())
   expect((await stored()).students).toHaveLength(3)
 })
 
@@ -149,7 +183,7 @@ test('Échap après saisie puis réouverture : champs vides', async () => {
   fill('Martin', 'Zoé')
 
   fireEvent.keyDown(screen.getByLabelText('Nom'), { key: 'Escape' })
-  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  await waitFor(() => expect(addDialog()).not.toBeInTheDocument())
 
   openDialog()
   expect(screen.getByLabelText('Nom')).toHaveValue('')

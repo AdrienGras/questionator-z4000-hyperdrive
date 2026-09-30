@@ -39,11 +39,14 @@ export function expectPassageError(fn: () => unknown, code: PassageErrorCode): v
 }
 
 /**
- * Élément portant ce texte, hors du panneau latéral : le panneau répète les notes et les listes
- * de l'écran final, une requête d'écran non bornée y trouverait plusieurs éléments (F12).
+ * Élément portant ce texte, hors du tiroir latéral : ouvert, le tiroir répète les notes et les
+ * listes de l'écran final, une requête d'écran non bornée y trouverait plusieurs éléments (F12,
+ * F21).
  */
 export function outsidePanel(label: string): HTMLElement {
-  const found = screen.getAllByText(label).filter((element) => element.closest('aside') === null)
+  const found = screen
+    .getAllByText(label)
+    .filter((element) => element.closest('[data-slot="sheet-content"]') === null)
   const [first] = found
   if (found.length !== 1 || first === undefined) {
     throw new Error(`« ${label} » : ${found.length} éléments hors panneau, un seul attendu`)

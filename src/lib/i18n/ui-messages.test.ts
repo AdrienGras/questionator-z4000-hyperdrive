@@ -132,7 +132,6 @@ const SAMPLE: UiMessageParams = {
   attempt_out_of: { max: '2' },
   score_not_computed: {},
   side_panel_label: {},
-  side_panel_hide: {},
   side_panel_open: {},
   side_panel_close: {},
   side_panel_show: {},

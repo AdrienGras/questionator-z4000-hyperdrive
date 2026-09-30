@@ -139,7 +139,6 @@ export type UiMessageParams = {
   attempt_out_of: { max: string }
   score_not_computed: NoParams
   side_panel_label: NoParams
-  side_panel_hide: NoParams
   side_panel_open: NoParams
   side_panel_close: NoParams
   side_panel_show: NoParams
@@ -429,9 +428,8 @@ const fr: Dictionary<UiMessageParams> = {
   attempt_out_of: ({ max }) => `/ ${max}`,
   score_not_computed: () => '—',
   side_panel_label: () => 'Panneau latéral',
-  side_panel_hide: () => 'Masquer le panneau',
-  side_panel_open: () => 'Ouvrir le panneau latéral',
-  side_panel_close: () => 'Fermer le panneau latéral',
+  side_panel_open: () => 'Panneau',
+  side_panel_close: () => 'Fermer le panneau',
   side_panel_show: () => 'Afficher le panneau',
   side_panel_tab_student: () => 'Étudiant',
   side_panel_tab_students: () => 'Étudiants',
@@ -676,9 +674,8 @@ const en: Dictionary<UiMessageParams> = {
   attempt_out_of: ({ max }) => `/ ${max}`,
   score_not_computed: () => '—',
   side_panel_label: () => 'Side panel',
-  side_panel_hide: () => 'Hide panel',
-  side_panel_open: () => 'Open the side panel',
-  side_panel_close: () => 'Close the side panel',
+  side_panel_open: () => 'Panel',
+  side_panel_close: () => 'Close the panel',
   side_panel_show: () => 'Show panel',
   side_panel_tab_student: () => 'Student',
   side_panel_tab_students: () => 'Students',
