@@ -528,3 +528,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : l'aperçu de la vue projetée (`ProjectionPreview`) rend le même contenu dans son canevas. Celui-ci est `aria-hidden` et `inert`, ce qui le retire des requêtes par rôle (`getByRole`), mais pas de `getByText` / `getAllByText`, qui lisent tout le DOM.
 **Workaround** : préférer `getByRole(…, { name })`, ou restreindre la requête : `within(<zone examinateur>)` pour la page, `canvas.textContent` (`[data-projection-canvas]`) pour l'aperçu.
 **Référence** : `src/features/session/components/projection-preview.tsx`, `src/features/session/projection.test.tsx`.
+
+## Le navigateur Playwright MCP plante sur un téléchargement déclenché par la page (2026-10-01)
+
+**Découvert** : vérification visuelle de F20 (export Excel depuis la carte de session).
+**Symptôme** : un clic `browser_click` sur « Exporter en Excel » renvoie « Cannot read properties of undefined (reading 'url') » et la page repasse à `about:blank`. Un clic déclenché depuis `browser_evaluate` ferme ensuite le navigateur (« Target page, context or browser has been closed »).
+**Cause** : l'outil MCP gère mal l'événement de téléchargement (blob `a[download]` créé par `lib/download` / write-excel-file). Le test e2e Playwright du dépôt (`waitForEvent('download')`) n'a pas ce problème.
+**Workaround** : vérifier un export par les tests unitaires, par l'e2e (`e2e/export.spec.ts`), ou à la main. Dans le MCP, se limiter aux vérifications sans téléchargement (réseau, rendu).
+**Référence** : `src/lib/download.ts`, `e2e/export.spec.ts`.
