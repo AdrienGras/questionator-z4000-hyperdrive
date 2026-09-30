@@ -4,6 +4,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
 import { categoryButton, outsidePanel } from '@/testing/passage-assertions'
+import { expectColorModeToggleLast, bannerInteractiveNames } from '@/testing/page-shell-assertions'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, type AttemptSpec, makeStudent } from '@/testing/student-fixtures'
 import { renderAt } from '@/testing/render-at'
@@ -501,4 +502,30 @@ test('grille de 5 catégories : 3 + 2, disposition inchangée après un tirage (
   await screen.findByText('PA')
 
   expect(gridLayout()).toEqual(expected)
+})
+
+test('barre de titre : retour, titre de l’examen, contrôles de projection puis thème', async () => {
+  const session = passageSession()
+  await putSession(session)
+  renderAt('/session/session-1')
+
+  const title = await screen.findByRole('heading', { level: 1 })
+  expect(title).toHaveTextContent(session.config.exam.title)
+  const names = bannerInteractiveNames()
+  expect(names[0]).toBe("Retour à l'accueil")
+  expect(
+    within(screen.getByRole('banner')).getByRole('button', { name: 'Ouvrir la vue projetée' }),
+  ).toBeInTheDocument()
+  expectColorModeToggleLast()
+})
+
+test('sans étudiant actif : pas de ligne d’infos, projection et thème présents', async () => {
+  await putSession(passageSession({ activeStudentId: undefined }))
+  renderAt('/session/session-1')
+
+  await screen.findByRole('heading', { name: 'Aucun étudiant sélectionné' })
+  const banner = within(screen.getByRole('banner'))
+  expect(banner.getByRole('button', { name: 'Ouvrir la vue projetée' })).toBeInTheDocument()
+  expect(banner.queryByText(/Question/)).not.toBeInTheDocument()
+  expectColorModeToggleLast()
 })
