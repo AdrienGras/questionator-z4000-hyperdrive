@@ -1,5 +1,5 @@
 import type { HistogramBin } from '@/domain/stats/types'
-import { binLabel } from '@/features/stats/format-stats'
+import { binLabel } from '@/domain/stats/labels'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { NUMERIC_CELL, ROW_HEADER, StatsTable } from './stats-section'
 
