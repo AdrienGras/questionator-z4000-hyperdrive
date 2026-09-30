@@ -31,6 +31,7 @@ export type ConfigIssueParams = {
   unreachable_max_score: { reachable: number; maxRawScore: number }
   final_scale_off_grid: { finalScale: number; step: number }
   unknown_icon: { icon: string }
+  unknown_code_language: { language: string; questionId: string }
 }
 
 export type ConfigIssueCode = keyof ConfigIssueParams

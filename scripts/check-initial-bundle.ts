@@ -1,5 +1,6 @@
 /**
- * Vérifie que les bibliothèques lourdes (Recharts et son wrapper shadcn, F15/D70 ; xlsx, F16/D71)
+ * Vérifie que les bibliothèques lourdes (Recharts et son wrapper shadcn, F15/D70 ; xlsx, F16/D71 ;
+ * catalogue et grammaires Shiki, F18)
  * restent hors du bundle initial.
  * Lancé par `pnpm check:bundle` après `pnpm build` ; nécessite `build.manifest: true`.
  * Exécuté par Node natif (types retirés) : imports avec extension `.ts`, syntaxe effaçable.
@@ -100,12 +101,22 @@ export type BundleTarget = {
   importer: string
   /** Motif interdit dans le graphe statique depuis les entrées. */
   forbidden: RegExp
+  /** Piste ajoutée aux problèmes de vacuité quand la cause probable diffère du message générique. */
+  vacuityHint?: string
 }
 
 export const XLSX_CHUNK = /^_xlsx[.-]/
 export const XLSX_IMPORTER = 'src/lib/xlsx/write-workbook.ts'
 export const XLSX_FORBIDDEN =
   /(?:^_xlsx[.-])|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?(?:write-excel-file|fflate)\/)|(?:^src\/lib\/xlsx\/)/
+
+/** Catalogue `shiki/langs` (F18) : chunk `_langs-<hash>.js`, atteint statiquement par le validateur de configuration. */
+export const SHIKI_CHUNK = /^_langs[.-]/
+export const SHIKI_IMPORTER = 'src/domain/config/validate.ts'
+// Le catalogue et chacune des ~240 grammaires (`@shikijs/langs/dist/<langage>.mjs`) doivent rester
+// hors de la fermeture statique de l'entrée : ils se chargent à la demande (F18).
+export const SHIKI_FORBIDDEN =
+  /(?:^_langs[.-])|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@shikijs\/langs\/)|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?shiki\/dist\/langs)/
 
 export const BUNDLE_TARGETS: BundleTarget[] = [
   {
@@ -115,6 +126,14 @@ export const BUNDLE_TARGETS: BundleTarget[] = [
     forbidden: RECHARTS_FORBIDDEN,
   },
   { name: 'xlsx', chunk: XLSX_CHUNK, importer: XLSX_IMPORTER, forbidden: XLSX_FORBIDDEN },
+  {
+    name: 'shiki',
+    chunk: SHIKI_CHUNK,
+    importer: SHIKI_IMPORTER,
+    forbidden: SHIKI_FORBIDDEN,
+    vacuityHint:
+      ' (cause probable : un import statique de `shiki/langs` inline le catalogue dans l’entrée)',
+  },
 ]
 
 /** Problèmes (vacuité puis fuites) de chaque cible ; [] si le bundle initial est propre. */
@@ -124,7 +143,7 @@ export function checkTargets(
 ): string[] {
   return targets.flatMap((target) => [
     ...findVacuityProblems(manifest, target.chunk, target.importer).map(
-      (problem) => `${target.name} : contrôle sans objet, ${problem}`,
+      (problem) => `${target.name} : contrôle sans objet, ${problem}${target.vacuityHint ?? ''}`,
     ),
     // Contrôlées même si la garde échoue : une fuite explique souvent l'absence de l'importeur.
     ...findInitialLeaks(manifest, target.forbidden).map(

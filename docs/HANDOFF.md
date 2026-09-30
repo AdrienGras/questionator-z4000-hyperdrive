@@ -20,6 +20,21 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-30 — F17 mergé, F18 implémenté : tous les langages Shiki
+
+**Dernière chose faite** : PR #50 (F17) mergée, #17 fermé à la main (encore une PR non liée au ticket). F18 (#36) sur `feat/f18-langages` : spec du 26/09 actualisée après F17, plan en 4 tâches, subagent-driven development (revue par tâche, deux tours de correctifs mineurs, revue finale Opus sans défaut de code).
+- `src/lib/markdown/languages.ts` : `normalizeLanguage`, pseudo-langages (`text`, `txt`, `plain`, `plaintext`) ; écart à la spec tranché (`lib/` n'importe pas `domain/`, `CodeBlock` ne doit pas tirer le catalogue).
+- `src/domain/config/code-languages.ts` (`isKnownLanguage`, import statique de `shiki/langs`, atteint seulement par des chunks paresseux) et `code-fences.ts` (`fenceLanguages`, sans regex à risque) ; règle `unknown_code_language` (warning, une issue par question et langage).
+- Highlighter : catalogue par `import('shiki/langs')`, cache des grammaires par module importé (`py`/`python` une fois), nouvel essai après échec ; `SupportedLanguage`, `LANGUAGE_ALIASES`, `LANGUAGE_IMPORTS`, `resolveLanguage` supprimés.
+- Mesures : 242 chunks de grammaire, 7,99 Mo bruts, 1,35 Mo gzip ; catalogue 7,4 Ko gzip ; pré-cache 68 → 302 entrées, ~5 → ~12,6 Mo.
+- `check:bundle` : cible `shiki` (chunk `_langs-*`, importeur `validate.ts`), message de vacuité qui pointe l'import statique. e2e `languages.spec.ts` (service worker bloqué) et bloc python dans `offline.spec.ts`.
+
+**Trucs en suspens** : PR F18 à ouvrir (brouillon, gate SonarQube, mesures dans le corps). Mineurs au BACKLOG § Rendu markdown. Limites de l'heuristique `fenceLanguages` dans QUIRKS. Restent de F16/F17 : ouvrir un export dans Excel, installer la PWA dans Chrome et Edge, suivre la première mise à jour réelle.
+
+**Prochaine chose à creuser** : plus aucun ticket ouvert après #36. Parcourir le BACKLOG (fond des blocs `.shiki`, code en ligne, taille de projection) et les vérifications manuelles en attente.
+
+**Notes pour future Claude** : un test e2e « rien d'autre n'est chargé » doit calculer son ensemble interdit depuis le manifeste Vite (ici les `dynamicImports` du chunk du catalogue, chunks partagés `_*` compris) et échouer si une recherche ne trouve rien : la première version comparait à `undefined` et ne prouvait rien. Les chunks de grammaire partagés (`_yaml-*`) n'ont pas de `src` dans le manifeste.
+
 ## 2026-09-30 — F17 implémenté : hors ligne et PWA installable
 
 **Dernière chose faite** : F17 (#17) sur `feat/f17-offline`, processus complet : brainstorming (quatre choix tranchés avec l'utilisateur : rechargement de la vue projetée aussi sur `controllerchange`, icône SVG du soleil rayé, pastille fixe globale, store dans `lib/pwa/`), spec `docs/superpowers/specs/2026-09-30-f17-offline-design.md` et D72 (amende D36), plan en 5 tâches, subagent-driven development (une revue par tâche, un seul tour de correctifs en tâche 3), revue finale sur Opus, une vague de correctifs relue.

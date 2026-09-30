@@ -46,16 +46,38 @@ describe('CodeBlock', () => {
     expect(highlight).toHaveBeenCalledWith('echo 1;', 'php')
   })
 
-  test('un langage inconnu ou absent reste en texte brut sans appeler highlight', () => {
+  test('un bloc sans langage ou en text reste en texte brut sans appeler highlight', () => {
     const highlight = vi.fn<Highlight>(() => Promise.resolve(null))
     const { container, rerender } = render(
-      <CodeBlock code="MOVE A TO B" lang="cobol" highlight={highlight} />,
+      <CodeBlock code="brut" lang="text" highlight={highlight} />,
     )
+    expect(container.querySelector('pre')).toHaveAttribute('data-highlighted', 'false')
     rerender(<CodeBlock code="texte" highlight={highlight} />)
 
     expect(container.querySelector('pre')).toHaveAttribute('data-highlighted', 'false')
     expect(screen.getByText('texte')).toBeInTheDocument()
     expect(highlight).not.toHaveBeenCalled()
+  })
+
+  test('un langage inconnu (highlight renvoie null) reste en texte brut', async () => {
+    const highlight = vi.fn<Highlight>(() => Promise.resolve(null))
+    const { container } = render(
+      <CodeBlock code="MOVE A TO B" lang="cobol9" highlight={highlight} />,
+    )
+
+    await waitFor(() => {
+      expect(highlight).toHaveBeenCalledWith('MOVE A TO B', 'cobol9')
+    })
+    expect(container.querySelector('pre')).toHaveAttribute('data-highlighted', 'false')
+  })
+
+  test('Python est normalisé en python avant l’appel à highlight', async () => {
+    const highlight = vi.fn<Highlight>((code) => Promise.resolve(highlighted(code)))
+    render(<CodeBlock code="print(1)" lang="Python" highlight={highlight} />)
+
+    await waitFor(() => {
+      expect(highlight).toHaveBeenCalledWith('print(1)', 'python')
+    })
   })
 
   test('un échec de coloration (null) laisse le texte brut', async () => {

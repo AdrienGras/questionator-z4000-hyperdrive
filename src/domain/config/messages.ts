@@ -79,6 +79,8 @@ const fr: Dictionary<ConfigIssueParams> = {
   final_scale_off_grid: ({ finalScale, step }) =>
     `L’échelle finale (${finalScale}) n’est pas un multiple du pas d’arrondi (${step}) : la note maximale sera hors grille.`,
   unknown_icon: ({ icon }) => `Icône inconnue « ${icon} » : la catégorie s’affichera sans icône.`,
+  unknown_code_language: ({ language, questionId }) =>
+    `Le langage « ${language} » d’un bloc de code de la question ${questionId} n’est pas reconnu : il s’affichera en texte brut.`,
 }
 
 const en: Dictionary<ConfigIssueParams> = {
@@ -132,6 +134,8 @@ const en: Dictionary<ConfigIssueParams> = {
   final_scale_off_grid: ({ finalScale, step }) =>
     `The final scale (${finalScale}) is not a multiple of the rounding step (${step}): the top score will fall off the grid.`,
   unknown_icon: ({ icon }) => `Unknown icon "${icon}": the category will be shown without an icon.`,
+  unknown_code_language: ({ language, questionId }) =>
+    `The language “${language}” of a code block in question ${questionId} is not recognized: it will be shown as plain text.`,
 }
 
 export const CONFIG_ISSUE_MESSAGES: Record<Locale, Dictionary<ConfigIssueParams>> = { fr, en }

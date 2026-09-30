@@ -10,10 +10,14 @@ export class PresentPage {
   /** Un jeton de code colorié par Shiki (`span` aux variables `--shiki-*` dans un `pre`). */
   readonly highlightedCode: Locator
 
+  /** Tous les blocs de code colorés (`pre` marqué `data-highlighted="true"`). */
+  readonly highlightedBlocks: Locator
+
   private readonly page: Page
 
   constructor(page: Page) {
     this.page = page
+    this.highlightedBlocks = page.locator('pre[data-highlighted="true"]')
     this.waitingMessage = page.getByText("L'épreuve va bientôt commencer.")
     this.prompt = page.getByRole('region', { name: 'Question en cours' })
     this.highlightedCode = page.locator('pre span[style*="--shiki-"]').first()

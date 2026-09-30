@@ -18,6 +18,14 @@ function only(config: ParsedConfig, code: string): ConfigIssue[] {
   return checkRules(config, deps).filter((issue) => issue.code === code)
 }
 
+const fence = (lang: string) => '```' + lang + '\ncode\n```'
+const withQuestion = (fields: { prompt?: string; answer?: string }): ParsedConfig => {
+  const config = minimalConfig()
+  const question = config.categories[0]!.questions[0]!
+  Object.assign(question, fields)
+  return config
+}
+
 function withSecondCategory(config: ParsedConfig, id: string, questionId: string): ParsedConfig {
   config.categories.push({
     id,
@@ -310,5 +318,47 @@ describe('checkRules', () => {
     ])
     config.categories[0]!.icon = 'leaf'
     expect(only(config, 'unknown_icon')).toEqual([])
+  })
+
+  describe('unknown_code_language (avertissement)', () => {
+    test('levée dans l’énoncé, avec sévérité et paramètres attendus', () => {
+      const config = withQuestion({ prompt: fence('pyhton') })
+      const questionId = config.categories[0]!.questions[0]!.id
+      expect(only(config, 'unknown_code_language')).toEqual([
+        {
+          severity: 'warning',
+          code: 'unknown_code_language',
+          path: ['categories', 0, 'questions', 0, 'prompt'],
+          params: { language: 'pyhton', questionId },
+        },
+      ])
+    })
+
+    test('levée dans la réponse', () => {
+      const config = withQuestion({ answer: fence('pyhton') })
+      expect(only(config, 'unknown_code_language').map((issue) => issue.path)).toEqual([
+        ['categories', 0, 'questions', 0, 'answer'],
+      ])
+    })
+
+    test('un même langage dans l’énoncé et la réponse donne une seule issue, sur l’énoncé', () => {
+      const config = withQuestion({ prompt: fence('pyhton'), answer: fence('pyhton') })
+      expect(only(config, 'unknown_code_language').map((issue) => issue.path)).toEqual([
+        ['categories', 0, 'questions', 0, 'prompt'],
+      ])
+    })
+
+    test('deux langages inconnus distincts donnent deux issues', () => {
+      const config = withQuestion({ prompt: `${fence('pyhton')}\n\n${fence('rusty')}` })
+      expect(only(config, 'unknown_code_language').map((issue) => issue.params)).toEqual([
+        expect.objectContaining({ language: 'pyhton' }),
+        expect.objectContaining({ language: 'rusty' }),
+      ])
+    })
+
+    test('absente pour les langages connus, les pseudo-langages et les blocs sans langage', () => {
+      const prompt = ['python', 'py', 'PHP', 'text', ''].map(fence).join('\n\n')
+      expect(only(withQuestion({ prompt }), 'unknown_code_language')).toEqual([])
+    })
   })
 })

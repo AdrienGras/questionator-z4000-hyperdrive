@@ -35,8 +35,11 @@ test('réseau coupé après un premier chargement : créer, faire passer, projet
   for (const category of ['Facile', 'Normal', 'Difficile']) {
     await examiner.draw(category)
     await expect(examiner.highlightedCode).toBeAttached()
+    // Le bloc PHP et le bloc Python de chaque énoncé sont colorés, sans réseau.
+    await expect(examiner.highlightedBlocks).toHaveCount(2)
     await expect(present.prompt).toBeVisible()
     await expect(present.highlightedCode).toBeAttached()
+    await expect(present.highlightedBlocks).toHaveCount(2)
     await examiner.score('1')
   }
   await examiner.confirmAdjustment()

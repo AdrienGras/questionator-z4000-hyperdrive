@@ -1,11 +1,11 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import {
   highlight as defaultHighlight,
-  resolveLanguage,
   type CssVariables,
   type Highlight,
   type HighlightedCode,
 } from '@/lib/markdown/highlighter'
+import { isPlainLanguage, normalizeLanguage } from '@/lib/markdown/languages'
 
 type Result = Readonly<{ code: string; lang: string; highlighted: HighlightedCode }>
 
@@ -17,14 +17,16 @@ function styleOf(variables: CssVariables): CSSProperties & CssVariables {
  * Bloc de code : texte brut tout de suite, puis tokens Shiki rendus en `<span>` React, sans
  * `dangerouslySetInnerHTML`. Chaque token porte `--shiki-light` et `--shiki-dark`, et les règles
  * `.shiki` de `index.css` choisissent l'une ou l'autre selon `.dark` : la bascule de mode ne refait
- * aucun rendu. Langage inconnu ou coloration en échec : le texte brut reste (D27).
+ * aucun rendu. Sans langage ou en pseudo-langage (`text`), pas d'appel à `highlight`. Langage
+ * inconnu ou coloration en échec : le texte brut reste (D27).
  */
 export function CodeBlock({
   code,
   lang,
   highlight = defaultHighlight,
 }: Readonly<{ code: string; lang?: string; highlight?: Highlight }>) {
-  const language = resolveLanguage(lang)
+  const normalized = normalizeLanguage(lang ?? '')
+  const language = isPlainLanguage(normalized) || normalized === '' ? null : normalized
   const [result, setResult] = useState<Result | null>(null)
 
   useEffect(() => {

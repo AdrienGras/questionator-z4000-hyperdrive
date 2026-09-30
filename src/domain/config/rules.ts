@@ -8,6 +8,9 @@ import {
   type IssuePath,
 } from './issues'
 import { hasAtMostThreeDecimals, MAX_SCORING_VALUE, roundToMilli } from '@/domain/scoring/milli'
+import { fenceLanguages } from './code-fences'
+import { isKnownLanguage } from './code-languages'
+import { isPlainLanguage } from '@/lib/markdown/languages'
 import { THEME_TOKENS, type ParsedConfig } from './schema'
 
 export type CssSupports = (property: string, value: string) => boolean
@@ -184,6 +187,28 @@ function checkIcons(config: ParsedConfig, iconNames: ReadonlySet<string>): Confi
   )
 }
 
+/** F18 : un avertissement par couple (question, langage), à la première occurrence (énoncé d'abord). */
+function checkCodeLanguages(config: ParsedConfig): ConfigIssue[] {
+  return config.categories.flatMap((category, c) =>
+    category.questions.flatMap((question, q) => {
+      const seen = new Set<string>()
+      return (['prompt', 'answer'] as const).flatMap((field) =>
+        fenceLanguages(question[field] ?? '').flatMap((language) => {
+          if (seen.has(language) || isPlainLanguage(language) || isKnownLanguage(language))
+            return []
+          seen.add(language)
+          return [
+            configWarning('unknown_code_language', ['categories', c, 'questions', q, field], {
+              language,
+              questionId: question.id,
+            }),
+          ]
+        }),
+      )
+    }),
+  )
+}
+
 /** Règles croisées de PRODUCT.md §6.2, sur une config structurellement valide (D38). */
 export function checkRules(config: ParsedConfig, deps: RuleDeps): ConfigIssue[] {
   return [
@@ -197,5 +222,6 @@ export function checkRules(config: ParsedConfig, deps: RuleDeps): ConfigIssue[] 
     ...checkReachableMax(config),
     ...checkFinalScaleGrid(config),
     ...checkIcons(config, deps.iconNames),
+    ...checkCodeLanguages(config),
   ]
 }
