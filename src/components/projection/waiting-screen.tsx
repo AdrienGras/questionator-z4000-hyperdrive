@@ -4,7 +4,7 @@ import { useUi } from '@/lib/i18n/use-ui'
 export function WaitingScreen({ title }: Readonly<{ title: string }>) {
   const ui = useUi()
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-4 p-6 text-center">
+    <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
       <h1 className="text-4xl font-bold tracking-tight">{title}</h1>
       <p className="text-xl text-muted-foreground">{ui.text('present_waiting', {})}</p>
     </div>

@@ -1,10 +1,9 @@
 import { getRouteApi } from '@tanstack/react-router'
+import { ProjectedScreen } from '@/components/projection/projected-screen'
 import { DbStatusBanner } from '@/components/db-status-banner'
 import { SessionAppearance } from '@/components/session-appearance'
 import { SessionFallback } from '@/components/session-fallback'
 import { PresentControls } from '@/features/present/components/present-controls'
-import { StudentScreen } from '@/features/present/components/student-screen'
-import { WaitingScreen } from '@/features/present/components/waiting-screen'
 import { useIdle } from '@/features/present/hooks/use-idle'
 import { useProjectedView } from '@/features/present/hooks/use-projected-view'
 import { useDbStatus } from '@/lib/db/hooks'
@@ -37,15 +36,7 @@ export function PresentPage() {
     <SessionAppearance sessionId={sessionId} view="present" config={view.appearance}>
       <main className={cn('relative', idle && 'cursor-none')}>
         <PresentControls idle={idle} />
-        {view.mode === 'student' ? (
-          // `key` : un autre étudiant projeté repart d'un premier rendu (pas d'animation, Task 3).
-          <StudentScreen
-            key={`${view.student.lastName}\u0000${view.student.firstName}`}
-            view={view}
-          />
-        ) : (
-          <WaitingScreen title={view.examTitle} />
-        )}
+        <ProjectedScreen view={view} className="min-h-svh" />
       </main>
     </SessionAppearance>
   )

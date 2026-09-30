@@ -155,18 +155,21 @@ test('session supprimée pendant l’affichage : écran « introuvable »', asyn
   expect(await screen.findByText('Session introuvable')).toBeInTheDocument()
 })
 
-test('aucun import du modèle de session dans src/features/present', () => {
-  const root = join(process.cwd(), 'src/features/present')
-  const files = readdirSync(root, { recursive: true, encoding: 'utf8' })
-    .filter((f) => /\.tsx?$/.test(f) && !f.endsWith('.test.tsx'))
-    .map((f) => join(root, f))
-  expect(files.length).toBeGreaterThan(0)
-  const offenders = files.filter((file) => {
-    const source = readFileSync(file, 'utf8')
-    return source.includes('domain/session/types') || source.includes('NormalizedConfig')
-  })
-  expect(offenders).toEqual([])
-})
+test.each(['src/features/present', 'src/components/projection'])(
+  'aucun import du modèle de session dans %s',
+  (dir) => {
+    const root = join(process.cwd(), dir)
+    const files = readdirSync(root, { recursive: true, encoding: 'utf8' })
+      .filter((f) => /\.tsx?$/.test(f) && !f.endsWith('.test.tsx'))
+      .map((f) => join(root, f))
+    expect(files.length).toBeGreaterThan(0)
+    const offenders = files.filter((file) => {
+      const source = readFileSync(file, 'utf8')
+      return source.includes('domain/session/types') || source.includes('NormalizedConfig')
+    })
+    expect(offenders).toEqual([])
+  },
+)
 
 test('tuiles : même disposition que la vue examinateur, 2 catégories sur une ligne (D74)', async () => {
   await seed(makeStudent())
