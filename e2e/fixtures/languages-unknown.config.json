@@ -3,8 +3,8 @@
   "schemaVersion": 1,
   "locale": "fr",
   "exam": {
-    "title": "Oral PHP hors ligne",
-    "subject": "PHP",
+    "title": "Oral langages",
+    "subject": "Langages",
     "cohort": "B2 2026"
   },
   "scoring": {
@@ -23,7 +23,7 @@
     "value": 0
   },
   "skips": {
-    "enabled": true,
+    "enabled": false,
     "maxPerStudent": 2,
     "reasons": ["Question déjà vue", "Hors programme", "Énoncé ambigu"],
     "allowFreeText": true
@@ -117,23 +117,9 @@
         {
           "id": "facile-001",
           "title": "Question Facile 1",
-          "tags": ["php"],
-          "prompt": "Que fait ce code (Facile 1) ?\n\n```php\n$total = 1 + 1;\necho $total;\n```\n\nEt en Python :\n\n```python\ntotal = 1 + 1\nprint(total)\n```",
+          "tags": [],
+          "prompt": "Que fait ce code ?\n\n```pyhton\ntotal = 1 + 1\nprint(total)\n```",
           "answer": "Il affiche `2`."
-        },
-        {
-          "id": "facile-002",
-          "title": "Question Facile 2",
-          "tags": ["php"],
-          "prompt": "Que fait ce code (Facile 2) ?\n\n```php\n$total = 2 + 1;\necho $total;\n```\n\nEt en Python :\n\n```python\ntotal = 1 + 1\nprint(total)\n```",
-          "answer": "Il affiche `3`."
-        },
-        {
-          "id": "facile-003",
-          "title": "Question Facile 3",
-          "tags": ["php"],
-          "prompt": "Que fait ce code (Facile 3) ?\n\n```php\n$total = 3 + 1;\necho $total;\n```\n\nEt en Python :\n\n```python\ntotal = 1 + 1\nprint(total)\n```",
-          "answer": "Il affiche `4`."
         }
       ]
     },
@@ -148,23 +134,9 @@
         {
           "id": "normal-001",
           "title": "Question Normal 1",
-          "tags": ["php"],
-          "prompt": "Que fait ce code (Normal 1) ?\n\n```php\n$total = 1 + 1;\necho $total;\n```\n\nEt en Python :\n\n```python\ntotal = 1 + 1\nprint(total)\n```",
+          "tags": [],
+          "prompt": "Question Normal, sans code.",
           "answer": "Il affiche `2`."
-        },
-        {
-          "id": "normal-002",
-          "title": "Question Normal 2",
-          "tags": ["php"],
-          "prompt": "Que fait ce code (Normal 2) ?\n\n```php\n$total = 2 + 1;\necho $total;\n```\n\nEt en Python :\n\n```python\ntotal = 1 + 1\nprint(total)\n```",
-          "answer": "Il affiche `3`."
-        },
-        {
-          "id": "normal-003",
-          "title": "Question Normal 3",
-          "tags": ["php"],
-          "prompt": "Que fait ce code (Normal 3) ?\n\n```php\n$total = 3 + 1;\necho $total;\n```\n\nEt en Python :\n\n```python\ntotal = 1 + 1\nprint(total)\n```",
-          "answer": "Il affiche `4`."
         }
       ]
     },
@@ -179,23 +151,9 @@
         {
           "id": "difficile-001",
           "title": "Question Difficile 1",
-          "tags": ["php"],
-          "prompt": "Que fait ce code (Difficile 1) ?\n\n```php\n$total = 1 + 1;\necho $total;\n```\n\nEt en Python :\n\n```python\ntotal = 1 + 1\nprint(total)\n```",
+          "tags": [],
+          "prompt": "Question Difficile, sans code.",
           "answer": "Il affiche `2`."
-        },
-        {
-          "id": "difficile-002",
-          "title": "Question Difficile 2",
-          "tags": ["php"],
-          "prompt": "Que fait ce code (Difficile 2) ?\n\n```php\n$total = 2 + 1;\necho $total;\n```\n\nEt en Python :\n\n```python\ntotal = 1 + 1\nprint(total)\n```",
-          "answer": "Il affiche `3`."
-        },
-        {
-          "id": "difficile-003",
-          "title": "Question Difficile 3",
-          "tags": ["php"],
-          "prompt": "Que fait ce code (Difficile 3) ?\n\n```php\n$total = 3 + 1;\necho $total;\n```\n\nEt en Python :\n\n```python\ntotal = 1 + 1\nprint(total)\n```",
-          "answer": "Il affiche `4`."
         }
       ]
     },
@@ -210,23 +168,9 @@
         {
           "id": "cauchemar-001",
           "title": "Question Cauchemar 1",
-          "tags": ["php"],
-          "prompt": "Que fait ce code (Cauchemar 1) ?\n\n```php\n$total = 1 + 1;\necho $total;\n```\n\nEt en Python :\n\n```python\ntotal = 1 + 1\nprint(total)\n```",
+          "tags": [],
+          "prompt": "Question Cauchemar, sans code.",
           "answer": "Il affiche `2`."
-        },
-        {
-          "id": "cauchemar-002",
-          "title": "Question Cauchemar 2",
-          "tags": ["php"],
-          "prompt": "Que fait ce code (Cauchemar 2) ?\n\n```php\n$total = 2 + 1;\necho $total;\n```\n\nEt en Python :\n\n```python\ntotal = 1 + 1\nprint(total)\n```",
-          "answer": "Il affiche `3`."
-        },
-        {
-          "id": "cauchemar-003",
-          "title": "Question Cauchemar 3",
-          "tags": ["php"],
-          "prompt": "Que fait ce code (Cauchemar 3) ?\n\n```php\n$total = 3 + 1;\necho $total;\n```\n\nEt en Python :\n\n```python\ntotal = 1 + 1\nprint(total)\n```",
-          "answer": "Il affiche `4`."
         }
       ]
     }

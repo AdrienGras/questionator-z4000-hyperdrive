@@ -7,6 +7,9 @@ import {
   RECHARTS_FORBIDDEN,
   RECHARTS_CHUNK,
   STATS_ROUTE_KEY,
+  SHIKI_CHUNK,
+  SHIKI_FORBIDDEN,
+  SHIKI_IMPORTER,
   XLSX_CHUNK,
   XLSX_IMPORTER,
   XLSX_FORBIDDEN,
@@ -125,7 +128,10 @@ describe('findVacuityProblems', () => {
   })
 })
 
-/** Manifeste à deux cibles : Recharts (route des stats) et xlsx (écriture du classeur). */
+const PYTHON_KEY =
+  'node_modules/.pnpm/@shikijs+langs@4.4.3/node_modules/@shikijs/langs/dist/python.mjs'
+
+/** Manifeste à trois cibles : Recharts (route des stats) et xlsx (écriture du classeur). */
 const TWO_TARGETS: Record<string, ManifestChunk> = {
   ...REAL_MANIFEST,
   'index.html': {
@@ -138,14 +144,21 @@ const TWO_TARGETS: Record<string, ManifestChunk> = {
     imports: ['_vendor-DqVrg90E.js', '_xlsx-Ab12Cd34.js'],
   },
   '_xlsx-Ab12Cd34.js': { file: 'assets/xlsx-Ab12Cd34.js' },
+  [SHIKI_IMPORTER]: {
+    file: 'assets/validate.js',
+    isDynamicEntry: true,
+    imports: ['_vendor-DqVrg90E.js', '_langs-WOor098P.js'],
+  },
+  '_langs-WOor098P.js': { file: 'assets/langs-WOor098P.js', dynamicImports: [PYTHON_KEY] },
+  [PYTHON_KEY]: { file: 'assets/python-Bd1.js', isDynamicEntry: true },
 }
 
 const problemsOf = (manifest: Record<string, ManifestChunk>): string[] =>
   checkTargets(manifest, BUNDLE_TARGETS)
 
 describe('cibles multiples', () => {
-  it('déclare recharts et xlsx', () => {
-    expect(BUNDLE_TARGETS.map((target) => target.name)).toEqual(['recharts', 'xlsx'])
+  it('déclare recharts, xlsx et shiki', () => {
+    expect(BUNDLE_TARGETS.map((target) => target.name)).toEqual(['recharts', 'xlsx', 'shiki'])
     expect(BUNDLE_TARGETS[1]).toMatchObject({ chunk: XLSX_CHUNK, importer: XLSX_IMPORTER })
   })
 
@@ -172,5 +185,42 @@ describe('cibles multiples', () => {
     }
     expect(findInitialLeaks(manifest, XLSX_FORBIDDEN)).toEqual(['_xlsx-Ab12Cd34.js'])
     expect(findInitialLeaks(manifest, RECHARTS_FORBIDDEN)).toEqual([])
+  })
+
+  it('accepte le catalogue Shiki chargé seulement dynamiquement', () => {
+    expect(problemsOf(TWO_TARGETS)).toEqual([])
+  })
+
+  it('signale le catalogue Shiki importé statiquement par l’entrée', () => {
+    const manifest: Record<string, ManifestChunk> = {
+      ...TWO_TARGETS,
+      'index.html': {
+        ...TWO_TARGETS['index.html'],
+        imports: ['_vendor-DqVrg90E.js', '_langs-WOor098P.js'],
+      },
+    }
+    expect(findInitialLeaks(manifest, SHIKI_FORBIDDEN)).toEqual(['_langs-WOor098P.js'])
+    expect(problemsOf(manifest)).toContain('shiki fuit dans le bundle initial : _langs-WOor098P.js')
+  })
+
+  it('signale une grammaire importée statiquement par l’entrée', () => {
+    const manifest: Record<string, ManifestChunk> = {
+      ...TWO_TARGETS,
+      'index.html': {
+        ...TWO_TARGETS['index.html'],
+        imports: ['_vendor-DqVrg90E.js', PYTHON_KEY],
+      },
+    }
+    expect(findInitialLeaks(manifest, SHIKI_FORBIDDEN)).toEqual([PYTHON_KEY])
+  })
+
+  it('signale la vacuité de shiki quand le catalogue n’est plus atteint par le validateur', () => {
+    const manifest: Record<string, ManifestChunk> = {
+      ...TWO_TARGETS,
+      [SHIKI_IMPORTER]: { file: 'assets/validate.js', isDynamicEntry: true },
+    }
+    expect(findVacuityProblems(manifest, SHIKI_CHUNK, SHIKI_IMPORTER)[0]).toMatch(
+      /n'importe pas statiquement _langs-WOor098P\.js/,
+    )
   })
 })

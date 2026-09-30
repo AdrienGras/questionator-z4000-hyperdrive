@@ -13,10 +13,18 @@ export class ExaminerPage {
   /** Un jeton de code colorié par Shiki (`span` aux variables `--shiki-*` dans un `pre`). */
   readonly highlightedCode: Locator
 
+  /** Tous les blocs de code colorés (`pre` marqué `data-highlighted="true"`). */
+  readonly highlightedBlocks: Locator
+
+  /** Un bloc de code resté en texte brut (`data-highlighted="false"`). */
+  readonly plainCode: Locator
+
   private readonly page: Page
 
   constructor(page: Page) {
     this.page = page
+    this.highlightedBlocks = page.locator('pre[data-highlighted="true"]')
+    this.plainCode = page.locator('pre[data-highlighted="false"]')
     this.passageDone = page.getByRole('heading', { level: 2, name: 'Passage terminé' })
     this.highlightedCode = page.locator('pre span[style*="--shiki-"]').first()
     this.banner = page.getByRole('status').filter({ hasText: 'La vue projetée montre' })
