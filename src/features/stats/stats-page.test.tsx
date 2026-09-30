@@ -7,6 +7,7 @@ import { minimalConfig } from '@/testing/config-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
 import { attemptOf, sessionWith } from '@/testing/stats-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
+import { expectColorModeToggleLast, bannerInteractiveNames } from '@/testing/page-shell-assertions'
 import { renderAt } from '@/testing/render-at'
 
 beforeEach(async () => {
@@ -41,6 +42,24 @@ test('titre = nom de la session, retour au passage vers la vue examinateur', asy
   fireEvent.click(back)
   expect(await screen.findByRole('heading', { name: 'Oral de test' })).toBeInTheDocument()
   expect(screen.getByRole('complementary', { name: 'Panneau latéral' })).toBeInTheDocument()
+})
+
+test('barre de titre : « Retour au passage », nom de la session, thème dernier', async () => {
+  await putSession(makeSession({ name: 'Oral du lundi' }))
+  renderAt('/session/session-1/stats')
+
+  expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Oral du lundi')
+  const banner = screen.getByRole('banner')
+  expect(within(banner).getByRole('link', { name: 'Retour au passage' })).toBeInTheDocument()
+  expectColorModeToggleLast()
+})
+
+test('config en anglais : le thème de la barre est en anglais', async () => {
+  await putSession(makeSession({ config: { ...makeConfig(), locale: 'en' } }))
+  renderAt('/session/session-1/stats')
+
+  await screen.findByRole('heading', { level: 1 })
+  expect(bannerInteractiveNames().at(-1)).toMatch(/^Display mode:/u)
 })
 
 test('session sans terminé : les cinq indicateurs de notes affichent —', async () => {

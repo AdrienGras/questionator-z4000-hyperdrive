@@ -496,3 +496,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : `fenceLanguages` (heuristique ligne par ligne) ne voit pas les blocs dans une citation (`> ```js`) ni dans une liste indentée de 4 espaces ou plus : pas d'avertissement pour eux. À l'inverse, une info string échappée (```` ```c\+\+ ````) ou avec entité (`c&#43;&#43;`) est décodée en `c++` par remark, donc colorée, mais l'heuristique voit le texte brut et avertit à tort.
 **Workaround** : aucun nécessaire, l'avertissement n'est jamais bloquant. Le rendu, lui, repose sur l'arbre de react-markdown. Si le cas devient courant, extraire les langages avec `mdast-util-from-markdown` au lieu de l'heuristique.
 **Référence** : `src/domain/config/code-fences.ts`, spec F18.
+
+## Un `<header>` dans `<main>` est un `banner` en jsdom, pas dans un navigateur (2026-09-30)
+
+**Découvert** : revue finale F19.
+**Symptôme** : dans jsdom / Testing Library, le `<header>` de `PageShell`, placé dans `<main>`, est exposé avec le rôle `banner`. Les vrais navigateurs (HTML-AAM) ne l'exposent pas comme repère `banner` à cet endroit (seul un `header` hors `main`, `article`, `section`… le devient).
+**Cause** : le mapping d'`aria-query` / dom-accessibility-api utilisé par Testing Library ne tient pas compte de l'ancêtre sectionnant.
+**Workaround** : aucun, les tests s'appuient sur le mapping jsdom (`expectColorModeToggleLast`, `bannerInteractiveNames` dans `src/testing/page-shell-assertions.ts`, `add-student.test.tsx`…). Si Testing Library s'aligne sur HTML-AAM, ces tests échoueront d'un coup : passer l'aide sur `main > header`.
+**Référence** : `src/components/page-shell.tsx`, `src/testing/page-shell-assertions.ts`, D75.

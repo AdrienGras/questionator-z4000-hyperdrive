@@ -24,7 +24,7 @@ type CategoryGridProps = Readonly<{
  * catégories, commune avec la vue projetée (`CategoryLayout`, D74).
  *
  * Catégorie épuisée pour l'étudiant actif : le bouton lui-même porte l'infobulle
- * (`TooltipTrigger render={<Button …/>}`, comme `src/features/home/components/home-header.tsx`)
+ * (`TooltipTrigger render={<Button …/>}`, comme `src/features/home/components/home-actions.tsx`)
  * et reste `aria-disabled`, jamais `disabled` — un bouton HTML nativement désactivé n'émet ni
  * `focus` ni `mouseenter`, l'infobulle ne s'ouvrirait jamais (D06). Le clic est alors un no-op ;
  * le motif est en plus exposé via `aria-describedby` vers un texte visually-hidden, indépendant

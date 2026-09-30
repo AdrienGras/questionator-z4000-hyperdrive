@@ -596,6 +596,25 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 - Un langage inconnu s'affiche en texte brut et est signalé à la création de session.
 - Après F17, un bloc `python` est coloré hors ligne.
 
+### F19 — Mise en page commune
+
+**Objectif.** Donner aux quatre pages examinateur une coque commune : barre de titre de même structure avec le bouton de thème toujours à droite, et zone de contenu plus large sur grand écran.
+
+**Contenu.**
+- Composant `PageShell` (D75) pour l'accueil, la création de session, le passage et les stats.
+- Largeur utile plafonnée à 1536 px CSS, centrée ; marges latérales de 16, 24 puis 40 px selon la largeur.
+- Barre de titre : retour, titre et ligne d'infos à gauche ; actions puis bouton de thème à droite. Non sticky.
+- La vue projetée n'est pas dans la coque. Les écrans d'état rendus en retour anticipé (bandeau de base de données, repli de session, erreur des stats, 404) non plus.
+- Favicon : déjà servi depuis F17 (D72), aucun changement.
+
+**Critères d'acceptation.**
+- Les quatre pages examinateur passent par `PageShell`.
+- Pleine largeur moins les marges jusqu'à 1536 px CSS, 1536 px centrés au-delà (vérifié à 1280, 1366, 1920 et 2560 px).
+- Le bouton de thème est le dernier élément de la barre de titre sur les quatre pages.
+- La vue projetée n'est pas modifiée.
+- Favicon servi sans 404.
+- Mise en page utilisable à 1280 px de large.
+
 ## 9. Stack technique
 
 | Besoin | Choix |

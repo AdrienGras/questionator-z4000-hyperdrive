@@ -1116,3 +1116,19 @@ autre encodage 8 bits.
 **Pourquoi** : un flex à retour à la ligne donne 5 + 5 + 3 pour 13 au lieu de 5 + 4 + 4 ; des lignes rendues séparément casseraient la liste unique (sémantique, tests par rôle). La fonction de domaine se teste sans navigateur ; jsdom ne calculant pas de mise en page, les tests de composant vérifient `--cols` et `data-row-start`, le rendu réel a été contrôlé au navigateur (4, 7, 13 catégories, 420 px).
 
 **Reporté dans** : `PRODUCT.md` F09, F14. Impacte F09, F14, F22 (#56 : l'aperçu réduit la largeur disponible côté examinateur).
+
+## D75 — F19 : coque PageShell, plafond 1536 px, actions à droite avant le thème (2026-09-30)
+
+**Question** : les quatre pages examinateur (accueil, création, passage, stats) avaient chacune leur en-tête et leur largeur, et le bouton de thème n'était pas toujours au même endroit. Comment leur donner une mise en page commune, sans toucher à la vue projetée ?
+
+**Décision** :
+- `PageShell` (`components/page-shell.tsx`), composant appelé par chaque page : props `ui`, `title`, `back?`, `meta?`, `actions?`, plus celles du `<main>`.
+- Largeur : plafond `max-w-(--breakpoint-2xl)` (96 rem = 1536 px CSS, Tailwind 4 n'a plus `max-w-screen-*`), centré ; marges `px-4`, `sm:px-6`, `lg:px-10`, `py-4`, `sm:py-6`.
+- Barre de titre : retour, titre et ligne d'infos à gauche ; actions à droite, **bouton de thème toujours en dernier** (ce n'est pas une prop, une page ne peut pas le déplacer). Barre non sticky, sans bordure.
+- Repli d'un titre long : bloc titre en `flex-[1_1_20rem]`, groupe de droite en `ml-auto justify-end` ; un titre long se replie dans sa colonne sans faire passer le bouton de thème à gauche.
+- Hors coque, inchangés : les écrans d'état rendus en retour anticipé (`DbStatusBanner` de la session et des stats, `SessionFallback`, erreur des stats, 404) et la vue projetée (sa propre mise en page). `DbStatusBanner` affiché dans l'accueil et la création reste du contenu de la coque.
+- Favicon : rien à coder. Déjà réglé par F17 (D72), avec `<link rel="icon">` vers `icons/icon.svg` ; constaté le 2026-09-30 en preview et en prod (200, aucune requête `/favicon.ico`).
+
+**Pourquoi** : un composant appelé par la page est rendu sous `SessionAppearance` là où la page l'est déjà, donc langue et thème de la config sans tuyauterie. Une route de mise en page TanStack aurait dû remonter titre et actions par contexte ou portail, et aurait rendu la barre hors du thème de session. Une simple classe partagée ne garantit pas la place du bouton de thème. 1536 px : pleine largeur sur un portable HDPI (≈ 1280 à 1440 px CSS) et sur un MDPI 1366, marge pour #54 et #56 sur un 1920 ou un 2560 à 100 %. Sans barre sticky : seules les stats sont longues, et une barre collée prend de la hauteur sur 1366 × 768.
+
+**Reporté dans** : `PRODUCT.md` F19, `docs/CONVENTIONS.md` § « Page examinateur — squelette ». Impacte F19 ; prépare #54, #55, #56.

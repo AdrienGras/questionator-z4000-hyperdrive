@@ -1,7 +1,7 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useId, useRef, type DragEvent, type FormEvent } from 'react'
-import { ColorModeToggle } from '@/components/color-mode-toggle'
 import { DbStatusBanner } from '@/components/db-status-banner'
+import { PageShell } from '@/components/page-shell'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -75,21 +75,17 @@ export function CreateSessionPage() {
   const bothEmpty = form.students.kind === 'empty' && form.config.kind === 'empty'
 
   return (
-    // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- garde de dépôt (voir handlePageDragOver/handlePageDrop) : n'ajoute ni rôle ni interaction clavier, se contente d'empêcher le navigateur d'ouvrir le fichier hors des deux zones dédiées.
-    <main
+    <PageShell
+      ui={ui}
+      title={text('create_title', {})}
+      back={
+        <Link to="/" className="self-start text-sm text-primary underline underline-offset-4">
+          {text('back_home', {})}
+        </Link>
+      }
       onDragOver={handlePageDragOver}
       onDrop={handlePageDrop}
-      className="mx-auto flex min-h-svh max-w-5xl flex-col gap-6 p-4 sm:p-6"
     >
-      <header className="flex flex-col gap-2">
-        <div className="flex items-center justify-between gap-2">
-          <Link to="/" className="text-sm text-primary underline underline-offset-4">
-            {text('back_home', {})}
-          </Link>
-          <ColorModeToggle ui={ui} />
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight">{text('create_title', {})}</h1>
-      </header>
       <DbStatusBanner ui={ui} status={status} />
       <div className="grid gap-6 md:grid-cols-2">
         <form onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-4">
@@ -192,6 +188,6 @@ export function CreateSessionPage() {
           )}
         </section>
       </div>
-    </main>
+    </PageShell>
   )
 }

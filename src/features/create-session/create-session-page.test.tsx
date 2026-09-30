@@ -1,11 +1,12 @@
 import 'fake-indexeddb/auto'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { formatPath } from '@/domain/config/issues'
 import { formatConfigIssue } from '@/domain/config/messages'
 import { validateConfig } from '@/domain/config/validate'
 import { db, type DbStatus } from '@/lib/db/db'
 import { minimalConfig } from '@/testing/config-fixtures'
+import { expectColorModeToggleLast } from '@/testing/page-shell-assertions'
 import { renderAt } from '@/testing/render-at'
 
 type CreateSession = typeof import('@/lib/db/sessions').createSession
@@ -84,6 +85,14 @@ describe('écran de création', () => {
     const config = screen.getByRole('link', { name: "Télécharger la config d'exemple" })
     expect(config.getAttribute('href')).toMatch(/config\.example\.json$/)
     expect(config).toHaveAttribute('download')
+  })
+
+  test('barre de titre : retour, « Nouvelle session », thème dernier', async () => {
+    await renderPage()
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Nouvelle session')
+    const banner = screen.getByRole('banner')
+    expect(within(banner).getByRole('link', { name: "Retour à l'accueil" })).toBeInTheDocument()
+    expectColorModeToggleLast()
   })
 
   test('sans fichier : bouton désactivé et aide de l’aperçu', async () => {

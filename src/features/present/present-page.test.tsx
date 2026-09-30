@@ -72,6 +72,14 @@ test('projection en attente : titre de l’épreuve et message, aucun nom', asyn
   expect(screen.queryByText(/Durand/)).not.toBeInTheDocument()
 })
 
+test('la vue projetée n’est pas dans la coque : pas de lien de retour à l’accueil', async () => {
+  await seed(makeStudent())
+  renderAt('/present/session-1')
+
+  await screen.findByText(/Alice/)
+  expect(screen.queryByRole('link', { name: "Retour à l'accueil" })).not.toBeInTheDocument()
+})
+
 test('étudiant sans tirage : nom, une tuile par catégorie, « Question 1 / 3 », rien de cliquable', async () => {
   await seed(makeStudent())
   renderAt('/present/session-1')

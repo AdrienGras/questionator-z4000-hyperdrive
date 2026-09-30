@@ -1,5 +1,6 @@
 import { IconChartBar } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
+import { PageShell } from '@/components/page-shell'
 import { buttonVariants } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { PassageError } from '@/domain/passage/errors'
@@ -13,8 +14,9 @@ import { AbsentToggle } from './absent-toggle'
 import { CommentField } from './comment-field'
 import { ExportButton } from './export-button'
 import { PassageBody } from './passage-body'
-import { PassageHeader } from './passage-header'
+import { PassageMeta } from './passage-meta'
 import { ProjectionBanner } from './projection-banner'
+import { ProjectionControls } from './projection-controls'
 import { SidePanel } from './side-panel'
 import { StudentTab } from './student-tab'
 import { StudentsTab } from './students-tab'
@@ -30,7 +32,7 @@ function errorText(error: Error | null, ui: Ui): string | undefined {
 }
 
 /**
- * Écran de passage (§7) : en-tête, aiguillage par statut de
+ * Écran de passage (§7) : coque commune (titre, projection, thème), aiguillage par statut de
  * l'étudiant actif, grille de tirage, panneau de la question en cours et panneau latéral (F12).
  */
 export function ExaminerView({ session }: Readonly<{ session: Session }>) {
@@ -44,16 +46,26 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
 
   return (
     <TooltipProvider>
-      <main className="mx-auto flex min-h-svh max-w-6xl flex-col gap-6 p-4 sm:p-6">
-        <PassageHeader
-          ui={ui}
-          config={config}
-          student={student}
-          sessionId={session.id}
-          projection={session.projection}
-          disabled={actions.busy}
-          onProject={actions.project}
-        />
+      <PageShell
+        ui={ui}
+        back={
+          <Link to="/" className="self-start text-sm text-primary underline underline-offset-4">
+            {ui.text('back_home', {})}
+          </Link>
+        }
+        title={config.exam.title}
+        meta={<PassageMeta ui={ui} config={config} student={student} />}
+        actions={
+          <ProjectionControls
+            ui={ui}
+            sessionId={session.id}
+            projection={session.projection}
+            activeStudentId={student?.id}
+            disabled={actions.busy}
+            onProject={actions.project}
+          />
+        }
+      >
         <ProjectionBanner ui={ui} session={session} activeStudentId={student?.id} />
         <div className="flex flex-1 flex-col gap-3 lg:grid lg:grid-cols-[1fr_auto] lg:items-start">
           <div className="flex flex-col gap-4">
@@ -141,7 +153,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
             }
           />
         </div>
-      </main>
+      </PageShell>
     </TooltipProvider>
   )
 }
