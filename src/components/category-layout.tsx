@@ -27,7 +27,8 @@ function shortRowStarts(rows: readonly number[]): Set<number> {
 /**
  * Disposition des tuiles de catégorie, commune à la vue examinateur et à la vue projetée (F25,
  * D74) : grille de deux colonnes par tuile, `c` tuiles sur les lignes longues, tuiles de même
- * largeur partout. Une seule colonne sous `sm`.
+ * largeur partout. Une seule colonne sous 40rem de conteneur
+ * (container query : la vue projetée peut être rendue dans un canvas réduit).
  */
 export function CategoryLayout<T>({
   items,
@@ -41,20 +42,25 @@ export function CategoryLayout<T>({
   const style: CSSProperties & Record<'--cols', string> = { '--cols': String(2 * (rows[0] ?? 1)) }
 
   return (
-    <ul
-      aria-label={ariaLabel}
-      style={style}
-      className={cn('grid grid-cols-1 sm:grid-cols-[repeat(var(--cols),minmax(0,1fr))]', className)}
-    >
-      {items.map((item, index) => (
-        <li
-          key={itemKey(item)}
-          data-row-start={starts.has(index)}
-          className="sm:col-span-2 sm:data-[row-start=true]:col-start-2"
-        >
-          {renderItem(item)}
-        </li>
-      ))}
-    </ul>
+    <div className="@container">
+      <ul
+        aria-label={ariaLabel}
+        style={style}
+        className={cn(
+          'grid grid-cols-1 @min-[40rem]:grid-cols-[repeat(var(--cols),minmax(0,1fr))]',
+          className,
+        )}
+      >
+        {items.map((item, index) => (
+          <li
+            key={itemKey(item)}
+            data-row-start={starts.has(index)}
+            className="@min-[40rem]:col-span-2 @min-[40rem]:data-[row-start=true]:col-start-2"
+          >
+            {renderItem(item)}
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }

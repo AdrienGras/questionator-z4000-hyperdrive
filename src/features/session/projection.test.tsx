@@ -1,10 +1,14 @@
 import 'fake-indexeddb/auto'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import type { Student } from '@/domain/session/types'
 import { db } from '@/lib/db/db'
+import { makeUi } from '@/testing/make-ui'
+import { categoryButton } from '@/testing/passage-assertions'
+import { FixedWidthResizeObserver } from '@/testing/resize-observer'
 import { makeStudent } from '@/testing/student-fixtures'
 import { mountSession } from '@/testing/students-tab-harness'
+import { ProjectionControls } from './components/projection-controls'
 
 function student(id: string, lastName: string, order: number): Student {
   return makeStudent([], { id, lastName, firstName: 'X', order })
@@ -34,12 +38,17 @@ function stubOpen(win: Window | null) {
   return vi.spyOn(window, 'open').mockReturnValue(win)
 }
 
+const preview = () => screen.getByRole('region', { name: 'Vue projetée' })
+const canvas = () => preview().querySelector('[data-projection-canvas]')!
+
 beforeEach(async () => {
+  vi.stubGlobal('ResizeObserver', FixedWidthResizeObserver)
   localStorage.clear()
   await db.sessions.clear()
 })
 
 afterEach(() => {
+  vi.unstubAllGlobals()
   vi.restoreAllMocks()
 })
 
@@ -107,6 +116,55 @@ test('pop-up bloquée : message d’alerte', async () => {
   )
 })
 
+test.each([
+  ['« Écran d’attente »', waiting],
+  ['« Projeter cet étudiant »', project],
+])('popup bloquée : message effacé au clic suivant (%s)', async (_label, button) => {
+  stubOpen(null)
+  await mountSession([A, B], { projection: { mode: 'student', studentId: 's-b' } })
+
+  fireEvent.click(open())
+  expect(await screen.findByRole('alert')).toHaveTextContent(
+    'Autorisez les fenêtres pop-up pour ce site pour ouvrir la vue projetée.',
+  )
+  fireEvent.click(button())
+
+  await waitFor(() => expect(screen.queryByRole('alert')).toBeNull())
+})
+
+test('popup bloquée puis ouverture réussie : message effacé', async () => {
+  const openSpy = stubOpen(null)
+  await mountSession([A, B])
+
+  fireEvent.click(open())
+  expect(await screen.findByRole('alert')).toBeInTheDocument()
+  openSpy.mockReturnValue(fakeWindow().win)
+  fireEvent.click(open())
+
+  expect(screen.queryByRole('alert')).toBeNull()
+})
+
+test('fenêtre d’une autre session : rouverte, pas ramenée', () => {
+  const { win, focus } = fakeWindow()
+  const openSpy = stubOpen(win)
+  const props = {
+    ui: makeUi(),
+    projection: { mode: 'waiting' } as const,
+    activeStudentId: undefined,
+    disabled: false,
+    onProject: vi.fn<() => Promise<boolean>>(() => Promise.resolve(true)),
+  }
+  const { rerender } = render(<ProjectionControls {...props} sessionId="s1" />)
+
+  fireEvent.click(open())
+  rerender(<ProjectionControls {...props} sessionId="s2" />)
+  fireEvent.click(open())
+
+  expect(openSpy).toHaveBeenCalledTimes(2)
+  expect(String(openSpy.mock.calls[1]?.[0])).toContain('#/present/s2')
+  expect(focus).not.toHaveBeenCalled()
+})
+
 test('bandeau : projection sur un autre étudiant que l’actif', async () => {
   await mountSession([A, B], { projection: { mode: 'student', studentId: 's-b' } })
 
@@ -126,4 +184,52 @@ test('bandeau absent en mode attente', async () => {
   await mountSession([A, B])
 
   expect(screen.queryByRole('status')).not.toBeInTheDocument()
+})
+
+const WAITING = "L'épreuve va bientôt commencer."
+
+test('aperçu : suit la projection en direct', async () => {
+  await mountSession([A, B])
+  expect(canvas().textContent).toContain(WAITING)
+
+  fireEvent.click(project())
+  await waitFor(() => expect(canvas().textContent).toContain('X Aba'))
+
+  fireEvent.click(waiting())
+  await waitFor(() => expect(canvas().textContent).toContain(WAITING))
+})
+
+test('aperçu : tirage → énoncé', async () => {
+  await mountSession([A, B], { projection: { mode: 'student', studentId: 's-a' } })
+
+  fireEvent.click(await categoryButton('A'))
+  await waitFor(async () => {
+    const session = await db.sessions.get('session-1')
+    const drawn = session?.students.find((s) => s.id === 's-a')?.attempts.at(-1)?.questionId
+    expect(drawn).toMatch(/^a-\d$/)
+    expect(canvas().textContent).toContain(drawn)
+  })
+  expect(canvas().textContent).not.toContain(WAITING)
+})
+
+test('aperçu : note finale révélée', async () => {
+  const done = makeStudent([2, 1], { finalRevealedAt: '2026-09-25T10:00:00.000Z' })
+  await mountSession([done], { projection: { mode: 'student', studentId: 'student-1' } })
+
+  await waitFor(() => expect(canvas().textContent).toMatch(/Note : .* \/ 20/))
+})
+
+test('aperçu : étudiant projeté supprimé → attente', async () => {
+  await mountSession([A, B], { projection: { mode: 'student', studentId: 'inconnu' } })
+
+  expect(canvas().textContent).toContain(WAITING)
+})
+
+test('contrôles sous l’aperçu, hors de l’en-tête', async () => {
+  await mountSession([A, B])
+
+  expect(
+    within(screen.getByRole('banner')).queryByRole('button', { name: 'Ouvrir la vue projetée' }),
+  ).toBeNull()
+  expect(preview().compareDocumentPosition(open()) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
 })

@@ -21,12 +21,19 @@ export class ExaminerPage {
 
   private readonly page: Page
 
+  /** Exclut l'aperçu de la vue projetée (F22), qui duplique l'énoncé et ses blocs de code. */
+  private static readonly OUTSIDE_PREVIEW = ':not([data-projection-canvas] *)'
+
   constructor(page: Page) {
     this.page = page
-    this.highlightedBlocks = page.locator('pre[data-highlighted="true"]')
-    this.plainCode = page.locator('pre[data-highlighted="false"]')
+    this.highlightedBlocks = page.locator(
+      `pre[data-highlighted="true"]${ExaminerPage.OUTSIDE_PREVIEW}`,
+    )
+    this.plainCode = page.locator(`pre[data-highlighted="false"]${ExaminerPage.OUTSIDE_PREVIEW}`)
     this.passageDone = page.getByRole('heading', { level: 2, name: 'Passage terminé' })
-    this.highlightedCode = page.locator('pre span[style*="--shiki-"]').first()
+    this.highlightedCode = page
+      .locator(`pre${ExaminerPage.OUTSIDE_PREVIEW} span[style*="--shiki-"]`)
+      .first()
     this.banner = page.getByRole('status').filter({ hasText: 'La vue projetée montre' })
   }
 

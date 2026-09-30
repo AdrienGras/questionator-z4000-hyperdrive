@@ -1152,3 +1152,21 @@ autre encodage 8 bits.
 **Pourquoi** : le panneau sert à des gestes ponctuels, pas à rester ouvert pendant un tirage ; un tiroir modal rend toute la largeur à la vue et donne l'accessibilité (piège de focus, Échap, retour du focus) sans code maison. Un tiroir non modal aurait dû renoncer à la fermeture au clic extérieur (chaque tirage le fermerait). 28 rem : la ligne d'étudiant (nom, statut, note brute, note convertie) tient, et il reste plus de 800 px de vue à 1280 px ; 24 rem est trop serré, 32 rem couvre 40 % d'un écran de 1280 px. Un hook local suffit pour trois consommateurs (barre de titre, états vides, onglet « Étudiants ») : un contexte serait de la plomberie. La modalité cache la page, donc l'erreur de passage doit être visible dans le tiroir.
 
 **Reporté dans** : `PRODUCT.md` F12, F13, F21 ; `docs/CONVENTIONS.md` § « Composant shadcn — ajout » ; `docs/BACKLOG.md` (deux items livrés). Impacte F12, F13, F19 ; prépare #56 (aperçu de la vue projetée, plus de largeur libre côté examinateur).
+
+## D77 — F22 : aperçu de la vue projetée en canevas réduit, seuils par conteneur (2026-09-30)
+
+**Question** : l'examinateur pilote la vue projetée (F14) sans voir ce qu'elle affiche. Comment lui montrer un aperçu fidèle, sans iframe ni second chargement, alors que les composants de la vue projetée vivent dans `features/present/` (D59 : pas d'import entre features) ?
+
+**Décision** :
+- Les écrans de la vue projetée (`StudentScreen`, `WaitingScreen`, `FinalCard`, `CategoryTiles`, `DrawReveal`) remontent dans `src/components/projection/`, derrière un point d'entrée `ProjectedScreen({ view, animate, className })`. `PresentControls` et `useIdle` restent dans `features/present/`. Le test d'architecture « aucun import du modèle de session » couvre les deux dossiers.
+- `ExaminerView` calcule `toProjectedView(session)` (`useMemo`) et le passe à `ProjectionPreview`, qui ne reçoit que la `ProjectedView` (D69).
+- Canevas virtuel **1280 × 720**, réduit par `transform: scale(largeur / 1280)` ; largeur mesurée par `useElementWidth` (`src/hooks/`, `ResizeObserver`). Boîte `aspect-video overflow-hidden` : un contenu plus haut est coupé. Canevas caché (`visibility: hidden`) avant la première mesure.
+- Seuils en **container queries** : `@min-[40rem]:` remplace `sm:` dans `StudentScreen` et `CategoryLayout` (dont la `ul` est enveloppée d'un `div.@container`). Même seuil de 640 px, mesuré sur le conteneur.
+- Animation de tirage désactivée dans l'aperçu (`animate={false}`). Mode clair / sombre : celui de l'examinateur.
+- Accessibilité : `section` intitulée « Vue projetée », canevas `aria-hidden` + `inert`.
+- Mise en page : ≥ `lg`, grille `minmax(0,1fr) | 26rem`, colonne droite = aperçu, `ProjectionControls`, `ProjectionBanner` ; < `lg`, même colonne empilée en haut, plafonnée à `max-w-xl`. Cette colonne vient en premier dans le DOM. Les contrôles quittent la barre de titre.
+- Pilotage : l'alerte de popup bloquée s'efface au début de chaque clic sur « Ouvrir », « Projeter », « Écran d'attente » ; la référence de fenêtre retient le `sessionId`, une fenêtre d'une autre session est rouverte au lieu d'être ramenée au premier plan.
+
+**Pourquoi** : réutiliser les composants et la fonction de domaine garantit que l'aperçu montre exactement la projection, et hérite de son étanchéité. 1280 plutôt que 1920 : à 1920, le texte courant de l'aperçu tomberait vers 4 px ; 1280 est aussi la largeur des vidéoprojecteurs WXGA courants. Dans le canevas, une media query réagirait à la fenêtre examinateur et non à la largeur simulée : sur écran étroit, les tuiles de l'aperçu passeraient sur une colonne alors que la projection en montre plusieurs ; la container query règle aussi le repli de la grille examinateur, qui suit désormais sa colonne. `aria-hidden` + `inert` : le canevas duplique des titres et un énoncé déjà présents sur la page, et ses liens ne doivent pas entrer dans l'ordre de tabulation. Suivre le mode de couleur de la projection aurait demandé d'écouter le stockage de l'autre fenêtre et de scoper les tokens de thème, pour un gain cosmétique.
+
+**Reporté dans** : `PRODUCT.md` F22 ; `docs/CONVENTIONS.md` § « Vue de session thémée » ; `docs/BACKLOG.md` (items → #56). Impacte F14, F19, F21, F25.

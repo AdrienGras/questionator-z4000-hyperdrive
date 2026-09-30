@@ -46,3 +46,11 @@ test('rend les éléments dans l’ordre reçu', () => {
     'c4',
   ])
 })
+
+test('seuils mesurés sur le conteneur, pas sur la fenêtre (F22)', () => {
+  const { list } = mount(4)
+  expect(list.parentElement).toHaveClass('@container')
+  expect(list.className).toContain('@min-[40rem]:grid-cols-[repeat(var(--cols),minmax(0,1fr))]')
+  expect(list.className).not.toMatch(/(^|\s)sm:/)
+  expect(screen.getAllByRole('listitem')[0]?.className).toContain('@min-[40rem]:col-span-2')
+})

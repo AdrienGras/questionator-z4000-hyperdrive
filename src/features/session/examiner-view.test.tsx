@@ -606,7 +606,7 @@ test('grille de 5 catégories : 3 + 2, disposition inchangée après un tirage (
   expect(gridLayout()).toEqual(expected)
 })
 
-test('barre de titre : retour, titre de l’examen, contrôles de projection puis thème', async () => {
+test('barre de titre : retour, titre de l’examen, panneau puis thème', async () => {
   const session = passageSession()
   await putSession(session)
   renderAt('/session/session-1')
@@ -616,19 +616,17 @@ test('barre de titre : retour, titre de l’examen, contrôles de projection pui
   const names = bannerInteractiveNames()
   expect(names[0]).toBe("Retour à l'accueil")
   expect(names[1]).toBe('Panneau')
-  expect(
-    within(screen.getByRole('banner')).getByRole('button', { name: 'Ouvrir la vue projetée' }),
-  ).toBeInTheDocument()
+  expect(names).not.toContain('Ouvrir la vue projetée')
   expectColorModeToggleLast()
 })
 
-test('sans étudiant actif : pas de ligne d’infos, projection et thème présents', async () => {
+test('sans étudiant actif : pas de ligne d’infos, contrôles de projection dans la colonne droite, thème présent', async () => {
   await putSession(passageSession({ activeStudentId: undefined }))
   renderAt('/session/session-1')
 
   await screen.findByRole('heading', { name: 'Aucun étudiant sélectionné' })
   const banner = within(screen.getByRole('banner'))
-  expect(banner.getByRole('button', { name: 'Ouvrir la vue projetée' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Ouvrir la vue projetée' })).toBeInTheDocument()
   expect(banner.queryByText(/Question/)).not.toBeInTheDocument()
   expectColorModeToggleLast()
 })

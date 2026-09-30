@@ -16,8 +16,9 @@ const WINDOW_NAME = 'questionator-present'
 
 /**
  * Pilotage de la vue projetée (F14) : ouvrir la fenêtre, y projeter l'étudiant actif ou
- * revenir à l'écran d'attente. La fenêtre est gardée en `useRef` : un second `window.open`
- * sur une fenêtre déjà ouverte la rechargerait, on la ramène donc au premier plan.
+ * revenir à l'écran d'attente. La fenêtre est gardée en `useRef`, liée à la session pour
+ * laquelle elle a été ouverte : un second `window.open` la rechargerait, on la ramène donc au
+ * premier plan, sauf si elle montre une autre session (alors on la rouvre).
  */
 export function ProjectionControls({
   ui,
@@ -28,18 +29,21 @@ export function ProjectionControls({
   onProject,
 }: ProjectionControlsProps) {
   const { text } = ui
-  const presentWindow = useRef<Window | null>(null)
+  const presentWindow = useRef<{ sessionId: string; window: Window } | null>(null)
   const [popupBlocked, setPopupBlocked] = useState(false)
 
   const openWindow = () => {
-    if (presentWindow.current !== null && !presentWindow.current.closed) {
-      presentWindow.current.focus()
+    setPopupBlocked(false)
+    const current = presentWindow.current
+    if (current?.sessionId === sessionId && !current.window.closed) {
+      current.window.focus()
       return
     }
     const url = new URL(location.href)
     url.hash = `/present/${sessionId}`
-    presentWindow.current = window.open(url, WINDOW_NAME)
-    setPopupBlocked(presentWindow.current === null)
+    const opened = window.open(url, WINDOW_NAME)
+    presentWindow.current = opened === null ? null : { sessionId, window: opened }
+    setPopupBlocked(opened === null)
   }
 
   const alreadyProjected = projection.mode === 'student' && projection.studentId === activeStudentId
@@ -55,6 +59,7 @@ export function ProjectionControls({
         size="sm"
         disabled={disabled || activeStudentId === undefined || alreadyProjected}
         onClick={() => {
+          setPopupBlocked(false)
           if (activeStudentId !== undefined) {
             void onProject({ mode: 'student', studentId: activeStudentId })
           }
@@ -67,7 +72,10 @@ export function ProjectionControls({
         variant="outline"
         size="sm"
         disabled={disabled || projection.mode === 'waiting'}
-        onClick={() => void onProject({ mode: 'waiting' })}
+        onClick={() => {
+          setPopupBlocked(false)
+          void onProject({ mode: 'waiting' })
+        }}
       >
         {text('projection_waiting', {})}
       </Button>

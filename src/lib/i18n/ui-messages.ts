@@ -151,6 +151,7 @@ export type UiMessageParams = {
   projection_waiting: NoParams
   projection_banner: { name: string }
   projection_popup_blocked: NoParams
+  projection_preview_label: NoParams
   students_row_scores: { raw: string; final: string }
   students_add: NoParams
   students_add_title: NoParams
@@ -438,6 +439,7 @@ const fr: Dictionary<UiMessageParams> = {
   projection_open: () => 'Ouvrir la vue projetée',
   projection_project: () => 'Projeter cet étudiant',
   projection_waiting: () => 'Écran d’attente',
+  projection_preview_label: () => 'Vue projetée',
   projection_banner: ({ name }) => `La vue projetée montre ${name}.`,
   projection_popup_blocked: () =>
     'Autorisez les fenêtres pop-up pour ce site pour ouvrir la vue projetée.',
@@ -684,6 +686,7 @@ const en: Dictionary<UiMessageParams> = {
   projection_open: () => 'Open the projected view',
   projection_project: () => 'Project this student',
   projection_waiting: () => 'Waiting screen',
+  projection_preview_label: () => 'Projected view',
   projection_banner: ({ name }) => `The projected view shows ${name}.`,
   projection_popup_blocked: () => 'Allow pop-ups for this site to open the projected view.',
   students_row_scores: ({ raw, final }) => `${raw} · ${final}`,
