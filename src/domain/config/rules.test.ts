@@ -319,6 +319,7 @@ describe('checkRules', () => {
     config.categories[0]!.icon = 'leaf'
     expect(only(config, 'unknown_icon')).toEqual([])
   })
+
   describe('unknown_code_language (avertissement)', () => {
     test('levée dans l’énoncé, avec sévérité et paramètres attendus', () => {
       const config = withQuestion({ prompt: fence('pyhton') })

@@ -121,7 +121,7 @@ describe('formatConfigIssue', () => {
       params: { language: 'pyhton', questionId: 'q1' },
     }
     expect(formatConfigIssue(issue, 'fr')).toBe(
-      "Le langage « pyhton » d'un bloc de code de la question q1 n'est pas reconnu : il s'affichera en texte brut.",
+      'Le langage « pyhton » d’un bloc de code de la question q1 n’est pas reconnu : il s’affichera en texte brut.',
     )
     expect(formatConfigIssue(issue, 'en')).toBe(
       'The language “pyhton” of a code block in question q1 is not recognized: it will be shown as plain text.',

@@ -80,7 +80,7 @@ const fr: Dictionary<ConfigIssueParams> = {
     `L’échelle finale (${finalScale}) n’est pas un multiple du pas d’arrondi (${step}) : la note maximale sera hors grille.`,
   unknown_icon: ({ icon }) => `Icône inconnue « ${icon} » : la catégorie s’affichera sans icône.`,
   unknown_code_language: ({ language, questionId }) =>
-    `Le langage « ${language} » d'un bloc de code de la question ${questionId} n'est pas reconnu : il s'affichera en texte brut.`,
+    `Le langage « ${language} » d’un bloc de code de la question ${questionId} n’est pas reconnu : il s’affichera en texte brut.`,
 }
 
 const en: Dictionary<ConfigIssueParams> = {
