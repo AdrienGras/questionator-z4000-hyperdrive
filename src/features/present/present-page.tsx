@@ -1,6 +1,6 @@
 import { getRouteApi } from '@tanstack/react-router'
-import { ProjectedScreen } from '@/components/projection/projected-screen'
 import { DbStatusBanner } from '@/components/db-status-banner'
+import { ProjectedScreen } from '@/components/projection/projected-screen'
 import { SessionAppearance } from '@/components/session-appearance'
 import { SessionFallback } from '@/components/session-fallback'
 import { PresentControls } from '@/features/present/components/present-controls'

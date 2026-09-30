@@ -209,11 +209,16 @@ test('aperçu : suit la projection en direct', async () => {
   await waitFor(() => expect(canvas().textContent).toContain(WAITING))
 })
 
-test('aperçu : tirage puis note finale', async () => {
+test('aperçu : tirage → énoncé', async () => {
   await mountSession([A, B], { projection: { mode: 'student', studentId: 's-a' } })
 
   fireEvent.click(await categoryButton('A'))
-  await waitFor(() => expect(canvas().textContent).toContain('a-'))
+  await waitFor(async () => {
+    const session = await db.sessions.get('session-1')
+    const drawn = session?.students.find((s) => s.id === 's-a')?.attempts.at(-1)?.questionId
+    expect(drawn).toMatch(/^a-\d$/)
+    expect(canvas().textContent).toContain(drawn)
+  })
   expect(canvas().textContent).not.toContain(WAITING)
 })
 
@@ -233,6 +238,8 @@ test('aperçu : étudiant projeté supprimé → attente', async () => {
 test('contrôles sous l’aperçu, hors de l’en-tête', async () => {
   await mountSession([A, B])
 
-  expect(within(screen.getByRole('banner')).queryByText('Ouvrir la vue projetée')).toBeNull()
+  expect(
+    within(screen.getByRole('banner')).queryByRole('button', { name: 'Ouvrir la vue projetée' }),
+  ).toBeNull()
   expect(preview().compareDocumentPosition(open()) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
 })

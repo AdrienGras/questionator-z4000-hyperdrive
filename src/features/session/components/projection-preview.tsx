@@ -24,6 +24,7 @@ export function ProjectionPreview({ ui, view }: ProjectionPreviewProps) {
         {ui.text('projection_preview_label', {})}
       </h2>
       <div ref={ref} className="relative aspect-video w-full overflow-hidden rounded-md border">
+        {/* Classes littérales (Tailwind) : 1280 = CANVAS_WIDTH, 720 = 1280 × 9/16. */}
         <div
           data-projection-canvas
           aria-hidden="true"

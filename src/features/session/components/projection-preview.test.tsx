@@ -85,7 +85,7 @@ describe('ProjectionPreview', () => {
     expect(container.querySelector('iframe')).toBeNull()
   })
 
-  it('tirage animé côté projection, immédiat dans l’aperçu', () => {
+  it('tirage immédiat dans l’aperçu, même avec drawAnimation', () => {
     const { container, rerender } = render(
       inFrench(<ProjectionPreview ui={ui} view={student('Énoncé secret', 'a', true)} />),
     )

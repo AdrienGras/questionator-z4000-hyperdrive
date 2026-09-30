@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Markdown } from '@/components/markdown/markdown'
-import type { ProjectedStudentView } from '@/domain/presentation/projected-view'
 import { CategoryTiles } from '@/components/projection/category-tiles'
 import { DrawReveal } from '@/components/projection/draw-reveal'
 import { FinalCard } from '@/components/projection/final-card'
+import type { ProjectedStudentView } from '@/domain/presentation/projected-view'
 import { useUi, type Ui } from '@/lib/i18n/use-ui'
 
 /** Bas d'écran : progression en cours de passage, « Passage terminé » ou note finale une fois terminé. */

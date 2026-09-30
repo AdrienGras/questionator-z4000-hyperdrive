@@ -15,7 +15,7 @@ export function ProjectedScreen({
   return (
     <div className={cn('@container flex flex-col', className)}>
       {view.mode === 'student' ? (
-        // `key` : un autre étudiant projeté repart d'un premier rendu (pas d'animation, Task 3).
+        // `key` : un autre étudiant projeté repart d'un premier rendu : son énoncé présent au montage n'est jamais animé.
         <StudentScreen
           key={`${view.student.lastName}\u0000${view.student.firstName}`}
           view={view}
