@@ -10,6 +10,12 @@ if (typeof window !== 'undefined') {
   // jsdom annonce en-US : l'interface suit la langue du navigateur (D51), les tests l'attendent en fr.
   Object.defineProperty(window.navigator, 'languages', { value: ['fr-FR'], configurable: true })
   installMatchMedia()
+  // jsdom n'a pas `ResizeObserver` (aperçu de projection, F22) ; les tests qui mesurent le simulent.
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
 }
 
 // `autoCodeSplitting` charge le composant de chaque route à la demande : sous la suite complète

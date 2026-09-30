@@ -1,9 +1,10 @@
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { IconChartBar, IconLayoutSidebarRight } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { PageShell } from '@/components/page-shell'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { toProjectedView } from '@/domain/presentation/projected-view'
 import { PassageError } from '@/domain/passage/errors'
 import { passageErrorMessage } from '@/domain/passage/messages'
 import { currentPending } from '@/domain/passage/selectors'
@@ -19,6 +20,7 @@ import { PassageBody } from './passage-body'
 import { PassageMeta } from './passage-meta'
 import { ProjectionBanner } from './projection-banner'
 import { ProjectionControls } from './projection-controls'
+import { ProjectionPreview } from './projection-preview'
 import { SidePanel } from './side-panel'
 import { StudentTab } from './student-tab'
 import { StudentsTab } from './students-tab'
@@ -34,8 +36,9 @@ function errorText(error: Error | null, ui: Ui): string | undefined {
 }
 
 /**
- * Écran de passage (§7) : coque commune (titre, projection, thème), aiguillage par statut de
+ * Écran de passage (§7) : coque commune (titre, thème), aiguillage par statut de
  * l'étudiant actif, grille de tirage, panneau de la question en cours et panneau latéral (F12),
+ * avec, en colonne droite, l'aperçu de la vue projetée et les contrôles de projection (F22),
  * en tiroir ouvert par le bouton « Panneau » de la barre de titre (F21). Le tiroir se ferme après
  * un changement d'étudiant actif réussi ; il reste ouvert sinon, erreur visible dans le tiroir, au-dessus des onglets.
  */
@@ -47,6 +50,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
   const status = student === undefined ? undefined : studentStatus(student, config)
   const pending = student === undefined ? undefined : currentPending(student)
   const errorMessage = errorText(actions.error, ui)
+  const projected = useMemo(() => toProjectedView(session), [session])
   const panel = useSidePanel()
   const panelButton = useRef<HTMLButtonElement>(null)
 
@@ -85,6 +89,12 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
               <IconLayoutSidebarRight aria-hidden />
               {ui.text('side_panel_open', {})}
             </Button>
+          </>
+        }
+      >
+        <div className="flex flex-1 flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-start">
+          <div className="flex w-full max-w-xl flex-col gap-3 lg:col-start-2 lg:row-start-1 lg:max-w-none">
+            <ProjectionPreview ui={ui} view={projected} />
             <ProjectionControls
               ui={ui}
               sessionId={session.id}
@@ -93,31 +103,30 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
               disabled={actions.busy}
               onProject={actions.project}
             />
-          </>
-        }
-      >
-        <ProjectionBanner ui={ui} session={session} activeStudentId={student?.id} />
-        <div className="flex flex-1 flex-col gap-4">
-          {/* Rendu une seule fois, au-dessus de l'aiguillage par statut : une erreur touchant
-              un état sans passage (aucun étudiant, absent, terminé) doit rester visible. */}
-          {errorMessage !== undefined && <p role="alert">{errorMessage}</p>}
-          <PassageBody
-            ui={ui}
-            config={config}
-            session={session}
-            student={student}
-            status={status}
-            onShowPanel={panel.show}
-            pending={pending}
-            disabled={actions.busy}
-            onDraw={(categoryId) => void actions.draw(categoryId)}
-            onScore={(attemptId, value) => void actions.score(attemptId, value)}
-            onSkip={(attemptId, reason) => void actions.skip(attemptId, reason)}
-            onAdjust={(value, reason, options) => actions.adjust(value, reason, options)}
-            onRevealFinal={() => actions.revealFinal()}
-            onReset={() => actions.reset()}
-            onNext={() => void actions.next()}
-          />
+            <ProjectionBanner ui={ui} session={session} activeStudentId={student?.id} />
+          </div>
+          <div className="flex min-w-0 flex-col gap-4 lg:col-start-1 lg:row-start-1">
+            {/* Rendu une seule fois, au-dessus de l'aiguillage par statut : une erreur touchant
+                un état sans passage (aucun étudiant, absent, terminé) doit rester visible. */}
+            {errorMessage !== undefined && <p role="alert">{errorMessage}</p>}
+            <PassageBody
+              ui={ui}
+              config={config}
+              session={session}
+              student={student}
+              status={status}
+              onShowPanel={panel.show}
+              pending={pending}
+              disabled={actions.busy}
+              onDraw={(categoryId) => void actions.draw(categoryId)}
+              onScore={(attemptId, value) => void actions.score(attemptId, value)}
+              onSkip={(attemptId, reason) => void actions.skip(attemptId, reason)}
+              onAdjust={(value, reason, options) => actions.adjust(value, reason, options)}
+              onRevealFinal={() => actions.revealFinal()}
+              onReset={() => actions.reset()}
+              onNext={() => void actions.next()}
+            />
+          </div>
         </div>
         <SidePanel
           ui={ui}

@@ -1,8 +1,9 @@
 import 'fake-indexeddb/auto'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import type { Student } from '@/domain/session/types'
 import { db } from '@/lib/db/db'
+import { categoryButton } from '@/testing/passage-assertions'
 import { makeStudent } from '@/testing/student-fixtures'
 import { mountSession } from '@/testing/students-tab-harness'
 
@@ -34,12 +35,28 @@ function stubOpen(win: Window | null) {
   return vi.spyOn(window, 'open').mockReturnValue(win)
 }
 
+const preview = () => screen.getByRole('region', { name: 'Vue projetée' })
+const canvas = () => preview().querySelector('[data-projection-canvas]')!
+
+class FauxResizeObserver {
+  readonly cb: (entries: { contentRect: { width: number } }[]) => void
+  constructor(cb: (entries: { contentRect: { width: number } }[]) => void) {
+    this.cb = cb
+  }
+  observe() {
+    this.cb([{ contentRect: { width: 384 } }])
+  }
+  disconnect() {}
+}
+
 beforeEach(async () => {
+  vi.stubGlobal('ResizeObserver', FauxResizeObserver)
   localStorage.clear()
   await db.sessions.clear()
 })
 
 afterEach(() => {
+  vi.unstubAllGlobals()
   vi.restoreAllMocks()
 })
 
@@ -126,4 +143,45 @@ test('bandeau absent en mode attente', async () => {
   await mountSession([A, B])
 
   expect(screen.queryByRole('status')).not.toBeInTheDocument()
+})
+
+const WAITING = "L'épreuve va bientôt commencer."
+
+test('aperçu : suit la projection en direct', async () => {
+  await mountSession([A, B])
+  expect(canvas().textContent).toContain(WAITING)
+
+  fireEvent.click(project())
+  await waitFor(() => expect(canvas().textContent).toContain('X Aba'))
+
+  fireEvent.click(waiting())
+  await waitFor(() => expect(canvas().textContent).toContain(WAITING))
+})
+
+test('aperçu : tirage puis note finale', async () => {
+  await mountSession([A, B], { projection: { mode: 'student', studentId: 's-a' } })
+
+  fireEvent.click(await categoryButton('A'))
+  await waitFor(() => expect(canvas().textContent).toContain('a-'))
+  expect(canvas().textContent).not.toContain(WAITING)
+})
+
+test('aperçu : note finale révélée', async () => {
+  const done = makeStudent([2, 1], { finalRevealedAt: '2026-09-25T10:00:00.000Z' })
+  await mountSession([done], { projection: { mode: 'student', studentId: 'student-1' } })
+
+  await waitFor(() => expect(canvas().textContent).toMatch(/Note : .* \/ 20/))
+})
+
+test('aperçu : étudiant projeté supprimé → attente', async () => {
+  await mountSession([A, B], { projection: { mode: 'student', studentId: 'inconnu' } })
+
+  expect(canvas().textContent).toContain(WAITING)
+})
+
+test('contrôles sous l’aperçu, hors de l’en-tête', async () => {
+  await mountSession([A, B])
+
+  expect(within(screen.getByRole('banner')).queryByText('Ouvrir la vue projetée')).toBeNull()
+  expect(preview().compareDocumentPosition(open()) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
 })
