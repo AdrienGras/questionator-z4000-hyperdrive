@@ -49,6 +49,12 @@ export class ExaminerPage {
     const field = this.page.getByRole('textbox', { name: 'Commentaire' })
     await field.fill(text)
     await field.blur()
+    // Attend l'écriture Dexie (statut visible ; la zone sr-only en porte une copie) avant de fermer.
+    await this.page
+      .getByRole('dialog', { name: 'Panneau latéral' })
+      .getByText('Enregistré', { exact: true })
+      .first()
+      .waitFor()
     await this.page.getByRole('button', { name: 'Fermer le panneau' }).click()
     await this.page.getByRole('dialog', { name: 'Panneau latéral' }).waitFor({ state: 'hidden' })
   }

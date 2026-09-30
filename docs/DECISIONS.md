@@ -1141,7 +1141,7 @@ autre encodage 8 bits.
 - Modalité : tiroir **modal** `Sheet` à droite (`role=dialog` nommé « Panneau latéral »), avec voile, focus piégé, fermeture par Échap, clic sur le voile ou bouton traduit, focus rendu au bouton d'ouverture.
 - Largeur : 28 rem (448 px) au-delà de 640 px, pleine largeur en dessous. Classes `data-[side=right]:w-full data-[side=right]:sm:max-w-md` : les largeurs du vendor portent le préfixe `data-[side=right]:`, des classes nues perdraient.
 - Bouton d'ouverture : « Panneau » (icône + texte), premier élément des `actions` de `PageShell`, avant `ProjectionControls` ; le thème reste dernier (D75).
-- État : hook `useSidePanel()` dans `ExaminerView`, `SidePanel` contrôlé. Fermé à chaque chargement ; seul l'onglet reste mémorisé (`localStorage`), la clé de l'état ouvert est supprimée.
+- État : hook `useSidePanel()` dans `ExaminerView`, `SidePanel` contrôlé. Fermé à chaque chargement ; seul l'onglet reste mémorisé (`localStorage`), la clé de l'état ouvert n'est plus lue ni écrite (une valeur orpheline peut subsister dans le `localStorage` des navigateurs existants).
 - Fermeture automatique quand un **autre** étudiant devient actif avec succès (clic dans la liste, « Ajouter et faire passer »). Le tiroir reste ouvert pour « Ajouter » seul, le commentaire, la correction de note, absent, export, stats et en cas d'échec.
 - États vides (étudiant absent, aucun étudiant) : bouton « Afficher le panneau » qui ouvre l'onglet utile (« Étudiant » pour l'absence, « Étudiants » sinon). Après l'ouverture depuis un état vide, le focus revient au bouton « Panneau ».
 - Commentaire : statut visible inchangé ; la zone `sr-only` `aria-live="polite"` n'annonce que « Enregistré » ou « Échec de l’enregistrement ».
