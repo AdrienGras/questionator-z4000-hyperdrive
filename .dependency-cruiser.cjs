@@ -64,7 +64,7 @@ module.exports = {
       to: { path: '^src/domain/' },
     },
     {
-      name: 'lib-xlsx-domain-types-only',
+      name: 'lib-xlsx-only-export-types',
       severity: 'error',
       comment:
         'lib/xlsx/ ne lit du métier que les types du classeur neutre (domain/export/types.ts), en `import type` : aucune dépendance à l’exécution.',
@@ -75,7 +75,7 @@ module.exports = {
       },
     },
     {
-      name: 'lib-xlsx-domain-type-only',
+      name: 'lib-xlsx-export-types-import-type-only',
       severity: 'error',
       comment:
         'Le seul fichier de domain/ que lib/xlsx/ peut lire l’est en `import type` uniquement.',
@@ -129,6 +129,14 @@ module.exports = {
         // pnpm résout vers node_modules/.pnpm/recharts@<v>/node_modules/recharts/…
         path: [String.raw`/node_modules/recharts/`, String.raw`^src/components/ui/chart\.tsx$`],
       },
+    },
+    {
+      name: 'lib-xlsx-dynamic-import-only',
+      severity: 'error',
+      comment:
+        'lib/xlsx/ ne s’importe qu’en `import()` : un import statique le ferait entrer dans le graphe de la route appelante (D35, D71). `check:bundle` ne garde que le graphe initial.',
+      from: { pathNot: ['^src/lib/xlsx/', TEST] },
+      to: { path: '^src/lib/xlsx/', dependencyTypesNot: ['dynamic-import'] },
     },
     {
       name: 'xlsx-only-in-lib-xlsx',
