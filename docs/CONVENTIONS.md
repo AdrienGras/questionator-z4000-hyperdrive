@@ -380,6 +380,9 @@ export function XPage() {
 - Bascule de mode : `<ColorModeToggle ui={ui} />` dans l'en-tête de chaque écran.
 - Tests : `src/testing/setup.ts` simule `matchMedia` (`setSystemDark(true)` de `@/testing/match-media` pour simuler un système sombre) et vide `localStorage` après chaque test.
 - Vue projetée : ses composants ne reçoivent jamais la `Session` (`usePresentedConfig`, puis `toProjectedView` en F14).
+- Écrans de la vue projetée : `src/components/projection/`, point d'entrée `ProjectedScreen`, partagés par la vue projetée et l'aperçu de la vue de passage (D77). Ils ne prennent que la `ProjectedView`.
+- Composant rendu à la fois en page et dans un canevas réduit (aperçu F22) : seuils en container queries (`@min-[40rem]:` sous un ancêtre `@container`), jamais en media queries (`sm:`), qui réagiraient à la fenêtre examinateur et non à la largeur simulée. Idem pour tout composant partagé qui y est rendu (`CategoryLayout`).
+- Tests : jsdom n'a pas de `ResizeObserver`. `src/testing/setup.ts` en pose un no-op global ; un test qui a besoin d'une largeur mesurée le remplace par `vi.stubGlobal` et déclenche le rappel dans `act`.
 
 ## Markdown et bloc de code — squelette
 

@@ -20,6 +20,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-09-30 — F22 : aperçu de la vue projetée (#56)
+
+**Dernière chose faite** : F22 implémenté sur `feat/f22-apercu-projection`, en subagent-driven development (six tâches, chacune revue, puis une revue finale « prête à merger »). Les écrans de la vue projetée sont dans `src/components/projection/`, derrière `ProjectedScreen`. `ProjectionPreview` rend dans la vue de passage un canevas 1280 × 720 réduit par `transform: scale` (`useElementWidth`, `src/hooks/`). La colonne de droite (≥ `lg`) porte l'aperçu, les contrôles de projection et le bandeau, et s'empile en haut en dessous. Les seuils `sm:` sont devenus des container queries `@min-[40rem]:` (`StudentScreen`, `CategoryLayout`). L'alerte de popup bloquée s'efface au clic suivant, et la fenêtre projetée est liée à sa session. D77, section F22 de `PRODUCT.md`, INDEX, CONVENTIONS, BACKLOG et QUIRKS sont à jour. Vérifié dans le navigateur à 1440 et 900 px : aucune iframe, un seul document chargé, retour à l'attente suivi en direct.
+
+**Trucs en suspens** : PR en brouillon, Sonar, puis « Ready for review » et go de l'utilisateur pour le merge. BACKLOG F22 : mode de couleur de l'aperçu (celui de l'examinateur), `FauxResizeObserver` recopié entre deux tests, étanchéité du commentaire et du motif de skip prouvée contre la base seulement. Toujours sans retour : vérifications manuelles de F16, F17 et F18.
+
+**Prochaine chose à creuser** : #54 (F20, accueil sur deux colonnes), puis #58 (F24, fond des blocs de code), puis #60 (F26, éditeur de config, débloqué une fois #54 et #56 mergés).
+
+**Notes pour future Claude** : jsdom n'a pas de `ResizeObserver`. `src/testing/setup.ts` en pose un no-op global ; un test qui a besoin d'une largeur mesurée le remplace par `vi.stubGlobal` et déclenche le rappel dans `act`. Le canevas de l'aperçu duplique le nom de l'étudiant et l'énoncé dans le DOM (QUIRKS) : préférer les requêtes par rôle. Un composant rendu à la fois en page et dans le canevas doit utiliser des container queries, jamais `sm:`/`md:` (CONVENTIONS § « Vue de session thémée »).
+
 ## 2026-09-30 — Fin de session : F23, F25, F19, F21 mergés
 
 **Dernière chose faite** : quatre tickets de la série V1 mergés dans `main`, dans l'ordre : #57 F23 (PR #62, changer d'étudiant remet la projection en attente), #59 F25 (PR #63, tuiles de catégorie selon leur nombre), #53 F19 (PR #65, coque `PageShell`), #55 F21 (PR #66, panneau latéral en tiroir). Règle ajoutée à `CLAUDE.md` (PR #64) : tickets en séquence, merge seulement sur go explicite de l'utilisateur. Deux pièges ajoutés à QUIRKS (dialog base-ui monté pendant sa sortie, test de flush au démontage trop patient).

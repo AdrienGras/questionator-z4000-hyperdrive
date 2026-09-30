@@ -520,3 +520,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : `waitFor` attend 1000 ms par défaut, plus que le délai de l'autosave (500 ms) : le minuteur, jamais annulé, enregistre de lui-même pendant l'attente.
 **Workaround** : borner l'attente sous le délai (`waitFor(…, { timeout: 250 })`) et le dire en commentaire ; vérifier par mutation (retirer le flush → le test doit échouer).
 **Référence** : `src/features/session/student-tab.test.tsx`, `src/features/session/hooks/use-autosave.ts`.
+
+## Depuis F22, la vue de passage contient deux fois le nom de l'étudiant et l'énoncé (2026-09-30)
+
+**Découvert** : revue finale de F22.
+**Symptôme** : dans un test de la vue examinateur, `getByText('…')` sur le nom de l'étudiant ou l'énoncé en cours peut lever « Found multiple elements ».
+**Cause** : l'aperçu de la vue projetée (`ProjectionPreview`) rend le même contenu dans son canevas. Celui-ci est `aria-hidden` et `inert`, ce qui le retire des requêtes par rôle (`getByRole`), mais pas de `getByText` / `getAllByText`, qui lisent tout le DOM.
+**Workaround** : préférer `getByRole(…, { name })`, ou restreindre la requête : `within(<zone examinateur>)` pour la page, `canvas.textContent` (`[data-projection-canvas]`) pour l'aperçu.
+**Référence** : `src/features/session/components/projection-preview.tsx`, `src/features/session/projection.test.tsx`.

@@ -52,14 +52,16 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Un backup édité à la main avec `adjustment: { value: 0 }` affiche « 0,00 » au lieu de « aucun ».
 - [ ] Dialogue d'ajout d'étudiant : une erreur antérieure (tirage, note) encore dans le hook s'affiche dans le dialogue dès son ouverture ; ne l'y montrer qu'après un échec d'ajout dans ce dialogue (flag local remis à zéro à l'ouverture) (F13).
 - [ ] Onglet « Étudiants » (montage partagé dans `src/testing/students-tab-harness.tsx` depuis la PR #45) : le test de double clic ne distingue pas la garde `submitting` du verrou `run` ; pas de test `rosterScore` d'un absent qui a des notes (F13).
-- [ ] Onglet « Étudiants » : l'icône de l'étudiant projeté n'est vérifiable qu'en test tant que F14 ne permet pas de projeter depuis l'interface. → #56
+- [x] Onglet « Étudiants » : l'icône de l'étudiant projeté n'est vérifiable qu'en test tant que F14 ne permet pas de projeter depuis l'interface. → #56. *Vérifiable depuis F22 : l'aperçu montre l'étudiant projeté.*
 - [ ] Vue projetée (F14) : catégorie « indisponible » visuellement identique à « épuisée » (même atténuation, sans libellé) ; séparateur entre catégorie et titre dans le détail, `points ?? 0` pour une question notée sans note.
 - [ ] Vue projetée (F14) : `animate` non figé au montage de `DrawReveal` (basculer `drawAnimation` pendant une question rejoue le mélange) ; `cursor-none` non testé au niveau page ; test de réinitialisation qui n'attend pas la disparition de l'énoncé.
 - [ ] Vue projetée (F14) : écran étudiant remonté par une `key` sur le nom affiché, deux homonymes partagent un montage ; `key` du détail (catégorie + titre) non garantie unique.
-- [ ] Pilotage (F14) : la référence de la fenêtre projetée n'est pas liée à la session ; `?search` conservé dans l'URL ; message de popup bloquée persistant jusqu'au clic suivant ; tests manquants (boutons pendant `busy`, bandeau quand l'étudiant projeté a disparu). → #56 (popup bloquée, référence de fenêtre)
+- [ ] Pilotage (F14) : `?search` conservé dans l'URL de la fenêtre projetée ; tests manquants (boutons pendant `busy`, bandeau quand l'étudiant projeté a disparu). *Popup bloquée effacée au clic suivant et référence de fenêtre liée à la session : livrés en F22.*
 - [ ] Tests F14 : marqueur `0.37` du test d'étanchéité en sous-chaîne (échec bruyant si un score le contient) ; pas de mutation vérifiée pour `editedAt` et le montant d'ajustement ; test d'architecture aveugle aux réexports de `Session` ; `computeScores` appelé deux fois dans `toProjectedView`.
 - [ ] `categoryButton` (`src/testing/passage-assertions.ts`) : `waitFor` au délai par défaut (1 s), à allonger si la CI devient lente.
-- [ ] Tuiles de catégorie (F25, D74) : jusqu'à 5 tuiles par ligne au-dessus de 640 px ; avec l'aperçu de #56 (F22) la largeur côté examinateur baisse, revoir le seuil du repli sur une colonne (ou un seuil par conteneur, `@container`) une fois F22 livré. → #56
+- [x] Tuiles de catégorie (F25, D74) : seuil du repli sur une colonne à revoir avec l'aperçu de #56. *Livré en F22 : seuil mesuré sur le conteneur (`@min-[40rem]:`, D77).*
+- [ ] Aperçu de la vue projetée (F22) : suit le mode clair / sombre de l'examinateur, pas celui mémorisé par la vue projetée (D77) ; à reprendre si l'écart gêne.
+- [ ] Tests F22 : `FauxResizeObserver` recopié entre `projection.test.tsx` et `projection-preview-leak.test.tsx` (à sortir dans `src/testing/`) ; commentaire et motif de skip prouvés absents de l'aperçu mais seulement présents en base, pas dans le DOM examinateur ; `useElementWidth` garde la dernière largeur après `ref(null)`.
 
 ## Accueil et backup
 

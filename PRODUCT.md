@@ -637,6 +637,22 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 - Le commentaire n'annonce que « Enregistré » ou « Échec de l’enregistrement ».
 - Tests d'écran et e2e adaptés.
 
+### F22 — Aperçu de la vue projetée
+
+**Objectif.** L'examinateur voit ce que montre la vue projetée sans regarder l'autre écran.
+
+**Contenu.**
+- Aperçu réduit de la vue projetée dans la vue de passage, en haut à droite à partir de 1024 px, empilé en haut en dessous (D77). Mêmes composants et même `toProjectedView` que la vue projetée ; pas d'iframe ni de second chargement.
+- Canevas virtuel 1280 × 720 réduit à la largeur de la colonne ; un contenu plus haut est coupé. Mode clair / sombre de la vue examinateur ; animation de tirage désactivée dans l'aperçu.
+- Boutons « Ouvrir la vue projetée », « Projeter cet étudiant » et « Écran d'attente » sous l'aperçu (retirés de la barre de titre), puis le bandeau « autre étudiant projeté ».
+- Le message de popup bloquée s'efface au clic suivant sur l'un de ces boutons. « Ouvrir » ne ramène au premier plan que la fenêtre ouverte pour cette session ; sinon la fenêtre est rouverte sur la bonne session.
+
+**Critères d'acceptation.**
+- L'aperçu montre ce que montre la vue projetée dans tous ses états (attente, étudiant, question tirée, note finale), animation exceptée.
+- Aucune donnée réservée à l'examinateur n'apparaît dans l'aperçu.
+- La vue projetée est inchangée.
+- Aucun second chargement pour l'aperçu.
+
 ## 9. Stack technique
 
 | Besoin | Choix |
