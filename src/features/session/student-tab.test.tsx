@@ -111,7 +111,7 @@ test('commentaire : rien en base avant le délai, enregistré après, indicateur
 
   expect((await storedStudent()).comment).toBeUndefined()
   await waitFor(async () => expect((await storedStudent()).comment).toBe('À revoir'), AFTER_DELAY)
-  expect(await within(panel()).findByText('Enregistré')).toBeInTheDocument()
+  expect(await within(panel()).findAllByText('Enregistré')).not.toHaveLength(0)
 })
 
 test('commentaire : la sortie du champ écrit tout de suite', async () => {
@@ -143,7 +143,7 @@ test('commentaire : taper puis revenir au texte d’origine et sortir n’écrit
   fireEvent.blur(commentBox())
 
   // La sauvegarde est bien partie (indicateur), mais sans changement : rien n'est écrit.
-  expect(await within(panel()).findByText('Enregistré')).toBeInTheDocument()
+  expect(await within(panel()).findAllByText('Enregistré')).not.toHaveLength(0)
   expect(put).not.toHaveBeenCalled()
   expect((await stored()).updatedAt).toBe(before)
 })
@@ -157,7 +157,7 @@ test('commentaire : entrer et sortir sans frappe n’écrit rien', async () => {
   await new Promise((resolve) => setTimeout(resolve, 700))
 
   expect((await stored()).updatedAt).toBe(before)
-  expect(within(panel()).queryByText('Enregistré')).not.toBeInTheDocument()
+  expect(within(panel()).queryAllByText('Enregistré')).toHaveLength(0)
 })
 
 test('commentaire : survit au rechargement et à la réinitialisation', async () => {
@@ -328,4 +328,55 @@ test('dialogue d’absence ouvert pour Alice, Bob devient actif ailleurs : c’e
   const other = await storedStudent('student-2')
   expect(other.absent).toBe(false)
   expect(other.attempts).toHaveLength(1)
+})
+
+/** Zone annoncée aux lecteurs d'écran (`aria-live`) du champ commentaire. */
+function announcer(): HTMLElement {
+  const region = panel().querySelector<HTMLElement>('[aria-live="polite"]')
+  if (region === null) throw new Error('zone annoncée absente')
+  return region
+}
+
+test('commentaire : zone annoncée vide pendant l’enregistrement, « Enregistré » ensuite', async () => {
+  await mount([makeStudent([])])
+  const visible: string[] = []
+  const announced: string[] = []
+  const observer = new MutationObserver(() => {
+    visible.push(
+      ...within(panel())
+        .queryAllByText('Enregistrement…')
+        .map(() => 'saving'),
+    )
+    announced.push(announcer().textContent)
+  })
+  observer.observe(panel(), { subtree: true, childList: true, characterData: true })
+
+  fireEvent.change(commentBox(), { target: { value: 'À revoir' } })
+  fireEvent.blur(commentBox())
+
+  await waitFor(() => expect(announcer()).toHaveTextContent('Enregistré'))
+  observer.disconnect()
+  // Le statut visible est passé par « Enregistrement… », la zone annoncée jamais.
+  expect(visible).not.toHaveLength(0)
+  expect(announced).not.toContain('Enregistrement…')
+  expect(within(panel()).getAllByText('Enregistré')).toHaveLength(2)
+})
+
+test('commentaire : échec, la zone annoncée contient « Échec de l’enregistrement »', async () => {
+  await mount([makeStudent([])])
+  vi.spyOn(db.sessions, 'put').mockRejectedValueOnce(new Error('disque plein'))
+
+  fireEvent.change(commentBox(), { target: { value: 'À revoir' } })
+  fireEvent.blur(commentBox())
+
+  await waitFor(() => expect(announcer()).toHaveTextContent('Échec de l’enregistrement'))
+})
+
+test('commentaire tapé puis tiroir fermé par Échap avant le délai : enregistré en base', async () => {
+  await mount([makeStudent([])])
+
+  fireEvent.change(commentBox(), { target: { value: 'Avant fermeture' } })
+  await closePanel()
+
+  await waitFor(async () => expect((await storedStudent()).comment).toBe('Avant fermeture'))
 })

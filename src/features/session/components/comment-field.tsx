@@ -8,6 +8,12 @@ import type { UiMessageParams } from '@/lib/i18n/ui-messages'
 
 type CommentStatusKey = Extract<keyof UiMessageParams, `comment_${string}`>
 
+/** Seuls le succès et l'échec sont annoncés aux lecteurs d'écran. */
+const ANNOUNCED_KEY: Partial<Record<AutosaveStatus, CommentStatusKey>> = {
+  saved: 'comment_saved',
+  error: 'comment_error',
+}
+
 const STATUS_KEY: Record<AutosaveStatus, CommentStatusKey | undefined> = {
   idle: undefined,
   saving: 'comment_saving',
@@ -33,6 +39,7 @@ export function CommentField({ ui, student, onSave }: CommentFieldProps) {
   const studentId = student.id
   const { schedule, flush, status } = useAutosave((comment) => onSave(studentId, comment))
   const statusKey = STATUS_KEY[status]
+  const announcedKey = ANNOUNCED_KEY[status]
 
   return (
     <section className="flex flex-col gap-2">
@@ -48,8 +55,12 @@ export function CommentField({ ui, student, onSave }: CommentFieldProps) {
         }}
         onBlur={flush}
       />
-      <p aria-live="polite" className="min-h-5 text-sm text-muted-foreground">
+      <p className="min-h-5 text-sm text-muted-foreground">
         {statusKey === undefined ? null : text(statusKey, {})}
+      </p>
+      {/* Seul le résultat (enregistré / échec) est annoncé : « Enregistrement… » resterait du bruit. */}
+      <p className="sr-only" aria-live="polite">
+        {announcedKey === undefined ? null : text(announcedKey, {})}
       </p>
     </section>
   )
