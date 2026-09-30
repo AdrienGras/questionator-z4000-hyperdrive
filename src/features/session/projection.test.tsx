@@ -5,6 +5,7 @@ import type { Student } from '@/domain/session/types'
 import { db } from '@/lib/db/db'
 import { makeUi } from '@/testing/make-ui'
 import { categoryButton } from '@/testing/passage-assertions'
+import { FixedWidthResizeObserver } from '@/testing/resize-observer'
 import { makeStudent } from '@/testing/student-fixtures'
 import { mountSession } from '@/testing/students-tab-harness'
 import { ProjectionControls } from './components/projection-controls'
@@ -40,19 +41,8 @@ function stubOpen(win: Window | null) {
 const preview = () => screen.getByRole('region', { name: 'Vue projetée' })
 const canvas = () => preview().querySelector('[data-projection-canvas]')!
 
-class FauxResizeObserver {
-  readonly cb: (entries: { contentRect: { width: number } }[]) => void
-  constructor(cb: (entries: { contentRect: { width: number } }[]) => void) {
-    this.cb = cb
-  }
-  observe() {
-    this.cb([{ contentRect: { width: 384 } }])
-  }
-  disconnect() {}
-}
-
 beforeEach(async () => {
-  vi.stubGlobal('ResizeObserver', FauxResizeObserver)
+  vi.stubGlobal('ResizeObserver', FixedWidthResizeObserver)
   localStorage.clear()
   await db.sessions.clear()
 })

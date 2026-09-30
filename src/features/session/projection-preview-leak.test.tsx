@@ -5,6 +5,7 @@ import type { NormalizedCategory } from '@/domain/config/normalize'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
 import { renderAt } from '@/testing/render-at'
+import { FixedWidthResizeObserver } from '@/testing/resize-observer'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
 
@@ -24,19 +25,8 @@ const categories: NormalizedCategory[] = [
   },
 ]
 
-class FauxResizeObserver {
-  readonly cb: (entries: { contentRect: { width: number } }[]) => void
-  constructor(cb: (entries: { contentRect: { width: number } }[]) => void) {
-    this.cb = cb
-  }
-  observe() {
-    this.cb([{ contentRect: { width: 384 } }])
-  }
-  disconnect() {}
-}
-
 beforeEach(async () => {
-  vi.stubGlobal('ResizeObserver', FauxResizeObserver)
+  vi.stubGlobal('ResizeObserver', FixedWidthResizeObserver)
   localStorage.clear()
   await db.sessions.clear()
 })

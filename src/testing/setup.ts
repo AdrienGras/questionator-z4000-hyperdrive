@@ -12,9 +12,15 @@ if (typeof window !== 'undefined') {
   installMatchMedia()
   // jsdom n'a pas `ResizeObserver` (aperçu de projection, F22) ; les tests qui mesurent le simulent.
   globalThis.ResizeObserver ??= class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
+    observe() {
+      // No-op : aucun élément n'est mesuré.
+    }
+    unobserve() {
+      // No-op.
+    }
+    disconnect() {
+      // No-op.
+    }
   }
 }
 

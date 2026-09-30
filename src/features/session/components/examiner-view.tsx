@@ -79,17 +79,15 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
         title={config.exam.title}
         meta={<PassageMeta ui={ui} config={config} student={student} />}
         actions={
-          <>
-            <Button
-              ref={panelButton}
-              type="button"
-              variant="outline"
-              onClick={() => panel.setOpen(true)}
-            >
-              <IconLayoutSidebarRight aria-hidden />
-              {ui.text('side_panel_open', {})}
-            </Button>
-          </>
+          <Button
+            ref={panelButton}
+            type="button"
+            variant="outline"
+            onClick={() => panel.setOpen(true)}
+          >
+            <IconLayoutSidebarRight aria-hidden />
+            {ui.text('side_panel_open', {})}
+          </Button>
         }
       >
         <div className="flex flex-1 flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-start">
