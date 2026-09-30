@@ -117,9 +117,6 @@ export const BUNDLE_TARGETS: BundleTarget[] = [
   { name: 'xlsx', chunk: XLSX_CHUNK, importer: XLSX_IMPORTER, forbidden: XLSX_FORBIDDEN },
 ]
 
-/** Cibles réellement contrôlées : chacune est chargée en dynamique par l'application. */
-export const ACTIVE_TARGETS: BundleTarget[] = BUNDLE_TARGETS
-
 /** Problèmes (vacuité puis fuites) de chaque cible ; [] si le bundle initial est propre. */
 export function checkTargets(
   manifest: Record<string, ManifestChunk>,
@@ -140,13 +137,13 @@ const MANIFEST_PATH = 'dist/.vite/manifest.json'
 
 function main(): void {
   const manifest = manifestSchema.parse(JSON.parse(readFileSync(MANIFEST_PATH, 'utf8')))
-  const problems = checkTargets(manifest, ACTIVE_TARGETS)
+  const problems = checkTargets(manifest, BUNDLE_TARGETS)
   if (problems.length > 0) {
     console.error('Contrôle du bundle initial en échec :')
     for (const problem of problems) console.error(`  - ${problem}`)
     process.exit(1)
   }
-  console.log(`Bundle initial sans ${ACTIVE_TARGETS.map((target) => target.name).join(', ')}.`)
+  console.log(`Bundle initial sans ${BUNDLE_TARGETS.map((target) => target.name).join(', ')}.`)
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) main()

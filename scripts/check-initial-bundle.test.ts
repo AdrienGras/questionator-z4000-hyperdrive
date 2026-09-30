@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 import {
-  ACTIVE_TARGETS,
   BUNDLE_TARGETS,
   checkTargets,
   findInitialLeaks,
@@ -148,10 +147,6 @@ describe('cibles multiples', () => {
   it('déclare recharts et xlsx', () => {
     expect(BUNDLE_TARGETS.map((target) => target.name)).toEqual(['recharts', 'xlsx'])
     expect(BUNDLE_TARGETS[1]).toMatchObject({ chunk: XLSX_CHUNK, importer: XLSX_IMPORTER })
-  })
-
-  it('active recharts et xlsx', () => {
-    expect(ACTIVE_TARGETS.map((target) => target.name)).toEqual(['recharts', 'xlsx'])
   })
 
   it('ne trouve aucun problème sur un manifeste propre à deux cibles', () => {
