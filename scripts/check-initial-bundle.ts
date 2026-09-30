@@ -87,7 +87,7 @@ export const STATS_ROUTE_KEY = 'src/routes/session.$sessionId_.stats.tsx?tsr-spl
 // Chunk `recharts` (vite.config.ts, codeSplitting) : clé `_recharts-<hash>.js` dans le manifeste.
 // Repli : chemins sources (pnpm : node_modules/.pnpm/recharts@x/node_modules/recharts/…) et wrapper.
 export const FORBIDDEN =
-  /^_recharts[.-]|node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?recharts\/|src\/components\/ui\/chart\.tsx/
+  /(?:^_recharts[.-])|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?recharts\/)|(?:src\/components\/ui\/chart\.tsx)/
 const MANIFEST_PATH = 'dist/.vite/manifest.json'
 
 function main(): void {
