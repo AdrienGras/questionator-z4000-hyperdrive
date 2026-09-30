@@ -15,7 +15,7 @@ export class HomePage {
 
   /** Suit le lien « Créer une session » et renvoie l'écran de création. */
   async createSession(): Promise<CreateSessionPage> {
-    await this.page.getByRole('link', { name: 'Créer une session' }).click()
+    await this.page.getByRole('link', { name: 'Créer une session' }).first().click()
     return new CreateSessionPage(this.page)
   }
 }

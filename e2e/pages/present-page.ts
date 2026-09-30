@@ -7,12 +7,16 @@ export class PresentPage {
   /** Région de l'énoncé en cours ; absente tant que l'animation de tirage n'est pas terminée. */
   readonly prompt: Locator
 
+  /** Un jeton de code colorié par Shiki (`span` aux variables `--shiki-*` dans un `pre`). */
+  readonly highlightedCode: Locator
+
   private readonly page: Page
 
   constructor(page: Page) {
     this.page = page
     this.waitingMessage = page.getByText("L'épreuve va bientôt commencer.")
     this.prompt = page.getByRole('region', { name: 'Question en cours' })
+    this.highlightedCode = page.locator('pre span[style*="--shiki-"]').first()
     this.questionIndex = page.getByText(/^Question \d+ \/ \d+$/)
   }
 
