@@ -33,6 +33,8 @@ jobs:
         run: pnpm build
       - name: Vérifier que Recharts et write-excel-file restent hors du bundle initial
         run: pnpm check:bundle
+      - name: Vérifier que tout le build est pré-caché par le service worker
+        run: pnpm check:precache
       - name: Vérifier que l'arbre de routes est à jour
         run: git diff --exit-code -- src/routeTree.gen.ts
       - name: Vérifier la base des assets
