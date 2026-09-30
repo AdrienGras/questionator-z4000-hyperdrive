@@ -461,3 +461,17 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : un import statique d'une bibliothèque lourde depuis une route paresseuse (ex. `write-excel-file` via `lib/xlsx/`) n'entre pas dans le bundle initial : `check:bundle` reste vert, mais la bibliothèque est chargée avec la route au lieu de l'être à la demande.
 **Workaround** : règle dependency-cruiser `lib-xlsx-dynamic-import-only`, qui n'autorise que `import()` vers `src/lib/xlsx/` (D35, D71).
 **Référence** : `.dependency-cruiser.cjs`.
+
+## `Closes #n` dans le corps d'une PR ne lie pas toujours le ticket (2026-09-30)
+
+**Découvert** : PR #47 (F15) et #48 (F16).
+**Symptôme** : `gh pr view <n> --json closingIssuesReferences` renvoie une liste vide malgré `Closes #n` en première ligne du corps ; le merge ne ferme pas le ticket.
+**Workaround** : vérifier `closingIssuesReferences` à l'ouverture de la PR ; à défaut, fermer le ticket après le merge (`gh issue close <n> -c "Livré par #<pr>."`).
+**Référence** : `docs/CONVENTIONS.md` § « Pull request — checklist ».
+
+## SonarQube compte les dictionnaires fr/en comme du code dupliqué (2026-09-30)
+
+**Découvert** : PR #48 (F16), gate en échec sur `new_duplicated_lines_density` (9,5 %, seuil 3).
+**Symptôme** : un dictionnaire `Dictionary<P>` fr + en (ex. `src/domain/export/messages.ts`) a deux blocs de même structure ; le CPD de Sonar ignore les littéraux et signale tout le fichier.
+**Workaround** : ajouter le fichier à `sonar.cpd.exclusions` dans `.sonarcloud.properties` (D61), comme `src/lib/i18n/ui-messages.ts`. Un petit dictionnaire de domaine (quelques clés) passe sous le seuil sans exclusion.
+**Référence** : `.sonarcloud.properties`.

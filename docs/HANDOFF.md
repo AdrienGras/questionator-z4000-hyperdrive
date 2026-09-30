@@ -20,7 +20,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
-## 2026-09-30 — F16 implémenté : export Excel
+## 2026-09-30 — F16 livré : export Excel
 
 **Dernière chose faite** : F15 mergé (PR #47, #15 fermé à la main : la PR n'y était pas liée). F16 (#16) sur `feat/f16-excel-export`, en processus complet : brainstorming, spec `docs/superpowers/specs/2026-09-30-f16-excel-export-design.md` et D71, plan en 5 tâches, subagent-driven development (revue par tâche, deux tours de correctifs, revue finale sur Opus, une vague de correctifs relue). La session a été interrompue pendant la tâche 2, reprise sans perte (rien n'avait été commité).
 - Domaine `src/domain/export/` : `buildWorkbook` pur → `WorkbookSpec` neutre ; un fichier par onglet ; dictionnaire `exportText` fr/en complet ; absent : brute, plafonnée, convertie, ajustement vides, finale selon `absent.export`.
@@ -32,9 +32,9 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 Vérifié à la main : export réel ouvert dans LibreOffice headless (5 onglets, formats appliqués, volets figés, heure locale juste, motif et justification présents).
 
-**Trucs en suspens** : PR à ouvrir en brouillon, `sonar-check.sh --pr <n> --wait`, puis « Ready for review ». Ouverture dans Excel à faire par le propriétaire du dépôt et à consigner dans la PR (critère d'acceptation). Points mineurs au BACKLOG § Export Excel.
+**Trucs en suspens** : PR #48 mergée, #16 fermé à la main (la PR n'était pas liée au ticket). Gate SonarQube passé au second essai : la duplication de `src/domain/export/messages.ts` (dictionnaires fr/en de même forme) est exclue du CPD comme `ui-messages.ts` (D61). Reste à ouvrir un export dans Excel (critère d'acceptation, fait seulement sous LibreOffice) : vérifier l'absence d'invite de réparation liée au volet figé. Points mineurs au BACKLOG § Export Excel.
 
-**Prochaine chose à creuser** : ouvrir la PR F16 et passer le gate SonarQube ; ensuite F17 (hors ligne), qui pré-cache les chunks `_recharts-*` et `_xlsx-*` que `check:bundle` isole déjà.
+**Prochaine chose à creuser** : F17 (hors ligne, #17) : pré-cache des chunks `_recharts-*` et `_xlsx-*`, que `check:bundle` isole déjà ; brainstorming d'abord (vite-plugin-pwa, D36).
 
 **Notes pour future Claude** : une PR avec `Closes #n` peut ne pas lier le ticket (cas de #47) : vérifier `gh pr view <n> --json closingIssuesReferences` avant le merge. write-excel-file écrit les dates en UTC ; la conversion LibreOffice en CSV n'applique les formats qu'avec le 9e jeton de filtre à `true`. Les agents lancés en arrière-plan ne survivent pas à la fin d'une session : vérifier `git log` et le ledger avant de relancer.
 
