@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import { memo, type CSSProperties } from 'react'
 import { CategoryIcon } from '@/components/category-icon'
 import { Markdown } from '@/components/markdown/markdown'
 import type { NormalizedCategory, NormalizedQuestion } from '@/domain/config/normalize'
@@ -11,7 +11,11 @@ type QuestionPreviewProps = Readonly<{
 }>
 
 /** Carte d'une question : en-tête, énoncé rendu comme à la projection, réponse attendue repliée. */
-export function QuestionPreview({ ui, category, question }: QuestionPreviewProps) {
+export const QuestionPreview = memo(function QuestionPreview({
+  ui,
+  category,
+  question,
+}: QuestionPreviewProps) {
   const { color, icon } = category
   const accent: (CSSProperties & Record<'--category-color', string>) | undefined =
     color === undefined ? undefined : { '--category-color': color }
@@ -47,4 +51,4 @@ export function QuestionPreview({ ui, category, question }: QuestionPreviewProps
       )}
     </article>
   )
-}
+})

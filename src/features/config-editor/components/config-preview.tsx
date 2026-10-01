@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { ProjectionCanvas } from '@/components/projection/projection-canvas'
 import { ThemeScope } from '@/components/theme-scope'
 import type { NormalizedConfig } from '@/domain/config/normalize'
@@ -15,7 +16,11 @@ type ConfigPreviewProps = Readonly<{
 
 /** Aperçu de la dernière config valide : questions par catégorie, puis écran final factice. */
 export function ConfigPreview({ ui, config, stale }: ConfigPreviewProps) {
-  if (config === undefined) {
+  const finalView = useMemo(
+    () => (config === undefined ? undefined : toProjectedView(previewSession(config))),
+    [config],
+  )
+  if (config === undefined || finalView === undefined) {
     return <p className="text-sm text-muted-foreground">{ui.text('editor_preview_empty', {})}</p>
   }
   return (
@@ -42,7 +47,7 @@ export function ConfigPreview({ ui, config, stale }: ConfigPreviewProps) {
         ))}
         <section className="space-y-3">
           <h3 className="text-lg font-semibold">{ui.text('editor_final_screen', {})}</h3>
-          <ProjectionCanvas view={toProjectedView(previewSession(config))} />
+          <ProjectionCanvas view={finalView} />
         </section>
       </ThemeScope>
     </div>

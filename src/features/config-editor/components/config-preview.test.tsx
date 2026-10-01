@@ -1,11 +1,17 @@
 import { render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import exampleText from '../../../../examples/config.example.json?raw'
+import * as previewSessionModule from '@/domain/presentation/preview-session'
 import { AppearanceProvider } from '@/app/appearance-provider'
 import { validateConfig } from '@/domain/config/validate'
 import { makeUi } from '@/testing/make-ui'
 import { FixedWidthResizeObserver } from '@/testing/resize-observer'
 import { ConfigPreview } from './config-preview'
+
+vi.mock('@/domain/presentation/preview-session', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/domain/presentation/preview-session')>()
+  return { ...actual, previewSession: vi.fn<typeof actual.previewSession>(actual.previewSession) }
+})
 
 const result = validateConfig(exampleText, { cssSupports: () => true })
 if (!result.ok) throw new Error('exemple invalide')
@@ -51,5 +57,24 @@ describe('ConfigPreview', () => {
     mount({ ui, config: undefined, stale: false })
     expect(screen.getByText("L'aperçu apparaîtra dès que la config sera valide.")).toBeTruthy()
     expect(screen.queryByRole('heading')).toBeNull()
+  })
+
+  it('ne recalcule pas l’écran final quand la config est la même', () => {
+    const spy = vi.mocked(previewSessionModule.previewSession)
+    spy.mockClear()
+    const tree = (
+      <AppearanceProvider>
+        <ConfigPreview ui={ui} config={config} stale={false} />
+      </AppearanceProvider>
+    )
+    const { rerender } = render(tree)
+    expect(spy).toHaveBeenCalledTimes(1)
+    rerender(tree)
+    rerender(
+      <AppearanceProvider>
+        <ConfigPreview ui={ui} config={config} stale />
+      </AppearanceProvider>,
+    )
+    expect(spy).toHaveBeenCalledTimes(1)
   })
 })
