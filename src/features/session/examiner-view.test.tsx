@@ -107,9 +107,25 @@ test('activeStudentId inconnu : session endommagée, vue examinateur non ouverte
   await putSession(sessionWith(config, twoStudents(), 'inconnu'))
   renderAt('/session/session-1')
 
-  // Provisoire : la Tâche 5 de F31 remplace ce repli par l'écran « session endommagée ».
-  expect(await screen.findByRole('heading', { name: 'Session introuvable' })).toBeInTheDocument()
+  expect(
+    await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
+  ).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Exporter un backup' })).toBeInTheDocument()
   expect(screen.queryByText(/^Question /)).not.toBeInTheDocument()
+})
+
+test('session corrompue après le montage : la page bascule sur l’écran « endommagée » (F31)', async () => {
+  const config = makeConfig({ questionsPerStudent: 3 })
+  const session = sessionWith(config, twoStudents(), 'student-1')
+  await putSession(session)
+  renderAt('/session/session-1')
+  await screen.findAllByText('Durand Alice')
+
+  await db.sessions.put({ ...session, activeStudentId: 'inconnu' })
+
+  expect(
+    await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
+  ).toBeInTheDocument()
 })
 
 test('sans activeStudentId, « Aucun étudiant sélectionné »', async () => {

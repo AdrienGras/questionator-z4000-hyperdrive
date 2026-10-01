@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { deleteSession } from '@/lib/db/sessions'
 import type { Session } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
-import { exportSession } from '@/features/home/export-session'
+import { exportBackup } from '@/components/export/export-backup'
 
 type DeleteDialogProps = Readonly<{
   ui: Ui
@@ -58,7 +58,7 @@ export function DeleteDialog({ ui, session, open, onOpenChange }: DeleteDialogPr
           </p>
         )}
         <AlertDialogFooter>
-          <Button variant="outline" onClick={() => exportSession(session)}>
+          <Button variant="outline" onClick={() => exportBackup(session)}>
             {text('delete_export_first', {})}
           </Button>
           <AlertDialogCancel>{text('dialog_cancel', {})}</AlertDialogCancel>

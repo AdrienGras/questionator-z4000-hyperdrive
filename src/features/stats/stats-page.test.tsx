@@ -138,9 +138,24 @@ test("question tirée d'id inconnu : session endommagée, statistiques non affic
   await putSession(sessionWith([[attemptOf('a', 'ghost-question', 1)]]))
   renderAt('/session/session-1/stats')
 
-  // Provisoire : la Tâche 5 de F31 remplace ce repli par l'écran « session endommagée ».
-  expect(await screen.findByRole('heading', { name: 'Session introuvable' })).toBeInTheDocument()
+  expect(
+    await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
+  ).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Exporter un backup' })).toBeInTheDocument()
   expect(screen.queryByRole('table', { name: 'Questions les plus tirées' })).not.toBeInTheDocument()
+})
+
+test('session corrompue après le montage : les statistiques basculent sur l’écran « endommagée » (F31)', async () => {
+  const session = makeSession()
+  await putSession(session)
+  renderAt('/session/session-1/stats')
+  await screen.findByRole('region', { name: 'Effectifs' })
+
+  await db.sessions.put({ ...session, activeStudentId: 'inconnu' })
+
+  expect(
+    await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
+  ).toBeInTheDocument()
 })
 
 test('locale « en » : titres des blocs en anglais', async () => {

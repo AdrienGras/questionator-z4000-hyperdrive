@@ -1,4 +1,5 @@
 import { getRouteApi } from '@tanstack/react-router'
+import { DamagedSessionScreen } from '@/components/damaged-session'
 import { DbStatusBanner } from '@/components/db-status-banner'
 import { SessionAppearance } from '@/components/session-appearance'
 import { SessionFallback } from '@/components/session-fallback'
@@ -11,7 +12,7 @@ const route = getRouteApi('/session/$sessionId')
 
 /**
  * Vue examinateur (F07 : layout provisoire, D60 ; F09 remplace le corps). `useUi()` ici ne sert
- * qu'aux états sans session ; sous `SessionAppearance`, `ExaminerView` prend la langue de la config.
+ * qu'aux états sans session lisible ; sous `SessionAppearance`, `ExaminerView` prend la langue de la config.
  */
 export function SessionPage() {
   const { sessionId } = route.useParams()
@@ -26,8 +27,8 @@ export function SessionPage() {
     )
   if (session === undefined) return <SessionFallback ui={ui} kind="loading" />
   if (session === null) return <SessionFallback ui={ui} kind="not-found" />
-  // Provisoire (F31) : l'écran « session endommagée » remplace cette branche.
-  if (isDamaged(session)) return <SessionFallback ui={ui} kind="not-found" />
+  if (isDamaged(session))
+    return <DamagedSessionScreen ui={ui} damaged={session} variant="examiner" />
   return (
     <SessionAppearance sessionId={session.id} view="examiner" config={session.config}>
       <ExaminerView session={session} />

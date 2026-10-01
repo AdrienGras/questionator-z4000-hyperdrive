@@ -233,8 +233,10 @@ test('aperçu : étudiant projeté inconnu → session endommagée, aucun aperç
   )
   renderAt('/session/session-1')
 
-  // Provisoire : la Tâche 5 de F31 remplace ce repli par l'écran « session endommagée ».
-  expect(await screen.findByRole('heading', { name: 'Session introuvable' })).toBeInTheDocument()
+  expect(
+    await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
+  ).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Exporter un backup' })).toBeInTheDocument()
 })
 
 test('contrôles sous l’aperçu, hors de l’en-tête', async () => {

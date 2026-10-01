@@ -32,3 +32,21 @@ describe('backupFileName', () => {
     expect(backupFileName(makeSession({ name }), NOW)).toBe(`${slug}-backup-2026-09-25.json`)
   })
 })
+
+describe('export brut (F31)', () => {
+  test('serializeBackup écrit une session quelconque telle quelle', () => {
+    const text = serializeBackup({ id: 'x', foo: 1 }, NOW)
+    expect(text).toContain('"session": {\n    "id": "x",\n    "foo": 1\n  }')
+    expect(JSON.parse(text).session).toEqual({ id: 'x', foo: 1 })
+  })
+
+  test.each([
+    [{ name: 42, id: 'abc' }, 'abc'],
+    [{ name: '  ' }, 'session'],
+    [{ name: '', id: 7 }, 'session'],
+    ['pas un objet', 'session'],
+    [null, 'session'],
+  ])('backupFileName(%j) → %s', (session, slug) => {
+    expect(backupFileName(session, NOW)).toBe(`${slug}-backup-2026-09-25.json`)
+  })
+})

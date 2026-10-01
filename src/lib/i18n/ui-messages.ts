@@ -33,6 +33,9 @@ export type UiMessageParams = {
   color_mode_system: NoParams
   session_loading: NoParams
   session_not_found: NoParams
+  damaged_title: NoParams
+  damaged_body: NoParams
+  damaged_details: NoParams
   present_waiting: NoParams
   present_prompt_label: NoParams
   present_question_index: { current: number; total: number }
@@ -352,6 +355,10 @@ const fr: Dictionary<UiMessageParams> = {
   color_mode_system: () => 'Système',
   session_loading: () => 'Chargement de la session…',
   session_not_found: () => 'Session introuvable',
+  damaged_title: () => 'Cette session est endommagée',
+  damaged_body: () =>
+    'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Exportez un backup pour le conserver ou le corriger.',
+  damaged_details: () => 'Détails',
   present_waiting: () => "L'épreuve va bientôt commencer.",
   present_prompt_label: () => 'Question en cours',
   present_question_index: ({ current, total }) => `Question ${current} / ${total}`,
@@ -633,6 +640,10 @@ const en: Dictionary<UiMessageParams> = {
   color_mode_system: () => 'System',
   session_loading: () => 'Loading session…',
   session_not_found: () => 'Session not found',
+  damaged_title: () => 'This session is damaged',
+  damaged_body: () =>
+    'The saved content is inconsistent; the app cannot open it. Export a backup to keep it or fix it.',
+  damaged_details: () => 'Details',
   present_waiting: () => 'The exam will start soon.',
   present_prompt_label: () => 'Current question',
   present_question_index: ({ current, total }) => `Question ${current} / ${total}`,
