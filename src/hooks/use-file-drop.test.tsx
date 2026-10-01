@@ -1,6 +1,6 @@
-import { createEvent, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, test, vi } from 'vitest'
-import { useFileDrop } from './use-file-drop'
+import { act, createEvent, fireEvent, render, screen } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { useFileDrop, WINDOW_EXIT_DELAY_MS } from './use-file-drop'
 
 const file = new File(['{}'], 'a.json', { type: 'application/json' })
 const files = { files: [file], types: ['Files'] }
@@ -24,15 +24,40 @@ function Zone({
   )
 }
 
-/** Survol en cours sur l'enfant, puis enfant démonté : son `dragleave` n'atteindra jamais React. */
+/** `dragleave` avec un `relatedTarget` réel : jsdom n'a pas de `DragEvent` (QUIRKS), posé à la main. */
+function leaveToward(target: Element, relatedTarget: Element | null) {
+  const leave = createEvent.dragLeave(target, { dataTransfer: files })
+  Object.defineProperty(leave, 'relatedTarget', { value: relatedTarget })
+  fireEvent(target, leave)
+}
+
+/**
+ * Survol de l'enfant, puis enfant démonté : son `dragleave` n'atteindra jamais React. Ordre
+ * Chromium / Firefox : `dragenter` du nouvel élément, puis `dragleave` de l'ancien avec
+ * `relatedTarget` posé.
+ */
 function hoverChildThenUnmountIt() {
   const view = render(<Zone />)
-  fireEvent.dragEnter(screen.getByTestId('zone'), { dataTransfer: files })
-  fireEvent.dragEnter(screen.getByTestId('child'), { dataTransfer: files })
-  fireEvent.dragLeave(screen.getByTestId('zone'), { dataTransfer: files, relatedTarget: null })
+  const zone = screen.getByTestId('zone')
+  const child = screen.getByTestId('child')
+  fireEvent.dragEnter(zone, { dataTransfer: files })
+  fireEvent.dragEnter(child, { dataTransfer: files })
+  leaveToward(zone, child)
+  fireEvent.dragOver(child, { dataTransfer: files })
   view.rerender(<Zone withChild={false} />)
   expect(draggingState()).toBe('true')
   return view
+}
+
+/** Appels d'`addEventListener` / `removeEventListener` portant sur le glisser-déposer. */
+function dragTypes(calls: ReadonlyArray<readonly unknown[]>) {
+  return calls.filter(([type]) => typeof type === 'string' && /^(drag|drop)/.test(type))
+}
+
+function advance(ms: number) {
+  act(() => {
+    vi.advanceTimersByTime(ms)
+  })
 }
 
 function draggingState(): string | null {
@@ -124,61 +149,77 @@ describe('useFileDrop', () => {
   })
 
   describe('filet window (#87)', () => {
-    test('élément survolé démonté, puis le glisser quitte la fenêtre : surimpression retirée', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    test('ordre Chromium, élément survolé démonté, puis sortie de fenêtre : retirée après le délai', () => {
       hoverChildThenUnmountIt()
-      // Sortie de la fenêtre : `dragleave` sans `relatedTarget` ni `dragenter` qui le précède.
-      fireEvent.dragLeave(document.body, { dataTransfer: files, relatedTarget: null })
+      leaveToward(document.body, null)
+      advance(WINDOW_EXIT_DELAY_MS - 1)
+      expect(draggingState()).toBe('true')
+      advance(1)
       expect(draggingState()).toBe('false')
-      // Le compteur est remis à zéro : un nouveau survol puis une sortie de la zone la retirent.
+      // Compteur remis à zéro : un nouveau survol puis une sortie de la zone la retirent.
       fireEvent.dragEnter(screen.getByTestId('zone'), { dataTransfer: files })
       expect(draggingState()).toBe('true')
-      fireEvent.dragLeave(screen.getByTestId('zone'), { dataTransfer: files, relatedTarget: null })
+      leaveToward(screen.getByTestId('zone'), document.body)
       expect(draggingState()).toBe('false')
     })
 
-    test('élément survolé démonté, puis dépôt ailleurs sur la page : surimpression retirée', () => {
+    test('élément survolé démonté, puis dépôt ailleurs sur la page : retirée aussitôt', () => {
       hoverChildThenUnmountIt()
       fireEvent.drop(document.body, { dataTransfer: files })
       expect(draggingState()).toBe('false')
     })
 
-    test('dragleave sans relatedTarget précédé d’un dragenter (passage vers un enfant, WebKit) : surimpression tenue', () => {
+    test('paire WebKit parent → enfant (relatedTarget nul) : le dragover suivant annule le délai', () => {
+      render(<Zone />)
+      const zone = screen.getByTestId('zone')
+      const child = screen.getByTestId('child')
+      fireEvent.dragEnter(zone, { dataTransfer: files })
+      fireEvent.dragEnter(child, { dataTransfer: files })
+      leaveToward(zone, null)
+      fireEvent.dragOver(child, { dataTransfer: files })
+      advance(WINDOW_EXIT_DELAY_MS * 3)
+      expect(draggingState()).toBe('true')
+    })
+
+    test('dragenter après un dragleave sans relatedTarget : délai annulé aussi', () => {
       render(<Zone />)
       const zone = screen.getByTestId('zone')
       fireEvent.dragEnter(zone, { dataTransfer: files })
+      leaveToward(document.body, null)
       fireEvent.dragEnter(screen.getByTestId('child'), { dataTransfer: files })
-      fireEvent.dragLeave(zone, { dataTransfer: files, relatedTarget: null })
-      fireEvent.dragEnter(zone, { dataTransfer: files })
-      fireEvent.dragLeave(screen.getByTestId('child'), { dataTransfer: files, relatedTarget: null })
+      advance(WINDOW_EXIT_DELAY_MS * 3)
       expect(draggingState()).toBe('true')
     })
 
-    test('dragleave avec relatedTarget (Chromium, passage interne) : ignoré par le filet', () => {
+    test('dragleave avec relatedTarget (passage interne) : aucun délai lancé', () => {
       render(<Zone />)
-      const zone = screen.getByTestId('zone')
-      fireEvent.dragEnter(zone, { dataTransfer: files })
-      // jsdom n'a pas de `DragEvent` : l'événement est un `Event` sans `relatedTarget`, posé à la main.
-      const leave = createEvent.dragLeave(document.body, { dataTransfer: files })
-      Object.defineProperty(leave, 'relatedTarget', { value: screen.getByTestId('child') })
-      fireEvent(document.body, leave)
+      fireEvent.dragEnter(screen.getByTestId('zone'), { dataTransfer: files })
+      leaveToward(document.body, screen.getByTestId('child'))
+      advance(WINDOW_EXIT_DELAY_MS * 3)
       expect(draggingState()).toBe('true')
     })
 
-    test('sans survol en cours, aucun écouteur sur window', () => {
+    test('démontage pendant le délai : minuteur annulé, écouteurs retirés', () => {
       const add = vi.spyOn(window, 'addEventListener')
       const remove = vi.spyOn(window, 'removeEventListener')
       const { unmount } = render(<Zone />)
-      expect(add.mock.calls.filter(([type]) => type.startsWith('drag') || type === 'drop')).toEqual(
-        [],
-      )
+      expect(dragTypes(add.mock.calls)).toEqual([])
       fireEvent.dragEnter(screen.getByTestId('zone'), { dataTransfer: files })
-      const added = add.mock.calls.filter(([type]) => type.startsWith('drag') || type === 'drop')
+      const added = dragTypes(add.mock.calls)
       expect(added.length).toBeGreaterThan(0)
+      leaveToward(document.body, null)
+      expect(vi.getTimerCount()).toBe(1)
       unmount()
-      const removed = remove.mock.calls.filter(
-        ([type]) => type.startsWith('drag') || type === 'drop',
-      )
-      expect(removed.length).toBe(added.length)
+      expect(vi.getTimerCount()).toBe(0)
+      expect(dragTypes(remove.mock.calls).length).toBe(added.length)
     })
   })
 })

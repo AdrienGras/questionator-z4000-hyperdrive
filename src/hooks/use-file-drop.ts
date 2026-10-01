@@ -20,14 +20,18 @@ type DropProps<T extends HTMLElement> = {
   onDrop: (event: DragEvent<T>) => void
 }
 
+/** Délai sans `dragenter` ni `dragover` après lequel un `dragleave` sans cible vaut sortie de fenêtre. */
+export const WINDOW_EXIT_DELAY_MS = 100
+
 /**
  * Filet `window` pendant un survol (#87) : si l'élément survolé est démonté, son `dragleave`
- * n'atteint jamais React et le compteur reste positif. On remet tout à zéro quand le glisser quitte
- * la fenêtre ou qu'un fichier est déposé n'importe où. Quitter la fenêtre = `dragleave` sans
- * `relatedTarget` **et** sans `dragenter` juste avant : en passant d'un élément à l'autre, le
- * navigateur envoie le `dragenter` du nouveau avant le `dragleave` de l'ancien (WebKit laisse alors
- * `relatedTarget` à `null`, d'où ce second critère). Écoute en capture : un `stopPropagation`
- * (`isolate`, garde de page) ne le masque pas.
+ * n'atteint jamais React et le compteur reste positif. On remet tout à zéro quand un fichier est
+ * déposé n'importe où, ou quand le glisser quitte la fenêtre. Sortie de fenêtre : un `dragleave`
+ * sans `relatedTarget` lance un délai, qu'annule tout `dragenter` ou `dragover` (le navigateur en
+ * envoie un toutes les ~50 ms tant que le pointeur est dans la fenêtre). Indépendant de l'ordre
+ * des événements : WebKit laisse aussi `relatedTarget` à `null` en passant d'un élément à un enfant,
+ * mais le `dragover` suivant annule le délai. Écoute en capture : un `stopPropagation` (`isolate`,
+ * garde de page) ne le masque pas.
  */
 function useWindowDragReset(active: boolean, reset: () => void) {
   const resetRef = useRef(reset)
@@ -36,22 +40,32 @@ function useWindowDragReset(active: boolean, reset: () => void) {
   })
   useEffect(() => {
     if (!active) return undefined
-    let entered = false
-    const onEnter = () => {
-      entered = true
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const cancel = () => {
+      clearTimeout(timer)
+      timer = undefined
     }
     const onLeave = (event: globalThis.DragEvent) => {
       // `relatedTarget` peut manquer (jsdom, événements synthétiques) : traité comme `null`.
       if (event.relatedTarget) return
-      if (entered) entered = false
-      else resetRef.current()
+      cancel()
+      timer = setTimeout(() => {
+        timer = undefined
+        resetRef.current()
+      }, WINDOW_EXIT_DELAY_MS)
     }
-    const onDrop = () => resetRef.current()
-    window.addEventListener('dragenter', onEnter, true)
+    const onDrop = () => {
+      cancel()
+      resetRef.current()
+    }
+    window.addEventListener('dragenter', cancel, true)
+    window.addEventListener('dragover', cancel, true)
     window.addEventListener('dragleave', onLeave, true)
     window.addEventListener('drop', onDrop, true)
     return () => {
-      window.removeEventListener('dragenter', onEnter, true)
+      cancel()
+      window.removeEventListener('dragenter', cancel, true)
+      window.removeEventListener('dragover', cancel, true)
       window.removeEventListener('dragleave', onLeave, true)
       window.removeEventListener('drop', onDrop, true)
     }
