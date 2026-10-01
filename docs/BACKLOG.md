@@ -13,6 +13,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Outillage
 
+- [ ] Tests instables vus pendant F31 : `src/features/create-session/create-session-page.test.tsx` (rejet non géré « window is not defined » au démontage du routeur) et `src/features/config-editor/config-editor-page.test.tsx` (`getByRole('banner')`, une fois). → #87
 - [ ] Passer `.nvmrc` (et la CI) à Node 26 une fois LTS (prévu le 2026-10-28) ; Node 24 passe en maintenance le 2026-10-20. → #85
 - [ ] Évaluer oxfmt en remplacement de Prettier + prettier-plugin-tailwindcss quand il sort en 1.0 (tri Tailwind natif via `sortTailwindcss`). → #88
 
@@ -25,12 +26,10 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Notation
 
-- [ ] `formatScore` en `final` : si `finalScale` a plus de décimales que le pas (ex. 20,25 au pas de 0,5, déjà signalé par `final_scale_off_grid`), Intl arrondit l'affichage de la note plafonnée (« 20,3 »). Prendre le max des décimales du pas et de `finalScale`, ou refuser ce cas en F02. → #79
-- [ ] Valider en F04/F11 les données persistées (ajustement hors bornes, attempt `scored` sans `score`) : aujourd'hui `computeScores` lève sur donnée corrompue. → #79
 
 ## Persistance
 
-- [ ] Relire `navigator.storage.persisted()` sur `visibilitychange` : le navigateur peut accorder la persistance de lui-même (PWA installée), l'indicateur de F05 resterait sinon à `best-effort` jusqu'au rechargement. → #79
+- [ ] `listSessions` lit la table deux fois hors transaction (index puis enregistrements sans `updatedAt`) : une lecture unique et un tri en mémoire. → #87
 - [ ] Première migration de schéma (`version(2)`) : tester l'ouverture d'un ancien onglet sur une base déjà montée de version.
 
 ## Écran de passage
@@ -65,6 +64,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Accueil et backup
 
+- [ ] La clé `back_home` utilise une apostrophe droite alors que le reste de l'interface a `’` : harmoniser (e2e et tests à suivre). → #87
 - [ ] Ignorer le glisser-déposer pendant qu'un dialogue d'import est ouvert (aujourd'hui un second fichier remplace le conflit en attente) et pendant un import en cours. → #82
 - [ ] Surimpression de dépôt : compteur `dragenter`/`dragleave` au lieu du test `relatedTarget` (WebKit envoie `relatedTarget = null`, scintillement possible). → #82
 - [ ] Garder le contenu des dialogues d'import pendant l'animation de fermeture (il disparaît dès que l'état revient à `idle`). → #82

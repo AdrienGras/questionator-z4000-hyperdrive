@@ -40,7 +40,7 @@ de 0,5 et une convertie exacte de 13,3, l'examinateur voyait « 13,5 + 0,2 = 13,
 - `convertie = arrondi(plafonnée × finalScale / maxRawScore)`.
 - `finale = arrondi(clamp(convertie + ajustement, 0, finalScale))`.
 - L'ajustement se saisit par multiples du pas d'arrondi. Le second arrondi est un filet
-  pour le cas où `finalScale` n'est pas multiple du pas.
+  pour le cas où `finalScale` n'est pas multiple du pas (*cas désormais refusé par la validation : D81*).
 
 **Pourquoi** : le calcul affiché (convertie + ajustement = finale) est toujours exact et
 lisible pour l'examinateur. Remplace la mention « un seul arrondi » de D01.
@@ -307,7 +307,7 @@ au-delà de l'échelle : la formule de D02 (borner puis arrondir) la laissait pa
 **Décision** :
 - `convertie = clamp(arrondi(exacte), 0, finalScale)`.
 - `finale = clamp(arrondi(convertie + ajustement), 0, finalScale)`.
-- Avertissement de validation (F02) si `finalScale` n'est pas multiple du pas.
+- Avertissement de validation (F02) si `finalScale` n'est pas multiple du pas (*remplacé par D81 : c'est maintenant une erreur*).
 
 **Pourquoi** : 0 et `finalScale` toujours atteignables et jamais dépassés, même hors
 grille.
@@ -1214,3 +1214,22 @@ autre encodage 8 bits.
 **Pourquoi** : la route dédiée garde CodeMirror (et l'exemple) hors de l'accueil et de la création ; le pré-cache de F17 couvre le hors ligne sans rien ajouter. Réutiliser le validateur et ses messages garantit qu'une erreur s'affiche à l'identique dans l'éditeur et à la création. Thème et langue limités à l'aperçu : l'éditeur reste dans l'apparence de l'application pendant qu'on tape un `theme`. Le passage par `sessionStorage` évite l'import entre features (D59) et survit au rechargement de `#/new`.
 
 **Reporté dans** : `PRODUCT.md` F05, F26 ; `docs/CONVENTIONS.md` § « Vue de session thémée » ; `docs/BACKLOG.md` ; `docs/QUIRKS.md`. Impacte F02, F06, F14, F20, F22.
+
+## D81 — F31 : robustesse des données persistées (sessions endommagées, échelle hors grille refusée, persistance relue) (2026-10-01)
+
+**Question** : une session lue en IndexedDB mais incohérente (attempt `scored` sans `score`, ajustement hors bornes, config qui ne valide plus) faisait lever `computeScores` ou affichait une note trompeuse, sans que l'utilisateur puisse récupérer ses données. Comment détecter, afficher et conserver une telle session ?
+
+**Décision** :
+- Détection dans la couche de lecture `lib/db` (`getSession`, `listSessions`, `updateSession`), par `checkStoredSession` (`domain/backup/stored-session.ts`) : exactement les règles de l'import de backup (schéma, `validateConfig` sur la config figée, `checkSessionRules`). Coût mesuré : ~0,17 ms par session (exemple, 40 étudiants). Un enregistrement invalide devient un `DamagedSession` (`id`, `raw`, `issues`), garde `isDamaged` ; le reste du code reçoit des sessions sûres.
+- `updateSession` lève `SessionDamagedError` sans écrire : on ne réécrit jamais un contenu qu'on ne comprend pas.
+- `DamagedSessionScreen` : variante examinateur (titre, explication, « Exporter un backup », retour à l'accueil, détails des issues) sur la session et les statistiques ; variante vue projetée : le titre seul (écart assumé au ticket : rien à exporter ni à lire devant l'étudiant, et les issues peuvent citer des noms ou des notes). La vue projetée ne reçoit pas la session (D69) : la variante n'en prend aucune, `useProjectedView` ne remonte que `'damaged'`.
+- Export brut : `raw` est écrit tel quel dans l'enveloppe ; nom de fichier = nom lisible, sinon id, sinon `session`. Accueil : `DamagedSessionCard` (badge « Endommagée », menu « Exporter un backup » + « Supprimer »).
+- Réparation : l'import d'un backup par-dessus une session endommagée reste possible (dialogue de conflit : nom lisible ou id, sans date). Boucle « exporter, corriger, réimporter ».
+- `final_scale_off_grid` passe d'avertissement à **erreur** (remplace D02 / D44 sur ce point). Conséquence assumée : une session ou un backup portant une telle config devient « endommagé » / inimportable.
+- Nouvelle règle de backup `invalid_adjustment` : ajustement fini, au plus 3 décimales, au plus 10 000 en valeur absolue (mêmes bornes que les autres valeurs de notation, supprime l'exception de `toMilli`). `parseBackup` signale désormais les erreurs d'enveloppe avant celles de la session.
+- `persistence.ts` relit `navigator.storage.persisted()` quand l'onglet redevient visible.
+- Hors périmètre : error boundary générique, réparation automatique, migration `version(2)`.
+
+**Pourquoi** : un seul point de passage pour tous les écrans ; deux chemins (lecture, import), une seule définition de « session valide ». Refuser l'échelle hors grille supprime le cas d'affichage trompeur (« 20,3 » pour 20,25 au pas de 0,5) plutôt que de l'habiller, le projet n'étant pas encore en production. Une session validée qui lève relève d'un bug, pas d'une donnée endommagée.
+
+**Reporté dans** : `PRODUCT.md` §6.2 ; `docs/CONVENTIONS.md` § « Mutation de session » ; `docs/BACKLOG.md` ; `docs/QUIRKS.md`. Spec : `docs/superpowers/specs/2026-10-01-f31-robustesse-design.md`. Impacte F04, F05, F11, F14, F18, F30.

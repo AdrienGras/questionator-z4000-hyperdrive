@@ -568,3 +568,28 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : `closeOnClick` vaut `false` par défaut sur `Menu.RadioItem` et `Menu.CheckboxItem` (choix multiples attendus), alors qu'il vaut `true` sur `Menu.Item`.
 **Workaround** : passer `closeOnClick` sur l'item quand un choix doit refermer le menu. base-ui rend alors le focus au déclencheur, au clavier comme à la souris.
 **Référence** : `src/components/color-mode-toggle.tsx`, `e2e/color-mode.spec.ts`, `node_modules/@base-ui/react/menu/radio-item/MenuRadioItem.d.ts`.
+
+## Un test qui sème une session incohérente la lit désormais comme endommagée (2026-10-01)
+
+**Découvert** : F31.
+**Symptôme** : un test qui écrivait en base une session aux données incohérentes (attempt `scored` sans `score`, question absente de la config, ajustement hors bornes) obtient un `DamagedSession` au lieu d'une `Session` ; 51 tests existants ont dû être corrigés.
+**Cause** : toute lecture IndexedDB passe par `checkStoredSession` (mêmes règles que l'import de backup).
+**Workaround** : les fixtures doivent passer `checkStoredSession` (`makeConfig` contient les questions `a-1` à `a-10`) ; `healthy()` (`src/testing/healthy-session.ts`) réduit le type `Session | DamagedSession` à `Session` dans les assertions.
+**Référence** : `src/testing/healthy-session.ts`, `src/domain/backup/stored-session.ts`.
+
+## jsdom n'a pas `CSS.supports` : `readStored` retombe sur « tout accepter » (2026-10-01)
+
+**Découvert** : F31.
+**Symptôme** : sous jsdom, valider une couleur de thème par `CSS.supports` lèverait un `TypeError`.
+**Cause** : jsdom n'implémente pas `CSS.supports`.
+**Workaround** : `readStored` (`src/lib/db/damaged-session.ts`) détecte l'absence de `CSS.supports` et injecte un `cssSupports` qui accepte tout. Un test qui veut une couleur refusée doit fournir sa propre fonction à `checkStoredSession`.
+**Référence** : `src/lib/db/damaged-session.ts`.
+
+## Écrire un enregistrement brut endommagé dans un test : `db.table('sessions').put(...)` (2026-10-01)
+
+**Découvert** : F31.
+**Symptôme** : `db.sessions.put(donnee as Session)` pour semer une session endommagée échoue à oxlint (règle type-aware sur les `as`, cf. entrée précédente sur oxlint).
+**Cause** : `db.sessions` est typée `EntityTable<Session, 'id'>` ; il faudrait un cast.
+**Workaround** : passer par `db.table('sessions').put(brut)`, non typée, qui accepte tout objet porteur d'un `id`.
+**Référence** : tests de `src/lib/db/`.
+
