@@ -1,4 +1,3 @@
-import { expect } from '@playwright/test'
 import type { Download, Locator, Page } from '@playwright/test'
 import { PresentPage } from './present-page.ts'
 import { StatsPage } from './stats-page.ts'
@@ -20,6 +19,12 @@ export class ExaminerPage {
   /** Un bloc de code resté en texte brut (`data-highlighted="false"`). */
   readonly plainCode: Locator
 
+  /** Champ « Commentaire » de l'onglet « Étudiant » du tiroir (à ouvrir avec `openPanel`). */
+  readonly commentField: Locator
+
+  /** Statut « Enregistré » du commentaire dans le tiroir. */
+  readonly commentSaved: Locator
+
   private readonly page: Page
 
   /** Exclut l'aperçu de la vue projetée (F22), qui duplique l'énoncé et ses blocs de code. */
@@ -36,6 +41,11 @@ export class ExaminerPage {
       .locator(`pre${ExaminerPage.OUTSIDE_PREVIEW} span[style*="--shiki-"]`)
       .first()
     this.banner = page.getByRole('status').filter({ hasText: 'La vue projetée montre' })
+    this.commentField = page.getByRole('textbox', { name: 'Commentaire' })
+    this.commentSaved = page
+      .getByRole('dialog', { name: 'Panneau latéral' })
+      .getByText('Enregistré', { exact: true })
+      .first()
   }
 
   /** Tire une question dans la catégorie (`Normal` pour le bouton « Normal max 2 »). */
@@ -77,17 +87,6 @@ export class ExaminerPage {
   async typeCommentWithoutSaving(text: string): Promise<void> {
     await this.openPanel('Étudiant')
     await this.page.getByRole('textbox', { name: 'Commentaire' }).fill(text)
-  }
-
-  /** Rouvre l'onglet « Étudiant » : le commentaire est dans le champ et finit enregistré. */
-  async expectCommentRestoredAndSaved(text: string): Promise<void> {
-    await this.openPanel('Étudiant')
-    await expect(this.page.getByRole('textbox', { name: 'Commentaire' })).toHaveValue(text)
-    await this.page
-      .getByRole('dialog', { name: 'Panneau latéral' })
-      .getByText('Enregistré', { exact: true })
-      .first()
-      .waitFor()
   }
 
   /** Ouvre la vue projetée dans une nouvelle fenêtre et renvoie son écran. */
