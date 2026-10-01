@@ -11,6 +11,19 @@ export function usePwaUpdate(update: PwaUpdate = pwaUpdate): {
   return { status, applyUpdate }
 }
 
+/** Message « Prête pour le hors ligne » (F36) : levé à la fin du premier pré-cache. */
+export function useOfflineReady(update: PwaUpdate = pwaUpdate): {
+  offlineReady: boolean
+  dismiss: () => void
+} {
+  const subscribe = useCallback((listener: () => void) => update.onStatusChange(listener), [update])
+  const offlineReady = useSyncExternalStore(subscribe, () => update.offlineReady)
+  const dismiss = useCallback(() => {
+    update.dismissOfflineReady()
+  }, [update])
+  return { offlineReady, dismiss }
+}
+
 function reloadPage(): void {
   window.location.reload()
 }

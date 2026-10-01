@@ -209,3 +209,69 @@ test('l’onglet du tout premier chargement (sans contrôleur initial) se rechar
   await expect(page.getByRole('link', { name: 'Créer une session' }).first()).toBeVisible()
   await expect(pill(page)).toHaveCount(0)
 })
+
+test('premier chargement : « Prête pour le hors ligne » une seule fois, jusqu’à « OK »', async ({
+  page,
+}) => {
+  const offline = page.getByRole('status').filter({ hasText: 'Prête pour le hors ligne' })
+  await new HomePage(page).goto()
+  await expect(offline).toBeVisible()
+  await offline.getByRole('button', { name: 'OK' }).click()
+  await expect(offline).toHaveCount(0)
+
+  await page.reload()
+  await waitForController(page)
+  await expect(page.getByRole('link', { name: 'Créer une session' }).first()).toBeVisible()
+  await expect(offline).toHaveCount(0)
+})
+
+test('version déployée page ouverte : la vérification horaire fait apparaître la pastille', async ({
+  page,
+  site,
+}) => {
+  await page.clock.install()
+  await new HomePage(page).goto()
+  await waitForController(page)
+
+  // Déploiement sans `registration.update()` à la main : seule la vérification périodique le voit.
+  await appendFile(join(site.root, 'sw.js'), '\n// déploiement simulé\n')
+  await page.clock.fastForward('01:00:00')
+  await expect(pill(page)).toBeVisible()
+})
+
+test('vue projetée ouverte sans contrôleur (Shift+Reload) : rechargée à l’activation', async ({
+  page: tab,
+  context,
+  site,
+}) => {
+  const home = new HomePage(tab)
+  await home.goto()
+  await waitForController(tab)
+  await tab.reload()
+  await waitForController(tab)
+
+  const create = await home.createSession()
+  await create.uploadStudents(examplePath('students.example.csv'))
+  await create.uploadConfig(examplePath('config.example.json'))
+  await create.fillName('Session Shift+Reload')
+  await create.submit()
+
+  const [present] = await Promise.all([
+    tab.waitForEvent('popup'),
+    tab.getByRole('button', { name: 'Ouvrir la vue projetée' }).click(),
+  ])
+  await expect(present.getByRole('main')).toBeVisible()
+  await waitForController(present)
+
+  // Rechargement en ignorant le cache, comme Shift+Reload : la page n'a plus de contrôleur.
+  const cdp = await context.newCDPSession(present)
+  await Promise.all([present.waitForEvent('load'), cdp.send('Page.reload', { ignoreCache: true })])
+  await expect(present.getByRole('main')).toBeVisible()
+  expect(await present.evaluate(() => navigator.serviceWorker.controller)).toBeNull()
+  const loadsPresent = await loads(present)
+
+  await deploy(tab, site)
+  await pill(tab).getByRole('button', { name: 'Recharger' }).click()
+  await expect.poll(() => loads(present)).toBe(loadsPresent + 1)
+  await expect(present.getByRole('main')).toBeVisible()
+})

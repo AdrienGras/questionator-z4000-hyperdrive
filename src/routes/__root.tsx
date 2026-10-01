@@ -1,5 +1,6 @@
 import { createRootRoute, Link, Outlet, useMatchRoute } from '@tanstack/react-router'
 import { AppearanceProvider } from '@/app/appearance-provider'
+import { OfflineReadyPrompt } from '@/components/offline-ready-prompt'
 import { UpdatePrompt } from '@/components/update-prompt'
 import { useUi } from '@/lib/i18n/use-ui'
 import { LocaleProvider, useLocale } from '@/lib/i18n/locale-context'
@@ -17,14 +18,20 @@ export function NotFound() {
 }
 
 function RootLayout() {
-  // Jamais de pastille sur la vue projetée : elle se recharge seule (D72).
+  // Jamais de pastille sur la vue projetée : elle se recharge seule (D72), et le message hors ligne
+  // s'adresse à l'examinateur (F36).
   const projected = useMatchRoute()({ to: '/present/$sessionId' }) !== false
   return (
     <LocaleProvider locale={useLocale()}>
       <AppearanceProvider>
         <div className="min-h-svh bg-background text-foreground">
           <Outlet />
-          {!projected && <UpdatePrompt />}
+          {!projected && (
+            <>
+              <UpdatePrompt />
+              <OfflineReadyPrompt />
+            </>
+          )}
         </div>
       </AppearanceProvider>
     </LocaleProvider>
