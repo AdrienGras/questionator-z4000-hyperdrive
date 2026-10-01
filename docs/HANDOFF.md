@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-01 — Vague de fix terminée, suite : #84, #80, puis les chores
+
+**Dernière chose faite** : PR #95 (F33) mergée sur go de l'utilisateur. La vague de fix est entièrement livrée et mergée : #76 (PR #90, menu de thème), #79 (PR #91, F31 robustesse), #78 (PR #92, F30 écran de passage), #83 (PR #93, F35 fichiers d'entrée), #82 (PR #94, F34 glisser-déposer), #81 (PR #95, F33 vue projetée). Décisions D81 à D85.
+
+**Trucs en suspens** : #77 (vérifications manuelles) reste à faire par l'utilisateur, avec en plus : Safari pour le glisser-déposer (F34, pas de clignotement, contenu des dialogues pendant la fermeture), rendu des tuiles sur un vrai vidéoprojecteur (F33, lisibilité de « Épuisée » à `opacity-40`). Un e2e local a échoué une fois sans être reproduit (F34) ; deux tests unitaires instables connus (BACKLOG → #87). #71 à #74 (documentation) sans priorité.
+
+**Prochaine chose à creuser** : ordre fixé par l'utilisateur : #84 (F36, mises à jour en cours de journée), puis #80 (F32, aide à la saisie depuis le JSON Schema), puis les chores #86 (budget de bundle), #87 (dette de tests et de code, beaucoup de mineurs y ont été rangés pendant la vague), #88 (outillage), et #85 (Node 26) pas avant sa sortie LTS le 2026-10-28. Partir de `main` à jour, une branche et une PR par ticket.
+
+**Notes pour future Claude** : méthode qui a bien marché pendant la vague. Ticket borné : design court en chat, validé par l'utilisateur, exécution directe en TDD puis une revue de toute la branche par un relecteur neuf (modèle le plus capable). Ticket plus gros (F31, F30) : spec ou plan court et sous-agents par tâche avec revue à chaque tâche. Dans les deux cas : prouver chaque test de correctif rouge en retirant le correctif (et vérifier par `grep -c` que le retrait a bien eu lieu), lancer `pnpm build && pnpm check:bundle` et `pnpm e2e` avant la PR, puis Sonar (`.claude/scripts/sonar-check.sh --pr <n> --wait`) ; Sonar a relevé deux fois un défaut que `pnpm check` laisse passer (test e2e sans assertion dans son corps, ternaire imbriqué).
+
 ## 2026-10-01 — F33 (#81) : finitions de la vue projetée, fin de la vague de fix
 
 **Dernière chose faite** : PR #94 (F34) mergée sur go de l'utilisateur. F33 implémentée sur `feat/81-finitions-projection` (D85), en exécution directe : tuiles de la vue projetée à états (« Épuisée », catégorie en cours mise en avant, « Indisponible » seulement en fin de passage — choix de l'utilisateur) ; détail final « catégorie · titre » et « — » au lieu d'un « 0 » inventé ; écran étudiant monté sur `student.order` (homonymes) et lignes du détail sur `questionId` ; animation de tirage figée au montage. Chaque test de correctif prouvé rouge en retirant le correctif. Avec ce ticket, la vague de fix convenue (#76, #79, #78, #83, #82, #81) est terminée.
