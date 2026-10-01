@@ -6,18 +6,7 @@ import { ProjectionPreview } from '@/features/session/components/projection-prev
 import type { ProjectedView } from '@/domain/presentation/projected-view'
 import { LocaleProvider } from '@/lib/i18n/locale-context'
 import { makeUi } from '@/testing/make-ui'
-
-type Rappel = (entries: { contentRect: { width: number } }[]) => void
-
-let rappel: Rappel
-
-class FauxResizeObserver {
-  constructor(cb: Rappel) {
-    rappel = cb
-  }
-  observe = vi.fn<(element: Element) => void>()
-  disconnect = vi.fn<() => void>()
-}
+import { ManualResizeObserver } from '@/testing/resize-observer'
 
 const appearance: ProjectedView['appearance'] = {
   locale: 'fr',
@@ -47,7 +36,8 @@ const canvas = (container: HTMLElement) =>
 
 describe('ProjectionPreview', () => {
   beforeEach(() => {
-    vi.stubGlobal('ResizeObserver', FauxResizeObserver)
+    ManualResizeObserver.reset()
+    vi.stubGlobal('ResizeObserver', ManualResizeObserver)
   })
   afterEach(() => {
     vi.unstubAllGlobals()
@@ -60,7 +50,7 @@ describe('ProjectionPreview', () => {
 
   it('canevas réduit à la largeur mesurée', () => {
     const { container } = render(inFrench(<ProjectionPreview ui={ui} view={waiting} />))
-    act(() => rappel([{ contentRect: { width: 384 } }]))
+    act(() => ManualResizeObserver.resize(384))
     expect(canvas(container).style.transform).toBe('scale(0.3)')
     expect(canvas(container).style.visibility).toBe('')
   })

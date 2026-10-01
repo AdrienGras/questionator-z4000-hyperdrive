@@ -115,8 +115,16 @@ module.exports = {
       name: 'db-singleton',
       severity: 'error',
       comment:
-        'Le singleton `db` ne sort pas de lib/db/ : toute écriture passe par updateSession & co. Les imports de type restent libres.',
-      from: { pathNot: ['^src/lib/db/', TEST, String.raw`^src/main\.tsx$`] },
+        'Le singleton `db` ne sort pas de lib/db/ : toute écriture passe par updateSession & co. Les imports de type restent libres. ' +
+        'Exception : src/testing/stored-session.ts, helper de test qui relit la session brute en base, comme les tests eux-mêmes.',
+      from: {
+        pathNot: [
+          '^src/lib/db/',
+          TEST,
+          String.raw`^src/main\.tsx$`,
+          String.raw`^src/testing/stored-session\.ts$`,
+        ],
+      },
       to: { path: String.raw`^src/lib/db/db\.ts$`, dependencyTypesNot: ['type-only'] },
     },
     {

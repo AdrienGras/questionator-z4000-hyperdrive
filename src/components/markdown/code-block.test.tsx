@@ -3,6 +3,7 @@ import { describe, expect, test, vi } from 'vitest'
 import css from '@/index.css?raw'
 import type { Highlight, HighlightedCode } from '@/lib/markdown/highlighter'
 import { CodeBlock } from './code-block'
+import { deferred } from '@/testing/deferred'
 
 function highlighted(code: string): HighlightedCode {
   return {
@@ -16,16 +17,6 @@ function highlighted(code: string): HighlightedCode {
     ],
     rootStyle: { '--shiki-light-bg': '#fff', '--shiki-dark-bg': '#000' },
   }
-}
-
-function noop() {}
-
-function deferred<T>() {
-  let resolve: (value: T) => void = noop
-  const promise = new Promise<T>((settle) => {
-    resolve = settle
-  })
-  return { promise, resolve }
 }
 
 describe('CodeBlock', () => {

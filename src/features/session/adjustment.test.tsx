@@ -6,21 +6,10 @@ import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
 import { categoryButton } from '@/testing/passage-assertions'
 import { renderAt } from '@/testing/render-at'
-import { REVEALED, screenCategory } from '@/testing/screen-fixtures'
+import { REVEALED, screenConfig } from '@/testing/screen-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
-import { makeConfig, makeStudent } from '@/testing/student-fixtures'
-
-function config(step = 0.5) {
-  return {
-    ...makeConfig({
-      questionsPerStudent: 1,
-      maxRawScore: 20,
-      finalScale: 20,
-      rounding: { mode: 'nearest', decimals: 2, step },
-    }),
-    categories: [screenCategory],
-  }
-}
+import { storedSession } from '@/testing/stored-session'
+import { makeStudent } from '@/testing/student-fixtures'
 
 beforeEach(async () => {
   await db.sessions.clear()
@@ -32,15 +21,19 @@ afterEach(() => {
 
 async function mount(student: Student, step = 0.5): Promise<void> {
   await putSession(
-    makeSession({ config: config(step), students: [student], activeStudentId: student.id }),
+    makeSession({
+      config: screenConfig({ step }),
+      students: [student],
+      activeStudentId: student.id,
+    }),
   )
   renderAt('/session/session-1')
 }
 
 async function stored() {
-  const session = await db.sessions.get('session-1')
-  const student = session?.students[0]
-  if (session === undefined || student === undefined) throw new Error('session absente')
+  const session = await storedSession()
+  const student = session.students[0]
+  if (student === undefined) throw new Error('étudiant absent')
   return { session, student }
 }
 

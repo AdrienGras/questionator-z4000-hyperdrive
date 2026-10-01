@@ -8,18 +8,13 @@ import { StudentsTab } from './components/students-tab'
 import { db } from '@/lib/db/db'
 import { makeUi } from '@/testing/make-ui'
 import { makeSession } from '@/testing/session-fixtures'
-import { openSidePanel, panelButton } from '@/testing/side-panel-assertions'
+import { expectPanelClosed, openSidePanel, panelButton } from '@/testing/side-panel-assertions'
 import { makeStudent } from '@/testing/student-fixtures'
 import { config, mountStudentsTab as mount } from '@/testing/students-tab-harness'
+import { storedSession as stored } from '@/testing/stored-session'
 
 function student(id: string, lastName: string, order: number, overrides: Partial<Student> = {}) {
   return makeStudent([], { id, lastName, firstName: 'X', order, ...overrides })
-}
-
-async function expectPanelClosed() {
-  await waitFor(() =>
-    expect(screen.queryByRole('dialog', { name: 'Panneau latéral' })).not.toBeInTheDocument(),
-  )
 }
 
 function list(): HTMLElement {
@@ -34,12 +29,6 @@ function rowOf(lastName: string): HTMLElement {
   const button = buttons().find((b) => b.textContent.includes(lastName))
   if (button === undefined) throw new Error(`ligne ${lastName} absente`)
   return button
-}
-
-async function stored() {
-  const session = await db.sessions.get('session-1')
-  if (session === undefined) throw new Error('session absente')
-  return session
 }
 
 beforeEach(async () => {

@@ -9,6 +9,8 @@ import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
 import { expectPanelStaysOpen, openSidePanel } from '@/testing/side-panel-assertions'
 import { config, mountStudentsTab } from '@/testing/students-tab-harness'
+import { storedSession as stored } from '@/testing/stored-session'
+import { deferred } from '@/testing/deferred'
 
 const alice = makeStudent([], {
   id: 's-a',
@@ -27,15 +29,6 @@ const alice = makeStudent([], {
 })
 const durand = makeStudent([], { id: 's-d', lastName: 'Durand', firstName: 'Élodie', order: 2 })
 
-/** Promesse résolue à la demande, pour suspendre une écriture. */
-function deferred<T>() {
-  const box: { resolve?: (value: T) => void } = {}
-  const promise = new Promise<T>((resolve) => {
-    box.resolve = resolve
-  })
-  return { promise, resolve: (value: T) => box.resolve?.(value) }
-}
-
 async function mount(students: Student[] = [alice, durand], overrides: Partial<Session> = {}) {
   await mountStudentsTab(students, overrides)
 }
@@ -53,12 +46,6 @@ const addDialog = () => screen.queryByRole('dialog', { name: 'Ajouter un étudia
 const drawer = () => screen.queryByRole('dialog', { name: 'Panneau latéral' })
 const addButton = () => screen.getByRole('button', { name: 'Ajouter' })
 const startButton = () => screen.getByRole('button', { name: 'Ajouter et faire passer' })
-
-async function stored() {
-  const session = await db.sessions.get('session-1')
-  if (session === undefined) throw new Error('session absente')
-  return session
-}
 
 beforeEach(async () => {
   localStorage.clear()

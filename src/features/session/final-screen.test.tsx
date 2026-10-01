@@ -6,21 +6,10 @@ import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
 import { categoryButton, outsidePanel } from '@/testing/passage-assertions'
 import { renderAt } from '@/testing/render-at'
-import { REVEALED, screenCategory } from '@/testing/screen-fixtures'
+import { REVEALED, screenConfig } from '@/testing/screen-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
-import { makeConfig, makeStudent } from '@/testing/student-fixtures'
-
-function config(questionsPerStudent = 1) {
-  return {
-    ...makeConfig({
-      questionsPerStudent,
-      maxRawScore: 20,
-      finalScale: 20,
-      rounding: { mode: 'nearest', decimals: 2, step: 0.5 },
-    }),
-    categories: [screenCategory],
-  }
-}
+import { makeStudent } from '@/testing/student-fixtures'
+import { storedSession as stored } from '@/testing/stored-session'
 
 beforeEach(async () => {
   await db.sessions.clear()
@@ -37,7 +26,7 @@ async function openFinal(
 ): Promise<void> {
   await putSession(
     makeSession({
-      config: config(questionsPerStudent),
+      config: screenConfig({ questionsPerStudent }),
       students: [student, ...others],
       activeStudentId: student.id,
       projection: { mode: 'student', studentId: student.id },
@@ -65,12 +54,6 @@ function row(label: string): HTMLElement {
   const parent = outsidePanel(label).parentElement
   if (parent === null) throw new Error(`ligne « ${label} » introuvable`)
   return parent
-}
-
-async function stored() {
-  const session = await db.sessions.get('session-1')
-  if (session === undefined) throw new Error('session absente')
-  return session
 }
 
 test('affiche les cinq notes formatées et la justification de l’ajustement', async () => {

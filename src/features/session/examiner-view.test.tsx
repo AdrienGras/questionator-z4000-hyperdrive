@@ -8,7 +8,11 @@ import { expectColorModeToggleLast, bannerInteractiveNames } from '@/testing/pag
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, type AttemptSpec, makeStudent } from '@/testing/student-fixtures'
 import { renderAt } from '@/testing/render-at'
-import { expectPanelStaysOpen, openSidePanel } from '@/testing/side-panel-assertions'
+import {
+  expectPanelClosed,
+  expectPanelStaysOpen,
+  openSidePanel,
+} from '@/testing/side-panel-assertions'
 import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import type { Session, Student } from '@/domain/session/types'
 
@@ -57,12 +61,6 @@ async function studentButton(name: string): Promise<HTMLElement> {
     .find((b) => b.textContent.includes(name))
   if (button === undefined) throw new Error(`bouton ${name} introuvable`)
   return button
-}
-
-async function expectPanelClosed() {
-  await waitFor(() =>
-    expect(screen.queryByRole('dialog', { name: 'Panneau latéral' })).not.toBeInTheDocument(),
-  )
 }
 
 function sessionWith(
