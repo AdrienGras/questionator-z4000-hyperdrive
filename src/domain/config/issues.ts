@@ -18,6 +18,8 @@ export type ConfigIssueParams = {
   invalid_value: NoParams
   duplicate_category_id: { id: string; firstPath: string }
   duplicate_question_id: { id: string; firstPath: string }
+  unicode_variant_id: { id: string; firstPath: string }
+  padded_id: { id: string }
   empty_scale: NoParams
   negative_scale_value: { value: number }
   duplicate_scale_value: { value: number }

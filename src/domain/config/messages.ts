@@ -53,6 +53,9 @@ const fr: Dictionary<ConfigIssueParams> = {
     `L’identifiant de catégorie « ${id} » est déjà utilisé (${firstPath}).`,
   duplicate_question_id: ({ id, firstPath }) =>
     `L’identifiant de question « ${id} » est déjà utilisé (${firstPath}) : il doit être unique dans toute la configuration.`,
+  unicode_variant_id: ({ id, firstPath }) =>
+    `L’identifiant « ${id} » ressemble à celui de ${firstPath} mais ne s’écrit pas avec les mêmes caractères (accents saisis différemment) : retapez l’un des deux pour qu’ils soient identiques, ou choisissez un autre identifiant.`,
+  padded_id: ({ id }) => `L’identifiant « ${id} » commence ou finit par une espace : retirez-la.`,
   empty_scale: () => 'Le barème est vide : indiquez au moins une valeur attribuable.',
   negative_scale_value: ({ value }) => `Le barème contient une valeur négative (${value}).`,
   duplicate_scale_value: ({ value }) =>
@@ -111,6 +114,9 @@ const en: Dictionary<ConfigIssueParams> = {
     `Category id "${id}" is already used (${firstPath}).`,
   duplicate_question_id: ({ id, firstPath }) =>
     `Question id "${id}" is already used (${firstPath}): it must be unique across the whole configuration.`,
+  unicode_variant_id: ({ id, firstPath }) =>
+    `Id "${id}" looks like the one at ${firstPath} but is written with different characters (accents typed differently): retype one of them so they match, or pick another id.`,
+  padded_id: ({ id }) => `Id "${id}" starts or ends with a space: remove it.`,
   empty_scale: () => 'The scale is empty: list at least one value that can be awarded.',
   negative_scale_value: ({ value }) => `The scale contains a negative value (${value}).`,
   duplicate_scale_value: ({ value }) => `The value ${value} appears more than once in the scale.`,

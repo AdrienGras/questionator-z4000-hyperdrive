@@ -72,6 +72,57 @@ describe('checkRules', () => {
     ])
   })
 
+  test('padded_id : espace en bord d’un id de catégorie ou de question', () => {
+    const config = withSecondCategory(minimalConfig(), ' b', 'facile-001 ')
+    expect(only(config, 'padded_id')).toEqual([
+      {
+        severity: 'error',
+        code: 'padded_id',
+        path: ['categories', 1, 'id'],
+        params: { id: ' b' },
+      },
+      {
+        severity: 'error',
+        code: 'padded_id',
+        path: ['categories', 1, 'questions', 0, 'id'],
+        params: { id: 'facile-001 ' },
+      },
+    ])
+  })
+
+  test('unicode_variant_id : même id en NFC et en NFD, catégorie et question', () => {
+    const nfc = 'é'
+    const nfd = 'é'
+    const config = withSecondCategory(minimalConfig(), nfd, 'b-1')
+    config.categories[0]!.id = nfc
+    config.categories[0]!.questions[0]!.id = `q-${nfc}`
+    config.categories[1]!.questions[0]!.id = `q-${nfd}`
+    expect(only(config, 'unicode_variant_id')).toEqual([
+      {
+        severity: 'error',
+        code: 'unicode_variant_id',
+        path: ['categories', 1, 'id'],
+        params: { id: nfd, firstPath: 'categories[0].id' },
+      },
+      {
+        severity: 'error',
+        code: 'unicode_variant_id',
+        path: ['categories', 1, 'questions', 0, 'id'],
+        params: { id: `q-${nfd}`, firstPath: 'categories[0].questions[0].id' },
+      },
+    ])
+    expect(only(config, 'duplicate_category_id')).toEqual([])
+  })
+
+  test('ids réellement différents ou identiques : ni padded_id ni unicode_variant_id', () => {
+    const different = withSecondCategory(minimalConfig(), 'e', 'b-1')
+    const same = withSecondCategory(minimalConfig(), 'a', 'b-1')
+    for (const config of [different, same]) {
+      expect(only(config, 'padded_id')).toEqual([])
+      expect(only(config, 'unicode_variant_id')).toEqual([])
+    }
+  })
+
   test('empty_scale', () => {
     const config = minimalConfig()
     config.categories[0]!.scale = []
