@@ -77,7 +77,12 @@ test('dialogue d’ajout : un échec d’ajout dans le dialogue est affiché', a
   fireEvent.click(screen.getByRole('button', { name: 'Ajouter' }))
 
   const dialog = screen.getByRole('dialog', { name: 'Ajouter un étudiant' })
-  expect(await within(dialog).findByRole('alert')).toBeInTheDocument()
+  const alert = await within(dialog).findByRole('alert')
+  // Une seule alerte : celle du dialogue, ni celle du tiroir derrière, ni celle de la page.
+  expect(screen.getAllByRole('alert', { hidden: true }).map((a) => a.textContent)).toEqual([
+    "L'enregistrement a échoué. La session a peut-être été supprimée dans un autre onglet.",
+  ])
+  expect(alert).toBeInTheDocument()
 })
 
 /** Écriture sans effet visible : relance le rendu de l'écran avec la même erreur d'action. */

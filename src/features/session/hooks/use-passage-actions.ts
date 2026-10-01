@@ -212,14 +212,18 @@ export function usePassageActions(
     [run],
   )
 
+  // `ownError` : le dialogue d'ajout affiche son propre échec ; sans ça, l'alerte du tiroir et celle
+  // de la page s'y ajoutaient, derrière le modal.
   const addStudent = useCallback(
     (names: { lastName: string; firstName: string }, options: { activate: boolean }) =>
-      run((session) =>
-        addStudentTransition(
-          session,
-          { ...names, ...options },
-          { newId: () => crypto.randomUUID() },
-        ),
+      run(
+        (session) =>
+          addStudentTransition(
+            session,
+            { ...names, ...options },
+            { newId: () => crypto.randomUUID() },
+          ),
+        { ownError: true },
       ),
     [run],
   )

@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import type { Failure } from '@/features/session/hooks/use-fresh-error'
 import type { Session } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { AddStudentDialog } from './add-student-dialog'
@@ -12,8 +11,6 @@ type StudentsTabProps = Readonly<{
   activeStudentId: string | undefined
   /** Verrouille les seuls boutons d'envoi du dialogue : les lignes gardent le focus clavier. */
   disabled: boolean
-  /** Dernière action refusée, affichée dans le dialogue d'ajout. */
-  error?: Failure
   onSelect: (studentId: string) => void
   onAdd: (
     names: { lastName: string; firstName: string },
@@ -29,7 +26,6 @@ export function StudentsTab({
   session,
   activeStudentId,
   disabled,
-  error,
   onSelect,
   onAdd,
   actionsSlot,
@@ -38,7 +34,7 @@ export function StudentsTab({
   const sorted = session.students.toSorted((a, b) => a.order - b.order)
   return (
     <div className="flex flex-col gap-4">
-      <AddStudentDialog ui={ui} session={session} disabled={disabled} error={error} onAdd={onAdd} />
+      <AddStudentDialog ui={ui} session={session} disabled={disabled} onAdd={onAdd} />
       <ul aria-label={ui.text('students_list_label', {})} className="flex flex-col gap-2">
         {sorted.map((student) => (
           <StudentRow

@@ -192,60 +192,85 @@ test('le déclencheur « Ajouter un étudiant » n’est pas désactivé pendant
   expect(screen.getByRole('button', { name: 'Ajouter un étudiant' })).toBeEnabled()
 })
 
-test('échec de l’ajout : le dialogue reste ouvert, champs gardés, erreur visible dedans', async () => {
-  const onAdd = vi.fn<() => Promise<boolean>>().mockResolvedValue(false)
-  const dialogFor = (error?: { message: string }) => (
-    <AddStudentDialog
-      ui={makeUi()}
-      session={makeSession({ config, students: [alice, durand] })}
-      disabled={false}
-      error={error}
-      onAdd={onAdd}
-    />
-  )
-  const { rerender } = render(dialogFor())
-  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-  openDialog()
-  fill('Martin', 'Zoé')
-  fireEvent.click(addButton())
-  await waitFor(() => expect(onAdd).toHaveBeenCalledTimes(1))
-  // L'erreur arrive du hook d'actions une fois l'écriture refusée, dialogue ouvert.
-  rerender(dialogFor({ message: 'Écriture impossible.' }))
-
-  const dialog = screen.getByRole('dialog')
-  expect(within(dialog).getByRole('alert')).toHaveTextContent('Écriture impossible.')
-  expect(screen.getByLabelText('Nom')).toHaveValue('Martin')
-  expect(screen.getByLabelText('Prénom')).toHaveValue('Zoé')
-})
-
-test('une erreur déjà présente à l’ouverture du dialogue n’y est pas affichée', () => {
+/** Dialogue monté seul : `onAdd` simulé, sans le verrou `run` du hook d'actions. */
+function renderDialog(onAdd: () => Promise<boolean>) {
   render(
     <AddStudentDialog
       ui={makeUi()}
       session={makeSession({ config, students: [alice, durand] })}
       disabled={false}
-      error={{ message: 'Ancienne erreur.' }}
-      onAdd={vi.fn<() => Promise<boolean>>()}
+      onAdd={onAdd}
     />,
   )
+}
 
+const WRITE_ERROR =
+  "L'enregistrement a échoué. La session a peut-être été supprimée dans un autre onglet."
+
+test('échec de l’ajout : le dialogue reste ouvert, champs gardés, erreur visible dedans', async () => {
+  const onAdd = vi.fn<() => Promise<boolean>>().mockResolvedValue(false)
+  renderDialog(onAdd)
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  openDialog()
+  fill('Martin', 'Zoé')
+
+  fireEvent.click(addButton())
+
+  const dialog = screen.getByRole('dialog')
+  expect(await within(dialog).findByRole('alert')).toHaveTextContent(WRITE_ERROR)
+  expect(screen.getByLabelText('Nom')).toHaveValue('Martin')
+  expect(screen.getByLabelText('Prénom')).toHaveValue('Zoé')
+})
+
+test('l’erreur d’un échec disparaît au nouvel essai et à la réouverture', async () => {
+  const retry = deferred<boolean>()
+  const onAdd = vi
+    .fn<() => Promise<boolean>>()
+    .mockResolvedValueOnce(false)
+    .mockReturnValueOnce(retry.promise)
+    .mockResolvedValue(false)
+  renderDialog(onAdd)
+  openDialog()
+  fill('Martin', 'Zoé')
+  fireEvent.click(addButton())
+  expect(await screen.findByRole('alert')).toBeInTheDocument()
+
+  // Nouvel essai : l'erreur précédente s'efface dès l'envoi.
+  fireEvent.click(addButton())
+  await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument())
+  retry.resolve(false)
+  expect(await screen.findByRole('alert')).toBeInTheDocument()
+
+  fireEvent.keyDown(screen.getByLabelText('Nom'), { key: 'Escape' })
+  await waitFor(() => expect(addDialog()).not.toBeInTheDocument())
   openDialog()
 
   expect(screen.getByRole('dialog')).toBeInTheDocument()
   expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 })
 
+test('double clic avant la fin de l’écriture : la garde du dialogue n’envoie qu’un appel', async () => {
+  // Pas de hook d'actions ici : seul `submitting` peut écarter le second clic, pas le verrou `run`.
+  const pending = deferred<boolean>()
+  const onAdd = vi.fn<() => Promise<boolean>>(() => pending.promise)
+  renderDialog(onAdd)
+  openDialog()
+  fill('Martin', 'Zoé')
+
+  fireEvent.click(startButton())
+  fireEvent.click(startButton())
+  fireEvent.click(addButton())
+
+  expect(onAdd).toHaveBeenCalledTimes(1)
+  pending.resolve(true)
+  await waitFor(() => expect(addDialog()).not.toBeInTheDocument())
+  expect(onAdd).toHaveBeenCalledTimes(1)
+})
+
 test('écriture en cours : Échap ne ferme pas le dialogue ni ne vide les champs', async () => {
   const pending = deferred<boolean>()
   const onAdd = vi.fn<() => Promise<boolean>>(() => pending.promise)
-  render(
-    <AddStudentDialog
-      ui={makeUi()}
-      session={makeSession({ config, students: [alice, durand] })}
-      disabled={false}
-      onAdd={onAdd}
-    />,
-  )
+  renderDialog(onAdd)
   openDialog()
   fill('Martin', 'Zoé')
   fireEvent.click(addButton())

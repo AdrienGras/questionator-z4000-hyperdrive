@@ -50,8 +50,8 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
   const actions = usePassageActions(session.id, student?.id, session.updatedAt)
   const status = student === undefined ? undefined : studentStatus(student, config)
   const pending = student === undefined ? undefined : currentPending(student)
-  // Un objet par échec (`actions.error` est neuf à chaque échec) : le tiroir et le dialogue
-  // d'ajout distinguent ainsi l'erreur survenue ouverts de celle déjà là à leur ouverture.
+  // Un objet par échec (`actions.error` est neuf à chaque échec) : le tiroir distingue ainsi
+  // l'erreur survenue ouvert de celle déjà là à son ouverture.
   const failure = useMemo<Failure | undefined>(() => {
     const message = errorText(actions.error, ui)
     return message === undefined ? undefined : { message }
@@ -154,7 +154,6 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
               // ni présélectionner le premier étudiant de la liste (spec F09 §7).
               activeStudentId={student?.id}
               disabled={actions.busy}
-              error={failure}
               onSelect={(studentId) => void selectStudent(studentId)}
               onAdd={addStudent}
               actionsSlot={
