@@ -1,9 +1,9 @@
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import { skipsRemaining } from '@/domain/passage/skip'
 import { Button } from '@/components/ui/button'
-import type { StudentStatus } from '@/domain/scoring/status'
 import type { Attempt, Session, Student } from '@/domain/session/types'
 import type { SidePanelTab } from '@/features/session/side-panel-state'
+import type { StudentStanding } from '@/features/session/student-standing'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { AbsentState } from './absent-state'
 import { CategoryGrid } from './category-grid'
@@ -15,7 +15,8 @@ type PassageBodyProps = Readonly<{
   config: NormalizedConfig
   session: Session
   student: Student | undefined
-  status: StudentStatus | undefined
+  /** Statut et notes de `student`, calculés par `ExaminerView`. */
+  standing: StudentStanding | undefined
   pending: Attempt | undefined
   disabled: boolean
   onDraw: (categoryId: string) => void
@@ -41,7 +42,7 @@ export function PassageBody({
   config,
   session,
   student,
-  status,
+  standing,
   pending,
   disabled,
   onDraw,
@@ -67,9 +68,9 @@ export function PassageBody({
     )
   }
 
-  if (status === 'absent') return <AbsentState ui={ui} onShowPanel={onShowPanel} />
+  if (standing?.status === 'absent') return <AbsentState ui={ui} onShowPanel={onShowPanel} />
 
-  if (status === 'done') {
+  if (standing?.status === 'done') {
     return (
       <FinalScreen
         // Un autre étudiant terminé repart sans popup ouverte à la main.
@@ -77,6 +78,7 @@ export function PassageBody({
         ui={ui}
         session={session}
         student={student}
+        scores={standing.scores}
         disabled={disabled}
         onAdjust={onAdjust}
         onRevealFinal={onRevealFinal}

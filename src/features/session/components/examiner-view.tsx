@@ -8,11 +8,11 @@ import { toProjectedView } from '@/domain/presentation/projected-view'
 import { PassageError } from '@/domain/passage/errors'
 import { passageErrorMessage } from '@/domain/passage/messages'
 import { currentPending } from '@/domain/passage/selectors'
-import { studentStatus } from '@/domain/scoring/status'
 import type { Session } from '@/domain/session/types'
 import { usePassageActions } from '@/features/session/hooks/use-passage-actions'
 import type { Failure } from '@/features/session/hooks/use-fresh-error'
 import { useSidePanel } from '@/features/session/hooks/use-side-panel'
+import { studentStanding } from '@/features/session/student-standing'
 import { useUi, type Ui } from '@/lib/i18n/use-ui'
 import { AbsentToggle } from './absent-toggle'
 import { CommentField } from './comment-field'
@@ -48,7 +48,11 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
   const { config } = session
   const student = session.students.find((s) => s.id === session.activeStudentId)
   const actions = usePassageActions(session.id, student?.id, session.updatedAt)
-  const status = student === undefined ? undefined : studentStatus(student, config)
+  // Calculés une fois ici, passés en props (ligne d'infos, aiguillage, listes de notes).
+  const standing = useMemo(
+    () => (student === undefined ? undefined : studentStanding(student, config)),
+    [student, config],
+  )
   const pending = student === undefined ? undefined : currentPending(student)
   // Un objet par échec (`actions.error` est neuf à chaque échec) : le tiroir distingue ainsi
   // l'erreur survenue ouvert de celle déjà là à son ouverture.
@@ -88,7 +92,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
           </Link>
         }
         title={config.exam.title}
-        meta={<PassageMeta ui={ui} config={config} student={student} />}
+        meta={<PassageMeta ui={ui} config={config} student={student} standing={standing} />}
         actions={
           <Button
             ref={panelButton}
@@ -123,7 +127,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
               config={config}
               session={session}
               student={student}
-              status={status}
+              standing={standing}
               onShowPanel={panel.show}
               pending={pending}
               disabled={actions.busy}
@@ -178,6 +182,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
               ui={ui}
               session={session}
               student={student}
+              scores={standing?.scores}
               disabled={actions.busy}
               onEditScore={(attemptId, score) => void actions.editScore(attemptId, score)}
               commentSlot={

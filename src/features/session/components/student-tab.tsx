@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import type { ScoreBreakdown } from '@/domain/scoring/score'
 import type { Session, Student } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { AttemptList } from './attempt-list'
@@ -8,6 +9,8 @@ type StudentTabProps = Readonly<{
   ui: Ui
   session: Session
   student: Student | undefined
+  /** Notes de `student`, calculées par `ExaminerView` ; définies dès que `student` l'est. */
+  scores: ScoreBreakdown | undefined
   disabled: boolean
   onEditScore: (attemptId: string, score: number) => void
   /** `CommentField` de l'étudiant, monté par l'appelant avec `key={student.id}`. */
@@ -21,13 +24,14 @@ export function StudentTab({
   ui,
   session,
   student,
+  scores,
   disabled,
   onEditScore,
   commentSlot,
   absentSlot,
 }: StudentTabProps) {
   const { text } = ui
-  if (student === undefined) {
+  if (student === undefined || scores === undefined) {
     return <p className="text-muted-foreground">{text('student_tab_no_student', {})}</p>
   }
   return (
@@ -48,7 +52,7 @@ export function StudentTab({
       </section>
       <section className="flex flex-col gap-2">
         <h3 className="font-semibold">{text('student_tab_totals', {})}</h3>
-        <ScoreList ui={ui} config={session.config} student={student} />
+        <ScoreList ui={ui} config={session.config} student={student} scores={scores} />
       </section>
       {commentSlot}
       {absentSlot}

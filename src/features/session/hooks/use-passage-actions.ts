@@ -15,6 +15,13 @@ import { skipAttempt } from '@/domain/passage/skip'
 import type { Session } from '@/domain/session/types'
 import { updateSession } from '@/lib/db/sessions'
 
+/**
+ * Actions de l'écran de passage. Un échec renseigne `error` (alerte de la page et du tiroir), sauf
+ * pour `adjust`, `revealFinal`, `reset` et `addStudent`, et `setAbsent` appelé avec `ownError` :
+ * passés en `ownError`, ils laissent l'affichage de l'échec à l'appelant (leur dialogue, qui
+ * affiche `write_error` quand le booléen revient à `false`) et `error` reste à `null`.
+ * `setComment` ne touche jamais `error` : son champ annonce lui-même l'échec (D67).
+ */
 export type PassageActions = {
   draw: (categoryId: string) => Promise<void>
   score: (attemptId: string, value: number) => Promise<void>

@@ -1,7 +1,7 @@
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import { formatScore } from '@/domain/scoring/format'
 import { asMilli, toMilli, type Milli } from '@/domain/scoring/milli'
-import { computeScores } from '@/domain/scoring/score'
+import type { ScoreBreakdown } from '@/domain/scoring/score'
 import type { Student } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
 
@@ -21,14 +21,17 @@ function ScoreRow({ label, children }: Readonly<{ label: string; children: React
   )
 }
 
-/** Les cinq notes d'un étudiant ; « — » tant que la note convertie n'est pas calculable. */
+/**
+ * Les cinq notes d'un étudiant ; « — » tant que la note convertie n'est pas calculable. `scores` :
+ * `computeScores(student, config)`, calculé une fois par l'appelant.
+ */
 export function ScoreList({
   ui,
   config,
   student,
-}: Readonly<{ ui: Ui; config: NormalizedConfig; student: Student }>) {
+  scores,
+}: Readonly<{ ui: Ui; config: NormalizedConfig; student: Student; scores: ScoreBreakdown }>) {
   const { text, locale } = ui
-  const scores = computeScores(student, config)
   const fmtRaw = (value: Milli) => formatScore(value, 'raw', config, locale)
   const fmtFinal = (value: Milli | null) =>
     value === null ? text('score_not_computed', {}) : formatScore(value, 'final', config, locale)
