@@ -24,6 +24,26 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-01 — F32 (#80) : aide à la saisie depuis le JSON Schema
+
+**Dernière chose faite** : PR #97 (F36) mergée sur go de l'utilisateur. F32 implémentée sur `feat/80-aide-saisie-schema` (D87), avec une spec et un plan courts (`docs/superpowers/`), exécutés par subagents avec une revue par tâche puis une revue finale de branche :
+- chaque champ du schéma Zod porte une description en français (`.meta`) et, s'il en a un, un défaut lu dans `CONFIG_DEFAULTS` ;
+- `buildConfigJsonSchema` ajoute un `markdownDescription` (description + « Défaut : `…` »), car le survol de VS Code ignore `default` ;
+- `features/config-editor/schema-assist.ts` (module pur, `jsonc-parser`) calcule les complétions (clés, `enum`, `const`, booléens, `null`) et le survol ;
+- `JsonEditor` branche Ctrl+Espace et l'infobulle de survol.
+
+Choix de l'utilisateur : descriptions en français seul ; complétion maison plutôt que `codemirror-json-schema` (non maintenu, tire shiki v1). La revue finale a trouvé le trou VS Code et deux bugs à l'acceptation d'une complétion (mot en cours conservé, double deux-points au renommage), tous corrigés et testés.
+
+**Trucs en suspens** : PR à ouvrir en brouillon, Sonar, puis « Ready for review » ; ne pas merger sans le go de l'utilisateur. À vérifier à la main (#77) : le survol dans un vrai VS Code (description et « Défaut : » en Markdown) et la couleur de l'option sélectionnée en mode sombre (l'e2e ne la vérifie qu'en clair). `color-mode.spec.ts` a encore échoué une fois sur une suite e2e complète (#87).
+
+**Prochaine chose à creuser** : après le merge de F32, les chores #86 (budget de bundle), #87 (dette de tests et de code), #88 (outillage) ; #85 (Node 26) pas avant le 2026-10-28.
+
+**Notes pour future Claude** :
+- Tout ajout de champ au schéma de config exige une `description` : `json-schema.test.ts` échoue sinon, et `markdownDescription` se déduit tout seul.
+- `example.test.ts` déclare `markdownDescription` à ajv en mode strict.
+- Dans un e2e CodeMirror, Entrée est ignorée pendant 75 ms après l'ouverture de la liste (`interactionDelay`) : d'où l'attente fixe de `config-editor.spec.ts`, commentée.
+- Un pointeur posé sur la liste change l'option sélectionnée : éloigner la souris.
+
 ## 2026-10-01 — F36 (#84) : mises à jour en cours de journée
 
 **Dernière chose faite** : F36 implémentée sur `feat/84-mises-a-jour-journee` (D86), ticket borné, design validé en session :
