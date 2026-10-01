@@ -70,7 +70,7 @@ export function ConfigEditorPage() {
   const navigate = useNavigate()
   const draft = useConfigDraft()
   const [text, setText] = useState(draft.initialText)
-  const { result, lastValid, validatedText } = useLiveValidation(text)
+  const { result, lastValid, pending, validatedText, loadError } = useLiveValidation(text)
   const editor = useRef<JsonEditorApi>(null)
   const fileInput = useRef<HTMLInputElement>(null)
   const [dragging, setDragging] = useState(false)
@@ -207,10 +207,19 @@ export function ConfigEditorPage() {
               <Button type="button" variant="outline" onClick={download}>
                 {t('editor_download', {})}
               </Button>
-              <Button type="button" disabled={result?.ok !== true} onClick={createSession}>
+              <Button
+                type="button"
+                disabled={pending || result?.ok !== true}
+                onClick={createSession}
+              >
                 {t('editor_create_session', {})}
               </Button>
             </div>
+            {loadError && (
+              <p role="alert" className="text-sm text-destructive">
+                {t('editor_validator_error', {})}
+              </p>
+            )}
             {readError && (
               <p role="alert" className="text-sm text-destructive">
                 {t('import_read_error', {})}

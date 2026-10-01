@@ -259,6 +259,7 @@ const SAMPLE: UiMessageParams = {
   editor_preview_empty: {},
   editor_expected_answer: {},
   editor_final_screen: {},
+  editor_validator_error: {},
 }
 
 function isUiMessageKey(key: string): key is keyof UiMessageParams {

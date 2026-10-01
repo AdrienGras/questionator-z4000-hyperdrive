@@ -27,7 +27,7 @@ function writeDraft(text: string): void {
 /**
  * Brouillon de l'éditeur dans `localStorage`. Lu une seule fois (premier rendu) ; sans
  * brouillon, on part de l'exemple livré. `save` est différé de 300 ms (dernière valeur) et
- * l'écriture en attente est vidangée au démontage.
+ * l'écriture en attente est vidangée au démontage et sur `pagehide`.
  */
 export function useConfigDraft(): { initialText: string; save: (text: string) => void } {
   const [initialText] = useState(readDraft)
@@ -50,7 +50,14 @@ export function useConfigDraft(): { initialText: string; save: (text: string) =>
     [flush],
   )
 
-  useEffect(() => flush, [flush])
+  // `pagehide` : onglet fermé ou rechargé avant la fin du délai, le démontage n'a pas lieu.
+  useEffect(() => {
+    globalThis.addEventListener('pagehide', flush)
+    return () => {
+      globalThis.removeEventListener('pagehide', flush)
+      flush()
+    }
+  }, [flush])
 
   return { initialText, save }
 }

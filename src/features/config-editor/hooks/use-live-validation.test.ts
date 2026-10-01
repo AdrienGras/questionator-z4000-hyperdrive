@@ -58,4 +58,23 @@ describe('useLiveValidation', () => {
     expect(result.current.result?.ok).toBe(false)
     expect(result.current.result?.issues.map((issue) => issue.code)).toContain('json_syntax')
   })
+
+  it('import du validateur en échec : pas de rejet non géré, pending retombe, loadError', async () => {
+    vi.resetModules()
+    vi.doMock('@/domain/config/validate', () => {
+      throw new Error('chunk introuvable')
+    })
+    try {
+      const { useLiveValidation: fresh } = await import('./use-live-validation')
+      const { result } = renderHook(() => fresh(exampleText))
+      expect(result.current.loadError).toBe(false)
+      await settle()
+      expect(result.current.loadError).toBe(true)
+      expect(result.current.pending).toBe(false)
+      expect(result.current.result).toBeUndefined()
+    } finally {
+      vi.doUnmock('@/domain/config/validate')
+      vi.resetModules()
+    }
+  })
 })

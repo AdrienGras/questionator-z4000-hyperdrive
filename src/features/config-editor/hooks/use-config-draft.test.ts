@@ -61,4 +61,21 @@ describe('useConfigDraft', () => {
     act(() => result.current.save('x'))
     expect(() => act(() => void vi.advanceTimersByTime(300))).not.toThrow()
   })
+
+  it('vidange l’écriture en attente sur pagehide', () => {
+    const { result } = renderHook(() => useConfigDraft())
+    act(() => result.current.save('quitte'))
+    expect(localStorage.getItem(DRAFT_KEY)).toBeNull()
+    act(() => void globalThis.dispatchEvent(new Event('pagehide')))
+    expect(localStorage.getItem(DRAFT_KEY)).toBe('quitte')
+  })
+
+  it('retire l’écouteur pagehide au démontage', () => {
+    const { result, unmount } = renderHook(() => useConfigDraft())
+    unmount()
+    localStorage.clear()
+    act(() => result.current.save('après'))
+    act(() => void globalThis.dispatchEvent(new Event('pagehide')))
+    expect(localStorage.getItem(DRAFT_KEY)).toBeNull()
+  })
 })

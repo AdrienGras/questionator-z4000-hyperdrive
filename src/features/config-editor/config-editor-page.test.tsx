@@ -77,6 +77,17 @@ describe('ConfigEditorPage', () => {
     await waitFor(() => expect(document.querySelector('.cm-lintRange-error')).not.toBeNull())
   })
 
+  it('désactive la création tant que la validation du texte courant est en attente', async () => {
+    await renderEditor()
+    await previewReady()
+    expect(screen.getByRole('button', { name: CREATE })).toBeEnabled()
+    type(EXAMPLE_TEXT.replace('"Oral PHP"', '"Oral PHP bis"'))
+    expect(screen.getByRole('button', { name: CREATE })).toBeDisabled()
+    await waitFor(() => expect(screen.getByRole('button', { name: CREATE })).toBeEnabled(), {
+      timeout: 5000,
+    })
+  })
+
   it('place la sélection sur la position de l’issue cliquée', async () => {
     await renderEditor()
     const text = EXAMPLE_TEXT.replace('"schemaVersion": 1,', '"schemaVersion": 1, "intrus": true,')

@@ -5,6 +5,7 @@ import type { NormalizedConfig } from '@/domain/config/normalize'
 import { previewSession } from '@/domain/presentation/preview-session'
 import { toProjectedView } from '@/domain/presentation/projected-view'
 import { QuestionPreview } from '@/features/config-editor/components/question-preview'
+import { LocaleScope, resolveSessionLocale } from '@/lib/i18n/locale-context'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
 
@@ -14,12 +15,17 @@ type ConfigPreviewProps = Readonly<{
   stale: boolean
 }>
 
-/** Aperçu de la dernière config valide : questions par catégorie, puis écran final factice. */
+/**
+ * Aperçu de la dernière config valide : questions par catégorie, puis écran final factice. Le
+ * contenu suit la langue de la config (`LocaleScope`, sans toucher `<html lang>`) ; l'habillage
+ * (bandeau, intitulés « Réponse attendue », « Écran final ») reste dans celle de l'éditeur (`ui`).
+ */
 export function ConfigPreview({ ui, config, stale }: ConfigPreviewProps) {
   const finalView = useMemo(
     () => (config === undefined ? undefined : toProjectedView(previewSession(config))),
     [config],
   )
+  const configLocale = resolveSessionLocale(config?.locale)
   if (config === undefined || finalView === undefined) {
     return <p className="text-sm text-muted-foreground">{ui.text('editor_preview_empty', {})}</p>
   }
@@ -32,23 +38,31 @@ export function ConfigPreview({ ui, config, stale }: ConfigPreviewProps) {
       )}
       <ThemeScope
         theme={config.theme}
-        className={cn(
-          'space-y-6 rounded-md bg-background p-4 text-foreground',
-          stale && 'opacity-60',
-        )}
+        className={cn('rounded-md bg-background p-4 text-foreground', stale && 'opacity-60')}
       >
-        {config.categories.map((category) => (
-          <section key={category.id} className="space-y-3">
-            <h3 className="text-lg font-semibold">{category.label}</h3>
-            {category.questions.map((question) => (
-              <QuestionPreview key={question.id} ui={ui} category={category} question={question} />
+        <LocaleScope locale={configLocale}>
+          <div lang={configLocale} className="space-y-6">
+            {config.categories.map((category) => (
+              <section key={category.id} className="space-y-3">
+                <h3 className="text-lg font-semibold">{category.label}</h3>
+                {category.questions.map((question) => (
+                  <QuestionPreview
+                    key={question.id}
+                    ui={ui}
+                    category={category}
+                    question={question}
+                  />
+                ))}
+              </section>
             ))}
-          </section>
-        ))}
-        <section className="space-y-3">
-          <h3 className="text-lg font-semibold">{ui.text('editor_final_screen', {})}</h3>
-          <ProjectionCanvas view={finalView} />
-        </section>
+            <section className="space-y-3">
+              <h3 lang={ui.locale} className="text-lg font-semibold">
+                {ui.text('editor_final_screen', {})}
+              </h3>
+              <ProjectionCanvas view={finalView} />
+            </section>
+          </div>
+        </LocaleScope>
       </ThemeScope>
     </div>
   )

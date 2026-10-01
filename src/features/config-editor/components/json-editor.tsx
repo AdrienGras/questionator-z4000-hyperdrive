@@ -1,4 +1,4 @@
-import { autocompletion, closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete'
+import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import { json } from '@codemirror/lang-json'
 import { bracketMatching, indentOnInput } from '@codemirror/language'
@@ -78,7 +78,6 @@ export function JsonEditor({
           highlightActiveLineGutter(),
           history(),
           closeBrackets(),
-          autocompletion(),
           indentOnInput(),
           bracketMatching(),
           json(),

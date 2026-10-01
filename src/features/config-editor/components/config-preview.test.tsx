@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import exampleText from '../../../../examples/config.example.json?raw'
 import * as previewSessionModule from '@/domain/presentation/preview-session'
 import { AppearanceProvider } from '@/app/appearance-provider'
+import { LocaleProvider } from '@/lib/i18n/locale-context'
 import { validateConfig } from '@/domain/config/validate'
 import { makeUi } from '@/testing/make-ui'
 import { FixedWidthResizeObserver } from '@/testing/resize-observer'
@@ -76,5 +77,28 @@ describe('ConfigPreview', () => {
       </AppearanceProvider>,
     )
     expect(spy).toHaveBeenCalledTimes(1)
+  })
+
+  it('rend le contenu dans la langue de la config sans changer <html lang>', () => {
+    const english = validateConfig(exampleText.replace('"locale": "fr"', '"locale": "en"'), {
+      cssSupports: () => true,
+    })
+    if (!english.ok) throw new Error('exemple en invalide')
+    document.documentElement.lang = ''
+    const { container } = render(
+      <LocaleProvider locale="fr">
+        <AppearanceProvider>
+          <ConfigPreview ui={ui} config={english.config} stale={false} />
+        </AppearanceProvider>
+      </LocaleProvider>,
+    )
+    expect(document.documentElement.lang).toBe('fr')
+    const canvas = container.querySelector('[data-projection-canvas]')
+    expect(canvas?.textContent).toContain('Grade:')
+    expect(canvas?.textContent).not.toContain('Note :')
+    expect(canvas?.closest('[lang]')?.getAttribute('lang')).toBe('en')
+    // Habillage de l'éditeur : langue de l'interface, pas celle de la config.
+    expect(screen.getAllByRole('heading', { level: 3 }).at(-1)?.textContent).toBe('Écran final')
+    expect(screen.getAllByText('Réponse attendue').length).toBeGreaterThan(0)
   })
 })

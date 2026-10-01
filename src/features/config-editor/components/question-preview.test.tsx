@@ -49,4 +49,15 @@ describe('QuestionPreview', () => {
     )
     expect(container.querySelector('details')).toBeNull()
   })
+
+  it('réponse vide ou blanche : pas de <details>', () => {
+    const { container } = render(
+      <QuestionPreview
+        ui={ui}
+        category={category}
+        question={{ id: 'q3', title: 'T', tags: [], prompt: 'P', answer: '  ' }}
+      />,
+    )
+    expect(container.querySelector('details')).toBeNull()
+  })
 })

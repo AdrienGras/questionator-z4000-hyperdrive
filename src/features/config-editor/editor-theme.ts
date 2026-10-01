@@ -3,9 +3,9 @@ import { EditorView } from '@codemirror/view'
 import { tags } from '@lezer/highlight'
 
 /**
- * Habillage de l'éditeur JSON (F26) : les couleurs viennent des variables CSS du thème de la
- * config (`--background`, `--border`…) et des cinq `--cm-*` de `index.css`, donc le mode sombre
- * s'applique sans reconfigurer l'éditeur.
+ * Habillage de l'éditeur JSON (F26) : les couleurs viennent des variables CSS du thème de
+ * l'application (jetons shadcn `--background`, `--border`… et les cinq `--cm-*` de `index.css`),
+ * pas du thème de la config éditée ; le mode sombre s'applique donc sans reconfigurer l'éditeur.
  */
 export const editorChrome = EditorView.theme({
   '&': {

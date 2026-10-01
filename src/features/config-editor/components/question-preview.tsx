@@ -2,20 +2,25 @@ import { memo, type CSSProperties } from 'react'
 import { CategoryIcon } from '@/components/category-icon'
 import { Markdown } from '@/components/markdown/markdown'
 import type { NormalizedCategory, NormalizedQuestion } from '@/domain/config/normalize'
-import type { Ui } from '@/lib/i18n/use-ui'
+import { useUi, type Ui } from '@/lib/i18n/use-ui'
 
 type QuestionPreviewProps = Readonly<{
+  /** Langue de l'éditeur, pour l'habillage ; le contenu suit la portée de langue englobante. */
   ui: Ui
   category: NormalizedCategory
   question: NormalizedQuestion
 }>
 
-/** Carte d'une question : en-tête, énoncé rendu comme à la projection, réponse attendue repliée. */
+/**
+ * Carte d'une question : en-tête, énoncé rendu comme à la projection, réponse attendue repliée.
+ * Les Markdown suivent la langue de la portée (`LocaleScope` de l'aperçu : celle de la config).
+ */
 export const QuestionPreview = memo(function QuestionPreview({
   ui,
   category,
   question,
 }: QuestionPreviewProps) {
+  const contentUi = useUi()
   const { color, icon } = category
   const accent: (CSSProperties & Record<'--category-color', string>) | undefined =
     color === undefined ? undefined : { '--category-color': color }
@@ -40,13 +45,13 @@ export const QuestionPreview = memo(function QuestionPreview({
         <span>{question.title}</span>
         <span className="ml-auto text-muted-foreground">{category.scale.join(' / ')}</span>
       </header>
-      <Markdown source={question.prompt} ui={ui} size="projection" />
-      {question.answer !== undefined && (
+      <Markdown source={question.prompt} ui={contentUi} size="projection" />
+      {question.answer !== undefined && question.answer.trim() !== '' && (
         <details className="rounded-md border p-2">
-          <summary className="cursor-pointer text-sm font-medium">
+          <summary lang={ui.locale} className="cursor-pointer text-sm font-medium">
             {ui.text('editor_expected_answer', {})}
           </summary>
-          <Markdown source={question.answer} ui={ui} className="mt-2" />
+          <Markdown source={question.answer} ui={contentUi} className="mt-2" />
         </details>
       )}
     </article>
