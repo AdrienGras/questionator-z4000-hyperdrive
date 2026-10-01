@@ -39,7 +39,12 @@ export function StudentScreen({
           {student.firstName} {student.lastName}
         </h1>
       </header>
-      <CategoryTiles ui={ui} categories={view.categories} />
+      <CategoryTiles
+        ui={ui}
+        categories={view.categories}
+        currentCategoryId={current?.categoryId}
+        finished={view.finished}
+      />
       {current !== undefined && (
         <DrawReveal
           key={current.drawnAt}

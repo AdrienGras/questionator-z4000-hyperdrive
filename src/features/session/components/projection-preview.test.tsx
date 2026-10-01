@@ -29,7 +29,7 @@ const student = (prompt: string, drawnAt: string, drawAnimation = false): Projec
   mode: 'student',
   examTitle: 'Partiel de maths',
   appearance,
-  student: { firstName: 'Ada', lastName: 'Lovelace' },
+  student: { firstName: 'Ada', lastName: 'Lovelace', order: 1 },
   categories: [
     { id: 'algo', label: 'Algorithmique', maxPoints: 4, exhausted: false, disabled: false },
   ],

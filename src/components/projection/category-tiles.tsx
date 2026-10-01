@@ -5,6 +5,35 @@ import type { ProjectedStudentView } from '@/domain/presentation/projected-view'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
 
+type Category = ProjectedStudentView['categories'][number]
+
+/**
+ * État affiché d'une tuile (F33) : `exhausted` (plus de question pour l'étudiant), `current`
+ * (catégorie de la question en cours), `waiting` (une autre question est en cours : aucun tirage
+ * possible, sans libellé pour ne pas charger l'écran), `unavailable` (passage terminé), sinon
+ * `available`.
+ */
+type TileState = 'available' | 'current' | 'waiting' | 'unavailable' | 'exhausted'
+
+function tileState(
+  category: Category,
+  currentCategoryId: string | undefined,
+  finished: boolean,
+): TileState {
+  if (category.exhausted) return 'exhausted'
+  if (category.id === currentCategoryId) return 'current'
+  if (!category.disabled) return 'available'
+  return finished ? 'unavailable' : 'waiting'
+}
+
+const STATE_CLASSES: Record<TileState, string | undefined> = {
+  available: undefined,
+  current: 'border-4',
+  waiting: 'opacity-60',
+  unavailable: 'opacity-60',
+  exhausted: 'border-dashed opacity-40',
+}
+
 /**
  * Tuiles de catégorie de la vue projetée : purement visuelles (ni bouton ni focusable), couleur
  * en accent de bordure et d'icône comme la grille examinateur (D26), même disposition selon le
@@ -13,23 +42,32 @@ import { cn } from '@/lib/utils'
 export function CategoryTiles({
   ui,
   categories,
-}: Readonly<{ ui: Ui; categories: ProjectedStudentView['categories'] }>) {
+  currentCategoryId,
+  finished = false,
+}: Readonly<{
+  ui: Ui
+  categories: ProjectedStudentView['categories']
+  currentCategoryId?: string
+  finished?: boolean
+}>) {
   return (
     <CategoryLayout
       className="gap-4"
       items={categories}
       itemKey={(category) => category.id}
       renderItem={(category) => {
+        const state = tileState(category, currentCategoryId, finished)
         const accent: (CSSProperties & Record<'--category-color', string>) | undefined =
           category.color === undefined ? undefined : { '--category-color': category.color }
         return (
           <div
             style={accent}
             data-colored={category.color !== undefined}
+            data-state={state}
             className={cn(
               'flex h-full flex-col items-center gap-2 rounded-lg border p-5 text-center text-2xl',
               'data-[colored=true]:border-[var(--category-color)]',
-              (category.exhausted || category.disabled) && 'opacity-50',
+              STATE_CLASSES[state],
             )}
           >
             {category.icon !== undefined && (
@@ -39,9 +77,14 @@ export function CategoryTiles({
               />
             )}
             <span className="font-semibold">{category.label}</span>
-            {category.exhausted && (
+            {state === 'exhausted' && (
               <span className="text-base text-muted-foreground">
                 {ui.text('present_category_exhausted', {})}
+              </span>
+            )}
+            {state === 'unavailable' && (
+              <span className="text-base text-muted-foreground">
+                {ui.text('present_category_unavailable', {})}
               </span>
             )}
           </div>

@@ -34,17 +34,19 @@ export function FinalCard({
       {detail !== undefined && (
         <ul className="w-full max-w-2xl divide-y text-2xl">
           {detail.map((row) => (
-            <li
-              key={`${row.categoryLabel}\u0000${row.title}`}
-              className="flex items-baseline justify-between gap-4 py-2"
-            >
+            <li key={row.questionId} className="flex items-baseline justify-between gap-4 py-2">
               <span>
-                <span className="text-muted-foreground">{row.categoryLabel}</span> {row.title}
+                <span className="text-muted-foreground">{row.categoryLabel}</span>
+                <span aria-hidden className="text-muted-foreground">
+                  {' · '}
+                </span>
+                {row.title}
               </span>
               <span className="font-semibold">
                 {row.skipped
                   ? ui.text('present_skipped', {})
-                  : `${format.format(row.points ?? 0)} / ${format.format(row.maxPoints)}`}
+                  : // Notée sans note (donnée incohérente) : « — », jamais une note inventée.
+                    `${row.points === undefined ? '—' : format.format(row.points)} / ${format.format(row.maxPoints)}`}
               </span>
             </li>
           ))}
