@@ -176,7 +176,7 @@ function checkFinalScaleGrid(config: ParsedConfig): ConfigIssue[] {
   if (stepThousandths === 0) return []
   return roundToMilli(finalScale) % stepThousandths === 0
     ? []
-    : [configWarning('final_scale_off_grid', ['scoring', 'finalScale'], { finalScale, step })]
+    : [configError('final_scale_off_grid', ['scoring', 'finalScale'], { finalScale, step })]
 }
 
 function checkIcons(config: ParsedConfig, iconNames: ReadonlySet<string>): ConfigIssue[] {

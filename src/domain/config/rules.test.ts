@@ -280,12 +280,12 @@ describe('checkRules', () => {
     })
   })
 
-  test('final_scale_off_grid avec un pas explicite (avertissement)', () => {
+  test('final_scale_off_grid avec un pas explicite (erreur)', () => {
     const config = minimalConfig()
     config.scoring.rounding = { step: 0.3 }
     expect(only(config, 'final_scale_off_grid')).toEqual([
       {
-        severity: 'warning',
+        severity: 'error',
         code: 'final_scale_off_grid',
         path: ['scoring', 'finalScale'],
         params: { finalScale: 20, step: 0.3 },

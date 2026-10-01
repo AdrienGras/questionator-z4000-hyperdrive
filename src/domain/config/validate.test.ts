@@ -94,6 +94,17 @@ describe('validateConfig', () => {
     expect(result.issues.map((issue) => issue.code)).toEqual(['unknown_icon'])
   })
 
+  test('final_scale_off_grid bloque la config (erreur)', () => {
+    const config = minimalConfig()
+    config.scoring.finalScale = 20.25
+    config.scoring.rounding = { step: 0.5 }
+    const result = validateConfig(json(config), deps)
+    expect(result.ok).toBe(false)
+    expect(result.issues).toContainEqual(
+      expect.objectContaining({ severity: 'error', code: 'final_scale_off_grid' }),
+    )
+  })
+
   test('erreur de règle → ok false avec erreurs et avertissements', () => {
     const config = minimalConfig()
     config.categories[0]!.icon = 'licorne'
