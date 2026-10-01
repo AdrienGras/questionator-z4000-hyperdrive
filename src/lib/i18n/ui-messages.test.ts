@@ -268,6 +268,7 @@ const SAMPLE: UiMessageParams = {
   editor_expected_answer: {},
   editor_final_screen: {},
   editor_validator_error: {},
+  editor_hover_default: {},
 }
 
 function isUiMessageKey(key: string): key is keyof UiMessageParams {

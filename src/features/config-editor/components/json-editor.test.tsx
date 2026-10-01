@@ -1,7 +1,9 @@
+import { CompletionContext } from '@codemirror/autocomplete'
+import { EditorState } from '@codemirror/state'
 import { act, render, screen } from '@testing-library/react'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
-import { JsonEditor, type JsonEditorApi } from './json-editor'
+import { configCompletionSource, JsonEditor, type JsonEditorApi } from './json-editor'
 
 type Props = Parameters<typeof JsonEditor>[0]
 
@@ -14,11 +16,16 @@ function mount(overrides: Partial<Props> = {}) {
       onChange={onChange}
       diagnostics={[]}
       ariaLabel="Configuration JSON"
+      defaultLabel="Défaut :"
       apiRef={apiRef}
       {...overrides}
     />,
   )
   return { apiRef, onChange, ...view }
+}
+
+function classCount(selector: string) {
+  return selector.split(/[.[]/).length - 1
 }
 
 describe('JsonEditor', () => {
@@ -54,5 +61,54 @@ describe('JsonEditor', () => {
     act(() => apiRef.current?.reveal(15, 18))
     expect(container.querySelector('.cm-activeLine')?.textContent).toBe('  "b": 2')
     expect(container.querySelector('.cm-lineNumbers .cm-activeLineGutter')?.textContent).toBe('3')
+  })
+
+  it("l'élément de complétion sélectionné l'emporte en spécificité sur le thème par défaut", () => {
+    mount()
+    const css = [...document.querySelectorAll('style')].map((style) => style.textContent).join('\n')
+    const selectors = (needle: string) =>
+      [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+        .filter(([, , body]) => body?.includes(needle))
+        .flatMap(([, selector]) => (selector ?? '').split(','))
+        .filter((selector) => selector.includes('tooltip-autocomplete ') && selector.includes('li'))
+        .map((selector) => selector.trim())
+    const ours = selectors('var(--accent)')
+    const theirs = selectors('white')
+    expect(ours.length).toBeGreaterThan(0)
+    expect(theirs.length).toBeGreaterThan(0)
+    expect(Math.min(...ours.map(classCount))).toBeGreaterThan(Math.max(...theirs.map(classCount)))
+  })
+
+  describe('configCompletionSource', () => {
+    const doc = '{ "scoring": {  } }'
+    const between = doc.indexOf('{  }') + 2
+
+    it('propose les clés du schéma entre les accolades', () => {
+      const context = new CompletionContext(EditorState.create({ doc }), between, true)
+      const result = configCompletionSource(context)
+      expect(result?.from).toBe(between)
+      expect(result?.options.map((option) => option.label)).toContain('questionsPerStudent')
+    })
+
+    it('accepter une option remplace le mot en cours', () => {
+      const typed = '{ "scoring": { "rounding": { "mode": ne } } }'
+      const pos = typed.indexOf('ne') + 2
+      const result = configCompletionSource(
+        new CompletionContext(EditorState.create({ doc: typed }), pos, false),
+      )
+      const option = result?.options.find((candidate) => candidate.label === '"nearest"')
+      expect(result).not.toBeNull()
+      expect(typeof option?.apply).toBe('string')
+      const state = EditorState.create({ doc: typed })
+      const next = state.update({
+        changes: { from: result?.from ?? 0, to: result?.to ?? pos, insert: String(option?.apply) },
+      }).state
+      expect(next.doc.toString()).toBe('{ "scoring": { "rounding": { "mode": "nearest" } } }')
+    })
+
+    it("n'ouvre pas la liste seule hors de tout mot", () => {
+      const context = new CompletionContext(EditorState.create({ doc }), between, false)
+      expect(configCompletionSource(context)).toBeNull()
+    })
   })
 })

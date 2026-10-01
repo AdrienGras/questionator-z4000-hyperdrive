@@ -239,6 +239,7 @@ export type UiMessageParams = {
   editor_expected_answer: NoParams
   editor_final_screen: NoParams
   editor_validator_error: NoParams
+  editor_hover_default: NoParams
   stats_back: NoParams
   stats_error: NoParams
   stats_headcount: NoParams
@@ -564,6 +565,7 @@ const fr: Dictionary<UiMessageParams> = {
   editor_expected_answer: () => 'Réponse attendue',
   editor_final_screen: () => 'Écran final',
   editor_validator_error: () => "Le validateur n'a pas pu être chargé. Rechargez la page.",
+  editor_hover_default: () => 'Défaut :',
   stats_back: () => 'Retour au passage',
   stats_error: () => "Les statistiques n'ont pas pu être chargées.",
   stats_headcount: () => 'Effectifs',
@@ -849,6 +851,7 @@ const en: Dictionary<UiMessageParams> = {
   editor_expected_answer: () => 'Expected answer',
   editor_final_screen: () => 'Final screen',
   editor_validator_error: () => 'The validator could not be loaded. Reload the page.',
+  editor_hover_default: () => 'Default:',
   stats_back: () => 'Back to the exam',
   stats_error: () => 'The statistics could not be loaded.',
   stats_headcount: () => 'Headcount',

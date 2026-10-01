@@ -78,7 +78,7 @@ Pendant le passage, le score cumulé affiché est la note brute. L'affichage de 
 
 ### 6.2 Configuration (JSON)
 
-Le schéma est défini avec Zod. Un JSON Schema en est généré au build et publié sur GitHub Pages, pour que le champ `$schema` du fichier donne l'autocomplétion et la validation dans l'éditeur. Un fichier d'exemple complet est versionné dans le dépôt et téléchargeable depuis l'écran de création de session.
+Le schéma est défini avec Zod. Un JSON Schema en est généré au build et publié sur GitHub Pages, pour que le champ `$schema` du fichier donne l'autocomplétion et la validation dans l'éditeur. Il porte aussi la description et le défaut de chaque champ, en français (D87). Un fichier d'exemple complet est versionné dans le dépôt et téléchargeable depuis l'écran de création de session.
 
 Exemple :
 
@@ -683,6 +683,7 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 **Contenu.**
 - Page `#/editor`, ouverte par la carte « Éditer une config » de l'accueil (toujours affichée). CodeMirror n'est chargé que sur cette page, et pré-caché pour le hors ligne (D80).
 - Éditeur JSON (gauche) : validation 300 ms après la frappe avec le validateur de la création ; erreurs et avertissements soulignés dans le texte et dans la marge, à la position du nœud concerné ; liste des issues (mêmes messages qu'à la création) dont chaque ligne place le curseur sur le nœud.
+- Autocomplétion (Ctrl+Espace) des clés et des valeurs d'énumération, aide au survol (description, défaut), tirées du JSON Schema (D87).
 - Brouillon enregistré en local ; au retour, brouillon repris, sinon config d'exemple. « Charger un fichier » (ou glisser-déposer) et « Repartir de l'exemple » remplacent le texte, annulable par Ctrl+Z.
 - Aperçu (droite), au thème de la config : toutes les questions groupées par catégorie (en-tête, énoncé au rendu de la projection, réponse attendue repliée), puis l'écran final projeté d'une étudiante fictive. Config invalide : dernier aperçu valide, marqué comme périmé.
 - « Télécharger » : le texte exact de l'éditeur, nommé d'après le titre de l'examen. « Créer une session avec cette config » (config valide) : ouvre la création avec la config chargée.

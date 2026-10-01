@@ -35,7 +35,19 @@ export const editorChrome = EditorView.theme({
     backgroundColor: 'var(--popover, var(--background))',
     color: 'var(--popover-foreground, var(--foreground))',
     border: '1px solid var(--border)',
+    borderRadius: 'var(--radius)',
   },
+  // Le thème par défaut de l'autocomplétion (bleu/blanc, préfixé `&light` / `&dark`, donc une
+  // classe de plus) l'emporterait sur une règle simple : on surcharge en spécificité.
+  '.cm-tooltip.cm-tooltip-autocomplete ul[role=listbox] li[role=option][aria-selected]': {
+    background: 'var(--accent)',
+    color: 'var(--accent-foreground)',
+  },
+  '.cm-completionInfo, .cm-schema-hover': {
+    maxWidth: '28rem',
+    padding: '0.5rem 0.75rem',
+  },
+  '.cm-schema-hover p + p': { marginTop: '0.25rem' },
 })
 
 export const highlightStyle = HighlightStyle.define([

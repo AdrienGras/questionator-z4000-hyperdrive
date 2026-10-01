@@ -1307,3 +1307,20 @@ autre encodage 8 bits.
 **Pourquoi** : une journée d'oraux dure plusieurs heures ; une heure suffit, et le retour sur l'onglet couvre le cas d'un examinateur qui revient de pause. Une pastille qui s'efface seule peut passer inaperçue au moment où l'examinateur prépare la salle. Lire le worker actif avant l'enregistrement est sûr : même lu après, `active` reste nul tant que le pré-cache de la première installation n'est pas fini.
 
 **Reporté dans** : `PRODUCT.md` F17. Amende D72. Impacte F17.
+
+## D87 — F32 : aide à la saisie tirée du JSON Schema, descriptions en français, complétion et survol maison (2026-10-01)
+
+**Question** : le JSON Schema publié ne dit rien de chaque champ, et l'éditeur de config (F26) n'aide pas à la saisie. Dans quelle langue décrire les champs, d'où tirer les textes et les défauts, et avec quelle bibliothèque brancher complétion et survol ?
+
+**Décision** :
+- Descriptions en français seul, un seul schéma publié. Source : `.meta({ description })` sur chaque champ de `ConfigSchema`, texte tiré du tableau de `PRODUCT.md` §6.2 ; le JSON Schema les hérite.
+- Défauts : `.meta({ default })` sur les champs optionnels qui en ont un, valeur lue dans `CONFIG_DEFAULTS` (pas recopiée).
+- Jetons de thème : description générique construite par jeton (« Variable CSS `--primary` du thème clair »).
+- Icône : l'`override` de `buildConfigJsonSchema` conserve `description` et `default` du nœud qu'il remplace.
+- Éditeur : complétion et survol maison (`jsonc-parser` + `@codemirror/autocomplete` + `hoverTooltip`), pas `codemirror-json-schema`. Le schéma est produit par `buildConfigJsonSchema()` dans le chunk de l'éditeur, mémorisé au premier usage.
+- `markdownDescription` = `description` + « Défaut : `…` » sur chaque nœud décrit, car le survol de VS Code ignore `default`. `description` reste brut (l'éditeur de l'app l'affiche tel quel).
+- Hors périmètre : validation par le JSON Schema (le validateur de l'app reste la référence) ; extraits de blocs entiers.
+
+**Pourquoi** : public francophone, comme `PRODUCT.md`, et un JSON Schema ne porte qu'une langue. Le schéma Zod reste la source unique : le survol ne peut pas diverger de la normalisation. 64 jetons de thème : un texte par jeton n'apporterait rien de plus que son nom. Sans l'`override` corrigé, l'aide disparaît sur `icon`. `codemirror-json-schema` 0.8.1 n'est plus maintenu depuis avril 2025 et tire shiki v1 (doublon de notre v4), `markdown-it`, `yaml`, `json-schema-library`. Pas de réseau ni d'état de chargement : Zod et la liste d'icônes sont déjà chargés par la validation en direct. `vscode-json-languageservice` n'affiche que `title`, `markdownDescription` (ou `description`) et les descriptions d'enum : sans `markdownDescription`, le défaut promis par le README n'apparaîtrait pas dans VS Code.
+
+**Reporté dans** : `PRODUCT.md` F26 et §6.2 ; `README.md`. Impacte F26.
