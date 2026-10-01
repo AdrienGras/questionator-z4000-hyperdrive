@@ -370,6 +370,7 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 - Actions : reprendre, créer, renommer, modifier l'examinateur, supprimer (avec confirmation), exporter un backup, importer un backup.
 - Backup : un fichier JSON `{ format: "questionator-backup", formatVersion, appVersion, exportedAt, session }`, nommé `<slug-session>-backup-<AAAA-MM-JJ>.json`. `appVersion` vient de `package.json` (injecté au build). À l'import, validation de l'enveloppe, de la session (schéma Zod de `Session`) **et de sa config figée par le validateur de F02**. Une dernière passe vérifie la cohérence entre session et config (références, scores dans le barème, un seul passage en attente par étudiant, identifiants uniques). `formatVersion` ou `schemaVersion` plus récents : erreur invitant à mettre l'application à jour. Si une session avec le même `id` existe, l'utilisateur choisit entre remplacer et annuler.
 - État vide : bouton « Créer une session » et lien vers la config d'exemple (remplacé en F20 par un message ; les actions et les liens d'exemple sont dans les cartes d'action).
+- Troisième carte d'action « Éditer une config » (F26), vers l'éditeur de config.
 - Indicateur discret dans l'en-tête, seulement si le navigateur a refusé le stockage persistant (F04), avec une infobulle qui recommande les backups.
 - La confirmation de suppression propose « Exporter un backup d'abord ».
 
@@ -671,6 +672,24 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 - Les liens d'exemple fonctionnent hors ligne.
 - L'export depuis l'accueil produit le même fichier que depuis la vue examinateur, et la bibliothèque d'export n'est chargée qu'au clic.
 - Import par bouton et par glisser-déposer inchangés.
+
+### F26 — Éditeur de config
+
+**Objectif.** Écrire ou corriger une config sans créer de session : erreurs reliées à leur ligne, aperçu des questions telles qu'elles seront projetées.
+
+**Contenu.**
+- Page `#/editor`, ouverte par la carte « Éditer une config » de l'accueil (toujours affichée). CodeMirror n'est chargé que sur cette page, et pré-caché pour le hors ligne (D80).
+- Éditeur JSON (gauche) : validation 300 ms après la frappe avec le validateur de la création ; erreurs et avertissements soulignés dans le texte et dans la marge, à la position du nœud concerné ; liste des issues (mêmes messages qu'à la création) dont chaque ligne place le curseur sur le nœud.
+- Brouillon enregistré en local ; au retour, brouillon repris, sinon config d'exemple. « Charger un fichier » (ou glisser-déposer) et « Repartir de l'exemple » remplacent le texte, annulable par Ctrl+Z.
+- Aperçu (droite), au thème de la config : toutes les questions groupées par catégorie (en-tête, énoncé au rendu de la projection, réponse attendue repliée), puis l'écran final projeté d'une étudiante fictive. Config invalide : dernier aperçu valide, marqué comme périmé.
+- « Télécharger » : le texte exact de l'éditeur, nommé d'après le titre de l'examen. « Créer une session avec cette config » (config valide) : ouvre la création avec la config chargée.
+
+**Critères d'acceptation.**
+- La carte de l'accueil ouvre l'éditeur sur l'exemple ou sur le brouillon.
+- Une virgule manquante est signalée à sa position ; un identifiant en double est souligné sur sa ligne, avec le message de la création ; cliquer une issue place le curseur sur le nœud.
+- L'aperçu montre toutes les questions et l'écran final ; une config invalide laisse le dernier aperçu valide, marqué périmé.
+- Fichier téléchargé identique au texte ; création ouverte avec la config validée ; brouillon retrouvé au rechargement.
+- Fonctionne hors ligne ; l'accueil ne charge pas CodeMirror.
 
 ## 9. Stack technique
 
