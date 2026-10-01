@@ -215,6 +215,26 @@ test('Ctrl+Espace propose les clés à l’endroit du curseur, puis les valeurs 
   }
 })
 
+test('Entrée applique l’option de complétion sélectionnée à la place du mot en cours', async ({
+  page,
+}) => {
+  const editor = new ConfigEditorPage(page)
+  await editor.goto()
+  await editor.replaceText('{ "scoring": { "rounding": { "mode": ne } } }')
+  await page.locator('.cm-line').first().click()
+  await page.keyboard.press('Control+Home')
+  for (let i = 0; i < 39; i++) await page.keyboard.press('ArrowRight')
+  // La souris hors de la liste : elle ne doit pas changer l'option sélectionnée.
+  await page.mouse.move(0, 0)
+  await editor.complete()
+  await expect(editor.completionOption('"nearest"')).toBeVisible()
+  // CodeMirror ignore Entrée juste après l'ouverture de la liste (interactionDelay, 75 ms) : un
+  // appui trop tôt est perdu, et le reprendre en boucle ne rattrape rien.
+  await page.waitForTimeout(300)
+  await page.keyboard.press('Enter')
+  await expect(editor.editor).toContainText('"mode": "nearest" }')
+})
+
 test('le survol de finalScoreDisplay affiche sa description et son défaut', async ({ page }) => {
   const editor = new ConfigEditorPage(page)
   await editor.goto()

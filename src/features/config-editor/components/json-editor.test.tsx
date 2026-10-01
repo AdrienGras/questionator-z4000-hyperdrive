@@ -16,7 +16,7 @@ function mount(overrides: Partial<Props> = {}) {
       onChange={onChange}
       diagnostics={[]}
       ariaLabel="Configuration JSON"
-      defaultLabel="Défaut"
+      defaultLabel="Défaut :"
       apiRef={apiRef}
       {...overrides}
     />,
@@ -88,6 +88,22 @@ describe('JsonEditor', () => {
       const result = configCompletionSource(context)
       expect(result?.from).toBe(between)
       expect(result?.options.map((option) => option.label)).toContain('questionsPerStudent')
+    })
+
+    it('accepter une option remplace le mot en cours', () => {
+      const typed = '{ "scoring": { "rounding": { "mode": ne } } }'
+      const pos = typed.indexOf('ne') + 2
+      const result = configCompletionSource(
+        new CompletionContext(EditorState.create({ doc: typed }), pos, false),
+      )
+      const option = result?.options.find((candidate) => candidate.label === '"nearest"')
+      expect(result).not.toBeNull()
+      expect(typeof option?.apply).toBe('string')
+      const state = EditorState.create({ doc: typed })
+      const next = state.update({
+        changes: { from: result?.from ?? 0, to: result?.to ?? pos, insert: String(option?.apply) },
+      }).state
+      expect(next.doc.toString()).toBe('{ "scoring": { "rounding": { "mode": "nearest" } } }')
     })
 
     it("n'ouvre pas la liste seule hors de tout mot", () => {

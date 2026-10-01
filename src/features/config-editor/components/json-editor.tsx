@@ -48,7 +48,7 @@ type JsonEditorProps = {
   onChange: (text: string) => void
   diagnostics: readonly JsonEditorDiagnostic[]
   ariaLabel: string
-  /** Libellé localisé de « Défaut », affiché dans la bulle de survol. */
+  /** Libellé localisé de « Défaut : » (ponctuation comprise), affiché dans la bulle de survol. */
   defaultLabel: string
   apiRef: Ref<JsonEditorApi>
   /** Classes du conteneur ; l'éditeur en occupe toute la hauteur. */
@@ -196,7 +196,7 @@ function hoverDom(hover: AssistHover, defaultLabel: string): HTMLElement {
   dom.append(description)
   if ('default' in hover) {
     const line = document.createElement('p')
-    line.append(`${defaultLabel} : `)
+    line.append(`${defaultLabel} `)
     const code = document.createElement('code')
     code.textContent = JSON.stringify(hover.default)
     line.append(code)
