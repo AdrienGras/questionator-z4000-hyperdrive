@@ -343,10 +343,11 @@ type FileSlot<T> =
 
 - Un compteur de séquence par emplacement : seule la dernière lecture lancée écrit son résultat (un fichier lent ne remplace jamais un fichier plus récent).
 - Une valeur lue après un `await` (drapeau « saisi à la main », verrou d'envoi) vit dans un `useRef`, pas dans un état capturé par la fermeture.
-- `dragover` appelle toujours `preventDefault()` quand des fichiers sont survolés, même désactivé (`dropEffect = 'none'`), et la page entière pose la même garde : sinon le navigateur ouvre le fichier et le formulaire est perdu.
+- Une zone de dépôt passe par `useFileDrop({ disabled, isolate, onFile })` (`src/hooks/use-file-drop.ts`, D84) et étale `dropProps` sur un `div` neutre : compteur `dragenter` / `dragleave` (jamais `relatedTarget`), `dragover` toujours empêché quand des fichiers sont survolés, même désactivé (`dropEffect = 'none'`), et la page entière pose la même garde (`hasFiles`) : sinon le navigateur ouvre le fichier et le formulaire est perdu. `isolate` quand la zone doit passer avant cette garde.
+- Une zone dont l'action ouvre un dialogue est désactivée tant que le dialogue est ouvert ou l'action en cours ; un dialogue alimenté par un état qui revient au repos garde son contenu via `useRetained` (sur un état stable, jamais un objet recréé au rendu).
 - Statut annoncé par une région `aria-live="polite"` toujours montée (`reading` compris) ; la zone est un `<fieldset>` + `<legend>` (rôle `group` nommé par le libellé visible).
 - CSV : lire les octets et décoder avec `decodeCsvBytes` (UTF-8 strict, repli Windows-1252, D58), jamais `file.text()`.
-- Référence : `src/features/create-session/components/file-drop-field.tsx`, `src/features/create-session/hooks/use-create-form.ts`, `src/features/create-session/slot-status.ts`.
+- Référence : `src/hooks/use-file-drop.ts`, `src/features/create-session/components/file-drop-field.tsx`, `src/features/create-session/hooks/use-create-form.ts`, `src/features/create-session/slot-status.ts`, `src/features/home/components/import-controller.tsx`.
 
 ## Vue de session thémée — squelette
 

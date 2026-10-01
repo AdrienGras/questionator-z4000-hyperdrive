@@ -1,4 +1,4 @@
-import { useState, type DragEvent, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -19,20 +19,19 @@ import {
 } from '@/components/ui/dialog'
 import type { BackupIssue } from '@/domain/backup/issues'
 import { formatBackupIssue, formatIssuePath } from '@/domain/backup/messages'
+import { useFileDrop } from '@/hooks/use-file-drop'
 import { damagedName, isDamaged, type StoredSession } from '@/lib/db/damaged-session'
+import { uniqueBy } from '@/lib/issue-list'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { formatDateTime } from '@/lib/format-date'
 import { useBackupImport, type ImportState } from '@/features/home/hooks/use-backup-import'
+import { useRetained } from '@/features/home/hooks/use-retained'
 
 type ImportControllerProps = Readonly<{
   ui: Ui
   disabled: boolean
   children: (openPicker: () => void) => ReactNode
 }>
-
-function hasFiles(event: DragEvent<HTMLElement>): boolean {
-  return Array.from(event.dataTransfer.types).includes('Files')
-}
 
 /**
  * Import de backup sur l'accueil : input fichier caché (ouvert via `openPicker`), dépôt d'un
@@ -43,40 +42,20 @@ export function ImportController({ ui, disabled, children }: ImportControllerPro
   // Élément en état (ref callback) plutôt qu'en `useRef` : `openPicker` est transmis pendant le
   // rendu, et le compilateur React interdit d'y lire une ref.
   const [input, setInput] = useState<HTMLInputElement | null>(null)
-  const [dragging, setDragging] = useState(false)
-  const { state, importFile, replace, dismiss } = useBackupImport()
+  const { state, importing, importFile, replace, dismiss } = useBackupImport()
+  // Un dialogue d'import ouvert ou un import en cours : un second fichier ne remplace rien (F34).
+  const blocked = disabled || importing || state.kind !== 'idle'
+  const { dragging, dropProps } = useFileDrop({
+    disabled: blocked,
+    onFile: (file) => void importFile(file),
+  })
 
   function openPicker() {
-    if (!disabled) input?.click()
-  }
-
-  function handleDragOver(event: DragEvent<HTMLDivElement>) {
-    if (!hasFiles(event)) return
-    if (disabled) {
-      // Empêche le navigateur d'ouvrir le JSON (et de quitter l'app) sans activer la surimpression.
-      event.preventDefault()
-      event.dataTransfer.dropEffect = 'none'
-      return
-    }
-    event.preventDefault()
-    setDragging(true)
-  }
-
-  function handleDragLeave(event: DragEvent<HTMLDivElement>) {
-    const next = event.relatedTarget
-    if (next instanceof Node && event.currentTarget.contains(next)) return
-    setDragging(false)
-  }
-
-  function handleDrop(event: DragEvent<HTMLDivElement>) {
-    event.preventDefault()
-    setDragging(false)
-    const file = event.dataTransfer.files[0]
-    if (!disabled && file) void importFile(file)
+    if (!blocked) input?.click()
   }
 
   return (
-    <div onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
+    <div {...dropProps}>
       <input
         ref={setInput}
         type="file"
@@ -121,9 +100,12 @@ type ImportErrorDialogProps = Readonly<{ ui: Ui; state: ImportState; onClose: ()
 /** Fichier refusé (toutes les issues, chemin en `<code>`), illisible, ou écriture échouée. */
 function ImportErrorDialog({ ui, state, onClose }: ImportErrorDialogProps) {
   const { text, locale } = ui
-  const view = errorView(state, ui)
+  const open = errorView(state, ui) !== null
+  // Contenu tiré du dernier état d'erreur : il reste affiché pendant l'animation de fermeture.
+  const shown = useRetained(open ? state : null)
+  const view = shown === null ? null : errorView(shown, ui)
   return (
-    <Dialog open={view !== null} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
       <DialogContent showCloseButton={false}>
         {view && (
           <>
@@ -133,9 +115,13 @@ function ImportErrorDialog({ ui, state, onClose }: ImportErrorDialogProps) {
             </DialogHeader>
             {view.issues.length > 0 && (
               <ul className="flex max-h-80 flex-col gap-2 overflow-y-auto text-sm">
-                {view.issues.map((issue) => {
-                  const path = formatIssuePath(issue)
-                  const message = formatBackupIssue(issue, locale)
+                {uniqueBy(
+                  view.issues.map((issue) => ({
+                    path: formatIssuePath(issue),
+                    message: formatBackupIssue(issue, locale),
+                  })),
+                  ({ path, message }) => `${path}|${message}`,
+                ).map(({ path, message }) => {
                   return (
                     <li key={`${path}|${message}`} className="flex flex-col gap-0.5">
                       {path !== '' && <code className="text-muted-foreground">{path}</code>}
@@ -179,12 +165,12 @@ function conflictBody({ text, locale }: Ui, existing: StoredSession, imported: s
 function ImportConflictDialog({ ui, state, onCancel, onReplace }: ImportConflictDialogProps) {
   const { text } = ui
   const [replacing, setReplacing] = useState(false)
-  const conflict = state.kind === 'conflict' ? state : null
+  const open = state.kind === 'conflict'
+  // Contenu tiré du dernier conflit : il reste affiché pendant l'animation de fermeture.
+  const shown = useRetained(open ? state : null)
+  const conflict = shown?.kind === 'conflict' ? shown : null
   return (
-    <AlertDialog
-      open={conflict !== null}
-      onOpenChange={(open) => !open && !replacing && onCancel()}
-    >
+    <AlertDialog open={open} onOpenChange={(next) => !next && !replacing && onCancel()}>
       <AlertDialogContent>
         {conflict && (
           <AlertDialogHeader>

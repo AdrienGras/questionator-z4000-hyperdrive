@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { BackupIssue } from '@/domain/backup/issues'
 import type { BackupParseResult } from '@/domain/backup/parse'
 import type { StoredSession } from '@/lib/db/damaged-session'
@@ -31,8 +31,25 @@ async function validateBackup(text: string): Promise<BackupParseResult> {
  */
 export function useBackupImport() {
   const [state, setState] = useState<ImportState>({ kind: 'idle' })
+  const [importing, setImporting] = useState(false)
+  // Lu après des `await` : un ref, pas l'état capturé par la fermeture (CONVENTIONS).
+  const busy = useRef(false)
 
+  /** Un seul import à la fois, et jamais par-dessus un dialogue d'import ouvert (F34). */
   async function importFile(file: File): Promise<void> {
+    // Un dialogue d'import ouvert (erreur, conflit) : rien ne doit le remplacer (F34).
+    if (busy.current || state.kind !== 'idle') return
+    busy.current = true
+    setImporting(true)
+    try {
+      await runImport(file)
+    } finally {
+      busy.current = false
+      setImporting(false)
+    }
+  }
+
+  async function runImport(file: File): Promise<void> {
     let text: string
     try {
       text = await file.text()
@@ -74,5 +91,5 @@ export function useBackupImport() {
     }
   }
 
-  return { state, importFile, replace, dismiss: () => setState({ kind: 'idle' }) }
+  return { state, importing, importFile, replace, dismiss: () => setState({ kind: 'idle' }) }
 }
