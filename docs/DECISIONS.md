@@ -1228,6 +1228,7 @@ autre encodage 8 bits.
 - `final_scale_off_grid` passe d'avertissement à **erreur** (remplace D02 / D44 sur ce point). Conséquence assumée : une session ou un backup portant une telle config devient « endommagé » / inimportable.
 - Nouvelle règle de backup `invalid_adjustment` : ajustement fini, au plus 3 décimales, au plus 10 000 en valeur absolue (mêmes bornes que les autres valeurs de notation, supprime l'exception de `toMilli`). `parseBackup` signale désormais les erreurs d'enveloppe avant celles de la session.
 - `persistence.ts` relit `navigator.storage.persisted()` quand l'onglet redevient visible.
+- Bundle initial : `lib/db` charge le validateur à la demande (`loadReadStored()`, `import('@/domain/backup/stored-session')` mémoïsé, avant la transaction de `updateSession`, après les lectures de `getSession` / `listSessions`) ; le contrôle `unknown_code_language` est injecté (`isKnownLanguage`, facultatif) par l'écran de création et l'éditeur seuls, `rules.ts` n'importe plus `code-languages.ts` (`shiki/langs`).
 - Hors périmètre : error boundary générique, réparation automatique, migration `version(2)`.
 
 **Pourquoi** : un seul point de passage pour tous les écrans ; deux chemins (lecture, import), une seule définition de « session valide ». Refuser l'échelle hors grille supprime le cas d'affichage trompeur (« 20,3 » pour 20,25 au pas de 0,5) plutôt que de l'habiller, le projet n'étant pas encore en production. Une session validée qui lève relève d'un bug, pas d'une donnée endommagée.

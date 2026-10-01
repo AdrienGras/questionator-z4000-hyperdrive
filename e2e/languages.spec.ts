@@ -46,6 +46,13 @@ function staticFiles(manifest: Manifest, start: string): Set<string> {
 }
 
 /**
+ * Clé du catalogue dans le manifeste, même motif que `SHIKI_CHUNK` (scripts/check-initial-bundle.ts) :
+ * chunk partagé `_langs-*` ou entrée dynamique à son chemin de module, selon le graphe d'imports.
+ */
+const CATALOG_KEY =
+  /(?:^_langs[.-])|(?:^node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?shiki\/dist\/langs\.mjs$)/
+
+/**
  * Lu dans `dist/.vite/manifest.json` : fichier du catalogue `shiki/langs`, fichiers de toutes les
  * grammaires (ceux que le catalogue importe dynamiquement, dépendances partagées comprises) et
  * fichiers propres à une grammaire donnée (elle-même et ses imports statiques).
@@ -58,7 +65,7 @@ function shikiChunkFiles(): {
   const manifest = manifestSchema.parse(
     JSON.parse(readFileSync('dist/.vite/manifest.json', 'utf8')),
   )
-  const catalogKey = Object.keys(manifest).find((key) => /^_langs[.-]/.test(key))
+  const catalogKey = Object.keys(manifest).find((key) => CATALOG_KEY.test(key))
   if (catalogKey === undefined) throw new Error('chunk du catalogue absent du manifeste')
   const catalogEntry = entryOf(manifest, catalogKey)
   const grammarKeys = catalogEntry.dynamicImports ?? []

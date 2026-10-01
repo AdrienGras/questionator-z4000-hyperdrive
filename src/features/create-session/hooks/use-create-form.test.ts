@@ -122,6 +122,16 @@ describe('useCreateForm', () => {
     expect(result.current.name).not.toBe('')
   })
 
+  test('config avec un langage de code inconnu → avertissement unknown_code_language', async () => {
+    const config = minimalConfig()
+    config.categories[0]!.questions[0]!.prompt = '```pyhton\nx = 1\n```'
+    const { result } = renderForm()
+    await act(() => result.current.setConfigText(JSON.stringify(config), 'editeur.json'))
+    const slot = result.current.config
+    if (slot.kind !== 'loaded') throw new Error(`slot ${slot.kind}`)
+    expect(slot.result.issues.map((issue) => issue.code)).toEqual(['unknown_code_language'])
+  })
+
   test('état initial : deux emplacements vides, création impossible', () => {
     const { result } = renderForm()
     expect(result.current.students).toEqual({ kind: 'empty' })

@@ -12,9 +12,12 @@ async function settle() {
 }
 
 describe('useLiveValidation', () => {
-  // Module chargé à l'avance : l'import dynamique du hook se résout alors sans E/S réelle.
+  // Modules chargés à l'avance : les imports dynamiques du hook se résolvent alors sans E/S réelle.
   beforeAll(async () => {
-    await import('@/domain/config/validate')
+    await Promise.all([
+      import('@/domain/config/validate'),
+      import('@/domain/config/code-languages'),
+    ])
   })
   beforeEach(() => {
     vi.useFakeTimers()

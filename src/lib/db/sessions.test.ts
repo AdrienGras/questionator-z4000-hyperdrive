@@ -118,6 +118,18 @@ describe('updateSession', () => {
     expect(await getSession('session-1')).toEqual(written)
   })
 
+  test('validateur pas encore chargé : la première écriture aboutit (la transaction n’expire pas)', async () => {
+    await createSession(makeSession())
+    vi.resetModules()
+    const fresh = await import('./sessions')
+    const written = await fresh.updateSession('session-1', (session) => ({
+      ...session,
+      name: 'Fraîche',
+    }))
+    expect(written.name).toBe('Fraîche')
+    expect(healthy(await getSession('session-1'))?.name).toBe('Fraîche')
+  })
+
   test('un mutator qui renvoie la session reçue n’écrit rien', async () => {
     await createSession(makeSession())
     const put = vi.spyOn(db.sessions, 'put')

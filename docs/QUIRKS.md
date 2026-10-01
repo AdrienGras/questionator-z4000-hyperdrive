@@ -577,12 +577,12 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Workaround** : les fixtures doivent passer `checkStoredSession` (`makeConfig` contient les questions `a-1` à `a-10`) ; `healthy()` (`src/testing/healthy-session.ts`) réduit le type `Session | DamagedSession` à `Session` dans les assertions.
 **Référence** : `src/testing/healthy-session.ts`, `src/domain/backup/stored-session.ts`.
 
-## jsdom n'a pas `CSS.supports` : `readStored` retombe sur « tout accepter » (2026-10-01)
+## jsdom n'a pas `CSS.supports` : le validateur de `lib/db` retombe sur « tout accepter » (2026-10-01)
 
 **Découvert** : F31.
 **Symptôme** : sous jsdom, valider une couleur de thème par `CSS.supports` lèverait un `TypeError`.
 **Cause** : jsdom n'implémente pas `CSS.supports`.
-**Workaround** : `readStored` (`src/lib/db/damaged-session.ts`) détecte l'absence de `CSS.supports` et injecte un `cssSupports` qui accepte tout. Un test qui veut une couleur refusée doit fournir sa propre fonction à `checkStoredSession`.
+**Workaround** : le validateur renvoyé par `loadReadStored()` (`src/lib/db/damaged-session.ts`) détecte l'absence de `CSS.supports` et injecte un `cssSupports` qui accepte tout. Un test qui veut une couleur refusée doit fournir sa propre fonction à `checkStoredSession`.
 **Référence** : `src/lib/db/damaged-session.ts`.
 
 ## Écrire un enregistrement brut endommagé dans un test : `db.table('sessions').put(...)` (2026-10-01)
@@ -593,3 +593,18 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Workaround** : passer par `db.table('sessions').put(brut)`, non typée, qui accepte tout objet porteur d'un `id`.
 **Référence** : tests de `src/lib/db/`.
 
+## Un `import()` attendu dans une transaction Dexie la valide trop tôt : `PrematureCommitError` (2026-10-01)
+
+**Découvert** : F31 (correctif R2, validateur de `lib/db` chargé à la demande).
+**Symptôme** : `updateSession` lève `PrematureCommitError: Transaction committed too early` à la première écriture, quand le validateur n'est pas encore chargé ; les suivantes passent (module en cache), d'où un bug qui ne se voit qu'une fois par chargement de page.
+**Cause** : IndexedDB valide une transaction dès qu'aucune requête n'est en attente à la fin d'une tâche ; attendre une promesse non Dexie (`await import(...)`, `fetch`) dans le callback de `db.transaction` laisse la transaction sans requête. Dans un querier `liveQuery`, le même `await` peut faire perdre la zone Dexie : les lectures faites *après* ne sont plus observées.
+**Workaround** : charger le module **avant** `db.transaction(...)` et valider de façon synchrone dedans ; dans `getSession` / `listSessions` (queriers de `useLiveQuery`), faire toutes les lectures Dexie d'abord, attendre le validateur ensuite. Test : `sessions.test.ts`, « validateur pas encore chargé » (`vi.resetModules()` puis import neuf de `./sessions`), rouge avec l'`await` dans la transaction.
+**Référence** : `src/lib/db/sessions.ts`, `src/lib/db/damaged-session.ts` (`loadReadStored`).
+
+## La clé du catalogue `shiki/langs` dans le manifeste dépend du graphe d'imports (2026-10-01)
+
+**Découvert** : F31 (correctif R2).
+**Symptôme** : `check:bundle` signale « aucun chunk /^_langs[.-]/ » alors que le catalogue est bien chargé à la demande.
+**Cause** : importé statiquement par plusieurs chunks, Rolldown en fait un chunk partagé `_langs-<hash>.js` ; importé statiquement par un seul (`code-languages.ts`) et en `import()` par le surligneur, il devient une entrée dynamique à son chemin de module (`node_modules/.pnpm/shiki@…/shiki/dist/langs.mjs`). Un groupe `codeSplitting` nommé ne le capture pas (entrée dynamique) : il produit un `_langs-*` vide qui rendrait le contrôle vacant, et avec `includeDependenciesRecursively` par défaut il avale l'assistant de préchargement de Vite et fuit dans l'entrée.
+**Workaround** : `SHIKI_CHUNK` (`scripts/check-initial-bundle.ts`) et `CATALOG_KEY` (`e2e/languages.spec.ts`) acceptent les deux formes de clé ; ne pas ajouter de groupe `langs`.
+**Référence** : `scripts/check-initial-bundle.ts`, `e2e/languages.spec.ts`.

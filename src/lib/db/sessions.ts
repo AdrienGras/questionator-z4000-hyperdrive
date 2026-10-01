@@ -1,7 +1,7 @@
 import { Dexie } from 'dexie'
 import type { Session } from '@/domain/session/types'
 import { db } from './db'
-import { isDamaged, readStored, type StoredSession } from './damaged-session'
+import { isDamaged, loadReadStored, type StoredSession } from './damaged-session'
 import { SessionDamagedError, SessionExistsError, SessionNotFoundError } from './errors'
 
 /** Crée une session construite par F06 ; refuse un id existant (D46). */
@@ -16,8 +16,12 @@ export async function createSession(session: Session): Promise<void> {
 
 /** Session validée, forme endommagée si l'enregistrement est incohérent (F31), `null` si absente. */
 export async function getSession(id: string): Promise<StoredSession | null> {
+  // Lecture Dexie d'abord, validateur ensuite : `useLiveQuery` observe les lectures faites avant
+  // le premier `await` d'une promesse non Dexie (F31).
   const raw = await db.sessions.get(id)
-  return raw === undefined ? null : readStored(raw, id)
+  if (raw === undefined) return null
+  const readStored = await loadReadStored()
+  return readStored(raw, id)
 }
 
 /**
@@ -29,7 +33,10 @@ export async function listSessions(): Promise<StoredSession[]> {
   const indexed = await db.sessions.orderBy('updatedAt').reverse().toArray()
   const seen = new Set(indexed.map((record) => record.id))
   const unindexed = (await db.sessions.toArray()).filter((record) => !seen.has(record.id))
-  return [...indexed, ...unindexed].map((record) => readStored(record, record.id))
+  const records = [...indexed, ...unindexed]
+  if (records.length === 0) return []
+  const readStored = await loadReadStored()
+  return records.map((record) => readStored(record, record.id))
 }
 
 /** Écrase la session de même id (import F05, après confirmation de l'utilisateur). */
@@ -50,10 +57,13 @@ export function deleteSession(id: string): Promise<void> {
  * immuable (il renvoie une nouvelle session) ; s'il renvoie la session reçue, rien n'a changé :
  * pas d'écriture, `updatedAt` intact, la session lue est renvoyée.
  */
-export function updateSession(
+export async function updateSession(
   id: string,
   mutator: (session: Session) => Session,
 ): Promise<Session> {
+  // Chargé avant la transaction : un `import()` attendu dedans la ferait valider trop tôt
+  // (`PrematureCommitError`). La validation, elle, reste synchrone dans la transaction.
+  const readStored = await loadReadStored()
   return db.transaction('rw', db.sessions, async () => {
     const raw = await db.sessions.get(id)
     if (raw === undefined) throw new SessionNotFoundError(id)

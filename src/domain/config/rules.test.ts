@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { minimalConfig } from '@/testing/config-fixtures'
+import { isKnownLanguage } from './code-languages'
 import { ICON_NAME_SET } from './icon-names'
 import type { ConfigIssue } from './issues'
 import { checkRules, type RuleDeps } from './rules'
@@ -8,6 +9,7 @@ import type { ParsedConfig } from './schema'
 const deps: RuleDeps = {
   cssSupports: (_property, value) => !value.startsWith('bad'),
   iconNames: new Set(['leaf', 'flame']),
+  isKnownLanguage,
 }
 
 function codes(config: ParsedConfig): string[] {
@@ -354,6 +356,13 @@ describe('checkRules', () => {
         expect.objectContaining({ language: 'pyhton' }),
         expect.objectContaining({ language: 'rusty' }),
       ])
+    })
+
+    test('non évaluée sans `isKnownLanguage` injecté (lecture du stockage, backup)', () => {
+      const config = withQuestion({ prompt: fence('pyhton') })
+      const { isKnownLanguage: _omitted, ...withoutLanguages } = deps
+      const issues = checkRules(config, withoutLanguages)
+      expect(issues.filter((issue) => issue.code === 'unknown_code_language')).toEqual([])
     })
 
     test('absente pour les langages connus, les pseudo-langages et les blocs sans langage', () => {

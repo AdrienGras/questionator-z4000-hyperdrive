@@ -15,6 +15,16 @@ describe('validateConfig', () => {
     expect(result.config.categories[0]?.questions[0]?.title).toBe('Question A1')
   })
 
+  test('unknown_code_language seulement si `isKnownLanguage` est injecté', () => {
+    const config = minimalConfig()
+    const question = config.categories[0]!.questions[0]!
+    question.prompt = '```pyhton\nx = 1\n```'
+    const codesWith = (extra: object) =>
+      validateConfig(json(config), { ...deps, ...extra }).issues.map((issue) => issue.code)
+    expect(codesWith({ isKnownLanguage: () => false })).toEqual(['unknown_code_language'])
+    expect(codesWith({})).toEqual([])
+  })
+
   test('JSON mal formé → json_syntax seul', () => {
     const result = validateConfig('{\n "a": 1,\n }', deps)
     expect(result).toEqual({
