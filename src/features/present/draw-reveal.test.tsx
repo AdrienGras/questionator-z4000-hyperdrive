@@ -140,7 +140,10 @@ describe('vue projetée', () => {
     await screen.findByText(PROMPT)
 
     await setAttempts('student-1', [])
-    expect(await screen.findByText('Question 1 / 3')).toBeInTheDocument()
+    // « Question 1 / 3 » s'affichait déjà avec la question en cours : seule la disparition de
+    // l'énoncé prouve que la réinitialisation est arrivée à l'écran.
+    await waitFor(() => expect(screen.queryByText(PROMPT)).not.toBeInTheDocument())
+    expect(screen.getByText('Question 1 / 3')).toBeInTheDocument()
     expect(cards(container)).toHaveLength(0)
 
     await setAttempts('student-1', [attempt(2, 'pending', T3)])

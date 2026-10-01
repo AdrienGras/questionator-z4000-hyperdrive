@@ -61,6 +61,13 @@ function studentView(session: Session): ProjectedStudentView {
 
 const revealed = '2026-09-29T10:00:00.000Z'
 
+/** Feuilles (chaînes et nombres) d'une valeur JSON, à toute profondeur. */
+function leavesOf(value: unknown): unknown[] {
+  if (Array.isArray(value)) return value.flatMap(leavesOf)
+  if (typeof value === 'object' && value !== null) return Object.values(value).flatMap(leavesOf)
+  return [value]
+}
+
 describe('toProjectedView', () => {
   test('waiting : titre et apparence seulement', () => {
     const session = makeSession({ projection: { mode: 'waiting' } })
@@ -275,18 +282,27 @@ describe('toProjectedView', () => {
       return makeSession({ config, students: [student, other], projection })
     }
 
-    /** Marqueurs et identifiants d'étudiants retrouvés dans la vue sérialisée (attendu : aucun). */
-    function leaks(session: Session): string[] {
-      const json = JSON.stringify(toProjectedView(session))
+    /**
+     * Marqueurs et identifiants retrouvés dans `view` (attendu : aucun). Les chaînes interdites
+     * sont cherchées dans chaque chaîne ; le montant d'ajustement, seulement en nombre exact : une
+     * note qui contient « 0.37 » en sous-chaîne (10,37) n'est pas une fuite.
+     */
+    function leaksIn(view: unknown, session: Session): string[] {
       const forbidden = [
         ...markers,
         'FUITE-PRENOM',
         'FUITE-NOM',
         editedAt,
-        String(adjustmentValue),
         ...session.students.map((student) => student.id),
       ]
-      return forbidden.filter((value) => json.includes(value))
+      const leaves = leavesOf(view)
+      const strings = leaves.filter((leaf): leaf is string => typeof leaf === 'string')
+      const found = forbidden.filter((value) => strings.some((leaf) => leaf.includes(value)))
+      return leaves.includes(adjustmentValue) ? [...found, String(adjustmentValue)] : found
+    }
+
+    function leaks(session: Session): string[] {
+      return leaksIn(toProjectedView(session), session)
     }
 
     const base = {
@@ -311,6 +327,19 @@ describe('toProjectedView', () => {
       const session = leakySession(student, { mode: 'student', studentId: student.id })
       expect(toProjectedView(session).mode).toBe('student')
       expect(leaks(session)).toEqual([])
+    })
+
+    test('détecteur : une date d’édition ou un montant d’ajustement injectés sont vus', () => {
+      const student = makeStudent([1, 2], { ...base, finalRevealedAt: revealed })
+      const session = leakySession(student, { mode: 'student', studentId: student.id })
+      const view = toProjectedView(session)
+
+      expect(leaksIn({ ...view, injected: { editedAt } }, session)).toEqual([editedAt])
+      expect(leaksIn({ ...view, injected: [{ points: adjustmentValue }] }, session)).toEqual([
+        String(adjustmentValue),
+      ])
+      // Exact, pas en sous-chaîne : une note de 10,37 n'est pas le montant d'ajustement.
+      expect(leaksIn({ ...view, injected: { points: 10.37 } }, session)).toEqual([])
     })
   })
 })

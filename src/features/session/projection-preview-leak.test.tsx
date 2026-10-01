@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import type { NormalizedCategory } from '@/domain/config/normalize'
 import { db } from '@/lib/db/db'
@@ -7,6 +7,7 @@ import { putSession } from '@/lib/db/sessions'
 import { renderAt } from '@/testing/render-at'
 import { FixedWidthResizeObserver } from '@/testing/resize-observer'
 import { makeSession } from '@/testing/session-fixtures'
+import { openSidePanel } from '@/testing/side-panel-assertions'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
 
 const categories: NormalizedCategory[] = [
@@ -64,13 +65,17 @@ test('aperçu étanche : rien de réservé à l’examinateur', async () => {
     .querySelector('[data-projection-canvas]')!
   await waitFor(() => expect(canvas.textContent).toContain('Énoncé a-3'))
 
-  // Commentaire et motif de passe : lus dans la session stockée (visibles seulement dans le tiroir).
-  const stored = await db.sessions.get('session-1')
-  expect(stored?.students[0]?.comment).toBe('COMMENT-7Q')
-  expect(stored?.students[0]?.attempts[1]?.skipReason).toBe('SKIP-7Q')
+  // Commentaire et motif de passe : bien présents dans le DOM examinateur (onglet « Étudiant » du
+  // tiroir), pour que leur absence de l'aperçu prouve quelque chose.
+  const panel = await openSidePanel('Étudiant')
+  expect(within(panel).getByRole('textbox', { name: 'Commentaire' })).toHaveValue('COMMENT-7Q')
+  expect(within(panel).getByText(/SKIP-7Q/)).toBeInTheDocument()
 
   const text = canvas.textContent
-  for (const secret of ['ANSWER-7Q', 'COMMENT-7Q', 'SKIP-7Q', '0,37', '0.37']) {
+  for (const secret of ['ANSWER-7Q', 'COMMENT-7Q', 'SKIP-7Q']) {
     expect(text).not.toContain(secret)
   }
+  // La note 0,37 : nombre exact parmi les nombres du canevas, pas en sous-chaîne (10,37 passerait).
+  const numbers = text.match(/\d+(?:[.,]\d+)?/g) ?? []
+  expect(numbers.map((n) => Number(n.replace(',', '.')))).not.toContain(0.37)
 })

@@ -76,4 +76,18 @@ describe('scoreAttempt', () => {
     )
     expect(session).toEqual(snapshot)
   })
+
+  // Branche défensive : inatteignable avec une config figée valide (F31), d'où la session forgée.
+  test('category_not_found (attempt sur une catégorie absente de la config)', () => {
+    const student = makeStudent(['pending'])
+    const pending = student.attempts[0]!
+    const session = makeScoreSession({ ...student, attempts: [{ ...pending, categoryId: 'zz' }] })
+    const snapshot = structuredClone(session)
+
+    expectPassageError(
+      () => scoreAttempt(session, { studentId: 'student-1', attemptId: 'attempt-1', score: 1 }),
+      'category_not_found',
+    )
+    expect(session).toEqual(snapshot)
+  })
 })

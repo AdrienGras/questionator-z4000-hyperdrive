@@ -7,6 +7,7 @@ import { categoryButton } from '@/testing/passage-assertions'
 import { openSidePanel } from '@/testing/side-panel-assertions'
 import { mountSession } from '@/testing/students-tab-harness'
 import { REVEALED } from '@/testing/screen-fixtures'
+import { storedSession } from '@/testing/stored-session'
 import { makeStudent } from '@/testing/student-fixtures'
 
 const failing = vi.hoisted(() => ({ on: false }))
@@ -85,11 +86,19 @@ test('dialogue d’ajout : un échec d’ajout dans le dialogue est affiché', a
   expect(alert).toBeInTheDocument()
 })
 
-/** Écriture sans effet visible : relance le rendu de l'écran avec la même erreur d'action. */
-async function touchSession() {
-  const stored = await db.sessions.get('session-1')
-  if (stored === undefined) throw new Error('session absente')
-  await db.sessions.put({ ...stored, updatedAt: new Date().toISOString() })
+/**
+ * Écriture qui relance le rendu de l'écran avec la même erreur d'action : l'étudiant actif est
+ * renommé, et on attend son nouveau nom à l'écran (la barre de titre, même sous le modal) pour
+ * savoir que le rendu a eu lieu.
+ */
+async function rerenderScreen() {
+  const stored = await storedSession()
+  await db.sessions.put({
+    ...stored,
+    updatedAt: new Date().toISOString(),
+    students: stored.students.map((s) => (s.id === alice.id ? { ...s, lastName: 'Aba-bis' } : s)),
+  })
+  expect(await screen.findAllByText(/Aba-bis/)).not.toHaveLength(0)
 }
 
 test('tiroir : l’erreur périmée ne réapparaît pas après un nouveau rendu de l’écran', async () => {
@@ -97,8 +106,7 @@ test('tiroir : l’erreur périmée ne réapparaît pas après un nouveau rendu 
   const dialog = await openSidePanel()
   expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument()
 
-  await touchSession()
-  await new Promise((resolve) => setTimeout(resolve, 100))
+  await rerenderScreen()
 
   expect(within(screen.getByRole('dialog')).queryByRole('alert')).not.toBeInTheDocument()
 })
@@ -110,8 +118,7 @@ test('dialogue d’ajout : l’erreur périmée ne réapparaît pas après un no
   const dialog = screen.getByRole('dialog', { name: 'Ajouter un étudiant' })
   expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument()
 
-  await touchSession()
-  await new Promise((resolve) => setTimeout(resolve, 100))
+  await rerenderScreen()
 
   expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument()
 })
@@ -126,8 +133,7 @@ test('« Étudiant suivant » sans suivant : l’erreur ne s’affiche pas à l�
   })
   await mountSession([done, bob])
   const next = await screen.findByRole('button', { name: 'Étudiant suivant' })
-  const stored = await db.sessions.get('session-1')
-  if (stored === undefined) throw new Error('session absente')
+  const stored = await storedSession()
   const removal = db.sessions.put({
     ...stored,
     students: stored.students.filter((s) => s.id !== bob.id),

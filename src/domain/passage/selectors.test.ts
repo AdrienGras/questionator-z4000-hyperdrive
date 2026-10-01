@@ -203,6 +203,11 @@ describe('rosterScore', () => {
     expect(rosterScore(makeStudent([], { absent: true }), one)).toEqual({ kind: 'absent' })
   })
 
+  // Le marquage d'absence vide les attempts, mais un backup ou une ancienne session peut en garder.
+  test('absent avec des notes → absent, les notes ne sont pas affichées', () => {
+    expect(rosterScore(makeStudent([3, 4], { absent: true }), one)).toEqual({ kind: 'absent' })
+  })
+
   test('todo → raw 0 et final null', () => {
     expect(rosterScore(makeStudent(), one)).toEqual({ kind: 'scored', raw: 0, final: null })
   })
