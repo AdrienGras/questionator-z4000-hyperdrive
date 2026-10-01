@@ -24,6 +24,21 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-01 — F36 (#84) : mises à jour en cours de journée
+
+**Dernière chose faite** : F36 implémentée sur `feat/84-mises-a-jour-journee` (D86), ticket borné, design validé en session :
+- `PwaUpdate` vérifie la mise à jour toutes les heures, au retour sur l'onglet et au retour du réseau. Ces deux derniers déclencheurs sont limités à une vérification par tranche de 5 minutes, limite levée après un échec. Choix de l'utilisateur : 1 h, plus le retour sur l'onglet et du réseau.
+- Pastille « Prête pour le hors ligne » à fermer par « OK » (choix de l'utilisateur, plutôt qu'une disparition automatique).
+- Le premier `controllerchange` d'une page sans contrôleur n'est ignoré que si aucun worker n'était actif au démarrage : la vue projetée ouverte par Shift+Reload se recharge maintenant. Le même filtre évite un faux « Prête pour le hors ligne » après un Shift+Reload qui trouve une version.
+
+Tests de correctif prouvés rouges sans le correctif, y compris deux e2e (vérification horaire par `page.clock`, Shift+Reload par CDP). Une revue de branche par un relecteur neuf n'a rien trouvé de bloquant ; ses mineurs ont été corrigés.
+
+**Trucs en suspens** : PR à ouvrir en brouillon, Sonar, puis « Ready for review » ; ne pas merger sans le go de l'utilisateur. Pendant F36, trois tests ont échoué une fois chacun sans être reproduits : deux unitaires (`add-student`, `config-editor-page`) et un e2e (`color-mode`), tous rangés au BACKLOG → #87. À vérifier à la main (#77) : la pastille hors ligne sur un vrai premier chargement de GitHub Pages.
+
+**Prochaine chose à creuser** : après le merge de F36, #80 (F32, aide à la saisie depuis le JSON Schema), puis les chores #86, #87, #88 ; #85 (Node 26) pas avant le 2026-10-28.
+
+**Notes pour future Claude** : `PwaUpdate` a maintenant deux états observables (`status`, `offlineReady`) sur le même abonnement `onStatusChange`. Ses déclencheurs (`UpdateTriggers`) sont injectables. Le vrai `browserTriggers` n'est posé que lorsque `onRegisteredSW` reçoit un enregistrement, donc aucun minuteur réel ne traîne dans vitest. Pour les e2e de service worker, voir QUIRKS « Simuler un Shift+Reload ou une heure qui passe ». Une page sous contrôle garde une décision synchrone sur `controllerchange` : les tests de hooks et de routes en dépendent.
+
 ## 2026-10-01 — Vague de fix terminée, suite : #84, #80, puis les chores
 
 **Dernière chose faite** : PR #95 (F33) mergée sur go de l'utilisateur. La vague de fix est entièrement livrée et mergée : #76 (PR #90, menu de thème), #79 (PR #91, F31 robustesse), #78 (PR #92, F30 écran de passage), #83 (PR #93, F35 fichiers d'entrée), #82 (PR #94, F34 glisser-déposer), #81 (PR #95, F33 vue projetée). Décisions D81 à D85.

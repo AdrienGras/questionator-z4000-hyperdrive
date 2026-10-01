@@ -27,6 +27,8 @@ export type UiMessageParams = {
   db_unavailable: NoParams
   update_available: NoParams
   update_reload: NoParams
+  offline_ready: NoParams
+  offline_ready_dismiss: NoParams
   color_mode_label: { mode: string }
   color_mode_light: NoParams
   color_mode_dark: NoParams
@@ -351,6 +353,8 @@ const fr: Dictionary<UiMessageParams> = {
     'Le stockage local est indisponible (navigation privée ou cookies bloqués ?). Les sessions ne peuvent pas être enregistrées.',
   update_available: () => 'Nouvelle version disponible',
   update_reload: () => 'Recharger',
+  offline_ready: () => "Prête pour le hors ligne : l'application fonctionne désormais sans réseau.",
+  offline_ready_dismiss: () => 'OK',
   color_mode_label: ({ mode }) => `Mode d'affichage : ${mode.toLocaleLowerCase('fr')}`,
   color_mode_light: () => 'Clair',
   color_mode_dark: () => 'Sombre',
@@ -638,6 +642,8 @@ const en: Dictionary<UiMessageParams> = {
     'Local storage is unavailable (private browsing or blocked cookies?). Sessions cannot be saved.',
   update_available: () => 'New version available',
   update_reload: () => 'Reload',
+  offline_ready: () => 'Ready to work offline: the app now works without a network.',
+  offline_ready_dismiss: () => 'OK',
   color_mode_label: ({ mode }) => `Display mode: ${mode.toLocaleLowerCase('en')}`,
   color_mode_light: () => 'Light',
   color_mode_dark: () => 'Dark',

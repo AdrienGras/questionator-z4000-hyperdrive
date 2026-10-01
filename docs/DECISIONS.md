@@ -1294,3 +1294,16 @@ autre encodage 8 bits.
 **Pourquoi** : l'étudiant comprend pourquoi une catégorie est grisée sans que l'écran se charge de libellés à chaque question ; aucune donnée inventée ne s'affiche devant la salle.
 
 **Reporté** : `docs/QUIRKS.md` (stub `matchMedia` et mouvement réduit), `docs/BACKLOG.md` (items → #81 retirés, restes → #87).
+
+## D86 — F36 : vérification horaire des mises à jour, message « prête hors ligne » à fermer, premier `controllerchange` selon le worker actif (2026-10-01)
+
+**Question** : F17 ne cherche une nouvelle version qu'au chargement : une version publiée en cours de journée reste invisible tant que l'examinateur ne recharge pas. Rien ne lui dit quand l'app est prête pour une salle sans réseau. Et la vue projetée ouverte par Shift+Reload (page sans contrôleur, worker déjà actif) prend son premier vrai `controllerchange` pour celui de `clientsClaim` (D72) et ne se recharge pas.
+
+**Décision** :
+- `PwaUpdate` appelle `registration.update()` toutes les heures, au retour sur l'onglet (`visibilitychange` vers `visible`) et au retour du réseau (`online`) ; ces deux derniers au plus une fois par tranche de 5 minutes depuis la dernière vérification (horaire comprise). Posé une seule fois, à la réception de l'enregistrement. Échec (hors ligne) ignoré sans bruit, et la limite est levée : le retour du réseau qui suit vérifie sans attendre 5 minutes. Une version trouvée passe par `onNeedRefresh` : pastille « Recharger » existante, jamais appliquée d'office. Déclencheurs injectables (`UpdateTriggers`).
+- « Prête pour le hors ligne » : état `offlineReady` du store, levé par `onOfflineReady` de `registerSW` (pré-cache terminé, première installation seulement), filtré par la même lecture du worker actif : après un Shift+Reload qui trouve une version, workbox-window prend son installation pour une première installation. Pastille `OfflineReadyPrompt` au même endroit que `UpdatePrompt`, fermée par « OK » (choix de l'utilisateur, plutôt qu'une disparition automatique), absente de `/present/*`, masquée dès qu'une version est proposée. Fermeture non mémorisée : un rechargement avant « OK » ne la fait pas revenir, ce qui tient le « une seule fois ».
+- Premier `controllerchange` d'une page sans contrôleur : ignoré seulement si `navigator.serviceWorker.getRegistration()`, lu avant `register`, ne renvoie aucun worker actif (premier chargement). Worker déjà actif (Shift+Reload) : aucun `clientsClaim` ne viendra, le premier `controllerchange` est une vraie activation. Page sous contrôle : décision synchrone, inchangée.
+
+**Pourquoi** : une journée d'oraux dure plusieurs heures ; une heure suffit, et le retour sur l'onglet couvre le cas d'un examinateur qui revient de pause. Une pastille qui s'efface seule peut passer inaperçue au moment où l'examinateur prépare la salle. Lire le worker actif avant l'enregistrement est sûr : même lu après, `active` reste nul tant que le pré-cache de la première installation n'est pas fini.
+
+**Reporté dans** : `PRODUCT.md` F17. Amende D72. Impacte F17.
