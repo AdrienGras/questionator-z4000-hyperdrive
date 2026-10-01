@@ -656,3 +656,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : `autoCodeSplitting` de TanStack découpe le composant de chaque route, accueil compris (`src/routes/index.tsx?tsr-split=component`, entrée dynamique). La fermeture statique depuis `index.html` s'arrête avant lui.
 **Workaround** : `check:bundle` et `check:budget` partent tous deux de l'entrée **et** de la route `/` (`HOME_ROUTE_KEY` dans `check-initial-bundle.ts`, D88).
 **Référence** : `scripts/check-bundle-budget.ts`, `scripts/check-initial-bundle.ts`, D88.
+
+## Un test d'écran sur une config avec `icon` charge tout l'index Tabler : plusieurs secondes sous la suite (2026-10-01)
+
+**Découvert** : #87 (PR 1), en cherchant pourquoi `passage-example.test.tsx` dépassait 5 s sous `pnpm test`.
+**Symptôme** : le test passe en ~1,2 s seul mais monte à 4,3 s sous la suite complète (délai porté à 15 s en F12). Le temps part par paliers : ~540 ms au premier montage de la route, ~430 ms au premier tirage, ~140 ms à la première note.
+**Cause** : dès qu'une catégorie porte une `icon`, `CategoryIcon` importe `@tabler/icons-react/dist/esm/icons/index.mjs`, qui réexporte des milliers de modules d'icônes : Vitest les résout et les évalue un par un (~400 ms seul, bien plus quand les workers se disputent le CPU). Les blocs ```php ajoutent le chargement de Shiki (cœur, thèmes, grammaire, ~140 ms). Le premier montage de la route (découpage à la demande) reste, lui, inhérent (voir le piège du premier `findBy*`).
+**Workaround** : dans un test qui ne vérifie ni les icônes ni la coloration, `vi.mock('@tabler/icons-react/dist/esm/icons/index.mjs', () => ({}))` (aucune icône rendue) et `highlight` remplacé par `() => Promise.resolve(null)` (code en texte brut). Mesuré : 4,3 s → ~2,1 s sous la suite, ~0,75 s seul, délai par défaut rétabli.
+**Référence** : `src/features/session/passage-example.test.tsx`, `src/components/category-icon.tsx`, `src/lib/markdown/highlighter.ts`.
