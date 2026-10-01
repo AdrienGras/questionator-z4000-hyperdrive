@@ -242,6 +242,12 @@ const SAMPLE: UiMessageParams = {
   export_button: {},
   export_busy: {},
   export_error: {},
+  editor_issues_none: {},
+  editor_issues_count: { errors: 2, warnings: 1 },
+  editor_preview_stale: {},
+  editor_preview_empty: {},
+  editor_expected_answer: {},
+  editor_final_screen: {},
 }
 
 function isUiMessageKey(key: string): key is keyof UiMessageParams {

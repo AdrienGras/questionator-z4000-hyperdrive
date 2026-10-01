@@ -213,6 +213,12 @@ export type UiMessageParams = {
   export_button: NoParams
   export_busy: NoParams
   export_error: NoParams
+  editor_issues_none: NoParams
+  editor_issues_count: { errors: number; warnings: number }
+  editor_preview_stale: NoParams
+  editor_preview_empty: NoParams
+  editor_expected_answer: NoParams
+  editor_final_screen: NoParams
   stats_back: NoParams
   stats_error: NoParams
   stats_headcount: NoParams
@@ -508,6 +514,13 @@ const fr: Dictionary<UiMessageParams> = {
   export_button: () => 'Exporter en Excel',
   export_busy: () => 'Export en cours…',
   export_error: () => "L'export a échoué. Réessayez.",
+  editor_issues_none: () => 'Aucune erreur',
+  editor_issues_count: ({ errors, warnings }) =>
+    `${errors} ${plural(errors, 'erreur', 'erreurs')}, ${warnings} ${plural(warnings, 'avertissement', 'avertissements')}`,
+  editor_preview_stale: () => 'Aperçu périmé : la config contient des erreurs.',
+  editor_preview_empty: () => "L'aperçu apparaîtra dès que la config sera valide.",
+  editor_expected_answer: () => 'Réponse attendue',
+  editor_final_screen: () => 'Écran final',
   stats_back: () => 'Retour au passage',
   stats_error: () => "Les statistiques n'ont pas pu être chargées.",
   stats_headcount: () => 'Effectifs',
@@ -763,6 +776,13 @@ const en: Dictionary<UiMessageParams> = {
   export_button: () => 'Export to Excel',
   export_busy: () => 'Exporting…',
   export_error: () => 'Export failed. Try again.',
+  editor_issues_none: () => 'No errors',
+  editor_issues_count: ({ errors, warnings }) =>
+    `${errors} ${pluralEn(errors, 'error', 'errors')}, ${warnings} ${pluralEn(warnings, 'warning', 'warnings')}`,
+  editor_preview_stale: () => 'Preview out of date: the config contains errors.',
+  editor_preview_empty: () => 'The preview will appear once the config is valid.',
+  editor_expected_answer: () => 'Expected answer',
+  editor_final_screen: () => 'Final screen',
   stats_back: () => 'Back to the exam',
   stats_error: () => 'The statistics could not be loaded.',
   stats_headcount: () => 'Headcount',
