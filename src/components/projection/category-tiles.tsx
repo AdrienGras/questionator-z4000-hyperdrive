@@ -8,8 +8,8 @@ import { cn } from '@/lib/utils'
 type Category = ProjectedStudentView['categories'][number]
 
 /**
- * État affiché d'une tuile (F33) : `exhausted` (plus de question pour l'étudiant), `current`
- * (catégorie de la question en cours), `waiting` (une autre question est en cours : aucun tirage
+ * État affiché d'une tuile (F33) : `current` (catégorie de la question en cours, même si c'était
+ * sa dernière question), `exhausted` (plus de question pour l'étudiant), `waiting` (une autre question est en cours : aucun tirage
  * possible, sans libellé pour ne pas charger l'écran), `unavailable` (passage terminé), sinon
  * `available`.
  */
@@ -20,8 +20,9 @@ function tileState(
   currentCategoryId: string | undefined,
   finished: boolean,
 ): TileState {
-  if (category.exhausted) return 'exhausted'
+  // Avant `exhausted` : tirer la dernière question d'une catégorie l'épuise aussitôt.
   if (category.id === currentCategoryId) return 'current'
+  if (category.exhausted) return 'exhausted'
   if (!category.disabled) return 'available'
   return finished ? 'unavailable' : 'waiting'
 }

@@ -1288,6 +1288,8 @@ autre encodage 8 bits.
 - Détail final : « catégorie · titre » ; une question notée sans note affiche « — », jamais une note inventée.
 - `ProjectedView` gagne `student.order` (clé de montage de l'écran étudiant) et `detail[].questionId` (clé de ligne). Pas l'`id` de l'étudiant : le test d'étanchéité de D69 l'interdit ; l'ordre de passage n'apprend rien de plus que l'écran lui-même.
 - `DrawReveal` fige `animate` au montage.
+- La tuile de la catégorie en cours reste `current` même si sa question était la dernière (elle est alors déjà « épuisée » au sens de `isCategoryExhausted`).
+- `questionId` n'est jamais affiché ; il voyage dans la vue sérialisée, ce qui reste acceptable même si un enseignant choisit des identifiants parlants.
 
 **Pourquoi** : l'étudiant comprend pourquoi une catégorie est grisée sans que l'écran se charge de libellés à chaque question ; aucune donnée inventée ne s'affiche devant la salle.
 

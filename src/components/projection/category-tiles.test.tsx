@@ -57,6 +57,21 @@ test('question en cours : catégorie tirée mise en avant, les autres sans libel
   expect(screen.getByText('Épuisée')).toBeInTheDocument()
 })
 
+test('dernière question de sa catégorie en cours : la tuile reste « en cours », pas « Épuisée »', () => {
+  render(
+    <CategoryTiles
+      ui={makeUi()}
+      currentCategoryId="b"
+      categories={[
+        category('a', { disabled: true }),
+        category('b', { exhausted: true, disabled: true }),
+      ]}
+    />,
+  )
+  expect(tile('Catégorie b')).toHaveAttribute('data-state', 'current')
+  expect(screen.queryByText('Épuisée')).not.toBeInTheDocument()
+})
+
 test('tirage possible : tuiles normales', () => {
   render(<CategoryTiles ui={makeUi()} categories={[category('a')]} />)
   expect(tile('Catégorie a')).toHaveAttribute('data-state', 'available')

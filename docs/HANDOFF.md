@@ -28,7 +28,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 **Dernière chose faite** : PR #94 (F34) mergée sur go de l'utilisateur. F33 implémentée sur `feat/81-finitions-projection` (D85), en exécution directe : tuiles de la vue projetée à états (« Épuisée », catégorie en cours mise en avant, « Indisponible » seulement en fin de passage — choix de l'utilisateur) ; détail final « catégorie · titre » et « — » au lieu d'un « 0 » inventé ; écran étudiant monté sur `student.order` (homonymes) et lignes du détail sur `questionId` ; animation de tirage figée au montage. Chaque test de correctif prouvé rouge en retirant le correctif. Avec ce ticket, la vague de fix convenue (#76, #79, #78, #83, #82, #81) est terminée.
 
-**Trucs en suspens** : PR de F33 (brouillon, Sonar, puis « Ready for review »), merge sur go de l'utilisateur. #77 (vérifications manuelles) reste à faire à la main, avec en plus : Safari pour le glisser-déposer (F34), rendu des tuiles sur un vrai vidéoprojecteur (F33).
+**Trucs en suspens** : PR de F33 (brouillon, Sonar, puis « Ready for review »), merge sur go de l'utilisateur. #77 (vérifications manuelles) reste à faire à la main, avec en plus : Safari pour le glisser-déposer (F34), rendu des tuiles sur un vrai vidéoprojecteur, en particulier la lisibilité de « Épuisée » sur une tuile à `opacity-40` (F33).
 
 **Prochaine chose à creuser** : demander à l'utilisateur la suite après la vague de fix : #84 (F36, mises à jour en cours de journée), #80 (F32, aide à la saisie depuis le JSON Schema), les chores (#85 pas avant le 28/10, #86, #87, #88) ou la documentation (#71 à #74).
 

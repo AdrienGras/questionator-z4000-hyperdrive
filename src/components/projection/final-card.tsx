@@ -36,10 +36,10 @@ export function FinalCard({
           {detail.map((row) => (
             <li key={row.questionId} className="flex items-baseline justify-between gap-4 py-2">
               <span>
-                <span className="text-muted-foreground">{row.categoryLabel}</span>
+                <span className="text-muted-foreground">{row.categoryLabel}</span>{' '}
                 <span aria-hidden className="text-muted-foreground">
-                  {' · '}
-                </span>
+                  ·
+                </span>{' '}
                 {row.title}
               </span>
               <span className="font-semibold">

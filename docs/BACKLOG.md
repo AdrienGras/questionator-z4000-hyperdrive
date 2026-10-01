@@ -28,6 +28,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Persistance
 
+- [ ] Règle de backup / session stockée `duplicate_student_order` : deux étudiants au même `order` (backup édité à la main) partageraient le montage de l'écran projeté (D85) et rendraient l'ordre de passage ambigu. Les parcours de l'application gardent `order` unique (création : rang + 1, ajout : max + 1). → #87
 - [ ] `listSessions` lit la table deux fois hors transaction (index puis enregistrements sans `updatedAt`) : une lecture unique et un tri en mémoire. → #87
 - [ ] Première migration de schéma (`version(2)`) : tester l'ouverture d'un ancien onglet sur une base déjà montée de version.
 

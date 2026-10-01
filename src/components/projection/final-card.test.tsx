@@ -36,14 +36,17 @@ test('détail : catégorie et titre séparés, aucune note inventée', () => {
 
 test('détail : deux lignes de même catégorie et même titre restent deux lignes', () => {
   const errors = vi.spyOn(console, 'error').mockImplementation(() => {})
-  render(
-    <FinalCard
-      ui={makeUi()}
-      final={{ final: 12, scale: 20 }}
-      detail={[row('q-1', { points: 1 }), row('q-2', { points: 2 })]}
-    />,
-  )
-  expect(screen.getAllByRole('listitem')).toHaveLength(2)
-  expect(errors).not.toHaveBeenCalled()
-  errors.mockRestore()
+  try {
+    render(
+      <FinalCard
+        ui={makeUi()}
+        final={{ final: 12, scale: 20 }}
+        detail={[row('q-1', { points: 1 }), row('q-2', { points: 2 })]}
+      />,
+    )
+    expect(screen.getAllByRole('listitem')).toHaveLength(2)
+    expect(errors).not.toHaveBeenCalled()
+  } finally {
+    errors.mockRestore()
+  }
 })
