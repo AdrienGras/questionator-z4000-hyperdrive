@@ -22,7 +22,8 @@ export type ProjectedView =
       mode: 'student'
       examTitle: string
       appearance: ProjectedAppearance
-      student: { firstName: string; lastName: string }
+      /** `order` : clé de montage de l'écran (deux homonymes restent distincts), sans l'`id` (D69). */
+      student: { firstName: string; lastName: string; order: number }
       categories: {
         id: string
         label: string
@@ -39,6 +40,8 @@ export type ProjectedView =
       finished: boolean
       drawAnimation: boolean
       detail?: {
+        /** Clé de ligne : une question n'est tirée qu'une fois par étudiant. */
+        questionId: string
         categoryLabel: string
         title: string
         points?: number
@@ -84,6 +87,7 @@ function detailOf(student: Student, config: NormalizedConfig): ProjectedStudentV
     const question = category.questions.find((q) => q.id === attempt.questionId)
     const skipped = attempt.outcome === 'skipped'
     detail.push({
+      questionId: attempt.questionId,
       categoryLabel: category.label,
       title: question?.title ?? attempt.questionId,
       ...(!skipped && attempt.score !== undefined && { points: attempt.score }),
@@ -120,7 +124,7 @@ export function toProjectedView(session: Session): ProjectedView {
     mode: 'student',
     examTitle,
     appearance,
-    student: { firstName: student.firstName, lastName: student.lastName },
+    student: { firstName: student.firstName, lastName: student.lastName, order: student.order },
     categories: config.categories.map((category) => ({
       id: category.id,
       label: category.label,

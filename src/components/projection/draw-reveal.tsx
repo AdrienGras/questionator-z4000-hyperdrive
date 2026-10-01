@@ -14,15 +14,17 @@ function prefersReducedMotion(): boolean {
  * qui décide seul. `animate` : trois cartes neutres (aucun texte, l'énoncé n'est pas dans le DOM)
  * se mélangent puis l'énoncé se retourne ; avec `prefers-reduced-motion`, un fondu remplace le
  * mélange. Sinon (ouverture, réouverture, animation coupée) l'énoncé s'affiche directement.
+ * `animate` est figé au montage : basculer `drawAnimation` pendant une question ne rejoue rien.
  */
 export function DrawReveal({
   color,
   animate,
   children,
 }: Readonly<{ color?: string; animate: boolean; children: ReactNode }>) {
-  const [reduced] = useState(() => animate && prefersReducedMotion())
+  const [animated] = useState(animate)
+  const [reduced] = useState(() => animated && prefersReducedMotion())
   const [done, setDone] = useState(false)
-  const shuffling = animate && !reduced && !done
+  const shuffling = animated && !reduced && !done
 
   useEffect(() => {
     if (!shuffling) return undefined
@@ -54,7 +56,7 @@ export function DrawReveal({
       </div>
     )
   return (
-    <div className={cn(animate && (reduced ? 'animate-in duration-300 fade-in' : 'draw-reveal'))}>
+    <div className={cn(animated && (reduced ? 'animate-in duration-300 fade-in' : 'draw-reveal'))}>
       {children}
     </div>
   )

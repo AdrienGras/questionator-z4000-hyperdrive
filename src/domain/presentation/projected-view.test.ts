@@ -92,7 +92,7 @@ describe('toProjectedView', () => {
 
   test('étudiant sans tirage : catégories dans l’ordre, aucune question en cours', () => {
     const view = studentView(sessionOf(makeStudent([])))
-    expect(view.student).toEqual({ firstName: 'Alice', lastName: 'Durand' })
+    expect(view.student).toEqual({ firstName: 'Alice', lastName: 'Durand', order: 1 })
     expect(view.categories).toEqual([
       {
         id: 'a',
@@ -204,9 +204,29 @@ describe('toProjectedView', () => {
       }),
     )
     expect(view.detail).toEqual([
-      { categoryLabel: 'Catégorie A', title: 'Énoncé A1', points: 1, maxPoints: 2, skipped: false },
-      { categoryLabel: 'Catégorie A', title: 'Énoncé A2', maxPoints: 2, skipped: true },
-      { categoryLabel: 'Catégorie A', title: 'Énoncé A3', points: 2, maxPoints: 2, skipped: false },
+      {
+        questionId: 'a-1',
+        categoryLabel: 'Catégorie A',
+        title: 'Énoncé A1',
+        points: 1,
+        maxPoints: 2,
+        skipped: false,
+      },
+      {
+        questionId: 'a-2',
+        categoryLabel: 'Catégorie A',
+        title: 'Énoncé A2',
+        maxPoints: 2,
+        skipped: true,
+      },
+      {
+        questionId: 'a-3',
+        categoryLabel: 'Catégorie A',
+        title: 'Énoncé A3',
+        points: 2,
+        maxPoints: 2,
+        skipped: false,
+      },
     ])
     expect('points' in view.detail![1]!).toBe(false)
   })

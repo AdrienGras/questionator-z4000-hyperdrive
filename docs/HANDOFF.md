@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-01 — F33 (#81) : finitions de la vue projetée, fin de la vague de fix
+
+**Dernière chose faite** : PR #94 (F34) mergée sur go de l'utilisateur. F33 implémentée sur `feat/81-finitions-projection` (D85), en exécution directe : tuiles de la vue projetée à états (« Épuisée », catégorie en cours mise en avant, « Indisponible » seulement en fin de passage — choix de l'utilisateur) ; détail final « catégorie · titre » et « — » au lieu d'un « 0 » inventé ; écran étudiant monté sur `student.order` (homonymes) et lignes du détail sur `questionId` ; animation de tirage figée au montage. Chaque test de correctif prouvé rouge en retirant le correctif. Avec ce ticket, la vague de fix convenue (#76, #79, #78, #83, #82, #81) est terminée.
+
+**Trucs en suspens** : PR de F33 (brouillon, Sonar, puis « Ready for review »), merge sur go de l'utilisateur. #77 (vérifications manuelles) reste à faire à la main, avec en plus : Safari pour le glisser-déposer (F34), rendu des tuiles sur un vrai vidéoprojecteur, en particulier la lisibilité de « Épuisée » sur une tuile à `opacity-40` (F33).
+
+**Prochaine chose à creuser** : demander à l'utilisateur la suite après la vague de fix : #84 (F36, mises à jour en cours de journée), #80 (F32, aide à la saisie depuis le JSON Schema), les chores (#85 pas avant le 28/10, #86, #87, #88) ou la documentation (#71 à #74).
+
+**Notes pour future Claude** : le stub `matchMedia` des tests peut annoncer `prefers-reduced-motion` : prouver « pas d'animation » avec `[data-card], .draw-reveal, .animate-in`. Pour prouver un test rouge par `sed`, vérifier que le motif a bien été remplacé (`grep -c`) : prettier fusionne parfois les lignes.
+
 ## 2026-10-01 — F34 (#82) : glisser-déposer fiabilisé
 
 **Dernière chose faite** : PR #93 (F35) mergée sur go de l'utilisateur. F34 implémentée sur `feat/82-glisser-deposer` (D84), en exécution directe : `useFileDrop` (`src/hooks/`) remplace les trois implémentations (compteur `dragenter`/`dragleave`, plus de clignotement WebKit) ; l'import de backup ignore un dépôt pendant un dialogue ou un import en cours ; ses dialogues gardent leur contenu pendant la fermeture (`useRetained`) ; issues dédoublonnées (`uniqueBy`). Gardes d'import prouvées une à une en les retirant : zone désactivée pendant un dialogue (contrôleur), verrou `busy` et refus d'un import par-dessus un dialogue ouvert (hook, `use-backup-import.test.ts`).

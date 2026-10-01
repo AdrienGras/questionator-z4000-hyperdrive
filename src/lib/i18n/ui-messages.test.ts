@@ -46,6 +46,7 @@ const SAMPLE: UiMessageParams = {
   present_final: { value: '14', scale: '20' },
   present_raw: { value: '7' },
   present_category_exhausted: {},
+  present_category_unavailable: {},
   present_skipped: {},
   present_fullscreen: {},
   present_exit_fullscreen: {},

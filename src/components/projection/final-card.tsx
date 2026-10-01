@@ -1,6 +1,15 @@
 import type { ProjectedStudentView } from '@/domain/presentation/projected-view'
 import type { Ui } from '@/lib/i18n/use-ui'
 
+type DetailRow = NonNullable<ProjectedStudentView['detail']>[number]
+
+/** « Passée », ou « points / max » ; notée sans note (donnée incohérente) : « — », jamais inventée. */
+function rowScore(row: DetailRow, ui: Ui, format: Intl.NumberFormat): string {
+  if (row.skipped) return ui.text('present_skipped', {})
+  const points = row.points === undefined ? '—' : format.format(row.points)
+  return `${points} / ${format.format(row.maxPoints)}`
+}
+
 /** Note(s) sur l'échelle et, si demandé, détail question par question. */
 export function FinalCard({
   ui,
@@ -34,18 +43,15 @@ export function FinalCard({
       {detail !== undefined && (
         <ul className="w-full max-w-2xl divide-y text-2xl">
           {detail.map((row) => (
-            <li
-              key={`${row.categoryLabel}\u0000${row.title}`}
-              className="flex items-baseline justify-between gap-4 py-2"
-            >
+            <li key={row.questionId} className="flex items-baseline justify-between gap-4 py-2">
               <span>
-                <span className="text-muted-foreground">{row.categoryLabel}</span> {row.title}
+                <span className="text-muted-foreground">{row.categoryLabel}</span>{' '}
+                <span aria-hidden className="text-muted-foreground">
+                  ·
+                </span>{' '}
+                {row.title}
               </span>
-              <span className="font-semibold">
-                {row.skipped
-                  ? ui.text('present_skipped', {})
-                  : `${format.format(row.points ?? 0)} / ${format.format(row.maxPoints)}`}
-              </span>
+              <span className="font-semibold">{rowScore(row, ui, format)}</span>
             </li>
           ))}
         </ul>
