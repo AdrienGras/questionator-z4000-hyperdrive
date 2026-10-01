@@ -61,7 +61,10 @@ export function usePassageActions(
   const inFlight = useRef(false)
 
   const run = useCallback(
-    async (mutator: (session: Session) => Session): Promise<boolean> => {
+    async (
+      mutator: (session: Session) => Session,
+      options: { ownError?: boolean } = {},
+    ): Promise<boolean> => {
       if (inFlight.current) return false
       inFlight.current = true
       setBusyState(true)
@@ -71,7 +74,8 @@ export function usePassageActions(
         setLastWritten(written.updatedAt)
         return true
       } catch (e) {
-        setError(e instanceof Error ? e : new Error(String(e)))
+        // `ownError` : l'appelant affiche lui-même l'échec (dialogue), pas d'alerte de page en double.
+        if (options.ownError !== true) setError(e instanceof Error ? e : new Error(String(e)))
         return false
       } finally {
         inFlight.current = false
@@ -126,19 +130,23 @@ export function usePassageActions(
   const adjust = useCallback(
     (value: number, reason: string | undefined, options: { reveal: boolean }) => {
       if (studentId === undefined) return Promise.resolve(false)
-      return run((session) => {
-        const adjusted = setAdjustment(session, { studentId, value, reason })
-        if (!options.reveal) return adjusted
-        return revealFinalTransition(adjusted, { studentId }, { now: () => new Date() })
-      })
+      return run(
+        (session) => {
+          const adjusted = setAdjustment(session, { studentId, value, reason })
+          if (!options.reveal) return adjusted
+          return revealFinalTransition(adjusted, { studentId }, { now: () => new Date() })
+        },
+        { ownError: true },
+      )
     },
     [run, studentId],
   )
 
   const revealFinal = useCallback(() => {
     if (studentId === undefined) return Promise.resolve(false)
-    return run((session) =>
-      revealFinalTransition(session, { studentId }, { now: () => new Date() }),
+    return run(
+      (session) => revealFinalTransition(session, { studentId }, { now: () => new Date() }),
+      { ownError: true },
     )
   }, [run, studentId])
 

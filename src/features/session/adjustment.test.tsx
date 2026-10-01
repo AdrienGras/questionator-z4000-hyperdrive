@@ -291,6 +291,8 @@ test('écriture en échec : popup ouverte avec le message d’erreur', async () 
   fireEvent.click(button(dialog, 'Enregistrer'))
 
   expect(await within(dialog).findByRole('alert')).toHaveTextContent("L'enregistrement a échoué")
+  // Une seule alerte : celle du dialogue, pas celle de la page.
+  expect(screen.getAllByRole('alert', { hidden: true })).toHaveLength(1)
   expect(screen.getByRole('dialog', { name: 'Ajuster la note' })).toBeInTheDocument()
   expect((await stored()).student.finalRevealedAt).toBeUndefined()
 })
@@ -308,4 +310,38 @@ test('réinitialiser un étudiant révélé puis le refaire passer rouvre la pop
 
   expect(await findDialog()).toBeInTheDocument()
   expect((await stored()).student.finalRevealedAt).toBeUndefined()
+})
+
+test('à l’ouverture, le champ de valeur a le focus', async () => {
+  await mount(makeStudent([13.5]))
+  const dialog = await findDialog()
+
+  await waitFor(() => expect(field(dialog)).toHaveFocus())
+})
+
+test('« + » et « − » sont bornés à ± l’échelle finale', async () => {
+  await mount(makeStudent([13.5]))
+  const dialog = await findDialog()
+
+  type(dialog, '20')
+  expect(button(dialog, 'Ajouter un pas')).toBeDisabled()
+  expect(button(dialog, 'Retirer un pas')).toBeEnabled()
+
+  type(dialog, '-20')
+  expect(button(dialog, 'Retirer un pas')).toBeDisabled()
+  expect(button(dialog, 'Ajouter un pas')).toBeEnabled()
+
+  type(dialog, '19,5')
+  fireEvent.click(button(dialog, 'Ajouter un pas'))
+  expect(field(dialog).value).toBe('20')
+})
+
+test('« + » depuis une saisie invalide repart de 0', async () => {
+  await mount(makeStudent([13.5]))
+  const dialog = await findDialog()
+
+  type(dialog, 'abc')
+  fireEvent.click(button(dialog, 'Ajouter un pas'))
+
+  expect(field(dialog).value).toBe('0,5')
 })
