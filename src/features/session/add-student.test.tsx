@@ -120,8 +120,13 @@ test('« Ajouter et faire passer » active le nouvel étudiant, remet la project
 
   fireEvent.click(startButton())
 
+  // La liste des catégories est déjà celle d'Aba (étudiante active) : elle réapparaît dès la
+  // fermeture du tiroir, avant que la lecture en direct de la session ait rendu le nouvel actif.
+  // On attend donc le nom dans la barre de titre, pas la seule liste.
   expect(await screen.findByRole('list', { name: 'Choisir une catégorie' })).toBeInTheDocument()
-  expect(within(screen.getByRole('banner')).getByText('Martin Zoé')).toBeInTheDocument()
+  await waitFor(() =>
+    expect(within(screen.getByRole('banner')).getByText('Martin Zoé')).toBeInTheDocument(),
+  )
   expect((await stored()).projection).toEqual({ mode: 'waiting' })
 
   const reopened = await openSidePanel()

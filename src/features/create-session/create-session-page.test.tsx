@@ -9,6 +9,7 @@ import { minimalConfig } from '@/testing/config-fixtures'
 import { expectColorModeToggleLast } from '@/testing/page-shell-assertions'
 import { stashConfigForCreation } from '@/lib/config-handoff'
 import { renderAt } from '@/testing/render-at'
+import { panelButton } from '@/testing/side-panel-assertions'
 
 type CreateSession = typeof import('@/lib/db/sessions').createSession
 
@@ -64,6 +65,17 @@ async function renderFilled(config = VALID_CONFIG) {
 }
 
 const submitButton = () => screen.getByRole('button', { name: 'Créer la session' })
+
+/**
+ * Attend l'arrivée sur l'écran de la session créée. Le titre de l'examen ne suffit pas : l'aperçu
+ * de l'écran de création l'affiche déjà, le test finissait avant l'écriture et la navigation, et
+ * le chargement à la demande de la route de session se terminait après le démontage, voire après
+ * le fichier (« window is not defined » au démontage de l'environnement).
+ */
+async function arrivedOnSession(router: ReturnType<typeof renderAt>['router']) {
+  await waitFor(() => expect(router.state.location.pathname).toMatch(/^\/session\/[^/]+$/))
+  await panelButton()
+}
 
 beforeEach(async () => {
   await db.sessions.clear()
@@ -220,12 +232,12 @@ describe('écran de création', () => {
   })
 
   test('création : session en base, config figée, navigation vers la session', async () => {
-    await renderFilled()
+    const { router } = await renderFilled()
     fireEvent.change(screen.getByRole('textbox', { name: "Nom de l'examinateur" }), {
       target: { value: 'Mme Durand' },
     })
     fireEvent.click(submitButton())
-    expect(await screen.findByRole('heading', { name: 'Oral de test' })).toBeInTheDocument()
+    await arrivedOnSession(router)
     const [session] = await db.sessions.toArray()
     if (session === undefined) throw new Error('session absente de la base')
     expect(session.students.map((s) => `${s.lastName} ${s.firstName}`)).toEqual([
@@ -241,7 +253,7 @@ describe('écran de création', () => {
   test('une autre config chargée ensuite ne modifie pas la session créée', async () => {
     const first = await renderFilled()
     fireEvent.click(submitButton())
-    await screen.findByRole('heading', { name: 'Oral de test' })
+    await arrivedOnSession(first.router)
     const [before] = await db.sessions.toArray()
     first.unmount()
 
