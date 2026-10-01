@@ -228,9 +228,11 @@ test('Entrée applique l’option de complétion sélectionnée à la place du m
   await page.mouse.move(0, 0)
   await editor.complete()
   await expect(editor.completionOption('"nearest"')).toBeVisible()
-  // CodeMirror ignore Entrée juste après l'ouverture de la liste (interactionDelay, 75 ms) : un
-  // appui trop tôt est perdu, et le reprendre en boucle ne rattrape rien.
-  await page.waitForTimeout(300)
+  // CodeMirror ignore Entrée pendant les 75 ms qui suivent l'ouverture de la liste
+  // (`interactionDelay`) : un appui trop tôt insère un saut de ligne, irrattrapable. On attend que
+  // ce délai soit écoulé avant d'appuyer.
+  const shownAt = Date.now()
+  await expect.poll(() => Date.now() - shownAt).toBeGreaterThanOrEqual(150)
   await page.keyboard.press('Enter')
   await expect(editor.editor).toContainText('"mode": "nearest" }')
 })

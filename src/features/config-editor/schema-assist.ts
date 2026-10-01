@@ -80,12 +80,10 @@ function contextAt(text: string, offset: number): Context {
     isClosed(text, previous) &&
     offset === previous.offset + previous.length
   const touchesBefore = !string && text[offset] === '"'
-  const before = /[\w-]*$/.exec(text.slice(0, offset))?.[0].length ?? 0
-  const after = /^[\w-]*/.exec(text.slice(offset))?.[0].length ?? 0
   return {
     string,
     range,
-    word: { from: offset - before, to: offset + after },
+    word: wordAround(text, offset),
     touching: touchesAfter || touchesBefore,
     isKey: location.isAtPropertyKey,
     path: location.path,
@@ -129,11 +127,28 @@ function keyCompletions(text: string, root: SchemaNode, ctx: Context): AssistCom
     }))
 }
 
+const WORD_CHARACTER = /[\w-]/
+
+/** Plage du mot (lettres, chiffres, `_`, `-`) qui entoure `offset`, parcourue caractère par caractère. */
+function wordAround(text: string, offset: number): { from: number; to: number } {
+  let from = offset
+  while (from > 0 && WORD_CHARACTER.test(text.charAt(from - 1))) from -= 1
+  let to = offset
+  while (to < text.length && WORD_CHARACTER.test(text.charAt(to))) to += 1
+  return { from, to }
+}
+
+/** Types déclarés d'un nœud, toujours sous forme de tableau. */
+function typesOf(node: SchemaNode): readonly string[] {
+  if (Array.isArray(node.type)) return node.type
+  return node.type === undefined ? [] : [node.type]
+}
+
 /** Valeurs littérales proposables, en parcourant récursivement les `anyOf`. */
 function collectValues(node: SchemaNode, out: unknown[]): void {
   if (node.enum) out.push(...node.enum)
   if (node.const !== undefined) out.push(node.const)
-  const types = Array.isArray(node.type) ? node.type : node.type ? [node.type] : []
+  const types = typesOf(node)
   if (types.includes('boolean')) out.push(true, false)
   if (types.includes('null')) out.push(null)
   for (const branch of node.anyOf ?? []) collectValues(branch, out)

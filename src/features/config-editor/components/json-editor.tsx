@@ -176,7 +176,8 @@ export function JsonEditor({
  * liste ne s'ouvre que pendant la frappe d'un mot ou d'une clé, pas sur un espace ou une virgule.
  */
 export function configCompletionSource(context: CompletionContext): CompletionResult | null {
-  if (!context.explicit && context.matchBefore(/["\w-]+$/) === null) return null
+  const previous = context.state.sliceDoc(context.pos - 1, context.pos)
+  if (!context.explicit && !/["\w-]/.test(previous)) return null
   const found = completionsAt(context.state.doc.toString(), context.pos, configJsonSchema())
   if (found === undefined) return null
   return {
