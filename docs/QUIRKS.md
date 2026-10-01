@@ -609,3 +609,8 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : importé statiquement par plusieurs chunks, Rolldown en fait un chunk partagé `_langs-<hash>.js` ; importé statiquement par un seul (`code-languages.ts`) et en `import()` par le surligneur, il devient une entrée dynamique à son chemin de module (`node_modules/.pnpm/shiki@…/shiki/dist/langs.mjs`). Un groupe `codeSplitting` nommé ne le capture pas (entrée dynamique) : il produit un `_langs-*` vide qui rendrait le contrôle vacant, et avec `includeDependenciesRecursively` par défaut il avale l'assistant de préchargement de Vite et fuit dans l'entrée.
 **Workaround** : `SHIKI_CHUNK` (`scripts/check-initial-bundle.ts`) et `CATALOG_KEY` (`e2e/languages.spec.ts`) acceptent les deux formes de clé ; ne pas ajouter de groupe `langs`.
 **Référence** : `scripts/check-initial-bundle.ts`, `e2e/languages.spec.ts`.
+
+## `pagehide` ne laisse pas finir une écriture Dexie asynchrone
+
+`useAutosave` écoute `pagehide` et flushe, mais `updateSession` enchaîne un `import()` mémoïsé, une lecture puis un `put` : en Chromium (vérifié en e2e, `page.reload()` juste après la frappe), `put` n'est jamais appelé avant le déchargement, le commentaire est perdu. Ne pas écrire de test e2e « taper puis recharger » sans attente : il échoue. Voir D82.
+

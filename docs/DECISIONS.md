@@ -1234,3 +1234,22 @@ autre encodage 8 bits.
 **Pourquoi** : un seul point de passage pour tous les écrans ; deux chemins (lecture, import), une seule définition de « session valide ». Refuser l'échelle hors grille supprime le cas d'affichage trompeur (« 20,3 » pour 20,25 au pas de 0,5) plutôt que de l'habiller, le projet n'étant pas encore en production. Une session validée qui lève relève d'un bug, pas d'une donnée endommagée.
 
 **Reporté dans** : `PRODUCT.md` §6.2 ; `docs/CONVENTIONS.md` § « Mutation de session » ; `docs/BACKLOG.md` ; `docs/QUIRKS.md`. Spec : `docs/superpowers/specs/2026-10-01-f31-robustesse-design.md`. Impacte F04, F05, F11, F14, F18, F30.
+
+---
+
+## D82 — F30 : finitions de l'écran de passage, une erreur ne s'affiche que là où elle est survenue (2026-10-01)
+
+**Question** : l'écran de passage affichait des erreurs au mauvais endroit (une vieille erreur du hook réapparue à chaque ouverture du tiroir ou du dialogue d'ajout, l'alerte du dialogue d'ajustement doublée par l'alerte générique de la page), laissait fermer un dialogue pendant une écriture, et perdait un commentaire tapé juste avant un rechargement. Que corriger, et comment ?
+
+**Décision** :
+- `run(mutator, { ownError })` dans `usePassageActions` : avec `ownError`, un échec laisse `error` du hook à `null` et l'appelant affiche le sien. Utilisé par `adjust` et `revealFinal` (dont le seul appelant est le dialogue d'ajustement) : plus de double alerte.
+- `useFreshError(error, open)` (`Failure = { readonly message: string }`, un objet par occurrence) : n'expose que les erreurs survenues pendant que la surface est ouverte. `SidePanel` et `AddStudentDialog` l'utilisent. `examiner-view` mémoïse la `Failure` sur `actions.error` seul : le message est figé à l'instant de l'échec (la langue vient de la config de la session).
+- Dialogue d'ajustement : focus initial sur le champ, boutons − / + bornés à ±`finalScale` et désactivés à la borne ; `score-list` affiche « aucun » pour un ajustement absent ou nul.
+- Écriture en cours : « Annuler » désactivé et Échap / clic extérieur ignorés dans `TextFieldDialog`, `DeleteDialog`, `ImportConflictDialog` et `AddStudentDialog`. Ajustement, réinitialisation et absent le faisaient déjà ; le saut et `ImportErrorDialog` n'ont rien à protéger.
+- `useAutosave` flushe aussi sur `pagehide` (même principe que `useConfigDraft`). **Limite** : l'écriture Dexie est asynchrone (`updateSession` charge le validateur, lit, puis écrit). En e2e Chromium, `page.reload()` juste après la frappe perd quand même le commentaire : `pagehide` se déclenche, mais `put` n'est jamais appelé avant le déchargement. Le flush n'est donc qu'au mieux (utile quand l'écriture est déjà lancée, ou en démontage SPA) ; la correction complète demande une copie synchrone, au backlog.
+- Fixtures d'écran partagées dans `src/testing/screen-fixtures.ts` (`screenCategory`, `REVEALED`, `panel()`).
+
+**Pourquoi** : une alerte `role="alert"` est annoncée par le lecteur d'écran à chaque apparition ; une erreur périmée y est trompeuse. L'erreur appartient à la surface qui l'a provoquée, le temps qu'elle est ouverte.
+
+**Reporté** : `docs/CONVENTIONS.md` § « Dialogue de saisie » (motif `ownError` + `useFreshError`), `docs/BACKLOG.md` (copie synchrone du commentaire, mineurs → #87).
+

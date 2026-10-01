@@ -41,15 +41,8 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] `passage-example.test.tsx` : ~1,2 s seul, au-delà de 5 s sous la charge de la suite complète ; délai porté à 15 s en F12. Trouver où part le temps (le panneau n'en explique que ~12 %). → #87
 - [x] Panneau latéral : la zone `aria-live` du commentaire annonce « Enregistrement… » puis « Enregistré » à chaque pause de frappe ; n'annoncer que « Enregistré » / « Échec ». → #55. *Livré en F21.*
 - [x] `AbsentState` renvoie au panneau alors qu'il peut être replié ou sur l'onglet « Étudiants » : proposer « Afficher le panneau ». Même chose pour l'état « aucun étudiant » depuis F13, qui renvoie à l'onglet « Étudiants » sans l'ouvrir. → #55. *Livré en F21.*
-- [ ] Une erreur refusée hors tiroir (ex. « Étudiant suivant » sans suivant) reste dans `actions.error` ; chaque ouverture du tiroir remonte une `role="alert"` avec ce vieux message, réannoncée par le lecteur d'écran. Piste : n'afficher dans le tiroir que les erreurs survenues tiroir ouvert, ou un paragraphe non live. → #78
-- [ ] Fermer l'onglet dans les 500 ms qui suivent une frappe perd le commentaire non enregistré (pas de flush sur `pagehide`). → #78
-- [ ] Fixtures de tests d'écran (`category` à trois questions, `REVEALED`, `mount`, `panel`) copiées entre `side-panel.test.tsx`, `student-tab.test.tsx`, `final-screen.test.tsx`, `adjustment.test.tsx`, `skip.test.tsx` : à sortir dans `src/testing/`. → #87
-- [ ] Popup d'ajustement : focus initial sur le champ plutôt que sur le bouton « − » (vu dans le navigateur, F11). → #78
-- [ ] Popup d'ajustement : en cas d'échec d'écriture, l'alerte `write_error` du dialogue et l'alerte générique de la page (« Rechargez la page ») s'affichent ensemble ; effacer l'erreur du hook quand un dialogue la prend en charge. → #78
-- [ ] Boutons − / + de l'ajustement : s'arrêter à ±`finalScale` au lieu de laisser le message d'erreur apparaître. → #78
-- [ ] Tests d'écran F11 : fixtures (`category` à trois questions, `config()`, `stored()`) copiées entre `adjustment.test.tsx` et `final-screen.test.tsx`, à sortir dans `src/testing/` pour F12/F14 ; cas `decimals: 0` (pas de 1) jamais testé à l'écran. → #87
-- [ ] Un backup édité à la main avec `adjustment: { value: 0 }` affiche « 0,00 » au lieu de « aucun ». → #78
-- [ ] Dialogue d'ajout d'étudiant : une erreur antérieure (tirage, note) encore dans le hook s'affiche dans le dialogue dès son ouverture ; ne l'y montrer qu'après un échec d'ajout dans ce dialogue (flag local remis à zéro à l'ouverture) (F13). → #78
+- [ ] Fixtures de tests d'écran : `src/testing/screen-fixtures.ts` (`screenCategory`, `REVEALED`, `panel()`) livré en F30 ; restent locales les copies qui diffèrent (échelle `[0, 1, 2, 3]` dans `side-panel.test.tsx` et `student-tab.test.tsx`, quatre questions dans `skip.test.tsx`) : à rapprocher si l'écart cesse d'être nécessaire. → #87
+- [ ] Cas `decimals: 0` (pas de 1) de l'ajustement jamais testé à l'écran (F11). → #87
 - [ ] Onglet « Étudiants » (montage partagé dans `src/testing/students-tab-harness.tsx` depuis la PR #45) : le test de double clic ne distingue pas la garde `submitting` du verrou `run` ; pas de test `rosterScore` d'un absent qui a des notes (F13). → #87
 - [x] Onglet « Étudiants » : l'icône de l'étudiant projeté n'est vérifiable qu'en test tant que F14 ne permet pas de projeter depuis l'interface. → #56. *Vérifiable depuis F22 : l'aperçu montre l'étudiant projeté.*
 - [ ] Vue projetée (F14) : catégorie « indisponible » visuellement identique à « épuisée » (même atténuation, sans libellé) ; séparateur entre catégorie et titre dans le détail, `points ?? 0` pour une question notée sans note. → #81
@@ -70,7 +63,6 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Garder le contenu des dialogues d'import pendant l'animation de fermeture (il disparaît dès que l'état revient à `idle`). → #82
 - [ ] Dédoublonner les issues identiques avant affichage (clé React `chemin|message`). → #82
 - [ ] Tests manquants : erreurs d'écriture (renommer, examinateur, suppression), réinitialisation du champ à la réouverture d'un dialogue, « toutes les issues » avec un décompte exact, `score` sur un attempt `skipped`, date locale vs UTC du nom de fichier (cas à 00:30). → #87
-- [ ] Désactiver « Annuler » pendant un enregistrement en cours dans les dialogues de saisie. → #78
 - [x] Ajouter un favicon (404 sur `/favicon.ico` en preview et en prod). → #53 — réglé par F17 (D72), constaté en F19
 
 ## Création de session
@@ -132,3 +124,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Icônes du manifeste pré-cachées deux fois (motif glob + `includeManifestIcons`), sans effet ; `includeManifestIcons: false` pour un manifeste net.
 - [ ] Vérification périodique des mises à jour pendant la journée, message « prêt hors ligne » (hors périmètre F17). → #84
 - [ ] e2e : `highlightedCode` (`.first()`) peut se satisfaire d'un bloc de la question précédente ; le scoper à la question courante. → #88
+- [ ] Helper de test `deferred<T>()` dupliqué dans `import-controller.test.tsx` et `add-student.test.tsx` : le sortir dans `src/testing/` (F30). → #87
+- [ ] `stale-errors.test.tsx` attend avec `setTimeout(100)` : attendre un état observable à la place (F30). → #87
+- [ ] Commenter sur `PassageActions` que `adjust` et `revealFinal` laissent l'affichage de l'erreur à l'appelant (`ownError`) (F30). → #87
+- [ ] Commentaire tapé dans les 500 ms avant un rechargement ou une fermeture d'onglet : le flush `pagehide` de `useAutosave` part, mais `updateSession` (import à la demande, lecture, écriture Dexie) ne rend pas la main avant le déchargement, l'écriture est perdue (mesuré en e2e Chromium, F30). Piste : copie synchrone (`localStorage`) du commentaire en attente, relue au montage. → #87
