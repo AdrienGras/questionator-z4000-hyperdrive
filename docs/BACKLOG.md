@@ -32,8 +32,8 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Persistance
 
-- [ ] Règle de backup / session stockée `duplicate_student_order` : deux étudiants au même `order` (backup édité à la main) partageraient le montage de l'écran projeté (D85) et rendraient l'ordre de passage ambigu. Les parcours de l'application gardent `order` unique (création : rang + 1, ajout : max + 1). → #87
-- [ ] `listSessions` lit la table deux fois hors transaction (index puis enregistrements sans `updatedAt`) : une lecture unique et un tri en mémoire. → #87
+- [x] Règle de backup / session stockée `duplicate_student_order` : deux étudiants au même `order` (backup édité à la main) partageraient le montage de l'écran projeté (D85) et rendraient l'ordre de passage ambigu. Les parcours de l'application gardent `order` unique (création : rang + 1, ajout : max + 1). → #87 *Fait en #87 (PR 2) : refusé à l'import seulement, jamais sur une session déjà en base (D89).*
+- [x] `listSessions` lit la table deux fois hors transaction (index puis enregistrements sans `updatedAt`) : une lecture unique et un tri en mémoire. → #87 *Fait en #87 (PR 2).*
 - [ ] Première migration de schéma (`version(2)`) : tester l'ouverture d'un ancien onglet sur une base déjà montée de version.
 
 ## Écran de passage
@@ -62,21 +62,21 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Accueil et backup
 
-- [ ] Glisser-déposer : filet `window` (`dragleave` avec `relatedTarget === null`, `drop`) qui remet le compteur de `useFileDrop` à zéro si l'élément survolé est démonté pendant le glisser (son `dragleave` n'atteint pas React : la surimpression de l'accueil reste affichée jusqu'au dépôt suivant). Rare (ligne de session re-rendue par un autre onglet). → #87
-- [ ] La clé `back_home` utilise une apostrophe droite alors que le reste de l'interface a `’` : harmoniser (e2e et tests à suivre). → #87
-- [ ] Tests manquants : erreurs d'écriture (renommer, examinateur, suppression), réinitialisation du champ à la réouverture d'un dialogue, « toutes les issues » avec un décompte exact, `score` sur un attempt `skipped`, date locale vs UTC du nom de fichier (cas à 00:30). → #87
+- [x] Glisser-déposer : filet `window` (`dragleave` avec `relatedTarget === null`, `drop`) qui remet le compteur de `useFileDrop` à zéro si l'élément survolé est démonté pendant le glisser (son `dragleave` n'atteint pas React : la surimpression de l'accueil reste affichée jusqu'au dépôt suivant). Rare (ligne de session re-rendue par un autre onglet). → #87 *Fait en #87 (PR 2).*
+- [x] La clé `back_home` utilise une apostrophe droite alors que le reste de l'interface a `’` : harmoniser (e2e et tests à suivre). → #87 *Fait en #87 (PR 2).*
+- [x] Tests manquants : erreurs d'écriture (renommer, examinateur, suppression), réinitialisation du champ à la réouverture d'un dialogue, « toutes les issues » avec un décompte exact, `score` sur un attempt `skipped`, date locale vs UTC du nom de fichier (cas à 00:30). → #87 *Fait en #87 (PR 2).*
 - [x] Ajouter un favicon (404 sur `/favicon.ico` en preview et en prod). → #53 — réglé par F17 (D72), constaté en F19
 
 ## Création de session
 
 - [ ] Garde de montage de la création : comparer aussi `router.state.location.pathname` avant de naviguer (fenêtre résiduelle pendant le chargement du chunk de l'accueil).
-- [ ] Tests manquants : courses du slot config (nom saisi pendant la lecture, deux configs successives), messages `read-error` / `load-error` rendus, état `unavailable` à l'écran, `activeStudentId` affirmé dans le test d'écran. → #87
+- [x] Tests manquants : courses du slot config (nom saisi pendant la lecture, deux configs successives), messages `read-error` / `load-error` rendus, état `unavailable` à l'écran, `activeStudentId` affirmé dans le test d'écran. → #87 *Fait en #87 (PR 2).*
 
 ## Thème et langue
 
 - [x] Garde-fou de build : un script de fin de build qui échoue si un chunk autre que `icons-*` contient `IconBrandPhp`, ou si `index-*` dépasse un budget. *Livré en #86 (`pnpm check:budget`, D88).* `chunkSizeWarningLimit: 2400` ne surveille plus les autres chunks (D37). → #86
 - [ ] Synchroniser le mode entre deux fenêtres d'une même vue (événement `storage`, via `useSyncExternalStore`). Aujourd'hui, la valeur est lue une fois par clé.
-- [ ] Tests manquants de `LocaleProvider` : changement de la locale du propriétaire avec une déclaration active, deux imbriqués frères de même locale. → #87
+- [x] Tests manquants de `LocaleProvider` : changement de la locale du propriétaire avec une déclaration active, deux imbriqués frères de même locale. → #87 *Fait en #87 (PR 2).*
 - [ ] `isIconComponent` accepte tout objet non nul : vérifier `$$typeof` si Tabler exporte un jour autre chose que des composants sous un nom `Icon…`.
 - [ ] Faire disparaître l'avertissement `missing-typescript-transpiler` de `pnpm deps`, quand dependency-cruiser gérera typescript@7. → #88
 
@@ -112,7 +112,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Autofiltre sur Synthèse et Détail (hors périmètre F16, D35) si la consolidation le demande.
 - [x] Export depuis la carte de session de l'accueil (à côté du backup), sans ouvrir la vue examinateur. → #54. *Livré en F20 (item du menu « … »).*
 - [x] Garde double-clic de `ExportButton` sur un `useRef` plutôt que sur l'état du rendu. → #54. *Livré en F20 (`useWorkbookExport`).*
-- [ ] Classe de lien (`text-sm text-primary underline underline-offset-4`) recopiée entre `create-session-page.tsx` et `action-cards.tsx` : à sortir dans `components/` si un troisième écran en a besoin (F20). → #87
+- [x] Classe de lien (`text-sm text-primary underline underline-offset-4`) recopiée entre `create-session-page.tsx` et `action-cards.tsx` : à sortir dans `components/` si un troisième écran en a besoin (F20). → #87 *Fait en #87 (PR 2) : `@/components/text-link`, appliqué à tous les liens texte.*
 - [ ] Accueil (F20) : `session-card` importe `exportWorkbook`, qui tire `buildWorkbook` et `computeStats` dans le chunk de l'accueil (chargé à la demande, hors bundle initial). Les passer dans l'`import()` dynamique si la taille du chunk devient gênante.
 
 ## Hors ligne
