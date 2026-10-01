@@ -27,7 +27,7 @@ describe('resolveSessionLocale', () => {
 describe('LocaleProvider', () => {
   test('hors provider : langue du navigateur (fr sous setup)', () => {
     render(<ShowLocale />)
-    expect(screen.getByText("fr fr Retour à l'accueil")).toBeInTheDocument()
+    expect(screen.getByText('fr fr Retour à l’accueil')).toBeInTheDocument()
   })
 
   test('useUi suit la locale du provider', () => {

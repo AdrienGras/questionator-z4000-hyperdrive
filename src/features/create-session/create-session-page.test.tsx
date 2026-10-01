@@ -98,7 +98,7 @@ describe('écran de création', () => {
 
   test('titre, retour à l’accueil et fichiers d’exemple', async () => {
     await renderPage()
-    expect(screen.getByRole('link', { name: "Retour à l'accueil" })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
     const students = screen.getByRole('link', { name: "Télécharger la liste d'exemple" })
     expect(students.getAttribute('href')).toMatch(/students\.example\.csv$/)
     expect(students).toHaveAttribute('download')
@@ -111,7 +111,7 @@ describe('écran de création', () => {
     await renderPage()
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Nouvelle session')
     const banner = screen.getByRole('banner')
-    expect(within(banner).getByRole('link', { name: "Retour à l'accueil" })).toBeInTheDocument()
+    expect(within(banner).getByRole('link', { name: 'Retour à l’accueil' })).toBeInTheDocument()
     expectColorModeToggleLast()
   })
 
@@ -289,7 +289,7 @@ describe('écran de création', () => {
     const { router } = await renderFilled()
     fireEvent.click(submitButton())
     await waitFor(() => expect(submitButton()).toBeDisabled())
-    fireEvent.click(screen.getByRole('link', { name: "Retour à l'accueil" }))
+    fireEvent.click(screen.getByRole('link', { name: 'Retour à l’accueil' }))
     // Attendre le démontage effectif de l'écran (le composant de l'accueil est chargé à la demande).
     await waitFor(() =>
       expect(

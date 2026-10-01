@@ -64,7 +64,7 @@ test('examinateur : titre, explication, export, retour, détails', async () => {
       'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Exportez un backup pour le conserver ou le corriger.',
     ),
   ).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: "Retour à l'accueil" })).toHaveAttribute('href', '/')
+  expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
 
   const details = screen.getByText('Détails').closest('details')
   expect(details).not.toBeNull()

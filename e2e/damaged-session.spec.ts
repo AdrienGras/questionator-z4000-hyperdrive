@@ -57,7 +57,7 @@ test('une session endommagée s’exporte telle quelle et s’affiche badgée à
   const backup = backupSchema.parse(JSON.parse(await readFile(await download.path(), 'utf8')))
   expect(backup.session).toEqual(corrupted)
 
-  // 5. Retour à l'accueil : la carte porte le badge.
-  await page.getByRole('link', { name: "Retour à l'accueil" }).click()
+  // 5. Retour à l’accueil : la carte porte le badge.
+  await page.getByRole('link', { name: 'Retour à l’accueil' }).click()
   await expect(page.getByText('Endommagée')).toBeVisible()
 })

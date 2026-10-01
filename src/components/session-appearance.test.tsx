@@ -75,5 +75,5 @@ test('sans locale dans la config : langue du navigateur', () => {
       </SessionAppearance>
     </AppearanceProvider>,
   )
-  expect(screen.getByText("Retour à l'accueil")).toBeInTheDocument()
+  expect(screen.getByText('Retour à l’accueil')).toBeInTheDocument()
 })
