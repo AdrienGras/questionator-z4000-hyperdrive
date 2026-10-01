@@ -40,12 +40,12 @@ export function buildConfigJsonSchema(): Record<string, unknown> {
  * `markdownDescription`. `description` reste brut (l'éditeur de l'app l'affiche tel quel).
  */
 function addMarkdownDescriptions(node: unknown): void {
-  if (typeof node !== 'object' || node === null) return
   if (Array.isArray(node)) {
     for (const item of node) addMarkdownDescriptions(item)
     return
   }
-  const record = node as Record<string, unknown>
+  if (!isRecord(node)) return
+  const record = node
   if (typeof record.description === 'string') {
     record.markdownDescription =
       'default' in record
@@ -53,9 +53,13 @@ function addMarkdownDescriptions(node: unknown): void {
         : record.description
   }
   const { properties, items, anyOf } = record
-  if (typeof properties === 'object' && properties !== null) {
+  if (isRecord(properties)) {
     for (const child of Object.values(properties)) addMarkdownDescriptions(child)
   }
   addMarkdownDescriptions(items)
   addMarkdownDescriptions(anyOf)
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }

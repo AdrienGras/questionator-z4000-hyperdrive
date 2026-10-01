@@ -70,6 +70,8 @@ describe('fichier d’exemple', () => {
 
   test('valide le JSON Schema généré (ajv, draft 2020-12)', () => {
     const ajv = new Ajv2020({ allErrors: true, strict: true })
+    // Extension VS Code (survol) : annotation connue du schéma publié, sans effet de validation.
+    ajv.addKeyword('markdownDescription')
     const validate = ajv.compile(buildConfigJsonSchema())
     const valid = validate(JSON.parse(exampleText))
     if (!valid) throw new Error(JSON.stringify(validate.errors))
@@ -99,6 +101,8 @@ describe('buildConfigJsonSchema', () => {
 
   test('refuse une clé inconnue et accepte une icône inconnue', () => {
     const ajv = new Ajv2020({ allErrors: true, strict: true })
+    // Extension VS Code (survol) : annotation connue du schéma publié, sans effet de validation.
+    ajv.addKeyword('markdownDescription')
     const validate = ajv.compile(buildConfigJsonSchema())
     const parsed: unknown = JSON.parse(exampleText)
     if (typeof parsed !== 'object' || parsed === null) throw new Error('exemple invalide')
