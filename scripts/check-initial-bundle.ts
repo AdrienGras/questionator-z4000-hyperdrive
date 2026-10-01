@@ -17,21 +17,31 @@ const manifestChunkSchema = z.object({
   isDynamicEntry: z.boolean().optional(),
   imports: z.array(z.string()).optional(),
   dynamicImports: z.array(z.string()).optional(),
+  css: z.array(z.string()).optional(),
 })
-const manifestSchema = z.record(z.string(), manifestChunkSchema)
+export const manifestSchema = z.record(z.string(), manifestChunkSchema)
 
 export type ManifestChunk = z.infer<typeof manifestChunkSchema>
 
 /**
- * Clés du manifeste atteintes par imports statiques depuis les entrées `isEntry`
- * et correspondant au motif interdit. Les `dynamicImports` ne sont pas suivis.
+ * Chunk paresseux du composant de l'accueil (autoCodeSplitting TanStack) : entrée dynamique, mais
+ * chargée dès l'ouverture de l'application sur `/`, donc traitée comme une entrée (D88).
+ */
+export const HOME_ROUTE_KEY = 'src/routes/index.tsx?tsr-split=component'
+
+/**
+ * Clés du manifeste atteintes par imports statiques depuis les entrées `isEntry` et la route
+ * d'accueil, et correspondant au motif interdit. Les `dynamicImports` ne sont pas suivis.
  */
 export function findInitialLeaks(
   manifest: Record<string, ManifestChunk>,
   forbidden: RegExp,
 ): string[] {
   const visited = new Set<string>()
-  const queue = Object.keys(manifest).filter((key) => manifest[key]?.isEntry === true)
+  const queue = [
+    ...Object.keys(manifest).filter((key) => manifest[key]?.isEntry === true),
+    HOME_ROUTE_KEY,
+  ]
   const leaks: string[] = []
   for (const key of queue) {
     if (visited.has(key)) continue
@@ -46,7 +56,7 @@ export function findInitialLeaks(
 }
 
 /** Clés atteintes par imports statiques depuis `start` (inclus). */
-function staticClosure(manifest: Record<string, ManifestChunk>, start: string): Set<string> {
+export function staticClosure(manifest: Record<string, ManifestChunk>, start: string): Set<string> {
   const visited = new Set<string>()
   const queue = [start]
   for (const key of queue) {
@@ -174,7 +184,7 @@ export function checkTargets(
   ])
 }
 
-const MANIFEST_PATH = 'dist/.vite/manifest.json'
+export const MANIFEST_PATH = 'dist/.vite/manifest.json'
 
 function main(): void {
   const manifest = manifestSchema.parse(JSON.parse(readFileSync(MANIFEST_PATH, 'utf8')))

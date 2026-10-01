@@ -17,6 +17,7 @@
     "lint": "oxlint --type-aware --deny-warnings",
     "check:bundle": "node scripts/check-initial-bundle.ts",
     "check:precache": "node scripts/check-precache.ts",
+    "check:budget": "node scripts/check-bundle-budget.ts",
     "icons": "node scripts/render-icons.ts",
     "deps": "depcruise src --config .dependency-cruiser.cjs",
     "format": "prettier --write .",
