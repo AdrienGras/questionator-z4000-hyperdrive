@@ -369,7 +369,7 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 - Liste des sessions avec nom, titre de l'épreuve, date de dernière modification et avancement (passés, absents, restants).
 - Actions : reprendre, créer, renommer, modifier l'examinateur, supprimer (avec confirmation), exporter un backup, importer un backup.
 - Backup : un fichier JSON `{ format: "questionator-backup", formatVersion, appVersion, exportedAt, session }`, nommé `<slug-session>-backup-<AAAA-MM-JJ>.json`. `appVersion` vient de `package.json` (injecté au build). À l'import, validation de l'enveloppe, de la session (schéma Zod de `Session`) **et de sa config figée par le validateur de F02**. Une dernière passe vérifie la cohérence entre session et config (références, scores dans le barème, un seul passage en attente par étudiant, identifiants uniques). `formatVersion` ou `schemaVersion` plus récents : erreur invitant à mettre l'application à jour. Si une session avec le même `id` existe, l'utilisateur choisit entre remplacer et annuler.
-- État vide : bouton « Créer une session » et lien vers la config d'exemple.
+- État vide : bouton « Créer une session » et lien vers la config d'exemple (remplacé en F20 par un message ; les actions et les liens d'exemple sont dans les cartes d'action).
 - Indicateur discret dans l'en-tête, seulement si le navigateur a refusé le stockage persistant (F04), avec une infobulle qui recommande les backups.
 - La confirmation de suppression propose « Exporter un backup d'abord ».
 
@@ -563,6 +563,7 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 - Mise en forme : en-têtes figés, largeurs adaptées, formats numériques avec le nombre de décimales configuré.
 - Valeurs uniquement, aucune formule (le classeur sert à la consolidation par copier-coller). Onglets et en-têtes dans la langue de la session. Dates en vraies cellules date. Étudiant en cours : convertie et finale vides, statut « en cours ». Statistiques : blocs de `computeStats` (F15) empilés, une ligne de titre par bloc.
 - Le bouton « Exporter en Excel » de l'onglet « Étudiants » est ajouté par ce ticket.
+- Depuis F20, le même export est proposé dans le menu « … » de chaque carte de session de l'accueil.
 - Nom de fichier : `<slug-session>-<date>.xlsx`.
 
 **Critères d'acceptation.**
@@ -652,6 +653,24 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 - Aucune donnée réservée à l'examinateur n'apparaît dans l'aperçu.
 - La vue projetée est inchangée.
 - Aucun second chargement pour l'aperçu.
+
+### F20 — Accueil sur deux colonnes
+
+**Objectif.** Rendre les actions de l'accueil explicites et exporter une session sans ouvrir la vue examinateur.
+
+**Contenu.**
+- Deux colonnes à partir de 1024 px (actions sur 24 rem, sessions sur le reste), empilées en dessous, actions d'abord (D78). Sessions sur deux colonnes à partir de 1536 px.
+- Cartes d'action horizontales (icône, titre, texte, bouton) : « Nouvelle session », avec les liens vers `students.example.csv`, `config.example.json` et le JSON Schema, et « Restaurer une session » (import de backup, glisser-déposer rappelé). La carte de création est masquée si le stockage est indisponible.
+- La barre de titre ne garde que l'indicateur de persistance et le bouton de thème.
+- Carte de session : « Exporter en Excel » dans le menu « … », sous « Exporter un backup » ; même fichier que depuis la vue examinateur ; message d'échec sur la carte.
+- État vide : un message qui renvoie aux actions.
+
+**Critères d'acceptation.**
+- Colonnes côte à côte sur écran large, empilées sur écran étroit.
+- Chaque carte d'action dit ce qu'elle fait et ce qu'elle attend comme fichier.
+- Les liens d'exemple fonctionnent hors ligne.
+- L'export depuis l'accueil produit le même fichier que depuis la vue examinateur, et la bibliothèque d'export n'est chargée qu'au clic.
+- Import par bouton et par glisser-déposer inchangés.
 
 ## 9. Stack technique
 

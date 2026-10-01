@@ -1170,3 +1170,18 @@ autre encodage 8 bits.
 **Pourquoi** : réutiliser les composants et la fonction de domaine garantit que l'aperçu montre exactement la projection, et hérite de son étanchéité. 1280 plutôt que 1920 : à 1920, le texte courant de l'aperçu tomberait vers 4 px ; 1280 est aussi la largeur des vidéoprojecteurs WXGA courants. Dans le canevas, une media query réagirait à la fenêtre examinateur et non à la largeur simulée : sur écran étroit, les tuiles de l'aperçu passeraient sur une colonne alors que la projection en montre plusieurs ; la container query règle aussi le repli de la grille examinateur, qui suit désormais sa colonne. `aria-hidden` + `inert` : le canevas duplique des titres et un énoncé déjà présents sur la page, et ses liens ne doivent pas entrer dans l'ordre de tabulation. Suivre le mode de couleur de la projection aurait demandé d'écouter le stockage de l'autre fenêtre et de scoper les tokens de thème, pour un gain cosmétique.
 
 **Reporté dans** : `PRODUCT.md` F22 ; `docs/CONVENTIONS.md` § « Vue de session thémée » ; `docs/BACKLOG.md` (items → #56). Impacte F14, F19, F21, F25.
+
+## D78 — F20 : accueil sur deux colonnes, export Excel partagé par un hook (2026-10-01)
+
+**Question** : l'accueil empilait actions et sessions, sans dire ce que faisaient les actions, et l'export Excel n'existait que dans la vue de passage, que `features/home` ne peut pas importer (D59). Comment exposer l'export sur la carte de session et rendre les actions explicites ?
+
+**Décision** :
+- Logique d'export partagée dans `src/components/export/` : `exportWorkbook` (déplacé, `import()` dynamique de `lib/xlsx` inchangé, D71) et `useWorkbookExport(locale) → { state, run }`, avec une garde contre le double clic en `useRef` (lue et écrite dans `run`, jamais au rendu). `ExportButton` reste dans `features/session/` et consomme le hook.
+- Carte de session : item « Exporter en Excel » dans le menu « … », sous « Exporter un backup », désactivé et libellé « Export en cours… » pendant l'export ; échec → alerte sur la carte.
+- Mise en page : `lg:grid-cols-[24rem_minmax(0,1fr)]`, actions puis sessions (empilées sous `lg`), liste `2xl:grid-cols-2`. Barre de titre : indicateur de persistance et thème seulement.
+- Cartes d'action (`ActionCards`) : « Nouvelle session » (texte, liens vers les deux exemples et le JSON Schema, lien vers `/new`, masquée sans stockage) et « Restaurer une session » (texte, bouton d'import désactivé si la base n'est pas ouverte). Section « Actions » et section « Sessions » titrées en `h2` `sr-only`, cartes en `h3`.
+- État vide réduit à un titre et une phrase.
+
+**Pourquoi** : l'export de la carte est un item de menu (choix utilisateur) ; le menu se ferme au clic, le bouton et son alerte ne s'y réutilisent pas. Ce que les deux features partagent est la logique (garde, état, échec), d'où un hook plutôt qu'un bouton déplacé : écart assumé avec le ticket. La garde en ref corrige deux clics dans le même tick, qui passaient la garde sur l'état du rendu (BACKLOG). Colonne d'actions de largeur fixe : lisible et stable ; à 1536 px, une carte de session sur une colonne ferait ~1100 px, d'où deux colonnes à partir de `2xl`. Les fichiers d'exemple et le schéma sont déjà pré-cachés (F17) : rien à ajouter pour le hors ligne.
+
+**Reporté dans** : `PRODUCT.md` F05, F16, F20 ; `docs/BACKLOG.md` (deux items → #54). Impacte F05, F16, F19.

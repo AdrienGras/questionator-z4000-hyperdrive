@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { exportWorkbook } from '@/components/export/export-workbook'
 import { getSession, putSession } from '@/lib/db/sessions'
 import type { PersistenceStatus } from '@/lib/db/persistence'
 import { db, type DbStatus } from '@/lib/db/db'
@@ -24,6 +25,7 @@ vi.mock('@/lib/db/persistence', async (importOriginal) => ({
   usePersistenceStatus: () => persistence.status,
 }))
 vi.mock('@/lib/download', () => ({ downloadText: download }))
+vi.mock('@/components/export/export-workbook')
 
 const ACTIONS = 'Actions pour « Oral de test »'
 
@@ -44,34 +46,46 @@ beforeEach(async () => {
   dbState.status = 'open'
   persistence.status = 'persisted'
   download.mockClear()
+  vi.mocked(exportWorkbook).mockReset()
 })
 
 describe('accueil', () => {
-  test('état vide : message, création, import et config d’exemple', async () => {
-    renderAt('/')
-    expect(await screen.findByRole('heading', { name: 'Aucune session' })).toBeInTheDocument()
-    const createLinks = screen.getAllByRole('link', { name: 'Créer une session' })
-    expect(createLinks.length).toBeGreaterThan(0)
-    for (const link of createLinks) expect(link).toHaveAttribute('href', '/new')
-    expect(screen.getAllByRole('button', { name: 'Importer un backup' }).length).toBeGreaterThan(0)
-    const example = screen.getByRole('link', { name: "Télécharger la config d'exemple" })
-    expect(example.getAttribute('href')).toMatch(/config\.example\.json$/)
-    expect(example).toHaveAttribute('download')
-    const studentsExample = screen.getByRole('link', {
-      name: "Télécharger la liste d'étudiants d'exemple",
-    })
-    expect(studentsExample.getAttribute('href')).toMatch(/students\.example\.csv$/)
-    expect(studentsExample).toHaveAttribute('download')
-  })
-
-  test('barre de titre : Importer un backup, Créer une session, puis le thème en dernier', async () => {
+  test('état vide : message seul, actions à gauche', async () => {
     renderAt('/')
     await screen.findByRole('heading', { name: 'Aucune session' })
-    expect(bannerInteractiveNames().slice(-3, -1)).toEqual([
-      'Importer un backup',
-      'Créer une session',
-    ])
+    const sessions = screen.getByRole('region', { name: 'Sessions' })
+    expect(within(sessions).getByRole('heading', { name: 'Aucune session' })).toBeInTheDocument()
+    expect(
+      within(sessions).getByText('Créez une session ou importez un backup depuis les actions.'),
+    ).toBeInTheDocument()
+    expect(within(sessions).queryByRole('link')).not.toBeInTheDocument()
+    expect(within(sessions).queryByRole('button')).not.toBeInTheDocument()
+    const actions = screen.getByRole('region', { name: 'Actions' })
+    expect(within(actions).getByRole('link', { name: 'Créer une session' })).toHaveAttribute(
+      'href',
+      '/new',
+    )
+    expect(within(actions).getByRole('button', { name: 'Importer un backup' })).toBeEnabled()
+  })
+
+  test('barre de titre : plus de création ni d’import, thème en dernier', async () => {
+    renderAt('/')
+    await screen.findByRole('heading', { name: 'Aucune session' })
+    const names = bannerInteractiveNames()
+    expect(names).not.toContain('Créer une session')
+    expect(names).not.toContain('Importer un backup')
     expectColorModeToggleLast()
+  })
+
+  test('deux colonnes : actions avant sessions', async () => {
+    renderAt('/')
+    const sessions = await screen.findByRole('region', { name: 'Sessions' })
+    const actions = screen.getByRole('region', { name: 'Actions' })
+    expect(
+      actions.compareDocumentPosition(sessions) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(actions.parentElement).toBe(sessions.parentElement)
+    expect(actions.parentElement).toHaveClass('lg:grid-cols-[24rem_minmax(0,1fr)]')
   })
 
   test('liste triée de la plus récente à la plus ancienne, avec jury et avancement', async () => {
@@ -89,7 +103,9 @@ describe('accueil', () => {
     )
     renderAt('/')
     await screen.findByRole('heading', { name: 'Récente' })
-    const names = screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent)
+    const names = within(screen.getByRole('region', { name: 'Sessions' }))
+      .getAllByRole('heading', { level: 3 })
+      .map((heading) => heading.textContent)
     expect(names).toEqual(['Récente', 'Ancienne'])
     expect(screen.getByText('Jury : M. Dupont')).toBeInTheDocument()
     expect(screen.getByText('1 passé · 0 absent · 0 restant')).toBeInTheDocument()
@@ -210,6 +226,36 @@ describe('accueil', () => {
     renderAt('/')
     await chooseAction('Exporter un backup')
     expect(download).toHaveBeenCalledTimes(1)
+  })
+
+  test('« Exporter en Excel » exporte la session dans la langue de l’interface', async () => {
+    vi.mocked(exportWorkbook).mockResolvedValue()
+    await putSession(makeSession())
+    renderAt('/')
+    fireEvent.click(await screen.findByRole('button', { name: ACTIONS }))
+    const names = (await screen.findAllByRole('menuitem')).map((item) => item.textContent)
+    expect(names.indexOf('Exporter en Excel')).toBe(names.indexOf('Exporter un backup') + 1)
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Exporter en Excel' }))
+    await waitFor(() => expect(exportWorkbook).toHaveBeenCalledTimes(1))
+    expect(exportWorkbook).toHaveBeenCalledWith(expect.objectContaining({ id: 'session-1' }), 'fr')
+  })
+
+  test('export Excel en échec : alerte sur la carte', async () => {
+    vi.mocked(exportWorkbook).mockRejectedValue(new Error('boom'))
+    await putSession(makeSession())
+    renderAt('/')
+    await chooseAction('Exporter en Excel')
+    expect(await screen.findByRole('alert')).toHaveTextContent("L'export a échoué. Réessayez.")
+  })
+
+  test('item désactivé pendant l’export', async () => {
+    vi.mocked(exportWorkbook).mockReturnValue(new Promise<void>(() => undefined))
+    await putSession(makeSession())
+    renderAt('/')
+    await chooseAction('Exporter en Excel')
+    fireEvent.click(await screen.findByRole('button', { name: ACTIONS }))
+    const busy = await screen.findByRole('menuitem', { name: 'Export en cours…' })
+    expect(busy).toHaveAttribute('aria-disabled', 'true')
   })
 
   test('« Reprendre » mène à la session', async () => {

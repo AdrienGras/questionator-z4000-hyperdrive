@@ -18,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useWorkbookExport } from '@/components/export/use-workbook-export'
 import { Progress } from '@/components/ui/progress'
 import { updateSession } from '@/lib/db/sessions'
 import type { Session } from '@/domain/session/types'
@@ -38,6 +39,8 @@ type OpenDialog = 'rename' | 'examiner' | 'delete' | null
 
 export function SessionCard({ ui, session }: SessionCardProps) {
   const { locale, text } = ui
+  const excel = useWorkbookExport(locale)
+  const excelBusy = excel.state === 'busy'
   const [dialog, setDialog] = useState<OpenDialog>(null)
   const { done, absent, remaining, total } = sessionProgress(session)
   const progressText = text('card_progress', { done, absent, remaining })
@@ -47,7 +50,7 @@ export function SessionCard({ ui, session }: SessionCardProps) {
     <Card>
       <CardHeader>
         <CardTitle>
-          <h2 className="text-lg font-semibold">{session.name}</h2>
+          <h3 className="text-lg font-semibold">{session.name}</h3>
         </CardTitle>
         <CardDescription>{session.config.exam.title}</CardDescription>
         <CardAction>
@@ -73,6 +76,9 @@ export function SessionCard({ ui, session }: SessionCardProps) {
               <DropdownMenuItem onClick={() => exportSession(session)}>
                 {text('action_export', {})}
               </DropdownMenuItem>
+              <DropdownMenuItem disabled={excelBusy} onClick={() => void excel.run(session)}>
+                {text(excelBusy ? 'export_busy' : 'export_button', {})}
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive" onClick={() => setDialog('delete')}>
                 {text('action_delete', {})}
@@ -90,6 +96,11 @@ export function SessionCard({ ui, session }: SessionCardProps) {
         </p>
         <Progress value={total === 0 ? 0 : (done / total) * 100} aria-label={progressText} />
         <p>{progressText}</p>
+        {excel.state === 'failed' && (
+          <p role="alert" className="text-sm text-destructive">
+            {text('export_error', {})}
+          </p>
+        )}
       </CardContent>
       <CardFooter>
         <Link

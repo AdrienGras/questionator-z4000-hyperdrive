@@ -20,6 +20,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ---
 
+## 2026-10-01 — F22 mergé, F20 : accueil sur deux colonnes (#54)
+
+**Dernière chose faite** : PR #68 (F22) mergée sur go de l'utilisateur. F20 implémenté sur `feat/f20-accueil-deux-colonnes` en subagent-driven development (quatre tâches revues, revue finale, correctifs : titres h3 dans la région « Sessions », clé `create_config_example_link`). `ActionCards` : « Nouvelle session » (liens vers les exemples et le JSON Schema) et « Restaurer une session ». Grille `lg:grid-cols-[24rem_minmax(0,1fr)]`, sessions en `2xl:grid-cols-2`. La barre de titre est réduite à l'indicateur de persistance et au thème, l'état vide à un message. Export Excel dans le menu « … » de la carte de session via `useWorkbookExport` (`components/export/`, garde en `useRef`), partagé avec `ExportButton`. D78, `PRODUCT.md` F05, F16 et F20, INDEX et BACKLOG sont à jour. Vérifié dans le navigateur à 1440 et 900 px ; aucun chunk xlsx au chargement de l'accueil.
+
+**Trucs en suspens** : PR F20 à ouvrir en brouillon, Sonar, « Ready for review », puis go de l'utilisateur. Le clic « Exporter en Excel » depuis la carte n'a pas été vérifié dans le navigateur (le navigateur Playwright MCP plante sur le téléchargement) ; il est couvert par les tests unitaires. BACKLOG : classe de lien recopiée entre la création et l'accueil, `buildWorkbook` / `computeStats` dans le chunk de l'accueil.
+
+**Prochaine chose à creuser** : #58 (F24, fond des blocs de code), puis #60 (F26, éditeur de config, débloqué une fois #54 et #56 mergés).
+
+**Notes pour future Claude** : l'accueil a maintenant des titres `h3` à la fois dans les cartes d'action et dans les cartes de session : scoper les requêtes de test par `region` (« Actions », « Sessions »). La page de création a un `h1` « Nouvelle session » et la carte d'action un `h3` du même nom : filtrer par `level`. Le navigateur Playwright MCP plante sur un téléchargement déclenché depuis la page : vérifier un export par les tests ou à la main.
+
 ## 2026-09-30 — F22 : aperçu de la vue projetée (#56)
 
 **Dernière chose faite** : F22 implémenté sur `feat/f22-apercu-projection`, en subagent-driven development (six tâches, chacune revue, puis une revue finale « prête à merger »). Les écrans de la vue projetée sont dans `src/components/projection/`, derrière `ProjectedScreen`. `ProjectionPreview` rend dans la vue de passage un canevas 1280 × 720 réduit par `transform: scale` (`useElementWidth`, `src/hooks/`). La colonne de droite (≥ `lg`) porte l'aperçu, les contrôles de projection et le bandeau, et s'empile en haut en dessous. Les seuils `sm:` sont devenus des container queries `@min-[40rem]:` (`StudentScreen`, `CategoryLayout`). L'alerte de popup bloquée s'efface au clic suivant, et la fenêtre projetée est liée à sa session. D77, section F22 de `PRODUCT.md`, INDEX, CONVENTIONS, BACKLOG et QUIRKS sont à jour. Vérifié dans le navigateur à 1440 et 900 px : aucune iframe, un seul document chargé, retour à l'attente suivi en direct.

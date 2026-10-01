@@ -204,14 +204,12 @@ describe('import de backup', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  test('les boutons « Importer un backup » ouvrent le sélecteur de fichier', async () => {
+  test('le bouton « Importer un backup » ouvre le sélecteur de fichier', async () => {
     const input = await renderImport()
     await screen.findByRole('heading', { name: 'Aucune session' })
     const click = vi.spyOn(input, 'click').mockImplementation(() => {})
-    const buttons = screen.getAllByRole('button', { name: 'Importer un backup' })
-    expect(buttons).toHaveLength(2)
-    for (const button of buttons) fireEvent.click(button)
-    expect(click).toHaveBeenCalledTimes(2)
+    fireEvent.click(screen.getByRole('button', { name: 'Importer un backup' }))
+    expect(click).toHaveBeenCalledTimes(1)
   })
 
   test('l’input est vidé après le choix, pour réimporter le même fichier', async () => {

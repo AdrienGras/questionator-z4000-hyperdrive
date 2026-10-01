@@ -9,16 +9,15 @@ type SessionListProps = Readonly<{
   ui: Ui
   status: DbStatus
   sessions: Session[] | undefined
-  onImport: () => void
 }>
 
 /** États de la liste par priorité : outdated, unavailable, chargement, vide, cartes. */
-export function SessionList({ ui, status, sessions, onImport }: SessionListProps) {
+export function SessionList({ ui, status, sessions }: SessionListProps) {
   if (status !== 'open') return <DbStatusBanner ui={ui} status={status} />
   if (sessions === undefined) return null
-  if (sessions.length === 0) return <EmptyState ui={ui} onImport={onImport} />
+  if (sessions.length === 0) return <EmptyState ui={ui} />
   return (
-    <ul className="flex flex-col gap-4">
+    <ul className="grid gap-4 2xl:grid-cols-2">
       {sessions.map((session) => (
         <li key={session.id}>
           <SessionCard ui={ui} session={session} />

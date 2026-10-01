@@ -272,7 +272,9 @@ describe('écran de création', () => {
     fireEvent.click(screen.getByRole('link', { name: "Retour à l'accueil" }))
     // Attendre le démontage effectif de l'écran (le composant de l'accueil est chargé à la demande).
     await waitFor(() =>
-      expect(screen.queryByRole('heading', { name: 'Nouvelle session' })).not.toBeInTheDocument(),
+      expect(
+        screen.queryByRole('heading', { level: 1, name: 'Nouvelle session' }),
+      ).not.toBeInTheDocument(),
     )
     expect(router.state.location.pathname).toBe('/')
     if (finish === undefined) throw new Error('createSession non appelé')
