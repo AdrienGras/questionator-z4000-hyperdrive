@@ -37,24 +37,24 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 - [ ] Raccourcis clavier : chiffres pour les valeurs du barème, touches pour les catégories, raccourci de skip.
 - [x] Helper `requireStudent(session, studentId)` dans `domain/passage/` : la recherche + `student_not_found` est copiée dans `drawQuestion`, `scoreAttempt`, `setActiveStudent` ; F10 et F11 en ajouteront deux copies. *Fait en F10.*
-- [ ] Test de la branche défensive `category_not_found` de `scoreAttempt` (inatteignable avec une config figée valide). → #87
-- [ ] `studentStatus` et `computeScores` calculés deux fois (`ExaminerView` et `PassageHeader`) : passer le statut en prop si l'écran grossit. → #87
-- [ ] `passage-example.test.tsx` : ~1,2 s seul, au-delà de 5 s sous la charge de la suite complète ; délai porté à 15 s en F12. Trouver où part le temps (le panneau n'en explique que ~12 %). → #87
+- [x] Test de la branche défensive `category_not_found` de `scoreAttempt` (inatteignable avec une config figée valide). → #87 *Fait en #87 (PR 1).*
+- [x] `studentStatus` et `computeScores` calculés deux fois (`ExaminerView` et `PassageHeader`) : passer le statut en prop si l'écran grossit. → #87 *Fait en #87 (PR 1).*
+- [x] `passage-example.test.tsx` : ~1,2 s seul, au-delà de 5 s sous la charge de la suite complète ; délai porté à 15 s en F12. Trouver où part le temps (le panneau n'en explique que ~12 %). → #87 *Fait en #87 (PR 1).*
 - [x] Panneau latéral : la zone `aria-live` du commentaire annonce « Enregistrement… » puis « Enregistré » à chaque pause de frappe ; n'annoncer que « Enregistré » / « Échec ». → #55. *Livré en F21.*
 - [x] `AbsentState` renvoie au panneau alors qu'il peut être replié ou sur l'onglet « Étudiants » : proposer « Afficher le panneau ». Même chose pour l'état « aucun étudiant » depuis F13, qui renvoie à l'onglet « Étudiants » sans l'ouvrir. → #55. *Livré en F21.*
-- [ ] Fixtures de tests d'écran : `src/testing/screen-fixtures.ts` (`screenCategory`, `REVEALED`, `panel()`) livré en F30 ; restent locales les copies qui diffèrent (échelle `[0, 1, 2, 3]` dans `side-panel.test.tsx` et `student-tab.test.tsx`, quatre questions dans `skip.test.tsx`) : à rapprocher si l'écart cesse d'être nécessaire. → #87
-- [ ] Cas `decimals: 0` (pas de 1) de l'ajustement jamais testé à l'écran (F11). → #87
-- [ ] Brouillons de commentaire (`comment-draft.ts`, F30) jamais nettoyés à la suppression d'une session ni à l'import d'un backup par-dessus : un brouillon resté peut écraser le commentaire importé à la réouverture du tiroir. → #87
-- [ ] Dialogue d'ajout d'étudiant : en cas d'échec, alerte du dialogue plus alerte du tiroir derrière (F30 n'a appliqué `ownError` qu'à l'ajustement, `reset` et l'absence). → #87
-- [ ] Onglet « Étudiants » (montage partagé dans `src/testing/students-tab-harness.tsx` depuis la PR #45) : le test de double clic ne distingue pas la garde `submitting` du verrou `run` ; pas de test `rosterScore` d'un absent qui a des notes (F13). → #87
+- [x] Fixtures de tests d'écran : `src/testing/screen-fixtures.ts` (`screenCategory`, `REVEALED`, `panel()`) livré en F30 ; restent locales les copies qui diffèrent (échelle `[0, 1, 2, 3]` dans `side-panel.test.tsx` et `student-tab.test.tsx`, quatre questions dans `skip.test.tsx`) : à rapprocher si l'écart cesse d'être nécessaire. → #87 *Fait en #87 (PR 1).*
+- [x] Cas `decimals: 0` (pas de 1) de l'ajustement jamais testé à l'écran (F11). → #87 *Fait en #87 (PR 1).*
+- [x] Brouillons de commentaire (`comment-draft.ts`, F30) jamais nettoyés à la suppression d'une session ni à l'import d'un backup par-dessus : un brouillon resté peut écraser le commentaire importé à la réouverture du tiroir. → #87 *Fait en #87 (PR 1).*
+- [x] Dialogue d'ajout d'étudiant : en cas d'échec, alerte du dialogue plus alerte du tiroir derrière (F30 n'a appliqué `ownError` qu'à l'ajustement, `reset` et l'absence). → #87 *Fait en #87 (PR 1).*
+- [x] Onglet « Étudiants » (montage partagé dans `src/testing/students-tab-harness.tsx` depuis la PR #45) : le test de double clic ne distingue pas la garde `submitting` du verrou `run` ; pas de test `rosterScore` d'un absent qui a des notes (F13). → #87 *Fait en #87 (PR 1).*
 - [x] Onglet « Étudiants » : l'icône de l'étudiant projeté n'est vérifiable qu'en test tant que F14 ne permet pas de projeter depuis l'interface. → #56. *Vérifiable depuis F22 : l'aperçu montre l'étudiant projeté.*
-- [ ] Vue projetée (F14) : `cursor-none` non testé au niveau page ; test de réinitialisation qui n'attend pas la disparition de l'énoncé. → #87
-- [ ] Pilotage (F14) : `?search` conservé dans l'URL de la fenêtre projetée ; tests manquants (boutons pendant `busy`, bandeau quand l'étudiant projeté a disparu). *Popup bloquée effacée au clic suivant et référence de fenêtre liée à la session : livrés en F22.* → #87
-- [ ] Tests F14 : marqueur `0.37` du test d'étanchéité en sous-chaîne (échec bruyant si un score le contient) ; pas de mutation vérifiée pour `editedAt` et le montant d'ajustement ; test d'architecture aveugle aux réexports de `Session` ; `computeScores` appelé deux fois dans `toProjectedView`. → #87
+- [x] Vue projetée (F14) : `cursor-none` non testé au niveau page ; test de réinitialisation qui n'attend pas la disparition de l'énoncé. → #87 *Fait en #87 (PR 1).*
+- [x] Pilotage (F14) : `?search` conservé dans l'URL de la fenêtre projetée ; tests manquants (boutons pendant `busy`, bandeau quand l'étudiant projeté a disparu). *Popup bloquée effacée au clic suivant et référence de fenêtre liée à la session : livrés en F22.* → #87 *Fait en #87 (PR 1).*
+- [x] Tests F14 : marqueur `0.37` du test d'étanchéité en sous-chaîne (échec bruyant si un score le contient) ; pas de mutation vérifiée pour `editedAt` et le montant d'ajustement ; test d'architecture aveugle aux réexports de `Session` ; `computeScores` appelé deux fois dans `toProjectedView`. → #87 *Fait en #87 (PR 1).*
 - [ ] `categoryButton` (`src/testing/passage-assertions.ts`) : `waitFor` au délai par défaut (1 s), à allonger si la CI devient lente. → #88
 - [x] Tuiles de catégorie (F25, D74) : seuil du repli sur une colonne à revoir avec l'aperçu de #56. *Livré en F22 : seuil mesuré sur le conteneur (`@min-[40rem]:`, D77).*
 - [ ] Aperçu de la vue projetée (F22) : suit le mode clair / sombre de l'examinateur, pas celui mémorisé par la vue projetée (D77) ; à reprendre si l'écart gêne.
-- [ ] Tests F22 : `FauxResizeObserver` recopié entre `projection.test.tsx` et `projection-preview-leak.test.tsx` (à sortir dans `src/testing/`) ; commentaire et motif de skip prouvés absents de l'aperçu mais seulement présents en base, pas dans le DOM examinateur ; `useElementWidth` garde la dernière largeur après `ref(null)`. → #87
+- [x] Tests F22 : `FauxResizeObserver` recopié entre `projection.test.tsx` et `projection-preview-leak.test.tsx` (à sortir dans `src/testing/`) ; commentaire et motif de skip prouvés absents de l'aperçu mais seulement présents en base, pas dans le DOM examinateur ; `useElementWidth` garde la dernière largeur après `ref(null)`. → #87 *Fait en #87 (PR 1).*
 
 ## Accueil et backup
 
@@ -120,6 +120,6 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [x] Vérification périodique des mises à jour pendant la journée, message « prêt hors ligne » (hors périmètre F17). → #84 *Livré en F36 (D86).*
 - [ ] Première installation interrompue (réseau coupé pendant le pré-cache) : le navigateur supprime l'enregistrement, les vérifications de F36 échouent alors sans bruit (`InvalidStateError`) et rien ne relance l'installation avant un rechargement. Relancer `register` au retour du réseau si le cas se présente.
 - [ ] e2e : `highlightedCode` (`.first()`) peut se satisfaire d'un bloc de la question précédente ; le scoper à la question courante. → #88
-- [ ] Helper de test `deferred<T>()` dupliqué dans `import-controller.test.tsx` et `add-student.test.tsx` : le sortir dans `src/testing/` (F30). → #87
-- [ ] `stale-errors.test.tsx` attend avec `setTimeout(100)` : attendre un état observable à la place (F30). → #87
-- [ ] Commenter sur `PassageActions` que `adjust` et `revealFinal` laissent l'affichage de l'erreur à l'appelant (`ownError`) (F30). → #87
+- [x] Helper de test `deferred<T>()` dupliqué dans `import-controller.test.tsx` et `add-student.test.tsx` : le sortir dans `src/testing/` (F30). → #87 *Fait en #87 (PR 1).*
+- [x] `stale-errors.test.tsx` attend avec `setTimeout(100)` : attendre un état observable à la place (F30). → #87 *Fait en #87 (PR 1).*
+- [x] Commenter sur `PassageActions` que `adjust` et `revealFinal` laissent l'affichage de l'erreur à l'appelant (`ownError`) (F30). → #87 *Fait en #87 (PR 1).*
