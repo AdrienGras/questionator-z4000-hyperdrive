@@ -24,6 +24,23 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-02 — #87 : tests instables expliqués et corrigés
+
+**Dernière chose faite** : PR #105 (#87 PR 1) mergée sur go de l'utilisateur. À sa demande, investigation dédiée des tests instables sur `chore/87-tests-instables`, par un subagent, mesures à l'appui (environ 90 suites complètes) :
+- machine calme : 0 échec sur 20 suites, avant comme après ;
+- échecs reproduits en chargeant le CPU (8 boucles actives) : 6 sur 7 avant, 0 sur 20 après ;
+- causes : CPU saturé (15 workers, jsdom recréé par fichier) contre des délais de 5 s ; `config-editor-page` chargeait icônes et Shiki pour rien ; deux tests attendaient un état déjà à l'écran avant l'action (`create-session` : « window is not defined », la navigation n'était même pas vérifiée ; `add-student` : course sur la barre de titre).
+
+Corrections : `test.maxWorkers: '75%'`, doublures icônes et Shiki dans les tests de l'éditeur, attentes corrigées, règle dans CONVENTIONS, entrée QUIRKS. Machine calme : p50 32,2 → 31,8 s, test le plus lent 4,57 → 2,77 s.
+
+**Trucs en suspens** : PR à ouvrir, Sonar, puis « Ready for review » ; ne pas merger sans le go de l'utilisateur. Restes au BACKLOG : `vmThreads` ou `isolate: false` (#88), garde-fou de la convention des doublures (#88), échec `getByRole('banner')` jamais reproduit (#87). L'e2e `color-mode` n'a pas été examiné (#88).
+
+**Prochaine chose à creuser** : après le merge, PR 2 de #87 (accueil, création, persistance, langue), puis PR 3 (projection, rendu, éditeur) et PR 4 (stats ; la partie « instables » est faite ici).
+
+**Notes pour future Claude** :
+- Pour reproduire une instabilité, charger le CPU pendant la suite : `scratchpad/flaky/hog.sh`, `runs.sh` et `agg.mjs` (rapport JSON de Vitest agrégé). Sur une machine calme, rien n'échoue.
+- Ne jamais faire tourner deux suites complètes en même temps : implémenteur, relecteur et e2e se marchent dessus.
+
 ## 2026-10-01 — #87 PR 1 : dette de l'écran de passage
 
 **Dernière chose faite** : PR #99 (#86) mergée sur go de l'utilisateur. #87 découpé en 4 PR successives, découpage validé par l'utilisateur : écran de passage ; accueil, création, persistance, langue ; projection, rendu, éditeur ; stats, puis les tests instables. La PR 1 est faite sur `chore/87-dette-ecran-passage` par un subagent, puis relue :
