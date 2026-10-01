@@ -26,15 +26,23 @@ type TextFieldDialogProps = Readonly<{
 
 /** Dialogue à un champ texte (nom de session, examinateur) ; valeur trimée avant `onSave`. */
 export function TextFieldDialog({ ui, open, onOpenChange, title, ...form }: TextFieldDialogProps) {
+  const [saving, setSaving] = useState(false)
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    // Pendant l'écriture, Échap et le clic extérieur sont ignorés, comme « Annuler » (désactivé).
+    <Dialog open={open} onOpenChange={(next) => !saving && onOpenChange(next)}>
       <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {form.hint !== undefined && <DialogDescription>{form.hint}</DialogDescription>}
         </DialogHeader>
         {/* Monté à chaque ouverture : la valeur repart de `initialValue`. */}
-        <TextFieldForm ui={ui} onClose={() => onOpenChange(false)} {...form} />
+        <TextFieldForm
+          ui={ui}
+          saving={saving}
+          onSavingChange={setSaving}
+          onClose={() => onOpenChange(false)}
+          {...form}
+        />
       </DialogContent>
     </Dialog>
   )
@@ -42,29 +50,40 @@ export function TextFieldDialog({ ui, open, onOpenChange, title, ...form }: Text
 
 type TextFieldFormProps = Readonly<
   Pick<TextFieldDialogProps, 'ui' | 'label' | 'initialValue' | 'required' | 'onSave'> & {
+    saving: boolean
+    onSavingChange: (saving: boolean) => void
     onClose: () => void
   }
 >
 
-function TextFieldForm({ ui, label, initialValue, required, onSave, onClose }: TextFieldFormProps) {
+function TextFieldForm({
+  ui,
+  label,
+  initialValue,
+  required,
+  onSave,
+  saving,
+  onSavingChange,
+  onClose,
+}: TextFieldFormProps) {
   const { text } = ui
   const id = useId()
   const [value, setValue] = useState(initialValue)
-  const [saving, setSaving] = useState(false)
   const [failed, setFailed] = useState(false)
   const invalid = required && value.trim() === ''
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (invalid) return
-    setSaving(true)
+    if (invalid || saving) return
+    onSavingChange(true)
     setFailed(false)
     try {
       await onSave(value.trim())
+      onSavingChange(false)
       onClose()
     } catch {
       setFailed(true)
-      setSaving(false)
+      onSavingChange(false)
     }
   }
 
@@ -80,7 +99,7 @@ function TextFieldForm({ ui, label, initialValue, required, onSave, onClose }: T
         </p>
       )}
       <DialogFooter>
-        <Button type="button" variant="outline" onClick={onClose}>
+        <Button type="button" variant="outline" disabled={saving} onClick={onClose}>
           {text('dialog_cancel', {})}
         </Button>
         <Button type="submit" disabled={invalid || saving}>

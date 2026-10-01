@@ -609,3 +609,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : importé statiquement par plusieurs chunks, Rolldown en fait un chunk partagé `_langs-<hash>.js` ; importé statiquement par un seul (`code-languages.ts`) et en `import()` par le surligneur, il devient une entrée dynamique à son chemin de module (`node_modules/.pnpm/shiki@…/shiki/dist/langs.mjs`). Un groupe `codeSplitting` nommé ne le capture pas (entrée dynamique) : il produit un `_langs-*` vide qui rendrait le contrôle vacant, et avec `includeDependenciesRecursively` par défaut il avale l'assistant de préchargement de Vite et fuit dans l'entrée.
 **Workaround** : `SHIKI_CHUNK` (`scripts/check-initial-bundle.ts`) et `CATALOG_KEY` (`e2e/languages.spec.ts`) acceptent les deux formes de clé ; ne pas ajouter de groupe `langs`.
 **Référence** : `scripts/check-initial-bundle.ts`, `e2e/languages.spec.ts`.
+
+## Une écriture IndexedDB lancée à `pagehide` ne finit pas avant le déchargement (2026-10-01)
+
+**Découvert** : F30 (#78), e2e `comment-reload.spec.ts` (`page.reload()` juste après la frappe).
+**Symptôme** : un commentaire tapé puis une actualisation immédiate de la page perd la saisie, bien que `useAutosave` flushe à `pagehide`.
+**Cause** : `updateSession` enchaîne un `import()` mémoïsé du validateur, une lecture puis un `put` ; en Chromium, le document est déchargé avant que `put` ne soit appelé. Le flush à `pagehide` n'est donc qu'un plus.
+**Workaround** : copie **synchrone** de la saisie dans `localStorage` à chaque frappe (`comment-draft.ts`, D82), supprimée quand l'enregistrement de cette valeur réussit, relue au montage de `CommentField`. Le test e2e ne doit ni attendre ni quitter le champ avant `reload()`.
+**Référence** : `src/features/session/comment-draft.ts`, `src/features/session/hooks/use-autosave.ts`, `e2e/comment-reload.spec.ts`, D82.

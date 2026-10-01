@@ -206,4 +206,27 @@ describe('useAutosave', () => {
     act(() => result.current.flush())
     expect(save).toHaveBeenCalledTimes(2)
   })
+
+  it('flushe la valeur en attente sur pagehide, avant le délai', async () => {
+    const save = vi.fn<Save>().mockResolvedValue(true)
+    const { result } = renderHook(() => useAutosave(save))
+    act(() => result.current.schedule('abc'))
+    act(() => {
+      globalThis.dispatchEvent(new Event('pagehide'))
+    })
+    expect(save).toHaveBeenCalledTimes(1)
+    expect(save).toHaveBeenCalledWith('abc')
+    await advance(500)
+    expect(save).toHaveBeenCalledTimes(1)
+  })
+
+  it('retire son écouteur pagehide au démontage', async () => {
+    const save = vi.fn<Save>().mockResolvedValue(true)
+    const { unmount } = renderHook(() => useAutosave(save))
+    unmount()
+    act(() => {
+      globalThis.dispatchEvent(new Event('pagehide'))
+    })
+    expect(save).not.toHaveBeenCalled()
+  })
 })

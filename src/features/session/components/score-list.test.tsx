@@ -38,3 +38,11 @@ test('étudiant en cours : convertie et finale « — », ajustement « aucun »
   expect(value('Ajustement')).toBe('aucun')
   expect(value('Note finale')).toBe('—')
 })
+
+test('ajustement nul enregistré : « aucun », puis le motif', () => {
+  const scaledConfig = makeConfig({ questionsPerStudent: 1, maxRawScore: 2, finalScale: 20 })
+  const student = makeStudent([1], { adjustment: { value: 0, reason: 'x' } })
+  render(<ScoreList ui={ui} config={scaledConfig} student={student} />)
+
+  expect(value('Ajustement')).toBe('aucunx')
+})

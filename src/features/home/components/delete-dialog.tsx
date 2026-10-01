@@ -22,7 +22,10 @@ type DeleteDialogProps = Readonly<{
   onOpenChange: (open: boolean) => void
 }>
 
-/** Confirmation de suppression ; « Exporter un backup d'abord » laisse le dialogue ouvert. */
+/**
+ * Confirmation de suppression ; « Exporter un backup d'abord » laisse le dialogue ouvert. Pendant
+ * l'écriture, ni « Annuler » ni Échap ne ferment le dialogue.
+ */
 export function DeleteDialog({
   ui,
   sessionId,
@@ -36,20 +39,22 @@ export function DeleteDialog({
   const [failed, setFailed] = useState(false)
 
   function changeOpen(next: boolean) {
+    if (deleting) return
     setFailed(false)
     onOpenChange(next)
   }
 
   async function confirm() {
+    if (deleting) return
     setDeleting(true)
     setFailed(false)
     try {
       await deleteSession(sessionId)
+      setDeleting(false)
       onOpenChange(false)
     } catch {
-      setFailed(true)
-    } finally {
       setDeleting(false)
+      setFailed(true)
     }
   }
 
@@ -69,7 +74,7 @@ export function DeleteDialog({
           <Button variant="outline" onClick={() => exportBackup(backup)}>
             {text('delete_export_first', {})}
           </Button>
-          <AlertDialogCancel>{text('dialog_cancel', {})}</AlertDialogCancel>
+          <AlertDialogCancel disabled={deleting}>{text('dialog_cancel', {})}</AlertDialogCancel>
           <Button variant="destructive" disabled={deleting} onClick={() => void confirm()}>
             {text('delete_confirm', {})}
           </Button>

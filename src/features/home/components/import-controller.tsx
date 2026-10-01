@@ -98,12 +98,7 @@ export function ImportController({ ui, disabled, children }: ImportControllerPro
         </div>
       )}
       <ImportErrorDialog ui={ui} state={state} onClose={dismiss} />
-      <ImportConflictDialog
-        ui={ui}
-        state={state}
-        onCancel={dismiss}
-        onReplace={() => void replace()}
-      />
+      <ImportConflictDialog ui={ui} state={state} onCancel={dismiss} onReplace={replace} />
     </div>
   )
 }
@@ -166,7 +161,7 @@ type ImportConflictDialogProps = Readonly<{
   ui: Ui
   state: ImportState
   onCancel: () => void
-  onReplace: () => void
+  onReplace: () => Promise<void>
 }>
 
 /** Une session endommagée n'a pas de date fiable : son nom lisible seul (F31). */
@@ -183,9 +178,13 @@ function conflictBody({ text, locale }: Ui, existing: StoredSession, imported: s
 /** Même `id` déjà en base : remplacer ou annuler ; remplacer une session endommagée la répare. */
 function ImportConflictDialog({ ui, state, onCancel, onReplace }: ImportConflictDialogProps) {
   const { text } = ui
+  const [replacing, setReplacing] = useState(false)
   const conflict = state.kind === 'conflict' ? state : null
   return (
-    <AlertDialog open={conflict !== null} onOpenChange={(open) => !open && onCancel()}>
+    <AlertDialog
+      open={conflict !== null}
+      onOpenChange={(open) => !open && !replacing && onCancel()}
+    >
       <AlertDialogContent>
         {conflict && (
           <AlertDialogHeader>
@@ -196,8 +195,16 @@ function ImportConflictDialog({ ui, state, onCancel, onReplace }: ImportConflict
           </AlertDialogHeader>
         )}
         <AlertDialogFooter>
-          <AlertDialogCancel>{text('dialog_cancel', {})}</AlertDialogCancel>
-          <Button onClick={onReplace}>{text('import_replace', {})}</Button>
+          <AlertDialogCancel disabled={replacing}>{text('dialog_cancel', {})}</AlertDialogCancel>
+          <Button
+            disabled={replacing}
+            onClick={() => {
+              setReplacing(true)
+              void onReplace().finally(() => setReplacing(false))
+            }}
+          >
+            {text('import_replace', {})}
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

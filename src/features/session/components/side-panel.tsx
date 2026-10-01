@@ -3,6 +3,7 @@ import { IconX } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useFreshError, type Failure } from '@/features/session/hooks/use-fresh-error'
 import type { SidePanelTab } from '@/features/session/side-panel-state'
 import type { Ui } from '@/lib/i18n/use-ui'
 
@@ -15,7 +16,8 @@ function isSidePanelTab(value: unknown): value is SidePanelTab {
  * contrôlé : l'ouverture et l'onglet viennent de `useSidePanel` (seul l'onglet est mémorisé).
  * Le contenu est démonté à la fermeture, ce qui flushe le commentaire en attente.
  *
- * `error` : message de la dernière action refusée. Le tiroir modal masque le reste de la page,
+ * `error` : dernière action refusée, montrée seulement si elle survient tiroir ouvert (une erreur
+ * déjà là à l'ouverture est périmée, la page l'affiche). Le tiroir modal masque le reste de la page,
  * l'alerte du corps de l'écran y serait invisible : elle est répétée ici, au-dessus des onglets.
  *
  * `returnFocusRef` : élément qui reprend le focus à la fermeture. Le bouton d'ouverture n'est
@@ -38,12 +40,13 @@ export function SidePanel({
   tab: SidePanelTab
   onOpenChange: (open: boolean) => void
   onTabChange: (tab: SidePanelTab) => void
-  error?: string
+  error?: Failure
   returnFocusRef?: RefObject<HTMLElement | null>
   studentTab: ReactNode
   studentsTab: ReactNode
 }>) {
   const { text } = ui
+  const freshError = useFreshError(error, open)
   const changeTab = (value: unknown) => {
     if (isSidePanelTab(value)) onTabChange(value)
   }
@@ -69,7 +72,7 @@ export function SidePanel({
           </SheetClose>
         </SheetHeader>
         <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pb-4">
-          {error !== undefined && <p role="alert">{error}</p>}
+          {freshError !== undefined && <p role="alert">{freshError.message}</p>}
           <Tabs value={tab} onValueChange={changeTab}>
             <TabsList className="w-full">
               <TabsTrigger value="student" className="flex-1">

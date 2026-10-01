@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useFreshError, type Failure } from '@/features/session/hooks/use-fresh-error'
 import { findDuplicate } from '@/domain/passage/selectors'
 import type { Session } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
@@ -22,8 +23,8 @@ type AddStudentDialogProps = Readonly<{
   session: Session
   /** Écriture en cours : verrouille les deux boutons d'envoi (pas le déclencheur). */
   disabled: boolean
-  /** Erreur de la dernière action, montrée ici car le `role="alert"` de l'écran est sous le modal. */
-  error?: string
+  /** Dernière action refusée, montrée ici (seulement si survenue dialogue ouvert) car le `role="alert"` de l'écran est sous le modal. */
+  error?: Failure
   onAdd: (names: Names, options: { activate: boolean }) => Promise<boolean>
 }>
 
@@ -36,6 +37,7 @@ export function AddStudentDialog({ ui, session, disabled, error, onAdd }: AddStu
   const lastNameId = useId()
   const firstNameId = useId()
   const [open, setOpen] = useState(false)
+  const freshError = useFreshError(error, open)
   const [lastName, setLastName] = useState('')
   const [firstName, setFirstName] = useState('')
   // Garde synchrone : les deux boutons n'envoient qu'un appel pendant l'écriture, en plus du
@@ -52,6 +54,8 @@ export function AddStudentDialog({ ui, session, disabled, error, onAdd }: AddStu
   }
 
   function handleOpenChange(next: boolean) {
+    // Échap et clic extérieur sont ignorés pendant l'écriture : l'erreur doit rester visible.
+    if (!next && submitting.current) return
     setOpen(next)
     if (!next) reset()
   }
@@ -110,9 +114,9 @@ export function AddStudentDialog({ ui, session, disabled, error, onAdd }: AddStu
               })}
             </output>
           )}
-          {error !== undefined && (
+          {freshError !== undefined && (
             <p role="alert" className="text-sm text-destructive">
-              {error}
+              {freshError.message}
             </p>
           )}
           <DialogFooter>

@@ -277,6 +277,8 @@ export function SessionToolbar({ ui, disabled, onExport }: SessionToolbarProps) 
 - État du champ dans l'enfant (`useState(initialValue)`), pas d'`useEffect` de synchronisation : base-ui démonte le contenu d'un dialogue fermé.
 - `onSave` renvoie une promesse : succès → fermeture ; échec → message `write_error` en `role="alert"`, dialogue ouvert.
 - Référence : `src/components/text-field-dialog.tsx`, `src/features/home/components/delete-dialog.tsx`.
+- Pendant l'écriture : « Annuler » désactivé, `onOpenChange` ignore la fermeture (Échap, clic extérieur) tant que `submitting`.
+- Une erreur s'affiche dans la surface où elle est survenue (D82) : une action dont le dialogue affiche son propre `write_error` passe `{ ownError: true }` à `run` (le `error` du hook reste `null`) ; une surface qui lit l'`error` du hook (tiroir, dialogue d'ajout) le filtre par `useFreshError(error, open)`, qui ne garde que les erreurs survenues ouverte. Le hook reçoit un objet `Failure` par occurrence, mémoïsé sur `actions.error` seul.
 
 ## Module lourd chargé à la demande — squelette
 

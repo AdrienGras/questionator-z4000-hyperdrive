@@ -9,6 +9,7 @@ import { putSession, updateSession } from '@/lib/db/sessions'
 import { categoryButton } from '@/testing/passage-assertions'
 import { renderAt } from '@/testing/render-at'
 import { openSidePanel } from '@/testing/side-panel-assertions'
+import { panel, REVEALED } from '@/testing/screen-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
 
@@ -26,7 +27,6 @@ const category: NormalizedCategory = {
   })),
 }
 
-const REVEALED = '2026-09-25T10:00:00.000Z'
 const ABSENT_BODY = 'Décochez « Absent » dans le panneau pour le faire passer.'
 /** Au-delà du délai de sauvegarde différée (500 ms). */
 const AFTER_DELAY = { timeout: 2000 }
@@ -45,10 +45,6 @@ async function mount(students: Student[], questionsPerStudent = 3) {
   const rendered = renderAt('/session/session-1')
   await openSidePanel('Étudiant')
   return rendered
-}
-
-function panel(): HTMLElement {
-  return screen.getByRole('dialog', { name: 'Panneau latéral' })
 }
 
 /**
@@ -300,10 +296,24 @@ test('échec d’écriture sur « Déclarer absent » : dialogue ouvert avec le 
   fireEvent.click(within(dialog).getByRole('button', { name: 'Déclarer absent' }))
 
   expect(await within(dialog).findByRole('alert')).toHaveTextContent("L'enregistrement a échoué")
+  // Une seule alerte : celle du dialogue, pas celle de la page (D82).
+  expect(screen.getAllByRole('alert', { hidden: true })).toHaveLength(1)
   expect(screen.getByRole('alertdialog')).toBeInTheDocument()
   const student = await storedStudent()
   expect(student.absent).toBe(false)
   expect(student.attempts).toHaveLength(2)
+})
+
+test('décocher absent sans dialogue, écriture en échec : l’alerte de page reste affichée', async () => {
+  await mount([makeStudent([], { absent: true })])
+  await screen.findByText(ABSENT_BODY)
+  vi.spyOn(db.sessions, 'put').mockRejectedValueOnce(new Error('disque plein'))
+
+  fireEvent.click(absentBox())
+
+  expect(await screen.findByRole('alert')).toHaveTextContent('Rechargez la page')
+  expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+  expect((await storedStudent()).absent).toBe(true)
 })
 
 test('dialogue d’absence ouvert pour Alice, Bob devient actif ailleurs : c’est Alice qui est absente', async () => {

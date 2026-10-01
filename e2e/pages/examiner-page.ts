@@ -19,6 +19,12 @@ export class ExaminerPage {
   /** Un bloc de code resté en texte brut (`data-highlighted="false"`). */
   readonly plainCode: Locator
 
+  /** Champ « Commentaire » de l'onglet « Étudiant » du tiroir (à ouvrir avec `openPanel`). */
+  readonly commentField: Locator
+
+  /** Statut « Enregistré » du commentaire dans le tiroir. */
+  readonly commentSaved: Locator
+
   private readonly page: Page
 
   /** Exclut l'aperçu de la vue projetée (F22), qui duplique l'énoncé et ses blocs de code. */
@@ -35,6 +41,11 @@ export class ExaminerPage {
       .locator(`pre${ExaminerPage.OUTSIDE_PREVIEW} span[style*="--shiki-"]`)
       .first()
     this.banner = page.getByRole('status').filter({ hasText: 'La vue projetée montre' })
+    this.commentField = page.getByRole('textbox', { name: 'Commentaire' })
+    this.commentSaved = page
+      .getByRole('dialog', { name: 'Panneau latéral' })
+      .getByText('Enregistré', { exact: true })
+      .first()
   }
 
   /** Tire une question dans la catégorie (`Normal` pour le bouton « Normal max 2 »). */
@@ -70,6 +81,12 @@ export class ExaminerPage {
       .waitFor()
     await this.page.getByRole('button', { name: 'Fermer le panneau' }).click()
     await this.page.getByRole('dialog', { name: 'Panneau latéral' }).waitFor({ state: 'hidden' })
+  }
+
+  /** Saisit le commentaire (onglet « Étudiant ») sans quitter le champ ni attendre l'enregistrement. */
+  async typeCommentWithoutSaving(text: string): Promise<void> {
+    await this.openPanel('Étudiant')
+    await this.page.getByRole('textbox', { name: 'Commentaire' }).fill(text)
   }
 
   /** Ouvre la vue projetée dans une nouvelle fenêtre et renvoie son écran. */

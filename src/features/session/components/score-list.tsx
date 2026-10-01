@@ -44,7 +44,7 @@ export function ScoreList({
       <ScoreRow label={text('final_capped', {})}>{fmtRaw(scores.capped)}</ScoreRow>
       <ScoreRow label={text('final_converted', {})}>{fmtFinal(scores.converted)}</ScoreRow>
       <ScoreRow label={text('final_adjustment', {})}>
-        {student.adjustment === undefined
+        {student.adjustment === undefined || student.adjustment.value === 0
           ? text('final_no_adjustment', {})
           : signedAdjustment(scores.adjustment, config, ui)}
         {student.adjustment?.reason !== undefined && (

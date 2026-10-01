@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useId, useRef, useState, type FormEvent, type RefObject } from 'react'
 import { IconMinus, IconPlus } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -55,6 +55,8 @@ export function AdjustmentDialog({
   // Garde synchrone : un double-clic ne part jamais deux fois en base (Review Focus 1), et le
   // second appel, ignoré par la garde du hook, n'est jamais pris pour un échec.
   const inFlight = useRef(false)
+  // Focus initial sur le champ de valeur (sinon Base UI prend le premier tabbable, le bouton « − »).
+  const valueRef = useRef<HTMLInputElement>(null)
 
   // Chaque ouverture repart sans erreur ni écriture en cours (motif « état précédent » de React).
   if (open !== wasOpen) {
@@ -108,12 +110,13 @@ export function AdjustmentDialog({
         if (!next) cancel()
       }}
     >
-      <DialogContent showCloseButton={false}>
+      <DialogContent showCloseButton={false} initialFocus={valueRef}>
         <DialogHeader>
           <DialogTitle>{text('adjust_title', {})}</DialogTitle>
         </DialogHeader>
         {/* Monté à chaque ouverture : la saisie repart de l'ajustement enregistré. */}
         <AdjustmentForm
+          valueRef={valueRef}
           ui={ui}
           config={config}
           student={student}
@@ -128,6 +131,7 @@ export function AdjustmentDialog({
 }
 
 type AdjustmentFormProps = Readonly<{
+  valueRef: RefObject<HTMLInputElement | null>
   ui: Ui
   config: NormalizedConfig
   student: Student
@@ -145,6 +149,7 @@ function formatInput(value: number, locale: string): string {
 }
 
 function AdjustmentForm({
+  valueRef,
   ui,
   config,
   student,
@@ -165,10 +170,13 @@ function AdjustmentForm({
   const fmtFinal = (milli: number) => formatScore(asMilli(milli), 'final', config, locale)
   const fmtRaw = (milli: number) => formatScore(asMilli(milli), 'raw', config, locale)
   const scale = toMilli(config.scoring.finalScale)
+  const atMin = value !== null && toMilli(value) <= 0 - scale
+  const atMax = value !== null && toMilli(value) >= scale
 
   function step(direction: 1 | -1) {
     const base = value === null ? 0 : toMilli(value)
-    setInput(formatInput(fromMilli(asMilli(base + direction * stepMilli(config))), locale))
+    const next = Math.min(scale, Math.max(0 - scale, base + direction * stepMilli(config)))
+    setInput(formatInput(fromMilli(asMilli(next)), locale))
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -204,18 +212,20 @@ function AdjustmentForm({
             variant="outline"
             size="icon"
             aria-label={text('adjust_decrement', {})}
-            disabled={pending}
+            disabled={pending || atMin}
             onClick={() => step(-1)}
           >
             <IconMinus />
           </Button>
           <Input
             id={fieldId}
+            ref={valueRef}
             inputMode="decimal"
             autoComplete="off"
             value={input}
             aria-invalid={value === null}
             aria-describedby={value === null ? errorId : undefined}
+            onFocus={(event) => event.currentTarget.select()}
             onChange={(event) => setInput(event.target.value)}
           />
           <Button
@@ -223,7 +233,7 @@ function AdjustmentForm({
             variant="outline"
             size="icon"
             aria-label={text('adjust_increment', {})}
-            disabled={pending}
+            disabled={pending || atMax}
             onClick={() => step(1)}
           >
             <IconPlus />

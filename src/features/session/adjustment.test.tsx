@@ -1,33 +1,14 @@
 import 'fake-indexeddb/auto'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import type { NormalizedCategory } from '@/domain/config/normalize'
 import type { Student } from '@/domain/session/types'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
 import { categoryButton } from '@/testing/passage-assertions'
 import { renderAt } from '@/testing/render-at'
+import { REVEALED, screenCategory } from '@/testing/screen-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
-
-/**
- * Catégorie `a` à 3 questions (la fixture par défaut n'en a qu'une) ; le barème contient les notes
- * brutes des tests (13,5 et 20) : une session stockée hors barème est lue comme endommagée (F31).
- */
-const category: NormalizedCategory = {
-  id: 'a',
-  label: 'A',
-  scale: [0, 1, 2, 3, 13.5, 20],
-  order: 1,
-  questions: ['a-1', 'a-2', 'a-3'].map((id) => ({
-    id,
-    title: `Titre ${id}`,
-    tags: [],
-    prompt: id,
-  })),
-}
-
-const REVEALED = '2026-09-25T10:00:00.000Z'
 
 function config(step = 0.5) {
   return {
@@ -37,7 +18,7 @@ function config(step = 0.5) {
       finalScale: 20,
       rounding: { mode: 'nearest', decimals: 2, step },
     }),
-    categories: [category],
+    categories: [screenCategory],
   }
 }
 
@@ -187,6 +168,19 @@ test('mode « ajuster », « Enregistrer » : ajustement sans toucher à la rév
   expect(student.finalRevealedAt).toBe(REVEALED)
 })
 
+test('ouverture : le contenu du champ est sélectionné, taper remplace la valeur', async () => {
+  await mount(makeStudent([13.5]))
+  const dialog = await findDialog()
+  const input = field(dialog)
+
+  // jsdom ne simule pas la frappe sur une sélection : on prouve la sélection elle-même
+  // (tout le contenu, donc une frappe réelle remplace la valeur au lieu de s'y ajouter).
+  await waitFor(() => expect(input).toHaveFocus())
+  expect(input.value).toBe('0')
+  expect(input.selectionStart).toBe(0)
+  expect(input.selectionEnd).toBe(input.value.length)
+})
+
 test('calcul en direct', async () => {
   await mount(makeStudent([13.5]))
   const dialog = await findDialog()
@@ -310,6 +304,8 @@ test('écriture en échec : popup ouverte avec le message d’erreur', async () 
   fireEvent.click(button(dialog, 'Enregistrer'))
 
   expect(await within(dialog).findByRole('alert')).toHaveTextContent("L'enregistrement a échoué")
+  // Une seule alerte : celle du dialogue, pas celle de la page.
+  expect(screen.getAllByRole('alert', { hidden: true })).toHaveLength(1)
   expect(screen.getByRole('dialog', { name: 'Ajuster la note' })).toBeInTheDocument()
   expect((await stored()).student.finalRevealedAt).toBeUndefined()
 })
@@ -327,4 +323,38 @@ test('réinitialiser un étudiant révélé puis le refaire passer rouvre la pop
 
   expect(await findDialog()).toBeInTheDocument()
   expect((await stored()).student.finalRevealedAt).toBeUndefined()
+})
+
+test('à l’ouverture, le champ de valeur a le focus', async () => {
+  await mount(makeStudent([13.5]))
+  const dialog = await findDialog()
+
+  await waitFor(() => expect(field(dialog)).toHaveFocus())
+})
+
+test('« + » et « − » sont bornés à ± l’échelle finale', async () => {
+  await mount(makeStudent([13.5]))
+  const dialog = await findDialog()
+
+  type(dialog, '20')
+  expect(button(dialog, 'Ajouter un pas')).toBeDisabled()
+  expect(button(dialog, 'Retirer un pas')).toBeEnabled()
+
+  type(dialog, '-20')
+  expect(button(dialog, 'Retirer un pas')).toBeDisabled()
+  expect(button(dialog, 'Ajouter un pas')).toBeEnabled()
+
+  type(dialog, '19,5')
+  fireEvent.click(button(dialog, 'Ajouter un pas'))
+  expect(field(dialog).value).toBe('20')
+})
+
+test('« + » depuis une saisie invalide repart de 0', async () => {
+  await mount(makeStudent([13.5]))
+  const dialog = await findDialog()
+
+  type(dialog, 'abc')
+  fireEvent.click(button(dialog, 'Ajouter un pas'))
+
+  expect(field(dialog).value).toBe('0,5')
 })

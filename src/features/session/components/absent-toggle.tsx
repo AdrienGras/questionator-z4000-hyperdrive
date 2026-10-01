@@ -17,7 +17,11 @@ type AbsentToggleProps = Readonly<{
   ui: Ui
   student: Student
   disabled: boolean
-  onChange: (studentId: string, absent: boolean) => Promise<boolean>
+  onChange: (
+    studentId: string,
+    absent: boolean,
+    options?: { ownError?: boolean },
+  ) => Promise<boolean>
 }>
 
 /**
@@ -61,7 +65,7 @@ export function AbsentToggle({ ui, student, disabled, onChange }: AbsentTogglePr
     if (pending) return
     setPending(true)
     setFailed(false)
-    const succeeded = await onChange(target.id, true)
+    const succeeded = await onChange(target.id, true, { ownError: true })
     setPending(false)
     if (succeeded) setOpen(false)
     else setFailed(true)

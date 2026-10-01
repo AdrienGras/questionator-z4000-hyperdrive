@@ -227,7 +227,7 @@ describe('usePassageActions', () => {
       expect(student?.finalRevealedAt).toBeUndefined()
     })
 
-    test('adjust invalide renvoie false avec une PassageError adjustment_invalid', async () => {
+    test('adjust invalide renvoie false sans poser error (le dialogue affiche son propre échec)', async () => {
       const { result } = await setup()
 
       let ok: boolean | undefined
@@ -236,10 +236,7 @@ describe('usePassageActions', () => {
       })
 
       expect(ok).toBe(false)
-      const { error } = result.current
-      expect(error).toBeInstanceOf(PassageError)
-      if (!(error instanceof PassageError)) throw new Error('error devrait être une PassageError')
-      expect(error.code).toBe('adjustment_invalid')
+      expect(result.current.error).toBeNull()
       const student = (await getHealthySession('session-1'))?.students[0]
       expect(student?.adjustment).toBeUndefined()
       expect(student?.finalRevealedAt).toBeUndefined()

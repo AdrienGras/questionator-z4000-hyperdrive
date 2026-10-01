@@ -16,7 +16,7 @@ async function attempt(save: (value: string) => Promise<boolean>, value: string)
 
 /**
  * Sauvegarde différée : `schedule` repousse le délai à chaque appel, `flush` écrit tout de suite la
- * dernière valeur programmée, et le démontage la flushe (Review Focus 1). Une sauvegarde en échec
+ * dernière valeur programmée, et le démontage et `pagehide` la flushent (Review Focus 1). Une sauvegarde en échec
  * remet sa valeur en attente : le prochain `flush` (sortie du champ, démontage) la retente.
  */
 export function useAutosave(
@@ -65,7 +65,11 @@ export function useAutosave(
 
   useEffect(() => {
     mountedRef.current = true
+    // `pagehide` : onglet fermé ou rechargé avant la fin du délai, le démontage n'a pas lieu.
+    // L'écriture Dexie est asynchrone : elle part à temps, sa fin n'est pas garantie.
+    globalThis.addEventListener('pagehide', flush)
     return () => {
+      globalThis.removeEventListener('pagehide', flush)
       flush()
       mountedRef.current = false
     }
