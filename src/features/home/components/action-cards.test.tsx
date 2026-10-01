@@ -27,7 +27,7 @@ function renderCards(props: Partial<Parameters<typeof ActionCards>[0]> = {}) {
 }
 
 describe('ActionCards', () => {
-  it('rend une section « Actions » avec deux cartes titrées', async () => {
+  it('rend une section « Actions » avec trois cartes titrées', async () => {
     renderCards()
     const region = await screen.findByRole('region', { name: 'Actions' })
     expect(region).toBeInTheDocument()
@@ -35,6 +35,15 @@ describe('ActionCards', () => {
     expect(
       screen.getByRole('heading', { level: 3, name: 'Restaurer une session' }),
     ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 3, name: 'Éditer une config' })).toBeInTheDocument()
+  })
+
+  it('éditeur : texte et lien vers /editor, même sans stockage', async () => {
+    renderCards({ storageAvailable: false })
+    expect(await screen.findByText(ui.text('home_editor_body', {}))).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: "Ouvrir l'éditeur" }).getAttribute('href')).toMatch(
+      /\/editor$/,
+    )
   })
 
   it('création : texte, trois liens, lien vers /new', async () => {

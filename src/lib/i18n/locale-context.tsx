@@ -87,6 +87,24 @@ export function LocaleProvider({
   return <OwnerLocaleProvider locale={locale}>{children}</OwnerLocaleProvider>
 }
 
+const noDeclare: LocaleContextValue['declare'] = () => () => {}
+
+/**
+ * Portée de langue non déclarante : ses enfants lisent `locale`, mais `<html lang>` n'est pas
+ * touché (un aperçu dans une autre langue que la page). Le `declare` du parent est transmis tel
+ * quel, pour qu'un `LocaleProvider` descendant se déclare toujours au propriétaire. Poser `lang`
+ * sur le conteneur local reste à la charge de l'appelant.
+ */
+export function LocaleScope({
+  locale,
+  children,
+}: Readonly<{ locale: Locale; children: ReactNode }>) {
+  const parent = useContext(LocaleContext)
+  const declare = parent?.declare ?? noDeclare
+  const value = useMemo<LocaleContextValue>(() => ({ locale, declare }), [locale, declare])
+  return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>
+}
+
 /** Langue du provider le plus proche ; hors provider, celle du navigateur (D51). */
 export function useLocale(): Locale {
   const context = useContext(LocaleContext)

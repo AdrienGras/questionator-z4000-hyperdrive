@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { takeConfigForCreation } from '@/lib/config-handoff'
 import { useDbStatus } from '@/lib/db/hooks'
 import type { UiMessageParams } from '@/lib/i18n/ui-messages'
 import { useUi } from '@/lib/i18n/use-ui'
@@ -54,9 +55,18 @@ export function CreateSessionPage() {
   const previewTitleId = useId()
   // Si l'utilisateur a quitté l'écran pendant l'écriture, on ne le ramène pas de force.
   const mounted = useRef(false)
+  // Dernière version du setter : l'effet de montage ne doit pas se rejouer à chaque rendu.
+  const setConfigText = useRef(form.setConfigText)
+
+  useEffect(() => {
+    setConfigText.current = form.setConfigText
+  })
 
   useEffect(() => {
     mounted.current = true
+    // Config passée depuis l'éditeur (F26) : traitée comme un fichier déposé.
+    const handoff = takeConfigForCreation()
+    if (handoff !== undefined) void setConfigText.current(handoff.text, handoff.fileName)
     return () => {
       mounted.current = false
     }

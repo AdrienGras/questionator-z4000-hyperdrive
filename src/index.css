@@ -132,6 +132,25 @@
   }
 }
 
+/* Coloration de l'éditeur JSON (F26), portée par l'éditeur lui-même (`.cm-editor`) : hors des blocs
+   `:root` / `.dark` du thème, que `THEME_TOKENS` décrit ; ces variables ne sont pas personnalisables
+   par la config. */
+.cm-editor {
+  --cm-string: #0a3069;
+  --cm-number: #0550ae;
+  --cm-keyword: #cf222e;
+  --cm-property: #116329;
+  --cm-punctuation: #57606a;
+}
+
+.dark .cm-editor {
+  --cm-string: #a5d6ff;
+  --cm-number: #79c0ff;
+  --cm-keyword: #ff7b72;
+  --cm-property: #7ee787;
+  --cm-punctuation: #8b949e;
+}
+
 /* Blocs Shiki (F08, D27) : chaque token porte --shiki-light et --shiki-dark (defaultColor: false),
    ces règles choisissent la variable selon .dark, sans re-rendu React. Hors @layer : elles doivent
    l'emporter sur les couleurs de pre/code de @tailwindcss/typography. Le fond du thème Shiki n'est

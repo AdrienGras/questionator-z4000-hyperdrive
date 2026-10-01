@@ -27,6 +27,8 @@ export type CreateForm = {
   canSubmit: boolean
   setStudentsFile: (file: File) => Promise<void>
   setConfigFile: (file: File) => Promise<void>
+  /** Même chemin que `setConfigFile` pour un texte déjà en main (passage depuis l'éditeur). */
+  setConfigText: (text: string, fileName: string) => Promise<void>
   /** Saisie utilisateur : arrête le préremplissage du nom. */
   setName: (value: string) => void
   setExaminer: (value: string) => void
@@ -120,6 +122,16 @@ export function useCreateForm(locale: Locale, dbStatus: DbStatus): CreateForm {
       setConfig({ kind: 'read-error', fileName })
       return
     }
+    await validateText(text, fileName, seq)
+  }
+
+  async function setConfigText(text: string, fileName: string): Promise<void> {
+    const seq = ++configSeq.current
+    setConfig({ kind: 'reading', fileName })
+    await validateText(text, fileName, seq)
+  }
+
+  async function validateText(text: string, fileName: string, seq: number): Promise<void> {
     let validateConfig: Awaited<ReturnType<typeof loadValidator>>
     try {
       validateConfig = await loadValidator()
@@ -175,6 +187,7 @@ export function useCreateForm(locale: Locale, dbStatus: DbStatus): CreateForm {
     canSubmit,
     setStudentsFile,
     setConfigFile,
+    setConfigText,
     setName: editName,
     setExaminer,
     submit,

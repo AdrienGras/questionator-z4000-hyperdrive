@@ -70,6 +70,13 @@ export default defineConfig({
               name: 'xlsx',
               test: /node_modules[\\/](?:\.pnpm[\\/][^\\/]+[\\/]node_modules[\\/])?(?:write-excel-file|fflate)[\\/]/,
             },
+            // Éditeur JSON (F26) : CodeMirror et ses dépendances Lezer, chargés à la demande avec
+            // l'éditeur. Même raison que `recharts` : sans groupe nommé, Rolldown l'inline dans le
+            // chunk appelant et `check:bundle` ne le voit plus.
+            {
+              name: 'codemirror',
+              test: /node_modules[\\/](?:\.pnpm[\\/][^\\/]+[\\/]node_modules[\\/])?(?:@codemirror|@lezer|style-mod|w3c-keyname|crelt|@marijn)[\\/]/,
+            },
           ],
         },
       },

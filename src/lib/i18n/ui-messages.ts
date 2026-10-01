@@ -17,6 +17,9 @@ export type UiMessageParams = {
   home_config_schema_link: NoParams
   home_import_title: NoParams
   home_import_body: NoParams
+  home_editor_title: NoParams
+  home_editor_body: NoParams
+  home_editor_open: NoParams
   persistence_warning_label: NoParams
   persistence_warning: NoParams
   db_outdated: NoParams
@@ -213,6 +216,21 @@ export type UiMessageParams = {
   export_button: NoParams
   export_busy: NoParams
   export_error: NoParams
+  editor_title: NoParams
+  editor_label: NoParams
+  editor_source_title: NoParams
+  editor_preview_title: NoParams
+  editor_load_file: NoParams
+  editor_reset_example: NoParams
+  editor_download: NoParams
+  editor_create_session: NoParams
+  editor_issues_none: NoParams
+  editor_issues_count: { errors: number; warnings: number }
+  editor_preview_stale: NoParams
+  editor_preview_empty: NoParams
+  editor_expected_answer: NoParams
+  editor_final_screen: NoParams
+  editor_validator_error: NoParams
   stats_back: NoParams
   stats_error: NoParams
   stats_headcount: NoParams
@@ -313,6 +331,10 @@ const fr: Dictionary<UiMessageParams> = {
   home_import_title: () => 'Restaurer une session',
   home_import_body: () =>
     "Restaurez une session à partir d'un fichier .json créé par « Exporter un backup ». Vous pouvez aussi déposer le fichier n'importe où sur la page.",
+  home_editor_title: () => 'Éditer une config',
+  home_editor_body: () =>
+    "Écrivez ou corrigez un fichier de configuration : les erreurs sont signalées en direct et les questions affichées telles qu'elles seront projetées.",
+  home_editor_open: () => "Ouvrir l'éditeur",
   persistence_warning_label: () => 'Stockage non garanti',
   persistence_warning: () =>
     "Le navigateur n'a pas garanti la conservation des données : il peut effacer vos sessions s'il manque d'espace. Exportez régulièrement un backup.",
@@ -508,6 +530,22 @@ const fr: Dictionary<UiMessageParams> = {
   export_button: () => 'Exporter en Excel',
   export_busy: () => 'Export en cours…',
   export_error: () => "L'export a échoué. Réessayez.",
+  editor_title: () => 'Éditeur de config',
+  editor_label: () => 'Configuration JSON',
+  editor_source_title: () => 'Configuration',
+  editor_preview_title: () => 'Aperçu',
+  editor_load_file: () => 'Charger un fichier',
+  editor_reset_example: () => "Repartir de l'exemple",
+  editor_download: () => 'Télécharger',
+  editor_create_session: () => 'Créer une session avec cette config',
+  editor_issues_none: () => 'Aucune erreur',
+  editor_issues_count: ({ errors, warnings }) =>
+    `${errors} ${plural(errors, 'erreur', 'erreurs')}, ${warnings} ${plural(warnings, 'avertissement', 'avertissements')}`,
+  editor_preview_stale: () => 'Aperçu périmé : la config contient des erreurs.',
+  editor_preview_empty: () => "L'aperçu apparaîtra dès que la config sera valide.",
+  editor_expected_answer: () => 'Réponse attendue',
+  editor_final_screen: () => 'Écran final',
+  editor_validator_error: () => "Le validateur n'a pas pu être chargé. Rechargez la page.",
   stats_back: () => 'Retour au passage',
   stats_error: () => "Les statistiques n'ont pas pu être chargées.",
   stats_headcount: () => 'Effectifs',
@@ -573,6 +611,10 @@ const en: Dictionary<UiMessageParams> = {
   home_import_title: () => 'Restore a session',
   home_import_body: () =>
     'Restore a session from a .json file made with “Export a backup”. You can also drop the file anywhere on the page.',
+  home_editor_title: () => 'Edit a config',
+  home_editor_body: () =>
+    'Write or fix a configuration file: errors are flagged as you type and questions are shown as they will be projected.',
+  home_editor_open: () => 'Open the editor',
   persistence_warning_label: () => 'Storage not guaranteed',
   persistence_warning: () =>
     'The browser did not guarantee data retention: it may erase your sessions when space runs low. Export a backup regularly.',
@@ -763,6 +805,22 @@ const en: Dictionary<UiMessageParams> = {
   export_button: () => 'Export to Excel',
   export_busy: () => 'Exporting…',
   export_error: () => 'Export failed. Try again.',
+  editor_title: () => 'Config editor',
+  editor_label: () => 'JSON configuration',
+  editor_source_title: () => 'Configuration',
+  editor_preview_title: () => 'Preview',
+  editor_load_file: () => 'Load a file',
+  editor_reset_example: () => 'Start from the example',
+  editor_download: () => 'Download',
+  editor_create_session: () => 'Create a session with this config',
+  editor_issues_none: () => 'No errors',
+  editor_issues_count: ({ errors, warnings }) =>
+    `${errors} ${pluralEn(errors, 'error', 'errors')}, ${warnings} ${pluralEn(warnings, 'warning', 'warnings')}`,
+  editor_preview_stale: () => 'Preview out of date: the config contains errors.',
+  editor_preview_empty: () => 'The preview will appear once the config is valid.',
+  editor_expected_answer: () => 'Expected answer',
+  editor_final_screen: () => 'Final screen',
+  editor_validator_error: () => 'The validator could not be loaded. Reload the page.',
   stats_back: () => 'Back to the exam',
   stats_error: () => 'The statistics could not be loaded.',
   stats_headcount: () => 'Headcount',

@@ -536,3 +536,27 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : l'outil MCP gère mal l'événement de téléchargement (blob `a[download]` créé par `lib/download` / write-excel-file). Le test e2e Playwright du dépôt (`waitForEvent('download')`) n'a pas ce problème.
 **Workaround** : vérifier un export par les tests unitaires, par l'e2e (`e2e/export.spec.ts`), ou à la main. Dans le MCP, se limiter aux vérifications sans téléchargement (réseau, rendu).
 **Référence** : `src/lib/download.ts`, `e2e/export.spec.ts`.
+
+## CodeMirror ne rend que les lignes visibles (2026-10-01)
+
+**Découvert** : e2e de l'éditeur de config (F26).
+**Symptôme** : après avoir remplacé tout le texte (Ctrl+A puis saisie), un `.cm-lintRange-error` attendu près du début du document est introuvable dans le DOM, alors que l'issue est bien dans la liste.
+**Cause** : CodeMirror virtualise le rendu : seules les lignes proches de la zone visible existent dans le DOM. Après un remplacement, la vue est en fin de document.
+**Workaround** : amener la ligne à l'écran avant d'asserter (clic sur l'issue, qui appelle `reveal` et fait défiler), ou asserter sur l'état de l'éditeur plutôt que sur le DOM. Même chose pour la ligne active et les numéros de ligne.
+**Référence** : `e2e/config-editor.spec.ts`, `src/features/config-editor/components/json-editor.tsx`.
+
+## Un fichier déposé sur CodeMirror est inséré par l'éditeur lui-même (2026-10-01)
+
+**Découvert** : revue de la tâche 7 de F26.
+**Symptôme** : déposer un fichier `.json` sur le texte de l'éditeur pouvait dupliquer le contenu : CodeMirror insère le texte du fichier au point de dépôt, puis le gestionnaire `onDrop` de la page remplace le document.
+**Cause** : le gestionnaire `drop` natif de `@codemirror/view` lit le fichier avec `FileReader` et n'appelle que `preventDefault()` ; l'événement remonte ensuite jusqu'à React.
+**Workaround** : `Prec.highest(EditorView.domEventHandlers({ drop: (e) => (e.dataTransfer?.files.length ?? 0) > 0 }))` dans `JsonEditor` : renvoyer `true` court-circuite l'insertion de CodeMirror sans arrêter la propagation vers React.
+**Référence** : `src/features/config-editor/components/json-editor.tsx`.
+
+## Un `LocaleProvider` imbriqué change `<html lang>` pour toute la page (2026-10-01)
+
+**Découvert** : revue finale de F26 (aperçu de l'éditeur dans la langue de la config).
+**Symptôme** : envelopper l'aperçu d'une config `en` dans un `LocaleProvider` sous une page `fr` traduit bien l'aperçu, mais `<html lang>` passe à `en` pour toute la page tant que l'aperçu est monté (lecteurs d'écran, césure, correcteur).
+**Cause** : un `LocaleProvider` imbriqué appelle `declare(locale)` auprès du provider racine, qui écrit sur `<html>` la dernière locale déclarée. C'est voulu pour une vue de session qui prend toute la page, pas pour un fragment.
+**Workaround** : `LocaleScope` (non déclarant) fixe la langue des descendants sans appeler `declare`, et l'appelant pose `lang` sur le conteneur local. Garder l'habillage dans la langue de l'interface (`ui` reçu en prop, `lang={ui.locale}` sur les intitulés).
+**Référence** : `src/lib/i18n/locale-context.tsx`, `src/features/config-editor/components/config-preview.tsx`.

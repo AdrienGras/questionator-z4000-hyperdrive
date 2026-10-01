@@ -1198,3 +1198,19 @@ autre encodage 8 bits.
 **Pourquoi** : un fond unique supprime le saut quel que soit l'état de la coloration, et suit le thème de la config (tokens shadcn) au lieu de couleurs codées en dur. La bordure détache le bloc de la page dans les deux modes. Vérifié à l'écran, vue examinateur et vue projetée, clair et sombre : les couleurs de github-light et github-dark restent lisibles sur `--muted`, y compris sur le `--muted` violet du thème d'exemple.
 
 **Reporté dans** : `docs/CONVENTIONS.md` § « Markdown et bloc de code » ; `docs/BACKLOG.md` (deux items → #58). Impacte F08, F09, F14, F18.
+
+## D80 — F26 : éditeur de config (CodeMirror sur route dédiée, issues localisées, aperçu au thème de la config) (2026-10-01)
+
+**Question** : pour voir le rendu de ses questions, l'auteur d'une config devait créer une session et tirer les questions une à une ; les erreurs n'apparaissaient qu'à la création, par leur chemin. Comment offrir un éditeur avec validation en direct et aperçu, sans alourdir le reste de l'application ni importer entre features ?
+
+**Décision** :
+- Route `#/editor`, feature `features/config-editor/`, ouverte par une troisième carte d'action de l'accueil. CodeMirror 6 sans wrapper React (`@codemirror/*`, `@lezer/highlight`), groupe de chunk `codemirror`, interdit au bundle initial (`check:bundle`, cible avec `importer` = route de l'éditeur).
+- Couleurs de l'éditeur : thème et `HighlightStyle` sur des variables `--cm-*` (`index.css`, clair et sombre) ; ligne active marquée.
+- Validation 300 ms après la frappe (`validateConfig` chargé à la demande) ; la dernière config valide est gardée pour l'aperçu. Position d'une issue (`locateIssue`) : `json_syntax` par ligne / colonne, sinon `parseTree` + `findNodeAtLocation` de `jsonc-parser` en remontant au premier nœud existant ; `unknown_key` → paire clé-valeur. Diagnostics calculés sur le texte validé et passés à `@codemirror/lint`.
+- Brouillon : `localStorage` `questionator:config-draft` (300 ms) ; départ : brouillon, sinon l'exemple importé en `?raw` (exception oxlint limitée au fichier). Charger / repartir de l'exemple : transaction annulable. Les fichiers déposés sur l'éditeur sont ignorés par CodeMirror (la page remplace le texte une seule fois).
+- Aperçu : `ThemeScope` (variables du thème de la config sur la seule colonne d'aperçu, `themeVariables` partagé avec `AppearanceProvider`) et langue de la config ; questions en cartes (`<Markdown size="projection">`, réponse en `<details>`) ; écran final par `ProjectionCanvas` (extrait de F22) sur `toProjectedView(previewSession(config))`, session factice pure de `domain/presentation/`.
+- Sorties : téléchargement du texte exact (`<slug du titre>.json`, sinon `config.json`) ; « Créer une session avec cette config » via `lib/config-handoff.ts` (`sessionStorage`, repris une fois par la création, `useCreateForm.setConfigText`).
+
+**Pourquoi** : la route dédiée garde CodeMirror (et l'exemple) hors de l'accueil et de la création ; le pré-cache de F17 couvre le hors ligne sans rien ajouter. Réutiliser le validateur et ses messages garantit qu'une erreur s'affiche à l'identique dans l'éditeur et à la création. Thème et langue limités à l'aperçu : l'éditeur reste dans l'apparence de l'application pendant qu'on tape un `theme`. Le passage par `sessionStorage` évite l'import entre features (D59) et survit au rechargement de `#/new`.
+
+**Reporté dans** : `PRODUCT.md` F05, F26 ; `docs/CONVENTIONS.md` § « Vue de session thémée » ; `docs/BACKLOG.md` ; `docs/QUIRKS.md`. Impacte F02, F06, F14, F20, F22.

@@ -115,6 +115,13 @@ afterEach(() => {
 })
 
 describe('useCreateForm', () => {
+  test('setConfigText : slot loaded avec le nom fourni, nom de session prérempli', async () => {
+    const { result } = renderForm()
+    await act(() => result.current.setConfigText(JSON.stringify(minimalConfig()), 'editeur.json'))
+    expect(result.current.config).toMatchObject({ kind: 'loaded', fileName: 'editeur.json' })
+    expect(result.current.name).not.toBe('')
+  })
+
   test('état initial : deux emplacements vides, création impossible', () => {
     const { result } = renderForm()
     expect(result.current.students).toEqual({ kind: 'empty' })

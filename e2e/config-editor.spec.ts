@@ -1,0 +1,181 @@
+import { readFile } from 'node:fs/promises'
+import { readFileSync } from 'node:fs'
+import type { Page } from '@playwright/test'
+import { z } from 'zod'
+import { examplePath, expect, test } from './fixtures.ts'
+import { HomePage } from './pages/home-page.ts'
+import { ConfigEditorPage } from './pages/config-editor-page.ts'
+
+// Sans service worker : le pré-cache (F17) téléchargerait tous les chunks et fausserait le décompte.
+test.use({ serviceWorkers: 'block' })
+
+const EXAMPLE = readFileSync(examplePath('config.example.json'), 'utf8')
+
+/** Exemple dont une portion de texte est remplacée ; échoue si la portion est introuvable. */
+function exampleWith(search: string, replacement: string): string {
+  if (!EXAMPLE.includes(search)) throw new Error(`absent de l'exemple : ${search}`)
+  return EXAMPLE.replace(search, replacement)
+}
+
+/** Numéro (base 1) de la première ligne de `text` qui contient `fragment`. */
+function lineOf(text: string, fragment: string): number {
+  const index = text.split('\n').findIndex((line) => line.includes(fragment))
+  if (index === -1) throw new Error(`ligne introuvable : ${fragment}`)
+  return index + 1
+}
+
+/** Nombre de questions de l'exemple, toutes catégories confondues. */
+function exampleQuestionCount(): number {
+  const config = z
+    .looseObject({ categories: z.array(z.looseObject({ questions: z.array(z.unknown()) })) })
+    .parse(JSON.parse(EXAMPLE))
+  return config.categories.reduce((total, category) => total + category.questions.length, 0)
+}
+
+/** Fichier du chunk `codemirror` (groupe de `vite.config.ts`), lu dans le manifeste du build. */
+function codemirrorChunk(): string {
+  const manifest = z
+    .record(z.string(), z.object({ file: z.string(), name: z.string().optional() }))
+    .parse(JSON.parse(readFileSync('dist/.vite/manifest.json', 'utf8')))
+  const entry = Object.values(manifest).find((candidate) => candidate.name === 'codemirror')
+  if (entry === undefined) throw new Error('chunk codemirror absent du manifeste')
+  return entry.file
+}
+
+/** Fichiers JS demandés par la page (`assets/…`). */
+function trackAssetRequests(page: Page): string[] {
+  const requested: string[] = []
+  page.on('request', (request) => {
+    const match = /\/(assets\/[^/?#]+\.js)/.exec(request.url())
+    if (match?.[1] !== undefined) requested.push(match[1])
+  })
+  return requested
+}
+
+/** Doublon : la deuxième question de « Facile » reprend l'identifiant de la première. */
+const DUPLICATE = exampleWith('"id": "facile-002"', '"id": "facile-001"')
+const DUPLICATE_LINE = lineOf(EXAMPLE, '"id": "facile-002"')
+// Texte de `formatConfigIssue` (fr) pour `duplicate_question_id` ; vérifié aussi sur la création.
+const DUPLICATE_MESSAGE =
+  'L’identifiant de question « facile-001 » est déjà utilisé (categories[0].questions[0].id) : il doit être unique dans toute la configuration.'
+
+test("l'accueil ne charge pas CodeMirror ; la carte ouvre l'éditeur sur l'exemple", async ({
+  page,
+}) => {
+  const requested = trackAssetRequests(page)
+  const home = new HomePage(page)
+  await home.goto()
+  await page.waitForLoadState('networkidle')
+  const chunk = codemirrorChunk()
+  expect(requested.length).toBeGreaterThan(0)
+  expect(requested).not.toContain(chunk)
+
+  const editor = await home.openEditor()
+  await expect(editor.editor).toContainText('"title": "Oral PHP"')
+  await expect(editor.previewQuestions).toHaveCount(exampleQuestionCount())
+  await expect(editor.noIssues).toBeVisible()
+  expect(requested).toContain(chunk)
+})
+
+test('une virgule supprimée est signalée sur sa ligne', async ({ page }) => {
+  const editor = new ConfigEditorPage(page)
+  await editor.goto()
+  await editor.replaceText(exampleWith('"schemaVersion": 1,', '"schemaVersion": 1'))
+
+  // V8 situe l'erreur sur le jeton qui suit la virgule manquante : `"locale"`, ligne 4.
+  const message = 'Le fichier n’est pas un JSON valide (ligne 4, colonne 3).'
+  await expect(editor.issue(message)).toBeVisible()
+  // La saisie laisse la vue en fin de texte (CodeMirror ne rend que les lignes visibles) : le clic
+  // sur l'issue ramène la ligne 4 à l'écran.
+  await editor.selectIssue(message)
+  await expect(editor.activeLineNumber).toHaveText('4')
+  await expect(editor.errorLines).toHaveCount(1)
+  await expect(editor.errorLines).toContainText('"locale": "fr"')
+})
+
+test('un identifiant en double : message de la création, ligne soulignée, aperçu périmé puis à jour', async ({
+  page,
+}) => {
+  const editor = new ConfigEditorPage(page)
+  await editor.goto()
+  await expect(editor.previewQuestions).toHaveCount(exampleQuestionCount())
+  await editor.replaceText(DUPLICATE)
+
+  // 1. Issue listée avec le message de la création ; l'aperçu garde la dernière config valide.
+  await expect(editor.issue(DUPLICATE_MESSAGE)).toBeVisible()
+  await expect(editor.staleBanner).toBeVisible()
+  await expect(editor.preview.getByText('facile-002', { exact: true })).toBeVisible()
+  await expect(editor.createSessionButton).toBeDisabled()
+
+  // 2. Clic sur l'issue : curseur sur la ligne du doublon, qui porte le soulignement.
+  await editor.selectIssue(DUPLICATE_MESSAGE)
+  await expect(editor.activeLineNumber).toHaveText(String(DUPLICATE_LINE))
+  await expect(editor.activeLine).toContainText('"id": "facile-001"')
+  await expect(editor.errorLines).toHaveCount(1)
+  await expect(editor.activeLine.locator('.cm-lintRange-error')).toHaveText('"facile-001"')
+
+  // 3. Correction : l'aperçu n'est plus périmé et suit le nouveau texte.
+  await editor.replaceText(exampleWith('"id": "facile-002"', '"id": "facile-002-bis"'))
+  await expect(editor.staleBanner).toBeHidden()
+  await expect(editor.preview.getByText('facile-002-bis', { exact: true })).toBeVisible()
+  await expect(editor.noIssues).toBeVisible()
+})
+
+test('le message du doublon est celui de la création', async ({ page }) => {
+  const home = new HomePage(page)
+  await home.goto()
+  const create = await home.createSession()
+  await create.uploadConfigText('doublon.json', DUPLICATE)
+  await expect(page.getByText(DUPLICATE_MESSAGE)).toBeVisible()
+})
+
+test("l'aperçu rend les énoncés, replie la réponse et montre l'écran final", async ({ page }) => {
+  const editor = new ConfigEditorPage(page)
+  await editor.goto()
+  await expect(editor.previewQuestions).toHaveCount(exampleQuestionCount())
+
+  const first = editor.previewQuestions.first()
+  await expect(first).toContainText('Quelle différence entre')
+  const answer = first.getByText('compare après conversion de type')
+  await expect(answer).toBeHidden()
+  await editor.expandAnswer(0)
+  await expect(answer).toBeVisible()
+
+  await expect(editor.finalScreen).toBeVisible()
+  await expect(editor.finalScreen.getByText('Ada Lovelace')).toBeAttached()
+})
+
+test('téléchargement, brouillon au rechargement, puis création de session', async ({ page }) => {
+  const edited = exampleWith('"title": "Oral PHP"', '"title": "Oral PHP e2e"')
+  const editor = await (async () => {
+    const home = new HomePage(page)
+    await home.goto()
+    return home.openEditor()
+  })()
+  await editor.replaceText(edited)
+  // « Aucune erreur » est déjà vrai sur l'exemple : attendre le brouillon différé (300 ms), sinon
+  // le rechargement peut le précéder.
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem('questionator:config-draft')))
+    .toContain('Oral PHP e2e')
+  await expect(editor.noIssues).toBeVisible()
+
+  // 1. Le fichier téléchargé est le texte de l'éditeur, nommé d'après le titre.
+  const download = await editor.download()
+  expect(download.suggestedFilename()).toBe('oral-php-e2e.json')
+  expect(await readFile(await download.path(), 'utf8')).toBe(edited)
+
+  // 2. Rechargement : le brouillon est restitué.
+  await editor.reload()
+  await expect(editor.editor).toContainText('"title": "Oral PHP e2e"')
+
+  // 3. Création : la config arrive chargée et validée, la session se crée avec le CSV d'exemple.
+  const create = await editor.createSession()
+  await expect(page).toHaveURL(/#\/new$/)
+  await expect(create.configField).toContainText('oral-php-e2e.json')
+  await expect(create.configField).toContainText('Fichier valide')
+  await create.uploadStudents(examplePath('students.example.csv'))
+  await create.fillName('Session éditeur')
+  await create.submit()
+  await expect(page).toHaveURL(/#\/session\//)
+})

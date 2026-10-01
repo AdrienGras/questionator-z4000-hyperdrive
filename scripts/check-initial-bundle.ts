@@ -1,6 +1,6 @@
 /**
  * Vérifie que les bibliothèques lourdes (Recharts et son wrapper shadcn, F15/D70 ; xlsx, F16/D71 ;
- * catalogue et grammaires Shiki, F18)
+ * catalogue et grammaires Shiki, F18 ; CodeMirror, F26)
  * restent hors du bundle initial.
  * Lancé par `pnpm check:bundle` après `pnpm build` ; nécessite `build.manifest: true`.
  * Exécuté par Node natif (types retirés) : imports avec extension `.ts`, syntaxe effaçable.
@@ -118,6 +118,15 @@ export const SHIKI_IMPORTER = 'src/domain/config/validate.ts'
 export const SHIKI_FORBIDDEN =
   /(?:^_langs[.-])|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@shikijs\/langs\/)|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?shiki\/dist\/langs)/
 
+/**
+ * CodeMirror (F26) : `@codemirror/*` et `@lezer/*`, importés par `JsonEditor` seul, que la route
+ * `/editor` charge à la demande (autoCodeSplitting TanStack).
+ */
+export const CODEMIRROR_CHUNK = /^_codemirror[.-]/
+export const CODEMIRROR_IMPORTER = 'src/routes/editor.tsx?tsr-split=component'
+export const CODEMIRROR_FORBIDDEN =
+  /(?:^_codemirror[.-])|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@(?:codemirror|lezer)\/)/
+
 export const BUNDLE_TARGETS: BundleTarget[] = [
   {
     name: 'recharts',
@@ -133,6 +142,12 @@ export const BUNDLE_TARGETS: BundleTarget[] = [
     forbidden: SHIKI_FORBIDDEN,
     vacuityHint:
       ' (cause probable : un import statique de `shiki/langs` inline le catalogue dans l’entrée)',
+  },
+  {
+    name: 'codemirror',
+    chunk: CODEMIRROR_CHUNK,
+    importer: CODEMIRROR_IMPORTER,
+    forbidden: CODEMIRROR_FORBIDDEN,
   },
 ]
 

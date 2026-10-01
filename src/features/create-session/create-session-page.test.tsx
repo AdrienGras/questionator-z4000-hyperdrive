@@ -7,6 +7,7 @@ import { validateConfig } from '@/domain/config/validate'
 import { db, type DbStatus } from '@/lib/db/db'
 import { minimalConfig } from '@/testing/config-fixtures'
 import { expectColorModeToggleLast } from '@/testing/page-shell-assertions'
+import { stashConfigForCreation } from '@/lib/config-handoff'
 import { renderAt } from '@/testing/render-at'
 
 type CreateSession = typeof import('@/lib/db/sessions').createSession
@@ -76,6 +77,13 @@ afterEach(() => {
 })
 
 describe('écran de création', () => {
+  test('config déposée depuis l’éditeur : nom de fichier et aperçu, comme un dépôt', async () => {
+    stashConfigForCreation({ text: VALID_CONFIG, fileName: 'depuis-editeur.json' })
+    await renderPage()
+    expect(await screen.findByText('depuis-editeur.json')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Oral de test' })).toBeInTheDocument()
+  })
+
   test('titre, retour à l’accueil et fichiers d’exemple', async () => {
     await renderPage()
     expect(screen.getByRole('link', { name: "Retour à l'accueil" })).toHaveAttribute('href', '/')

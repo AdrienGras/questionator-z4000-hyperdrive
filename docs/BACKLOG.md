@@ -100,6 +100,13 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] e2e F18 : deux fixtures de 178 lignes presque identiques (`e2e/fixtures/languages-*.config.json`), à générer depuis une base commune.
 - [ ] Test du libellé de retour d'une note citée deux fois (suffixe `-2` de `footnoteBackLabel`, calqué sur `mdast-util-to-hast`, où `rereferenceIndex` commence à 1).
 
+## Éditeur de config
+
+- [ ] `locateIssue` : BOM en tête (colonne de `json_syntax` décalée d'un caractère en ligne 1), colonne au-delà de la ligne bornée à la fin du texte plutôt qu'à la fin de ligne ; pas de tests CRLF / BOM / index hors limites.
+- [ ] `JsonEditor` : `aria-label` figé au montage, diagnostics envoyés deux fois au montage ; tests de `reveal` et des diagnostics après montage à ajouter.
+- [ ] Aperçu : énoncé très long sans `break-words`.
+- [ ] Nom du fichier téléchargé (`configFileName`) : règle pure à sortir dans `domain/config/` avec ses tests (exam absent, titre vide).
+
 ## Statistiques
 
 - [ ] `check:bundle` ne connaît que Recharts : généraliser (liste de couples bibliothèque → route) quand une deuxième bibliothèque lourde sera confinée à une route.

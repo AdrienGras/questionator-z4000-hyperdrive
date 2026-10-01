@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, test } from 'vitest'
-import { LocaleProvider, resolveSessionLocale, useLocale } from './locale-context'
+import { LocaleProvider, LocaleScope, resolveSessionLocale, useLocale } from './locale-context'
 import { useUi } from './use-ui'
 
 function ShowLocale() {
@@ -80,6 +80,48 @@ describe('LocaleProvider', () => {
       </LocaleProvider>,
     )
     expect(screen.getByText('en en Back to home')).toBeInTheDocument()
+    expect(document.documentElement.lang).toBe('en')
+  })
+})
+
+describe('LocaleScope', () => {
+  test('change la langue des enfants sans toucher <html lang> sous un provider', () => {
+    document.documentElement.lang = ''
+    render(
+      <LocaleProvider locale="fr">
+        <LocaleScope locale="en">
+          <ShowLocale />
+        </LocaleScope>
+      </LocaleProvider>,
+    )
+    expect(screen.getByText('en en Back to home')).toBeInTheDocument()
+    expect(document.documentElement.lang).toBe('fr')
+  })
+
+  test('hors provider : ne pose pas lang sur <html>', () => {
+    document.documentElement.lang = 'fr'
+    const { unmount } = render(
+      <LocaleScope locale="en">
+        <ShowLocale />
+      </LocaleScope>,
+    )
+    expect(screen.getByText('en en Back to home')).toBeInTheDocument()
+    expect(document.documentElement.lang).toBe('fr')
+    unmount()
+    expect(document.documentElement.lang).toBe('fr')
+  })
+
+  test('un provider imbriqué sous la portée se déclare toujours au propriétaire', () => {
+    document.documentElement.lang = ''
+    render(
+      <LocaleProvider locale="fr">
+        <LocaleScope locale="en">
+          <LocaleProvider locale="en">
+            <ShowLocale />
+          </LocaleProvider>
+        </LocaleScope>
+      </LocaleProvider>,
+    )
     expect(document.documentElement.lang).toBe('en')
   })
 })
