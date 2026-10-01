@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { formatBackupIssue, formatIssuePath } from '@/domain/backup/messages'
 import type { DamagedSession } from '@/lib/db/damaged-session'
 import type { Ui } from '@/lib/i18n/use-ui'
+import { TEXT_LINK_CLASS } from '@/components/text-link'
 
 /**
  * La vue projetée ne reçoit jamais le contenu de la session (D69) : `damaged` y est facultatif,
@@ -34,7 +35,7 @@ export function DamagedSessionScreen(props: DamagedSessionScreenProps) {
       <Button variant="outline" onClick={() => exportBackup(damaged.raw)}>
         {text('action_export', {})}
       </Button>
-      <Link to="/" className="text-primary underline underline-offset-4">
+      <Link to="/" className={TEXT_LINK_CLASS}>
         {text('back_home', {})}
       </Link>
       <details className="w-full max-w-xl text-left text-sm">

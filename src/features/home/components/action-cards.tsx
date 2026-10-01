@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { Ui } from '@/lib/i18n/use-ui'
+import { SMALL_TEXT_LINK_CLASS } from '@/components/text-link'
 
 type ActionCardsProps = Readonly<{
   ui: Ui
@@ -11,8 +12,6 @@ type ActionCardsProps = Readonly<{
   importDisabled: boolean
   onImport: () => void
 }>
-
-const LINK_CLASS = 'text-sm text-primary underline underline-offset-4'
 
 function ActionCard({
   icon,
@@ -46,17 +45,17 @@ export function ActionCards({ ui, storageAvailable, importDisabled, onImport }: 
         <ActionCard icon={<IconPlus className="size-8" />} title={text('home_create_title', {})}>
           <p className="text-muted-foreground">{text('home_create_body', {})}</p>
           <div className="flex flex-col items-start gap-1">
-            <a href={`${base}students.example.csv`} download className={LINK_CLASS}>
+            <a href={`${base}students.example.csv`} download className={SMALL_TEXT_LINK_CLASS}>
               {text('home_students_example_link', {})}
             </a>
-            <a href={`${base}config.example.json`} download className={LINK_CLASS}>
+            <a href={`${base}config.example.json`} download className={SMALL_TEXT_LINK_CLASS}>
               {text('home_config_example_link', {})}
             </a>
             <a
               href={`${base}config.schema.json`}
               target="_blank"
               rel="noreferrer"
-              className={LINK_CLASS}
+              className={SMALL_TEXT_LINK_CLASS}
             >
               {text('home_config_schema_link', {})}
             </a>
