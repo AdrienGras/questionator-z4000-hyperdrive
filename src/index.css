@@ -134,17 +134,10 @@
 
 /* Blocs Shiki (F08, D27) : chaque token porte --shiki-light et --shiki-dark (defaultColor: false),
    ces règles choisissent la variable selon .dark, sans re-rendu React. Hors @layer : elles doivent
-   l'emporter sur les couleurs de pre/code de @tailwindcss/typography. */
-.shiki {
-  background-color: var(--shiki-light-bg);
-}
-
+   l'emporter sur les couleurs de pre/code de @tailwindcss/typography. Le fond du thème Shiki n'est
+   pas repris : bloc coloré et bloc brut partagent le fond de `.prose pre` (F24, D79). */
 .shiki span {
   color: var(--shiki-light);
-}
-
-.dark .shiki {
-  background-color: var(--shiki-dark-bg);
 }
 
 .dark .shiki span {
@@ -172,6 +165,24 @@
   --tw-prose-pre-bg: var(--muted);
   --tw-prose-th-borders: var(--border);
   --tw-prose-td-borders: var(--border);
+}
+
+/* Blocs de code (F24, D79) : même fond `--muted` avant et après coloration, bordure pour les
+   détacher de la page dans les deux modes. */
+.prose pre {
+  border: 1px solid var(--border);
+}
+
+/* Code en ligne (F24, D79) : sans les backticks de @tailwindcss/typography, sur un fond léger. */
+.prose :where(code):not(:where(pre *)) {
+  border-radius: 0.25rem;
+  background-color: var(--muted);
+  padding: 0.15em 0.35em;
+}
+
+.prose :where(code):not(:where(pre *))::before,
+.prose :where(code):not(:where(pre *))::after {
+  content: none;
 }
 
 /* Tirage projeté (F14) : les cartes se mélangent (~1,5 s) puis l'énoncé se retourne. */
