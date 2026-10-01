@@ -24,7 +24,7 @@ import { updateSession } from '@/lib/db/sessions'
 import type { Session } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { DeleteDialog } from './delete-dialog'
-import { exportSession } from '@/features/home/export-session'
+import { exportBackup } from '@/components/export/export-backup'
 import { formatDateTime } from '@/lib/format-date'
 import { sessionProgress } from '@/domain/session/progress'
 import { withExaminer } from '@/domain/session/session-edits'
@@ -73,7 +73,7 @@ export function SessionCard({ ui, session }: SessionCardProps) {
               <DropdownMenuItem onClick={() => setDialog('examiner')}>
                 {text('action_edit_examiner', {})}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => exportSession(session)}>
+              <DropdownMenuItem onClick={() => exportBackup(session)}>
                 {text('action_export', {})}
               </DropdownMenuItem>
               <DropdownMenuItem disabled={excelBusy} onClick={() => void excel.run(session)}>
@@ -137,7 +137,9 @@ export function SessionCard({ ui, session }: SessionCardProps) {
       />
       <DeleteDialog
         ui={ui}
-        session={session}
+        sessionId={session.id}
+        name={session.name}
+        backup={session}
         open={dialog === 'delete'}
         onOpenChange={openChangeFor('delete')}
       />

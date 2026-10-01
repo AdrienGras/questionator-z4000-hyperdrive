@@ -15,6 +15,16 @@ describe('validateConfig', () => {
     expect(result.config.categories[0]?.questions[0]?.title).toBe('Question A1')
   })
 
+  test('unknown_code_language seulement si `isKnownLanguage` est injecté', () => {
+    const config = minimalConfig()
+    const question = config.categories[0]!.questions[0]!
+    question.prompt = '```pyhton\nx = 1\n```'
+    const codesWith = (extra: object) =>
+      validateConfig(json(config), { ...deps, ...extra }).issues.map((issue) => issue.code)
+    expect(codesWith({ isKnownLanguage: () => false })).toEqual(['unknown_code_language'])
+    expect(codesWith({})).toEqual([])
+  })
+
   test('JSON mal formé → json_syntax seul', () => {
     const result = validateConfig('{\n "a": 1,\n }', deps)
     expect(result).toEqual({
@@ -92,6 +102,17 @@ describe('validateConfig', () => {
     const result = validateConfig(json(config), deps)
     expect(result.ok).toBe(true)
     expect(result.issues.map((issue) => issue.code)).toEqual(['unknown_icon'])
+  })
+
+  test('final_scale_off_grid bloque la config (erreur)', () => {
+    const config = minimalConfig()
+    config.scoring.finalScale = 20.25
+    config.scoring.rounding = { step: 0.5 }
+    const result = validateConfig(json(config), deps)
+    expect(result.ok).toBe(false)
+    expect(result.issues).toContainEqual(
+      expect.objectContaining({ severity: 'error', code: 'final_scale_off_grid' }),
+    )
   })
 
   test('erreur de règle → ok false avec erreurs et avertissements', () => {

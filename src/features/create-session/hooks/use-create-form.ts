@@ -41,11 +41,15 @@ const cssSupports = (property: string, value: string) => CSS.supports(property, 
 
 /**
  * Validateur chargé à la demande (~200 kB avec les noms d'icônes) : il ne doit pas alourdir le
- * chunk de l'écran de création tant qu'aucune config n'est déposée.
+ * chunk de l'écran de création tant qu'aucune config n'est déposée. Le catalogue des langages
+ * (`shiki/langs`) aussi : il active l'avertissement `unknown_code_language` (F18).
  */
-async function loadValidator() {
-  const { validateConfig } = await import('@/domain/config/validate')
-  return validateConfig
+async function loadValidator(): Promise<(text: string) => ValidationResult> {
+  const [{ validateConfig }, { isKnownLanguage }] = await Promise.all([
+    import('@/domain/config/validate'),
+    import('@/domain/config/code-languages'),
+  ])
+  return (text) => validateConfig(text, { cssSupports, isKnownLanguage })
 }
 
 async function readText(file: File): Promise<string | undefined> {
@@ -140,7 +144,7 @@ export function useCreateForm(locale: Locale, dbStatus: DbStatus): CreateForm {
       return
     }
     if (seq !== configSeq.current) return
-    const result = validateConfig(text, { cssSupports })
+    const result = validateConfig(text)
     setConfig({ kind: 'loaded', fileName, result })
     if (result.ok && !nameEdited.current) {
       setName(defaultSessionName(result.config.exam.title, new Date(), locale))

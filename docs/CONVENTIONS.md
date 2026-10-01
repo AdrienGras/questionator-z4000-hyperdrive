@@ -226,7 +226,7 @@ await updateSession(sessionId, (session) => {
 - Le mutator est immuable : il renvoie une nouvelle session, jamais l'entrée modifiée en place (les transitions de `src/domain/passage/` en sont l'exemple). Un mutator sans effet renvoie la session reçue ; `updateSession` ne l'écrit pas (pas de `put`, `updatedAt` inchangé).
 - Jamais d'`await` étranger à Dexie dans un mutator (le typage refuse un mutator `async`) : préparer les données avant l'appel.
 - Un mutator qui lève annule tout ; l'erreur remonte telle quelle à la feature, qui l'affiche.
-- Lecture : `useSession(id)` / `useSessions()` ; `undefined` = chargement, `null` = absente. Afficher un message si `useDbStatus()` vaut `'outdated'` (recharger) ou `'unavailable'` (stockage bloqué).
+- Lecture : `useSession(id)` / `useSessions()` ; `undefined` = chargement, `null` = absente, et depuis F31 (D81) le type est `StoredSession` (`Session | DamagedSession`) : **appeler `isDamaged(value)` avant tout usage** et afficher `DamagedSessionScreen` (pages) ou `DamagedSessionCard` (accueil) ; `updateSession` lève `SessionDamagedError` sur une session endommagée. Tests : semer des données qui passent `checkStoredSession` et réduire le type avec `healthy()` (`src/testing/healthy-session.ts`). Afficher un message si `useDbStatus()` vaut `'outdated'` (recharger) ou `'unavailable'` (stockage bloqué).
 - Tests de `src/lib/db/` : `import 'fake-indexeddb/auto'` en première ligne ; `createDb(nomUnique)` pour les tests de cycle de vie, `beforeEach(() => db.sessions.clear())` pour ceux du singleton ; `makeSession()` de `src/testing/session-fixtures.ts`.
 
 ## Composant d'écran traduit — squelette

@@ -260,8 +260,8 @@ Règles de validation, en plus des types :
 - **Erreur** si un token de thème ne fait pas partie de la liste blanche.
 - **Erreur** sur toute clé inconnue, à tout niveau (schéma strict ; seule `$schema` est admise en plus des champs du tableau) : une faute de frappe dans un nom de champ ne doit jamais retomber silencieusement sur la valeur par défaut.
 - **Erreur** si `schemaVersion` est supérieure à celle que connaît l'application, avec un message invitant à recharger la page pour mettre l'application à jour.
+- **Erreur** si `finalScale` n'est pas un multiple du pas d'arrondi (la note maximale serait hors grille, §5).
 - **Avertissement** si `questionsPerStudent × (plus grande valeur de barème, toutes catégories confondues)` est inférieur à `maxRawScore` (note maximale inatteignable).
-- **Avertissement** si `finalScale` n'est pas un multiple du pas d'arrondi (la note maximale sera hors grille, §5).
 
 Les erreurs sont listées avec leur chemin JSON (`categories[2].questions[5].id`) et un message lisible dans la langue de l'interface. Une config avec des erreurs bloque la création de session ; des avertissements seuls ne la bloquent pas.
 

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { BackupIssue } from '@/domain/backup/issues'
 import type { BackupParseResult } from '@/domain/backup/parse'
+import type { StoredSession } from '@/lib/db/damaged-session'
 import { getSession, putSession } from '@/lib/db/sessions'
 import type { Session } from '@/domain/session/types'
 
@@ -9,7 +10,7 @@ export type ImportState =
   | { kind: 'error'; fileName: string; issues: BackupIssue[] }
   | { kind: 'read-error'; fileName: string }
   | { kind: 'load-error'; fileName: string }
-  | { kind: 'conflict'; fileName: string; incoming: Session; existing: Session }
+  | { kind: 'conflict'; fileName: string; incoming: Session; existing: StoredSession }
   | { kind: 'write-error'; fileName: string }
 
 /** Appel paresseux : `CSS` n'est lu qu'au moment de la validation (absent de jsdom). */

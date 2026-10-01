@@ -3,7 +3,7 @@ import { ICON_NAME_SET } from './icon-names'
 import { configError, type ConfigIssue } from './issues'
 import { normalize, type NormalizedConfig } from './normalize'
 import { parseJson } from './parse-json'
-import { checkRules, type CssSupports } from './rules'
+import { checkRules, type RuleDeps } from './rules'
 import { ConfigSchema, SCHEMA_VERSION } from './schema'
 
 export type ValidationResult =
@@ -23,11 +23,14 @@ function checkFutureVersion(value: unknown): ConfigIssue | undefined {
   })
 }
 
+export type ValidateDeps = Omit<RuleDeps, 'iconNames'>
+
 /**
  * Valide le texte d'un fichier de config. Ne produit aucun texte : les issues sont traduites
- * par `formatConfigIssue`. `cssSupports` est injecté (`CSS.supports` dans le navigateur, D15).
+ * par `formatConfigIssue`. `cssSupports` est injecté (`CSS.supports` dans le navigateur, D15) ;
+ * `isKnownLanguage` aussi, facultatif : sans lui, pas d'avertissement `unknown_code_language`.
  */
-export function validateConfig(text: string, deps: { cssSupports: CssSupports }): ValidationResult {
+export function validateConfig(text: string, deps: ValidateDeps): ValidationResult {
   const parsed = parseJson(text)
   if (!parsed.ok) return { ok: false, issues: [parsed.issue] }
 
@@ -39,10 +42,7 @@ export function validateConfig(text: string, deps: { cssSupports: CssSupports })
     return { ok: false, issues: fromZodIssues(result.error.issues, parsed.value) }
   }
 
-  const issues = checkRules(result.data, {
-    cssSupports: deps.cssSupports,
-    iconNames: ICON_NAME_SET,
-  })
+  const issues = checkRules(result.data, { ...deps, iconNames: ICON_NAME_SET })
   if (issues.some((issue) => issue.severity === 'error')) return { ok: false, issues }
   return { ok: true, config: normalize(result.data), issues }
 }

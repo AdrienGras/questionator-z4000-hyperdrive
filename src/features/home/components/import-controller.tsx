@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dialog'
 import type { BackupIssue } from '@/domain/backup/issues'
 import { formatBackupIssue, formatIssuePath } from '@/domain/backup/messages'
+import { damagedName, isDamaged, type StoredSession } from '@/lib/db/damaged-session'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { formatDateTime } from '@/lib/format-date'
 import { useBackupImport, type ImportState } from '@/features/home/hooks/use-backup-import'
@@ -168,9 +169,20 @@ type ImportConflictDialogProps = Readonly<{
   onReplace: () => void
 }>
 
-/** Même `id` déjà en base : remplacer ou annuler. */
+/** Une session endommagée n'a pas de date fiable : son nom lisible seul (F31). */
+function conflictBody({ text, locale }: Ui, existing: StoredSession, imported: string): string {
+  if (isDamaged(existing))
+    return text('import_conflict_damaged_body', { existing: damagedName(existing), imported })
+  return text('import_conflict_body', {
+    existing: existing.name,
+    date: formatDateTime(existing.updatedAt, locale),
+    imported,
+  })
+}
+
+/** Même `id` déjà en base : remplacer ou annuler ; remplacer une session endommagée la répare. */
 function ImportConflictDialog({ ui, state, onCancel, onReplace }: ImportConflictDialogProps) {
-  const { text, locale } = ui
+  const { text } = ui
   const conflict = state.kind === 'conflict' ? state : null
   return (
     <AlertDialog open={conflict !== null} onOpenChange={(open) => !open && onCancel()}>
@@ -179,11 +191,7 @@ function ImportConflictDialog({ ui, state, onCancel, onReplace }: ImportConflict
           <AlertDialogHeader>
             <AlertDialogTitle>{text('import_conflict_title', {})}</AlertDialogTitle>
             <AlertDialogDescription>
-              {text('import_conflict_body', {
-                existing: conflict.existing.name,
-                date: formatDateTime(conflict.existing.updatedAt, locale),
-                imported: conflict.incoming.name,
-              })}
+              {conflictBody(ui, conflict.existing, conflict.incoming.name)}
             </AlertDialogDescription>
           </AlertDialogHeader>
         )}

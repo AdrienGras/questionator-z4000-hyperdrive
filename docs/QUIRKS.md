@@ -568,3 +568,44 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : `closeOnClick` vaut `false` par défaut sur `Menu.RadioItem` et `Menu.CheckboxItem` (choix multiples attendus), alors qu'il vaut `true` sur `Menu.Item`.
 **Workaround** : passer `closeOnClick` sur l'item quand un choix doit refermer le menu. base-ui rend alors le focus au déclencheur, au clavier comme à la souris.
 **Référence** : `src/components/color-mode-toggle.tsx`, `e2e/color-mode.spec.ts`, `node_modules/@base-ui/react/menu/radio-item/MenuRadioItem.d.ts`.
+
+## Un test qui sème une session incohérente la lit désormais comme endommagée (2026-10-01)
+
+**Découvert** : F31.
+**Symptôme** : un test qui écrivait en base une session aux données incohérentes (attempt `scored` sans `score`, question absente de la config, ajustement hors bornes) obtient un `DamagedSession` au lieu d'une `Session` ; 51 tests existants ont dû être corrigés.
+**Cause** : toute lecture IndexedDB passe par `checkStoredSession` (mêmes règles que l'import de backup).
+**Workaround** : les fixtures doivent passer `checkStoredSession` (`makeConfig` contient les questions `a-1` à `a-10`) ; `healthy()` (`src/testing/healthy-session.ts`) réduit le type `Session | DamagedSession` à `Session` dans les assertions.
+**Référence** : `src/testing/healthy-session.ts`, `src/domain/backup/stored-session.ts`.
+
+## jsdom n'a pas `CSS.supports` : le validateur de `lib/db` retombe sur « tout accepter » (2026-10-01)
+
+**Découvert** : F31.
+**Symptôme** : sous jsdom, valider une couleur de thème par `CSS.supports` lèverait un `TypeError`.
+**Cause** : jsdom n'implémente pas `CSS.supports`.
+**Workaround** : le validateur renvoyé par `loadReadStored()` (`src/lib/db/damaged-session.ts`) détecte l'absence de `CSS.supports` et injecte un `cssSupports` qui accepte tout. Un test qui veut une couleur refusée doit fournir sa propre fonction à `checkStoredSession`.
+**Référence** : `src/lib/db/damaged-session.ts`.
+
+## Écrire un enregistrement brut endommagé dans un test : `db.table('sessions').put(...)` (2026-10-01)
+
+**Découvert** : F31.
+**Symptôme** : `db.sessions.put(donnee as Session)` pour semer une session endommagée échoue à oxlint (règle type-aware sur les `as`, cf. entrée précédente sur oxlint).
+**Cause** : `db.sessions` est typée `EntityTable<Session, 'id'>` ; il faudrait un cast.
+**Workaround** : passer par `db.table('sessions').put(brut)`, non typée, qui accepte tout objet porteur d'un `id`.
+**Référence** : tests de `src/lib/db/`.
+
+## Un `import()` attendu dans une transaction Dexie la valide trop tôt : `PrematureCommitError` (2026-10-01)
+
+**Découvert** : F31 (correctif R2, validateur de `lib/db` chargé à la demande).
+**Symptôme** : `updateSession` lève `PrematureCommitError: Transaction committed too early` à la première écriture, quand le validateur n'est pas encore chargé ; les suivantes passent (module en cache), d'où un bug qui ne se voit qu'une fois par chargement de page.
+**Cause** : IndexedDB valide une transaction dès qu'aucune requête n'est en attente à la fin d'une tâche ; attendre une promesse non Dexie (`await import(...)`, `fetch`) dans le callback de `db.transaction` laisse la transaction sans requête. Dans un querier `liveQuery`, le même `await` peut faire perdre la zone Dexie : les lectures faites *après* ne sont plus observées.
+**Workaround** : charger le module **avant** `db.transaction(...)` et valider de façon synchrone dedans ; dans `getSession` / `listSessions` (queriers de `useLiveQuery`), faire toutes les lectures Dexie d'abord, attendre le validateur ensuite. Test : `sessions.test.ts`, « validateur pas encore chargé » (`vi.resetModules()` puis import neuf de `./sessions`), rouge avec l'`await` dans la transaction.
+**Référence** : `src/lib/db/sessions.ts`, `src/lib/db/damaged-session.ts` (`loadReadStored`).
+**Garde de bundle** : `e2e/languages.spec.ts`, « le validateur de lib/db reste hors de la clôture statique de l'accueil » (échoue si un import statique de `@/domain/backup/stored-session` entre dans `lib/db`).
+
+## La clé du catalogue `shiki/langs` dans le manifeste dépend du graphe d'imports (2026-10-01)
+
+**Découvert** : F31 (correctif R2).
+**Symptôme** : `check:bundle` signale « aucun chunk /^_langs[.-]/ » alors que le catalogue est bien chargé à la demande.
+**Cause** : importé statiquement par plusieurs chunks, Rolldown en fait un chunk partagé `_langs-<hash>.js` ; importé statiquement par un seul (`code-languages.ts`) et en `import()` par le surligneur, il devient une entrée dynamique à son chemin de module (`node_modules/.pnpm/shiki@…/shiki/dist/langs.mjs`). Un groupe `codeSplitting` nommé ne le capture pas (entrée dynamique) : il produit un `_langs-*` vide qui rendrait le contrôle vacant, et avec `includeDependenciesRecursively` par défaut il avale l'assistant de préchargement de Vite et fuit dans l'entrée.
+**Workaround** : `SHIKI_CHUNK` (`scripts/check-initial-bundle.ts`) et `CATALOG_KEY` (`e2e/languages.spec.ts`) acceptent les deux formes de clé ; ne pas ajouter de groupe `langs`.
+**Référence** : `scripts/check-initial-bundle.ts`, `e2e/languages.spec.ts`.

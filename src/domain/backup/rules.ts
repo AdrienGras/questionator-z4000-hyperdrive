@@ -1,4 +1,5 @@
 import { formatPath, type IssuePath } from '@/domain/config/issues'
+import { hasAtMostThreeDecimals, MAX_SCORING_VALUE } from '@/domain/scoring/milli'
 import type { Attempt, Session } from '@/domain/session/types'
 import { backupError, type BackupRuleIssue } from './issues'
 
@@ -61,6 +62,19 @@ function checkStudent(
   }
   if (student.absent && student.attempts.length > 0) {
     issues.push(backupError('absent_with_attempts', [...studentPath, 'attempts'], {}))
+  }
+  const adjustment = student.adjustment?.value
+  if (
+    adjustment !== undefined &&
+    (!Number.isFinite(adjustment) ||
+      !hasAtMostThreeDecimals(adjustment) ||
+      Math.abs(adjustment) > MAX_SCORING_VALUE)
+  ) {
+    issues.push(
+      backupError('invalid_adjustment', [...studentPath, 'adjustment', 'value'], {
+        value: adjustment,
+      }),
+    )
   }
   student.attempts.forEach((attempt, a) => {
     const attemptPath: IssuePath = [...studentPath, 'attempts', a]

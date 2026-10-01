@@ -8,7 +8,8 @@ const VALIDATION_DELAY_MS = 300
 const cssSupports = (property: string, value: string) => CSS.supports(property, value)
 
 /**
- * Validation différée (300 ms) du texte de l'éditeur. `validate` est importé à la demande ;
+ * Validation différée (300 ms) du texte de l'éditeur. `validate` et le catalogue des langages
+ * (`code-languages`, pour `unknown_code_language`) sont importés à la demande ;
  * `lastValid` garde la dernière config valide tant que le texte courant est invalide. Si le
  * module ne se charge pas (chunk introuvable après un déploiement, hors ligne), `loadError`
  * passe à vrai et `pending` retombe : rien n'attend plus une validation qui ne viendra pas. Le
@@ -34,10 +35,13 @@ export function useLiveValidation(text: string): {
   useEffect(() => {
     let cancelled = false
     const timer = setTimeout(() => {
-      void import('@/domain/config/validate').then(
-        ({ validateConfig }) => {
+      void Promise.all([
+        import('@/domain/config/validate'),
+        import('@/domain/config/code-languages'),
+      ]).then(
+        ([{ validateConfig }, { isKnownLanguage }]) => {
           if (cancelled) return
-          const result = validateConfig(text, { cssSupports })
+          const result = validateConfig(text, { cssSupports, isKnownLanguage })
           setState((previous) => ({
             result,
             lastValid: result.ok ? result.config : previous.lastValid,

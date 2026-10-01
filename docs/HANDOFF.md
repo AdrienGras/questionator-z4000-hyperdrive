@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-01 — F31 (#79) : sessions endommagées, échelle hors grille refusée, persistance relue
+
+**Dernière chose faite** : F31 implémentée sur `feat/79-robustesse-donnees` (D81). Toute lecture IndexedDB est validée par `checkStoredSession` (mêmes règles que l'import de backup) ; un enregistrement invalide devient un `DamagedSession` (`isDamaged`). Écran « Cette session est endommagée » (examinateur : export du brut, détails ; vue projetée : titre seul), carte « Endommagée » à l'accueil, `updateSession` qui lève `SessionDamagedError` sans écrire. `final_scale_off_grid` est maintenant une erreur ; nouvelle règle `invalid_adjustment` ; `persistence.ts` relit `persisted()` au retour sur l'onglet. e2e `e2e/damaged-session.spec.ts` (corruption par IndexedDB, rechargement, export, retour à l'accueil) vert. Correctif R2 : `lib/db` charge le validateur à la demande (`loadReadStored()`, avant la transaction de `updateSession`), `isKnownLanguage` est injecté par la création et l'éditeur seuls, `check:bundle` est repointé sur `code-languages.ts` (voir D81) ; le bundle initial reste sans `shiki/langs`. Mémoire mise à jour (D81 + notes de remplacement sur D02/D20, INDEX, QUIRKS, BACKLOG, CONVENTIONS).
+
+**Trucs en suspens** : ouvrir la PR en brouillon, `.claude/scripts/sonar-check.sh --pr <n> --wait`, passer en « Ready for review », puis merger sur le go de l'utilisateur. Deux tests instables vus pendant F31 (consignés au BACKLOG, → #87) : `create-session-page.test.tsx` (« window is not defined » au démontage du routeur) et `config-editor-page.test.tsx` (`getByRole('banner')`, une fois).
+
+**Prochaine chose à creuser** : #78 (F30).
+
+**Notes pour future Claude** : une fixture qui sème une session incohérente est lue comme endommagée (QUIRKS) : utiliser `healthy()`. L'import d'un backup par-dessus une session endommagée reste le chemin de réparation. Ne pas rouvrir la question de la vue projetée : elle ne reçoit jamais la session (D69).
+
 ## 2026-10-01 — #76 corrigé : le menu de thème se ferme au choix d'un mode
 
 **Dernière chose faite** : priorités relues avec l'utilisateur, qui a validé une vague de fix dans cet ordre : #76, #79, #78, #83, #82, #81 ; ensuite #84, #80, puis les chores (#85 pas avant le 28/10). #77 reste à faire à la main par l'utilisateur ; #71 à #74 n'ont pas de priorité. #76 corrigé sur `fix/76-menu-theme` : `closeOnClick` sur les `DropdownMenuRadioItem` de `ColorModeToggle`, deux tests unitaires (souris et clavier) et un e2e `color-mode.spec.ts` (changement de mode puis tirage), rouge sans le correctif.

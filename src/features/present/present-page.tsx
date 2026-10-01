@@ -1,4 +1,5 @@
 import { getRouteApi } from '@tanstack/react-router'
+import { DamagedSessionScreen } from '@/components/damaged-session'
 import { DbStatusBanner } from '@/components/db-status-banner'
 import { ProjectedScreen } from '@/components/projection/projected-screen'
 import { SessionAppearance } from '@/components/session-appearance'
@@ -32,6 +33,7 @@ export function PresentPage() {
     )
   if (view === undefined) return <SessionFallback ui={ui} kind="loading" />
   if (view === null) return <SessionFallback ui={ui} kind="not-found" />
+  if (view === 'damaged') return <DamagedSessionScreen ui={ui} variant="present" />
   return (
     <SessionAppearance sessionId={sessionId} view="present" config={view.appearance}>
       <main className={cn('relative', idle && 'cursor-none')}>

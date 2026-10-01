@@ -33,6 +33,10 @@ export type UiMessageParams = {
   color_mode_system: NoParams
   session_loading: NoParams
   session_not_found: NoParams
+  damaged_title: NoParams
+  damaged_badge: NoParams
+  damaged_body: NoParams
+  damaged_details: NoParams
   present_waiting: NoParams
   present_prompt_label: NoParams
   present_question_index: { current: number; total: number }
@@ -74,6 +78,7 @@ export type UiMessageParams = {
   import_load_error: NoParams
   import_conflict_title: NoParams
   import_conflict_body: { existing: string; date: string; imported: string }
+  import_conflict_damaged_body: { existing: string; imported: string }
   import_replace: NoParams
   create_title: NoParams
   create_students_label: NoParams
@@ -351,6 +356,11 @@ const fr: Dictionary<UiMessageParams> = {
   color_mode_system: () => 'Système',
   session_loading: () => 'Chargement de la session…',
   session_not_found: () => 'Session introuvable',
+  damaged_title: () => 'Cette session est endommagée',
+  damaged_badge: () => 'Endommagée',
+  damaged_body: () =>
+    'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Exportez un backup pour le conserver ou le corriger.',
+  damaged_details: () => 'Détails',
   present_waiting: () => "L'épreuve va bientôt commencer.",
   present_prompt_label: () => 'Question en cours',
   present_question_index: ({ current, total }) => `Question ${current} / ${total}`,
@@ -395,6 +405,8 @@ const fr: Dictionary<UiMessageParams> = {
   import_conflict_title: () => 'Session déjà présente',
   import_conflict_body: ({ existing, date, imported }) =>
     `Une session « ${existing} » (modifiée le ${date}) porte le même identifiant. La remplacer par « ${imported} » ?`,
+  import_conflict_damaged_body: ({ existing, imported }) =>
+    `Une session endommagée « ${existing} » porte le même identifiant. La remplacer par « ${imported} » ?`,
   import_replace: () => 'Remplacer',
   create_title: () => 'Nouvelle session',
   create_students_label: () => "Liste d'étudiants (CSV)",
@@ -630,6 +642,11 @@ const en: Dictionary<UiMessageParams> = {
   color_mode_system: () => 'System',
   session_loading: () => 'Loading session…',
   session_not_found: () => 'Session not found',
+  damaged_title: () => 'This session is damaged',
+  damaged_badge: () => 'Damaged',
+  damaged_body: () =>
+    'The saved content is inconsistent; the app cannot open it. Export a backup to keep it or fix it.',
+  damaged_details: () => 'Details',
   present_waiting: () => 'The exam will start soon.',
   present_prompt_label: () => 'Current question',
   present_question_index: ({ current, total }) => `Question ${current} / ${total}`,
@@ -673,6 +690,8 @@ const en: Dictionary<UiMessageParams> = {
   import_conflict_title: () => 'Session already exists',
   import_conflict_body: ({ existing, date, imported }) =>
     `A session "${existing}" (updated ${date}) has the same identifier. Replace it with "${imported}"?`,
+  import_conflict_damaged_body: ({ existing, imported }) =>
+    `A damaged session "${existing}" has the same identifier. Replace it with "${imported}"?`,
   import_replace: () => 'Replace',
   create_title: () => 'New session',
   create_students_label: () => 'Student list (CSV)',

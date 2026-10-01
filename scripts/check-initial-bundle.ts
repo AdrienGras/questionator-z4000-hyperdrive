@@ -110,9 +110,16 @@ export const XLSX_IMPORTER = 'src/lib/xlsx/write-workbook.ts'
 export const XLSX_FORBIDDEN =
   /(?:^_xlsx[.-])|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?(?:write-excel-file|fflate)\/)|(?:^src\/lib\/xlsx\/)/
 
-/** Catalogue `shiki/langs` (F18) : chunk `_langs-<hash>.js`, atteint statiquement par le validateur de configuration. */
-export const SHIKI_CHUNK = /^_langs[.-]/
-export const SHIKI_IMPORTER = 'src/domain/config/validate.ts'
+/**
+ * Catalogue `shiki/langs` (F18), atteint statiquement par `code-languages.ts`, que l'écran de
+ * création et l'éditeur importent à la demande avec le validateur (F31 : le validateur ne
+ * l'importe plus, la lecture du stockage s'en passe). Sa clé dépend du graphe : chunk partagé
+ * `_langs-<hash>.js` quand plusieurs chunks l'importent statiquement, sinon entrée dynamique à son
+ * chemin de module (le surligneur l'importe en `import()`), cas actuel depuis F31.
+ */
+export const SHIKI_CHUNK =
+  /(?:^_langs[.-])|(?:^node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?shiki\/dist\/langs\.mjs$)/
+export const SHIKI_IMPORTER = 'src/domain/config/code-languages.ts'
 // Le catalogue et chacune des ~240 grammaires (`@shikijs/langs/dist/<langage>.mjs`) doivent rester
 // hors de la fermeture statique de l'entrée : ils se chargent à la demande (F18).
 export const SHIKI_FORBIDDEN =

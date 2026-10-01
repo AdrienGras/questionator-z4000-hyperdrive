@@ -29,6 +29,8 @@ const fr: Dictionary<BackupIssueParams> = {
   unknown_projected_student: ({ studentId }) => `L'étudiant projeté « ${studentId} » n'existe pas.`,
   projection_mismatch: () =>
     'La projection est incohérente : un étudiant est requis en mode « student », et seulement dans ce mode.',
+  invalid_adjustment: ({ value }) =>
+    `L’ajustement ${value} est invalide : au plus 3 décimales et au plus 10 000 en valeur absolue.`,
 }
 
 const en: Dictionary<BackupIssueParams> = {
@@ -56,6 +58,8 @@ const en: Dictionary<BackupIssueParams> = {
   unknown_projected_student: ({ studentId }) => `Projected student "${studentId}" does not exist.`,
   projection_mismatch: () =>
     'The projection is inconsistent: a student is required in "student" mode, and only in that mode.',
+  invalid_adjustment: ({ value }) =>
+    `The adjustment ${value} is invalid: at most 3 decimals and at most 10,000 in absolute value.`,
 }
 
 export const BACKUP_ISSUE_MESSAGES: Record<Locale, Dictionary<BackupIssueParams>> = { fr, en }

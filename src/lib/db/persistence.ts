@@ -4,7 +4,6 @@ import { useSyncExternalStore } from 'react'
 export type PersistenceStatus = 'persisted' | 'best-effort' | 'unsupported'
 
 let status: PersistenceStatus | undefined
-let firstRead: Promise<void> | undefined
 let refreshSeq = 0
 const listeners = new Set<() => void>()
 
@@ -24,7 +23,7 @@ async function readStatus(): Promise<PersistenceStatus> {
 }
 
 /**
- * `subscribe` (premier abonnement) et `requestPersistentStorage` peuvent chacun déclencher un
+ * `subscribe` (premier abonnement), le retour sur l'onglet et `requestPersistentStorage` peuvent chacun déclencher un
  * `refresh()` ; s'ils se chevauchent, rien ne garantit que le premier lancé se résout le premier.
  * Le compteur de séquence ne laisse écrire `status` et notifier que le dernier `refresh()` lancé,
  * pour qu'un `'best-effort'` périmé n'écrase jamais un `'persisted'` plus récent.
@@ -37,11 +36,26 @@ async function refresh(): Promise<void> {
   for (const listener of listeners) listener()
 }
 
+function onVisibilityChange(): void {
+  if (document.visibilityState === 'visible') void refresh()
+}
+
+/**
+ * Tant qu'il y a un abonné, on relit au retour sur l'onglet : le navigateur peut accorder la
+ * persistance en cours de session (PWA installée) et l'indicateur doit alors disparaître.
+ */
 function subscribe(listener: () => void): () => void {
   listeners.add(listener)
-  firstRead ??= refresh()
+  if (listeners.size === 1) {
+    void refresh()
+    if (typeof document !== 'undefined')
+      document.addEventListener('visibilitychange', onVisibilityChange)
+  }
   return () => {
     listeners.delete(listener)
+    if (listeners.size === 0 && typeof document !== 'undefined') {
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+    }
   }
 }
 

@@ -4,7 +4,8 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import { drawQuestion } from '@/domain/passage/draw'
 import { PassageError } from '@/domain/passage/errors'
 import { db } from '@/lib/db/db'
-import { getSession, putSession, updateSession } from '@/lib/db/sessions'
+import { putSession, updateSession } from '@/lib/db/sessions'
+import { getHealthySession } from '@/testing/healthy-session'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
 import { usePassageActions } from './use-passage-actions'
@@ -31,7 +32,7 @@ describe('usePassageActions', () => {
     // Le prop `sessionUpdatedAt` (encore celui d'avant l'écriture) n'a pas rattrapé l'écriture :
     // le verrou reste actif tant que l'appelant ne re-rend pas avec la session fraîche.
     expect(result.current.busy).toBe(true)
-    const session = await getSession('session-1')
+    const session = await getHealthySession('session-1')
     expect(session?.students[0]?.attempts).toHaveLength(1)
     expect(session?.students[0]?.attempts[0]?.outcome).toBe('pending')
 
@@ -50,7 +51,7 @@ describe('usePassageActions', () => {
       await result.current.score('attempt-1', 1)
     })
 
-    const session = await getSession('session-1')
+    const session = await getHealthySession('session-1')
     expect(session?.students[0]?.attempts[0]?.outcome).toBe('scored')
     expect(session?.students[0]?.attempts[0]?.score).toBe(1)
   })
@@ -68,7 +69,7 @@ describe('usePassageActions', () => {
       await result.current.selectStudent('student-2')
     })
 
-    const session = await getSession('session-1')
+    const session = await getHealthySession('session-1')
     expect(session?.activeStudentId).toBe('student-2')
   })
 
@@ -84,7 +85,7 @@ describe('usePassageActions', () => {
       ].map((p) => p.catch((e: unknown) => e)),
     )
 
-    const session = await getSession('session-1')
+    const session = await getHealthySession('session-1')
     expect(session?.students[0]?.attempts).toHaveLength(1)
     expect(results.some((r) => r instanceof PassageError && r.code === 'pending_exists')).toBe(true)
   })
@@ -104,7 +105,7 @@ describe('usePassageActions', () => {
       await Promise.all([first, second])
     })
 
-    const session = await getSession('session-1')
+    const session = await getHealthySession('session-1')
     expect(session?.students[0]?.attempts).toHaveLength(1)
     expect(result.current.error).toBeNull()
     expect(result.current.busy).toBe(true)
@@ -130,7 +131,7 @@ describe('usePassageActions', () => {
     expect(error.code).toBe('pending_exists')
     // Une écriture refusée ne verrouille rien : `busy` est relâché immédiatement (Review Focus 1).
     expect(result.current.busy).toBe(false)
-    const session = await getSession('session-1')
+    const session = await getHealthySession('session-1')
     expect(session?.students[0]?.attempts).toHaveLength(1)
   })
 
@@ -148,7 +149,7 @@ describe('usePassageActions', () => {
 
     expect(result.current.busy).toBe(false)
     expect(result.current.error).toBeNull()
-    const session = await getSession('session-1')
+    const session = await getHealthySession('session-1')
     expect(session?.students[0]?.attempts).toHaveLength(0)
   })
 
@@ -181,7 +182,7 @@ describe('usePassageActions', () => {
     async function setup(withStudent = true) {
       const initialSession = makeSession({
         config,
-        students: [makeStudent([13.5]), makeStudent([], { id: 'student-2', order: 2 })],
+        students: [makeStudent([2]), makeStudent([], { id: 'student-2', order: 2 })],
         activeStudentId: 'student-1',
         projection: { mode: 'student', studentId: 'student-1' },
       })
@@ -205,7 +206,7 @@ describe('usePassageActions', () => {
       })
 
       expect(ok).toBe(true)
-      const session = await getSession('session-1')
+      const session = await getHealthySession('session-1')
       const student = session?.students[0]
       expect(student?.adjustment).toEqual({ value: 1, reason: 'r' })
       expect(student?.finalRevealedAt).toBeDefined()
@@ -221,7 +222,7 @@ describe('usePassageActions', () => {
       })
 
       expect(ok).toBe(true)
-      const student = (await getSession('session-1'))?.students[0]
+      const student = (await getHealthySession('session-1'))?.students[0]
       expect(student?.adjustment).toEqual({ value: 1 })
       expect(student?.finalRevealedAt).toBeUndefined()
     })
@@ -239,7 +240,7 @@ describe('usePassageActions', () => {
       expect(error).toBeInstanceOf(PassageError)
       if (!(error instanceof PassageError)) throw new Error('error devrait être une PassageError')
       expect(error.code).toBe('adjustment_invalid')
-      const student = (await getSession('session-1'))?.students[0]
+      const student = (await getHealthySession('session-1'))?.students[0]
       expect(student?.adjustment).toBeUndefined()
       expect(student?.finalRevealedAt).toBeUndefined()
     })
@@ -253,7 +254,7 @@ describe('usePassageActions', () => {
       })
 
       expect(ok).toBe(true)
-      expect((await getSession('session-1'))?.students[0]?.finalRevealedAt).toBeDefined()
+      expect((await getHealthySession('session-1'))?.students[0]?.finalRevealedAt).toBeDefined()
     })
 
     test('reset vide les attempts', async () => {
@@ -265,7 +266,7 @@ describe('usePassageActions', () => {
       })
 
       expect(ok).toBe(true)
-      expect((await getSession('session-1'))?.students[0]?.attempts).toEqual([])
+      expect((await getHealthySession('session-1'))?.students[0]?.attempts).toEqual([])
     })
 
     test('next change activeStudentId et remet la projection en attente (D73)', async () => {
@@ -275,7 +276,7 @@ describe('usePassageActions', () => {
         await result.current.next()
       })
 
-      const session = await getSession('session-1')
+      const session = await getHealthySession('session-1')
       expect(session?.activeStudentId).toBe('student-2')
       expect(session?.projection).toEqual({ mode: 'waiting' })
     })
@@ -308,7 +309,7 @@ describe('usePassageActions', () => {
 
       expect(results).toEqual([false, false])
       expect(result.current.error).toBeNull()
-      const session = await getSession('session-1')
+      const session = await getHealthySession('session-1')
       expect(session?.updatedAt).toBe(initialSession.updatedAt)
     })
   })
@@ -322,7 +323,7 @@ async function setupPanel(withStudent = true) {
       finalScale: 20,
       rounding: { mode: 'nearest', decimals: 2, step: 0.5 },
     }),
-    students: [makeStudent([13.5]), makeStudent([], { id: 'student-2', order: 2 })],
+    students: [makeStudent([1]), makeStudent([], { id: 'student-2', order: 2 })],
     activeStudentId: 'student-1',
     projection: { mode: 'student', studentId: 'student-1' },
   })
@@ -343,7 +344,7 @@ describe('actions du panneau (F12)', () => {
       await result.current.editScore('attempt-1', 2)
     })
 
-    const attempt = (await getSession('session-1'))?.students[0]?.attempts[0]
+    const attempt = (await getHealthySession('session-1'))?.students[0]?.attempts[0]
     expect(attempt?.score).toBe(2)
     expect(attempt?.editedAt).toBeDefined()
   })
@@ -357,7 +358,7 @@ describe('actions du panneau (F12)', () => {
     })
 
     expect(ok).toBe(true)
-    const session = await getSession('session-1')
+    const session = await getHealthySession('session-1')
     expect(session?.students[1]?.comment).toBe('x')
     expect(session?.students[0]?.comment).toBeUndefined()
   })
@@ -367,7 +368,7 @@ describe('actions du panneau (F12)', () => {
     await act(async () => {
       await result.current.setComment('student-1', 'x')
     })
-    const written = await getSession('session-1')
+    const written = await getHealthySession('session-1')
 
     let ok: boolean | undefined
     await act(async () => {
@@ -375,7 +376,7 @@ describe('actions du panneau (F12)', () => {
     })
 
     expect(ok).toBe(true)
-    expect((await getSession('session-1'))?.updatedAt).toBe(written?.updatedAt)
+    expect((await getHealthySession('session-1'))?.updatedAt).toBe(written?.updatedAt)
   })
 
   test('busy redevient faux après une écriture sans changement, sans nouvel updatedAt', async () => {
@@ -383,7 +384,7 @@ describe('actions du panneau (F12)', () => {
     await act(async () => {
       await result.current.setAbsent('student-1', true)
     })
-    const written = await getSession('session-1')
+    const written = await getHealthySession('session-1')
     rerender({ sessionUpdatedAt: written?.updatedAt ?? '' })
     expect(result.current.busy).toBe(false)
 
@@ -405,7 +406,7 @@ describe('actions du panneau (F12)', () => {
     })
 
     expect(ok).toBe(true)
-    const session = await getSession('session-1')
+    const session = await getHealthySession('session-1')
     expect(session?.students[0]?.comment).toBe('x')
     expect(session?.activeStudentId).toBe('student-2')
   })
@@ -413,7 +414,7 @@ describe('actions du panneau (F12)', () => {
   test('setComment ne verrouille jamais busy, même avant que sessionUpdatedAt rattrape', async () => {
     const seen: boolean[] = []
     const initialSession = makeSession({
-      students: [makeStudent([13.5]), makeStudent([], { id: 'student-2', order: 2 })],
+      students: [makeStudent([2]), makeStudent([], { id: 'student-2', order: 2 })],
     })
     await putSession(initialSession)
     const { result } = renderHook(() => {
@@ -426,7 +427,7 @@ describe('actions du panneau (F12)', () => {
       await result.current.setComment('student-1', 'x')
     })
 
-    expect((await getSession('session-1'))?.students[0]?.comment).toBe('x')
+    expect((await getHealthySession('session-1'))?.students[0]?.comment).toBe('x')
     expect(seen).not.toContain(true)
     expect(result.current.busy).toBe(false)
   })
@@ -467,7 +468,7 @@ describe('actions du panneau (F12)', () => {
     })
 
     expect(ok).toBe(true)
-    const student = (await getSession('session-1'))?.students[0]
+    const student = (await getHealthySession('session-1'))?.students[0]
     expect(student?.absent).toBe(true)
     expect(student?.attempts).toEqual([])
   })
@@ -481,7 +482,7 @@ describe('actions du panneau (F12)', () => {
     })
 
     expect(ok).toBe(true)
-    const session = await getSession('session-1')
+    const session = await getHealthySession('session-1')
     expect(session?.students[1]?.absent).toBe(true)
     expect(session?.students[0]?.absent).toBe(false)
     expect(session?.students[0]?.attempts).toHaveLength(1)
@@ -494,6 +495,6 @@ describe('actions du panneau (F12)', () => {
       await result.current.editScore('attempt-1', 2)
     })
 
-    expect((await getSession('session-1'))?.updatedAt).toBe(initialSession.updatedAt)
+    expect((await getHealthySession('session-1'))?.updatedAt).toBe(initialSession.updatedAt)
   })
 })

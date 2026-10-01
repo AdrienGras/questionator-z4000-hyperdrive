@@ -8,6 +8,11 @@ function stubStorage(storage: Storage | undefined) {
   vi.stubGlobal('navigator', Object.assign({}, window.navigator, { storage }))
 }
 
+function setVisibility(state: 'visible' | 'hidden') {
+  Object.defineProperty(document, 'visibilityState', { value: state, configurable: true })
+  document.dispatchEvent(new Event('visibilitychange'))
+}
+
 async function load() {
   return import('./persistence')
 }
@@ -107,5 +112,70 @@ describe('requestPersistentStorage', () => {
     const { result } = renderHook(() => usePersistenceStatus())
     expect(await requestPersistentStorage()).toBe(false)
     await waitFor(() => expect(result.current).toBe('best-effort'))
+  })
+})
+
+describe('relecture au retour sur l’onglet', () => {
+  afterEach(() => {
+    Reflect.deleteProperty(document, 'visibilityState')
+  })
+
+  test('visible relit persisted() et passe de best-effort à persisted', async () => {
+    let granted = false
+    const persisted = vi.fn<() => Promise<boolean>>(async () => granted)
+    stubStorage({ persisted, persist: async () => false })
+    const { usePersistenceStatus } = await load()
+    const { result } = renderHook(() => usePersistenceStatus())
+    await waitFor(() => expect(result.current).toBe('best-effort'))
+
+    granted = true
+    setVisibility('visible')
+    await waitFor(() => expect(result.current).toBe('persisted'))
+    expect(persisted).toHaveBeenCalledTimes(2)
+  })
+
+  test('hidden ne relit pas', async () => {
+    const persisted = vi.fn<() => Promise<boolean>>(async () => false)
+    stubStorage({ persisted, persist: async () => false })
+    const { usePersistenceStatus } = await load()
+    const { result } = renderHook(() => usePersistenceStatus())
+    await waitFor(() => expect(result.current).toBe('best-effort'))
+
+    setVisibility('hidden')
+    for (let tick = 0; tick < 5; tick += 1) await Promise.resolve()
+    expect(persisted).toHaveBeenCalledTimes(1)
+  })
+
+  test('après le démontage du dernier abonné, visibilitychange ne relit plus', async () => {
+    const persisted = vi.fn<() => Promise<boolean>>(async () => false)
+    stubStorage({ persisted, persist: async () => false })
+    const { usePersistenceStatus } = await load()
+    const { result, unmount } = renderHook(() => usePersistenceStatus())
+    await waitFor(() => expect(result.current).toBe('best-effort'))
+
+    unmount()
+    setVisibility('visible')
+    for (let tick = 0; tick < 5; tick += 1) await Promise.resolve()
+    expect(persisted).toHaveBeenCalledTimes(1)
+  })
+
+  test('un nouvel abonnement relit et réécoute', async () => {
+    let granted = false
+    const persisted = vi.fn<() => Promise<boolean>>(async () => granted)
+    stubStorage({ persisted, persist: async () => false })
+    const { usePersistenceStatus } = await load()
+    const first = renderHook(() => usePersistenceStatus())
+    await waitFor(() => expect(first.result.current).toBe('best-effort'))
+    first.unmount()
+
+    granted = true
+    const second = renderHook(() => usePersistenceStatus())
+    await waitFor(() => expect(second.result.current).toBe('persisted'))
+    expect(persisted).toHaveBeenCalledTimes(2)
+
+    granted = false
+    setVisibility('visible')
+    await waitFor(() => expect(second.result.current).toBe('best-effort'))
+    expect(persisted).toHaveBeenCalledTimes(3)
   })
 })

@@ -154,7 +154,7 @@ const ALL_TARGETS: Record<string, ManifestChunk> = {
   },
   '_xlsx-Ab12Cd34.js': { file: 'assets/xlsx-Ab12Cd34.js' },
   [SHIKI_IMPORTER]: {
-    file: 'assets/validate.js',
+    file: 'assets/code-languages.js',
     isDynamicEntry: true,
     imports: ['_vendor-DqVrg90E.js', '_langs-WOor098P.js'],
   },
@@ -238,20 +238,39 @@ describe('cibles multiples', () => {
     expect(findInitialLeaks(manifest, SHIKI_FORBIDDEN)).toEqual([PYTHON_KEY])
   })
 
-  it('signale la vacuité de shiki quand le catalogue n’est plus atteint par le validateur', () => {
+  it('signale la vacuité de shiki quand le catalogue n’est plus atteint par code-languages', () => {
     const manifest: Record<string, ManifestChunk> = {
       ...ALL_TARGETS,
-      [SHIKI_IMPORTER]: { file: 'assets/validate.js', isDynamicEntry: true },
+      [SHIKI_IMPORTER]: { file: 'assets/code-languages.js', isDynamicEntry: true },
     }
     expect(findVacuityProblems(manifest, SHIKI_CHUNK, SHIKI_IMPORTER)[0]).toMatch(
       /n'importe pas statiquement _langs-WOor098P\.js/,
     )
   })
 
+  it('accepte le catalogue Shiki émis en entrée dynamique à son chemin de module (F31)', () => {
+    const catalogKey = 'node_modules/.pnpm/shiki@4.4.3/node_modules/shiki/dist/langs.mjs'
+    const manifest: Record<string, ManifestChunk> = { ...ALL_TARGETS }
+    delete manifest['_langs-WOor098P.js']
+    manifest[catalogKey] = {
+      file: 'assets/langs-DP7UXOK0.js',
+      isDynamicEntry: true,
+      dynamicImports: [PYTHON_KEY],
+    }
+    manifest[SHIKI_IMPORTER] = {
+      file: 'assets/code-languages.js',
+      isDynamicEntry: true,
+      imports: [catalogKey],
+    }
+    expect(problemsOf(manifest)).toEqual([])
+    manifest['index.html'] = { ...manifest['index.html'], imports: [catalogKey] }
+    expect(problemsOf(manifest)).toEqual([`shiki fuit dans le bundle initial : ${catalogKey}`])
+  })
+
   it('explique la vacuité de shiki par l’inlining du catalogue dans l’entrée', () => {
     const manifest = { ...ALL_TARGETS }
     delete manifest['_langs-WOor098P.js']
-    manifest[SHIKI_IMPORTER] = { file: 'assets/validate.js', isDynamicEntry: true }
+    manifest[SHIKI_IMPORTER] = { file: 'assets/code-languages.js', isDynamicEntry: true }
     expect(problemsOf(manifest)).toEqual([
       expect.stringMatching(
         /^shiki : contrôle sans objet, aucun chunk .*import statique de `shiki\/langs`/,

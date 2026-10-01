@@ -24,7 +24,7 @@ describe('configSheet', () => {
     expect(sheet.name).toBe('Configuration')
     expect(sheet.rows[0]).toEqual([text('Catégories', true)])
     expect(sheet.rows[1]).toEqual(header(['Libellé', 'Id', 'Ordre', 'Questions', 'Barème']))
-    expect(sheet.rows[2]).toEqual([text('A'), text('a'), num(1), num(1), text('0 ; 0,5 ; 1')])
+    expect(sheet.rows[2]).toEqual([text('A'), text('a'), num(1), num(10), text('0 ; 0,5 ; 1')])
   })
 
   test('barème en anglais « 0; 0.5; 1 »', () => {

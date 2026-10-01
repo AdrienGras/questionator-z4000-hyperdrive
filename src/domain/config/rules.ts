@@ -9,13 +9,21 @@ import {
 } from './issues'
 import { hasAtMostThreeDecimals, MAX_SCORING_VALUE, roundToMilli } from '@/domain/scoring/milli'
 import { fenceLanguages } from './code-fences'
-import { isKnownLanguage } from './code-languages'
 import { isPlainLanguage } from '@/lib/markdown/languages'
 import { THEME_TOKENS, type ParsedConfig } from './schema'
 
 export type CssSupports = (property: string, value: string) => boolean
 
-export type RuleDeps = { cssSupports: CssSupports; iconNames: ReadonlySet<string> }
+export type RuleDeps = {
+  cssSupports: CssSupports
+  iconNames: ReadonlySet<string>
+  /**
+   * Catalogue des langages de code (`code-languages.ts`, qui tire `shiki/langs`), injecté par les
+   * écrans qui affichent les avertissements. Absent, `unknown_code_language` n'est pas évaluée :
+   * la lecture du stockage et l'import de backup ne gardent que les erreurs (F31).
+   */
+  isKnownLanguage?: (language: string) => boolean
+}
 
 type IdEntry = { id: string; path: IssuePath }
 type NumberEntry = { value: number; path: IssuePath }
@@ -176,7 +184,7 @@ function checkFinalScaleGrid(config: ParsedConfig): ConfigIssue[] {
   if (stepThousandths === 0) return []
   return roundToMilli(finalScale) % stepThousandths === 0
     ? []
-    : [configWarning('final_scale_off_grid', ['scoring', 'finalScale'], { finalScale, step })]
+    : [configError('final_scale_off_grid', ['scoring', 'finalScale'], { finalScale, step })]
 }
 
 function checkIcons(config: ParsedConfig, iconNames: ReadonlySet<string>): ConfigIssue[] {
@@ -188,7 +196,10 @@ function checkIcons(config: ParsedConfig, iconNames: ReadonlySet<string>): Confi
 }
 
 /** F18 : un avertissement par couple (question, langage), à la première occurrence (énoncé d'abord). */
-function checkCodeLanguages(config: ParsedConfig): ConfigIssue[] {
+function checkCodeLanguages(
+  config: ParsedConfig,
+  isKnownLanguage: (language: string) => boolean,
+): ConfigIssue[] {
   return config.categories.flatMap((category, c) =>
     category.questions.flatMap((question, q) => {
       const seen = new Set<string>()
@@ -222,6 +233,6 @@ export function checkRules(config: ParsedConfig, deps: RuleDeps): ConfigIssue[] 
     ...checkReachableMax(config),
     ...checkFinalScaleGrid(config),
     ...checkIcons(config, deps.iconNames),
-    ...checkCodeLanguages(config),
+    ...(deps.isKnownLanguage ? checkCodeLanguages(config, deps.isKnownLanguage) : []),
   ]
 }

@@ -10,11 +10,14 @@ import { renderAt } from '@/testing/render-at'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
 
-/** Catégorie `a` à 3 questions et barème 0-3 : la fixture par défaut n'a qu'une question. */
+/**
+ * Catégorie `a` à 3 questions (la fixture par défaut n'en a qu'une) ; le barème contient les notes
+ * brutes des tests (13,5 et 20) : une session stockée hors barème est lue comme endommagée (F31).
+ */
 const category: NormalizedCategory = {
   id: 'a',
   label: 'A',
-  scale: [0, 1, 2, 3],
+  scale: [0, 1, 2, 3, 13.5, 20],
   order: 1,
   questions: ['a-1', 'a-2', 'a-3'].map((id) => ({
     id,
@@ -135,9 +138,9 @@ test('détail du passage : rangs des questions notées, passée sans rang', asyn
   }
   const items = within(detail).getAllByRole('listitem')
   expect(items).toHaveLength(3)
-  expect(items[0]).toHaveTextContent(/^1\.\s*ATitre a-12 \/ 3$/)
+  expect(items[0]).toHaveTextContent(/^1\.\s*ATitre a-12 \/ 20$/)
   expect(items[1]).toHaveTextContent(/^ATitre a-2Passée — Hors programme$/)
-  expect(items[2]).toHaveTextContent(/^2\.\s*ATitre a-33 \/ 3$/)
+  expect(items[2]).toHaveTextContent(/^2\.\s*ATitre a-33 \/ 20$/)
 })
 
 test('réinitialiser : confirmation, attempts vidés, commentaire conservé, grille de retour', async () => {

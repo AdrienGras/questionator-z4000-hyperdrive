@@ -112,4 +112,21 @@ describe('checkSessionRules', () => {
       codes(makeSession({ activeStudentId: 'ghost', projection: { mode: 'student' } })),
     ).toEqual(['unknown_active_student', 'projection_mismatch'])
   })
+
+  test.each([1e20, -10000.5, 0.0005, Infinity, NaN])('ajustement invalide : %s', (value) => {
+    const session = makeSession({ students: [makeStudent([], { adjustment: { value } })] })
+    expect(checkSessionRules(session)).toEqual([
+      {
+        severity: 'error',
+        code: 'invalid_adjustment',
+        path: ['session', 'students', 0, 'adjustment', 'value'],
+        params: { value },
+      },
+    ])
+  })
+
+  test.each([-0.5, 10000, -10000, 1.125])('ajustement valide : %s', (value) => {
+    const session = makeSession({ students: [makeStudent([], { adjustment: { value } })] })
+    expect(codes(session)).toEqual([])
+  })
 })

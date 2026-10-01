@@ -2,7 +2,8 @@ import 'fake-indexeddb/auto'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { exportWorkbook } from '@/components/export/export-workbook'
-import { getSession, putSession } from '@/lib/db/sessions'
+import { putSession } from '@/lib/db/sessions'
+import { getHealthySession } from '@/testing/healthy-session'
 import type { PersistenceStatus } from '@/lib/db/persistence'
 import { db, type DbStatus } from '@/lib/db/db'
 import { renderAt } from '@/testing/render-at'
@@ -36,7 +37,7 @@ async function chooseAction(action: string) {
 }
 
 async function storedSession() {
-  const session = await getSession('session-1')
+  const session = await getHealthySession('session-1')
   if (!session) throw new Error('session-1 absente de la base')
   return session
 }
@@ -200,7 +201,7 @@ describe('accueil', () => {
     await chooseAction('Supprimer')
     const dialog = await screen.findByRole('alertdialog')
     fireEvent.click(within(dialog).getByRole('button', { name: 'Supprimer' }))
-    await waitFor(async () => expect(await getSession('session-1')).toBeNull())
+    await waitFor(async () => expect(await getHealthySession('session-1')).toBeNull())
     expect(await screen.findByRole('heading', { name: 'Aucune session' })).toBeInTheDocument()
   })
 
@@ -218,7 +219,7 @@ describe('accueil', () => {
     expect(
       screen.getByRole('heading', { name: 'Supprimer « Oral de test » ?' }),
     ).toBeInTheDocument()
-    expect(await getSession('session-1')).not.toBeNull()
+    expect(await getHealthySession('session-1')).not.toBeNull()
   })
 
   test('exporter depuis le menu télécharge le backup', async () => {

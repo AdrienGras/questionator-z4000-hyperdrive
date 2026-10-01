@@ -21,6 +21,7 @@ const SAMPLE_PARAMS: BackupIssueParams = {
   unknown_active_student: { studentId: 'ghost' },
   unknown_projected_student: { studentId: 'ghost' },
   projection_mismatch: {},
+  invalid_adjustment: { value: 1e20 },
 }
 
 describe('messages de backup', () => {
@@ -59,6 +60,9 @@ describe('messages de backup', () => {
     expect(
       dictionary.projection_mismatch(SAMPLE_PARAMS.projection_mismatch).length,
     ).toBeGreaterThan(0)
+    expect(dictionary.invalid_adjustment(SAMPLE_PARAMS.invalid_adjustment).length).toBeGreaterThan(
+      0,
+    )
   })
 
   test('traduit un code de backup', () => {

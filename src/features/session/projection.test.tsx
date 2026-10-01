@@ -7,7 +7,10 @@ import { makeUi } from '@/testing/make-ui'
 import { categoryButton } from '@/testing/passage-assertions'
 import { FixedWidthResizeObserver } from '@/testing/resize-observer'
 import { makeStudent } from '@/testing/student-fixtures'
-import { mountSession } from '@/testing/students-tab-harness'
+import { putSession } from '@/lib/db/sessions'
+import { renderAt } from '@/testing/render-at'
+import { makeSession } from '@/testing/session-fixtures'
+import { config, mountSession } from '@/testing/students-tab-harness'
 import { ProjectionControls } from './components/projection-controls'
 
 function student(id: string, lastName: string, order: number): Student {
@@ -219,10 +222,21 @@ test('aperçu : note finale révélée', async () => {
   await waitFor(() => expect(canvas().textContent).toMatch(/Note : .* \/ 20/))
 })
 
-test('aperçu : étudiant projeté supprimé → attente', async () => {
-  await mountSession([A, B], { projection: { mode: 'student', studentId: 'inconnu' } })
+// L'attente sur un étudiant projeté inconnu est couverte par `domain/presentation/projected-view.test.ts`.
+test('aperçu : étudiant projeté inconnu → session endommagée, aucun aperçu (F31)', async () => {
+  await putSession(
+    makeSession({
+      config,
+      students: [A, B],
+      projection: { mode: 'student', studentId: 'inconnu' },
+    }),
+  )
+  renderAt('/session/session-1')
 
-  expect(canvas().textContent).toContain(WAITING)
+  expect(
+    await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
+  ).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Exporter un backup' })).toBeInTheDocument()
 })
 
 test('contrôles sous l’aperçu, hors de l’en-tête', async () => {

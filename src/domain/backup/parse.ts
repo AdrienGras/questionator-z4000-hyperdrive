@@ -1,14 +1,11 @@
 import { z } from 'zod'
 import { fromZodIssues } from '@/domain/config/from-zod'
-import type { ConfigIssue } from '@/domain/config/issues'
 import { parseJson } from '@/domain/config/parse-json'
 import type { CssSupports } from '@/domain/config/rules'
-import { validateConfig } from '@/domain/config/validate'
-import { SessionSchema } from '@/domain/session/schema'
 import type { Session } from '@/domain/session/types'
 import { BACKUP_FORMAT, BACKUP_FORMAT_VERSION } from './envelope'
 import { backupError, type BackupIssue } from './issues'
-import { checkSessionRules } from './rules'
+import { checkStoredSession } from './stored-session'
 
 export type BackupParseResult =
   { ok: true; session: Session } | { ok: false; issues: BackupIssue[] }
@@ -18,7 +15,7 @@ const BackupEnvelopeSchema = z.strictObject({
   formatVersion: z.literal(BACKUP_FORMAT_VERSION),
   appVersion: z.string().min(1),
   exportedAt: z.iso.datetime(),
-  session: SessionSchema,
+  session: z.unknown(),
 })
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -39,10 +36,6 @@ function checkFormat(value: unknown): BackupIssue | undefined {
   return undefined
 }
 
-function prefixConfigPath(issue: ConfigIssue): ConfigIssue {
-  return { ...issue, path: ['session', 'config', ...issue.path] }
-}
-
 /**
  * Valide un fichier de backup (D24, D48, D49) : JSON → format → enveloppe et session → config
  * figée (F02) → règles croisées. Pure : n'écrit rien. La config renvoyée est celle du validateur.
@@ -58,15 +51,5 @@ export function parseBackup(text: string, deps: { cssSupports: CssSupports }): B
   if (!envelope.success)
     return { ok: false, issues: fromZodIssues(envelope.error.issues, parsed.value) }
 
-  const { session } = envelope.data
-  const validated = validateConfig(JSON.stringify(session.config), deps)
-  if (!validated.ok) {
-    const errors = validated.issues.filter((issue) => issue.severity === 'error')
-    return { ok: false, issues: errors.map((issue) => prefixConfigPath(issue)) }
-  }
-
-  const candidate: Session = { ...session, config: validated.config }
-  const ruleIssues = checkSessionRules(candidate)
-  if (ruleIssues.length > 0) return { ok: false, issues: ruleIssues }
-  return { ok: true, session: candidate }
+  return checkStoredSession(envelope.data.session, deps)
 }

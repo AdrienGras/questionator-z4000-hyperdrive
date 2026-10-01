@@ -102,18 +102,30 @@ test("en-tête, liste des étudiants et changement d'étudiant actif", async () 
   expect(updated?.activeStudentId).toBe('student-2')
 })
 
-test('activeStudentId inconnu affiche « Aucun étudiant sélectionné » sans planter', async () => {
+test('activeStudentId inconnu : session endommagée, vue examinateur non ouverte (F31)', async () => {
   const config = makeConfig({ questionsPerStudent: 3 })
   await putSession(sessionWith(config, twoStudents(), 'inconnu'))
   renderAt('/session/session-1')
 
   expect(
-    await screen.findByRole('heading', { name: 'Aucun étudiant sélectionné' }),
+    await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
   ).toBeInTheDocument()
-  expect(screen.queryByRole('combobox', { name: 'Étudiant' })).not.toBeInTheDocument()
-  await studentButton('Durand Alice')
-  expectNoCurrentStudent()
+  expect(screen.getByRole('button', { name: 'Exporter un backup' })).toBeInTheDocument()
   expect(screen.queryByText(/^Question /)).not.toBeInTheDocument()
+})
+
+test('session corrompue après le montage : la page bascule sur l’écran « endommagée » (F31)', async () => {
+  const config = makeConfig({ questionsPerStudent: 3 })
+  const session = sessionWith(config, twoStudents(), 'student-1')
+  await putSession(session)
+  renderAt('/session/session-1')
+  await screen.findAllByText('Durand Alice')
+
+  await db.sessions.put({ ...session, activeStudentId: 'inconnu' })
+
+  expect(
+    await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
+  ).toBeInTheDocument()
 })
 
 test('sans activeStudentId, « Aucun étudiant sélectionné »', async () => {
@@ -197,7 +209,8 @@ test('onglet « Étudiants » mémorisé, état absent : ouvert sur « Étudiant
 })
 
 test('étudiant ayant terminé son passage affiche l’écran final', async () => {
-  const config = makeConfig({ questionsPerStudent: 3 })
+  // Barème décimal : 0,5 doit y figurer, sinon la session stockée est endommagée (F31).
+  const config = { ...makeConfig({ questionsPerStudent: 3 }), categories: [answeredCategory] }
   const [alice, bob] = twoStudents([1, 1, 0.5])
   if (alice === undefined || bob === undefined) throw new Error('fixture incomplète')
   // Note déjà révélée : sinon la popup de fin de passage s'ouvre par-dessus l'écran (D66).
@@ -341,6 +354,7 @@ test('la note qui atteint questionsPerStudent affiche « Passage terminé »', a
 
 test('question sans « answer » n’affiche aucun bloc de réponse', async () => {
   const config = makeConfig({ questionsPerStudent: 1 })
+  config.categories[0]!.questions = config.categories[0]!.questions.slice(0, 1)
   await putSession(makeSession({ config, activeStudentId: 'student-1' }))
   renderAt('/session/session-1')
 

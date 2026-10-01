@@ -1,10 +1,12 @@
 import 'fake-indexeddb/auto'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import type { Session } from '@/domain/session/types'
+import { healthy } from '@/testing/healthy-session'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
 import { db } from './db'
-import { SessionExistsError, SessionNotFoundError } from './errors'
+import { isDamaged } from './damaged-session'
+import { SessionDamagedError, SessionExistsError, SessionNotFoundError } from './errors'
 import {
   createSession,
   deleteSession,
@@ -33,7 +35,7 @@ describe('CRUD', () => {
     const error = await createSession(makeSession({ name: 'Autre' })).catch((e: unknown) => e)
     expect(error).toBeInstanceOf(SessionExistsError)
     expect(error).toMatchObject({ id: 'session-1' })
-    expect((await getSession('session-1'))?.name).toBe('Oral de test')
+    expect(healthy(await getSession('session-1'))?.name).toBe('Oral de test')
   })
 
   test('getSession renvoie null pour une session absente', async () => {
@@ -43,7 +45,7 @@ describe('CRUD', () => {
   test('putSession écrase', async () => {
     await createSession(makeSession())
     await putSession(makeSession({ name: 'Importée' }))
-    expect((await getSession('session-1'))?.name).toBe('Importée')
+    expect(healthy(await getSession('session-1'))?.name).toBe('Importée')
   })
 
   test('deleteSession supprime, et ne lève pas sur une session absente', async () => {
@@ -61,6 +63,48 @@ describe('CRUD', () => {
   })
 })
 
+/** Session dont un attempt `scored` n'a pas de score : passe le schéma, échoue aux règles. */
+function scoredWithoutScore(overrides: Partial<Session> = {}): Session {
+  const session = makeSession({ students: [makeStudent([1])], ...overrides })
+  delete session.students[0]!.attempts[0]!.score
+  return session
+}
+
+describe('lecture validée', () => {
+  test('getSession d’une session saine renvoie la session validée', async () => {
+    await db.sessions.put(makeSession())
+    expect(await getSession('session-1')).toEqual(makeSession())
+  })
+
+  test('getSession d’une session incohérente renvoie la forme endommagée', async () => {
+    const raw = scoredWithoutScore()
+    await db.sessions.put(raw)
+    const stored = await getSession('session-1')
+    if (stored === null || !isDamaged(stored)) throw new Error('session endommagée attendue')
+    expect(stored.id).toBe('session-1')
+    expect(stored.raw).toEqual(raw)
+    expect(stored.issues[0]?.code).toBe('score_mismatch')
+  })
+
+  test('listSessions mêle saines et endommagées, par updatedAt décroissant', async () => {
+    await db.sessions.put(makeSession({ id: 'a', updatedAt: '2026-09-25T08:00:00.000Z' }))
+    await db.sessions.put(scoredWithoutScore({ id: 'b', updatedAt: '2026-09-25T10:00:00.000Z' }))
+    await db.sessions.put(makeSession({ id: 'c', updatedAt: '2026-09-25T09:00:00.000Z' }))
+    const sessions = await listSessions()
+    expect(sessions.map((session) => session.id)).toEqual(['b', 'c', 'a'])
+    expect(sessions.map((session) => isDamaged(session))).toEqual([true, false, false])
+  })
+
+  test('un enregistrement sans updatedAt apparaît en fin de liste, sans lever', async () => {
+    // Table non typée : un enregistrement hors du type `Session`, comme laissé par un bug passé.
+    await db.table('sessions').put({ id: 'x' })
+    await db.sessions.put(makeSession({ id: 'a' }))
+    const sessions = await listSessions()
+    expect(sessions.map((session) => session.id)).toEqual(['a', 'x'])
+    expect(isDamaged(sessions[1]!)).toBe(true)
+  })
+})
+
 describe('updateSession', () => {
   test('applique le mutator, pose updatedAt et renvoie la session écrite', async () => {
     vi.useFakeTimers({ toFake: ['Date'] })
@@ -74,14 +118,26 @@ describe('updateSession', () => {
     expect(await getSession('session-1')).toEqual(written)
   })
 
+  test('validateur pas encore chargé : la première écriture aboutit (la transaction n’expire pas)', async () => {
+    await createSession(makeSession())
+    vi.resetModules()
+    const fresh = await import('./sessions')
+    const written = await fresh.updateSession('session-1', (session) => ({
+      ...session,
+      name: 'Fraîche',
+    }))
+    expect(written.name).toBe('Fraîche')
+    expect(healthy(await getSession('session-1'))?.name).toBe('Fraîche')
+  })
+
   test('un mutator qui renvoie la session reçue n’écrit rien', async () => {
     await createSession(makeSession())
     const put = vi.spyOn(db.sessions, 'put')
-    const stored = await getSession('session-1')
+    const stored = healthy(await getSession('session-1'))
     const result = await updateSession('session-1', (session) => session)
     expect(put).not.toHaveBeenCalled()
     expect(result).toEqual(stored)
-    expect((await getSession('session-1'))?.updatedAt).toBe(stored?.updatedAt)
+    expect(healthy(await getSession('session-1'))?.updatedAt).toBe(stored?.updatedAt)
     put.mockRestore()
   })
 
@@ -91,6 +147,21 @@ describe('updateSession', () => {
     expect(error).toBeInstanceOf(SessionNotFoundError)
     expect(error).toMatchObject({ id: 'absente' })
     expect(mutator).not.toHaveBeenCalled()
+  })
+
+  test('SessionDamagedError sur une session endommagée, sans appeler le mutator', async () => {
+    const raw = scoredWithoutScore()
+    await db.sessions.put(raw)
+    const mutator = vi.fn<(session: Session) => Session>((session) => session)
+    const error = await updateSession('session-1', mutator).catch((e: unknown) => e)
+    expect(error).toBeInstanceOf(SessionDamagedError)
+    expect(error).toMatchObject({
+      id: 'session-1',
+      name: 'SessionDamagedError',
+      message: 'Session « session-1 » endommagée : écriture refusée.',
+    })
+    expect(mutator).not.toHaveBeenCalled()
+    expect(await db.sessions.get('session-1')).toEqual(raw)
   })
 
   test('un mutator qui modifie en place puis lève ne laisse rien écrit', async () => {
@@ -124,7 +195,7 @@ describe('updateSession', () => {
       updateSession('session-1', addStudent('s-a')),
       updateSession('session-1', addStudent('s-b')),
     ])
-    const students = (await getSession('session-1'))?.students.map((student) => student.id)
+    const students = healthy(await getSession('session-1'))?.students.map((student) => student.id)
     expect(students?.toSorted()).toEqual(['s-a', 's-b'])
     expect(seen).toEqual([0, 1])
   })

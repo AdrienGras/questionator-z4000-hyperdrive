@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { validateConfig } from '@/domain/config/validate'
-import { getSession } from '@/lib/db/sessions'
+import { getHealthySession } from '@/testing/healthy-session'
 import { db, type DbStatus } from '@/lib/db/db'
 import { minimalConfig } from '@/testing/config-fixtures'
 import { useCreateForm } from './use-create-form'
@@ -122,6 +122,16 @@ describe('useCreateForm', () => {
     expect(result.current.name).not.toBe('')
   })
 
+  test('config avec un langage de code inconnu → avertissement unknown_code_language', async () => {
+    const config = minimalConfig()
+    config.categories[0]!.questions[0]!.prompt = '```pyhton\nx = 1\n```'
+    const { result } = renderForm()
+    await act(() => result.current.setConfigText(JSON.stringify(config), 'editeur.json'))
+    const slot = result.current.config
+    if (slot.kind !== 'loaded') throw new Error(`slot ${slot.kind}`)
+    expect(slot.result.issues.map((issue) => issue.code)).toEqual(['unknown_code_language'])
+  })
+
   test('état initial : deux emplacements vides, création impossible', () => {
     const { result } = renderForm()
     expect(result.current.students).toEqual({ kind: 'empty' })
@@ -239,7 +249,7 @@ describe('useCreateForm', () => {
       id = await result.current.submit()
     })
     if (id === undefined) throw new Error('aucune session créée')
-    const session = await getSession(id)
+    const session = await getHealthySession(id)
     expect(session?.name).toBe('Oral PHP')
     expect(session?.examiner).toBe('M. Dupont')
     const expected = validateConfig(JSON.stringify(minimalConfig()), { cssSupports: () => true })

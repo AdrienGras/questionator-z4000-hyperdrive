@@ -155,6 +155,32 @@ test('session supprimée pendant l’affichage : écran « introuvable »', asyn
   expect(await screen.findByText('Session introuvable')).toBeInTheDocument()
 })
 
+test('session endommagée : titre seul, ni action ni détail (F31)', async () => {
+  const session = await seed(makeStudent())
+  await putSession({ ...session, activeStudentId: 'fantome' })
+  renderAt('/present/session-1')
+
+  expect(
+    await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
+  ).toBeInTheDocument()
+  expect(screen.queryAllByRole('button')).toEqual([])
+  expect(screen.queryByText('Détails')).not.toBeInTheDocument()
+  expect(screen.queryByText(/fantome/)).not.toBeInTheDocument()
+})
+
+test('session corrompue pendant l’affichage : bascule sur l’écran « endommagée » (F31)', async () => {
+  const session = await seed(makeStudent())
+  renderAt('/present/session-1')
+  await screen.findByText(/Alice/)
+
+  await db.sessions.put({ ...session, activeStudentId: 'fantome' })
+
+  expect(
+    await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
+  ).toBeInTheDocument()
+  expect(screen.queryByText(/Alice/)).not.toBeInTheDocument()
+})
+
 test.each(['src/features/present', 'src/components/projection'])(
   'aucun import du modèle de session dans %s',
   (dir) => {

@@ -15,7 +15,8 @@ const categories: NormalizedCategory[] = [
     label: 'Algorithmique',
     scale: [0, 0.37, 1],
     order: 1,
-    questions: [1, 2, 3].map((n) => ({
+    // Quatre questions : trois par étudiant plus une passe, sinon la session est endommagée (F31).
+    questions: [1, 2, 3, 4].map((n) => ({
       id: `a-${n}`,
       title: `Titre a-${n}`,
       tags: [],
