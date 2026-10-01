@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { exportWorkbook } from '@/components/export/export-workbook'
 import { putSession } from '@/lib/db/sessions'
 import { getHealthySession } from '@/testing/healthy-session'
@@ -44,6 +44,13 @@ beforeEach(async () => {
   download.mockClear()
   vi.mocked(exportWorkbook).mockReset()
 })
+
+afterEach(() => {
+  vi.restoreAllMocks()
+})
+
+const WRITE_ERROR =
+  "L'enregistrement a échoué. La session a peut-être été supprimée dans un autre onglet."
 
 describe('accueil', () => {
   test('état vide : message seul, actions à gauche', async () => {
@@ -177,6 +184,78 @@ describe('accueil', () => {
     fireEvent.change(field, { target: { value: '  ' } })
     fireEvent.click(screen.getByRole('button', { name: 'Enregistrer' }))
     await waitFor(async () => expect('examiner' in (await storedSession())).toBe(false))
+  })
+
+  test('renommer : écriture en échec, alerte, dialogue ouvert, nom inchangé (#87)', async () => {
+    await putSession(makeSession())
+    renderAt('/')
+    await chooseAction('Renommer')
+    const field = await screen.findByRole('textbox', { name: 'Nom de la session' })
+    vi.spyOn(db.sessions, 'put').mockRejectedValueOnce(new Error('quota'))
+    fireEvent.change(field, { target: { value: 'Nouveau nom' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Enregistrer' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(WRITE_ERROR)
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(field).toHaveValue('Nouveau nom')
+    expect((await storedSession()).name).toBe('Oral de test')
+  })
+
+  test('examinateur : écriture en échec, alerte, examinateur inchangé (#87)', async () => {
+    await putSession(makeSession({ examiner: 'M. Dupont' }))
+    renderAt('/')
+    await chooseAction("Modifier l'examinateur")
+    const field = await screen.findByRole('textbox', { name: "Nom de l'examinateur" })
+    vi.spyOn(db.sessions, 'put').mockRejectedValueOnce(new Error('quota'))
+    fireEvent.change(field, { target: { value: 'Mme Martin' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Enregistrer' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(WRITE_ERROR)
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect((await storedSession()).examiner).toBe('M. Dupont')
+  })
+
+  test('supprimer : écriture en échec, alerte, dialogue ouvert, session gardée (#87)', async () => {
+    await putSession(makeSession())
+    renderAt('/')
+    await chooseAction('Supprimer')
+    const dialog = await screen.findByRole('alertdialog')
+    vi.spyOn(db.sessions, 'delete').mockRejectedValueOnce(new Error('quota'))
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Supprimer' }))
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent(WRITE_ERROR)
+    expect(within(dialog).getByRole('button', { name: 'Supprimer' })).toBeEnabled()
+    expect(screen.getByRole('alertdialog')).toBe(dialog)
+    expect(await getHealthySession('session-1')).not.toBeNull()
+  })
+
+  test('renommer : saisie annulée puis dialogue rouvert, champ revenu au nom enregistré (#87)', async () => {
+    await putSession(makeSession())
+    renderAt('/')
+    await chooseAction('Renommer')
+    fireEvent.change(await screen.findByRole('textbox', { name: 'Nom de la session' }), {
+      target: { value: 'Brouillon abandonné' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Annuler' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+
+    await chooseAction('Renommer')
+    expect(await screen.findByRole('textbox', { name: 'Nom de la session' })).toHaveValue(
+      'Oral de test',
+    )
+  })
+
+  test('supprimer : alerte d’échec effacée à la réouverture du dialogue (#87)', async () => {
+    await putSession(makeSession())
+    renderAt('/')
+    await chooseAction('Supprimer')
+    const dialog = await screen.findByRole('alertdialog')
+    vi.spyOn(db.sessions, 'delete').mockRejectedValueOnce(new Error('quota'))
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Supprimer' }))
+    await within(dialog).findByRole('alert')
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Annuler' }))
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
+
+    await chooseAction('Supprimer')
+    const reopened = await screen.findByRole('alertdialog')
+    expect(within(reopened).queryByRole('alert')).not.toBeInTheDocument()
   })
 
   test('supprimer puis annuler : base inchangée', async () => {

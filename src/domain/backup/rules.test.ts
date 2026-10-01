@@ -51,6 +51,19 @@ describe('checkSessionRules', () => {
     expect(codes(session)).toEqual(['score_mismatch', 'score_mismatch'])
   })
 
+  test('score présent sur un attempt skipped (#87)', () => {
+    const session = makeSession({ students: [makeStudent([{ skipped: 'Déjà vue' }])] })
+    session.students[0]!.attempts[0]!.score = 1
+    expect(checkSessionRules(session)).toEqual([
+      {
+        severity: 'error',
+        code: 'score_mismatch',
+        path: ['session', 'students', 0, 'attempts', 0, 'score'],
+        params: { outcome: 'skipped' },
+      },
+    ])
+  })
+
   test('skipReason hors skipped', () => {
     const session = makeSession({ students: [makeStudent([1])] })
     session.students[0]!.attempts[0]!.skipReason = 'x'

@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest'
+import { afterEach, describe, expect, test, vi } from 'vitest'
 import { APP_VERSION } from '@/lib/app-version'
 import { makeSession } from '@/testing/session-fixtures'
 import { backupFileName, serializeBackup } from './serialize'
@@ -48,5 +48,22 @@ describe('export brut (F31)', () => {
     [null, 'session'],
   ])('backupFileName(%j) → %s', (session, slug) => {
     expect(backupFileName(session, NOW)).toBe(`${slug}-backup-2026-09-25.json`)
+  })
+})
+
+describe('date du nom de fichier : locale, pas UTC (#87)', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  test('à 00:30 à Paris, le fichier porte la date du jour local, pas celle de la veille en UTC', () => {
+    // Fuseau fixé dans le test : la CI tourne en UTC, où local et UTC se confondent. Node relit
+    // `process.env.TZ` à chaque affectation (pool `forks` de Vitest : un processus par worker).
+    vi.stubEnv('TZ', 'Europe/Paris')
+    const now = new Date('2026-09-24T22:30:00.000Z')
+    // Garde : si le fuseau n'était pas appliqué, le test ne prouverait rien.
+    expect(now.getHours()).toBe(0)
+    expect(now.toISOString().slice(0, 10)).toBe('2026-09-24')
+    expect(backupFileName(makeSession({ name: 'Oral' }), now)).toBe('oral-backup-2026-09-25.json')
   })
 })

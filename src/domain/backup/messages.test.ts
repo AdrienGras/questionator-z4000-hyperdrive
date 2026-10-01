@@ -91,6 +91,14 @@ describe('messages de backup', () => {
     )
   })
 
+  test('note sur une question passée : le message cite le statut (#87)', () => {
+    const issue = backupError('score_mismatch', ['session'], { outcome: 'skipped' })
+    expect(formatBackupIssue(issue, 'fr')).toBe(
+      'Une question « skipped » ne doit pas avoir de note.',
+    )
+    expect(formatBackupIssue(issue, 'en')).toBe('A "skipped" question must not have a score.')
+  })
+
   test('délègue les issues de config', () => {
     expect(formatBackupIssue(configError('required', ['session', 'name'], {}), 'en')).toBe(
       'Required field is missing.',
