@@ -29,6 +29,8 @@ type JsonEditorProps = {
   diagnostics: readonly JsonEditorDiagnostic[]
   ariaLabel: string
   apiRef: Ref<JsonEditorApi>
+  /** Classes du conteneur ; l'éditeur en occupe toute la hauteur. */
+  className?: string
 }
 
 /**
@@ -42,6 +44,7 @@ export function JsonEditor({
   diagnostics,
   ariaLabel,
   apiRef,
+  className,
 }: Readonly<JsonEditorProps>) {
   const hostRef = useRef<HTMLDivElement>(null)
   const viewRef = useRef<EditorView | null>(null)
@@ -115,7 +118,7 @@ export function JsonEditor({
     getText: () => viewRef.current?.state.doc.toString() ?? '',
   }))
 
-  return <div ref={hostRef} />
+  return <div ref={hostRef} className={className} />
 }
 
 /** Borne les plages au document courant : un diagnostic périmé ne doit pas faire échouer la vue. */

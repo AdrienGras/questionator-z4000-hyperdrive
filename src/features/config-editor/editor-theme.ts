@@ -9,6 +9,7 @@ import { tags } from '@lezer/highlight'
  */
 export const editorChrome = EditorView.theme({
   '&': {
+    height: '100%',
     color: 'var(--foreground)',
     backgroundColor: 'var(--background)',
     border: '1px solid var(--border)',

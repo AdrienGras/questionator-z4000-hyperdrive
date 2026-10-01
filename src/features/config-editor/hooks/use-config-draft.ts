@@ -2,6 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import exampleText from '../../../../examples/config.example.json?raw'
 
+/** Texte de l'exemple livré (`examples/config.example.json`), point de départ sans brouillon. */
+export const EXAMPLE_TEXT: string = exampleText
+
 export const DRAFT_KEY = 'questionator:config-draft'
 const SAVE_DELAY_MS = 300
 

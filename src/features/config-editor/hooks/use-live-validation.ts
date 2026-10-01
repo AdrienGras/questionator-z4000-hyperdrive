@@ -15,6 +15,8 @@ export function useLiveValidation(text: string): {
   result: ValidationResult | undefined
   lastValid: NormalizedConfig | undefined
   pending: boolean
+  /** Texte auquel `result` correspond (les positions de ses issues s'y rapportent). */
+  validatedText: string | undefined
 } {
   const [state, setState] = useState<{
     result: ValidationResult | undefined
@@ -45,5 +47,6 @@ export function useLiveValidation(text: string): {
     result: state.result,
     lastValid: state.lastValid,
     pending: state.validatedText !== text,
+    validatedText: state.validatedText,
   }
 }

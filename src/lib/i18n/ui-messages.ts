@@ -213,6 +213,14 @@ export type UiMessageParams = {
   export_button: NoParams
   export_busy: NoParams
   export_error: NoParams
+  editor_title: NoParams
+  editor_label: NoParams
+  editor_source_title: NoParams
+  editor_preview_title: NoParams
+  editor_load_file: NoParams
+  editor_reset_example: NoParams
+  editor_download: NoParams
+  editor_create_session: NoParams
   editor_issues_none: NoParams
   editor_issues_count: { errors: number; warnings: number }
   editor_preview_stale: NoParams
@@ -514,6 +522,14 @@ const fr: Dictionary<UiMessageParams> = {
   export_button: () => 'Exporter en Excel',
   export_busy: () => 'Export en cours…',
   export_error: () => "L'export a échoué. Réessayez.",
+  editor_title: () => 'Éditeur de config',
+  editor_label: () => 'Configuration JSON',
+  editor_source_title: () => 'Configuration',
+  editor_preview_title: () => 'Aperçu',
+  editor_load_file: () => 'Charger un fichier',
+  editor_reset_example: () => "Repartir de l'exemple",
+  editor_download: () => 'Télécharger',
+  editor_create_session: () => 'Créer une session avec cette config',
   editor_issues_none: () => 'Aucune erreur',
   editor_issues_count: ({ errors, warnings }) =>
     `${errors} ${plural(errors, 'erreur', 'erreurs')}, ${warnings} ${plural(warnings, 'avertissement', 'avertissements')}`,
@@ -776,6 +792,14 @@ const en: Dictionary<UiMessageParams> = {
   export_button: () => 'Export to Excel',
   export_busy: () => 'Exporting…',
   export_error: () => 'Export failed. Try again.',
+  editor_title: () => 'Config editor',
+  editor_label: () => 'JSON configuration',
+  editor_source_title: () => 'Configuration',
+  editor_preview_title: () => 'Preview',
+  editor_load_file: () => 'Load a file',
+  editor_reset_example: () => 'Start from the example',
+  editor_download: () => 'Download',
+  editor_create_session: () => 'Create a session with this config',
   editor_issues_none: () => 'No errors',
   editor_issues_count: ({ errors, warnings }) =>
     `${errors} ${pluralEn(errors, 'error', 'errors')}, ${warnings} ${pluralEn(warnings, 'warning', 'warnings')}`,

@@ -45,8 +45,10 @@ describe('useLiveValidation', () => {
     const valid = result.current.lastValid
     rerender({ text: '{}' })
     expect(result.current.pending).toBe(true)
+    expect(result.current.validatedText).toBe(exampleText)
     await settle()
     expect(result.current.result?.ok).toBe(false)
+    expect(result.current.validatedText).toBe('{}')
     expect(result.current.lastValid).toBe(valid)
   })
 
