@@ -1,0 +1,64 @@
+import { act, renderHook } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import exampleText from '../../../../examples/config.example.json?raw'
+import { DRAFT_KEY, useConfigDraft } from './use-config-draft'
+
+describe('useConfigDraft', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    vi.useFakeTimers()
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  it("part de l'exemple sans brouillon", () => {
+    const { result } = renderHook(() => useConfigDraft())
+    expect(result.current.initialText).toBe(exampleText)
+  })
+
+  it('restitue le brouillon enregistré', () => {
+    localStorage.setItem(DRAFT_KEY, '{"a":1}')
+    const { result } = renderHook(() => useConfigDraft())
+    expect(result.current.initialText).toBe('{"a":1}')
+  })
+
+  it('restitue un brouillon vide tel quel', () => {
+    localStorage.setItem(DRAFT_KEY, '')
+    const { result } = renderHook(() => useConfigDraft())
+    expect(result.current.initialText).toBe('')
+  })
+
+  it('écrit le brouillon après 300 ms', () => {
+    const { result } = renderHook(() => useConfigDraft())
+    act(() => result.current.save('abc'))
+    act(() => void vi.advanceTimersByTime(299))
+    expect(localStorage.getItem(DRAFT_KEY)).toBeNull()
+    act(() => void vi.advanceTimersByTime(1))
+    expect(localStorage.getItem(DRAFT_KEY)).toBe('abc')
+  })
+
+  it("ne garde que la dernière valeur d'une rafale", () => {
+    const { result } = renderHook(() => useConfigDraft())
+    act(() => result.current.save('a'))
+    act(() => void vi.advanceTimersByTime(200))
+    act(() => result.current.save('ab'))
+    act(() => void vi.advanceTimersByTime(300))
+    expect(localStorage.getItem(DRAFT_KEY)).toBe('ab')
+  })
+
+  it('tolère un stockage qui lève : exemple et save sans exception', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('denied')
+    })
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('quota')
+    })
+    const { result } = renderHook(() => useConfigDraft())
+    expect(result.current.initialText).toBe(exampleText)
+    act(() => result.current.save('x'))
+    expect(() => act(() => void vi.advanceTimersByTime(300))).not.toThrow()
+  })
+})

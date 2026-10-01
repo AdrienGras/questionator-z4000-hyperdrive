@@ -32,7 +32,10 @@
     {
       "files": [
         "src/domain/config/example.test.ts",
-        "src/features/session/passage-example.test.tsx"
+        "src/features/session/passage-example.test.tsx",
+        "src/features/config-editor/hooks/use-config-draft.ts",
+        "src/features/config-editor/hooks/use-config-draft.test.ts",
+        "src/features/config-editor/hooks/use-live-validation.test.ts"
       ],
       "rules": { "no-restricted-imports": "off" }
     }
