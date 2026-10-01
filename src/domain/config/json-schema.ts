@@ -19,8 +19,11 @@ export function buildConfigJsonSchema(): Record<string, unknown> {
       // par zod comme un JSONSchema générique restrictif ; on le traite comme un objet mutable
       // ordinaire pour le remplacer entièrement par l'anyOf ci-dessous.
       const node = ctx.jsonSchema as Record<string, unknown>
+      const { description, default: defaultValue } = node
       for (const key of Object.keys(node)) delete node[key]
       node.anyOf = [{ enum: [...ICON_NAMES] }, { type: 'string' }]
+      if (description !== undefined) node.description = description
+      if (defaultValue !== undefined) node.default = defaultValue
     },
   })
   return {
