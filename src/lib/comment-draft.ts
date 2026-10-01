@@ -39,3 +39,19 @@ export function clearCommentDraft(
     // Voir `writeCommentDraft`.
   }
 }
+
+/**
+ * Supprime toutes les copies de la session : à appeler quand la session disparaît (suppression) ou
+ * est remplacée (import d'un backup), sinon une copie restée l'emporterait sur le commentaire
+ * importé à la prochaine ouverture du champ.
+ */
+export function clearSessionCommentDrafts(sessionId: string): void {
+  try {
+    const prefix = `${PREFIX}${sessionId}:`
+    // Clés relevées avant de supprimer : `removeItem` décale les index de `localStorage.key`.
+    const keys = Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i))
+    for (const k of keys) if (k?.startsWith(prefix) === true) localStorage.removeItem(k)
+  } catch {
+    // Voir `writeCommentDraft`.
+  }
+}
