@@ -633,3 +633,10 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : sous `prefers-reduced-motion`, `DrawReveal` remplace le mélange par un fondu (`animate-in`) ; selon le premier montage, le stub de test peut annoncer le mouvement réduit.
 **Workaround** : pour prouver qu'aucune animation n'est jouée, vérifier l'absence des cartes **et** des classes d'animation (`[data-card], .draw-reveal, .animate-in`), et prouver le test rouge en retirant le correctif. Attention aussi aux preuves par `sed` : prettier peut fusionner les lignes visées, le retrait temporaire ne s'applique alors pas.
 **Référence** : `src/components/projection/draw-reveal.tsx`, `src/components/projection/projected-screen.test.tsx`, `src/testing/match-media.ts`.
+
+## Simuler un Shift+Reload ou une heure qui passe dans un e2e de service worker (2026-10-01)
+
+**Découvert** : F36 (#84), `e2e/update.spec.ts`.
+**Symptôme** : Playwright n'a ni Shift+Reload, ni moyen d'attendre une heure ; `page.reload()` garde le contrôleur, et un `registration.update()` lancé à la main par le test masque l'absence de vérification périodique.
+**Workaround** : Shift+Reload = `context.newCDPSession(page)` puis `Page.reload` avec `ignoreCache: true` ; la page recharge sans contrôleur (`navigator.serviceWorker.controller === null`) alors qu'un worker est actif. Heure qui passe = `page.clock.install()` **avant** `goto`, puis `page.clock.fastForward('01:00:00')` : le `setInterval` de la page tourne, le service worker (horloge réelle) n'est pas touché. Pour un déploiement vu par la seule vérification périodique, modifier `sw.js` sans appeler `deploy()` (qui force `update()`).
+**Référence** : `e2e/update.spec.ts`, `src/lib/pwa/pwa-update.ts`, D86.
