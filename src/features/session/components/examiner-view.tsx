@@ -72,14 +72,14 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
   const selectStudent = async (studentId: string) => {
     if (await actions.selectStudent(studentId)) panel.setOpen(false)
   }
-  // Le booléen revient tel quel au dialogue d'ajout, qui ne se ferme que sur succès.
+  // L'issue revient telle quelle au dialogue d'ajout, qui ne se ferme que sur `written`.
   const addStudent = async (
     names: { lastName: string; firstName: string },
     options: { activate: boolean },
   ) => {
-    const added = await actions.addStudent(names, options)
-    if (added && options.activate) panel.setOpen(false)
-    return added
+    const outcome = await actions.addStudent(names, options)
+    if (outcome === 'written' && options.activate) panel.setOpen(false)
+    return outcome
   }
 
   return (

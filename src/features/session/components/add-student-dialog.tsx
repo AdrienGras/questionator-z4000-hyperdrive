@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { findDuplicate } from '@/domain/passage/selectors'
 import type { Session } from '@/domain/session/types'
+import type { WriteOutcome } from '@/features/session/hooks/use-passage-actions'
 import type { Ui } from '@/lib/i18n/use-ui'
 
 type Names = { lastName: string; firstName: string }
@@ -22,12 +23,12 @@ type AddStudentDialogProps = Readonly<{
   session: Session
   /** Écriture en cours : verrouille les deux boutons d'envoi (pas le déclencheur). */
   disabled: boolean
-  onAdd: (names: Names, options: { activate: boolean }) => Promise<boolean>
+  onAdd: (names: Names, options: { activate: boolean }) => Promise<WriteOutcome>
 }>
 
 /**
  * Dialogue d'ajout d'un étudiant en cours de session (F13). Succès : fermeture et champs vidés ;
- * échec : le dialogue reste ouvert et affiche `write_error`, seule alerte de l'écran (l'appelant
+ * échec (`failed`) : le dialogue reste ouvert et affiche `write_error`, seule alerte de l'écran (l'appelant
  * passe `ownError`, motif F30 de `ResetDialog`).
  */
 export function AddStudentDialog({ ui, session, disabled, onAdd }: AddStudentDialogProps) {
@@ -63,15 +64,16 @@ export function AddStudentDialog({ ui, session, disabled, onAdd }: AddStudentDia
     if (blocked || submitting.current) return
     submitting.current = true
     setFailed(false)
-    let succeeded = false
+    let outcome: WriteOutcome = 'ignored'
     try {
-      // `run` ne lève jamais : un échec revient en `false`.
-      succeeded = await onAdd({ lastName, firstName }, { activate })
+      // L'écriture ne lève jamais : son issue revient en `WriteOutcome`.
+      outcome = await onAdd({ lastName, firstName }, { activate })
     } finally {
       submitting.current = false
     }
-    if (succeeded) handleOpenChange(false)
-    else setFailed(true)
+    // `ignored` (une autre écriture en vol) : ni fermeture ni alerte, l'utilisateur peut réessayer.
+    if (outcome === 'written') handleOpenChange(false)
+    else if (outcome === 'failed') setFailed(true)
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {

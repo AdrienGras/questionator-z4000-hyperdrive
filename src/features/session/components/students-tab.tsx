@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import type { Session } from '@/domain/session/types'
+import type { WriteOutcome } from '@/features/session/hooks/use-passage-actions'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { AddStudentDialog } from './add-student-dialog'
 import { StudentRow } from './student-row'
@@ -15,7 +16,7 @@ type StudentsTabProps = Readonly<{
   onAdd: (
     names: { lastName: string; firstName: string },
     options: { activate: boolean },
-  ) => Promise<boolean>
+  ) => Promise<WriteOutcome>
   /** Pied de l'onglet, réservé aux actions de liste (F15, F16). */
   actionsSlot?: ReactNode
 }>

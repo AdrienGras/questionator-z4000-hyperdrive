@@ -5,6 +5,7 @@ import { formatScore } from '@/domain/scoring/format'
 import { computeScores } from '@/domain/scoring/score'
 import type { Student } from '@/domain/session/types'
 import { StudentsTab } from './components/students-tab'
+import type { WriteOutcome } from './hooks/use-passage-actions'
 import { db } from '@/lib/db/db'
 import { makeUi } from '@/testing/make-ui'
 import { makeSession } from '@/testing/session-fixtures'
@@ -122,7 +123,7 @@ test('l’onglet ne relaie pas le clic sur l’étudiant actif, mais relaie celu
       activeStudentId="s-a"
       disabled={false}
       onSelect={onSelect}
-      onAdd={vi.fn<() => Promise<boolean>>()}
+      onAdd={vi.fn<() => Promise<WriteOutcome>>()}
     />,
   )
 
@@ -196,7 +197,7 @@ test('activeStudentId orphelin : aucune ligne en aria-current', () => {
       activeStudentId="inconnu"
       disabled={false}
       onSelect={vi.fn<(id: string) => void>()}
-      onAdd={vi.fn<() => Promise<boolean>>()}
+      onAdd={vi.fn<() => Promise<WriteOutcome>>()}
     />,
   )
 

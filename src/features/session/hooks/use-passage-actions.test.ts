@@ -494,4 +494,39 @@ describe('actions du panneau (F12)', () => {
 
     expect((await getHealthySession('session-1'))?.updatedAt).toBe(initialSession.updatedAt)
   })
+
+  test('addStudent distingue écrit, ignoré (écriture déjà en vol) et échoué, sans erreur de page', async () => {
+    const initialSession = makeSession()
+    await putSession(initialSession)
+    const { result } = renderHook(() =>
+      usePassageActions('session-1', 'student-1', initialSession.updatedAt),
+    )
+    const names = { lastName: 'Martin', firstName: 'Zoé' }
+
+    let outcomes: unknown[] = []
+    await act(async () => {
+      // Même tick : le tirage pose le verrou, l'ajout est écarté sans partir en base.
+      outcomes = await Promise.all([
+        result.current.draw('a'),
+        result.current.addStudent(names, { activate: false }),
+      ])
+    })
+    expect(outcomes[1]).toBe('ignored')
+    expect((await getHealthySession('session-1'))?.students).toHaveLength(1)
+
+    let written: unknown
+    await act(async () => {
+      written = await result.current.addStudent(names, { activate: false })
+    })
+    expect(written).toBe('written')
+    expect((await getHealthySession('session-1'))?.students).toHaveLength(2)
+
+    await db.sessions.clear()
+    let failed: unknown
+    await act(async () => {
+      failed = await result.current.addStudent(names, { activate: false })
+    })
+    expect(failed).toBe('failed')
+    expect(result.current.error).toBeNull()
+  })
 })
