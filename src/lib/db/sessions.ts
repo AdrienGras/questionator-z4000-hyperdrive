@@ -24,19 +24,40 @@ export async function getSession(id: string): Promise<StoredSession | null> {
   return readStored(raw, id)
 }
 
+/** `updatedAt` d'un enregistrement brut s'il est une chaîne, sinon `undefined` (hors index). */
+function updatedAtOf(record: unknown): string | undefined {
+  if (typeof record !== 'object' || record === null || !('updatedAt' in record)) return undefined
+  const { updatedAt } = record
+  return typeof updatedAt === 'string' ? updatedAt : undefined
+}
+
 /**
- * Sessions de la plus récemment modifiée à la plus ancienne, chacune validée (F31). Un
- * enregistrement sans `updatedAt` n'est pas dans l'index : il est lu à part et ajouté en fin.
+ * Ordre de `listSessions` : `updatedAt` décroissant, à égalité `id` décroissant (l'ordre de
+ * l'index `updatedAt` parcouru à l'envers) ; les enregistrements sans `updatedAt` texte en fin,
+ * par `id` croissant (l'ordre de la clé primaire).
+ */
+function compareRecords(a: Session, b: Session): number {
+  const left = updatedAtOf(a)
+  const right = updatedAtOf(b)
+  if (left === undefined || right === undefined) {
+    if (left !== right) return left === undefined ? 1 : -1
+    return a.id < b.id ? -1 : 1
+  }
+  if (left !== right) return left < right ? 1 : -1
+  return a.id < b.id ? 1 : -1
+}
+
+/**
+ * Sessions de la plus récemment modifiée à la plus ancienne, chacune validée (F31). Une seule
+ * lecture de la table (cohérente, pas de session vue deux fois ou manquée entre deux lectures),
+ * triée en mémoire ; un enregistrement sans `updatedAt` est rangé en fin.
  */
 export async function listSessions(): Promise<StoredSession[]> {
-  // oxlint-disable-next-line unicorn/no-array-reverse -- `Collection#reverse()` de Dexie, pas `Array#reverse()` : ne mute rien, aucune collection ordinaire n'existe encore à cet endroit.
-  const indexed = await db.sessions.orderBy('updatedAt').reverse().toArray()
-  const seen = new Set(indexed.map((record) => record.id))
-  const unindexed = (await db.sessions.toArray()).filter((record) => !seen.has(record.id))
-  const records = [...indexed, ...unindexed]
+  const records = await db.sessions.toArray()
   if (records.length === 0) return []
+  const sorted = records.toSorted(compareRecords)
   const readStored = await loadReadStored()
-  return records.map((record) => readStored(record, record.id))
+  return sorted.map((record) => readStored(record, record.id))
 }
 
 /** Écrase la session de même id (import F05, après confirmation de l'utilisateur). */
