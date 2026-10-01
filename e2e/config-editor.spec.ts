@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { readFileSync } from 'node:fs'
+import type { Page } from '@playwright/test'
 import { z } from 'zod'
 import { examplePath, expect, test } from './fixtures.ts'
 import { HomePage } from './pages/home-page.ts'
@@ -42,7 +43,7 @@ function codemirrorChunk(): string {
 }
 
 /** Fichiers JS demandés par la page (`assets/…`). */
-function trackAssetRequests(page: import('@playwright/test').Page): string[] {
+function trackAssetRequests(page: Page): string[] {
   const requested: string[] = []
   page.on('request', (request) => {
     const match = /\/(assets\/[^/?#]+\.js)/.exec(request.url())
@@ -72,7 +73,7 @@ test("l'accueil ne charge pas CodeMirror ; la carte ouvre l'éditeur sur l'exemp
   const editor = await home.openEditor()
   await expect(editor.editor).toContainText('"title": "Oral PHP"')
   await expect(editor.previewQuestions).toHaveCount(exampleQuestionCount())
-  await expect(page.getByText('Aucune erreur')).toBeVisible()
+  await expect(editor.noIssues).toBeVisible()
   expect(requested).toContain(chunk)
 })
 
@@ -117,7 +118,7 @@ test('un identifiant en double : message de la création, ligne soulignée, aper
   await editor.replaceText(exampleWith('"id": "facile-002"', '"id": "facile-002-bis"'))
   await expect(editor.staleBanner).toBeHidden()
   await expect(editor.preview.getByText('facile-002-bis', { exact: true })).toBeVisible()
-  await expect(page.getByText('Aucune erreur')).toBeVisible()
+  await expect(editor.noIssues).toBeVisible()
 })
 
 test('le message du doublon est celui de la création', async ({ page }) => {
@@ -152,7 +153,12 @@ test('téléchargement, brouillon au rechargement, puis création de session', a
     return home.openEditor()
   })()
   await editor.replaceText(edited)
-  await expect(page.getByText('Aucune erreur')).toBeVisible()
+  // « Aucune erreur » est déjà vrai sur l'exemple : attendre le brouillon différé (300 ms), sinon
+  // le rechargement peut le précéder.
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem('questionator:config-draft')))
+    .toContain('Oral PHP e2e')
+  await expect(editor.noIssues).toBeVisible()
 
   // 1. Le fichier téléchargé est le texte de l'éditeur, nommé d'après le titre.
   const download = await editor.download()

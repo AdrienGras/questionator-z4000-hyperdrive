@@ -19,6 +19,9 @@ export class ConfigEditorPage {
   /** Numéro de la ligne du curseur, dans la gouttière des numéros. */
   readonly activeLineNumber: Locator
 
+  /** Compteur « Aucune erreur » de la liste des issues. */
+  readonly noIssues: Locator
+
   /** Bandeau « Aperçu périmé » (rôle `status`). */
   readonly staleBanner: Locator
 
@@ -41,6 +44,7 @@ export class ConfigEditorPage {
     this.errorLines = page.locator('.cm-line').filter({ has: page.locator('.cm-lintRange-error') })
     this.activeLine = page.locator('.cm-activeLine')
     this.activeLineNumber = page.locator('.cm-lineNumbers .cm-activeLineGutter')
+    this.noIssues = page.getByText('Aucune erreur')
     this.staleBanner = page.getByRole('status').filter({ hasText: 'Aperçu périmé' })
     this.preview = page.getByRole('region', { name: 'Aperçu' })
     this.previewQuestions = this.preview.getByRole('article')
