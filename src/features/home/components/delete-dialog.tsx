@@ -10,19 +10,27 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { deleteSession } from '@/lib/db/sessions'
-import type { Session } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { exportBackup } from '@/components/export/export-backup'
 
 type DeleteDialogProps = Readonly<{
   ui: Ui
-  session: Session
+  sessionId: string
+  name: string
+  backup: unknown
   open: boolean
   onOpenChange: (open: boolean) => void
 }>
 
 /** Confirmation de suppression ; « Exporter un backup d'abord » laisse le dialogue ouvert. */
-export function DeleteDialog({ ui, session, open, onOpenChange }: DeleteDialogProps) {
+export function DeleteDialog({
+  ui,
+  sessionId,
+  name,
+  backup,
+  open,
+  onOpenChange,
+}: DeleteDialogProps) {
   const { text } = ui
   const [deleting, setDeleting] = useState(false)
   const [failed, setFailed] = useState(false)
@@ -36,7 +44,7 @@ export function DeleteDialog({ ui, session, open, onOpenChange }: DeleteDialogPr
     setDeleting(true)
     setFailed(false)
     try {
-      await deleteSession(session.id)
+      await deleteSession(sessionId)
       onOpenChange(false)
     } catch {
       setFailed(true)
@@ -49,7 +57,7 @@ export function DeleteDialog({ ui, session, open, onOpenChange }: DeleteDialogPr
     <AlertDialog open={open} onOpenChange={changeOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{text('delete_title', { name: session.name })}</AlertDialogTitle>
+          <AlertDialogTitle>{text('delete_title', { name })}</AlertDialogTitle>
           <AlertDialogDescription>{text('delete_body', {})}</AlertDialogDescription>
         </AlertDialogHeader>
         {failed && (
@@ -58,7 +66,7 @@ export function DeleteDialog({ ui, session, open, onOpenChange }: DeleteDialogPr
           </p>
         )}
         <AlertDialogFooter>
-          <Button variant="outline" onClick={() => exportBackup(session)}>
+          <Button variant="outline" onClick={() => exportBackup(backup)}>
             {text('delete_export_first', {})}
           </Button>
           <AlertDialogCancel>{text('dialog_cancel', {})}</AlertDialogCancel>

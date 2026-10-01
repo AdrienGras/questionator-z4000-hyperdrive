@@ -35,6 +35,7 @@ const SAMPLE: UiMessageParams = {
   session_loading: {},
   session_not_found: {},
   damaged_title: {},
+  damaged_badge: {},
   damaged_body: {},
   damaged_details: {},
   present_waiting: {},

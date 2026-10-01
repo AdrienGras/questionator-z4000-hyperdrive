@@ -137,7 +137,9 @@ export function SessionCard({ ui, session }: SessionCardProps) {
       />
       <DeleteDialog
         ui={ui}
-        session={session}
+        sessionId={session.id}
+        name={session.name}
+        backup={session}
         open={dialog === 'delete'}
         onOpenChange={openChangeFor('delete')}
       />

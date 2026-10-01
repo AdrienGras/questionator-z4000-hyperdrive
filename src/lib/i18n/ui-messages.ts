@@ -34,6 +34,7 @@ export type UiMessageParams = {
   session_loading: NoParams
   session_not_found: NoParams
   damaged_title: NoParams
+  damaged_badge: NoParams
   damaged_body: NoParams
   damaged_details: NoParams
   present_waiting: NoParams
@@ -356,6 +357,7 @@ const fr: Dictionary<UiMessageParams> = {
   session_loading: () => 'Chargement de la session…',
   session_not_found: () => 'Session introuvable',
   damaged_title: () => 'Cette session est endommagée',
+  damaged_badge: () => 'Endommagée',
   damaged_body: () =>
     'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Exportez un backup pour le conserver ou le corriger.',
   damaged_details: () => 'Détails',
@@ -641,6 +643,7 @@ const en: Dictionary<UiMessageParams> = {
   session_loading: () => 'Loading session…',
   session_not_found: () => 'Session not found',
   damaged_title: () => 'This session is damaged',
+  damaged_badge: () => 'Damaged',
   damaged_body: () =>
     'The saved content is inconsistent; the app cannot open it. Export a backup to keep it or fix it.',
   damaged_details: () => 'Details',
