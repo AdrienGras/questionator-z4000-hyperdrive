@@ -640,3 +640,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : Playwright n'a ni Shift+Reload, ni moyen d'attendre une heure ; `page.reload()` garde le contrôleur, et un `registration.update()` lancé à la main par le test masque l'absence de vérification périodique.
 **Workaround** : Shift+Reload = `context.newCDPSession(page)` puis `Page.reload` avec `ignoreCache: true` ; la page recharge sans contrôleur (`navigator.serviceWorker.controller === null`) alors qu'un worker est actif. Heure qui passe = `page.clock.install()` **avant** `goto`, puis `page.clock.fastForward('01:00:00')` : le `setInterval` de la page tourne, le service worker (horloge réelle) n'est pas touché. Pour un déploiement vu par la seule vérification périodique, modifier `sw.js` sans appeler `deploy()` (qui force `update()`).
 **Référence** : `e2e/update.spec.ts`, `src/lib/pwa/pwa-update.ts`, D86.
+
+## Le survol JSON de VS Code ignore `default` : passer par `markdownDescription` (2026-10-01)
+
+**Découvert** : F32 (#80), revue finale de la branche.
+**Symptôme** : un JSON Schema avec `description` et `default` n'affiche, au survol d'une clé dans VS Code, que la description ; le défaut n'apparaît nulle part.
+**Cause** : `doHover` de `vscode-json-languageservice` n'utilise que `title`, `markdownDescription` (à défaut `description`) et les descriptions d'enum, jamais `default`.
+**Workaround** : `buildConfigJsonSchema` recopie le défaut dans `markdownDescription` (`description` + « Défaut : `…` ») sur chaque nœud décrit, après `toJSONSchema` et après l'`override` d'icône. `description` reste brut, l'éditeur de l'app s'en sert.
+**Référence** : `src/domain/config/json-schema.ts`, `src/domain/config/json-schema.test.ts`, D87.

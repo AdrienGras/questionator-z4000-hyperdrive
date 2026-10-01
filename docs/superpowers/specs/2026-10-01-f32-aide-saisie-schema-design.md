@@ -51,7 +51,7 @@ Aucune dépendance à CodeMirror ni à React : texte, position et JSON Schema en
 - `schemaAt(root, path)` : descend par `properties[clé]` pour une clé, `items` pour un indice ; à travers `anyOf`, prend la première branche qui sait répondre. Renvoie `undefined` hors schéma (clé inconnue).
 - `completionsAt(text, offset, root)` : `getLocation(text, offset)` de `jsonc-parser`.
   - Sur une clé (`isAtPropertyKey`) : propriétés de l'objet parent absentes du texte (clés sœurs lues par `parseTree` + `findNodeAtLocation`), chacune avec sa description. Insertion : `"clé": ` ; la plage remplacée couvre le jeton en cours (guillemets compris).
-  - Sur une valeur : `enum` et `const` (JSON sérialisé), `true` / `false` pour `boolean`, `null` si le type l'admet, à travers `anyOf` (donc les ~5 000 noms d'icônes Tabler, filtrés par CodeMirror à la frappe).
+  - Sur une valeur : `enum` et `const` (JSON sérialisé), `true` / `false` pour `boolean`, `null` si le type l'admet, à travers `anyOf` (donc les ~6 200 noms d'icônes Tabler, filtrés par CodeMirror à la frappe).
   - Texte invalide en cours de frappe : `getLocation` tolère l'erreur ; si le chemin ne mène à aucun nœud, aucune proposition.
 - `hoverAt(text, offset, root)` : sur une clé connue, `{ from, to, description, default? }` ; ailleurs, `undefined`.
 - `configJsonSchema()` : `buildConfigJsonSchema()` mémorisé (un seul calcul par chargement de page).
