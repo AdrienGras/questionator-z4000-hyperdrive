@@ -625,3 +625,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : jsdom n'a pas d'animation, Base UI démonte donc le popup aussitôt `open` passé à `false` (rien à observer) ; un dialogue modal pose `aria-hidden` sur le reste de la page.
 **Workaround** : tester la rétention du contenu par son hook (`useRetained`) ; chercher l'élément de page avec `getByRole('main', { hidden: true })` pour y simuler un dépôt pendant qu'un dialogue est ouvert. Un dépôt sur le dialogue lui-même remonte bien au contrôleur dans le navigateur (les portails React suivent l'arbre React).
 **Référence** : `src/features/home/hooks/use-retained.ts`, `src/features/home/components/import-controller.test.tsx`.
+
+## Le stub `matchMedia` des tests annonce `prefers-reduced-motion` : un tirage animé n'y montre pas de cartes (2026-10-01)
+
+**Découvert** : F33 (#81), test « deux homonymes à la suite » de `projected-screen.test.tsx`.
+**Symptôme** : un test qui attend « pas de cartes de mélange » (`[data-card]`) passe même quand l'animation se déclenche à tort.
+**Cause** : sous `prefers-reduced-motion`, `DrawReveal` remplace le mélange par un fondu (`animate-in`) ; selon le premier montage, le stub de test peut annoncer le mouvement réduit.
+**Workaround** : pour prouver qu'aucune animation n'est jouée, vérifier l'absence des cartes **et** des classes d'animation (`[data-card], .draw-reveal, .animate-in`), et prouver le test rouge en retirant le correctif. Attention aussi aux preuves par `sed` : prettier peut fusionner les lignes visées, le retrait temporaire ne s'applique alors pas.
+**Référence** : `src/components/projection/draw-reveal.tsx`, `src/components/projection/projected-screen.test.tsx`, `src/testing/match-media.ts`.

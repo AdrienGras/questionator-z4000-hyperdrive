@@ -1278,3 +1278,17 @@ autre encodage 8 bits.
 **Pourquoi** : un seul mécanisme, testé une fois, qui ne remplace jamais une action en cours.
 
 **Reporté** : `docs/CONVENTIONS.md` § « Fichier déposé et lu », `docs/QUIRKS.md` (jsdom et dialogues), `docs/BACKLOG.md` (items → #82 retirés).
+
+## D85 — F33 : finitions de la vue projetée (états des tuiles, détail final, clés de montage, animation figée) (2026-10-01)
+
+**Question** : la vue projetée atténuait de la même façon une catégorie épuisée et une catégorie non tirable (question en cours, passage terminé), inventait « 0 » pour une question notée sans note, remontait l'écran sur le nom affiché (deux homonymes partageaient un montage) et rejouait le mélange quand `drawAnimation` changeait pendant une question.
+
+**Décision** :
+- Tuiles à cinq états (`data-state`) : `exhausted` (atténuation forte, pointillés, « Épuisée »), `current` (catégorie de la question en cours, bordure épaisse), `waiting` (une autre question est en cours : atténuation légère, **sans libellé**, pour ne pas charger l'écran à chaque question), `unavailable` (passage terminé : atténuation légère et « Indisponible »), `available`. Choix de l'utilisateur en session : le libellé « Indisponible » seulement en fin de passage.
+- Détail final : « catégorie · titre » ; une question notée sans note affiche « — », jamais une note inventée.
+- `ProjectedView` gagne `student.order` (clé de montage de l'écran étudiant) et `detail[].questionId` (clé de ligne). Pas l'`id` de l'étudiant : le test d'étanchéité de D69 l'interdit ; l'ordre de passage n'apprend rien de plus que l'écran lui-même.
+- `DrawReveal` fige `animate` au montage.
+
+**Pourquoi** : l'étudiant comprend pourquoi une catégorie est grisée sans que l'écran se charge de libellés à chaque question ; aucune donnée inventée ne s'affiche devant la salle.
+
+**Reporté** : `docs/QUIRKS.md` (stub `matchMedia` et mouvement réduit), `docs/BACKLOG.md` (items → #81 retirés, restes → #87).
