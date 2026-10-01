@@ -26,13 +26,13 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ## 2026-10-01 — F30 (#78) : finitions de l'écran de passage
 
-**Dernière chose faite** : F30 implémentée sur `feat/78-finitions-passage` (D82). Fixtures d'écran partagées (`src/testing/screen-fixtures.ts`) ; dialogue d'ajustement (focus sur le champ, − / + bornés à ±`finalScale`, `run(mutator, { ownError })` pour `adjust` / `revealFinal`) ; « aucun » pour un ajustement absent ou nul ; `useFreshError` dans `SidePanel` et `AddStudentDialog` ; « Annuler » et Échap verrouillés pendant l'écriture dans quatre dialogues ; `useAutosave` flushe sur `pagehide`.
+**Dernière chose faite** : F30 implémentée sur `feat/78-finitions-passage` (D82). Fixtures d'écran partagées (`src/testing/screen-fixtures.ts`) ; dialogue d'ajustement (focus sur le champ, − / + bornés à ±`finalScale`, `run(mutator, { ownError })` pour `adjust` / `revealFinal`) ; « aucun » pour un ajustement absent ou nul ; `useFreshError` dans `SidePanel` et `AddStudentDialog` ; « Annuler » et Échap verrouillés pendant l'écriture dans quatre dialogues ; `useAutosave` flushe sur `pagehide` et `CommentField` garde une copie synchrone du commentaire dans `localStorage` (`comment-draft.ts`) : taper puis recharger immédiatement retrouve la saisie (e2e `comment-reload.spec.ts`).
 
-**Trucs en suspens** : ouvrir la PR (brouillon), `.claude/scripts/sonar-check.sh --pr <n> --wait`, passer en « Ready for review », merger sur le go de l'utilisateur. Le flush `pagehide` ne sauve PAS un commentaire tapé juste avant `page.reload()` (mesuré en e2e : `put` jamais appelé avant le déchargement) ; pas de test e2e, test unitaire seul. Item BACKLOG (copie synchrone) ajouté.
+**Trucs en suspens** : ouvrir la PR (brouillon), `.claude/scripts/sonar-check.sh --pr <n> --wait`, passer en « Ready for review », merger sur le go de l'utilisateur.
 
 **Prochaine chose à creuser** : #83 (F35, fichiers d'entrée plus tolérants), selon l'ordre convenu #76, #79, #78, #83, #82, #81.
 
-**Notes pour future Claude** : une erreur ne s'affiche que dans la surface où elle est survenue (`ownError` + `useFreshError`, CONVENTIONS § « Dialogue de saisie »). Mineurs reportés au BACKLOG (→ #87) : `deferred<T>()` dupliqué, `setTimeout(100)` dans `stale-errors.test.tsx`, commentaire sur `PassageActions`. Fixtures locales restantes : échelle `[0, 1, 2, 3]` (side-panel, student-tab), `skip` à quatre questions. QUIRKS : `pagehide` et Dexie asynchrone.
+**Notes pour future Claude** : une erreur ne s'affiche que dans la surface où elle est survenue (`ownError` + `useFreshError`, CONVENTIONS § « Dialogue de saisie »). Mineurs reportés au BACKLOG (→ #87) : `deferred<T>()` dupliqué, `setTimeout(100)` dans `stale-errors.test.tsx`, commentaire sur `PassageActions`. Fixtures locales restantes : échelle `[0, 1, 2, 3]` (side-panel, student-tab), `skip` à quatre questions. QUIRKS : écriture IndexedDB à `pagehide`. Une copie locale restée en place l'emporte sur un commentaire changé dans un autre onglet (D82).
 
 ## 2026-10-01 — F31 (#79) : sessions endommagées, échelle hors grille refusée, persistance relue
 

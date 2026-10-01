@@ -127,4 +127,3 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Helper de test `deferred<T>()` dupliqué dans `import-controller.test.tsx` et `add-student.test.tsx` : le sortir dans `src/testing/` (F30). → #87
 - [ ] `stale-errors.test.tsx` attend avec `setTimeout(100)` : attendre un état observable à la place (F30). → #87
 - [ ] Commenter sur `PassageActions` que `adjust` et `revealFinal` laissent l'affichage de l'erreur à l'appelant (`ownError`) (F30). → #87
-- [ ] Commentaire tapé dans les 500 ms avant un rechargement ou une fermeture d'onglet : le flush `pagehide` de `useAutosave` part, mais `updateSession` (import à la demande, lecture, écriture Dexie) ne rend pas la main avant le déchargement, l'écriture est perdue (mesuré en e2e Chromium, F30). Piste : copie synchrone (`localStorage`) du commentaire en attente, relue au montage. → #87

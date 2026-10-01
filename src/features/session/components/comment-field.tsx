@@ -1,7 +1,12 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import type { Student } from '@/domain/session/types'
+import {
+  clearCommentDraft,
+  readCommentDraft,
+  writeCommentDraft,
+} from '@/features/session/comment-draft'
 import { useAutosave, type AutosaveStatus } from '@/features/session/hooks/use-autosave'
 import type { Ui } from '@/lib/i18n/use-ui'
 import type { UiMessageParams } from '@/lib/i18n/ui-messages'
@@ -23,6 +28,7 @@ const STATUS_KEY: Record<AutosaveStatus, CommentStatusKey | undefined> = {
 
 type CommentFieldProps = Readonly<{
   ui: Ui
+  sessionId: string
   student: Student
   onSave: (studentId: string, comment: string) => Promise<boolean>
 }>
@@ -32,12 +38,27 @@ type CommentFieldProps = Readonly<{
  * local n'est initialisé qu'une fois, la liveQuery n'écrase donc jamais la frappe, et le démontage
  * (changement d'étudiant) flushe la dernière valeur sur l'étudiant de CE montage (Review Focus 1).
  */
-export function CommentField({ ui, student, onSave }: CommentFieldProps) {
+export function CommentField({ ui, sessionId, student, onSave }: CommentFieldProps) {
   const { text } = ui
   const id = useId()
-  const [value, setValue] = useState(student.comment ?? '')
   const studentId = student.id
-  const { schedule, flush, status } = useAutosave((comment) => onSave(studentId, comment))
+  // Copie locale laissée par un rechargement avant l'enregistrement : elle l'emporte si elle diffère.
+  const [restored] = useState(() => {
+    const draft = readCommentDraft(sessionId, studentId)
+    return draft !== undefined && draft !== (student.comment ?? '') ? draft : undefined
+  })
+  const [value, setValue] = useState(restored ?? student.comment ?? '')
+  const { schedule, flush, status } = useAutosave(async (comment) => {
+    const ok = await onSave(studentId, comment)
+    if (ok) clearCommentDraft(sessionId, studentId, comment)
+    return ok
+  })
+  useEffect(() => {
+    if (restored === undefined) clearCommentDraft(sessionId, studentId)
+    else schedule(restored)
+    // Au montage seulement : le champ est monté par étudiant (`key`).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const statusKey = STATUS_KEY[status]
   const announcedKey = ANNOUNCED_KEY[status]
 
@@ -51,6 +72,7 @@ export function CommentField({ ui, student, onSave }: CommentFieldProps) {
         value={value}
         onChange={(event) => {
           setValue(event.target.value)
+          writeCommentDraft(sessionId, studentId, event.target.value)
           schedule(event.target.value)
         }}
         onBlur={flush}

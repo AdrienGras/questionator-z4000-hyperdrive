@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test'
 import type { Download, Locator, Page } from '@playwright/test'
 import { PresentPage } from './present-page.ts'
 import { StatsPage } from './stats-page.ts'
@@ -70,6 +71,23 @@ export class ExaminerPage {
       .waitFor()
     await this.page.getByRole('button', { name: 'Fermer le panneau' }).click()
     await this.page.getByRole('dialog', { name: 'Panneau latéral' }).waitFor({ state: 'hidden' })
+  }
+
+  /** Saisit le commentaire (onglet « Étudiant ») sans quitter le champ ni attendre l'enregistrement. */
+  async typeCommentWithoutSaving(text: string): Promise<void> {
+    await this.openPanel('Étudiant')
+    await this.page.getByRole('textbox', { name: 'Commentaire' }).fill(text)
+  }
+
+  /** Rouvre l'onglet « Étudiant » : le commentaire est dans le champ et finit enregistré. */
+  async expectCommentRestoredAndSaved(text: string): Promise<void> {
+    await this.openPanel('Étudiant')
+    await expect(this.page.getByRole('textbox', { name: 'Commentaire' })).toHaveValue(text)
+    await this.page
+      .getByRole('dialog', { name: 'Panneau latéral' })
+      .getByText('Enregistré', { exact: true })
+      .first()
+      .waitFor()
   }
 
   /** Ouvre la vue projetée dans une nouvelle fenêtre et renvoie son écran. */

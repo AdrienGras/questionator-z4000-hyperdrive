@@ -610,7 +610,6 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Workaround** : `SHIKI_CHUNK` (`scripts/check-initial-bundle.ts`) et `CATALOG_KEY` (`e2e/languages.spec.ts`) acceptent les deux formes de clé ; ne pas ajouter de groupe `langs`.
 **Référence** : `scripts/check-initial-bundle.ts`, `e2e/languages.spec.ts`.
 
-## `pagehide` ne laisse pas finir une écriture Dexie asynchrone
+## Une écriture IndexedDB lancée à `pagehide` ne finit pas avant le déchargement
 
-`useAutosave` écoute `pagehide` et flushe, mais `updateSession` enchaîne un `import()` mémoïsé, une lecture puis un `put` : en Chromium (vérifié en e2e, `page.reload()` juste après la frappe), `put` n'est jamais appelé avant le déchargement, le commentaire est perdu. Ne pas écrire de test e2e « taper puis recharger » sans attente : il échoue. Voir D82.
-
+`useAutosave` écoute `pagehide`, mais `updateSession` enchaîne un `import()` mémoïsé, une lecture puis un `put` : en Chromium (vérifié en e2e, `page.reload()` juste après la frappe), `put` n'est jamais appelé avant le déchargement. Pour qu'une saisie survive à un rechargement immédiat, il faut une copie **synchrone** dans `localStorage` (`comment-draft.ts`, D82), relue au montage. Même en e2e : le test ne doit ni attendre ni quitter le champ avant `reload()`.

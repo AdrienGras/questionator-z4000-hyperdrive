@@ -187,6 +187,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
                   <CommentField
                     key={student.id}
                     ui={ui}
+                    sessionId={session.id}
                     student={student}
                     onSave={actions.setComment}
                   />
