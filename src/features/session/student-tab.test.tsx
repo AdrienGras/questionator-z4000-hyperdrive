@@ -10,7 +10,7 @@ import { renderAt } from '@/testing/render-at'
 import { expectPanelClosed, openSidePanel } from '@/testing/side-panel-assertions'
 import { panel, REVEALED, screenConfig } from '@/testing/screen-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
-import { makeStudent } from '@/testing/student-fixtures'
+import { makeStudent, makeSecondStudent } from '@/testing/student-fixtures'
 import { storedSession as stored, storedStudent } from '@/testing/stored-session'
 
 const ABSENT_BODY = 'Décochez « Absent » dans le panneau pour le faire passer.'
@@ -44,15 +44,6 @@ function commentBox(): HTMLElement {
 
 function absentBox(): HTMLElement {
   return within(panel()).getByRole('checkbox', { name: 'Absent' })
-}
-
-function bob(): Student {
-  return makeStudent([], {
-    id: 'student-2',
-    lastName: 'Martin',
-    firstName: 'Bob',
-    order: 2,
-  })
 }
 
 beforeEach(async () => {
@@ -144,7 +135,7 @@ test('commentaire : survit au rechargement et à la réinitialisation', async ()
 })
 
 test('commentaire tapé puis changement d’étudiant avant le délai : enregistré sur le premier', async () => {
-  await mount([makeStudent([]), bob()])
+  await mount([makeStudent([]), makeSecondStudent()])
 
   fireEvent.change(commentBox(), { target: { value: 'Pour Alice' } })
   // L'onglet « Étudiant » reste monté : seul le changement d'étudiant démonte `CommentField`
@@ -157,7 +148,7 @@ test('commentaire tapé puis changement d’étudiant avant le délai : enregist
 })
 
 test('commentaire tapé puis passage à l’onglet « Étudiants » : enregistré, étudiant suivant vide', async () => {
-  await mount([makeStudent([]), bob()])
+  await mount([makeStudent([]), makeSecondStudent()])
 
   fireEvent.change(commentBox(), { target: { value: 'Pour Alice' } })
   fireEvent.click(within(panel()).getByRole('tab', { name: 'Étudiants' }))
@@ -281,7 +272,7 @@ test('décocher absent sans dialogue, écriture en échec : l’alerte de page r
 test('dialogue d’absence ouvert pour Alice, Bob devient actif ailleurs : c’est Alice qui est absente', async () => {
   // Ids d'attempts propres à Bob : un id en double rendrait la session endommagée (F31).
   const bobAttempts = makeStudent([1]).attempts.map((attempt) => ({ ...attempt, id: 'bob-1' }))
-  await mount([makeStudent([2, 1]), { ...bob(), attempts: bobAttempts }])
+  await mount([makeStudent([2, 1]), { ...makeSecondStudent(), attempts: bobAttempts }])
   await grid()
 
   fireEvent.click(absentBox())

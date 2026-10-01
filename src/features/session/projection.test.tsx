@@ -1,12 +1,11 @@
 import 'fake-indexeddb/auto'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import type { Student } from '@/domain/session/types'
 import { db } from '@/lib/db/db'
 import { makeUi } from '@/testing/make-ui'
 import { categoryButton } from '@/testing/passage-assertions'
 import { FixedWidthResizeObserver } from '@/testing/resize-observer'
-import { makeStudent } from '@/testing/student-fixtures'
+import { makeStudent, makeListStudent } from '@/testing/student-fixtures'
 import { putSession } from '@/lib/db/sessions'
 import { renderAt } from '@/testing/render-at'
 import { makeSession } from '@/testing/session-fixtures'
@@ -14,12 +13,8 @@ import { config, mountSession } from '@/testing/students-tab-harness'
 import { ProjectionBanner } from './components/projection-banner'
 import { ProjectionControls } from './components/projection-controls'
 
-function student(id: string, lastName: string, order: number): Student {
-  return makeStudent([], { id, lastName, firstName: 'X', order })
-}
-
-const A = student('s-a', 'Aba', 1)
-const B = student('s-b', 'Bec', 2)
+const A = makeListStudent('s-a', 'Aba', 1)
+const B = makeListStudent('s-b', 'Bec', 2)
 
 const project = () => screen.getByRole('button', { name: 'Projeter cet étudiant' })
 const waiting = () => screen.getByRole('button', { name: /Écran d.attente/ })

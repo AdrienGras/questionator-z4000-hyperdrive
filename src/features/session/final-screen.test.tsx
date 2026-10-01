@@ -8,7 +8,7 @@ import { categoryButton, outsidePanel } from '@/testing/passage-assertions'
 import { renderAt } from '@/testing/render-at'
 import { REVEALED, screenConfig } from '@/testing/screen-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
-import { makeStudent } from '@/testing/student-fixtures'
+import { makeStudent, makeSecondStudent } from '@/testing/student-fixtures'
 import { storedSession as stored } from '@/testing/stored-session'
 
 beforeEach(async () => {
@@ -38,16 +38,6 @@ async function openFinal(
 
 function done(overrides: Partial<Student> = {}): Student {
   return makeStudent([13.5], { finalRevealedAt: REVEALED, ...overrides })
-}
-
-function bob(attempts: Parameters<typeof makeStudent>[0] = [], overrides: Partial<Student> = {}) {
-  return makeStudent(attempts, {
-    id: 'student-2',
-    lastName: 'Martin',
-    firstName: 'Bob',
-    order: 2,
-    ...overrides,
-  })
 }
 
 function row(label: string): HTMLElement {
@@ -151,7 +141,7 @@ test('annuler la réinitialisation n’écrit rien', async () => {
 })
 
 test('« Étudiant suivant » change l’étudiant actif et remet la projection en attente (D73)', async () => {
-  await openFinal(done(), 1, [bob()])
+  await openFinal(done(), 1, [makeSecondStudent()])
 
   fireEvent.click(screen.getByRole('button', { name: 'Étudiant suivant' }))
 
@@ -162,7 +152,7 @@ test('« Étudiant suivant » change l’étudiant actif et remet la projection 
 })
 
 test('dernier étudiant restant : bouton désactivé et mention visible', async () => {
-  await openFinal(done(), 1, [bob([], { absent: true })])
+  await openFinal(done(), 1, [makeSecondStudent([], { absent: true })])
 
   expect(screen.getByRole('button', { name: 'Étudiant suivant' })).toBeDisabled()
   expect(screen.getByText('Tous les étudiants sont passés')).toBeVisible()

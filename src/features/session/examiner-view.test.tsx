@@ -6,7 +6,12 @@ import { putSession } from '@/lib/db/sessions'
 import { categoryButton, outsidePanel } from '@/testing/passage-assertions'
 import { expectColorModeToggleLast, bannerInteractiveNames } from '@/testing/page-shell-assertions'
 import { makeSession } from '@/testing/session-fixtures'
-import { makeConfig, type AttemptSpec, makeStudent } from '@/testing/student-fixtures'
+import {
+  makeConfig,
+  type AttemptSpec,
+  makeStudent,
+  makeSecondStudent,
+} from '@/testing/student-fixtures'
 import { renderAt } from '@/testing/render-at'
 import {
   expectPanelClosed,
@@ -44,7 +49,7 @@ function twoStudents(
       firstName: 'Alice',
       order: 1,
     }),
-    makeStudent(bobAttempts, { id: 'student-2', lastName: 'Martin', firstName: 'Bob', order: 2 }),
+    makeSecondStudent(bobAttempts),
   ]
 }
 
@@ -463,11 +468,7 @@ test('key={attempt.id} : changer d’étudiant vers un autre pending referme le 
         },
       ],
     }),
-    makeStudent([], {
-      id: 'student-2',
-      lastName: 'Martin',
-      firstName: 'Bob',
-      order: 2,
+    makeSecondStudent([], {
       attempts: [
         {
           id: 'attempt-2',

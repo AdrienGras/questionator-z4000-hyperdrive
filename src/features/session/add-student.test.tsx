@@ -6,27 +6,13 @@ import { db } from '@/lib/db/db'
 import { AddStudentDialog } from './components/add-student-dialog'
 import { makeUi } from '@/testing/make-ui'
 import { makeSession } from '@/testing/session-fixtures'
-import { makeStudent } from '@/testing/student-fixtures'
+import { makeStudent, makeListStudent } from '@/testing/student-fixtures'
 import { expectPanelStaysOpen, openSidePanel } from '@/testing/side-panel-assertions'
 import { config, mountStudentsTab } from '@/testing/students-tab-harness'
 import { storedSession as stored } from '@/testing/stored-session'
 import { deferred } from '@/testing/deferred'
 
-const alice = makeStudent([], {
-  id: 's-a',
-  lastName: 'Aba',
-  firstName: 'X',
-  order: 1,
-  attempts: [
-    {
-      id: 'attempt-1',
-      categoryId: 'a',
-      questionId: 'a-1',
-      drawnAt: '2026-09-25T09:00:00.000Z',
-      outcome: 'pending',
-    },
-  ],
-})
+const alice = makeListStudent('s-a', 'Aba', 1, ['pending'])
 const durand = makeStudent([], { id: 's-d', lastName: 'Durand', firstName: 'Élodie', order: 2 })
 
 async function mount(students: Student[] = [alice, durand], overrides: Partial<Session> = {}) {

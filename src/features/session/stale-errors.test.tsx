@@ -8,7 +8,7 @@ import { openSidePanel } from '@/testing/side-panel-assertions'
 import { mountSession } from '@/testing/students-tab-harness'
 import { REVEALED } from '@/testing/screen-fixtures'
 import { storedSession } from '@/testing/stored-session'
-import { makeStudent } from '@/testing/student-fixtures'
+import { makeStudent, makeListStudent } from '@/testing/student-fixtures'
 
 const failing = vi.hoisted(() => ({ on: false }))
 
@@ -20,7 +20,7 @@ vi.mock('@/lib/db/sessions', async (importOriginal) => {
   return { ...original, updateSession }
 })
 
-const alice = makeStudent([], { id: 's-a', lastName: 'Aba', firstName: 'X', order: 1 })
+const alice = makeListStudent('s-a', 'Aba', 1)
 const bob = makeStudent([], { id: 's-b', lastName: 'Bob', firstName: 'Y', order: 2 })
 
 beforeEach(async () => {
@@ -124,13 +124,7 @@ test('dialogue d’ajout : l’erreur périmée ne réapparaît pas après un no
 })
 
 test('« Étudiant suivant » sans suivant : l’erreur ne s’affiche pas à l’ouverture du tiroir', async () => {
-  const done = makeStudent([2, 1], {
-    id: 's-a',
-    lastName: 'Aba',
-    firstName: 'X',
-    order: 1,
-    finalRevealedAt: REVEALED,
-  })
+  const done = makeListStudent('s-a', 'Aba', 1, [2, 1], { finalRevealedAt: REVEALED })
   await mountSession([done, bob])
   const next = await screen.findByRole('button', { name: 'Étudiant suivant' })
   const stored = await storedSession()

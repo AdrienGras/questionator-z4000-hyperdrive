@@ -9,12 +9,12 @@ import { db } from '@/lib/db/db'
 import { makeUi } from '@/testing/make-ui'
 import { makeSession } from '@/testing/session-fixtures'
 import { expectPanelClosed, openSidePanel, panelButton } from '@/testing/side-panel-assertions'
-import { makeStudent } from '@/testing/student-fixtures'
+import { makeListStudent } from '@/testing/student-fixtures'
 import { config, mountStudentsTab as mount } from '@/testing/students-tab-harness'
 import { storedSession as stored } from '@/testing/stored-session'
 
 function student(id: string, lastName: string, order: number, overrides: Partial<Student> = {}) {
-  return makeStudent([], { id, lastName, firstName: 'X', order, ...overrides })
+  return makeListStudent(id, lastName, order, [], overrides)
 }
 
 function list(): HTMLElement {
@@ -145,21 +145,7 @@ test('après le changement d’étudiant, le focus revient au bouton « Panneau 
 })
 
 test('aller-retour A → B → A avec une question en cours : rien n’est perdu', async () => {
-  const alice = makeStudent([], {
-    id: 's-a',
-    lastName: 'Aba',
-    firstName: 'X',
-    order: 1,
-    attempts: [
-      {
-        id: 'attempt-1',
-        categoryId: 'a',
-        questionId: 'a-1',
-        drawnAt: '2026-09-25T09:00:00.000Z',
-        outcome: 'pending',
-      },
-    ],
-  })
+  const alice = makeListStudent('s-a', 'Aba', 1, ['pending'])
   await mount([alice, student('s-b', 'Bec', 2)])
   // `hidden` : le tiroir modal ouvert masque le reste de la page aux requêtes par rôle.
   await screen.findByRole('heading', { level: 2, name: 'Titre a-1', hidden: true })
@@ -179,11 +165,7 @@ test('aller-retour A → B → A avec une question en cours : rien n’est perdu
 
 test('notes : à passer « brute · — », terminé avec ajustement, absent', async () => {
   const todo = student('s-a', 'Aba', 1)
-  const done = makeStudent([2, 1], {
-    id: 's-b',
-    lastName: 'Bec',
-    firstName: 'X',
-    order: 2,
+  const done = makeListStudent('s-b', 'Bec', 2, [2, 1], {
     adjustment: { value: 1, reason: 'Bonne tenue' },
   })
   const absent = student('s-c', 'Cha', 3, { absent: true })
