@@ -177,11 +177,11 @@ export function ConfigEditorPage() {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           className={cn(
-            'min-w-0 rounded-xl outline-2 outline-offset-4 outline-transparent lg:sticky lg:top-4 lg:self-start',
+            'min-w-0 rounded-xl outline-2 outline-offset-4 outline-transparent lg:sticky lg:top-4 lg:h-[calc(100svh-2rem)] lg:self-start',
             dragging && 'outline-primary outline-dashed',
           )}
         >
-          <section aria-labelledby={sourceTitleId} className="flex flex-col gap-3">
+          <section aria-labelledby={sourceTitleId} className="flex flex-col gap-3 lg:h-full">
             <h2 id={sourceTitleId} className="text-xl font-semibold">
               {t('editor_source_title', {})}
             </h2>
@@ -222,10 +222,13 @@ export function ConfigEditorPage() {
               diagnostics={diagnostics}
               ariaLabel={t('editor_label', {})}
               apiRef={editor}
-              className="h-[60vh] lg:h-[calc(100svh-12rem)]"
+              className="h-[60vh] lg:h-auto lg:min-h-0 lg:flex-1"
             />
             {result !== undefined && (
-              <IssueList ui={ui} issues={result.issues} onSelect={selectIssue} />
+              // Bornée : la colonne collée tient dans l'écran, la liste y reste toujours visible.
+              <div className="max-h-48 shrink-0 overflow-auto">
+                <IssueList ui={ui} issues={result.issues} onSelect={selectIssue} />
+              </div>
             )}
           </section>
         </div>

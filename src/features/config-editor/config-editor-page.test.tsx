@@ -120,6 +120,18 @@ describe('ConfigEditorPage', () => {
     await waitFor(() => expect(editorView().state.doc.toString()).toBe('{"b":2}'))
   })
 
+  it('remplace le texte une seule fois quand le fichier est lâché sur l’éditeur lui-même', async () => {
+    await renderEditor()
+    const content = document.querySelector<HTMLElement>('.cm-content')
+    if (content === null) throw new Error('contenu de l’éditeur absent')
+    const file = new File(['{"c":3}'], 'c.json')
+    fireEvent.drop(content, { dataTransfer: { files: [file], types: ['Files'] } })
+    await waitFor(() => expect(editorView().state.doc.toString()).toBe('{"c":3}'))
+    // Laisse à une éventuelle lecture concurrente (FileReader de CodeMirror) le temps d'aboutir.
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(editorView().state.doc.toString()).toBe('{"c":3}')
+  })
+
   it('passe la config valide à l’écran de création', async () => {
     const { router } = await renderEditor()
     await previewReady()

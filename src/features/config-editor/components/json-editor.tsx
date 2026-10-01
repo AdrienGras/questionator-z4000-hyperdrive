@@ -3,7 +3,7 @@ import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import { json } from '@codemirror/lang-json'
 import { bracketMatching, indentOnInput } from '@codemirror/language'
 import { lintGutter, setDiagnostics } from '@codemirror/lint'
-import { EditorState } from '@codemirror/state'
+import { EditorState, Prec } from '@codemirror/state'
 import { EditorView, keymap, lineNumbers } from '@codemirror/view'
 import { useEffect, useImperativeHandle, useRef, type Ref } from 'react'
 import { editorTheme } from '@/features/config-editor/editor-theme'
@@ -73,6 +73,13 @@ export function JsonEditor({
           indentOnInput(),
           bracketMatching(),
           json(),
+          // Fichier lâché : la page remplace tout le texte. Déclaré traité ici pour que CodeMirror
+          // ne l'insère pas aussi au point de dépôt ; l'événement DOM remonte quand même à React.
+          Prec.highest(
+            EditorView.domEventHandlers({
+              drop: (event) => (event.dataTransfer?.files.length ?? 0) > 0,
+            }),
+          ),
           lintGutter(),
           editorTheme,
           keymap.of([...closeBracketsKeymap, ...defaultKeymap, ...historyKeymap]),
