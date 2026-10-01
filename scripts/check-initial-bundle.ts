@@ -97,12 +97,8 @@ export type BundleTarget = {
   name: string
   /** Clé du chunk produit par son groupe `codeSplitting` (`_<nom>-<hash>.js`). */
   chunk: RegExp
-  /**
-   * Clé du manifeste du module qui doit l'atteindre statiquement (garde de non-vacuité). Absente
-   * tant qu'aucun module chargé paresseusement n'importe la bibliothèque : seule la détection de
-   * fuite s'applique alors.
-   */
-  importer?: string
+  /** Clé du manifeste du module qui doit l'atteindre statiquement (garde de non-vacuité). */
+  importer: string
   /** Motif interdit dans le graphe statique depuis les entrées. */
   forbidden: RegExp
   /** Piste ajoutée aux problèmes de vacuité quand la cause probable diffère du message générique. */
@@ -123,11 +119,11 @@ export const SHIKI_FORBIDDEN =
   /(?:^_langs[.-])|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@shikijs\/langs\/)|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?shiki\/dist\/langs)/
 
 /**
- * CodeMirror (F26) : `@codemirror/*` et `@lezer/*`, importés par `JsonEditor` seul, chargé à la demande.
- * Pas d'`importer` pour l'instant : l'éditeur n'est monté par aucune route avant la suite de F26 ;
- * renseigner la clé de la route dès qu'elle le charge paresseusement (garde de non-vacuité).
+ * CodeMirror (F26) : `@codemirror/*` et `@lezer/*`, importés par `JsonEditor` seul, que la route
+ * `/editor` charge à la demande (autoCodeSplitting TanStack).
  */
 export const CODEMIRROR_CHUNK = /^_codemirror[.-]/
+export const CODEMIRROR_IMPORTER = 'src/routes/editor.tsx?tsr-split=component'
 export const CODEMIRROR_FORBIDDEN =
   /(?:^_codemirror[.-])|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@(?:codemirror|lezer)\/)/
 
@@ -147,7 +143,12 @@ export const BUNDLE_TARGETS: BundleTarget[] = [
     vacuityHint:
       ' (cause probable : un import statique de `shiki/langs` inline le catalogue dans l’entrée)',
   },
-  { name: 'codemirror', chunk: CODEMIRROR_CHUNK, forbidden: CODEMIRROR_FORBIDDEN },
+  {
+    name: 'codemirror',
+    chunk: CODEMIRROR_CHUNK,
+    importer: CODEMIRROR_IMPORTER,
+    forbidden: CODEMIRROR_FORBIDDEN,
+  },
 ]
 
 /** Problèmes (vacuité puis fuites) de chaque cible ; [] si le bundle initial est propre. */
@@ -156,12 +157,9 @@ export function checkTargets(
   targets: BundleTarget[],
 ): string[] {
   return targets.flatMap((target) => [
-    ...(target.importer === undefined
-      ? []
-      : findVacuityProblems(manifest, target.chunk, target.importer).map(
-          (problem) =>
-            `${target.name} : contrôle sans objet, ${problem}${target.vacuityHint ?? ''}`,
-        )),
+    ...findVacuityProblems(manifest, target.chunk, target.importer).map(
+      (problem) => `${target.name} : contrôle sans objet, ${problem}${target.vacuityHint ?? ''}`,
+    ),
     // Contrôlées même si la garde échoue : une fuite explique souvent l'absence de l'importeur.
     ...findInitialLeaks(manifest, target.forbidden).map(
       (leak) => `${target.name} fuit dans le bundle initial : ${leak}`,

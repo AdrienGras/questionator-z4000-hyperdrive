@@ -4,7 +4,9 @@ import {
   checkTargets,
   findInitialLeaks,
   findVacuityProblems,
+  CODEMIRROR_CHUNK,
   CODEMIRROR_FORBIDDEN,
+  CODEMIRROR_IMPORTER,
   RECHARTS_FORBIDDEN,
   RECHARTS_CHUNK,
   STATS_ROUTE_KEY,
@@ -133,12 +135,18 @@ const PYTHON_KEY =
   'node_modules/.pnpm/@shikijs+langs@4.4.3/node_modules/@shikijs/langs/dist/python.mjs'
 
 /** Manifeste à trois cibles : Recharts (route des stats), xlsx (écriture du classeur) et Shiki (validateur). */
-const THREE_TARGETS: Record<string, ManifestChunk> = {
+const ALL_TARGETS: Record<string, ManifestChunk> = {
   ...REAL_MANIFEST,
   'index.html': {
     ...REAL_MANIFEST['index.html'],
-    dynamicImports: [STATS_ROUTE_KEY, XLSX_IMPORTER],
+    dynamicImports: [STATS_ROUTE_KEY, XLSX_IMPORTER, CODEMIRROR_IMPORTER],
   },
+  [CODEMIRROR_IMPORTER]: {
+    file: 'assets/editor-Cm1.js',
+    isDynamicEntry: true,
+    imports: ['_vendor-DqVrg90E.js', '_codemirror-Xy12Zw34.js'],
+  },
+  '_codemirror-Xy12Zw34.js': { file: 'assets/codemirror-Xy12Zw34.js' },
   [XLSX_IMPORTER]: {
     file: 'assets/write-workbook.js',
     isDynamicEntry: true,
@@ -166,14 +174,28 @@ describe('cibles multiples', () => {
       'codemirror',
     ])
     expect(BUNDLE_TARGETS[1]).toMatchObject({ chunk: XLSX_CHUNK, importer: XLSX_IMPORTER })
+    expect(BUNDLE_TARGETS[3]).toMatchObject({
+      chunk: CODEMIRROR_CHUNK,
+      importer: CODEMIRROR_IMPORTER,
+    })
   })
 
-  it('ne trouve aucun problème sur un manifeste propre aux trois cibles', () => {
-    expect(problemsOf(THREE_TARGETS)).toEqual([])
+  it('signale la vacuité de codemirror quand la route de l’éditeur ne l’atteint plus', () => {
+    const manifest = {
+      ...ALL_TARGETS,
+      [CODEMIRROR_IMPORTER]: { file: 'assets/editor-Cm1.js', isDynamicEntry: true },
+    }
+    expect(problemsOf(manifest)).toEqual([
+      `codemirror : contrôle sans objet, ${CODEMIRROR_IMPORTER} n'importe pas statiquement _codemirror-Xy12Zw34.js`,
+    ])
+  })
+
+  it('ne trouve aucun problème sur un manifeste propre aux quatre cibles', () => {
+    expect(problemsOf(ALL_TARGETS)).toEqual([])
   })
 
   it('signale la vacuité de xlsx quand son chunk est absent', () => {
-    const manifest = { ...THREE_TARGETS }
+    const manifest = { ...ALL_TARGETS }
     delete manifest['_xlsx-Ab12Cd34.js']
     manifest[XLSX_IMPORTER] = { file: 'assets/write-workbook.js', isDynamicEntry: true }
     const problems = problemsOf(manifest)
@@ -183,9 +205,9 @@ describe('cibles multiples', () => {
 
   it('signale une fuite quand xlsx est atteint statiquement depuis l’entrée', () => {
     const manifest: Record<string, ManifestChunk> = {
-      ...THREE_TARGETS,
+      ...ALL_TARGETS,
       'index.html': {
-        ...THREE_TARGETS['index.html'],
+        ...ALL_TARGETS['index.html'],
         imports: ['_vendor-DqVrg90E.js', '_xlsx-Ab12Cd34.js'],
       },
     }
@@ -195,9 +217,9 @@ describe('cibles multiples', () => {
 
   it('signale le catalogue Shiki importé statiquement par l’entrée', () => {
     const manifest: Record<string, ManifestChunk> = {
-      ...THREE_TARGETS,
+      ...ALL_TARGETS,
       'index.html': {
-        ...THREE_TARGETS['index.html'],
+        ...ALL_TARGETS['index.html'],
         imports: ['_vendor-DqVrg90E.js', '_langs-WOor098P.js'],
       },
     }
@@ -207,9 +229,9 @@ describe('cibles multiples', () => {
 
   it('signale une grammaire importée statiquement par l’entrée', () => {
     const manifest: Record<string, ManifestChunk> = {
-      ...THREE_TARGETS,
+      ...ALL_TARGETS,
       'index.html': {
-        ...THREE_TARGETS['index.html'],
+        ...ALL_TARGETS['index.html'],
         imports: ['_vendor-DqVrg90E.js', PYTHON_KEY],
       },
     }
@@ -218,7 +240,7 @@ describe('cibles multiples', () => {
 
   it('signale la vacuité de shiki quand le catalogue n’est plus atteint par le validateur', () => {
     const manifest: Record<string, ManifestChunk> = {
-      ...THREE_TARGETS,
+      ...ALL_TARGETS,
       [SHIKI_IMPORTER]: { file: 'assets/validate.js', isDynamicEntry: true },
     }
     expect(findVacuityProblems(manifest, SHIKI_CHUNK, SHIKI_IMPORTER)[0]).toMatch(
@@ -227,7 +249,7 @@ describe('cibles multiples', () => {
   })
 
   it('explique la vacuité de shiki par l’inlining du catalogue dans l’entrée', () => {
-    const manifest = { ...THREE_TARGETS }
+    const manifest = { ...ALL_TARGETS }
     delete manifest['_langs-WOor098P.js']
     manifest[SHIKI_IMPORTER] = { file: 'assets/validate.js', isDynamicEntry: true }
     expect(problemsOf(manifest)).toEqual([
