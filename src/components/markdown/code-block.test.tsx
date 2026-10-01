@@ -139,11 +139,14 @@ describe('CodeBlock', () => {
 })
 
 describe('double thème Shiki (src/index.css)', () => {
-  test('les règles claire et sombre choisissent la variable du token et du fond', () => {
+  test('les règles claire et sombre choisissent la variable du token', () => {
     const compact = css.replaceAll(/\s+/g, ' ')
-    expect(compact).toContain('.shiki { background-color: var(--shiki-light-bg); }')
     expect(compact).toContain('.shiki span { color: var(--shiki-light); }')
-    expect(compact).toContain('.dark .shiki { background-color: var(--shiki-dark-bg); }')
     expect(compact).toContain('.dark .shiki span { color: var(--shiki-dark); }')
+  })
+
+  test('le fond du thème Shiki n’est pas repris : même fond que le bloc brut (F24)', () => {
+    expect(css).not.toContain('--shiki-light-bg')
+    expect(css).not.toContain('--shiki-dark-bg')
   })
 })
