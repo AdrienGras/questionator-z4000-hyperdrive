@@ -26,9 +26,36 @@ export function buildConfigJsonSchema(): Record<string, unknown> {
       if (defaultValue !== undefined) node.default = defaultValue
     },
   })
+  addMarkdownDescriptions(schema)
   return {
     ...schema,
     $id: CONFIG_SCHEMA_URL,
     title: 'Questionator Z-4000 Hyperdrive — configuration',
   }
+}
+
+/**
+ * Le survol de vscode-json-languageservice n'affiche que `title`, `markdownDescription` (à défaut
+ * `description`) et les descriptions d'enum, jamais `default` : on le recopie dans
+ * `markdownDescription`. `description` reste brut (l'éditeur de l'app l'affiche tel quel).
+ */
+function addMarkdownDescriptions(node: unknown): void {
+  if (typeof node !== 'object' || node === null) return
+  if (Array.isArray(node)) {
+    for (const item of node) addMarkdownDescriptions(item)
+    return
+  }
+  const record = node as Record<string, unknown>
+  if (typeof record.description === 'string') {
+    record.markdownDescription =
+      'default' in record
+        ? `${record.description}\n\nDéfaut : \`${JSON.stringify(record.default)}\``
+        : record.description
+  }
+  const { properties, items, anyOf } = record
+  if (typeof properties === 'object' && properties !== null) {
+    for (const child of Object.values(properties)) addMarkdownDescriptions(child)
+  }
+  addMarkdownDescriptions(items)
+  addMarkdownDescriptions(anyOf)
 }

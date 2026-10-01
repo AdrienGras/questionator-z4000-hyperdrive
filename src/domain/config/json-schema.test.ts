@@ -4,6 +4,7 @@ import { buildConfigJsonSchema } from './json-schema'
 
 interface Node {
   description?: string
+  markdownDescription?: string
   default?: unknown
   anyOf?: Node[]
   items?: Node
@@ -23,6 +24,17 @@ function missingDescriptions(node: Node, path = ''): string[] {
   if (node.items) missing.push(...missingDescriptions(node.items, `${path}[]`))
   for (const alternative of node.anyOf ?? [])
     missing.push(...missingDescriptions(alternative, path))
+  return missing
+}
+
+/** Chemins des nœuds avec `description` mais sans `markdownDescription`. */
+function missingMarkdown(node: Node, path = ''): string[] {
+  const missing: string[] = []
+  if (node.description !== undefined && node.markdownDescription === undefined) missing.push(path)
+  for (const [key, child] of Object.entries(node.properties ?? {}))
+    missing.push(...missingMarkdown(child, path === '' ? key : `${path}.${key}`))
+  if (node.items) missing.push(...missingMarkdown(node.items, `${path}[]`))
+  for (const alternative of node.anyOf ?? []) missing.push(...missingMarkdown(alternative, path))
   return missing
 }
 
@@ -52,6 +64,24 @@ describe('JSON Schema de config : aide à la saisie', () => {
         expect(property(property(root(), section), key).default).toStrictEqual(value)
       }
     }
+  })
+
+  test('markdownDescription ajoute le défaut (le survol VS Code ignore `default`)', () => {
+    const rounding = property(property(root(), 'scoring'), 'rounding')
+    const mode = property(rounding, 'mode')
+    expect(mode.markdownDescription).toContain('Défaut : `"nearest"`')
+    expect(property(rounding, 'step').markdownDescription).toContain('Défaut : `null`')
+    expect(mode.description).not.toContain('Défaut :')
+    const locale = property(root(), 'locale')
+    expect(locale.markdownDescription).toBe(
+      locale.description + ('default' in locale ? `\n\nDéfaut : \`${JSON.stringify(locale.default)}\`` : ''),
+    )
+    const scoring = property(root(), 'scoring')
+    expect('default' in scoring).toBe(false)
+    expect(scoring.markdownDescription).toBe(scoring.description)
+    expect(missingMarkdown(root())).toEqual([])
+    const icon = property(property(root(), 'categories').items, 'icon')
+    expect(icon.markdownDescription).toBeDefined()
   })
 
   test('icon garde sa description à côté de son anyOf', () => {
