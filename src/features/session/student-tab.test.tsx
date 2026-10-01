@@ -296,10 +296,24 @@ test('échec d’écriture sur « Déclarer absent » : dialogue ouvert avec le 
   fireEvent.click(within(dialog).getByRole('button', { name: 'Déclarer absent' }))
 
   expect(await within(dialog).findByRole('alert')).toHaveTextContent("L'enregistrement a échoué")
+  // Une seule alerte : celle du dialogue, pas celle de la page (D82).
+  expect(screen.getAllByRole('alert', { hidden: true })).toHaveLength(1)
   expect(screen.getByRole('alertdialog')).toBeInTheDocument()
   const student = await storedStudent()
   expect(student.absent).toBe(false)
   expect(student.attempts).toHaveLength(2)
+})
+
+test('décocher absent sans dialogue, écriture en échec : l’alerte de page reste affichée', async () => {
+  await mount([makeStudent([], { absent: true })])
+  await screen.findByText(ABSENT_BODY)
+  vi.spyOn(db.sessions, 'put').mockRejectedValueOnce(new Error('disque plein'))
+
+  fireEvent.click(absentBox())
+
+  expect(await screen.findByRole('alert')).toHaveTextContent('Rechargez la page')
+  expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+  expect((await storedStudent()).absent).toBe(true)
 })
 
 test('dialogue d’absence ouvert pour Alice, Bob devient actif ailleurs : c’est Alice qui est absente', async () => {

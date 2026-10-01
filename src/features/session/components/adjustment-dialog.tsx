@@ -225,6 +225,7 @@ function AdjustmentForm({
             value={input}
             aria-invalid={value === null}
             aria-describedby={value === null ? errorId : undefined}
+            onFocus={(event) => event.currentTarget.select()}
             onChange={(event) => setInput(event.target.value)}
           />
           <Button

@@ -168,6 +168,19 @@ test('mode « ajuster », « Enregistrer » : ajustement sans toucher à la rév
   expect(student.finalRevealedAt).toBe(REVEALED)
 })
 
+test('ouverture : le contenu du champ est sélectionné, taper remplace la valeur', async () => {
+  await mount(makeStudent([13.5]))
+  const dialog = await findDialog()
+  const input = field(dialog)
+
+  // jsdom ne simule pas la frappe sur une sélection : on prouve la sélection elle-même
+  // (tout le contenu, donc une frappe réelle remplace la valeur au lieu de s'y ajouter).
+  await waitFor(() => expect(input).toHaveFocus())
+  expect(input.value).toBe('0')
+  expect(input.selectionStart).toBe(0)
+  expect(input.selectionEnd).toBe(input.value.length)
+})
+
 test('calcul en direct', async () => {
   await mount(makeStudent([13.5]))
   const dialog = await findDialog()

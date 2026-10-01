@@ -29,7 +29,11 @@ export type PassageActions = {
   reset: () => Promise<boolean>
   editScore: (attemptId: string, score: number) => Promise<void>
   setComment: (studentId: string, comment: string) => Promise<boolean>
-  setAbsent: (studentId: string, absent: boolean) => Promise<boolean>
+  setAbsent: (
+    studentId: string,
+    absent: boolean,
+    options?: { ownError?: boolean },
+  ) => Promise<boolean>
   addStudent: (
     names: { lastName: string; firstName: string },
     options: { activate: boolean },
@@ -152,7 +156,7 @@ export function usePassageActions(
 
   const reset = useCallback(() => {
     if (studentId === undefined) return Promise.resolve(false)
-    return run((session) => resetStudent(session, studentId))
+    return run((session) => resetStudent(session, studentId), { ownError: true })
   }, [run, studentId])
 
   const next = useCallback(async () => {
@@ -191,9 +195,14 @@ export function usePassageActions(
 
   // L'étudiant est explicite : le dialogue d'absence le capture à l'ouverture, un changement
   // d'étudiant actif pendant qu'il est ouvert ne détourne donc pas la déclaration (D67).
+  // `ownError` : seul le dialogue de confirmation affiche son propre échec ; cocher/décocher sans
+  // dialogue garde l'alerte de page (D82).
   const setAbsent = useCallback(
-    (targetStudentId: string, absent: boolean) =>
-      run((session) => setAbsentTransition(session, { studentId: targetStudentId, absent })),
+    (targetStudentId: string, absent: boolean, options: { ownError?: boolean } = {}) =>
+      run(
+        (session) => setAbsentTransition(session, { studentId: targetStudentId, absent }),
+        options,
+      ),
     [run],
   )
 

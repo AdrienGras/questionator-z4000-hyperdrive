@@ -149,6 +149,8 @@ test('réinitialisation en échec : dialogue ouvert avec le message d’erreur, 
   fireEvent.click(within(dialog).getByRole('button', { name: 'Réinitialiser' }))
 
   expect(await within(dialog).findByRole('alert')).toHaveTextContent("L'enregistrement a échoué")
+  // Une seule alerte : celle du dialogue, pas celle de la page (D82).
+  expect(screen.getAllByRole('alert', { hidden: true })).toHaveLength(1)
   expect(screen.getByRole('alertdialog')).toBeInTheDocument()
   expect((await stored()).students[0]?.attempts).toHaveLength(1)
 })
