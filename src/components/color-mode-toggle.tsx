@@ -39,7 +39,8 @@ export function ColorModeToggle({ ui }: Readonly<{ ui: Ui }>) {
           }}
         >
           {MODES.map((value) => (
-            <DropdownMenuRadioItem key={value} value={value}>
+            // base-ui garde un RadioItem ouvert par défaut ; ouvert, le menu capte le clic suivant (#76).
+            <DropdownMenuRadioItem key={value} value={value} closeOnClick>
               {label(value)}
             </DropdownMenuRadioItem>
           ))}

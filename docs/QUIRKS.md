@@ -560,3 +560,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : un `LocaleProvider` imbriqué appelle `declare(locale)` auprès du provider racine, qui écrit sur `<html>` la dernière locale déclarée. C'est voulu pour une vue de session qui prend toute la page, pas pour un fragment.
 **Workaround** : `LocaleScope` (non déclarant) fixe la langue des descendants sans appeler `declare`, et l'appelant pose `lang` sur le conteneur local. Garder l'habillage dans la langue de l'interface (`ui` reçu en prop, `lang={ui.locale}` sur les intitulés).
 **Référence** : `src/lib/i18n/locale-context.tsx`, `src/features/config-editor/components/config-preview.tsx`.
+
+## `Menu.RadioItem` et `Menu.CheckboxItem` de base-ui ne ferment pas le menu au clic (2026-10-01)
+
+**Découvert** : bug #76 (menu de thème).
+**Symptôme** : après le choix d'un mode, la valeur change mais le menu reste ouvert ; dans un vrai navigateur, il capte le clic suivant sur la page (un tirage, une note) jusqu'à Échap ou un clic extérieur. jsdom ne reproduit pas la capture du clic : seul l'e2e la montre.
+**Cause** : `closeOnClick` vaut `false` par défaut sur `Menu.RadioItem` et `Menu.CheckboxItem` (choix multiples attendus), alors qu'il vaut `true` sur `Menu.Item`.
+**Workaround** : passer `closeOnClick` sur l'item quand un choix doit refermer le menu. base-ui rend alors le focus au déclencheur, au clavier comme à la souris.
+**Référence** : `src/components/color-mode-toggle.tsx`, `e2e/color-mode.spec.ts`, `node_modules/@base-ui/react/menu/radio-item/MenuRadioItem.d.ts`.

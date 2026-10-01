@@ -45,6 +45,12 @@ export class ExaminerPage {
       .click()
   }
 
+  /** Choisit un mode d'affichage (« Clair », « Sombre », « Système ») dans le menu de thème. */
+  async chooseColorMode(label: string): Promise<void> {
+    await this.page.getByRole('button', { name: /^Mode d'affichage/ }).click()
+    await this.page.getByRole('menuitemradio', { name: label }).click()
+  }
+
   /** Note la question en cours (`value` : la valeur affichée, ex. « 1 » ou « 0,5 »). */
   async score(value: string): Promise<void> {
     await this.page.getByRole('button', { name: `Noter ${value}`, exact: true }).click()

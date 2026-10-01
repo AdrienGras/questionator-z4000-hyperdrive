@@ -83,7 +83,6 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Thème et langue
 
-- [ ] Le menu du bouton de thème (`DropdownMenuRadioItem`, base-ui) reste ouvert après le choix d'un mode et bloque les clics de la page jusqu'à Échap ou un clic extérieur ; constaté en F21. Piste : fermer le menu à la sélection. → #76
 - [ ] Garde-fou de build : un script de fin de build qui échoue si un chunk autre que `icons-*` contient `IconBrandPhp`, ou si `index-*` dépasse un budget. `chunkSizeWarningLimit: 2400` ne surveille plus les autres chunks (D37). → #86
 - [ ] Synchroniser le mode entre deux fenêtres d'une même vue (événement `storage`, via `useSyncExternalStore`). Aujourd'hui, la valeur est lue une fois par clé.
 - [ ] Tests manquants de `LocaleProvider` : changement de la locale du propriétaire avec une déclaration active, deux imbriqués frères de même locale. → #87

@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-01 — #76 corrigé : le menu de thème se ferme au choix d'un mode
+
+**Dernière chose faite** : priorités relues avec l'utilisateur, qui a validé une vague de fix dans cet ordre : #76, #79, #78, #83, #82, #81 ; ensuite #84, #80, puis les chores (#85 pas avant le 28/10). #77 reste à faire à la main par l'utilisateur ; #71 à #74 n'ont pas de priorité. #76 corrigé sur `fix/76-menu-theme` : `closeOnClick` sur les `DropdownMenuRadioItem` de `ColorModeToggle`, deux tests unitaires (souris et clavier) et un e2e `color-mode.spec.ts` (changement de mode puis tirage), rouge sans le correctif.
+
+**Trucs en suspens** : PR de #76 (brouillon, Sonar, puis « Ready for review »), merge sur go de l'utilisateur. Un premier `pnpm check` a eu un test unitaire en échec, que je n'ai pas pu identifier ; cinq exécutions suivantes (suite seule et `pnpm check`) sont vertes. À surveiller.
+
+**Prochaine chose à creuser** : #79 (F31, robustesse des données persistées), en partant de `main` à jour après le merge de #76.
+
+**Notes pour future Claude** : `RadioItem` et `CheckboxItem` de base-ui gardent le menu ouvert par défaut (QUIRKS). Le blocage du clic suivant ne se voit pas dans jsdom : le reproduire en e2e. Le filtre `rtk vitest` échoue sur ce dépôt (« All parsing tiers failed ») : lancer `rtk proxy pnpm exec vitest run …`.
+
 ## 2026-10-01 — F26 mergé, BACKLOG relu et découpé en tickets (#76 à #88)
 
 **Dernière chose faite** : PR #75 (F26) mergée sur go de l'utilisateur. BACKLOG relu item par item avec l'utilisateur, et 13 tickets créés, tous au Project n°3 en Backlog :
