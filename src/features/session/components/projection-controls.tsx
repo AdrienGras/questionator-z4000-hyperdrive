@@ -39,7 +39,10 @@ export function ProjectionControls({
       current.window.focus()
       return
     }
+    // Même document (origine et chemin, la base de l'app), sans les paramètres de recherche de la
+    // page examinateur : la vue projetée n'en lit aucun, et elle n'hérite de rien de cette page.
     const url = new URL(location.href)
+    url.search = ''
     url.hash = `/present/${sessionId}`
     const opened = window.open(url, WINDOW_NAME)
     presentWindow.current = opened === null ? null : { sessionId, window: opened }

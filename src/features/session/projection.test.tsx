@@ -11,6 +11,7 @@ import { putSession } from '@/lib/db/sessions'
 import { renderAt } from '@/testing/render-at'
 import { makeSession } from '@/testing/session-fixtures'
 import { config, mountSession } from '@/testing/students-tab-harness'
+import { ProjectionBanner } from './components/projection-banner'
 import { ProjectionControls } from './components/projection-controls'
 
 function student(id: string, lastName: string, order: number): Student {
@@ -96,6 +97,22 @@ test('« Ouvrir la vue projetée » ouvre une fenêtre puis la refocalise sans l
   expect(focus).toHaveBeenCalledTimes(1)
 })
 
+test('URL de la fenêtre projetée : sans paramètres de recherche de la page examinateur', async () => {
+  const { win } = fakeWindow()
+  const openSpy = stubOpen(win)
+  const initial = location.href
+  history.replaceState(null, '', '/app/?search=Durand&x=1')
+  try {
+    await mountSession([A, B])
+
+    fireEvent.click(open())
+
+    expect(String(openSpy.mock.calls[0]?.[0])).toBe(`${location.origin}/app/#/present/session-1`)
+  } finally {
+    history.replaceState(null, '', initial)
+  }
+})
+
 test('une fenêtre fermée est rouverte au clic suivant', async () => {
   const { win } = fakeWindow()
   const openSpy = stubOpen(win)
@@ -168,6 +185,26 @@ test('fenêtre d’une autre session : rouverte, pas ramenée', () => {
   expect(focus).not.toHaveBeenCalled()
 })
 
+test('écriture en cours (`disabled`) : projeter et attente désactivés, ouverture toujours possible', () => {
+  const props = {
+    ui: makeUi(),
+    sessionId: 'session-1',
+    // Les deux boutons seraient actifs sans écriture en cours : B projeté, A actif.
+    projection: { mode: 'student', studentId: 's-b' } as const,
+    activeStudentId: 's-a',
+    onProject: vi.fn<() => Promise<boolean>>(() => Promise.resolve(true)),
+  }
+  const { rerender } = render(<ProjectionControls {...props} disabled={false} />)
+  expect(project()).toBeEnabled()
+  expect(waiting()).toBeEnabled()
+
+  rerender(<ProjectionControls {...props} disabled />)
+
+  expect(project()).toBeDisabled()
+  expect(waiting()).toBeDisabled()
+  expect(open()).toBeEnabled()
+})
+
 test('bandeau : projection sur un autre étudiant que l’actif', async () => {
   await mountSession([A, B], { projection: { mode: 'student', studentId: 's-b' } })
 
@@ -185,6 +222,23 @@ test('bandeau absent quand l’étudiant projeté est l’actif', async () => {
 
 test('bandeau absent en mode attente', async () => {
   await mountSession([A, B])
+
+  expect(screen.queryByRole('status')).not.toBeInTheDocument()
+})
+
+// Rendu direct : stockée, une projection sur un étudiant inconnu rend la session endommagée (F31).
+test('bandeau absent quand l’étudiant projeté n’existe plus', () => {
+  render(
+    <ProjectionBanner
+      ui={makeUi()}
+      session={makeSession({
+        config,
+        students: [A],
+        projection: { mode: 'student', studentId: 's-b' },
+      })}
+      activeStudentId="s-a"
+    />,
+  )
 
   expect(screen.queryByRole('status')).not.toBeInTheDocument()
 })
