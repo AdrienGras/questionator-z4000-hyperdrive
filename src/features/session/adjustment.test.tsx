@@ -1,33 +1,14 @@
 import 'fake-indexeddb/auto'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import type { NormalizedCategory } from '@/domain/config/normalize'
 import type { Student } from '@/domain/session/types'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
 import { categoryButton } from '@/testing/passage-assertions'
 import { renderAt } from '@/testing/render-at'
+import { REVEALED, screenCategory } from '@/testing/screen-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
-
-/**
- * Catégorie `a` à 3 questions (la fixture par défaut n'en a qu'une) ; le barème contient les notes
- * brutes des tests (13,5 et 20) : une session stockée hors barème est lue comme endommagée (F31).
- */
-const category: NormalizedCategory = {
-  id: 'a',
-  label: 'A',
-  scale: [0, 1, 2, 3, 13.5, 20],
-  order: 1,
-  questions: ['a-1', 'a-2', 'a-3'].map((id) => ({
-    id,
-    title: `Titre ${id}`,
-    tags: [],
-    prompt: id,
-  })),
-}
-
-const REVEALED = '2026-09-25T10:00:00.000Z'
 
 function config(step = 0.5) {
   return {
@@ -37,7 +18,7 @@ function config(step = 0.5) {
       finalScale: 20,
       rounding: { mode: 'nearest', decimals: 2, step },
     }),
-    categories: [category],
+    categories: [screenCategory],
   }
 }
 

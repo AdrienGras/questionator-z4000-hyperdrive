@@ -7,6 +7,7 @@ import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
 import { renderAt } from '@/testing/render-at'
 import { openSidePanel, panelButton } from '@/testing/side-panel-assertions'
+import { panel, REVEALED } from '@/testing/screen-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
 
@@ -22,8 +23,6 @@ const category: NormalizedCategory = {
     prompt: id,
   })),
 }
-
-const REVEALED = '2026-09-25T10:00:00.000Z'
 
 async function mount(student: Student | undefined, questionsPerStudent = 2) {
   const config = {
@@ -45,10 +44,6 @@ async function mount(student: Student | undefined, questionsPerStudent = 2) {
   const rendered = renderAt('/session/session-1')
   await panelButton()
   return rendered
-}
-
-function panel(): HTMLElement {
-  return screen.getByRole('dialog', { name: 'Panneau latéral' })
 }
 
 async function expectClosed() {

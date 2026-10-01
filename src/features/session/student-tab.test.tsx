@@ -9,6 +9,7 @@ import { putSession, updateSession } from '@/lib/db/sessions'
 import { categoryButton } from '@/testing/passage-assertions'
 import { renderAt } from '@/testing/render-at'
 import { openSidePanel } from '@/testing/side-panel-assertions'
+import { panel, REVEALED } from '@/testing/screen-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
 
@@ -26,7 +27,6 @@ const category: NormalizedCategory = {
   })),
 }
 
-const REVEALED = '2026-09-25T10:00:00.000Z'
 const ABSENT_BODY = 'Décochez « Absent » dans le panneau pour le faire passer.'
 /** Au-delà du délai de sauvegarde différée (500 ms). */
 const AFTER_DELAY = { timeout: 2000 }
@@ -45,10 +45,6 @@ async function mount(students: Student[], questionsPerStudent = 3) {
   const rendered = renderAt('/session/session-1')
   await openSidePanel('Étudiant')
   return rendered
-}
-
-function panel(): HTMLElement {
-  return screen.getByRole('dialog', { name: 'Panneau latéral' })
 }
 
 /**
