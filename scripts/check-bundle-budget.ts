@@ -39,6 +39,8 @@ export { HOME_ROUTE_KEY }
 const ICONS_FILE = /(?:^|\/)icons-[^/]+\.js$/
 const SHIKI_ASSET = /node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@shikijs\/(?:langs|themes)\//
 
+type Manifest = Record<string, ManifestChunk>
+
 /** Accès aux fichiers de `dist/`, injecté pour les tests. */
 export type BuildFiles = {
   gzipSize: (file: string) => number
@@ -60,7 +62,7 @@ function overBudget(label: string, size: number, budget: number): string {
  * Fichiers (JS et CSS, sans doublon) du premier affichage de l'accueil : atteints statiquement
  * depuis les entrées `isEntry` et depuis la route `/`.
  */
-function initialFiles(manifest: Record<string, ManifestChunk>): Set<string> {
+function initialFiles(manifest: Manifest): Set<string> {
   const result = new Set<string>()
   const starts = Object.keys(manifest).filter((key) => manifest[key]?.isEntry === true)
   for (const start of [...starts, HOME_ROUTE_KEY]) {
@@ -74,38 +76,46 @@ function initialFiles(manifest: Record<string, ManifestChunk>): Set<string> {
   return result
 }
 
-/** Problèmes de budget ou de garde (`[]` si tout va bien) et ligne de résumé pour la console. */
-export function checkBudgets(
-  manifest: Record<string, ManifestChunk>,
-  build: BuildFiles,
-): { problems: string[]; summary: string } {
+/** Gardes de non-vacuité sur le manifeste : une entrée et la route d'accueil. */
+function manifestProblems(manifest: Manifest): string[] {
   const problems: string[] = []
-  const entries = Object.values(manifest).filter((chunk) => chunk.isEntry === true)
-  if (entries.length === 0) problems.push('aucune entrée isEntry dans le manifeste')
+  if (!Object.values(manifest).some((chunk) => chunk.isEntry === true)) {
+    problems.push('aucune entrée isEntry dans le manifeste')
+  }
   if (manifest[HOME_ROUTE_KEY] === undefined) {
     problems.push(`route ${HOME_ROUTE_KEY} absente du manifeste (route renommée ?)`)
   }
+  return problems
+}
 
-  let initialSize = 0
-  for (const file of initialFiles(manifest)) initialSize += build.gzipSize(file)
-  if (initialSize > INITIAL_BUDGET) {
-    problems.push(overBudget('premier affichage de l’accueil', initialSize, INITIAL_BUDGET))
-  }
-
-  // Un fichier par chunk JS, même s'il apparaît sous plusieurs clés du manifeste.
-  // Clés du manifeste par fichier JS : un fichier n'est exempté que si toutes ses clés le sont.
+/** Clés du manifeste par fichier JS : un fichier n'est exempté que si toutes ses clés le sont. */
+function jsChunks(manifest: Manifest): Map<string, string[]> {
   const chunks = new Map<string, string[]>()
   for (const [key, chunk] of Object.entries(manifest)) {
     if (!chunk.file.endsWith('.js')) continue
     chunks.set(chunk.file, [...(chunks.get(chunk.file) ?? []), key])
   }
+  return chunks
+}
+
+/** Garde : un chunk `icons-*` existe et porte le marqueur. */
+function iconChunkProblems(chunks: Map<string, string[]>, build: BuildFiles): string[] {
   const iconFiles = [...chunks.keys()].filter((file) => ICONS_FILE.test(file))
   if (iconFiles.length === 0) {
-    problems.push('aucun chunk icons-* dans le manifeste (groupe des icônes renommé ?)')
-  } else if (!iconFiles.some((file) => build.contents(file).includes(ICON_MARKER))) {
-    problems.push(`${ICON_MARKER} absent du chunk des icônes : marqueur à mettre à jour`)
+    return ['aucun chunk icons-* dans le manifeste (groupe des icônes renommé ?)']
   }
+  if (!iconFiles.some((file) => build.contents(file).includes(ICON_MARKER))) {
+    return [`${ICON_MARKER} absent du chunk des icônes : marqueur à mettre à jour`]
+  }
+  return []
+}
 
+/** Budget par chunk et marqueur d'icônes, hors chunk des icônes ; plus gros chunk soumis au budget. */
+function chunkProblems(
+  chunks: Map<string, string[]>,
+  build: BuildFiles,
+): { problems: string[]; largest: { file: string; size: number } } {
+  const problems: string[] = []
   let shikiExempt = 0
   let largest = { file: '', size: 0 }
   for (const [file, keys] of chunks) {
@@ -124,10 +134,32 @@ export function checkBudgets(
   if (shikiExempt === 0) {
     problems.push('aucune grammaire ni thème Shiki exemptés (chemin @shikijs changé ?)')
   }
+  return { problems, largest }
+}
 
+/** Problèmes de budget ou de garde (`[]` si tout va bien) et ligne de résumé pour la console. */
+export function checkBudgets(
+  manifest: Manifest,
+  build: BuildFiles,
+): { problems: string[]; summary: string } {
+  let initialSize = 0
+  for (const file of initialFiles(manifest)) initialSize += build.gzipSize(file)
+  const initial =
+    initialSize > INITIAL_BUDGET
+      ? [overBudget('premier affichage de l’accueil', initialSize, INITIAL_BUDGET)]
+      : []
+
+  const chunks = jsChunks(manifest)
+  const perChunk = chunkProblems(chunks, build)
+  const problems = [
+    ...manifestProblems(manifest),
+    ...initial,
+    ...iconChunkProblems(chunks, build),
+    ...perChunk.problems,
+  ]
   const summary =
     `Premier affichage de l’accueil ${formatKb(initialSize)} Ko gzip (budget ${formatKb(INITIAL_BUDGET)} Ko) ; ` +
-    `plus gros chunk ${largest.file} ${formatKb(largest.size)} Ko (budget ${formatKb(CHUNK_BUDGET)} Ko).`
+    `plus gros chunk ${perChunk.largest.file} ${formatKb(perChunk.largest.size)} Ko (budget ${formatKb(CHUNK_BUDGET)} Ko).`
   return { problems, summary }
 }
 
