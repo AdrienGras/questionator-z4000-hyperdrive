@@ -20,8 +20,8 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Config
 
-- [ ] Éditeur de config (#60) : autocomplétion et aide au survol depuis le JSON Schema (`codemirror-json-schema`), hors périmètre de F26. → #80
-- [ ] JSON Schema : descriptions et défauts (`.meta({ description })` depuis le tableau de `PRODUCT.md` §6.2) pour l'aide au survol dans VSCode. → #80
+- [x] Éditeur de config (#60) : autocomplétion et aide au survol depuis le JSON Schema (`codemirror-json-schema`), hors périmètre de F26. → #80 *Livré en F32 (D87).*
+- [x] JSON Schema : descriptions et défauts (`.meta({ description })` depuis le tableau de `PRODUCT.md` §6.2) pour l'aide au survol dans VSCode. → #80 *Livré en F32 (D87).*
 - [ ] Test d'alignement entre `INTEGER_FIELDS` (`from-zod.ts`) et les champs `z.int()` du schéma.
 
 ## Notation
