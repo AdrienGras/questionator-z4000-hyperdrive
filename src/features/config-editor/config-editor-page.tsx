@@ -23,6 +23,7 @@ import {
 import { EXAMPLE_TEXT, useConfigDraft } from '@/features/config-editor/hooks/use-config-draft'
 import { useLiveValidation } from '@/features/config-editor/hooks/use-live-validation'
 import { locateIssue } from '@/features/config-editor/issue-locations'
+import { hasFiles, useFileDrop } from '@/hooks/use-file-drop'
 import { stashConfigForCreation } from '@/lib/config-handoff'
 import { downloadText } from '@/lib/download'
 import { useUi } from '@/lib/i18n/use-ui'
@@ -41,11 +42,6 @@ function configFileName(text: string): string {
   if (typeof exam !== 'object' || exam === null || !('title' in exam)) return 'config.json'
   const title = exam.title
   return typeof title === 'string' && title.trim() !== '' ? `${slugify(title)}.json` : 'config.json'
-}
-
-/** Un fichier est survolé ou déposé (par opposition à du texte sélectionné glissé). */
-function hasFiles(event: DragEvent<HTMLElement>): boolean {
-  return Array.from(event.dataTransfer.types).includes('Files')
 }
 
 // Garde de page : un fichier lâché hors de la colonne de l'éditeur ne doit jamais être ouvert par
@@ -73,7 +69,6 @@ export function ConfigEditorPage() {
   const { result, lastValid, pending, validatedText, loadError } = useLiveValidation(text)
   const editor = useRef<JsonEditorApi>(null)
   const fileInput = useRef<HTMLInputElement>(null)
-  const [dragging, setDragging] = useState(false)
   const [readError, setReadError] = useState(false)
   const sourceTitleId = useId()
   const previewTitleId = useId()
@@ -113,33 +108,16 @@ export function ConfigEditorPage() {
     }
   }
 
+  // `isolate` : la colonne passe avant la garde de page, qui refuse tout dépôt ailleurs.
+  const { dragging, dropProps } = useFileDrop({
+    isolate: true,
+    onFile: (file) => void loadFile(file),
+  })
+
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     // Vidé pour qu'un nouveau choix du même fichier redéclenche `change`.
     event.target.value = ''
-    if (file) void loadFile(file)
-  }
-
-  function handleDragOver(event: DragEvent<HTMLElement>) {
-    if (!hasFiles(event)) return
-    // Toujours empêché : sinon le navigateur ouvre le fichier et quitte l'application.
-    event.preventDefault()
-    event.stopPropagation()
-    setDragging(true)
-  }
-
-  function handleDragLeave(event: DragEvent<HTMLElement>) {
-    const next = event.relatedTarget
-    if (next instanceof Node && event.currentTarget.contains(next)) return
-    setDragging(false)
-  }
-
-  function handleDrop(event: DragEvent<HTMLElement>) {
-    if (!hasFiles(event)) return
-    event.preventDefault()
-    event.stopPropagation()
-    setDragging(false)
-    const file = event.dataTransfer.files[0]
     if (file) void loadFile(file)
   }
 
@@ -173,9 +151,7 @@ export function ConfigEditorPage() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         {/* Écouteurs de dépôt sur un `div` neutre : la `section` (région) n'est pas interactive. */}
         <div
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
+          {...dropProps}
           className={cn(
             'min-w-0 rounded-xl outline-2 outline-offset-4 outline-transparent lg:sticky lg:top-4 lg:h-[calc(100svh-2rem)] lg:self-start',
             dragging && 'outline-primary outline-dashed',

@@ -85,7 +85,9 @@ function pick(input: HTMLInputElement, file: File) {
 }
 
 function drop(file: File) {
-  fireEvent.drop(screen.getByRole('main'), { dataTransfer: { files: [file], types: ['Files'] } })
+  fireEvent.drop(screen.getByRole('main', { hidden: true }), {
+    dataTransfer: { files: [file], types: ['Files'] },
+  })
 }
 
 async function storedSession(id = 'session-1') {
@@ -213,6 +215,34 @@ describe('import de backup', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Annuler' }))
     await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
     expect(await storedSession()).toEqual(before)
+  })
+
+  test('second dépôt pendant le dialogue de conflit : le conflit en attente est conservé', async () => {
+    await putSession(makeSession({ name: 'Ancienne' }))
+    const input = await renderImport()
+    pick(input, sessionFile(makeSession({ name: 'Nouvelle' })))
+    const dialog = await screen.findByRole('alertdialog')
+    drop(sessionFile(makeSession({ id: 'session-2', name: 'Autre' })))
+    // Laisse le temps à un import parasite d'aboutir (lecture, validation, écriture).
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    expect(dialog).toHaveTextContent(/« Nouvelle »/)
+    expect(await db.sessions.count()).toBe(1)
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Remplacer' }))
+    await waitFor(async () => expect((await storedSession()).name).toBe('Nouvelle'))
+  })
+
+  test('dépôt pendant un import en cours : ignoré', async () => {
+    const input = await renderImport()
+    const gate = deferred<void>()
+    replaceGate.hold = gate.promise
+    pick(input, sessionFile(makeSession({ name: 'Première' })))
+    // L'écriture de la première est suspendue : l'import est en cours.
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    drop(sessionFile(makeSession({ id: 'session-2', name: 'Seconde' })))
+    gate.resolve()
+    await waitFor(async () => expect((await storedSession()).name).toBe('Première'))
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    expect(await db.sessions.count()).toBe(1)
   })
 
   test('fichier illisible : message de lecture, rien écrit', async () => {

@@ -24,3 +24,14 @@ export function keyed<T>(
     return { item, key: `${base}#${occurrence}` }
   })
 }
+
+/** Première occurrence de chaque clé, dans l'ordre d'origine (issues affichées en double). */
+export function uniqueBy<T>(items: readonly T[], key: (item: T) => string): T[] {
+  const seen = new Set<string>()
+  return items.filter((item) => {
+    const value = key(item)
+    if (seen.has(value)) return false
+    seen.add(value)
+    return true
+  })
+}

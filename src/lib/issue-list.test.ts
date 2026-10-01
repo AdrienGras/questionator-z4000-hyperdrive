@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { errorsFirst, keyed } from './issue-list'
+import { errorsFirst, keyed, uniqueBy } from './issue-list'
 
 describe('errorsFirst', () => {
   test('erreurs d’abord, ordre conservé dans chaque groupe', () => {
@@ -19,6 +19,20 @@ describe('keyed', () => {
       'a#0',
       'b#0',
       'a#1',
+    ])
+  })
+})
+
+describe('uniqueBy', () => {
+  test('garde la première occurrence de chaque clé, dans l’ordre d’origine', () => {
+    const items = [
+      { key: 'a', n: 1 },
+      { key: 'b', n: 2 },
+      { key: 'a', n: 3 },
+    ]
+    expect(uniqueBy(items, (item) => item.key)).toEqual([
+      { key: 'a', n: 1 },
+      { key: 'b', n: 2 },
     ])
   })
 })

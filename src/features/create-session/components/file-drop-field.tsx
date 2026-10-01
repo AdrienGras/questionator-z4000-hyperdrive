@@ -5,8 +5,9 @@ import {
   IconLoader2,
   type Icon,
 } from '@tabler/icons-react'
-import { useRef, useState, type ChangeEvent, type DragEvent } from 'react'
+import { useRef, type ChangeEvent } from 'react'
 import { Button } from '@/components/ui/button'
+import { useFileDrop } from '@/hooks/use-file-drop'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
 
@@ -40,11 +41,6 @@ const STATUS_LABELS: Record<
   errors: 'create_file_status_errors',
 }
 
-/** Un fichier est survolé ou déposé (par opposition à du texte, une image glissée, etc.). */
-export function hasFiles(event: DragEvent<HTMLElement>): boolean {
-  return Array.from(event.dataTransfer.types).includes('Files')
-}
-
 function StatusIcon({ status }: Readonly<{ status: FileDropStatus }>) {
   if (status === 'empty') return null
   if (status === 'reading') {
@@ -69,7 +65,7 @@ export function FileDropField({
 }: FileDropFieldProps) {
   const { text } = ui
   const input = useRef<HTMLInputElement>(null)
-  const [dragging, setDragging] = useState(false)
+  const { dragging, dropProps } = useFileDrop({ disabled, onFile })
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -78,36 +74,10 @@ export function FileDropField({
     if (file) onFile(file)
   }
 
-  function handleDragOver(event: DragEvent<HTMLDivElement>) {
-    if (!hasFiles(event)) return
-    // Toujours empêché : sinon le navigateur ouvre le fichier et quitte l'application.
-    event.preventDefault()
-    if (disabled) {
-      event.dataTransfer.dropEffect = 'none'
-      return
-    }
-    setDragging(true)
-  }
-
-  function handleDragLeave(event: DragEvent<HTMLDivElement>) {
-    const next = event.relatedTarget
-    if (next instanceof Node && event.currentTarget.contains(next)) return
-    setDragging(false)
-  }
-
-  function handleDrop(event: DragEvent<HTMLDivElement>) {
-    event.preventDefault()
-    setDragging(false)
-    const file = event.dataTransfer.files[0]
-    if (!disabled && file) onFile(file)
-  }
-
   return (
     // Écouteurs sur un `div` neutre : un `fieldset` (rôle group) n'est pas un élément interactif.
     <div
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
+      {...dropProps}
       className={cn(
         'rounded-xl border-2 border-dashed p-4 transition-colors',
         dragging && 'border-primary',
