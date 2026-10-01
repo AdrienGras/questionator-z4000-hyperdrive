@@ -18,6 +18,7 @@ export type BackupIssueParams = {
   unknown_active_student: { studentId: string }
   unknown_projected_student: { studentId: string }
   projection_mismatch: NoParams
+  invalid_adjustment: { value: number }
 }
 
 export type BackupIssueCode = keyof BackupIssueParams
@@ -49,6 +50,7 @@ const BACKUP_CODE_MAP: Record<BackupIssueCode, true> = {
   unknown_active_student: true,
   unknown_projected_student: true,
   projection_mismatch: true,
+  invalid_adjustment: true,
 }
 
 const BACKUP_CODES: ReadonlySet<string> = new Set(Object.keys(BACKUP_CODE_MAP))
