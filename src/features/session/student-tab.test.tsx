@@ -1,46 +1,24 @@
 import 'fake-indexeddb/auto'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import type { NormalizedCategory } from '@/domain/config/normalize'
 import { setActiveStudent } from '@/domain/passage/active-student'
 import type { Student } from '@/domain/session/types'
 import { db } from '@/lib/db/db'
 import { putSession, updateSession } from '@/lib/db/sessions'
 import { categoryButton } from '@/testing/passage-assertions'
 import { renderAt } from '@/testing/render-at'
-import { openSidePanel } from '@/testing/side-panel-assertions'
-import { panel, REVEALED } from '@/testing/screen-fixtures'
+import { expectPanelClosed, openSidePanel } from '@/testing/side-panel-assertions'
+import { panel, REVEALED, screenConfig } from '@/testing/screen-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
-import { makeConfig, makeStudent } from '@/testing/student-fixtures'
-
-/** Catégorie `a` à 3 questions : `makeStudent` fabrique `attempt-2` et au-delà. */
-const category: NormalizedCategory = {
-  id: 'a',
-  label: 'A',
-  scale: [0, 1, 2, 3],
-  order: 1,
-  questions: ['a-1', 'a-2', 'a-3'].map((id) => ({
-    id,
-    title: `Titre ${id}`,
-    tags: [],
-    prompt: id,
-  })),
-}
+import { makeStudent, makeSecondStudent } from '@/testing/student-fixtures'
+import { storedSession as stored, storedStudent } from '@/testing/stored-session'
 
 const ABSENT_BODY = 'Décochez « Absent » dans le panneau pour le faire passer.'
 /** Au-delà du délai de sauvegarde différée (500 ms). */
 const AFTER_DELAY = { timeout: 2000 }
 
 async function mount(students: Student[], questionsPerStudent = 3) {
-  const config = {
-    ...makeConfig({
-      questionsPerStudent,
-      maxRawScore: 20,
-      finalScale: 20,
-      rounding: { mode: 'nearest', decimals: 2, step: 0.5 },
-    }),
-    categories: [category],
-  }
+  const config = screenConfig({ questionsPerStudent })
   await putSession(makeSession({ config, students, activeStudentId: students[0]?.id }))
   const rendered = renderAt('/session/session-1')
   await openSidePanel('Étudiant')
@@ -57,9 +35,7 @@ function grid(): Promise<HTMLElement> {
 
 async function closePanel() {
   fireEvent.keyDown(panel(), { key: 'Escape' })
-  await waitFor(() =>
-    expect(screen.queryByRole('dialog', { name: 'Panneau latéral' })).not.toBeInTheDocument(),
-  )
+  await expectPanelClosed()
 }
 
 function commentBox(): HTMLElement {
@@ -68,27 +44,6 @@ function commentBox(): HTMLElement {
 
 function absentBox(): HTMLElement {
   return within(panel()).getByRole('checkbox', { name: 'Absent' })
-}
-
-async function stored() {
-  const session = await db.sessions.get('session-1')
-  if (session === undefined) throw new Error('session absente')
-  return session
-}
-
-async function storedStudent(id = 'student-1') {
-  const student = (await stored()).students.find((s) => s.id === id)
-  if (student === undefined) throw new Error(`étudiant ${id} absent`)
-  return student
-}
-
-function bob(): Student {
-  return makeStudent([], {
-    id: 'student-2',
-    lastName: 'Martin',
-    firstName: 'Bob',
-    order: 2,
-  })
 }
 
 beforeEach(async () => {
@@ -180,7 +135,7 @@ test('commentaire : survit au rechargement et à la réinitialisation', async ()
 })
 
 test('commentaire tapé puis changement d’étudiant avant le délai : enregistré sur le premier', async () => {
-  await mount([makeStudent([]), bob()])
+  await mount([makeStudent([]), makeSecondStudent()])
 
   fireEvent.change(commentBox(), { target: { value: 'Pour Alice' } })
   // L'onglet « Étudiant » reste monté : seul le changement d'étudiant démonte `CommentField`
@@ -193,7 +148,7 @@ test('commentaire tapé puis changement d’étudiant avant le délai : enregist
 })
 
 test('commentaire tapé puis passage à l’onglet « Étudiants » : enregistré, étudiant suivant vide', async () => {
-  await mount([makeStudent([]), bob()])
+  await mount([makeStudent([]), makeSecondStudent()])
 
   fireEvent.change(commentBox(), { target: { value: 'Pour Alice' } })
   fireEvent.click(within(panel()).getByRole('tab', { name: 'Étudiants' }))
@@ -203,9 +158,7 @@ test('commentaire tapé puis passage à l’onglet « Étudiants » : enregistr�
   await waitFor(async () => expect((await storedStudent('student-1')).comment).toBe('Pour Alice'))
   expect((await storedStudent('student-2')).comment).toBeUndefined()
   // Le changement d'étudiant a fermé le tiroir : rouvert sur l'onglet « Étudiant ».
-  await waitFor(() =>
-    expect(screen.queryByRole('dialog', { name: 'Panneau latéral' })).not.toBeInTheDocument(),
-  )
+  await expectPanelClosed()
   await openSidePanel('Étudiant')
   await waitFor(() => expect(commentBox()).toHaveValue(''))
 })
@@ -319,7 +272,7 @@ test('décocher absent sans dialogue, écriture en échec : l’alerte de page r
 test('dialogue d’absence ouvert pour Alice, Bob devient actif ailleurs : c’est Alice qui est absente', async () => {
   // Ids d'attempts propres à Bob : un id en double rendrait la session endommagée (F31).
   const bobAttempts = makeStudent([1]).attempts.map((attempt) => ({ ...attempt, id: 'bob-1' }))
-  await mount([makeStudent([2, 1]), { ...bob(), attempts: bobAttempts }])
+  await mount([makeStudent([2, 1]), { ...makeSecondStudent(), attempts: bobAttempts }])
   await grid()
 
   fireEvent.click(absentBox())

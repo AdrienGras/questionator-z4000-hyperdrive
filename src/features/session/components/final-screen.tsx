@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { nextStudent, shouldAutoOpenAdjustment } from '@/domain/passage/selectors'
+import type { ScoreBreakdown } from '@/domain/scoring/score'
 import type { Session, Student } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { AdjustmentDialog } from './adjustment-dialog'
@@ -12,6 +13,8 @@ type FinalScreenProps = Readonly<{
   ui: Ui
   session: Session
   student: Student
+  /** Notes de `student`, calculées par `ExaminerView`. */
+  scores: ScoreBreakdown
   disabled: boolean
   onAdjust: (
     value: number,
@@ -31,6 +34,7 @@ export function FinalScreen({
   ui,
   session,
   student,
+  scores,
   disabled,
   onAdjust,
   onRevealFinal,
@@ -53,7 +57,7 @@ export function FinalScreen({
 
       <section className="flex flex-col gap-2">
         <h3 className="font-semibold">{text('final_scores_heading', {})}</h3>
-        <ScoreList ui={ui} config={config} student={student} />
+        <ScoreList ui={ui} config={config} student={student} scores={scores} />
       </section>
 
       <section className="flex flex-col gap-2">

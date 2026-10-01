@@ -5,21 +5,17 @@ import { formatScore } from '@/domain/scoring/format'
 import { computeScores } from '@/domain/scoring/score'
 import type { Student } from '@/domain/session/types'
 import { StudentsTab } from './components/students-tab'
+import type { WriteOutcome } from './hooks/use-passage-actions'
 import { db } from '@/lib/db/db'
 import { makeUi } from '@/testing/make-ui'
 import { makeSession } from '@/testing/session-fixtures'
-import { openSidePanel, panelButton } from '@/testing/side-panel-assertions'
-import { makeStudent } from '@/testing/student-fixtures'
+import { expectPanelClosed, openSidePanel, panelButton } from '@/testing/side-panel-assertions'
+import { makeListStudent } from '@/testing/student-fixtures'
 import { config, mountStudentsTab as mount } from '@/testing/students-tab-harness'
+import { storedSession as stored } from '@/testing/stored-session'
 
 function student(id: string, lastName: string, order: number, overrides: Partial<Student> = {}) {
-  return makeStudent([], { id, lastName, firstName: 'X', order, ...overrides })
-}
-
-async function expectPanelClosed() {
-  await waitFor(() =>
-    expect(screen.queryByRole('dialog', { name: 'Panneau latéral' })).not.toBeInTheDocument(),
-  )
+  return makeListStudent(id, lastName, order, [], overrides)
 }
 
 function list(): HTMLElement {
@@ -34,12 +30,6 @@ function rowOf(lastName: string): HTMLElement {
   const button = buttons().find((b) => b.textContent.includes(lastName))
   if (button === undefined) throw new Error(`ligne ${lastName} absente`)
   return button
-}
-
-async function stored() {
-  const session = await db.sessions.get('session-1')
-  if (session === undefined) throw new Error('session absente')
-  return session
 }
 
 beforeEach(async () => {
@@ -133,7 +123,7 @@ test('l’onglet ne relaie pas le clic sur l’étudiant actif, mais relaie celu
       activeStudentId="s-a"
       disabled={false}
       onSelect={onSelect}
-      onAdd={vi.fn<() => Promise<boolean>>()}
+      onAdd={vi.fn<() => Promise<WriteOutcome>>()}
     />,
   )
 
@@ -156,21 +146,7 @@ test('après le changement d’étudiant, le focus revient au bouton « Panneau 
 })
 
 test('aller-retour A → B → A avec une question en cours : rien n’est perdu', async () => {
-  const alice = makeStudent([], {
-    id: 's-a',
-    lastName: 'Aba',
-    firstName: 'X',
-    order: 1,
-    attempts: [
-      {
-        id: 'attempt-1',
-        categoryId: 'a',
-        questionId: 'a-1',
-        drawnAt: '2026-09-25T09:00:00.000Z',
-        outcome: 'pending',
-      },
-    ],
-  })
+  const alice = makeListStudent('s-a', 'Aba', 1, ['pending'])
   await mount([alice, student('s-b', 'Bec', 2)])
   // `hidden` : le tiroir modal ouvert masque le reste de la page aux requêtes par rôle.
   await screen.findByRole('heading', { level: 2, name: 'Titre a-1', hidden: true })
@@ -190,11 +166,7 @@ test('aller-retour A → B → A avec une question en cours : rien n’est perdu
 
 test('notes : à passer « brute · — », terminé avec ajustement, absent', async () => {
   const todo = student('s-a', 'Aba', 1)
-  const done = makeStudent([2, 1], {
-    id: 's-b',
-    lastName: 'Bec',
-    firstName: 'X',
-    order: 2,
+  const done = makeListStudent('s-b', 'Bec', 2, [2, 1], {
     adjustment: { value: 1, reason: 'Bonne tenue' },
   })
   const absent = student('s-c', 'Cha', 3, { absent: true })
@@ -225,7 +197,7 @@ test('activeStudentId orphelin : aucune ligne en aria-current', () => {
       activeStudentId="inconnu"
       disabled={false}
       onSelect={vi.fn<(id: string) => void>()}
-      onAdd={vi.fn<() => Promise<boolean>>()}
+      onAdd={vi.fn<() => Promise<WriteOutcome>>()}
     />,
   )
 

@@ -2,11 +2,7 @@ import { useEffect, useId, useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import type { Student } from '@/domain/session/types'
-import {
-  clearCommentDraft,
-  readCommentDraft,
-  writeCommentDraft,
-} from '@/features/session/comment-draft'
+import { clearCommentDraft, readCommentDraft, writeCommentDraft } from '@/lib/comment-draft'
 import { useAutosave, type AutosaveStatus } from '@/features/session/hooks/use-autosave'
 import type { Ui } from '@/lib/i18n/use-ui'
 import type { UiMessageParams } from '@/lib/i18n/ui-messages'

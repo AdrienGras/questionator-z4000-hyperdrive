@@ -1,39 +1,17 @@
 import 'fake-indexeddb/auto'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import type { NormalizedCategory } from '@/domain/config/normalize'
 import type { Student } from '@/domain/session/types'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
 import { renderAt } from '@/testing/render-at'
-import { openSidePanel, panelButton } from '@/testing/side-panel-assertions'
-import { panel, REVEALED } from '@/testing/screen-fixtures'
+import { expectPanelClosed, openSidePanel, panelButton } from '@/testing/side-panel-assertions'
+import { panel, REVEALED, screenConfig } from '@/testing/screen-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
-import { makeConfig, makeStudent } from '@/testing/student-fixtures'
-
-const category: NormalizedCategory = {
-  id: 'a',
-  label: 'A',
-  scale: [0, 1, 2, 3],
-  order: 1,
-  questions: ['a-1', 'a-2', 'a-3'].map((id) => ({
-    id,
-    title: `Titre ${id}`,
-    tags: [],
-    prompt: id,
-  })),
-}
+import { makeStudent } from '@/testing/student-fixtures'
 
 async function mount(student: Student | undefined, questionsPerStudent = 2) {
-  const config = {
-    ...makeConfig({
-      questionsPerStudent,
-      maxRawScore: 20,
-      finalScale: 20,
-      rounding: { mode: 'nearest', decimals: 2, step: 0.5 },
-    }),
-    categories: [category],
-  }
+  const config = screenConfig({ questionsPerStudent })
   await putSession(
     makeSession({
       config,
@@ -44,12 +22,6 @@ async function mount(student: Student | undefined, questionsPerStudent = 2) {
   const rendered = renderAt('/session/session-1')
   await panelButton()
   return rendered
-}
-
-async function expectClosed() {
-  await waitFor(() =>
-    expect(screen.queryByRole('dialog', { name: 'Panneau latéral' })).not.toBeInTheDocument(),
-  )
 }
 
 beforeEach(async () => {
@@ -81,7 +53,7 @@ test('onglet « Étudiants » mémorisé : rouvert dessus après fermeture et ap
   await openSidePanel('Étudiants')
   expect(within(panel()).getByRole('list', { name: 'Étudiants de la session' })).toBeVisible()
   fireEvent.click(within(panel()).getByRole('button', { name: 'Fermer le panneau' }))
-  await expectClosed()
+  await expectPanelClosed()
 
   let dialog = await openSidePanel()
   expect(within(dialog).getByRole('tab', { name: 'Étudiants' })).toHaveAttribute(
@@ -119,7 +91,7 @@ test('Échap ferme et rend le focus à « Panneau »', async () => {
   const dialog = await openSidePanel()
   fireEvent.keyDown(within(dialog).getByRole('tab', { name: 'Étudiant' }), { key: 'Escape' })
 
-  await expectClosed()
+  await expectPanelClosed()
   await waitFor(() => expect(button).toHaveFocus())
 })
 
@@ -130,7 +102,7 @@ test('« Fermer le panneau » ferme et rend le focus', async () => {
   const dialog = await openSidePanel()
   fireEvent.click(within(dialog).getByRole('button', { name: 'Fermer le panneau' }))
 
-  await expectClosed()
+  await expectPanelClosed()
   await waitFor(() => expect(button).toHaveFocus())
 })
 
@@ -147,7 +119,7 @@ test('clic sur le voile ferme et rend le focus', async () => {
   fireEvent.mouseUp(overlay)
   fireEvent.click(overlay)
 
-  await expectClosed()
+  await expectPanelClosed()
   await waitFor(() => expect(button).toHaveFocus())
 })
 

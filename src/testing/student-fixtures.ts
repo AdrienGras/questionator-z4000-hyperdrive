@@ -51,3 +51,31 @@ export function makeStudent(
     ...overrides,
   }
 }
+
+/** Second étudiant des tests à deux étudiants : `student-2`, Martin Bob, `order` 2. */
+export function makeSecondStudent(
+  attempts: AttemptSpec[] = [],
+  overrides: Partial<Student> = {},
+): Student {
+  return makeStudent(attempts, {
+    id: 'student-2',
+    lastName: 'Martin',
+    firstName: 'Bob',
+    order: 2,
+    ...overrides,
+  })
+}
+
+/**
+ * Étudiant désigné par son nom de famille, prénom « X » : listes triées, projection, onglet
+ * « Étudiants ».
+ */
+export function makeListStudent(
+  id: string,
+  lastName: string,
+  order: number,
+  attempts: AttemptSpec[] = [],
+  overrides: Partial<Student> = {},
+): Student {
+  return makeStudent(attempts, { id, lastName, firstName: 'X', order, ...overrides })
+}

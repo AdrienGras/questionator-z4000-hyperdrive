@@ -15,6 +15,19 @@ import { skipAttempt } from '@/domain/passage/skip'
 import type { Session } from '@/domain/session/types'
 import { updateSession } from '@/lib/db/sessions'
 
+/**
+ * Issue d'une écriture : `ignored` quand le verrou l'a écartée (une autre écriture en vol), rien
+ * n'est parti en base et ce n'est pas un échec à afficher.
+ */
+export type WriteOutcome = 'written' | 'failed' | 'ignored'
+
+/**
+ * Actions de l'écran de passage. Un échec renseigne `error` (alerte de la page et du tiroir), sauf
+ * pour `adjust`, `revealFinal`, `reset` et `addStudent`, et `setAbsent` appelé avec `ownError` :
+ * passés en `ownError`, ils laissent l'affichage de l'échec à l'appelant (leur dialogue, qui
+ * affiche `write_error` quand le booléen revient à `false`) et `error` reste à `null`.
+ * `setComment` ne touche jamais `error` : son champ annonce lui-même l'échec (D67).
+ */
 export type PassageActions = {
   draw: (categoryId: string) => Promise<void>
   score: (attemptId: string, value: number) => Promise<void>
@@ -37,7 +50,7 @@ export type PassageActions = {
   addStudent: (
     names: { lastName: string; firstName: string },
     options: { activate: boolean },
-  ) => Promise<boolean>
+  ) => Promise<WriteOutcome>
   project: (projection: ProjectionRequest) => Promise<boolean>
   next: () => Promise<void>
   busy: boolean
@@ -64,29 +77,36 @@ export function usePassageActions(
   const [lastWritten, setLastWritten] = useState<string | undefined>(undefined)
   const inFlight = useRef(false)
 
-  const run = useCallback(
+  const attempt = useCallback(
     async (
       mutator: (session: Session) => Session,
       options: { ownError?: boolean } = {},
-    ): Promise<boolean> => {
-      if (inFlight.current) return false
+    ): Promise<WriteOutcome> => {
+      if (inFlight.current) return 'ignored'
       inFlight.current = true
       setBusyState(true)
       setError(null)
       try {
         const written = await updateSession(sessionId, mutator)
         setLastWritten(written.updatedAt)
-        return true
+        return 'written'
       } catch (e) {
         // `ownError` : l'appelant affiche lui-même l'échec (dialogue), pas d'alerte de page en double.
         if (options.ownError !== true) setError(e instanceof Error ? e : new Error(String(e)))
-        return false
+        return 'failed'
       } finally {
         inFlight.current = false
         setBusyState(false)
       }
     },
     [sessionId],
+  )
+
+  // Booléen de succès : un appel écarté par le verrou se confond avec un échec (voir `attempt`).
+  const run = useCallback(
+    async (mutator: (session: Session) => Session, options: { ownError?: boolean } = {}) =>
+      (await attempt(mutator, options)) === 'written',
+    [attempt],
   )
 
   const draw = useCallback(
@@ -212,16 +232,22 @@ export function usePassageActions(
     [run],
   )
 
+  // `ownError` : le dialogue d'ajout affiche son propre échec ; sans ça, l'alerte du tiroir et celle
+  // de la page s'y ajoutaient, derrière le modal.
+  // L'issue complète : le dialogue ne montre `write_error` que sur un vrai échec, pas sur un appel
+  // écarté par le verrou.
   const addStudent = useCallback(
     (names: { lastName: string; firstName: string }, options: { activate: boolean }) =>
-      run((session) =>
-        addStudentTransition(
-          session,
-          { ...names, ...options },
-          { newId: () => crypto.randomUUID() },
-        ),
+      attempt(
+        (session) =>
+          addStudentTransition(
+            session,
+            { ...names, ...options },
+            { newId: () => crypto.randomUUID() },
+          ),
+        { ownError: true },
       ),
-    [run],
+    [attempt],
   )
 
   const busy = busyState || (lastWritten !== undefined && sessionUpdatedAt < lastWritten)

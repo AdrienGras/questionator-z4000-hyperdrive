@@ -278,7 +278,7 @@ export function SessionToolbar({ ui, disabled, onExport }: SessionToolbarProps) 
 - `onSave` renvoie une promesse : succès → fermeture ; échec → message `write_error` en `role="alert"`, dialogue ouvert.
 - Référence : `src/components/text-field-dialog.tsx`, `src/features/home/components/delete-dialog.tsx`.
 - Pendant l'écriture : « Annuler » désactivé, `onOpenChange` ignore la fermeture (Échap, clic extérieur) tant que `submitting`.
-- Une erreur s'affiche dans la surface où elle est survenue (D82) : une action dont le dialogue affiche son propre `write_error` passe `{ ownError: true }` à `run` (le `error` du hook reste `null`) ; une surface qui lit l'`error` du hook (tiroir, dialogue d'ajout) le filtre par `useFreshError(error, open)`, qui ne garde que les erreurs survenues ouverte. Le hook reçoit un objet `Failure` par occurrence, mémoïsé sur `actions.error` seul.
+- Une erreur s'affiche dans la surface où elle est survenue (D82) : une action dont le dialogue affiche son propre `write_error` passe `{ ownError: true }` à `run` (le `error` du hook reste `null`) ; c'est le cas de l'ajustement, de `reset`, de l'absence confirmée et de l'ajout d'étudiant (#87). Une surface qui lit l'`error` du hook (le tiroir) le filtre par `useFreshError(error, open)`, qui ne garde que les erreurs survenues ouverte. Le hook reçoit un objet `Failure` par occurrence, mémoïsé sur `actions.error` seul.
 
 ## Module lourd chargé à la demande — squelette
 

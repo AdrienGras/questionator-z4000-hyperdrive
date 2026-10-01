@@ -6,21 +6,10 @@ import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
 import { categoryButton, outsidePanel } from '@/testing/passage-assertions'
 import { renderAt } from '@/testing/render-at'
-import { REVEALED, screenCategory } from '@/testing/screen-fixtures'
+import { REVEALED, screenConfig } from '@/testing/screen-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
-import { makeConfig, makeStudent } from '@/testing/student-fixtures'
-
-function config(questionsPerStudent = 1) {
-  return {
-    ...makeConfig({
-      questionsPerStudent,
-      maxRawScore: 20,
-      finalScale: 20,
-      rounding: { mode: 'nearest', decimals: 2, step: 0.5 },
-    }),
-    categories: [screenCategory],
-  }
-}
+import { makeStudent, makeSecondStudent } from '@/testing/student-fixtures'
+import { storedSession as stored } from '@/testing/stored-session'
 
 beforeEach(async () => {
   await db.sessions.clear()
@@ -37,7 +26,7 @@ async function openFinal(
 ): Promise<void> {
   await putSession(
     makeSession({
-      config: config(questionsPerStudent),
+      config: screenConfig({ questionsPerStudent }),
       students: [student, ...others],
       activeStudentId: student.id,
       projection: { mode: 'student', studentId: student.id },
@@ -51,26 +40,10 @@ function done(overrides: Partial<Student> = {}): Student {
   return makeStudent([13.5], { finalRevealedAt: REVEALED, ...overrides })
 }
 
-function bob(attempts: Parameters<typeof makeStudent>[0] = [], overrides: Partial<Student> = {}) {
-  return makeStudent(attempts, {
-    id: 'student-2',
-    lastName: 'Martin',
-    firstName: 'Bob',
-    order: 2,
-    ...overrides,
-  })
-}
-
 function row(label: string): HTMLElement {
   const parent = outsidePanel(label).parentElement
   if (parent === null) throw new Error(`ligne « ${label} » introuvable`)
   return parent
-}
-
-async function stored() {
-  const session = await db.sessions.get('session-1')
-  if (session === undefined) throw new Error('session absente')
-  return session
 }
 
 test('affiche les cinq notes formatées et la justification de l’ajustement', async () => {
@@ -168,7 +141,7 @@ test('annuler la réinitialisation n’écrit rien', async () => {
 })
 
 test('« Étudiant suivant » change l’étudiant actif et remet la projection en attente (D73)', async () => {
-  await openFinal(done(), 1, [bob()])
+  await openFinal(done(), 1, [makeSecondStudent()])
 
   fireEvent.click(screen.getByRole('button', { name: 'Étudiant suivant' }))
 
@@ -179,7 +152,7 @@ test('« Étudiant suivant » change l’étudiant actif et remet la projection 
 })
 
 test('dernier étudiant restant : bouton désactivé et mention visible', async () => {
-  await openFinal(done(), 1, [bob([], { absent: true })])
+  await openFinal(done(), 1, [makeSecondStudent([], { absent: true })])
 
   expect(screen.getByRole('button', { name: 'Étudiant suivant' })).toBeDisabled()
   expect(screen.getByText('Tous les étudiants sont passés')).toBeVisible()

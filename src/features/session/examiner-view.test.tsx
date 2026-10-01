@@ -6,9 +6,18 @@ import { putSession } from '@/lib/db/sessions'
 import { categoryButton, outsidePanel } from '@/testing/passage-assertions'
 import { expectColorModeToggleLast, bannerInteractiveNames } from '@/testing/page-shell-assertions'
 import { makeSession } from '@/testing/session-fixtures'
-import { makeConfig, type AttemptSpec, makeStudent } from '@/testing/student-fixtures'
+import {
+  makeConfig,
+  type AttemptSpec,
+  makeStudent,
+  makeSecondStudent,
+} from '@/testing/student-fixtures'
 import { renderAt } from '@/testing/render-at'
-import { expectPanelStaysOpen, openSidePanel } from '@/testing/side-panel-assertions'
+import {
+  expectPanelClosed,
+  expectPanelStaysOpen,
+  openSidePanel,
+} from '@/testing/side-panel-assertions'
 import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import type { Session, Student } from '@/domain/session/types'
 
@@ -40,7 +49,7 @@ function twoStudents(
       firstName: 'Alice',
       order: 1,
     }),
-    makeStudent(bobAttempts, { id: 'student-2', lastName: 'Martin', firstName: 'Bob', order: 2 }),
+    makeSecondStudent(bobAttempts),
   ]
 }
 
@@ -57,12 +66,6 @@ async function studentButton(name: string): Promise<HTMLElement> {
     .find((b) => b.textContent.includes(name))
   if (button === undefined) throw new Error(`bouton ${name} introuvable`)
   return button
-}
-
-async function expectPanelClosed() {
-  await waitFor(() =>
-    expect(screen.queryByRole('dialog', { name: 'Panneau latéral' })).not.toBeInTheDocument(),
-  )
 }
 
 function sessionWith(
@@ -465,11 +468,7 @@ test('key={attempt.id} : changer d’étudiant vers un autre pending referme le 
         },
       ],
     }),
-    makeStudent([], {
-      id: 'student-2',
-      lastName: 'Martin',
-      firstName: 'Bob',
-      order: 2,
+    makeSecondStudent([], {
       attempts: [
         {
           id: 'attempt-2',

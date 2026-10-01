@@ -8,7 +8,7 @@ import { putSession, updateSession } from '@/lib/db/sessions'
 import { setReducedMotion } from '@/testing/match-media'
 import { renderAt } from '@/testing/render-at'
 import { makeSession } from '@/testing/session-fixtures'
-import { makeConfig, makeStudent } from '@/testing/student-fixtures'
+import { makeConfig, makeSecondStudent, makeStudent } from '@/testing/student-fixtures'
 
 const PROMPT = 'Question A1'
 const T1 = '2026-09-25T09:00:00.000Z'
@@ -75,13 +75,7 @@ function sessionWith(
     },
     students: [
       makeStudent([], { attempts }),
-      makeStudent([], {
-        id: 'student-2',
-        firstName: 'Bob',
-        lastName: 'Martin',
-        order: 2,
-        attempts: options.other ?? [],
-      }),
+      makeSecondStudent([], { attempts: options.other ?? [] }),
     ],
     projection: { mode: 'student', studentId: 'student-1' },
   })
@@ -140,7 +134,10 @@ describe('vue projetée', () => {
     await screen.findByText(PROMPT)
 
     await setAttempts('student-1', [])
-    expect(await screen.findByText('Question 1 / 3')).toBeInTheDocument()
+    // « Question 1 / 3 » s'affichait déjà avec la question en cours : seule la disparition de
+    // l'énoncé prouve que la réinitialisation est arrivée à l'écran.
+    await waitFor(() => expect(screen.queryByText(PROMPT)).not.toBeInTheDocument())
+    expect(screen.getByText('Question 1 / 3')).toBeInTheDocument()
     expect(cards(container)).toHaveLength(0)
 
     await setAttempts('student-1', [attempt(2, 'pending', T3)])

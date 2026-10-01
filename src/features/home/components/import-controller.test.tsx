@@ -2,14 +2,15 @@ import 'fake-indexeddb/auto'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { serializeBackup } from '@/domain/backup/serialize'
-import { isDamaged } from '@/lib/db/damaged-session'
-import { getSession, putSession } from '@/lib/db/sessions'
+import { putSession } from '@/lib/db/sessions'
 import type { PersistenceStatus } from '@/lib/db/persistence'
 import { db, type DbStatus } from '@/lib/db/db'
 import type { Session } from '@/domain/session/types'
 import { renderAt } from '@/testing/render-at'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
+import { deferred } from '@/testing/deferred'
+import { storedSession } from '@/testing/stored-session'
 
 const dbState = vi.hoisted((): { status: DbStatus } => ({ status: 'open' }))
 const persistence = vi.hoisted((): { status: PersistenceStatus | undefined } => ({
@@ -54,15 +55,6 @@ vi.mock('@/lib/download', () => ({
   downloadText: vi.fn<(fileName: string, text: string) => void>(),
 }))
 
-/** Promesse résolue à la demande, pour suspendre une écriture. */
-function deferred<T>() {
-  const box: { resolve?: (value: T) => void } = {}
-  const promise = new Promise<T>((resolve) => {
-    box.resolve = resolve
-  })
-  return { promise, resolve: (value: T) => box.resolve?.(value) }
-}
-
 function backupFile(text: string): File {
   return new File([text], 'backup.json', { type: 'application/json' })
 }
@@ -88,13 +80,6 @@ function drop(file: File) {
   fireEvent.drop(screen.getByRole('main', { hidden: true }), {
     dataTransfer: { files: [file], types: ['Files'] },
   })
-}
-
-async function storedSession(id = 'session-1') {
-  const session = await getSession(id)
-  if (!session) throw new Error(`${id} absente de la base`)
-  if (isDamaged(session)) throw new Error(`${id} endommagée`)
-  return session
 }
 
 beforeEach(async () => {

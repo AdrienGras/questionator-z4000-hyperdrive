@@ -3,16 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ProjectionCanvas } from '@/components/projection/projection-canvas'
 import type { ProjectedView } from '@/domain/presentation/projected-view'
 import { LocaleProvider } from '@/lib/i18n/locale-context'
-
-type Rappel = (entries: { contentRect: { width: number } }[]) => void
-let rappel: Rappel
-class FauxResizeObserver {
-  constructor(cb: Rappel) {
-    rappel = cb
-  }
-  observe = vi.fn<(element: Element) => void>()
-  disconnect = vi.fn<() => void>()
-}
+import { ManualResizeObserver } from '@/testing/resize-observer'
 
 const waiting: ProjectedView = {
   mode: 'waiting',
@@ -32,12 +23,15 @@ const renderCanvas = () =>
   )
 
 describe('ProjectionCanvas', () => {
-  beforeEach(() => vi.stubGlobal('ResizeObserver', FauxResizeObserver))
+  beforeEach(() => {
+    ManualResizeObserver.reset()
+    vi.stubGlobal('ResizeObserver', ManualResizeObserver)
+  })
   afterEach(() => vi.unstubAllGlobals())
 
   it('réduit le canevas à la largeur mesurée', () => {
     const { container } = renderCanvas()
-    act(() => rappel([{ contentRect: { width: 384 } }]))
+    act(() => ManualResizeObserver.resize(384))
     expect(canvas(container).style.transform).toBe('scale(0.3)')
     expect(canvas(container).style.visibility).toBe('')
     expect(container.firstElementChild).toHaveClass('extra')

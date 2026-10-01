@@ -1,40 +1,20 @@
 import 'fake-indexeddb/auto'
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, expect, test, vi } from 'vitest'
 import type { Session, Student } from '@/domain/session/types'
 import { db } from '@/lib/db/db'
 import { AddStudentDialog } from './components/add-student-dialog'
+import type { WriteOutcome } from './hooks/use-passage-actions'
 import { makeUi } from '@/testing/make-ui'
 import { makeSession } from '@/testing/session-fixtures'
-import { makeStudent } from '@/testing/student-fixtures'
+import { makeStudent, makeListStudent } from '@/testing/student-fixtures'
 import { expectPanelStaysOpen, openSidePanel } from '@/testing/side-panel-assertions'
 import { config, mountStudentsTab } from '@/testing/students-tab-harness'
+import { storedSession as stored } from '@/testing/stored-session'
+import { deferred } from '@/testing/deferred'
 
-const alice = makeStudent([], {
-  id: 's-a',
-  lastName: 'Aba',
-  firstName: 'X',
-  order: 1,
-  attempts: [
-    {
-      id: 'attempt-1',
-      categoryId: 'a',
-      questionId: 'a-1',
-      drawnAt: '2026-09-25T09:00:00.000Z',
-      outcome: 'pending',
-    },
-  ],
-})
+const alice = makeListStudent('s-a', 'Aba', 1, ['pending'])
 const durand = makeStudent([], { id: 's-d', lastName: 'Durand', firstName: 'Élodie', order: 2 })
-
-/** Promesse résolue à la demande, pour suspendre une écriture. */
-function deferred<T>() {
-  const box: { resolve?: (value: T) => void } = {}
-  const promise = new Promise<T>((resolve) => {
-    box.resolve = resolve
-  })
-  return { promise, resolve: (value: T) => box.resolve?.(value) }
-}
 
 async function mount(students: Student[] = [alice, durand], overrides: Partial<Session> = {}) {
   await mountStudentsTab(students, overrides)
@@ -53,12 +33,6 @@ const addDialog = () => screen.queryByRole('dialog', { name: 'Ajouter un étudia
 const drawer = () => screen.queryByRole('dialog', { name: 'Panneau latéral' })
 const addButton = () => screen.getByRole('button', { name: 'Ajouter' })
 const startButton = () => screen.getByRole('button', { name: 'Ajouter et faire passer' })
-
-async function stored() {
-  const session = await db.sessions.get('session-1')
-  if (session === undefined) throw new Error('session absente')
-  return session
-}
 
 beforeEach(async () => {
   localStorage.clear()
@@ -205,60 +179,100 @@ test('le déclencheur « Ajouter un étudiant » n’est pas désactivé pendant
   expect(screen.getByRole('button', { name: 'Ajouter un étudiant' })).toBeEnabled()
 })
 
-test('échec de l’ajout : le dialogue reste ouvert, champs gardés, erreur visible dedans', async () => {
-  const onAdd = vi.fn<() => Promise<boolean>>().mockResolvedValue(false)
-  const dialogFor = (error?: { message: string }) => (
-    <AddStudentDialog
-      ui={makeUi()}
-      session={makeSession({ config, students: [alice, durand] })}
-      disabled={false}
-      error={error}
-      onAdd={onAdd}
-    />
-  )
-  const { rerender } = render(dialogFor())
-  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-  openDialog()
-  fill('Martin', 'Zoé')
-  fireEvent.click(addButton())
-  await waitFor(() => expect(onAdd).toHaveBeenCalledTimes(1))
-  // L'erreur arrive du hook d'actions une fois l'écriture refusée, dialogue ouvert.
-  rerender(dialogFor({ message: 'Écriture impossible.' }))
-
-  const dialog = screen.getByRole('dialog')
-  expect(within(dialog).getByRole('alert')).toHaveTextContent('Écriture impossible.')
-  expect(screen.getByLabelText('Nom')).toHaveValue('Martin')
-  expect(screen.getByLabelText('Prénom')).toHaveValue('Zoé')
-})
-
-test('une erreur déjà présente à l’ouverture du dialogue n’y est pas affichée', () => {
+/** Dialogue monté seul : `onAdd` simulé, sans le verrou `run` du hook d'actions. */
+function renderDialog(onAdd: () => Promise<WriteOutcome>) {
   render(
     <AddStudentDialog
       ui={makeUi()}
       session={makeSession({ config, students: [alice, durand] })}
       disabled={false}
-      error={{ message: 'Ancienne erreur.' }}
-      onAdd={vi.fn<() => Promise<boolean>>()}
+      onAdd={onAdd}
     />,
   )
+}
 
+const WRITE_ERROR =
+  "L'enregistrement a échoué. La session a peut-être été supprimée dans un autre onglet."
+
+test('échec de l’ajout : le dialogue reste ouvert, champs gardés, erreur visible dedans', async () => {
+  const onAdd = vi.fn<() => Promise<WriteOutcome>>().mockResolvedValue('failed')
+  renderDialog(onAdd)
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  openDialog()
+  fill('Martin', 'Zoé')
+
+  fireEvent.click(addButton())
+
+  const dialog = screen.getByRole('dialog')
+  expect(await within(dialog).findByRole('alert')).toHaveTextContent(WRITE_ERROR)
+  expect(screen.getByLabelText('Nom')).toHaveValue('Martin')
+  expect(screen.getByLabelText('Prénom')).toHaveValue('Zoé')
+})
+
+test('l’erreur d’un échec disparaît au nouvel essai et à la réouverture', async () => {
+  const retry = deferred<WriteOutcome>()
+  const onAdd = vi
+    .fn<() => Promise<WriteOutcome>>()
+    .mockResolvedValueOnce('failed')
+    .mockReturnValueOnce(retry.promise)
+    .mockResolvedValue('failed')
+  renderDialog(onAdd)
+  openDialog()
+  fill('Martin', 'Zoé')
+  fireEvent.click(addButton())
+  expect(await screen.findByRole('alert')).toBeInTheDocument()
+
+  // Nouvel essai : l'erreur précédente s'efface dès l'envoi.
+  fireEvent.click(addButton())
+  await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument())
+  retry.resolve('failed')
+  expect(await screen.findByRole('alert')).toBeInTheDocument()
+
+  fireEvent.keyDown(screen.getByLabelText('Nom'), { key: 'Escape' })
+  await waitFor(() => expect(addDialog()).not.toBeInTheDocument())
   openDialog()
 
   expect(screen.getByRole('dialog')).toBeInTheDocument()
   expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 })
 
+test('ajout écarté (une autre écriture en vol) : ni alerte ni fermeture, champs gardés', async () => {
+  const onAdd = vi.fn<() => Promise<WriteOutcome>>().mockResolvedValue('ignored')
+  renderDialog(onAdd)
+  openDialog()
+  fill('Martin', 'Zoé')
+
+  fireEvent.click(addButton())
+
+  await waitFor(() => expect(onAdd).toHaveBeenCalledTimes(1))
+  await act(() => Promise.resolve())
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  expect(addDialog()).toBeInTheDocument()
+  expect(screen.getByLabelText('Nom')).toHaveValue('Martin')
+})
+
+test('double clic avant la fin de l’écriture : la garde du dialogue n’envoie qu’un appel', async () => {
+  // Pas de hook d'actions ici : seul `submitting` peut écarter le second clic, pas le verrou `run`.
+  const pending = deferred<WriteOutcome>()
+  const onAdd = vi.fn<() => Promise<WriteOutcome>>(() => pending.promise)
+  renderDialog(onAdd)
+  openDialog()
+  fill('Martin', 'Zoé')
+
+  fireEvent.click(startButton())
+  fireEvent.click(startButton())
+  fireEvent.click(addButton())
+
+  expect(onAdd).toHaveBeenCalledTimes(1)
+  pending.resolve('written')
+  await waitFor(() => expect(addDialog()).not.toBeInTheDocument())
+  expect(onAdd).toHaveBeenCalledTimes(1)
+})
+
 test('écriture en cours : Échap ne ferme pas le dialogue ni ne vide les champs', async () => {
-  const pending = deferred<boolean>()
-  const onAdd = vi.fn<() => Promise<boolean>>(() => pending.promise)
-  render(
-    <AddStudentDialog
-      ui={makeUi()}
-      session={makeSession({ config, students: [alice, durand] })}
-      disabled={false}
-      onAdd={onAdd}
-    />,
-  )
+  const pending = deferred<WriteOutcome>()
+  const onAdd = vi.fn<() => Promise<WriteOutcome>>(() => pending.promise)
+  renderDialog(onAdd)
   openDialog()
   fill('Martin', 'Zoé')
   fireEvent.click(addButton())
@@ -268,6 +282,6 @@ test('écriture en cours : Échap ne ferme pas le dialogue ni ne vide les champs
   expect(addDialog()).toBeInTheDocument()
   expect(screen.getByLabelText('Nom')).toHaveValue('Martin')
 
-  pending.resolve(true)
+  pending.resolve('written')
   await waitFor(() => expect(addDialog()).not.toBeInTheDocument())
 })

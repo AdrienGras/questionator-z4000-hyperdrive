@@ -1,8 +1,8 @@
 import 'fake-indexeddb/auto'
 import { readdirSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
-import { screen, waitFor } from '@testing-library/react'
-import { beforeEach, expect, test } from 'vitest'
+import { dirname, join } from 'node:path'
+import { act, fireEvent, screen, waitFor } from '@testing-library/react'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import { editScore } from '@/domain/passage/edit-score'
 import type { Session, Student } from '@/domain/session/types'
@@ -60,6 +60,10 @@ async function seed(student: Student | undefined, presentation = {}): Promise<Se
 beforeEach(async () => {
   localStorage.clear()
   await db.sessions.clear()
+})
+
+afterEach(() => {
+  vi.useRealTimers()
 })
 
 test('projection en attente : titre de l’épreuve et message, aucun nom', async () => {
@@ -181,19 +185,93 @@ test('session corrompue pendant l’affichage : bascule sur l’écran « endomm
   expect(screen.queryByText(/Alice/)).not.toBeInTheDocument()
 })
 
+/** Fichiers source (hors tests) de `dir`, chemins relatifs à la racine du dépôt. */
+function sourceFiles(dir: string): string[] {
+  return readdirSync(join(process.cwd(), dir), { recursive: true, encoding: 'utf8' })
+    .filter((f) => /\.tsx?$/.test(f) && !/\.test\.tsx?$/.test(f))
+    .map((f) => join(dir, f))
+}
+
+/** Spécificateurs des `import … from`, `export … from` et `import()` d'un source formaté par Prettier. */
+function specifiers(source: string): string[] {
+  const found = source.matchAll(/(?:\bfrom |\bimport\(|^import )'([^']+)'/gm)
+  return [...found].map((match) => match[1] ?? '')
+}
+
+/** Fichier visé par un spécificateur `@/…` ou relatif, sans extension ; `undefined` sinon. */
+function target(specifier: string, from: string): string | undefined {
+  if (specifier.startsWith('@/')) return join('src', specifier.slice(2))
+  if (specifier.startsWith('.')) return join(dirname(from), specifier)
+  return undefined
+}
+
+const withoutExtension = (file: string) => file.replace(/\.tsx?$/, '')
+
+/**
+ * Modules qui exposent le modèle de session : `domain/session/types` et, de proche en proche, tout
+ * module qui en réexporte (`export … from`), pour qu'un réexport ne serve pas de détour.
+ */
+function sessionModelModules(sources: ReadonlyMap<string, string>): Set<string> {
+  const model = new Set(['src/domain/session/types'])
+  let grew = true
+  while (grew) {
+    grew = false
+    for (const [file, source] of sources) {
+      const module = withoutExtension(file)
+      if (model.has(module)) continue
+      const reexports = [
+        ...source.matchAll(/^export (?:type )?(?:\*(?: as \w+)?|\{[^}]*\}) from '([^']+)'/gm),
+      ]
+      if (reexports.some((m) => model.has(target(m[1] ?? '', file) ?? ''))) {
+        model.add(module)
+        grew = true
+      }
+    }
+  }
+  return model
+}
+
+/** Fichiers de `files` qui importent le modèle de session, directement ou par un réexport. */
+function sessionModelImporters(files: string[], sources: ReadonlyMap<string, string>): string[] {
+  const model = sessionModelModules(sources)
+  return files.filter((file) => {
+    const source = sources.get(file) ?? ''
+    return (
+      specifiers(source).some((s) => model.has(target(s, file) ?? '')) ||
+      source.includes('NormalizedConfig')
+    )
+  })
+}
+
+test('détecteur d’imports du modèle : direct, par réexport en chaîne, pas un module voisin', () => {
+  const sources = new Map([
+    ['src/domain/session/types.ts', 'export type Session = {}'],
+    ['src/lib/a.ts', "export type { Session } from '@/domain/session/types'"],
+    ['src/lib/b.ts', "export * from './a'"],
+    ['src/lib/c.ts', "import type { Session } from '@/domain/session/types'\nexport const c = 1"],
+    ['src/x/direct.tsx', "import type { Session } from '@/domain/session/types'"],
+    ['src/x/chained.tsx', "import { type Session } from '@/lib/b'"],
+    ['src/x/neighbour.tsx', "import { c } from '@/lib/c'"],
+  ])
+
+  expect(
+    sessionModelImporters(
+      ['src/x/direct.tsx', 'src/x/chained.tsx', 'src/x/neighbour.tsx'],
+      sources,
+    ),
+  ).toEqual(['src/x/direct.tsx', 'src/x/chained.tsx'])
+})
+
 test.each(['src/features/present', 'src/components/projection'])(
-  'aucun import du modèle de session dans %s',
+  'aucun import du modèle de session dans %s, même par un réexport',
   (dir) => {
-    const root = join(process.cwd(), dir)
-    const files = readdirSync(root, { recursive: true, encoding: 'utf8' })
-      .filter((f) => /\.tsx?$/.test(f) && !f.endsWith('.test.tsx'))
-      .map((f) => join(root, f))
+    const files = sourceFiles(dir)
     expect(files.length).toBeGreaterThan(0)
-    const offenders = files.filter((file) => {
-      const source = readFileSync(file, 'utf8')
-      return source.includes('domain/session/types') || source.includes('NormalizedConfig')
-    })
-    expect(offenders).toEqual([])
+    const all = sourceFiles('src')
+    const sources = new Map(
+      all.map((file) => [file, readFileSync(join(process.cwd(), file), 'utf8')]),
+    )
+    expect(sessionModelImporters(files, sources)).toEqual([])
   },
 )
 
@@ -206,4 +284,25 @@ test('tuiles : même disposition que la vue examinateur, 2 catégories sur une l
 
   expect(list?.style.getPropertyValue('--cols')).toBe('4')
   expect(list?.querySelectorAll('li[data-row-start="true"]')).toHaveLength(0)
+})
+
+test('pointeur masqué après 3 s d’inactivité, rendu au premier mouvement', async () => {
+  // `shouldAdvanceTime` : la liveQuery de la page avance au rythme réel, le délai d'inactivité se
+  // saute d'un coup.
+  vi.useFakeTimers({ shouldAdvanceTime: true })
+  await seed(makeStudent())
+  renderAt('/present/session-1')
+  const main = (await screen.findByText(/Alice/)).closest('main')
+  // Le délai court depuis le montage, avant les données : sous charge, le temps réel passé à
+  // attendre l'affichage peut déjà l'avoir épuisé. Un mouvement le relance à zéro.
+  fireEvent.mouseMove(window)
+  expect(main).not.toHaveClass('cursor-none')
+
+  act(() => {
+    vi.advanceTimersByTime(3000)
+  })
+  expect(main).toHaveClass('cursor-none')
+
+  fireEvent.mouseMove(window)
+  expect(main).not.toHaveClass('cursor-none')
 })

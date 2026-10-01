@@ -24,6 +24,20 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-01 — #87 PR 1 : dette de l'écran de passage
+
+**Dernière chose faite** : PR #99 (#86) mergée sur go de l'utilisateur. #87 découpé en 4 PR successives, découpage validé par l'utilisateur : écran de passage ; accueil, création, persistance, langue ; projection, rendu, éditeur ; stats, puis les tests instables. La PR 1 est faite sur `chore/87-dette-ecran-passage` par un subagent, puis relue :
+- les 15 lignes du BACKLOG de l'écran de passage sont traitées : fixtures regroupées et paramétrables dans `src/testing/` (`deferred`, `FauxResizeObserver`, `storedSession` sur `getHealthySession`), tests manquants, statut et notes calculés une fois dans `ExaminerView` ;
+- trois défauts corrigés : `?search` retiré de l'URL de la fenêtre projetée, brouillons de commentaire effacés à la suppression et à l'import, une seule alerte sur l'échec d'ajout d'étudiant ;
+- l'ajout d'étudiant renvoie désormais son issue (`written` / `failed` / `ignored`) ;
+- `passage-example` est passé de 4,35 s à environ 2,1 s sous la suite (QUIRKS : icônes Tabler et Shiki tirés par la config d'exemple).
+
+**Trucs en suspens** : PR à ouvrir, Sonar, puis « Ready for review » ; ne pas merger sans le go de l'utilisateur. Changement visible : l'échec d'ajout d'étudiant affiche `write_error`. L'utilisateur s'intéresse aux tests instables : une investigation dédiée, mesures sur une vingtaine de suites complètes, est proposée à la place de la partie « instables » de la PR 4. 3 échecs sur environ 13 suites ont été vus pendant la PR 1 (`config-editor-page` « ouvre l'exemple… » à 5 s, `add-student`, un non identifié). Hypothèse : charge CPU (177 jsdom) contre des délais de 5 s, avec icônes et Shiki chargés au premier rendu.
+
+**Prochaine chose à creuser** : après le merge, investigation des tests instables si l'utilisateur la valide, puis PR 2 de #87 (accueil, création, persistance, langue).
+
+**Notes pour future Claude** : le brief de chaque PR = les lignes exactes du BACKLOG (numéros sur `main`) plus des arbitrages explicites ; ça a bien marché avec un implémenteur Opus et une revue Opus. Ne pas lancer deux suites complètes en parallèle (implémenteur et relecteur) : la charge CPU est justement suspecte dans les instabilités.
+
 ## 2026-10-01 — #86 : budgets de taille du build
 
 **Dernière chose faite** : PR #98 (F32) mergée sur go de l'utilisateur. #86 implémenté sur `chore/86-budget-bundle` (D88), ticket borné, design validé en session : `pnpm check:budget` (`scripts/check-bundle-budget.ts`, en CI après `check:precache`) mesure en gzip le premier affichage de l'accueil (entrée + route `/`, ≤ 275 Ko, mesuré 238,5 Ko) et chaque chunk (≤ 135 Ko, hors `icons-*` et grammaires/thèmes Shiki), vérifie que `IconBrandPhp` reste dans le chunk des icônes, avec des gardes de non-vacuité. Choix de l'utilisateur : gzip, marge ~15 %. Écart au design annoncé, signalé : la route `/` est comptée avec l'entrée, car elle est découpée paresseusement et `check:bundle` ne la voit pas (QUIRKS). Preuve : Recharts importé dans l'accueil passait `check:bundle` et `check:budget` le refuse (+98,9 Ko) ; après la revue de branche, `check:bundle` part aussi de la route `/` et le refuse à son tour.

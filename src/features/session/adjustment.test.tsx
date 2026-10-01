@@ -6,21 +6,10 @@ import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
 import { categoryButton } from '@/testing/passage-assertions'
 import { renderAt } from '@/testing/render-at'
-import { REVEALED, screenCategory } from '@/testing/screen-fixtures'
+import { REVEALED, screenConfig } from '@/testing/screen-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
-import { makeConfig, makeStudent } from '@/testing/student-fixtures'
-
-function config(step = 0.5) {
-  return {
-    ...makeConfig({
-      questionsPerStudent: 1,
-      maxRawScore: 20,
-      finalScale: 20,
-      rounding: { mode: 'nearest', decimals: 2, step },
-    }),
-    categories: [screenCategory],
-  }
-}
+import { storedSession } from '@/testing/stored-session'
+import { makeStudent } from '@/testing/student-fixtures'
 
 beforeEach(async () => {
   await db.sessions.clear()
@@ -30,17 +19,24 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-async function mount(student: Student, step = 0.5): Promise<void> {
+async function mount(
+  student: Student,
+  rounding: Readonly<{ step?: number; decimals?: number }> = {},
+): Promise<void> {
   await putSession(
-    makeSession({ config: config(step), students: [student], activeStudentId: student.id }),
+    makeSession({
+      config: screenConfig(rounding),
+      students: [student],
+      activeStudentId: student.id,
+    }),
   )
   renderAt('/session/session-1')
 }
 
 async function stored() {
-  const session = await db.sessions.get('session-1')
-  const student = session?.students[0]
-  if (session === undefined || student === undefined) throw new Error('session absente')
+  const session = await storedSession()
+  const student = session.students[0]
+  if (student === undefined) throw new Error('étudiant absent')
   return { session, student }
 }
 
@@ -222,7 +218,7 @@ test('saisie hors du pas : message, aria-invalid, « Enregistrer » désactivé'
 })
 
 test('boutons − et + au pas de 0,25', async () => {
-  await mount(makeStudent([13.5]), 0.25)
+  await mount(makeStudent([13.5]), { step: 0.25 })
   const dialog = await findDialog()
 
   fireEvent.click(button(dialog, 'Ajouter un pas'))
@@ -357,4 +353,24 @@ test('« + » depuis une saisie invalide repart de 0', async () => {
   fireEvent.click(button(dialog, 'Ajouter un pas'))
 
   expect(field(dialog).value).toBe('0,5')
+})
+
+test('pas de 1 sans décimale (`decimals: 0`) : calcul en entiers, pas et saisie au point', async () => {
+  await mount(makeStudent([13.5]), { step: 1, decimals: 0 })
+  const dialog = await findDialog()
+
+  expect(within(dialog).getByText('14 + 0 = 14 / 20')).toBeInTheDocument()
+  fireEvent.click(button(dialog, 'Ajouter un pas'))
+  expect(field(dialog)).toHaveValue('1')
+  expect(within(dialog).getByText('14 + 1 = 15 / 20')).toBeInTheDocument()
+
+  type(dialog, '0,5')
+  expect(field(dialog)).toHaveAccessibleDescription('Saisissez un multiple de 1, entre −20 et 20.')
+  expect(button(dialog, 'Enregistrer')).toBeDisabled()
+
+  type(dialog, '-2')
+  fireEvent.click(button(dialog, 'Enregistrer'))
+  await dialogClosed()
+  expect((await stored()).student.adjustment).toEqual({ value: -2 })
+  expect(await screen.findByText('12 / 20')).toBeInTheDocument()
 })

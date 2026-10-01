@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import type { BackupIssue } from '@/domain/backup/issues'
 import type { BackupParseResult } from '@/domain/backup/parse'
 import type { StoredSession } from '@/lib/db/damaged-session'
+import { clearSessionCommentDrafts } from '@/lib/comment-draft'
 import { getSession, putSession } from '@/lib/db/sessions'
 import type { Session } from '@/domain/session/types'
 
@@ -75,6 +76,8 @@ export function useBackupImport() {
         return
       }
       await putSession(result.session)
+      // Aucune session de cet id avant l'import : un brouillon restant est orphelin.
+      clearSessionCommentDrafts(result.session.id)
       setState({ kind: 'idle' })
     } catch {
       setState({ kind: 'write-error', fileName: file.name })
@@ -85,6 +88,8 @@ export function useBackupImport() {
     if (state.kind !== 'conflict') return
     try {
       await putSession(state.incoming)
+      // Un brouillon de l'ancienne session écraserait le commentaire importé à la réouverture.
+      clearSessionCommentDrafts(state.incoming.id)
       setState({ kind: 'idle' })
     } catch {
       setState({ kind: 'write-error', fileName: state.fileName })

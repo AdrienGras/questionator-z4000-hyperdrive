@@ -10,6 +10,7 @@ import { renderAt } from '@/testing/render-at'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
 import { bannerInteractiveNames, expectColorModeToggleLast } from '@/testing/page-shell-assertions'
+import { storedSession } from '@/testing/stored-session'
 
 const dbState = vi.hoisted((): { status: DbStatus } => ({ status: 'open' }))
 const persistence = vi.hoisted((): { status: PersistenceStatus | undefined } => ({
@@ -34,12 +35,6 @@ const ACTIONS = 'Actions pour « Oral de test »'
 async function chooseAction(action: string) {
   fireEvent.click(await screen.findByRole('button', { name: ACTIONS }))
   fireEvent.click(await screen.findByRole('menuitem', { name: action }))
-}
-
-async function storedSession() {
-  const session = await getHealthySession('session-1')
-  if (!session) throw new Error('session-1 absente de la base')
-  return session
 }
 
 beforeEach(async () => {

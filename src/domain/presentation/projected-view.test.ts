@@ -61,6 +61,13 @@ function studentView(session: Session): ProjectedStudentView {
 
 const revealed = '2026-09-29T10:00:00.000Z'
 
+/** Feuilles (chaînes et nombres) d'une valeur JSON, à toute profondeur. */
+function leavesOf(value: unknown): unknown[] {
+  if (Array.isArray(value)) return value.flatMap(leavesOf)
+  if (typeof value === 'object' && value !== null) return Object.values(value).flatMap(leavesOf)
+  return [value]
+}
+
 describe('toProjectedView', () => {
   test('waiting : titre et apparence seulement', () => {
     const session = makeSession({ projection: { mode: 'waiting' } })
@@ -253,6 +260,8 @@ describe('toProjectedView', () => {
     // Montant d'ajustement et date d'édition improbables : ne doivent jamais apparaître tels quels.
     const editedAt = '1999-12-31T23:59:59.999Z'
     const adjustmentValue = 0.37
+    /** `adjustmentValue` écrit dans un texte, point ou virgule, non collé à d'autres chiffres. */
+    const ADJUSTMENT_IN_TEXT = /(^|[^\d])0[.,]37(?!\d)/
     const other = makeStudent([], {
       id: 'student-secret-2',
       firstName: 'FUITE-PRENOM',
@@ -275,18 +284,31 @@ describe('toProjectedView', () => {
       return makeSession({ config, students: [student, other], projection })
     }
 
-    /** Marqueurs et identifiants d'étudiants retrouvés dans la vue sérialisée (attendu : aucun). */
-    function leaks(session: Session): string[] {
-      const json = JSON.stringify(toProjectedView(session))
+    /**
+     * Marqueurs et identifiants retrouvés dans `view` (attendu : aucun). Les chaînes interdites
+     * sont cherchées dans chaque chaîne. Le montant d'ajustement, en nombre exact parmi les
+     * nombres, et dans les chaînes comme nombre isolé (« +0,37 », « 0.37 ») : une note qui le
+     * contient en sous-chaîne (10,37) n'est pas une fuite.
+     */
+    function leaksIn(view: unknown, session: Session): string[] {
       const forbidden = [
         ...markers,
         'FUITE-PRENOM',
         'FUITE-NOM',
         editedAt,
-        String(adjustmentValue),
         ...session.students.map((student) => student.id),
       ]
-      return forbidden.filter((value) => json.includes(value))
+      const leaves = leavesOf(view)
+      const strings = leaves.filter((leaf): leaf is string => typeof leaf === 'string')
+      const found = forbidden.filter((value) => strings.some((leaf) => leaf.includes(value)))
+      const amountInText = strings.some((leaf) => ADJUSTMENT_IN_TEXT.test(leaf))
+      return leaves.includes(adjustmentValue) || amountInText
+        ? [...found, String(adjustmentValue)]
+        : found
+    }
+
+    function leaks(session: Session): string[] {
+      return leaksIn(toProjectedView(session), session)
     }
 
     const base = {
@@ -311,6 +333,23 @@ describe('toProjectedView', () => {
       const session = leakySession(student, { mode: 'student', studentId: student.id })
       expect(toProjectedView(session).mode).toBe('student')
       expect(leaks(session)).toEqual([])
+    })
+
+    test('détecteur : une date d’édition ou un montant d’ajustement injectés sont vus', () => {
+      const student = makeStudent([1, 2], { ...base, finalRevealedAt: revealed })
+      const session = leakySession(student, { mode: 'student', studentId: student.id })
+      const view = toProjectedView(session)
+
+      expect(leaksIn({ ...view, injected: { editedAt } }, session)).toEqual([editedAt])
+      expect(leaksIn({ ...view, injected: [{ points: adjustmentValue }] }, session)).toEqual([
+        String(adjustmentValue),
+      ])
+      // Exact, pas en sous-chaîne : une note de 10,37 n'est pas le montant d'ajustement.
+      expect(leaksIn({ ...view, injected: { points: 10.37 } }, session)).toEqual([])
+      for (const text of ['Ajustement : +0,37', '0.37']) {
+        expect(leaksIn({ ...view, injected: { text } }, session)).toEqual(['0.37'])
+      }
+      expect(leaksIn({ ...view, injected: { text: 'Note : 10,37 / 20' } }, session)).toEqual([])
     })
   })
 })

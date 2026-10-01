@@ -1,4 +1,4 @@
-import { act, fireEvent, screen, within } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { expect } from 'vitest'
 
 /**
@@ -20,6 +20,13 @@ export async function openSidePanel(tab?: 'Étudiant' | 'Étudiants'): Promise<H
   const dialog = await screen.findByRole('dialog', { name: 'Panneau latéral' })
   if (tab !== undefined) fireEvent.click(within(dialog).getByRole('tab', { name: tab }))
   return dialog
+}
+
+/** Attend la fermeture du tiroir latéral (plus de `dialog` « Panneau latéral »). */
+export async function expectPanelClosed(): Promise<void> {
+  await waitFor(() =>
+    expect(screen.queryByRole('dialog', { name: 'Panneau latéral' })).not.toBeInTheDocument(),
+  )
 }
 
 /**

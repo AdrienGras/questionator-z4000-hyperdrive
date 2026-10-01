@@ -1,7 +1,7 @@
 import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import { currentPending, isCategoryExhausted, questionIndex } from '@/domain/passage/selectors'
 import { fromMilli } from '@/domain/scoring/milli'
-import { computeScores } from '@/domain/scoring/score'
+import { computeScores, type ScoreBreakdown } from '@/domain/scoring/score'
 import { studentStatus } from '@/domain/scoring/status'
 import type { Session, Student } from '@/domain/session/types'
 
@@ -67,9 +67,8 @@ function maxPointsOf(category: NormalizedCategory): number {
   return Math.max(...category.scale)
 }
 
-function finalOf(student: Student, config: NormalizedConfig): ProjectedStudentView['final'] {
+function finalOf(scores: ScoreBreakdown, config: NormalizedConfig): ProjectedStudentView['final'] {
   const { finalScoreDisplay } = config.presentation
-  const scores = computeScores(student, config)
   const final = scores.final
   return {
     ...(finalScoreDisplay !== 'converted' && { raw: fromMilli(scores.raw) }),
@@ -111,6 +110,8 @@ export function toProjectedView(session: Session): ProjectedView {
 
   const pending = currentPending(student)
   const finished = studentStatus(student, config) === 'done'
+  // Une seule fois : score cumulé en cours de passage, note finale une fois révélée.
+  const scores = computeScores(student, config)
   const question =
     pending === undefined
       ? undefined
@@ -145,9 +146,9 @@ export function toProjectedView(session: Session): ProjectedView {
     questionIndex: questionIndex(student, config),
     ...(presentation.showCumulativeScore &&
       !finished && {
-        cumulativeRaw: fromMilli(computeScores(student, config).raw),
+        cumulativeRaw: fromMilli(scores.raw),
       }),
-    ...(revealed && { final: finalOf(student, config) }),
+    ...(revealed && { final: finalOf(scores, config) }),
     finished,
     drawAnimation: presentation.drawAnimation,
     ...(presentation.showStatsOnFinal && revealed && { detail: detailOf(student, config) }),

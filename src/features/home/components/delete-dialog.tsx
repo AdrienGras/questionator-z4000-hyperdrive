@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { clearSessionCommentDrafts } from '@/lib/comment-draft'
 import { deleteSession } from '@/lib/db/sessions'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { exportBackup } from '@/components/export/export-backup'
@@ -50,6 +51,7 @@ export function DeleteDialog({
     setFailed(false)
     try {
       await deleteSession(sessionId)
+      clearSessionCommentDrafts(sessionId)
       setDeleting(false)
       onOpenChange(false)
     } catch {

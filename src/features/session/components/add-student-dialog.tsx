@@ -11,9 +11,9 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useFreshError, type Failure } from '@/features/session/hooks/use-fresh-error'
 import { findDuplicate } from '@/domain/passage/selectors'
 import type { Session } from '@/domain/session/types'
+import type { WriteOutcome } from '@/features/session/hooks/use-passage-actions'
 import type { Ui } from '@/lib/i18n/use-ui'
 
 type Names = { lastName: string; firstName: string }
@@ -23,21 +23,20 @@ type AddStudentDialogProps = Readonly<{
   session: Session
   /** Écriture en cours : verrouille les deux boutons d'envoi (pas le déclencheur). */
   disabled: boolean
-  /** Dernière action refusée, montrée ici (seulement si survenue dialogue ouvert) car le `role="alert"` de l'écran est sous le modal. */
-  error?: Failure
-  onAdd: (names: Names, options: { activate: boolean }) => Promise<boolean>
+  onAdd: (names: Names, options: { activate: boolean }) => Promise<WriteOutcome>
 }>
 
 /**
  * Dialogue d'ajout d'un étudiant en cours de session (F13). Succès : fermeture et champs vidés ;
- * échec : le dialogue reste ouvert et affiche l'erreur reçue en `error`.
+ * échec (`failed`) : le dialogue reste ouvert et affiche `write_error`, seule alerte de l'écran (l'appelant
+ * passe `ownError`, motif F30 de `ResetDialog`).
  */
-export function AddStudentDialog({ ui, session, disabled, error, onAdd }: AddStudentDialogProps) {
+export function AddStudentDialog({ ui, session, disabled, onAdd }: AddStudentDialogProps) {
   const { text } = ui
   const lastNameId = useId()
   const firstNameId = useId()
   const [open, setOpen] = useState(false)
-  const freshError = useFreshError(error, open)
+  const [failed, setFailed] = useState(false)
   const [lastName, setLastName] = useState('')
   const [firstName, setFirstName] = useState('')
   // Garde synchrone : les deux boutons n'envoient qu'un appel pendant l'écriture, en plus du
@@ -56,6 +55,7 @@ export function AddStudentDialog({ ui, session, disabled, error, onAdd }: AddStu
   function handleOpenChange(next: boolean) {
     // Échap et clic extérieur sont ignorés pendant l'écriture : l'erreur doit rester visible.
     if (!next && submitting.current) return
+    setFailed(false)
     setOpen(next)
     if (!next) reset()
   }
@@ -63,14 +63,17 @@ export function AddStudentDialog({ ui, session, disabled, error, onAdd }: AddStu
   async function submit(activate: boolean) {
     if (blocked || submitting.current) return
     submitting.current = true
-    let succeeded = false
+    setFailed(false)
+    let outcome: WriteOutcome
     try {
-      // `run` ne lève jamais : un échec revient en `false`.
-      succeeded = await onAdd({ lastName, firstName }, { activate })
+      // L'écriture ne lève jamais : son issue revient en `WriteOutcome`.
+      outcome = await onAdd({ lastName, firstName }, { activate })
     } finally {
       submitting.current = false
     }
-    if (succeeded) handleOpenChange(false)
+    // `ignored` (une autre écriture en vol) : ni fermeture ni alerte, l'utilisateur peut réessayer.
+    if (outcome === 'written') handleOpenChange(false)
+    else if (outcome === 'failed') setFailed(true)
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -114,9 +117,9 @@ export function AddStudentDialog({ ui, session, disabled, error, onAdd }: AddStu
               })}
             </output>
           )}
-          {freshError !== undefined && (
+          {failed && (
             <p role="alert" className="text-sm text-destructive">
-              {freshError.message}
+              {text('write_error', {})}
             </p>
           )}
           <DialogFooter>
