@@ -179,3 +179,47 @@ test('téléchargement, brouillon au rechargement, puis création de session', a
   await create.submit()
   await expect(page).toHaveURL(/#\/session\//)
 })
+
+test('Ctrl+Espace propose les clés à l’endroit du curseur, puis les valeurs d’une énumération', async ({
+  page,
+}) => {
+  const editor = new ConfigEditorPage(page)
+  await editor.goto()
+  await editor.replaceText('{\n  "scoring": {\n    \n  }\n}')
+  await page.locator('.cm-line').nth(2).click()
+  await page.keyboard.press('End')
+  await editor.complete()
+  await expect(editor.completionOption(/questionsPerStudent/)).toBeVisible()
+
+  // L'option sélectionnée porte la couleur d'accent de l'app (--accent), pas celle de CodeMirror.
+  const selected = page.locator('.cm-tooltip-autocomplete li[role="option"][aria-selected="true"]')
+  const [selectedColor, accentColor] = await Promise.all([
+    selected.evaluate((element) => getComputedStyle(element).backgroundColor),
+    page.evaluate(() => {
+      const probe = document.createElement('div')
+      probe.style.background = 'var(--accent)'
+      document.body.append(probe)
+      const color = getComputedStyle(probe).backgroundColor
+      probe.remove()
+      return color
+    }),
+  ])
+  expect(accentColor).not.toBe('rgba(0, 0, 0, 0)')
+  expect(selectedColor).toBe(accentColor)
+
+  await page.keyboard.press('Escape')
+  await page.keyboard.insertText('"rounding": { "mode": ')
+  await editor.complete()
+  for (const value of ['"nearest"', '"up"', '"down"']) {
+    await expect(editor.completionOption(value)).toBeVisible()
+  }
+})
+
+test('le survol de finalScoreDisplay affiche sa description et son défaut', async ({ page }) => {
+  const editor = new ConfigEditorPage(page)
+  await editor.goto()
+  await expect(editor.editor).toContainText('"finalScoreDisplay"')
+  await page.locator('.cm-content').getByText('"finalScoreDisplay"').hover()
+  await expect(editor.hoverTooltip).toContainText('écran final : brute, convertie ou les deux.')
+  await expect(editor.hoverTooltip).toContainText('Défaut : "both"')
+})

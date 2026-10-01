@@ -67,6 +67,21 @@ export class ConfigEditorPage {
     await this.page.keyboard.insertText(text)
   }
 
+  /** Ouvre la liste de complétion (Ctrl+Espace) ; le focus reste dans l'éditeur. */
+  async complete(): Promise<void> {
+    await this.page.keyboard.press('Control+Space')
+  }
+
+  /** Option de la liste de complétion, désignée par (un extrait de) son libellé. */
+  completionOption(name: string | RegExp): Locator {
+    return this.page.getByRole('option', { name })
+  }
+
+  /** Infobulle de survol (description et défaut). */
+  get hoverTooltip(): Locator {
+    return this.page.locator('.cm-tooltip-hover')
+  }
+
   /** Bouton d'une issue de la liste, désigné par (un extrait de) son message. */
   issue(message: string): Locator {
     return this.page.getByRole('button', { name: message })
