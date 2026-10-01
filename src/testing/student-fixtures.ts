@@ -10,6 +10,11 @@ export function makeConfig(
   skips?: ParsedConfig['skips'],
 ): NormalizedConfig {
   const config = minimalConfig()
+  // `makeStudent` dérive `questionId` de l'index (`a-1`…) : la catégorie `a` doit porter ces questions.
+  config.categories[0]!.questions = Array.from({ length: 10 }, (_, i) => ({
+    id: `a-${i + 1}`,
+    prompt: `Question A${i + 1}`,
+  }))
   config.scoring = { ...config.scoring, ...scoring }
   if (absent !== undefined) config.absent = absent
   if (skips !== undefined) config.skips = skips

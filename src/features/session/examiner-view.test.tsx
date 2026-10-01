@@ -341,6 +341,7 @@ test('la note qui atteint questionsPerStudent affiche « Passage terminé »', a
 
 test('question sans « answer » n’affiche aucun bloc de réponse', async () => {
   const config = makeConfig({ questionsPerStudent: 1 })
+  config.categories[0]!.questions = config.categories[0]!.questions.slice(0, 1)
   await putSession(makeSession({ config, activeStudentId: 'student-1' }))
   renderAt('/session/session-1')
 
