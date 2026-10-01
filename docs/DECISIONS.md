@@ -1253,3 +1253,14 @@ autre encodage 8 bits.
 
 **Reporté** : `docs/CONVENTIONS.md` § « Dialogue de saisie » (motif `ownError` + `useFreshError`), `docs/QUIRKS.md` (IndexedDB à `pagehide`), `docs/BACKLOG.md` (mineurs → #87).
 
+## D83 — F35 : fichiers d'entrée plus tolérants (tabulation, cellules sur plusieurs lignes, identifiants presque identiques) (2026-10-01)
+
+**Question** : un CSV séparé par tabulations donnait « aucun étudiant valide », un nom saisi sur deux lignes dans une cellule Excel gardait son saut de ligne, et deux identifiants de config presque identiques (espace en bord, accent précomposé contre accent combinant) passaient pour deux clés distinctes. Avertir ou refuser ?
+
+**Décision** :
+- CSV : séparateur détecté parmi `;`, `,` et tabulation par le même score qu'avant (lignes découpées en au moins deux cellules non vides) ; égalité : `;`, puis `,`. Chaque cellule passe par `replace(/\s+/gu, ' ').trim()`. Le numéro de ligne de chaque enregistrement est calculé depuis `meta.cursor` de PapaParse (mode `step`), car une cellule entre guillemets peut désormais couvrir plusieurs lignes : avertissements et `csv_syntax` citent la vraie ligne du fichier.
+- Config : deux **erreurs**, au même titre que les doublons : `padded_id` (id de catégorie ou de question avec une espace en début ou en fin) et `unicode_variant_id` (deux ids du même type égaux une fois normalisés en NFC, mais écrits avec des caractères différents). Une égalité stricte reste `duplicate_category_id` / `duplicate_question_id`.
+
+**Pourquoi** : un id est une clé de référence (attempts, stats, export) ; une variante invisible est presque toujours une faute de saisie, et on ne peut plus la corriger depuis l'application une fois la session créée. Le projet n'étant pas en production, refuser ne casse rien d'existant ; une session stockée qui porterait un tel id serait signalée endommagée (D81).
+
+**Reporté** : `PRODUCT.md` §6.1 et §6.2.
