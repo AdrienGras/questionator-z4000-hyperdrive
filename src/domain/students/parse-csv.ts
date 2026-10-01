@@ -26,8 +26,10 @@ function nonEmptyCellCount(cells: readonly string[]): number {
   return cells.filter((cell) => cell.trim() !== '').length
 }
 
+type Delimiter = ',' | ';' | '\t'
+
 /** Nombre de lignes (parmi un extrait) qu'un délimiteur candidat segmente en au moins 2 cellules non vides. */
-function scoreDelimiter(source: string, delimiter: ',' | ';'): number {
+function scoreDelimiter(source: string, delimiter: Delimiter): number {
   const preview = Papa.parse<string[]>(source, {
     header: false,
     skipEmptyLines: false,
@@ -38,7 +40,7 @@ function scoreDelimiter(source: string, delimiter: ',' | ';'): number {
 }
 
 /**
- * Détecte le séparateur (`,` ou `;`) en comparant, guillemets respectés, le nombre de lignes que
+ * Détecte le séparateur (`,`, `;` ou tabulation) en comparant, guillemets respectés, le nombre de lignes que
  * chaque candidat segmente en au moins deux cellules non vides ; le plus consistant gagne. Égalité
  * (aucun signal, p. ex. fichier à une seule colonne) : `;`, le séparateur des exports Excel FR.
  *
@@ -50,10 +52,23 @@ function scoreDelimiter(source: string, delimiter: ',' | ';'): number {
  * non significatifs (préambule, adresse). Faire segmenter chaque candidat par PapaParse lui-même
  * (guillemets respectés) et compter les lignes correctement découpées est robuste aux deux.
  */
-function detectDelimiter(source: string): ',' | ';' {
-  const semicolonScore = scoreDelimiter(source, ';')
-  const commaScore = scoreDelimiter(source, ',')
-  return commaScore > semicolonScore ? ',' : ';'
+function detectDelimiter(source: string): Delimiter {
+  // Ordre de préférence en cas d'égalité : `;`, puis `,`, puis tabulation (F35).
+  let best: Delimiter = ';'
+  let bestScore = scoreDelimiter(source, ';')
+  for (const candidate of [',', '\t'] as const) {
+    const score = scoreDelimiter(source, candidate)
+    if (score > bestScore) {
+      best = candidate
+      bestScore = score
+    }
+  }
+  return best
+}
+
+/** Saut de ligne Excel (Alt+Entrée), tabulation ou espaces répétées dans une cellule : une espace (F35). */
+function normalizeCell(cell: string): string {
+  return cell.replaceAll(/\s+/gu, ' ').trim()
 }
 
 /** Lit les lignes de données : construit les étudiants et signale doublons / lignes incomplètes / colonnes en trop. */
@@ -104,10 +119,10 @@ export function parseStudentsCsv(text: string): CsvParseResult {
     return { students: [], issues: [csvError('csv_syntax', {}, (quoteError.row ?? 0) + 1)] }
   }
 
-  // Numéros de ligne : `parsed.data[i]` correspond à la ligne `i + 1` du fichier tant qu'aucune
-  // cellule entre guillemets ne contient de saut de ligne (cas marginal, non géré).
+  // Numéro de ligne = numéro de l'enregistrement, soit la ligne vue dans Excel ou LibreOffice : une
+  // cellule saisie sur plusieurs lignes (Alt+Entrée) reste une seule ligne du tableur (D83).
   const rows: Row[] = parsed.data
-    .map((cells, index) => ({ line: index + 1, cells: cells.map((cell) => cell.trim()) }))
+    .map((cells, index) => ({ line: index + 1, cells: cells.map((cell) => normalizeCell(cell)) }))
     .filter((row) => row.cells.some((cell) => cell !== ''))
 
   const issues: CsvIssue[] = []

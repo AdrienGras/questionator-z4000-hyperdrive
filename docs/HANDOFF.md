@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-01 — F35 (#83) : fichiers d'entrée plus tolérants
+
+**Dernière chose faite** : PR #92 (F30) mergée sur go de l'utilisateur. F35 implémentée sur `feat/83-fichiers-tolerants` (D83), en exécution directe (portée petite) : CSV séparé par tabulations lu comme le même fichier à virgules, sauts de ligne et espaces répétées d'une cellule réduits à une espace, numéro de ligne cité = ligne du tableur (choix de l'utilisateur en revue) ; config : erreurs `padded_id` et `unicode_variant_id`, au même titre que les doublons, visibles à la création et dans l'éditeur. PRODUCT.md §6.1 et §6.2 à jour.
+
+**Trucs en suspens** : PR de F35 (brouillon, Sonar, puis « Ready for review »), merge sur go de l'utilisateur.
+
+**Prochaine chose à creuser** : #82 (F34, glisser-déposer fiabilisé), puis #81 (F33), dans l'ordre convenu de la vague de fix.
+
+**Notes pour future Claude** : `Record` est un utilitaire global de TypeScript : ne pas nommer un type local ainsi. Les deux nouvelles erreurs de config valent aussi pour l'import de backup et la lecture des sessions stockées (`checkStoredSession`) : une session avec un tel id serait « endommagée ».
+
 ## 2026-10-01 — F30 (#78) : finitions de l'écran de passage
 
 **Dernière chose faite** : F30 implémentée sur `feat/78-finitions-passage` (D82). Fixtures d'écran partagées (`src/testing/screen-fixtures.ts`) ; dialogue d'ajustement (focus sur le champ, − / + bornés à ±`finalScale`, `run(mutator, { ownError })` pour `adjust` / `revealFinal`) ; « aucun » pour un ajustement absent ou nul ; `useFreshError` dans `SidePanel` et `AddStudentDialog` ; « Annuler » et Échap verrouillés pendant l'écriture dans quatre dialogues ; `useAutosave` flushe sur `pagehide` et `CommentField` garde une copie synchrone du commentaire dans `localStorage` (`comment-draft.ts`) : taper puis recharger immédiatement retrouve la saisie (e2e `comment-reload.spec.ts`). Vague finale : `reset` et la confirmation d'absence passent `ownError` (plus de double alerte), et le contenu du champ d'ajustement est sélectionné à l'ouverture.

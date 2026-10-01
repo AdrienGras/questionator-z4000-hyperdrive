@@ -21,7 +21,6 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 - [ ] Éditeur de config (#60) : autocomplétion et aide au survol depuis le JSON Schema (`codemirror-json-schema`), hors périmètre de F26. → #80
 - [ ] JSON Schema : descriptions et défauts (`.meta({ description })` depuis le tableau de `PRODUCT.md` §6.2) pour l'aide au survol dans VSCode. → #80
-- [ ] Identifiants de catégorie/question avec espaces en bord (`'a-1 '`) ou en formes Unicode différentes (NFC/NFD) : erreur ou avertissement. → #83
 - [ ] Test d'alignement entre `INTEGER_FIELDS` (`from-zod.ts`) et les champs `z.int()` du schéma.
 
 ## Notation
@@ -70,8 +69,6 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 ## Création de session
 
 - [ ] Factoriser le glisser-déposer (`hasFiles`, dragover/dragleave/drop) de `FileDropField` et `ImportController` dans un hook `useFileDrop(disabled, onFile)`. → #82
-- [ ] Remplacer les sauts de ligne et espaces multiples internes aux noms lus dans le CSV par une espace (`"Du\nrand"`). → #83
-- [ ] Message dédié pour un fichier séparé par tabulations (aujourd'hui : lignes à un champ puis « aucun étudiant valide »). → #83
 - [ ] Garde de montage de la création : comparer aussi `router.state.location.pathname` avant de naviguer (fenêtre résiduelle pendant le chargement du chunk de l'accueil).
 - [ ] Tests manquants : courses du slot config (nom saisi pendant la lecture, deux configs successives), messages `read-error` / `load-error` rendus, état `unavailable` à l'écran, `activeStudentId` affirmé dans le test d'écran. → #87
 

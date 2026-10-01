@@ -72,6 +72,70 @@ describe('checkRules', () => {
     ])
   })
 
+  test('padded_id : espace en bord d’un id de catégorie ou de question', () => {
+    const config = withSecondCategory(minimalConfig(), ' b', 'facile-001 ')
+    expect(only(config, 'padded_id')).toEqual([
+      {
+        severity: 'error',
+        code: 'padded_id',
+        path: ['categories', 1, 'id'],
+        params: { id: ' b' },
+      },
+      {
+        severity: 'error',
+        code: 'padded_id',
+        path: ['categories', 1, 'questions', 0, 'id'],
+        params: { id: 'facile-001 ' },
+      },
+    ])
+  })
+
+  test('unicode_variant_id : même id en NFC et en NFD, catégorie et question', () => {
+    const nfc = '\u00e9'
+    const nfd = 'e\u0301'
+    const config = withSecondCategory(minimalConfig(), nfd, 'b-1')
+    config.categories[0]!.id = nfc
+    config.categories[0]!.questions[0]!.id = `q-${nfc}`
+    config.categories[1]!.questions[0]!.id = `q-${nfd}`
+    expect(only(config, 'unicode_variant_id')).toEqual([
+      {
+        severity: 'error',
+        code: 'unicode_variant_id',
+        path: ['categories', 1, 'id'],
+        params: { id: nfd, firstPath: 'categories[0].id' },
+      },
+      {
+        severity: 'error',
+        code: 'unicode_variant_id',
+        path: ['categories', 1, 'questions', 0, 'id'],
+        params: { id: `q-${nfd}`, firstPath: 'categories[0].questions[0].id' },
+      },
+    ])
+    expect(only(config, 'duplicate_category_id')).toEqual([])
+  })
+
+  test('variante NFD en premier puis deux ids NFC identiques : le second reste un doublon strict', () => {
+    const config = withSecondCategory(minimalConfig(), '\u00e9', 'b-1')
+    config.categories[0]!.id = 'e\u0301'
+    withSecondCategory(config, '\u00e9', 'c-1')
+    expect(checkRules(config, deps).map(({ code, path }) => [code, path])).toEqual(
+      expect.arrayContaining([
+        ['unicode_variant_id', ['categories', 1, 'id']],
+        ['duplicate_category_id', ['categories', 2, 'id']],
+      ]),
+    )
+    expect(only(config, 'unicode_variant_id')).toHaveLength(1)
+  })
+
+  test('ids réellement différents ou identiques : ni padded_id ni unicode_variant_id', () => {
+    const different = withSecondCategory(minimalConfig(), 'e', 'b-1')
+    const same = withSecondCategory(minimalConfig(), 'a', 'b-1')
+    for (const config of [different, same]) {
+      expect(only(config, 'padded_id')).toEqual([])
+      expect(only(config, 'unicode_variant_id')).toEqual([])
+    }
+  })
+
   test('empty_scale', () => {
     const config = minimalConfig()
     config.categories[0]!.scale = []

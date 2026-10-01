@@ -45,6 +45,20 @@ describe('locateIssue', () => {
     expect(lineOf(text, range.from)).toBe(index + 1)
   })
 
+  test('padded_id : « facile-001 » suivi d’une espace, la valeur sur sa ligne', () => {
+    const result = validateConfig(exampleText, { cssSupports: () => true })
+    if (!result.ok) throw new Error('exemple invalide')
+    const id = result.config.categories[0]?.questions[0]?.id
+    if (!id) throw new Error('exemple inattendu')
+    const lines = exampleText.split('\n')
+    const index = lines.findIndex((l) => l.includes(`"id": "${id}"`))
+    lines[index] = (lines[index] ?? '').replace(`"${id}"`, `"${id} "`)
+    const text = lines.join('\n')
+    const range = locateIssue(text, firstIssue(text, 'padded_id'))
+    expect(text.slice(range.from, range.to)).toBe(`"${id} "`)
+    expect(lineOf(text, range.from)).toBe(index + 1)
+  })
+
   test('required : champ manquant, plage de l’objet parent', () => {
     const text = exampleText.replace('    "title": "Oral PHP",\n', '')
     const issue = firstIssue(text, 'required')

@@ -33,17 +33,35 @@ type CssEntry = {
   path: IssuePath
 }
 
+/**
+ * Doublons stricts, puis variantes Unicode : deux ids égaux une fois normalisés en NFC mais écrits
+ * avec des caractères différents (« é » précomposé contre « e » + accent combinant) se ressemblent
+ * à l'écran sans être la même clé (F35).
+ */
 function findDuplicates(
   entries: IdEntry[],
   code: 'duplicate_category_id' | 'duplicate_question_id',
 ): ConfigIssue[] {
-  const firstPaths = new Map<string, IssuePath>()
+  const firstExact = new Map<string, IssuePath>()
+  const firstByNormalized = new Map<string, IssuePath>()
   return entries.flatMap(({ id, path }) => {
-    const firstPath = firstPaths.get(id)
-    if (firstPath) return [configError(code, path, { id, firstPath: formatPath(firstPath) })]
-    firstPaths.set(id, path)
+    const normalized = id.normalize('NFC')
+    const exact = firstExact.get(id)
+    const variant = firstByNormalized.get(normalized)
+    firstExact.set(id, exact ?? path)
+    firstByNormalized.set(normalized, variant ?? path)
+    if (exact) return [configError(code, path, { id, firstPath: formatPath(exact) })]
+    if (variant)
+      return [configError('unicode_variant_id', path, { id, firstPath: formatPath(variant) })]
     return []
   })
+}
+
+/** Espace en début ou en fin d'id : invisible dans l'éditeur, mais une clé différente (F35). */
+function findPaddedIds(entries: IdEntry[]): ConfigIssue[] {
+  return entries
+    .filter(({ id }) => id !== id.trim())
+    .map(({ id, path }) => configError('padded_id', path, { id }))
 }
 
 function checkIds(config: ParsedConfig): ConfigIssue[] {
@@ -60,6 +78,7 @@ function checkIds(config: ParsedConfig): ConfigIssue[] {
   return [
     ...findDuplicates(categories, 'duplicate_category_id'),
     ...findDuplicates(questions, 'duplicate_question_id'),
+    ...findPaddedIds([...categories, ...questions]),
   ]
 }
 

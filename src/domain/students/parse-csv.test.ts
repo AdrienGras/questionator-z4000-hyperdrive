@@ -146,4 +146,46 @@ describe('parseStudentsCsv', () => {
     ['BOM seul', BOM],
     ['en-tête seul', 'Nom;Prénom\n'],
   ])('%s : no_students', noStudents)
+
+  test('tabulation : même résultat que le fichier séparé par des virgules', () => {
+    const comma = 'Nom,Prénom\nDurand,Alice\nMartin,Bruno\n'
+    expect(parseStudentsCsv(comma.replaceAll(',', '\t'))).toEqual(parseStudentsCsv(comma))
+    expect(names('Durand\tAlice\nMartin\tBruno')).toEqual(['Durand Alice', 'Martin Bruno'])
+  })
+
+  test('tabulation : une virgule dans une cellule ne fait pas gagner la virgule', () => {
+    expect(names('Nom\tPrénom\nDurand, junior\tAlice\nMartin\tBruno')).toEqual([
+      'Durand, junior Alice',
+      'Martin Bruno',
+    ])
+  })
+
+  test('saut de ligne dans une cellule (Alt+Entrée) : remplacé par une espace', () => {
+    expect(names('Nom;Prénom\n"Du\nrand";"Alice\r\nMarie"')).toEqual(['Du rand Alice Marie'])
+  })
+
+  test('espaces multiples et tabulations internes : réduits à une espace', () => {
+    expect(names('Nom;Prénom\nDu   rand;Jean \t Pierre')).toEqual(['Du rand Jean Pierre'])
+  })
+
+  test.each([
+    ['LF', '\n'],
+    ['CRLF (export Excel)', '\r\n'],
+  ])('cellule sur deux lignes, fichier %s : numéros de ligne du tableur', (_label, eol) => {
+    const text = ['Nom;Prénom', '"Du\nrand";Alice', 'Seul', 'Martin;Bruno', ''].join(eol)
+    const result = parseStudentsCsv(text)
+    expect(result.students).toEqual([
+      { lastName: 'Du rand', firstName: 'Alice', line: 2 },
+      { lastName: 'Martin', firstName: 'Bruno', line: 4 },
+    ])
+    expect(result.issues).toEqual([
+      { severity: 'warning', code: 'single_field_row', params: {}, line: 3 },
+    ])
+  })
+
+  test('guillemet non fermé après une cellule sur deux lignes : ligne du tableur', () => {
+    expect(parseStudentsCsv('Nom;Prénom\n"Du\nrand";Alice\n"Martin;Bruno').issues).toEqual([
+      { severity: 'error', code: 'csv_syntax', params: {}, line: 3 },
+    ])
+  })
 })

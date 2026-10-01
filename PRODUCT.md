@@ -69,10 +69,10 @@ Pendant le passage, le score cumulé affiché est la note brute. L'affichage de 
 
 - Deux colonnes : nom et prénom.
 - En-tête reconnu sans tenir compte de la casse, des accents, des espaces ni des tirets. Nom : `nom`, `nom de famille`, `last name`, `lastname`, `surname`, `family name`. Prénom : `prenom`, `first name`, `firstname`, `given name`. L'en-tête est la première des cinq premières lignes non vides qui contient les deux colonnes ; l'ordre des colonnes est alors libre, et les lignes qui la précèdent (titre d'un export) sont ignorées avec un avertissement. Sans en-tête, toutes les lignes sont des données, dans l'ordre nom puis prénom.
-- Séparateur `,` ou `;` détecté automatiquement (les exports Excel en français utilisent souvent `;`).
+- Séparateur `,`, `;` ou tabulation détecté automatiquement (les exports Excel en français utilisent souvent `;`).
 - UTF-8, avec ou sans BOM. Un fichier qui n'est pas de l'UTF-8 valide (export « CSV » d'Excel en français) est relu en Windows-1252, avec un avertissement invitant à vérifier les accents.
 - L'ordre des lignes détermine l'ordre de passage.
-- Lignes vides ignorées. Espaces de début et de fin supprimés, casse conservée.
+- Lignes vides ignorées. Espaces de début et de fin supprimés, sauts de ligne et espaces répétées à l'intérieur d'une cellule (cellule Excel saisie avec Alt+Entrée) remplacés par une espace, casse conservée.
 - Aucune ligne isolée ne bloque, tout est visible dans l'aperçu : ligne avec un seul champ rempli ignorée avec un avertissement et son numéro de ligne ; colonnes en trop ignorées avec un avertissement unique ; doublons (nom et prénom identiques après normalisation) signalés par un avertissement.
 - **Erreur** bloquante si aucun étudiant valide.
 
@@ -251,6 +251,7 @@ Règles de validation, en plus des types :
 
 - **Erreur** si un `id` de catégorie est dupliqué.
 - **Erreur** si un `id` de question est dupliqué dans l'ensemble de la config.
+- **Erreur** si un `id` de catégorie ou de question commence ou finit par une espace, ou s'il ne diffère d'un autre `id` du même type que par la forme Unicode de ses caractères (NFC / NFD : accent précomposé ou combinant).
 - **Erreur** si un barème est vide, contient une valeur négative ou des doublons, ou si sa valeur maximale est 0.
 - **Erreur** si une catégorie n'a aucune question.
 - **Erreur** si le nombre total de questions de la config est inférieur à `questionsPerStudent + (skips.enabled ? skips.maxPerStudent : 0)`. Ce seuil garantit qu'un étudiant peut toujours terminer son passage, quitte à changer de catégorie. Une catégorie peut en revanche compter moins de questions que ce seuil : elle sera grisée pour un étudiant qui l'a épuisée (F09).
