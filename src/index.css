@@ -132,9 +132,10 @@
   }
 }
 
-/* Coloration de l'éditeur JSON (F26), hors des blocs du thème : `THEME_TOKENS` décrit le seul premier
-   bloc `:root`, ces cinq variables ne sont pas personnalisables par la config. */
-:root {
+/* Coloration de l'éditeur JSON (F26), portée par l'éditeur lui-même (`.cm-editor`) : hors des blocs
+   `:root` / `.dark` du thème, que `THEME_TOKENS` décrit ; ces variables ne sont pas personnalisables
+   par la config. */
+.cm-editor {
   --cm-string: #0a3069;
   --cm-number: #0550ae;
   --cm-keyword: #cf222e;
@@ -142,7 +143,7 @@
   --cm-punctuation: #57606a;
 }
 
-.dark {
+.dark .cm-editor {
   --cm-string: #a5d6ff;
   --cm-number: #79c0ff;
   --cm-keyword: #ff7b72;
