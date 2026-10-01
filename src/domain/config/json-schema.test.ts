@@ -74,7 +74,8 @@ describe('JSON Schema de config : aide à la saisie', () => {
     expect(mode.description).not.toContain('Défaut :')
     const locale = property(root(), 'locale')
     expect(locale.markdownDescription).toBe(
-      locale.description + ('default' in locale ? `\n\nDéfaut : \`${JSON.stringify(locale.default)}\`` : ''),
+      locale.description +
+        ('default' in locale ? `\n\nDéfaut : \`${JSON.stringify(locale.default)}\`` : ''),
     )
     const scoring = property(root(), 'scoring')
     expect('default' in scoring).toBe(false)
