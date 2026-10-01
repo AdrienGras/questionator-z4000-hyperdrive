@@ -54,6 +54,8 @@ export function AddStudentDialog({ ui, session, disabled, error, onAdd }: AddStu
   }
 
   function handleOpenChange(next: boolean) {
+    // Échap et clic extérieur sont ignorés pendant l'écriture : l'erreur doit rester visible.
+    if (!next && submitting.current) return
     setOpen(next)
     if (!next) reset()
   }

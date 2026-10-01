@@ -37,9 +37,31 @@ vi.mock('@/domain/backup/parse', async (importOriginal) => {
     },
   }
 })
+const replaceGate = vi.hoisted((): { hold: Promise<void> | undefined } => ({ hold: undefined }))
+
+// Permet de suspendre l'écriture du remplacement pour observer le dialogue pendant l'attente.
+vi.mock('@/lib/db/sessions', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/db/sessions')>()
+  return {
+    ...actual,
+    putSession: async (session: Session) => {
+      await replaceGate.hold
+      return actual.putSession(session)
+    },
+  }
+})
 vi.mock('@/lib/download', () => ({
   downloadText: vi.fn<(fileName: string, text: string) => void>(),
 }))
+
+/** Promesse résolue à la demande, pour suspendre une écriture. */
+function deferred<T>() {
+  const box: { resolve?: (value: T) => void } = {}
+  const promise = new Promise<T>((resolve) => {
+    box.resolve = resolve
+  })
+  return { promise, resolve: (value: T) => box.resolve?.(value) }
+}
 
 function backupFile(text: string): File {
   return new File([text], 'backup.json', { type: 'application/json' })
@@ -78,6 +100,7 @@ beforeEach(async () => {
   dbState.status = 'open'
   persistence.status = 'persisted'
   parseLoad.fail = false
+  replaceGate.hold = undefined
   vi.stubGlobal('CSS', { supports: () => true })
 })
 
@@ -149,6 +172,24 @@ describe('import de backup', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Remplacer' }))
     await waitFor(async () => expect((await storedSession()).name).toBe('Nouvelle'))
     await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
+  })
+
+  test('remplacement en cours : « Annuler » est désactivé, Échap ne ferme pas', async () => {
+    await putSession(makeSession({ name: 'Ancienne' }))
+    const input = await renderImport()
+    pick(input, sessionFile(makeSession({ name: 'Nouvelle' })))
+    const dialog = await screen.findByRole('alertdialog')
+    const gate = deferred<void>()
+    replaceGate.hold = gate.promise
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Remplacer' }))
+    await waitFor(() =>
+      expect(within(dialog).getByRole('button', { name: 'Annuler' })).toBeDisabled(),
+    )
+    fireEvent.keyDown(dialog, { key: 'Escape' })
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument()
+    gate.resolve()
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
+    expect((await storedSession()).name).toBe('Nouvelle')
   })
 
   test('conflit sur une session endommagée : remplacer écrit le backup (réparation)', async () => {

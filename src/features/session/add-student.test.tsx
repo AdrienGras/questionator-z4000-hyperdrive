@@ -27,6 +27,15 @@ const alice = makeStudent([], {
 })
 const durand = makeStudent([], { id: 's-d', lastName: 'Durand', firstName: 'Élodie', order: 2 })
 
+/** Promesse résolue à la demande, pour suspendre une écriture. */
+function deferred<T>() {
+  const box: { resolve?: (value: T) => void } = {}
+  const promise = new Promise<T>((resolve) => {
+    box.resolve = resolve
+  })
+  return { promise, resolve: (value: T) => box.resolve?.(value) }
+}
+
 async function mount(students: Student[] = [alice, durand], overrides: Partial<Session> = {}) {
   await mountStudentsTab(students, overrides)
 }
@@ -237,4 +246,28 @@ test('une erreur déjà présente à l’ouverture du dialogue n’y est pas aff
 
   expect(screen.getByRole('dialog')).toBeInTheDocument()
   expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+})
+
+test('écriture en cours : Échap ne ferme pas le dialogue ni ne vide les champs', async () => {
+  const pending = deferred<boolean>()
+  const onAdd = vi.fn<() => Promise<boolean>>(() => pending.promise)
+  render(
+    <AddStudentDialog
+      ui={makeUi()}
+      session={makeSession({ config, students: [alice, durand] })}
+      disabled={false}
+      onAdd={onAdd}
+    />,
+  )
+  openDialog()
+  fill('Martin', 'Zoé')
+  fireEvent.click(addButton())
+  await waitFor(() => expect(onAdd).toHaveBeenCalledTimes(1))
+
+  fireEvent.keyDown(screen.getByLabelText('Nom'), { key: 'Escape' })
+  expect(addDialog()).toBeInTheDocument()
+  expect(screen.getByLabelText('Nom')).toHaveValue('Martin')
+
+  pending.resolve(true)
+  await waitFor(() => expect(addDialog()).not.toBeInTheDocument())
 })
