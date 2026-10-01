@@ -298,6 +298,22 @@ try {
 - Les autres modules du dossier s'importent par chemin direct (`@/domain/backup/serialize`…), comme partout (pas de barrel) : un `index.ts` qui réexporterait le module lourd le remettrait dans le chunk principal.
 - `pnpm build` ne doit afficher aucun avertissement de taille de chunk.
 
+### Test qui rend une config avec icônes ou blocs de code (#87)
+
+```ts
+// En tête du fichier de test, avec le commentaire qui dit pourquoi
+vi.mock('@tabler/icons-react/dist/esm/icons/index.mjs', () => ({}))
+vi.mock('@/lib/markdown/highlighter', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/markdown/highlighter')>()),
+  highlight: () => Promise.resolve(null),
+}))
+```
+
+- Un test qui rend la config d'exemple (ou toute config dont une catégorie porte une `icon` ou dont un énoncé contient un bloc de code coloré) double l'index des icônes et `highlight`, sauf s'il vérifie précisément l'icône ou la coloration (`category-icon`, `code-block`, `markdown`, `highlighter` gardent le vrai module). Sinon chaque fichier recharge des milliers de modules d'icônes et la grammaire PHP, et frôle le délai de 5 s sous la suite (QUIRKS 2026-10-01).
+- Pas de doublure globale dans `src/testing/setup.ts` : elle masquerait ces modules aux tests qui les vérifient.
+- Après une action qui navigue ou écrit, attendre un état qui n'existe qu'après elle (`router.state.location.pathname`, écran d'arrivée, nouveau nom), jamais un texte déjà affiché avant : sinon le test se termine avant l'écriture et la suite de l'action déborde sur le test ou le fichier suivant.
+- Ne pas relever `testTimeout` pour un test lent sous la suite : chercher d'abord ce qu'il charge (`vitest run <fichier> --experimental.importDurations.print`, `--reporter=verbose` seul et sous la suite).
+
 ### Bibliothèque lourde confinée à une route (F15, Recharts)
 
 ```ts
