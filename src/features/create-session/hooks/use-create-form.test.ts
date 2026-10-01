@@ -5,6 +5,7 @@ import { validateConfig } from '@/domain/config/validate'
 import { getHealthySession } from '@/testing/healthy-session'
 import { db, type DbStatus } from '@/lib/db/db'
 import { minimalConfig } from '@/testing/config-fixtures'
+import { deferred } from '@/testing/deferred'
 import { useCreateForm } from './use-create-form'
 
 const dbMock = vi.hoisted(() => ({ failCreate: false, failPersist: false }))
@@ -52,6 +53,15 @@ function configFile(title = 'Oral de test'): File {
   const config = minimalConfig()
   config.exam.title = title
   return new File([JSON.stringify(config)], 'config.json', { type: 'application/json' })
+}
+
+/** Config dont la lecture (`text()`) reste en suspens jusqu'à `release`. */
+function slowConfigFile(title: string) {
+  const file = configFile(title)
+  const { promise, resolve } = deferred<string>()
+  const text = file.text()
+  vi.spyOn(file, 'text').mockReturnValue(promise)
+  return { file, release: async () => resolve(await text) }
 }
 
 function invalidConfigFile(): File {
@@ -192,6 +202,41 @@ describe('useCreateForm', () => {
     act(() => result.current.setName('Mon oral'))
     await act(() => result.current.setConfigFile(configFile('Autre oral')))
     expect(result.current.name).toBe('Mon oral')
+  })
+
+  test('nom saisi pendant la lecture de la config : pas écrasé par le préremplissage (#87)', async () => {
+    const { result } = renderForm()
+    const slow = slowConfigFile('Oral lent')
+    let reading: Promise<void> = Promise.resolve()
+    act(() => {
+      reading = result.current.setConfigFile(slow.file)
+    })
+    expect(result.current.config.kind).toBe('reading')
+    act(() => result.current.setName('Mon oral'))
+    await act(async () => {
+      await slow.release()
+      await reading
+    })
+    expect(result.current.config.kind).toBe('loaded')
+    expect(result.current.name).toBe('Mon oral')
+  })
+
+  test('deux configs successives, la première lue en retard : seule la seconde compte (#87)', async () => {
+    const { result } = renderForm()
+    const first = slowConfigFile('Premier oral')
+    let reading: Promise<void> = Promise.resolve()
+    act(() => {
+      reading = result.current.setConfigFile(first.file)
+    })
+    await act(() => result.current.setConfigFile(configFile('Second oral')))
+    await act(async () => {
+      await first.release()
+      await reading
+    })
+    const config = result.current.config
+    if (config.kind !== 'loaded' || !config.result.ok) throw new Error('config non chargée')
+    expect(config.result.config.exam.title).toBe('Second oral')
+    expect(result.current.name).toMatch(/^Second oral — /)
   })
 
   test('un nom vidé à la main reste vide après une config valide', async () => {
