@@ -64,7 +64,7 @@ export function AddStudentDialog({ ui, session, disabled, onAdd }: AddStudentDia
     if (blocked || submitting.current) return
     submitting.current = true
     setFailed(false)
-    let outcome: WriteOutcome = 'ignored'
+    let outcome: WriteOutcome
     try {
       // L'écriture ne lève jamais : son issue revient en `WriteOutcome`.
       outcome = await onAdd({ lastName, firstName }, { activate })
