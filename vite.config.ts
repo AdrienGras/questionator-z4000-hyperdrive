@@ -137,6 +137,12 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/testing/setup.ts'],
+    // Défaut Vitest : un worker par cœur moins un (15 sur 16). Chaque fichier y recrée jsdom et
+    // réévalue son graphe de modules : la suite sature le CPU, et le premier rendu d'un écran
+    // routé (~0,8 s seul) frôle le délai de 5 s dès que la machine porte une autre charge (#87 :
+    // 5 suites sur 10 en échec, 8 cœurs occupés). À 75 % : même durée machine libre, 0 sur 10
+    // dans les mêmes conditions. Sur 4 cœurs (CI), 75 % donne 3 workers, comme le défaut.
+    maxWorkers: '75%',
     // Les specs Playwright (`pnpm e2e`) ne sont pas des tests Vitest.
     exclude: [...configDefaults.exclude, 'e2e/**'],
     // Sans cela, `import css from '../index.css?raw'` renvoie '' sous Vitest (test des THEME_TOKENS).
