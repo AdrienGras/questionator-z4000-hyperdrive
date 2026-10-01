@@ -50,6 +50,8 @@ type Context = {
   string: Node | undefined
   /** Plage à remplacer pour `string` : une chaîne non fermée s'arrête au curseur, pas en fin de ligne. */
   range: { from: number; to: number } | undefined
+  /** Plage du mot nu (`true`, `sc`…) en cours de frappe, vide si le curseur n'est pas dans un mot. */
+  word: { from: number; to: number }
   /** Le curseur touche une chaîne sans y être (juste après ou juste avant) : rien à proposer. */
   touching: boolean
   isKey: boolean
@@ -78,9 +80,12 @@ function contextAt(text: string, offset: number): Context {
     isClosed(text, previous) &&
     offset === previous.offset + previous.length
   const touchesBefore = !string && text[offset] === '"'
+  const before = /[\w-]*$/.exec(text.slice(0, offset))?.[0].length ?? 0
+  const after = /^[\w-]*/.exec(text.slice(offset))?.[0].length ?? 0
   return {
     string,
     range,
+    word: { from: offset - before, to: offset + after },
     touching: touchesAfter || touchesBefore,
     isKey: location.isAtPropertyKey,
     path: location.path,
@@ -111,11 +116,14 @@ function keyCompletions(text: string, root: SchemaNode, ctx: Context): AssistCom
   const parent = schemaAt(root, ctx.parentPath)
   if (!parent?.properties) return []
   const present = siblingKeys(text, ctx.parentPath, ctx.string)
+  // Clé existante renommée : les deux-points sont déjà là, on ne les ajoute pas une seconde fois.
+  const end = ctx.range?.to ?? ctx.word.to
+  const colonFollows = text.slice(end).trimStart().startsWith(':')
   return Object.entries(parent.properties)
     .filter(([key]) => !present.has(key))
     .map(([key, node]) => ({
       label: key,
-      apply: `${JSON.stringify(key)}: `,
+      apply: colonFollows ? JSON.stringify(key) : `${JSON.stringify(key)}: `,
       detail: typeLabel(node),
       info: node.description,
     }))
@@ -157,7 +165,11 @@ export function completionsAt(
   if (ctx.touching) return undefined
   const options = ctx.isKey ? keyCompletions(text, root, ctx) : valueCompletions(root, ctx.path)
   if (options.length === 0) return undefined
-  return { from: ctx.range?.from ?? offset, to: ctx.range?.to ?? offset, options }
+  return {
+    from: ctx.range?.from ?? ctx.word.from,
+    to: ctx.range?.to ?? ctx.word.to,
+    options,
+  }
 }
 
 /** Description (et défaut) de la propriété dont la clé est sous `offset`. */

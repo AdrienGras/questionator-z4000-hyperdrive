@@ -14,6 +14,14 @@ function complete(textWithCursor: string) {
   return { text, offset, result: completionsAt(text, offset, root) }
 }
 
+/** Applique l'option `label` à sa plage et renvoie le texte résultant. */
+function applyCompletion(textWithCursor: string, label: string): string {
+  const { text, result } = complete(textWithCursor)
+  const option = result?.options.find((o) => o.label === label)
+  if (!result || !option) throw new Error(`option absente : ${label}`)
+  return text.slice(0, result.from) + option.apply + text.slice(result.to)
+}
+
 function labels(textWithCursor: string): string[] | undefined {
   return complete(textWithCursor).result?.options.map((o) => o.label)
 }
@@ -137,6 +145,48 @@ describe('completionsAt : bords de chaînes', () => {
   test('rien juste avant une chaîne', () => {
     expect(complete('{ "scoring": { "rounding": { "mode": |"up" } } }').result).toBeUndefined()
     expect(complete('{ |"scoring": 1 }').result).toBeUndefined()
+  })
+})
+
+describe('completionsAt : application', () => {
+  test('mot nu : il est remplacé, pas conservé', () => {
+    expect(applyCompletion('{ "skips": { "enabled": t| } }', 'true')).toBe(
+      '{ "skips": { "enabled": true } }',
+    )
+    expect(applyCompletion('{ "skips": { "enabled": tr| } }', 'true')).toBe(
+      '{ "skips": { "enabled": true } }',
+    )
+    expect(applyCompletion('{ "skips": { "enabled": true| } }', 'true')).toBe(
+      '{ "skips": { "enabled": true } }',
+    )
+    expect(applyCompletion('{ "scoring": { "rounding": { "mode": ne| } } }', '"nearest"')).toBe(
+      '{ "scoring": { "rounding": { "mode": "nearest" } } }',
+    )
+  })
+
+  test('clé nue : elle est remplacée', () => {
+    expect(applyCompletion('{ sc| }', 'scoring')).toBe('{ "scoring":  }')
+  })
+
+  test('renommer une clé existante : pas de double deux-points', () => {
+    expect(applyCompletion('{ "scoring": { "max|": 10 } }', 'questionsPerStudent')).toBe(
+      '{ "scoring": { "questionsPerStudent": 10 } }',
+    )
+    expect(applyCompletion('{ "scoring": { "max|"  : 10 } }', 'questionsPerStudent')).toBe(
+      '{ "scoring": { "questionsPerStudent"  : 10 } }',
+    )
+  })
+
+  test('mot dont la fin suit le curseur : remplacé en entier', () => {
+    expect(applyCompletion('{ "skips": { "enabled": t|rue } }', 'true')).toBe(
+      '{ "skips": { "enabled": true } }',
+    )
+  })
+
+  test('chaîne et valeur entre guillemets : remplacement intact', () => {
+    expect(applyCompletion('{ "scoring": { "rounding": { "mode": "ne|" } } }', '"up"')).toBe(
+      '{ "scoring": { "rounding": { "mode": "up" } } }',
+    )
   })
 })
 
