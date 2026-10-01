@@ -1185,3 +1185,16 @@ autre encodage 8 bits.
 **Pourquoi** : l'export de la carte est un item de menu (choix utilisateur) ; le menu se ferme au clic, le bouton et son alerte ne s'y réutilisent pas. Ce que les deux features partagent est la logique (garde, état, échec), d'où un hook plutôt qu'un bouton déplacé : écart assumé avec le ticket. La garde en ref corrige deux clics dans le même tick, qui passaient la garde sur l'état du rendu (BACKLOG). Colonne d'actions de largeur fixe : lisible et stable ; à 1536 px, une carte de session sur une colonne ferait ~1100 px, d'où deux colonnes à partir de `2xl`. Les fichiers d'exemple et le schéma sont déjà pré-cachés (F17) : rien à ajouter pour le hors ligne.
 
 **Reporté dans** : `PRODUCT.md` F05, F16, F20 ; `docs/BACKLOG.md` (deux items → #54). Impacte F05, F16, F19.
+
+## D79 — F24 : un seul fond pour les blocs de code, code en ligne sans backticks (2026-10-01)
+
+**Question** : les blocs colorés prenaient le fond du thème Shiki (`#fff` en `github-light`, invisible sur une page blanche ; `#24292e` en sombre), les blocs bruts celui de `prose` (`--muted`) : le fond sautait à la fin de la coloration. Le code en ligne affichait les backticks de `@tailwindcss/typography`, sans fond.
+
+**Décision** :
+- Les règles `background-color` de `.shiki` (claire et sombre) sont supprimées : tout bloc, coloré ou brut, prend le fond de `.prose pre` (`--tw-prose-pre-bg` = `--muted`) et une bordure `1px solid var(--border)`. Shiki ne pilote plus que la couleur des tokens.
+- Code en ligne (`.prose :where(code):not(:where(pre *))`) : `::before` / `::after` à `content: none`, fond `--muted`, padding `0.15em 0.35em`, coins de `0.25rem`.
+- Vérification par e2e (`e2e/code-style.spec.ts`), jsdom n'évaluant pas le CSS.
+
+**Pourquoi** : un fond unique supprime le saut quel que soit l'état de la coloration, et suit le thème de la config (tokens shadcn) au lieu de couleurs codées en dur. La bordure détache le bloc de la page dans les deux modes. Vérifié à l'écran, vue examinateur et vue projetée, clair et sombre : les couleurs de github-light et github-dark restent lisibles sur `--muted`, y compris sur le `--muted` violet du thème d'exemple.
+
+**Reporté dans** : `docs/CONVENTIONS.md` § « Markdown et bloc de code » ; `docs/BACKLOG.md` (deux items → #58). Impacte F08, F09, F14, F18.
