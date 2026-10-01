@@ -113,6 +113,33 @@ describe('completionsAt : valeurs', () => {
   })
 })
 
+describe('completionsAt : bords de chaînes', () => {
+  test("chaîne non fermée suivie de texte : la plage s'arrête au curseur (clé)", () => {
+    const { text, offset, result } = complete('{ "scoring": { "qu| } }')
+    expect(result?.from).toBe(text.lastIndexOf('"'))
+    expect(result?.to).toBe(offset)
+  })
+
+  test("chaîne non fermée suivie de texte : la plage s'arrête au curseur (valeur)", () => {
+    const { offset, result } = complete('{ "scoring": { "rounding": { "mode": "ne| } } }')
+    expect(result?.to).toBe(offset)
+    expect(result?.options.map((o) => o.label)).toContain('"nearest"')
+  })
+
+  test('rien juste après une valeur fermée', () => {
+    expect(complete('{ "scoring": { "rounding": { "mode": "up"| } } }').result).toBeUndefined()
+  })
+
+  test('rien juste après une clé terminée sans deux-points', () => {
+    expect(complete('{ "scoring"| }').result).toBeUndefined()
+  })
+
+  test('rien juste avant une chaîne', () => {
+    expect(complete('{ "scoring": { "rounding": { "mode": |"up" } } }').result).toBeUndefined()
+    expect(complete('{ |"scoring": 1 }').result).toBeUndefined()
+  })
+})
+
 describe('hoverAt', () => {
   test('description et plage de la clé guillemets compris', () => {
     const { text, hover: h } = hover('{ "scoring": { "roun|ding": {} } }')

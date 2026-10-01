@@ -37,13 +37,21 @@ export function schemaAt(root: SchemaNode, path: Path): SchemaNode | undefined {
 /** Le curseur est strictement à l'intérieur de la chaîne (guillemets compris, chaîne éventuellement non fermée). */
 function containsCursor(text: string, node: Node, offset: number): boolean {
   const end = node.offset + node.length
-  const closed = node.length >= 2 && text[end - 1] === '"'
-  return offset > node.offset && (closed ? offset < end : offset <= end)
+  return offset > node.offset && (isClosed(text, node) ? offset < end : offset <= end)
+}
+
+/** Chaîne terminée par son guillemet fermant (le scanner étend sinon la chaîne jusqu'à la fin de ligne). */
+function isClosed(text: string, node: Node): boolean {
+  return node.length >= 2 && text[node.offset + node.length - 1] === '"'
 }
 
 type Context = {
   /** Chaîne (clé ou valeur) sous le curseur, le cas échéant. */
   string: Node | undefined
+  /** Plage à remplacer pour `string` : une chaîne non fermée s'arrête au curseur, pas en fin de ligne. */
+  range: { from: number; to: number } | undefined
+  /** Le curseur touche une chaîne sans y être (juste après ou juste avant) : rien à proposer. */
+  touching: boolean
   isKey: boolean
   /** Chemin de la clé / valeur visée (dernier segment vide si la clé n'est pas encore tapée). */
   path: Path
@@ -59,8 +67,21 @@ function contextAt(text: string, offset: number): Context {
     previous?.type === 'string' || (location.isAtPropertyKey && previous?.type === 'property')
   const string =
     previous && isString && containsCursor(text, previous, offset) ? previous : undefined
+  const range = string && {
+    from: string.offset,
+    to: isClosed(text, string) ? string.offset + string.length : offset,
+  }
+  const touchesAfter =
+    previous !== undefined &&
+    isString &&
+    !string &&
+    isClosed(text, previous) &&
+    offset === previous.offset + previous.length
+  const touchesBefore = !string && text[offset] === '"'
   return {
     string,
+    range,
+    touching: touchesAfter || touchesBefore,
     isKey: location.isAtPropertyKey,
     path: location.path,
     parentPath: location.path.slice(0, -1),
@@ -133,22 +154,21 @@ export function completionsAt(
   root: SchemaNode,
 ): AssistCompletions | undefined {
   const ctx = contextAt(text, offset)
+  if (ctx.touching) return undefined
   const options = ctx.isKey ? keyCompletions(text, root, ctx) : valueCompletions(root, ctx.path)
   if (options.length === 0) return undefined
-  const from = ctx.string ? ctx.string.offset : offset
-  const to = ctx.string ? ctx.string.offset + ctx.string.length : offset
-  return { from, to, options }
+  return { from: ctx.range?.from ?? offset, to: ctx.range?.to ?? offset, options }
 }
 
 /** Description (et défaut) de la propriété dont la clé est sous `offset`. */
 export function hoverAt(text: string, offset: number, root: SchemaNode): AssistHover | undefined {
   const ctx = contextAt(text, offset)
-  if (!ctx.isKey || !ctx.string) return undefined
+  if (!ctx.isKey || !ctx.string || !ctx.range) return undefined
   const node = schemaAt(root, ctx.path)
   if (!node?.description) return undefined
   const hover: AssistHover = {
-    from: ctx.string.offset,
-    to: ctx.string.offset + ctx.string.length,
+    from: ctx.range.from,
+    to: ctx.range.to,
     description: node.description,
   }
   if ('default' in node) hover.default = node.default
