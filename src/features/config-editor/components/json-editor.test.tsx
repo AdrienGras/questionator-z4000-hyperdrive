@@ -48,4 +48,11 @@ describe('JsonEditor', () => {
     })
     expect(container.querySelector('.cm-lintRange-error')).not.toBeNull()
   })
+
+  it('reveal place le curseur et marque la ligne active, numéro compris', () => {
+    const { apiRef, container } = mount({ initialText: '{\n  "a": 1,\n  "b": 2\n}' })
+    act(() => apiRef.current?.reveal(15, 18))
+    expect(container.querySelector('.cm-activeLine')?.textContent).toBe('  "b": 2')
+    expect(container.querySelector('.cm-lineNumbers .cm-activeLineGutter')?.textContent).toBe('3')
+  })
 })

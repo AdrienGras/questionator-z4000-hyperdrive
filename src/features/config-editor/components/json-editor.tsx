@@ -4,7 +4,13 @@ import { json } from '@codemirror/lang-json'
 import { bracketMatching, indentOnInput } from '@codemirror/language'
 import { lintGutter, setDiagnostics } from '@codemirror/lint'
 import { EditorState, Prec } from '@codemirror/state'
-import { EditorView, keymap, lineNumbers } from '@codemirror/view'
+import {
+  EditorView,
+  highlightActiveLine,
+  highlightActiveLineGutter,
+  keymap,
+  lineNumbers,
+} from '@codemirror/view'
 import { useEffect, useImperativeHandle, useRef, type Ref } from 'react'
 import { editorTheme } from '@/features/config-editor/editor-theme'
 
@@ -67,6 +73,9 @@ export function JsonEditor({
         doc: initialTextRef.current,
         extensions: [
           lineNumbers(),
+          // Ligne du curseur marquée (texte et numéro) : c'est là que mène le clic sur une issue.
+          highlightActiveLine(),
+          highlightActiveLineGutter(),
           history(),
           closeBrackets(),
           autocompletion(),
