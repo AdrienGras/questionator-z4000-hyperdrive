@@ -42,16 +42,18 @@ function findDuplicates(
   entries: IdEntry[],
   code: 'duplicate_category_id' | 'duplicate_question_id',
 ): ConfigIssue[] {
-  const firstByNormalized = new Map<string, IdEntry>()
-  return entries.flatMap((entry) => {
-    const { id, path } = entry
-    const first = firstByNormalized.get(id.normalize('NFC'))
-    if (!first) {
-      firstByNormalized.set(id.normalize('NFC'), entry)
-      return []
-    }
-    const params = { id, firstPath: formatPath(first.path) }
-    return [configError(first.id === id ? code : 'unicode_variant_id', path, params)]
+  const firstExact = new Map<string, IssuePath>()
+  const firstByNormalized = new Map<string, IssuePath>()
+  return entries.flatMap(({ id, path }) => {
+    const normalized = id.normalize('NFC')
+    const exact = firstExact.get(id)
+    const variant = firstByNormalized.get(normalized)
+    firstExact.set(id, exact ?? path)
+    firstByNormalized.set(normalized, variant ?? path)
+    if (exact) return [configError(code, path, { id, firstPath: formatPath(exact) })]
+    if (variant)
+      return [configError('unicode_variant_id', path, { id, firstPath: formatPath(variant) })]
+    return []
   })
 }
 

@@ -26,7 +26,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ## 2026-10-01 — F35 (#83) : fichiers d'entrée plus tolérants
 
-**Dernière chose faite** : PR #92 (F30) mergée sur go de l'utilisateur. F35 implémentée sur `feat/83-fichiers-tolerants` (D83), en exécution directe (portée petite) : CSV séparé par tabulations lu comme le même fichier à virgules, sauts de ligne et espaces répétées d'une cellule réduits à une espace, numéro de ligne réel calculé depuis la position de PapaParse ; config : erreurs `padded_id` et `unicode_variant_id`, au même titre que les doublons, visibles à la création et dans l'éditeur. PRODUCT.md §6.1 et §6.2 à jour.
+**Dernière chose faite** : PR #92 (F30) mergée sur go de l'utilisateur. F35 implémentée sur `feat/83-fichiers-tolerants` (D83), en exécution directe (portée petite) : CSV séparé par tabulations lu comme le même fichier à virgules, sauts de ligne et espaces répétées d'une cellule réduits à une espace, numéro de ligne cité = ligne du tableur (choix de l'utilisateur en revue) ; config : erreurs `padded_id` et `unicode_variant_id`, au même titre que les doublons, visibles à la création et dans l'éditeur. PRODUCT.md §6.1 et §6.2 à jour.
 
 **Trucs en suspens** : PR de F35 (brouillon, Sonar, puis « Ready for review »), merge sur go de l'utilisateur.
 

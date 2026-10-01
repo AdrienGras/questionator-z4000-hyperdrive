@@ -71,36 +71,6 @@ function normalizeCell(cell: string): string {
   return cell.replaceAll(/\s+/gu, ' ').trim()
 }
 
-/**
- * Découpe le fichier enregistrement par enregistrement, chacun avec la ligne du fichier où il
- * commence : une cellule entre guillemets peut contenir des sauts de ligne (F35), l'index de
- * l'enregistrement ne suffit donc pas. Renvoie aussi la ligne du premier guillemet non fermé.
- */
-function readRecords(source: string, delimiter: Delimiter): { records: Row[]; quoteLine?: number } {
-  const records: Row[] = []
-  let quoteLine: number | undefined
-  let start = 0
-  let line = 1
-  Papa.parse<string[]>(source, {
-    header: false,
-    skipEmptyLines: false,
-    delimiter,
-    step(results) {
-      if (quoteLine === undefined && results.errors.some((error) => error.type === 'Quotes'))
-        quoteLine = line
-      records.push({ line, cells: results.data })
-      const end = results.meta.cursor
-      line += countLinebreaks(source.slice(start, end), results.meta.linebreak)
-      start = end
-    },
-  })
-  return { records, quoteLine }
-}
-
-function countLinebreaks(text: string, linebreak: string): number {
-  return linebreak === '' ? 0 : text.split(linebreak).length - 1
-}
-
 /** Lit les lignes de données : construit les étudiants et signale doublons / lignes incomplètes / colonnes en trop. */
 function readDataRows(
   dataRows: readonly Row[],
@@ -139,13 +109,20 @@ function readDataRows(
  */
 export function parseStudentsCsv(text: string): CsvParseResult {
   const source = text.startsWith(BOM) ? text.slice(BOM.length) : text
-  const { records, quoteLine } = readRecords(source, detectDelimiter(source))
-  if (quoteLine !== undefined) {
-    return { students: [], issues: [csvError('csv_syntax', {}, quoteLine)] }
+  const parsed = Papa.parse<string[]>(source, {
+    header: false,
+    skipEmptyLines: false,
+    delimiter: detectDelimiter(source),
+  })
+  const quoteError = parsed.errors.find((error) => error.type === 'Quotes')
+  if (quoteError) {
+    return { students: [], issues: [csvError('csv_syntax', {}, (quoteError.row ?? 0) + 1)] }
   }
 
-  const rows: Row[] = records
-    .map(({ line, cells }) => ({ line, cells: cells.map((cell) => normalizeCell(cell)) }))
+  // Numéro de ligne = numéro de l'enregistrement, soit la ligne vue dans Excel ou LibreOffice : une
+  // cellule saisie sur plusieurs lignes (Alt+Entrée) reste une seule ligne du tableur (D83).
+  const rows: Row[] = parsed.data
+    .map((cells, index) => ({ line: index + 1, cells: cells.map((cell) => normalizeCell(cell)) }))
     .filter((row) => row.cells.some((cell) => cell !== ''))
 
   const issues: CsvIssue[] = []

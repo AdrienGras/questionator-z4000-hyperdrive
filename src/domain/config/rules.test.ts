@@ -91,8 +91,8 @@ describe('checkRules', () => {
   })
 
   test('unicode_variant_id : même id en NFC et en NFD, catégorie et question', () => {
-    const nfc = 'é'
-    const nfd = 'é'
+    const nfc = '\u00e9'
+    const nfd = 'e\u0301'
     const config = withSecondCategory(minimalConfig(), nfd, 'b-1')
     config.categories[0]!.id = nfc
     config.categories[0]!.questions[0]!.id = `q-${nfc}`
@@ -112,6 +112,19 @@ describe('checkRules', () => {
       },
     ])
     expect(only(config, 'duplicate_category_id')).toEqual([])
+  })
+
+  test('variante NFD en premier puis deux ids NFC identiques : le second reste un doublon strict', () => {
+    const config = withSecondCategory(minimalConfig(), '\u00e9', 'b-1')
+    config.categories[0]!.id = 'e\u0301'
+    withSecondCategory(config, '\u00e9', 'c-1')
+    expect(checkRules(config, deps).map(({ code, path }) => [code, path])).toEqual(
+      expect.arrayContaining([
+        ['unicode_variant_id', ['categories', 1, 'id']],
+        ['duplicate_category_id', ['categories', 2, 'id']],
+      ]),
+    )
+    expect(only(config, 'unicode_variant_id')).toHaveLength(1)
   })
 
   test('ids réellement différents ou identiques : ni padded_id ni unicode_variant_id', () => {

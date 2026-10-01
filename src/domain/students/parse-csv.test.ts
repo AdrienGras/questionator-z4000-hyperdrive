@@ -168,20 +168,24 @@ describe('parseStudentsCsv', () => {
     expect(names('Nom;Prénom\nDu   rand;Jean \t Pierre')).toEqual(['Du rand Jean Pierre'])
   })
 
-  test('cellule sur deux lignes : les lignes suivantes gardent leur vrai numéro', () => {
-    const result = parseStudentsCsv('Nom;Prénom\n"Du\nrand";Alice\nSeul\nMartin;Bruno')
+  test.each([
+    ['LF', '\n'],
+    ['CRLF (export Excel)', '\r\n'],
+  ])('cellule sur deux lignes, fichier %s : numéros de ligne du tableur', (_label, eol) => {
+    const text = ['Nom;Prénom', '"Du\nrand";Alice', 'Seul', 'Martin;Bruno', ''].join(eol)
+    const result = parseStudentsCsv(text)
     expect(result.students).toEqual([
       { lastName: 'Du rand', firstName: 'Alice', line: 2 },
-      { lastName: 'Martin', firstName: 'Bruno', line: 5 },
+      { lastName: 'Martin', firstName: 'Bruno', line: 4 },
     ])
     expect(result.issues).toEqual([
-      { severity: 'warning', code: 'single_field_row', params: {}, line: 4 },
+      { severity: 'warning', code: 'single_field_row', params: {}, line: 3 },
     ])
   })
 
-  test('guillemet non fermé après une cellule sur deux lignes : vrai numéro de ligne', () => {
+  test('guillemet non fermé après une cellule sur deux lignes : ligne du tableur', () => {
     expect(parseStudentsCsv('Nom;Prénom\n"Du\nrand";Alice\n"Martin;Bruno').issues).toEqual([
-      { severity: 'error', code: 'csv_syntax', params: {}, line: 4 },
+      { severity: 'error', code: 'csv_syntax', params: {}, line: 3 },
     ])
   })
 })
