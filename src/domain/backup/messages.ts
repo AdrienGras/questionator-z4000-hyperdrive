@@ -31,6 +31,8 @@ const fr: Dictionary<BackupIssueParams> = {
     'La projection est incohérente : un étudiant est requis en mode « student », et seulement dans ce mode.',
   invalid_adjustment: ({ value }) =>
     `L’ajustement ${value} est invalide : au plus 3 décimales et au plus 10 000 en valeur absolue.`,
+  duplicate_student_order: ({ order, firstPath }) =>
+    `Rang de passage ${order} en double (déjà utilisé en ${firstPath}).`,
 }
 
 const en: Dictionary<BackupIssueParams> = {
@@ -60,6 +62,8 @@ const en: Dictionary<BackupIssueParams> = {
     'The projection is inconsistent: a student is required in "student" mode, and only in that mode.',
   invalid_adjustment: ({ value }) =>
     `The adjustment ${value} is invalid: at most 3 decimals and at most 10,000 in absolute value.`,
+  duplicate_student_order: ({ order, firstPath }) =>
+    `Duplicate passage order ${order} (already used at ${firstPath}).`,
 }
 
 export const BACKUP_ISSUE_MESSAGES: Record<Locale, Dictionary<BackupIssueParams>> = { fr, en }

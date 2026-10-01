@@ -1345,3 +1345,16 @@ autre encodage 8 bits.
 **Pourquoi** : le gzip est ce que paie l'examinateur au premier chargement ; une marge de 15 % laisse grandir l'app et attrape une bibliothèque lourde. Les grammaires Shiki imposeraient un budget par chunk de ~200 Ko qui ne surveillerait plus rien.
 
 **Reporté dans** : `docs/ENVIRONMENT.md` (commandes), `docs/INDEX.md`, `docs/BACKLOG.md`, `docs/QUIRKS.md`.
+
+## D89 — #87 : rang de passage en double refusé à l'import seulement (2026-10-02)
+
+**Question** : deux étudiants au même `order` (backup édité à la main) partageraient le montage de l'écran projeté (D85) et rendraient l'ordre de passage ambigu. Faut-il le refuser à l'import, et déclarer endommagée (F31, D81) une session déjà en base qui l'aurait ?
+
+**Décision** :
+- Nouvelle règle de backup `duplicate_student_order` (erreur, chemin `session.students[i].order`, paramètres `order` et `firstPath`, messages fr et en), dans `checkStudentOrders` (`domain/backup/rules.ts`), hors de `checkSessionRules`.
+- `parseBackup` la passe à `checkStoredSession` comme règle supplémentaire (`extraRules`) : un backup qui la porte est refusé, avec les autres issues de règles.
+- La couche de lecture (`loadReadStored`) ne l'applique pas : une session déjà en base avec un rang en double reste saine. Écart assumé à D81 (« exactement les règles de l'import ») : on n'enferme jamais l'utilisateur hors de données déjà stockées pour une incohérence que l'application ne produit pas et qui ne fausse aucune note.
+
+**Pourquoi** : les parcours de l'application gardent `order` unique (création : rang + 1, ajout : max + 1) ; seul un fichier édité à la main peut le casser, et l'import est le seul endroit où l'utilisateur peut encore le corriger.
+
+**Reporté dans** : `docs/BACKLOG.md` (§ Persistance).

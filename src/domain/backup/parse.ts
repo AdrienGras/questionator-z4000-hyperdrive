@@ -5,6 +5,7 @@ import type { CssSupports } from '@/domain/config/rules'
 import type { Session } from '@/domain/session/types'
 import { BACKUP_FORMAT, BACKUP_FORMAT_VERSION } from './envelope'
 import { backupError, type BackupIssue } from './issues'
+import { checkStudentOrders } from './rules'
 import { checkStoredSession } from './stored-session'
 
 export type BackupParseResult =
@@ -38,7 +39,8 @@ function checkFormat(value: unknown): BackupIssue | undefined {
 
 /**
  * Valide un fichier de backup (D24, D48, D49) : JSON → format → enveloppe et session → config
- * figée (F02) → règles croisées. Pure : n'écrit rien. La config renvoyée est celle du validateur.
+ * figée (F02) → règles croisées, plus les contrôles d'import (rangs uniques, #87). Pure : n'écrit
+ * rien. La config renvoyée est celle du validateur.
  */
 export function parseBackup(text: string, deps: { cssSupports: CssSupports }): BackupParseResult {
   const parsed = parseJson(text)
@@ -51,5 +53,5 @@ export function parseBackup(text: string, deps: { cssSupports: CssSupports }): B
   if (!envelope.success)
     return { ok: false, issues: fromZodIssues(envelope.error.issues, parsed.value) }
 
-  return checkStoredSession(envelope.data.session, deps)
+  return checkStoredSession(envelope.data.session, deps, [checkStudentOrders])
 }

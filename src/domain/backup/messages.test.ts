@@ -22,6 +22,7 @@ const SAMPLE_PARAMS: BackupIssueParams = {
   unknown_projected_student: { studentId: 'ghost' },
   projection_mismatch: {},
   invalid_adjustment: { value: 1e20 },
+  duplicate_student_order: { order: 2, firstPath: 'session.students[0].order' },
 }
 
 describe('messages de backup', () => {
@@ -63,6 +64,9 @@ describe('messages de backup', () => {
     expect(dictionary.invalid_adjustment(SAMPLE_PARAMS.invalid_adjustment).length).toBeGreaterThan(
       0,
     )
+    expect(
+      dictionary.duplicate_student_order(SAMPLE_PARAMS.duplicate_student_order).length,
+    ).toBeGreaterThan(0)
   })
 
   test('traduit un code de backup', () => {
@@ -72,6 +76,19 @@ describe('messages de backup', () => {
         'fr',
       ),
     ).toContain('mettre à jour')
+  })
+
+  test('rang de passage en double : message fr et en', () => {
+    const issue = backupError('duplicate_student_order', ['session', 'students', 1, 'order'], {
+      order: 2,
+      firstPath: 'session.students[0].order',
+    })
+    expect(formatBackupIssue(issue, 'fr')).toBe(
+      'Rang de passage 2 en double (déjà utilisé en session.students[0].order).',
+    )
+    expect(formatBackupIssue(issue, 'en')).toBe(
+      'Duplicate passage order 2 (already used at session.students[0].order).',
+    )
   })
 
   test('délègue les issues de config', () => {

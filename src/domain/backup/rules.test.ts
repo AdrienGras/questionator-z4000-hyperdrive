@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest'
 import type { Session } from '@/domain/session/types'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
-import { checkSessionRules } from './rules'
+import { checkSessionRules, checkStudentOrders } from './rules'
 
 function codes(session: Session) {
   return checkSessionRules(session).map((issue) => issue.code)
@@ -127,6 +127,40 @@ describe('checkSessionRules', () => {
 
   test.each([-0.5, 10000, -10000, 1.125])('ajustement valide : %s', (value) => {
     const session = makeSession({ students: [makeStudent([], { adjustment: { value } })] })
+    expect(codes(session)).toEqual([])
+  })
+})
+
+describe('checkStudentOrders (import seulement)', () => {
+  test('rangs distincts : aucune issue', () => {
+    const session = makeSession({
+      students: [makeStudent(), makeStudent([], { id: 'student-2', order: 2 })],
+    })
+    expect(checkStudentOrders(session)).toEqual([])
+  })
+
+  test('rang en double : issue sur le second étudiant', () => {
+    const session = makeSession({
+      students: [
+        makeStudent(),
+        makeStudent([], { id: 'student-2', order: 2 }),
+        makeStudent([], { id: 'student-3', order: 1 }),
+      ],
+    })
+    expect(checkStudentOrders(session)).toEqual([
+      {
+        severity: 'error',
+        code: 'duplicate_student_order',
+        path: ['session', 'students', 2, 'order'],
+        params: { order: 1, firstPath: 'session.students[0].order' },
+      },
+    ])
+  })
+
+  test('hors des règles de lecture : checkSessionRules ne le signale pas', () => {
+    const session = makeSession({
+      students: [makeStudent(), makeStudent([], { id: 'student-2', order: 1 })],
+    })
     expect(codes(session)).toEqual([])
   })
 })

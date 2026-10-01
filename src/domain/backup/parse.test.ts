@@ -120,4 +120,15 @@ describe('parseBackup', () => {
     }
     expect(parseBackup(envelopeWith({ ...session, config: withUnknownIcon }), deps).ok).toBe(true)
   })
+
+  test('rang de passage en double : refusé, avec les autres issues de règles', () => {
+    const session = makeSession({
+      activeStudentId: 'ghost',
+      students: [makeStudent(), makeStudent([], { id: 'student-2', order: 1 })],
+    })
+    expect(issueCodes(envelopeWith(session))).toEqual([
+      'unknown_active_student',
+      'duplicate_student_order',
+    ])
+  })
 })

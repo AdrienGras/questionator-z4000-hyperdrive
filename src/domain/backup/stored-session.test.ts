@@ -61,4 +61,10 @@ describe('checkStoredSession', () => {
     if (result.ok) throw new Error('attendu un échec')
     expect(result.issues.every((issue) => issue.path[0] === 'session')).toBe(true)
   })
+
+  test('rang de passage en double en base : session saine, jamais endommagée (#87)', () => {
+    const session = richSession()
+    session.students[1]!.order = 1
+    expect(checkStoredSession(session, deps)).toEqual({ ok: true, session })
+  })
 })
