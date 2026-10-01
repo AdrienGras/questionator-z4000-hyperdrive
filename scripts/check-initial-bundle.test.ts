@@ -4,6 +4,7 @@ import {
   checkTargets,
   findInitialLeaks,
   findVacuityProblems,
+  CODEMIRROR_FORBIDDEN,
   RECHARTS_FORBIDDEN,
   RECHARTS_CHUNK,
   STATS_ROUTE_KEY,
@@ -157,8 +158,13 @@ const problemsOf = (manifest: Record<string, ManifestChunk>): string[] =>
   checkTargets(manifest, BUNDLE_TARGETS)
 
 describe('cibles multiples', () => {
-  it('déclare recharts, xlsx et shiki', () => {
-    expect(BUNDLE_TARGETS.map((target) => target.name)).toEqual(['recharts', 'xlsx', 'shiki'])
+  it('déclare recharts, xlsx, shiki et codemirror', () => {
+    expect(BUNDLE_TARGETS.map((target) => target.name)).toEqual([
+      'recharts',
+      'xlsx',
+      'shiki',
+      'codemirror',
+    ])
     expect(BUNDLE_TARGETS[1]).toMatchObject({ chunk: XLSX_CHUNK, importer: XLSX_IMPORTER })
   })
 
@@ -229,5 +235,29 @@ describe('cibles multiples', () => {
         /^shiki : contrôle sans objet, aucun chunk .*import statique de `shiki\/langs`/,
       ),
     ])
+  })
+})
+
+describe('codemirror', () => {
+  const STATE_KEY =
+    'node_modules/.pnpm/@codemirror+state@6.7.6/node_modules/@codemirror/state/dist/index.js'
+  const LEZER_KEY =
+    'node_modules/.pnpm/@lezer+highlight@1.2.5/node_modules/@lezer/highlight/dist/index.js'
+
+  it('signale un module @codemirror ou @lezer importé statiquement par l’entrée', () => {
+    const manifest: Record<string, ManifestChunk> = {
+      'index.html': { file: 'assets/index.js', isEntry: true, imports: [STATE_KEY, LEZER_KEY] },
+      [STATE_KEY]: { file: 'assets/state.js' },
+      [LEZER_KEY]: { file: 'assets/lezer.js' },
+    }
+    expect(findInitialLeaks(manifest, CODEMIRROR_FORBIDDEN)).toEqual([STATE_KEY, LEZER_KEY])
+  })
+
+  it('accepte CodeMirror atteint seulement par import dynamique', () => {
+    const manifest: Record<string, ManifestChunk> = {
+      'index.html': { file: 'assets/index.js', isEntry: true, dynamicImports: [STATE_KEY] },
+      [STATE_KEY]: { file: 'assets/state.js', isDynamicEntry: true },
+    }
+    expect(findInitialLeaks(manifest, CODEMIRROR_FORBIDDEN)).toEqual([])
   })
 })

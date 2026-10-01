@@ -1,6 +1,6 @@
 /**
  * Vérifie que les bibliothèques lourdes (Recharts et son wrapper shadcn, F15/D70 ; xlsx, F16/D71 ;
- * catalogue et grammaires Shiki, F18)
+ * catalogue et grammaires Shiki, F18 ; CodeMirror, F26)
  * restent hors du bundle initial.
  * Lancé par `pnpm check:bundle` après `pnpm build` ; nécessite `build.manifest: true`.
  * Exécuté par Node natif (types retirés) : imports avec extension `.ts`, syntaxe effaçable.
@@ -97,8 +97,12 @@ export type BundleTarget = {
   name: string
   /** Clé du chunk produit par son groupe `codeSplitting` (`_<nom>-<hash>.js`). */
   chunk: RegExp
-  /** Clé du manifeste du module qui doit l'atteindre statiquement (garde de non-vacuité). */
-  importer: string
+  /**
+   * Clé du manifeste du module qui doit l'atteindre statiquement (garde de non-vacuité). Absente
+   * tant qu'aucun module chargé paresseusement n'importe la bibliothèque : seule la détection de
+   * fuite s'applique alors.
+   */
+  importer?: string
   /** Motif interdit dans le graphe statique depuis les entrées. */
   forbidden: RegExp
   /** Piste ajoutée aux problèmes de vacuité quand la cause probable diffère du message générique. */
@@ -118,6 +122,15 @@ export const SHIKI_IMPORTER = 'src/domain/config/validate.ts'
 export const SHIKI_FORBIDDEN =
   /(?:^_langs[.-])|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@shikijs\/langs\/)|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?shiki\/dist\/langs)/
 
+/**
+ * CodeMirror (F26) : `@codemirror/*` et `@lezer/*`, importés par `JsonEditor` seul, chargé à la demande.
+ * Pas d'`importer` pour l'instant : l'éditeur n'est monté par aucune route avant la suite de F26 ;
+ * renseigner la clé de la route dès qu'elle le charge paresseusement (garde de non-vacuité).
+ */
+export const CODEMIRROR_CHUNK = /^_codemirror[.-]/
+export const CODEMIRROR_FORBIDDEN =
+  /(?:^_codemirror[.-])|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@(?:codemirror|lezer)\/)/
+
 export const BUNDLE_TARGETS: BundleTarget[] = [
   {
     name: 'recharts',
@@ -134,6 +147,7 @@ export const BUNDLE_TARGETS: BundleTarget[] = [
     vacuityHint:
       ' (cause probable : un import statique de `shiki/langs` inline le catalogue dans l’entrée)',
   },
+  { name: 'codemirror', chunk: CODEMIRROR_CHUNK, forbidden: CODEMIRROR_FORBIDDEN },
 ]
 
 /** Problèmes (vacuité puis fuites) de chaque cible ; [] si le bundle initial est propre. */
@@ -142,9 +156,12 @@ export function checkTargets(
   targets: BundleTarget[],
 ): string[] {
   return targets.flatMap((target) => [
-    ...findVacuityProblems(manifest, target.chunk, target.importer).map(
-      (problem) => `${target.name} : contrôle sans objet, ${problem}${target.vacuityHint ?? ''}`,
-    ),
+    ...(target.importer === undefined
+      ? []
+      : findVacuityProblems(manifest, target.chunk, target.importer).map(
+          (problem) =>
+            `${target.name} : contrôle sans objet, ${problem}${target.vacuityHint ?? ''}`,
+        )),
     // Contrôlées même si la garde échoue : une fuite explique souvent l'absence de l'importeur.
     ...findInitialLeaks(manifest, target.forbidden).map(
       (leak) => `${target.name} fuit dans le bundle initial : ${leak}`,
