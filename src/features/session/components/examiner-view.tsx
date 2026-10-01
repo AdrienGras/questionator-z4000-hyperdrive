@@ -55,7 +55,10 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
   const failure = useMemo<Failure | undefined>(() => {
     const message = errorText(actions.error, ui)
     return message === undefined ? undefined : { message }
-  }, [actions.error, ui])
+    // Identité = occurrence : `ui` (neuf à chaque rendu) et la langue n'en font pas partie. Le tiroir
+    // modal masque le sélecteur de langue, le message figé à l'échec ne peut donc pas être périmé.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actions.error])
   const errorMessage = failure?.message
   const projected = useMemo(() => toProjectedView(session), [session])
   const panel = useSidePanel()

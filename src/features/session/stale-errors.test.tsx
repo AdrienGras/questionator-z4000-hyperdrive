@@ -1,11 +1,12 @@
 import 'fake-indexeddb/auto'
-import { fireEvent, screen, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { beforeEach, expect, test, vi } from 'vitest'
 import type { updateSession as UpdateSession } from '@/lib/db/sessions'
 import { db } from '@/lib/db/db'
 import { categoryButton } from '@/testing/passage-assertions'
 import { openSidePanel } from '@/testing/side-panel-assertions'
 import { mountSession } from '@/testing/students-tab-harness'
+import { REVEALED } from '@/testing/screen-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
 
 const failing = vi.hoisted(() => ({ on: false }))
@@ -77,4 +78,60 @@ test('dialogue d’ajout : un échec d’ajout dans le dialogue est affiché', a
 
   const dialog = screen.getByRole('dialog', { name: 'Ajouter un étudiant' })
   expect(await within(dialog).findByRole('alert')).toBeInTheDocument()
+})
+
+/** Écriture sans effet visible : relance le rendu de l'écran avec la même erreur d'action. */
+async function touchSession() {
+  const stored = await db.sessions.get('session-1')
+  if (stored === undefined) throw new Error('session absente')
+  await db.sessions.put({ ...stored, updatedAt: new Date().toISOString() })
+}
+
+test('tiroir : l’erreur périmée ne réapparaît pas après un nouveau rendu de l’écran', async () => {
+  await failDrawWhileClosed()
+  const dialog = await openSidePanel()
+  expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument()
+
+  await touchSession()
+  await new Promise((resolve) => setTimeout(resolve, 100))
+
+  expect(within(screen.getByRole('dialog')).queryByRole('alert')).not.toBeInTheDocument()
+})
+
+test('dialogue d’ajout : l’erreur périmée ne réapparaît pas après un nouveau rendu de l’écran', async () => {
+  await failDrawWhileClosed()
+  await openSidePanel('Étudiants')
+  fireEvent.click(screen.getByRole('button', { name: 'Ajouter un étudiant' }))
+  const dialog = screen.getByRole('dialog', { name: 'Ajouter un étudiant' })
+  expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument()
+
+  await touchSession()
+  await new Promise((resolve) => setTimeout(resolve, 100))
+
+  expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument()
+})
+
+test('« Étudiant suivant » sans suivant : l’erreur ne s’affiche pas à l’ouverture du tiroir', async () => {
+  const done = makeStudent([2, 1], {
+    id: 's-a',
+    lastName: 'Aba',
+    firstName: 'X',
+    order: 1,
+    finalRevealedAt: REVEALED,
+  })
+  await mountSession([done, bob])
+  const next = await screen.findByRole('button', { name: 'Étudiant suivant' })
+  const stored = await db.sessions.get('session-1')
+  if (stored === undefined) throw new Error('session absente')
+  const removal = db.sessions.put({
+    ...stored,
+    students: stored.students.filter((s) => s.id !== bob.id),
+  })
+  fireEvent.click(next)
+  await removal
+  await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+
+  const dialog = await openSidePanel()
+
+  expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument()
 })
