@@ -24,6 +24,10 @@ function mount(overrides: Partial<Props> = {}) {
   return { apiRef, onChange, ...view }
 }
 
+function classCount(selector: string) {
+  return selector.split(/[.[]/).length - 1
+}
+
 describe('JsonEditor', () => {
   it('affiche le texte initial dans une zone de texte nommée', () => {
     const { container } = mount()
@@ -57,6 +61,22 @@ describe('JsonEditor', () => {
     act(() => apiRef.current?.reveal(15, 18))
     expect(container.querySelector('.cm-activeLine')?.textContent).toBe('  "b": 2')
     expect(container.querySelector('.cm-lineNumbers .cm-activeLineGutter')?.textContent).toBe('3')
+  })
+
+  it("l'élément de complétion sélectionné l'emporte en spécificité sur le thème par défaut", () => {
+    mount()
+    const css = [...document.querySelectorAll('style')].map((style) => style.textContent).join('\n')
+    const selectors = (needle: string) =>
+      [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+        .filter(([, , body]) => body?.includes(needle))
+        .flatMap(([, selector]) => (selector ?? '').split(','))
+        .filter((selector) => selector.includes('tooltip-autocomplete ') && selector.includes('li'))
+        .map((selector) => selector.trim())
+    const ours = selectors('var(--accent)')
+    const theirs = selectors('white')
+    expect(ours.length).toBeGreaterThan(0)
+    expect(theirs.length).toBeGreaterThan(0)
+    expect(Math.min(...ours.map(classCount))).toBeGreaterThan(Math.max(...theirs.map(classCount)))
   })
 
   describe('configCompletionSource', () => {
