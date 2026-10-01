@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import type { Failure } from '@/features/session/hooks/use-fresh-error'
 import type { Session } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { AddStudentDialog } from './add-student-dialog'
@@ -11,8 +12,8 @@ type StudentsTabProps = Readonly<{
   activeStudentId: string | undefined
   /** Verrouille les seuls boutons d'envoi du dialogue : les lignes gardent le focus clavier. */
   disabled: boolean
-  /** Message de la dernière action refusée, affiché dans le dialogue d'ajout. */
-  error?: string
+  /** Dernière action refusée, affichée dans le dialogue d'ajout. */
+  error?: Failure
   onSelect: (studentId: string) => void
   onAdd: (
     names: { lastName: string; firstName: string },

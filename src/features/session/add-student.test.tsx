@@ -198,23 +198,43 @@ test('le déclencheur « Ajouter un étudiant » n’est pas désactivé pendant
 
 test('échec de l’ajout : le dialogue reste ouvert, champs gardés, erreur visible dedans', async () => {
   const onAdd = vi.fn<() => Promise<boolean>>().mockResolvedValue(false)
+  const dialogFor = (error?: { message: string }) => (
+    <AddStudentDialog
+      ui={makeUi()}
+      session={makeSession({ config, students: [alice, durand] })}
+      disabled={false}
+      error={error}
+      onAdd={onAdd}
+    />
+  )
+  const { rerender } = render(dialogFor())
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  openDialog()
+  fill('Martin', 'Zoé')
+  fireEvent.click(addButton())
+  await waitFor(() => expect(onAdd).toHaveBeenCalledTimes(1))
+  // L'erreur arrive du hook d'actions une fois l'écriture refusée, dialogue ouvert.
+  rerender(dialogFor({ message: 'Écriture impossible.' }))
+
+  const dialog = screen.getByRole('dialog')
+  expect(within(dialog).getByRole('alert')).toHaveTextContent('Écriture impossible.')
+  expect(screen.getByLabelText('Nom')).toHaveValue('Martin')
+  expect(screen.getByLabelText('Prénom')).toHaveValue('Zoé')
+})
+
+test('une erreur déjà présente à l’ouverture du dialogue n’y est pas affichée', () => {
   render(
     <AddStudentDialog
       ui={makeUi()}
       session={makeSession({ config, students: [alice, durand] })}
       disabled={false}
-      error="Écriture impossible."
-      onAdd={onAdd}
+      error={{ message: 'Ancienne erreur.' }}
+      onAdd={vi.fn<() => Promise<boolean>>()}
     />,
   )
-  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-  openDialog()
-  fill('Martin', 'Zoé')
-  fireEvent.click(addButton())
 
-  await waitFor(() => expect(onAdd).toHaveBeenCalledTimes(1))
-  const dialog = screen.getByRole('dialog')
-  expect(within(dialog).getByRole('alert')).toHaveTextContent('Écriture impossible.')
-  expect(screen.getByLabelText('Nom')).toHaveValue('Martin')
-  expect(screen.getByLabelText('Prénom')).toHaveValue('Zoé')
+  openDialog()
+
+  expect(screen.getByRole('dialog')).toBeInTheDocument()
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 })

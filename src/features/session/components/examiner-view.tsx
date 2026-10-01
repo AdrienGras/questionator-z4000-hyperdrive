@@ -11,6 +11,7 @@ import { currentPending } from '@/domain/passage/selectors'
 import { studentStatus } from '@/domain/scoring/status'
 import type { Session } from '@/domain/session/types'
 import { usePassageActions } from '@/features/session/hooks/use-passage-actions'
+import type { Failure } from '@/features/session/hooks/use-fresh-error'
 import { useSidePanel } from '@/features/session/hooks/use-side-panel'
 import { useUi, type Ui } from '@/lib/i18n/use-ui'
 import { AbsentToggle } from './absent-toggle'
@@ -49,7 +50,13 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
   const actions = usePassageActions(session.id, student?.id, session.updatedAt)
   const status = student === undefined ? undefined : studentStatus(student, config)
   const pending = student === undefined ? undefined : currentPending(student)
-  const errorMessage = errorText(actions.error, ui)
+  // Un objet par échec (`actions.error` est neuf à chaque échec) : le tiroir et le dialogue
+  // d'ajout distinguent ainsi l'erreur survenue ouverts de celle déjà là à leur ouverture.
+  const failure = useMemo<Failure | undefined>(() => {
+    const message = errorText(actions.error, ui)
+    return message === undefined ? undefined : { message }
+  }, [actions.error, ui])
+  const errorMessage = failure?.message
   const projected = useMemo(() => toProjectedView(session), [session])
   const panel = useSidePanel()
   const panelButton = useRef<HTMLButtonElement>(null)
@@ -132,7 +139,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
           tab={panel.tab}
           onOpenChange={panel.setOpen}
           onTabChange={panel.setTab}
-          error={errorMessage}
+          error={failure}
           returnFocusRef={panelButton}
           studentsTab={
             <StudentsTab
@@ -143,7 +150,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
               // ni présélectionner le premier étudiant de la liste (spec F09 §7).
               activeStudentId={student?.id}
               disabled={actions.busy}
-              error={errorMessage}
+              error={failure}
               onSelect={(studentId) => void selectStudent(studentId)}
               onAdd={addStudent}
               actionsSlot={
