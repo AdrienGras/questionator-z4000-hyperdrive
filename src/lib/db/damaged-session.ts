@@ -50,7 +50,7 @@ export function damagedName(damaged: DamagedSession): string {
   const { raw } = damaged
   if (typeof raw === 'object' && raw !== null && 'name' in raw) {
     const { name } = raw
-    if (typeof name === 'string' && name !== '') return name
+    if (typeof name === 'string' && name.trim() !== '') return name
   }
   return damaged.id
 }

@@ -600,6 +600,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : IndexedDB valide une transaction dès qu'aucune requête n'est en attente à la fin d'une tâche ; attendre une promesse non Dexie (`await import(...)`, `fetch`) dans le callback de `db.transaction` laisse la transaction sans requête. Dans un querier `liveQuery`, le même `await` peut faire perdre la zone Dexie : les lectures faites *après* ne sont plus observées.
 **Workaround** : charger le module **avant** `db.transaction(...)` et valider de façon synchrone dedans ; dans `getSession` / `listSessions` (queriers de `useLiveQuery`), faire toutes les lectures Dexie d'abord, attendre le validateur ensuite. Test : `sessions.test.ts`, « validateur pas encore chargé » (`vi.resetModules()` puis import neuf de `./sessions`), rouge avec l'`await` dans la transaction.
 **Référence** : `src/lib/db/sessions.ts`, `src/lib/db/damaged-session.ts` (`loadReadStored`).
+**Garde de bundle** : `e2e/languages.spec.ts`, « le validateur de lib/db reste hors de la clôture statique de l'accueil » (échoue si un import statique de `@/domain/backup/stored-session` entre dans `lib/db`).
 
 ## La clé du catalogue `shiki/langs` dans le manifeste dépend du graphe d'imports (2026-10-01)
 

@@ -40,11 +40,11 @@ export function DamagedSessionScreen(props: DamagedSessionScreenProps) {
       <details className="w-full max-w-xl text-left text-sm">
         <summary className="cursor-pointer text-center">{text('damaged_details', {})}</summary>
         <ul className="mt-3 flex flex-col gap-2">
-          {damaged.issues.map((issue) => {
+          {damaged.issues.map((issue, index) => {
             const path = formatIssuePath(issue)
             const message = formatBackupIssue(issue, locale)
             return (
-              <li key={`${path}|${message}`} className="flex flex-col gap-0.5">
+              <li key={`${index}|${path}|${message}`} className="flex flex-col gap-0.5">
                 {path !== '' && <code className="text-muted-foreground">{path}</code>}
                 <span>{message}</span>
               </li>

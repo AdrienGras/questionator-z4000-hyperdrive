@@ -113,6 +113,21 @@ test("l'accueil ne charge ni le catalogue ni aucune grammaire", async ({ page })
   expect(requested.filter((file) => allGrammars.has(file))).toEqual([])
 })
 
+test("le validateur de lib/db reste hors de la clôture statique de l'accueil", () => {
+  const manifest = manifestSchema.parse(
+    JSON.parse(readFileSync('dist/.vite/manifest.json', 'utf8')),
+  )
+  // Chunk partagé `_validate-*` (validateur de config) ou module `stored-session` : chargés à la demande (D63).
+  const validatorKeys = Object.keys(manifest).filter((key) =>
+    /^_validate[.-]|^src\/domain\/backup\/stored-session\.ts$/.test(key),
+  )
+  if (!validatorKeys.some((key) => key.endsWith('stored-session.ts'))) {
+    throw new Error('stored-session absent du manifeste')
+  }
+  const validatorFiles = new Set(validatorKeys.map((key) => entryOf(manifest, key).file))
+  expect([...staticFiles(manifest, 'index.html')].filter((f) => validatorFiles.has(f))).toEqual([])
+})
+
 test('seul le chunk de la grammaire python est chargé', async ({ page }) => {
   const requested = trackAssetRequests(page)
   const home = new HomePage(page)
