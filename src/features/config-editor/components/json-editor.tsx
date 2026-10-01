@@ -1,4 +1,11 @@
-import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete'
+import {
+  autocompletion,
+  closeBrackets,
+  closeBracketsKeymap,
+  completionKeymap,
+  type CompletionContext,
+  type CompletionResult,
+} from '@codemirror/autocomplete'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import { json } from '@codemirror/lang-json'
 import { bracketMatching, indentOnInput } from '@codemirror/language'
@@ -8,11 +15,18 @@ import {
   EditorView,
   highlightActiveLine,
   highlightActiveLineGutter,
+  hoverTooltip,
   keymap,
   lineNumbers,
 } from '@codemirror/view'
 import { useEffect, useImperativeHandle, useRef, type Ref } from 'react'
 import { editorTheme } from '@/features/config-editor/editor-theme'
+import {
+  completionsAt,
+  configJsonSchema,
+  type AssistHover,
+  hoverAt,
+} from '@/features/config-editor/schema-assist'
 
 export type JsonEditorApi = {
   /** Remplace tout le texte (transaction annulable). */
@@ -34,6 +48,8 @@ type JsonEditorProps = {
   onChange: (text: string) => void
   diagnostics: readonly JsonEditorDiagnostic[]
   ariaLabel: string
+  /** Libellé localisé de « Défaut », affiché dans la bulle de survol. */
+  defaultLabel: string
   apiRef: Ref<JsonEditorApi>
   /** Classes du conteneur ; l'éditeur en occupe toute la hauteur. */
   className?: string
@@ -49,6 +65,7 @@ export function JsonEditor({
   onChange,
   diagnostics,
   ariaLabel,
+  defaultLabel,
   apiRef,
   className,
 }: Readonly<JsonEditorProps>) {
@@ -57,11 +74,13 @@ export function JsonEditor({
   const onChangeRef = useRef(onChange)
   const initialTextRef = useRef(initialText)
   const ariaLabelRef = useRef(ariaLabel)
+  const defaultLabelRef = useRef(defaultLabel)
   const diagnosticsRef = useRef(diagnostics)
 
   useEffect(() => {
     onChangeRef.current = onChange
     diagnosticsRef.current = diagnostics
+    defaultLabelRef.current = defaultLabel
   })
 
   useEffect(() => {
@@ -90,7 +109,23 @@ export function JsonEditor({
           ),
           lintGutter(),
           editorTheme,
-          keymap.of([...closeBracketsKeymap, ...defaultKeymap, ...historyKeymap]),
+          autocompletion({ override: [configCompletionSource] }),
+          hoverTooltip((editorView, pos) => {
+            const hover = hoverAt(editorView.state.doc.toString(), pos, configJsonSchema())
+            if (hover === undefined) return null
+            return {
+              pos: hover.from,
+              end: hover.to,
+              above: true,
+              create: () => ({ dom: hoverDom(hover, defaultLabelRef.current) }),
+            }
+          }),
+          keymap.of([
+            ...closeBracketsKeymap,
+            ...completionKeymap,
+            ...defaultKeymap,
+            ...historyKeymap,
+          ]),
           EditorView.contentAttributes.of({ 'aria-label': ariaLabelRef.current }),
           EditorView.updateListener.of((update) => {
             if (update.docChanged) onChangeRef.current(update.state.doc.toString())
@@ -134,6 +169,40 @@ export function JsonEditor({
   }))
 
   return <div ref={hostRef} className={className} />
+}
+
+/**
+ * Source de complétion tirée du JSON Schema de la config. Sans appel explicite (Ctrl+Espace), la
+ * liste ne s'ouvre que pendant la frappe d'un mot ou d'une clé, pas sur un espace ou une virgule.
+ */
+export function configCompletionSource(context: CompletionContext): CompletionResult | null {
+  if (!context.explicit && context.matchBefore(/["\w-]+$/) === null) return null
+  const found = completionsAt(context.state.doc.toString(), context.pos, configJsonSchema())
+  if (found === undefined) return null
+  return {
+    from: found.from,
+    to: found.to,
+    options: found.options,
+    validFor: /^["\w-]*$/,
+  }
+}
+
+/** Contenu de la bulle de survol ; texte posé via `textContent`, jamais `innerHTML`. */
+function hoverDom(hover: AssistHover, defaultLabel: string): HTMLElement {
+  const dom = document.createElement('div')
+  dom.className = 'cm-schema-hover'
+  const description = document.createElement('p')
+  description.textContent = hover.description
+  dom.append(description)
+  if ('default' in hover) {
+    const line = document.createElement('p')
+    line.append(`${defaultLabel} : `)
+    const code = document.createElement('code')
+    code.textContent = JSON.stringify(hover.default)
+    line.append(code)
+    dom.append(line)
+  }
+  return dom
 }
 
 /** Borne les plages au document courant : un diagnostic périmé ne doit pas faire échouer la vue. */

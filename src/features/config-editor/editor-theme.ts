@@ -35,7 +35,17 @@ export const editorChrome = EditorView.theme({
     backgroundColor: 'var(--popover, var(--background))',
     color: 'var(--popover-foreground, var(--foreground))',
     border: '1px solid var(--border)',
+    borderRadius: 'var(--radius)',
   },
+  '.cm-tooltip-autocomplete ul li[aria-selected]': {
+    backgroundColor: 'var(--accent)',
+    color: 'var(--accent-foreground)',
+  },
+  '.cm-completionInfo, .cm-schema-hover': {
+    maxWidth: '28rem',
+    padding: '0.5rem 0.75rem',
+  },
+  '.cm-schema-hover p + p': { marginTop: '0.25rem' },
 })
 
 export const highlightStyle = HighlightStyle.define([
