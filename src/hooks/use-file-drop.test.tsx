@@ -55,6 +55,16 @@ describe('useFileDrop', () => {
     expect(draggingState()).toBe('true')
   })
 
+  test('dragover sans dragenter préalable : surimpression amorcée, retirée au premier dragleave', () => {
+    render(<Zone />)
+    const zone = screen.getByTestId('zone')
+    fireEvent.dragOver(zone, { dataTransfer: files })
+    fireEvent.dragOver(zone, { dataTransfer: files })
+    expect(draggingState()).toBe('true')
+    fireEvent.dragLeave(zone, { dataTransfer: files, relatedTarget: null })
+    expect(draggingState()).toBe('false')
+  })
+
   test('texte glissé (pas de fichier) : ni surimpression ni preventDefault', () => {
     render(<Zone />)
     const zone = screen.getByTestId('zone')

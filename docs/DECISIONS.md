@@ -1271,7 +1271,7 @@ autre encodage 8 bits.
 
 **Décision** :
 - `useFileDrop({ disabled, isolate, onFile })` dans `src/hooks/` (hook transverse, D59), avec `hasFiles` : surimpression tenue par un compteur `dragenter` / `dragleave` (un `dragover` sans `dragenter` préalable amorce le compteur), dépôt du premier fichier ; désactivé : `dragover` empêché avec `dropEffect = 'none'`, ni surimpression ni lecture ; `isolate` arrête la propagation (colonne de l'éditeur, avant la garde de page). Les trois zones l'utilisent.
-- Import de backup : la zone est désactivée tant qu'un dialogue d'import est ouvert (`state.kind !== 'idle'`) ou qu'un import est en cours (`importing`, plus un verrou `busy` en ref dans le hook) ; le bouton « Importer un backup » suit la même règle.
+- Import de backup : la zone est désactivée tant qu'un dialogue d'import est ouvert (`state.kind !== 'idle'`) ou qu'un import est en cours (`importing`, plus un verrou `busy` en ref dans le hook) ; le bouton « Importer un backup » suit la même règle, et `importFile` lui-même refuse un import par-dessus un dialogue ouvert (contrat tenu quel que soit le chemin d'appel).
 - Dialogues d'import : contenu tiré du dernier état non nul (`useRetained`, sur l'`ImportState`, objet stable), `open` sur l'état courant : rien ne se vide pendant l'animation de fermeture.
 - Issues dédoublonnées à l'affichage sur `chemin|message` (`uniqueBy`, `lib/issue-list.ts`) : deux issues de même chemin et même message sont un doublon d'affichage, pas une information.
 

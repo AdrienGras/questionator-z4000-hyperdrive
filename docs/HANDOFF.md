@@ -26,7 +26,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ## 2026-10-01 — F34 (#82) : glisser-déposer fiabilisé
 
-**Dernière chose faite** : PR #93 (F35) mergée sur go de l'utilisateur. F34 implémentée sur `feat/82-glisser-deposer` (D84), en exécution directe : `useFileDrop` (`src/hooks/`) remplace les trois implémentations (compteur `dragenter`/`dragleave`, plus de clignotement WebKit) ; l'import de backup ignore un dépôt pendant un dialogue ou un import en cours ; ses dialogues gardent leur contenu pendant la fermeture (`useRetained`) ; issues dédoublonnées (`uniqueBy`). Chaque garde d'import a été prouvée en la retirant (test rouge).
+**Dernière chose faite** : PR #93 (F35) mergée sur go de l'utilisateur. F34 implémentée sur `feat/82-glisser-deposer` (D84), en exécution directe : `useFileDrop` (`src/hooks/`) remplace les trois implémentations (compteur `dragenter`/`dragleave`, plus de clignotement WebKit) ; l'import de backup ignore un dépôt pendant un dialogue ou un import en cours ; ses dialogues gardent leur contenu pendant la fermeture (`useRetained`) ; issues dédoublonnées (`uniqueBy`). Gardes d'import prouvées une à une en les retirant : zone désactivée pendant un dialogue (contrôleur), verrou `busy` et refus d'un import par-dessus un dialogue ouvert (hook, `use-backup-import.test.ts`).
 
 **Trucs en suspens** : PR de F34 (brouillon, Sonar, puis « Ready for review »), merge sur go de l'utilisateur. Le non-clignotement sous WebKit et le contenu retenu pendant l'animation ne se voient qu'en vrai navigateur : à vérifier à la main (Safari), ajoutable à #77.
 

@@ -35,9 +35,10 @@ export function useBackupImport() {
   // Lu après des `await` : un ref, pas l'état capturé par la fermeture (CONVENTIONS).
   const busy = useRef(false)
 
-  /** Un seul import à la fois : un fichier déposé pendant un import est ignoré (F34). */
+  /** Un seul import à la fois, et jamais par-dessus un dialogue d'import ouvert (F34). */
   async function importFile(file: File): Promise<void> {
-    if (busy.current) return
+    // Un dialogue d'import ouvert (erreur, conflit) : rien ne doit le remplacer (F34).
+    if (busy.current || state.kind !== 'idle') return
     busy.current = true
     setImporting(true)
     try {
