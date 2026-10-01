@@ -24,6 +24,30 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-01 — F26 mergé, BACKLOG relu et découpé en tickets (#76 à #88)
+
+**Dernière chose faite** : PR #75 (F26) mergée sur go de l'utilisateur. BACKLOG relu item par item avec l'utilisateur, et 13 tickets créés, tous au Project n°3 en Backlog :
+- #76 bug du menu de thème (P1) ;
+- #77 vérifications manuelles V1, en checklist (P1) ;
+- #78 F30 finitions de l'écran de passage, commentaire perdu à la fermeture compris ;
+- #79 F31 robustesse des données persistées ;
+- #80 F32 aide à la saisie depuis le JSON Schema ;
+- #81 F33 finitions de la vue projetée ;
+- #82 F34 glisser-déposer fiabilisé ;
+- #83 F35 fichiers d'entrée plus tolérants (tabulation acceptée) ;
+- #84 F36 mises à jour en cours de journée ;
+- #85 Node 26 ;
+- #86 budget de bundle ;
+- #87 dette de tests et de code ;
+- #88 outillage.
+Label `chore` créé. Les items repris portent un renvoi `→ #n` dans le BACKLOG.
+
+**Trucs en suspens** : PR de docs de cette entrée (BACKLOG, HANDOFF) à merger. Tickets #71 à #74 (site de documentation, guides, animation du README) ouverts par l'utilisateur, pas encore traités. Restent au BACKLOG sans ticket : raccourcis clavier de notation (refusés pour l'instant), migration `version(2)`, autofiltre Excel, mode de couleur de l'aperçu, synchronisation du mode entre fenêtres, et quelques petits points.
+
+**Prochaine chose à creuser** : demander à l'utilisateur l'ordre de passage. Ordre proposé : #76 (bug P1, XS), puis #78 ou #79 ; #77 se fait à la main, de son côté.
+
+**Notes pour future Claude** : le Project n°3 ajoute lui-même les nouvelles issues (`gh project item-add` répond « Content already exists ») ; renseigner les champs avec `gh project item-edit 3 --owner AdrienGras --url <issue> --field <nom> --value <valeur>`. Priorités du Project : P0 à P2 seulement. Numérotation des features : F27 à F29 sont pris par #71 à #73 ; la prochaine libre est F37.
+
 ## 2026-10-01 — F24 mergé, F26 : éditeur de config (#60)
 
 **Dernière chose faite** : PR #70 (F24) mergée sur go de l'utilisateur. F26 implémenté sur `feat/f26-editeur-config` en subagent-driven development : neuf tâches revues (trois cycles de correction), une revue finale, une vague de corrections et sa re-revue. Livré :
