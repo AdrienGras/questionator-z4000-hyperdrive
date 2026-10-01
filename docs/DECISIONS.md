@@ -1264,3 +1264,17 @@ autre encodage 8 bits.
 **Pourquoi** : un id est une clé de référence (attempts, stats, export) ; une variante invisible est presque toujours une faute de saisie, et on ne peut plus la corriger depuis l'application une fois la session créée. Le projet n'étant pas en production, refuser ne casse rien d'existant ; une session stockée qui porterait un tel id serait signalée endommagée (D81).
 
 **Reporté** : `PRODUCT.md` §6.1 et §6.2.
+
+## D84 — F34 : glisser-déposer fiabilisé, un seul hook (2026-10-01)
+
+**Question** : trois zones de dépôt (import de backup, création de session, éditeur de config) avaient chacune leur code, avec un test `relatedTarget` qui fait clignoter la surimpression sous WebKit ; un second fichier déposé pendant le dialogue de conflit remplaçait le conflit en attente ; les dialogues d'import se vidaient pendant leur fermeture ; une issue répétée s'affichait deux fois.
+
+**Décision** :
+- `useFileDrop({ disabled, isolate, onFile })` dans `src/hooks/` (hook transverse, D59), avec `hasFiles` : surimpression tenue par un compteur `dragenter` / `dragleave` (un `dragover` sans `dragenter` préalable amorce le compteur), dépôt du premier fichier ; désactivé : `dragover` empêché avec `dropEffect = 'none'`, ni surimpression ni lecture ; `isolate` arrête la propagation (colonne de l'éditeur, avant la garde de page). Les trois zones l'utilisent.
+- Import de backup : la zone est désactivée tant qu'un dialogue d'import est ouvert (`state.kind !== 'idle'`) ou qu'un import est en cours (`importing`, plus un verrou `busy` en ref dans le hook) ; le bouton « Importer un backup » suit la même règle.
+- Dialogues d'import : contenu tiré du dernier état non nul (`useRetained`, sur l'`ImportState`, objet stable), `open` sur l'état courant : rien ne se vide pendant l'animation de fermeture.
+- Issues dédoublonnées à l'affichage sur `chemin|message` (`uniqueBy`, `lib/issue-list.ts`) : deux issues de même chemin et même message sont un doublon d'affichage, pas une information.
+
+**Pourquoi** : un seul mécanisme, testé une fois, qui ne remplace jamais une action en cours.
+
+**Reporté** : `docs/CONVENTIONS.md` § « Fichier déposé et lu », `docs/QUIRKS.md` (jsdom et dialogues), `docs/BACKLOG.md` (items → #82 retirés).

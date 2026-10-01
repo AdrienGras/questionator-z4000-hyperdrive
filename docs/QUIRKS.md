@@ -617,3 +617,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : `updateSession` enchaîne un `import()` mémoïsé du validateur, une lecture puis un `put` ; en Chromium, le document est déchargé avant que `put` ne soit appelé. Le flush à `pagehide` n'est donc qu'un plus.
 **Workaround** : copie **synchrone** de la saisie dans `localStorage` à chaque frappe (`comment-draft.ts`, D82), supprimée quand l'enregistrement de cette valeur réussit, relue au montage de `CommentField`. Le test e2e ne doit ni attendre ni quitter le champ avant `reload()`.
 **Référence** : `src/features/session/comment-draft.ts`, `src/features/session/hooks/use-autosave.ts`, `e2e/comment-reload.spec.ts`, D82.
+
+## jsdom démonte un dialogue Base UI dès sa fermeture et masque `main` quand il est ouvert (2026-10-01)
+
+**Découvert** : F34 (#82), tests du contrôleur d'import.
+**Symptôme** : un test « le contenu du dialogue reste affiché pendant sa fermeture » passe sans correctif ; `getByRole('main')` échoue pendant qu'un dialogue modal est ouvert.
+**Cause** : jsdom n'a pas d'animation, Base UI démonte donc le popup aussitôt `open` passé à `false` (rien à observer) ; un dialogue modal pose `aria-hidden` sur le reste de la page.
+**Workaround** : tester la rétention du contenu par son hook (`useRetained`) ; chercher l'élément de page avec `getByRole('main', { hidden: true })` pour y simuler un dépôt pendant qu'un dialogue est ouvert. Un dépôt sur le dialogue lui-même remonte bien au contrôleur dans le navigateur (les portails React suivent l'arbre React).
+**Référence** : `src/features/home/hooks/use-retained.ts`, `src/features/home/components/import-controller.test.tsx`.

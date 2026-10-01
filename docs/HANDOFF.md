@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-01 — F34 (#82) : glisser-déposer fiabilisé
+
+**Dernière chose faite** : PR #93 (F35) mergée sur go de l'utilisateur. F34 implémentée sur `feat/82-glisser-deposer` (D84), en exécution directe : `useFileDrop` (`src/hooks/`) remplace les trois implémentations (compteur `dragenter`/`dragleave`, plus de clignotement WebKit) ; l'import de backup ignore un dépôt pendant un dialogue ou un import en cours ; ses dialogues gardent leur contenu pendant la fermeture (`useRetained`) ; issues dédoublonnées (`uniqueBy`). Chaque garde d'import a été prouvée en la retirant (test rouge).
+
+**Trucs en suspens** : PR de F34 (brouillon, Sonar, puis « Ready for review »), merge sur go de l'utilisateur. Le non-clignotement sous WebKit et le contenu retenu pendant l'animation ne se voient qu'en vrai navigateur : à vérifier à la main (Safari), ajoutable à #77.
+
+**Prochaine chose à creuser** : #81 (F33, finitions de la vue projetée), dernier ticket de la vague de fix.
+
+**Notes pour future Claude** : jsdom démonte un dialogue Base UI dès sa fermeture et masque `main` derrière un modal (QUIRKS) : la rétention du contenu se teste sur `useRetained`, un dépôt pendant un dialogue avec `getByRole('main', { hidden: true })`.
+
 ## 2026-10-01 — F35 (#83) : fichiers d'entrée plus tolérants
 
 **Dernière chose faite** : PR #92 (F30) mergée sur go de l'utilisateur. F35 implémentée sur `feat/83-fichiers-tolerants` (D83), en exécution directe (portée petite) : CSV séparé par tabulations lu comme le même fichier à virgules, sauts de ligne et espaces répétées d'une cellule réduits à une espace, numéro de ligne cité = ligne du tableur (choix de l'utilisateur en revue) ; config : erreurs `padded_id` et `unicode_variant_id`, au même titre que les doublons, visibles à la création et dans l'éditeur. PRODUCT.md §6.1 et §6.2 à jour.
