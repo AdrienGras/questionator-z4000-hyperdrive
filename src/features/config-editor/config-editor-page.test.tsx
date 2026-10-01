@@ -10,6 +10,16 @@ import { expectColorModeToggleLast } from '@/testing/page-shell-assertions'
 import { renderAt } from '@/testing/render-at'
 
 vi.mock('@/lib/download', () => ({ downloadText: vi.fn<typeof downloadText>() }))
+// L'aperçu rend toute la config d'exemple : ses catégories portent des icônes (index Tabler, des
+// milliers de modules) et ses blocs ```php passent par Shiki (grammaire PHP et ses langages
+// embarqués). Aucun test de ce fichier ne vérifie icônes ni coloration ; chargés pour de vrai,
+// ils portaient « marque l'aperçu périmé… » à 4,3 s sous la suite (5,5 s machine chargée, au-delà
+// du délai de 5 s). Module d'icônes vide (aucune icône rendue) ; blocs de code en texte brut.
+vi.mock('@tabler/icons-react/dist/esm/icons/index.mjs', () => ({}))
+vi.mock('@/lib/markdown/highlighter', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/markdown/highlighter')>()),
+  highlight: () => Promise.resolve(null),
+}))
 
 const cssSupports = () => true
 const CREATE = 'Créer une session avec cette config'

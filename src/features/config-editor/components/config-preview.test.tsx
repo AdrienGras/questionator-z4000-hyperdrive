@@ -9,6 +9,14 @@ import { makeUi } from '@/testing/make-ui'
 import { FixedWidthResizeObserver } from '@/testing/resize-observer'
 import { ConfigPreview } from './config-preview'
 
+// La config d'exemple porte des icônes (index Tabler) et des blocs ```php (Shiki) : leurs
+// chargements, lancés au rendu et jamais attendus ici, débordaient sur les tests suivants du
+// fichier. Aucun test ne vérifie icônes ni coloration : module d'icônes vide, code en texte brut.
+vi.mock('@tabler/icons-react/dist/esm/icons/index.mjs', () => ({}))
+vi.mock('@/lib/markdown/highlighter', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/markdown/highlighter')>()),
+  highlight: () => Promise.resolve(null),
+}))
 vi.mock('@/domain/presentation/preview-session', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/domain/presentation/preview-session')>()
   return { ...actual, previewSession: vi.fn<typeof actual.previewSession>(actual.previewSession) }
