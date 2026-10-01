@@ -219,7 +219,7 @@ describe('useFileDrop', () => {
       expect(vi.getTimerCount()).toBe(1)
       unmount()
       expect(vi.getTimerCount()).toBe(0)
-      expect(dragTypes(remove.mock.calls).length).toBe(added.length)
+      expect(dragTypes(remove.mock.calls)).toHaveLength(added.length)
     })
   })
 })
