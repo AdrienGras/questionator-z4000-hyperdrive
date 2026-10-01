@@ -552,3 +552,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : le gestionnaire `drop` natif de `@codemirror/view` lit le fichier avec `FileReader` et n'appelle que `preventDefault()` ; l'événement remonte ensuite jusqu'à React.
 **Workaround** : `Prec.highest(EditorView.domEventHandlers({ drop: (e) => (e.dataTransfer?.files.length ?? 0) > 0 }))` dans `JsonEditor` : renvoyer `true` court-circuite l'insertion de CodeMirror sans arrêter la propagation vers React.
 **Référence** : `src/features/config-editor/components/json-editor.tsx`.
+
+## Un `LocaleProvider` imbriqué change `<html lang>` pour toute la page (2026-10-01)
+
+**Découvert** : revue finale de F26 (aperçu de l'éditeur dans la langue de la config).
+**Symptôme** : envelopper l'aperçu d'une config `en` dans un `LocaleProvider` sous une page `fr` traduit bien l'aperçu, mais `<html lang>` passe à `en` pour toute la page tant que l'aperçu est monté (lecteurs d'écran, césure, correcteur).
+**Cause** : un `LocaleProvider` imbriqué appelle `declare(locale)` auprès du provider racine, qui écrit sur `<html>` la dernière locale déclarée. C'est voulu pour une vue de session qui prend toute la page, pas pour un fragment.
+**Workaround** : `LocaleScope` (non déclarant) fixe la langue des descendants sans appeler `declare`, et l'appelant pose `lang` sur le conteneur local. Garder l'habillage dans la langue de l'interface (`ui` reçu en prop, `lang={ui.locale}` sur les intitulés).
+**Référence** : `src/lib/i18n/locale-context.tsx`, `src/features/config-editor/components/config-preview.tsx`.
