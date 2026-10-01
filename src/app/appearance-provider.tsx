@@ -20,6 +20,7 @@ import {
   type ColorMode,
   type EffectiveMode,
 } from '@/lib/appearance/color-mode'
+import { themeVariables } from '@/lib/appearance/theme-variables'
 
 const DARK_QUERY = '(prefers-color-scheme: dark)'
 
@@ -41,13 +42,9 @@ function useApplyAppearance(effective: EffectiveMode, tokens: ThemeTokens | unde
   useLayoutEffect(() => {
     const root = document.documentElement
     root.classList.toggle('dark', effective === 'dark')
-    const applied: string[] = []
-    for (const [token, value] of Object.entries(tokens ?? {})) {
-      if (value === undefined) continue
-      const name = `--${token}`
-      root.style.setProperty(name, value)
-      applied.push(name)
-    }
+    const variables = themeVariables(tokens ?? {})
+    const applied = Object.keys(variables)
+    for (const [name, value] of Object.entries(variables)) root.style.setProperty(name, value)
     return () => {
       for (const name of applied) root.style.removeProperty(name)
       root.classList.remove('dark')
