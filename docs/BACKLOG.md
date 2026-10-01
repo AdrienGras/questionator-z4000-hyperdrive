@@ -102,12 +102,9 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Éditeur de config
 
-- [ ] Autocomplétion et aide au survol depuis le JSON Schema (`codemirror-json-schema`), hors périmètre de F26.
-- [ ] Brouillon : écrit 300 ms après la frappe, rien à `pagehide` ; un rechargement dans ce délai perd la dernière frappe.
-- [ ] « Créer une session avec cette config » reste actif pendant le délai de validation (`pending`) : un texte devenu invalide peut être transmis ; la création le revalide et affiche l'erreur.
 - [ ] `locateIssue` : BOM en tête (colonne de `json_syntax` décalée d'un caractère en ligne 1), colonne au-delà de la ligne bornée à la fin du texte plutôt qu'à la fin de ligne ; pas de tests CRLF / BOM / index hors limites.
-- [ ] `JsonEditor` : `autocompletion()` sans source (à retirer ou alimenter), `aria-label` figé au montage, diagnostics envoyés deux fois au montage ; tests de `reveal` et des diagnostics après montage à ajouter.
-- [ ] Aperçu : `answer: ""` affiche un encart « Réponse attendue » vide ; énoncé très long sans `break-words`.
+- [ ] `JsonEditor` : `aria-label` figé au montage, diagnostics envoyés deux fois au montage ; tests de `reveal` et des diagnostics après montage à ajouter.
+- [ ] Aperçu : énoncé très long sans `break-words`.
 - [ ] Nom du fichier téléchargé (`configFileName`) : règle pure à sortir dans `domain/config/` avec ses tests (exam absent, titre vide).
 
 ## Statistiques

@@ -24,6 +24,23 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-01 — F24 mergé, F26 : éditeur de config (#60)
+
+**Dernière chose faite** : PR #70 (F24) mergée sur go de l'utilisateur. F26 implémenté sur `feat/f26-editeur-config` en subagent-driven development : neuf tâches revues (trois cycles de correction), une revue finale, une vague de corrections et sa re-revue. Livré :
+- route `#/editor` et carte d'accueil « Éditer une config » ;
+- `JsonEditor` CodeMirror 6, dans un chunk `codemirror` hors bundle initial ;
+- validation en direct, `locateIssue`, diagnostics et liste d'issues cliquable ;
+- brouillon `localStorage`, enregistré aussi au `pagehide` ;
+- aperçu au thème et à la langue de la config (`ThemeScope`, `LocaleScope` non déclarant, `ProjectionCanvas`, `previewSession`), marqué périmé si la config est invalide ;
+- téléchargement, et « Créer une session » par `lib/config-handoff.ts` + `setConfigText`.
+Vérifs : `pnpm check` (1327 tests), e2e 18/18 (6 pour l'éditeur), `check:bundle`, `check:precache` ; vérifié à l'écran en clair et en sombre à 1440 px.
+
+**Trucs en suspens** : PR F26 à ouvrir en brouillon, Sonar, « Ready for review », puis go de l'utilisateur. À vérifier à la main avant merge : le hors ligne (`pnpm build && pnpm preview`), et un navigateur en anglais avec l'exemple `fr` (l'écran final doit dire « Note »). BACKLOG « Éditeur de config » : `locateIssue` (BOM, colonne hors ligne), `configFileName` à sortir dans `domain/`, tests `JsonEditor`.
+
+**Prochaine chose à creuser** : la série V1 des retours de tests manuels est terminée (F19 à F26). Il restera à relire le BACKLOG avec l'utilisateur pour choisir la suite.
+
+**Notes pour future Claude** : un `LocaleProvider` imbriqué réécrit `<html lang>` pour toute la page (QUIRKS) ; pour une portée partielle, utiliser `LocaleScope` avec un `lang` local. CodeMirror ne rend que les lignes visibles : faire défiler la ligne (clic sur l'issue) avant d'asserter dans le DOM. Un fichier déposé sur CodeMirror est ignoré par l'éditeur (`Prec.highest` sur `drop`) : c'est la page qui remplace le texte. La session Claude a changé en cours de F26 : les commits portent l'identifiant de session courant.
+
 ## 2026-10-01 — F20 mergé, F24 : fond des blocs de code (#58)
 
 **Dernière chose faite** : PR #69 (F20) mergée sur go de l'utilisateur. F24 traité comme ticket borné (design court validé en conversation, pas de spec ni de plan), sur `feat/f24-blocs-de-code`. Dans `src/index.css`, le fond du thème Shiki est abandonné : blocs colorés et bruts partagent `--muted` avec une bordure `--border`. Le code en ligne n'a plus de backticks et prend un fond `--muted`. Nouvel e2e `e2e/code-style.spec.ts` (clair et sombre, `getComputedStyle`), test de `index.css` adapté dans `code-block.test.tsx`. D79, INDEX, BACKLOG et CONVENTIONS sont à jour. Vérifié à l'écran : vue examinateur clair et sombre, vue projetée sombre.
