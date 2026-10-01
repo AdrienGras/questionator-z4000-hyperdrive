@@ -1,4 +1,4 @@
-import { IconFileImport, IconPlus } from '@tabler/icons-react'
+import { IconFileCode, IconFileImport, IconPlus } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -74,6 +74,12 @@ export function ActionCards({ ui, storageAvailable, importDisabled, onImport }: 
         <Button variant="outline" disabled={importDisabled} onClick={onImport}>
           {text('home_import', {})}
         </Button>
+      </ActionCard>
+      <ActionCard icon={<IconFileCode className="size-8" />} title={text('home_editor_title', {})}>
+        <p className="text-muted-foreground">{text('home_editor_body', {})}</p>
+        <Link to="/editor" className={buttonVariants()}>
+          {text('home_editor_open', {})}
+        </Link>
       </ActionCard>
     </section>
   )

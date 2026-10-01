@@ -17,6 +17,9 @@ export type UiMessageParams = {
   home_config_schema_link: NoParams
   home_import_title: NoParams
   home_import_body: NoParams
+  home_editor_title: NoParams
+  home_editor_body: NoParams
+  home_editor_open: NoParams
   persistence_warning_label: NoParams
   persistence_warning: NoParams
   db_outdated: NoParams
@@ -327,6 +330,10 @@ const fr: Dictionary<UiMessageParams> = {
   home_import_title: () => 'Restaurer une session',
   home_import_body: () =>
     "Restaurez une session à partir d'un fichier .json créé par « Exporter un backup ». Vous pouvez aussi déposer le fichier n'importe où sur la page.",
+  home_editor_title: () => 'Éditer une config',
+  home_editor_body: () =>
+    "Écrivez ou corrigez un fichier de configuration : les erreurs sont signalées en direct et les questions affichées telles qu'elles seront projetées.",
+  home_editor_open: () => "Ouvrir l'éditeur",
   persistence_warning_label: () => 'Stockage non garanti',
   persistence_warning: () =>
     "Le navigateur n'a pas garanti la conservation des données : il peut effacer vos sessions s'il manque d'espace. Exportez régulièrement un backup.",
@@ -602,6 +609,10 @@ const en: Dictionary<UiMessageParams> = {
   home_import_title: () => 'Restore a session',
   home_import_body: () =>
     'Restore a session from a .json file made with “Export a backup”. You can also drop the file anywhere on the page.',
+  home_editor_title: () => 'Edit a config',
+  home_editor_body: () =>
+    'Write or fix a configuration file: errors are flagged as you type and questions are shown as they will be projected.',
+  home_editor_open: () => 'Open the editor',
   persistence_warning_label: () => 'Storage not guaranteed',
   persistence_warning: () =>
     'The browser did not guarantee data retention: it may erase your sessions when space runs low. Export a backup regularly.',
