@@ -1,10 +1,10 @@
 import type { Session, Student } from '@/domain/session/types'
-import { db } from '@/lib/db/db'
+import { getHealthySession } from './healthy-session'
 
-/** Session `id` relue en base (fake-indexeddb) ; lève si elle n'y est pas. */
+/** Session `id` relue en base, validée et saine (F31) ; lève si elle est absente ou endommagée. */
 export async function storedSession(id = 'session-1'): Promise<Session> {
-  const session = await db.sessions.get(id)
-  if (session === undefined) throw new Error(`session ${id} absente`)
+  const session = await getHealthySession(id)
+  if (session === null) throw new Error(`session ${id} absente de la base`)
   return session
 }
 

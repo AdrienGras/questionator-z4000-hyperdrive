@@ -293,6 +293,9 @@ test('pointeur masqué après 3 s d’inactivité, rendu au premier mouvement', 
   await seed(makeStudent())
   renderAt('/present/session-1')
   const main = (await screen.findByText(/Alice/)).closest('main')
+  // Le délai court depuis le montage, avant les données : sous charge, le temps réel passé à
+  // attendre l'affichage peut déjà l'avoir épuisé. Un mouvement le relance à zéro.
+  fireEvent.mouseMove(window)
   expect(main).not.toHaveClass('cursor-none')
 
   act(() => {

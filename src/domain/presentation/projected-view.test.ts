@@ -260,6 +260,8 @@ describe('toProjectedView', () => {
     // Montant d'ajustement et date d'édition improbables : ne doivent jamais apparaître tels quels.
     const editedAt = '1999-12-31T23:59:59.999Z'
     const adjustmentValue = 0.37
+    /** `adjustmentValue` écrit dans un texte, point ou virgule, non collé à d'autres chiffres. */
+    const ADJUSTMENT_IN_TEXT = /(^|[^\d])0[.,]37(?!\d)/
     const other = makeStudent([], {
       id: 'student-secret-2',
       firstName: 'FUITE-PRENOM',
@@ -284,8 +286,9 @@ describe('toProjectedView', () => {
 
     /**
      * Marqueurs et identifiants retrouvés dans `view` (attendu : aucun). Les chaînes interdites
-     * sont cherchées dans chaque chaîne ; le montant d'ajustement, seulement en nombre exact : une
-     * note qui contient « 0.37 » en sous-chaîne (10,37) n'est pas une fuite.
+     * sont cherchées dans chaque chaîne. Le montant d'ajustement, en nombre exact parmi les
+     * nombres, et dans les chaînes comme nombre isolé (« +0,37 », « 0.37 ») : une note qui le
+     * contient en sous-chaîne (10,37) n'est pas une fuite.
      */
     function leaksIn(view: unknown, session: Session): string[] {
       const forbidden = [
@@ -298,7 +301,10 @@ describe('toProjectedView', () => {
       const leaves = leavesOf(view)
       const strings = leaves.filter((leaf): leaf is string => typeof leaf === 'string')
       const found = forbidden.filter((value) => strings.some((leaf) => leaf.includes(value)))
-      return leaves.includes(adjustmentValue) ? [...found, String(adjustmentValue)] : found
+      const amountInText = strings.some((leaf) => ADJUSTMENT_IN_TEXT.test(leaf))
+      return leaves.includes(adjustmentValue) || amountInText
+        ? [...found, String(adjustmentValue)]
+        : found
     }
 
     function leaks(session: Session): string[] {
@@ -340,6 +346,10 @@ describe('toProjectedView', () => {
       ])
       // Exact, pas en sous-chaîne : une note de 10,37 n'est pas le montant d'ajustement.
       expect(leaksIn({ ...view, injected: { points: 10.37 } }, session)).toEqual([])
+      for (const text of ['Ajustement : +0,37', '0.37']) {
+        expect(leaksIn({ ...view, injected: { text } }, session)).toEqual(['0.37'])
+      }
+      expect(leaksIn({ ...view, injected: { text: 'Note : 10,37 / 20' } }, session)).toEqual([])
     })
   })
 })
