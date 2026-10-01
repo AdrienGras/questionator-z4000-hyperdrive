@@ -10,11 +10,14 @@ import { renderAt } from '@/testing/render-at'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
 
-/** Catégorie `a` à 3 questions, barème 0-3 : la fixture par défaut n'a qu'une question. */
+/**
+ * Catégorie `a` à 3 questions (la fixture par défaut n'en a qu'une) ; le barème contient les notes
+ * brutes des tests (13,5 et 20) : une session stockée hors barème est lue comme endommagée (F31).
+ */
 const category: NormalizedCategory = {
   id: 'a',
   label: 'A',
-  scale: [0, 1, 2, 3],
+  scale: [0, 1, 2, 3, 13.5, 20],
   order: 1,
   questions: ['a-1', 'a-2', 'a-3'].map((id) => ({
     id,

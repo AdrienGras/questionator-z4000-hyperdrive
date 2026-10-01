@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { validateConfig } from '@/domain/config/validate'
-import { getSession } from '@/lib/db/sessions'
+import { getHealthySession } from '@/testing/healthy-session'
 import { db, type DbStatus } from '@/lib/db/db'
 import { minimalConfig } from '@/testing/config-fixtures'
 import { useCreateForm } from './use-create-form'
@@ -239,7 +239,7 @@ describe('useCreateForm', () => {
       id = await result.current.submit()
     })
     if (id === undefined) throw new Error('aucune session créée')
-    const session = await getSession(id)
+    const session = await getHealthySession(id)
     expect(session?.name).toBe('Oral PHP')
     expect(session?.examiner).toBe('M. Dupont')
     const expected = validateConfig(JSON.stringify(minimalConfig()), { cssSupports: () => true })

@@ -32,6 +32,8 @@ export function PresentPage() {
     )
   if (view === undefined) return <SessionFallback ui={ui} kind="loading" />
   if (view === null) return <SessionFallback ui={ui} kind="not-found" />
+  // Provisoire (F31) : la variante projetée de l'écran « session endommagée » remplace cette branche.
+  if (view === 'damaged') return <SessionFallback ui={ui} kind="not-found" />
   return (
     <SessionAppearance sessionId={sessionId} view="present" config={view.appearance}>
       <main className={cn('relative', idle && 'cursor-none')}>

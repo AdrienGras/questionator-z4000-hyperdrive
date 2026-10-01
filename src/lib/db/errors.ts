@@ -19,3 +19,14 @@ export class SessionExistsError extends Error {
     this.id = id
   }
 }
+
+/** La session lue ne passe pas la validation : aucune écriture n'est faite (F31). */
+export class SessionDamagedError extends Error {
+  readonly id: string
+
+  constructor(id: string) {
+    super(`Session « ${id} » endommagée : écriture refusée.`)
+    this.name = 'SessionDamagedError'
+    this.id = id
+  }
+}

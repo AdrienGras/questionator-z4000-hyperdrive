@@ -133,12 +133,14 @@ test('question passée : motifs « Hors programme ×2, sans motif ×1 »', async
   expect(rowCells(table, 'Question A1')).toEqual(['A', '3', 'Hors programme ×2, sans motif ×1'])
 })
 
-test("question tirée d'id inconnu : l'id s'affiche à la place du titre", async () => {
+// L'id inconnu affiché à la place du titre est couvert par `domain/stats/questions.test.ts`.
+test("question tirée d'id inconnu : session endommagée, statistiques non affichées (F31)", async () => {
   await putSession(sessionWith([[attemptOf('a', 'ghost-question', 1)]]))
   renderAt('/session/session-1/stats')
 
-  const table = await screen.findByRole('table', { name: 'Questions les plus tirées' })
-  expect(rowCells(table, 'ghost-question')).toEqual(['A', '1'])
+  // Provisoire : la Tâche 5 de F31 remplace ce repli par l'écran « session endommagée ».
+  expect(await screen.findByRole('heading', { name: 'Session introuvable' })).toBeInTheDocument()
+  expect(screen.queryByRole('table', { name: 'Questions les plus tirées' })).not.toBeInTheDocument()
 })
 
 test('locale « en » : titres des blocs en anglais', async () => {

@@ -75,6 +75,7 @@ const SAMPLE: UiMessageParams = {
   import_load_error: {},
   import_conflict_title: {},
   import_conflict_body: { existing: 'Ada', date: '01/01/2026', imported: 'Bob' },
+  import_conflict_damaged_body: { existing: 'Ada', imported: 'Bob' },
   import_replace: {},
   create_title: {},
   create_students_label: {},

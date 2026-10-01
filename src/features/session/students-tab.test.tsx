@@ -215,8 +215,19 @@ test('notes : à passer « brute · — », terminé avec ajustement, absent', a
   expect(rowOf('Cha')).not.toHaveTextContent('·')
 })
 
-test('activeStudentId orphelin : aucune ligne en aria-current', async () => {
-  await mount([student('s-a', 'Aba', 1), student('s-b', 'Bec', 2)], { activeStudentId: 'inconnu' })
+// Rendu direct : une session stockée avec un étudiant actif inconnu est lue comme endommagée (F31).
+test('activeStudentId orphelin : aucune ligne en aria-current', () => {
+  const students = [student('s-a', 'Aba', 1), student('s-b', 'Bec', 2)]
+  render(
+    <StudentsTab
+      ui={makeUi()}
+      session={makeSession({ config, students })}
+      activeStudentId="inconnu"
+      disabled={false}
+      onSelect={vi.fn<(id: string) => void>()}
+      onAdd={vi.fn<() => Promise<boolean>>()}
+    />,
+  )
 
   for (const button of buttons()) expect(button).not.toHaveAttribute('aria-current')
 })

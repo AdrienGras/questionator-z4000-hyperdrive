@@ -2,6 +2,7 @@ import { getRouteApi } from '@tanstack/react-router'
 import { DbStatusBanner } from '@/components/db-status-banner'
 import { SessionAppearance } from '@/components/session-appearance'
 import { SessionFallback } from '@/components/session-fallback'
+import { isDamaged } from '@/lib/db/damaged-session'
 import { useDbStatus, useSession } from '@/lib/db/hooks'
 import { useUi } from '@/lib/i18n/use-ui'
 import { StatsView } from '@/features/stats/components/stats-view'
@@ -26,6 +27,8 @@ export function StatsPage() {
     )
   if (session === undefined) return <SessionFallback ui={ui} kind="loading" />
   if (session === null) return <SessionFallback ui={ui} kind="not-found" />
+  // Provisoire (F31) : l'écran « session endommagée » remplace cette branche.
+  if (isDamaged(session)) return <SessionFallback ui={ui} kind="not-found" />
   return (
     <SessionAppearance sessionId={session.id} view="examiner" config={session.config}>
       <StatsView session={session} />

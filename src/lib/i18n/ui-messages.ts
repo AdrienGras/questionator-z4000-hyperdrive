@@ -74,6 +74,7 @@ export type UiMessageParams = {
   import_load_error: NoParams
   import_conflict_title: NoParams
   import_conflict_body: { existing: string; date: string; imported: string }
+  import_conflict_damaged_body: { existing: string; imported: string }
   import_replace: NoParams
   create_title: NoParams
   create_students_label: NoParams
@@ -395,6 +396,8 @@ const fr: Dictionary<UiMessageParams> = {
   import_conflict_title: () => 'Session déjà présente',
   import_conflict_body: ({ existing, date, imported }) =>
     `Une session « ${existing} » (modifiée le ${date}) porte le même identifiant. La remplacer par « ${imported} » ?`,
+  import_conflict_damaged_body: ({ existing, imported }) =>
+    `Une session endommagée « ${existing} » porte le même identifiant. La remplacer par « ${imported} » ?`,
   import_replace: () => 'Remplacer',
   create_title: () => 'Nouvelle session',
   create_students_label: () => "Liste d'étudiants (CSV)",
@@ -673,6 +676,8 @@ const en: Dictionary<UiMessageParams> = {
   import_conflict_title: () => 'Session already exists',
   import_conflict_body: ({ existing, date, imported }) =>
     `A session "${existing}" (updated ${date}) has the same identifier. Replace it with "${imported}"?`,
+  import_conflict_damaged_body: ({ existing, imported }) =>
+    `A damaged session "${existing}" has the same identifier. Replace it with "${imported}"?`,
   import_replace: () => 'Replace',
   create_title: () => 'New session',
   create_students_label: () => 'Student list (CSV)',

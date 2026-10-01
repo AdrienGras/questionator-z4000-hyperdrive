@@ -2,7 +2,10 @@ import 'fake-indexeddb/auto'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { Dexie } from 'dexie'
 import { beforeEach, describe, expect, test } from 'vitest'
+import { healthy } from '@/testing/healthy-session'
 import { makeSession } from '@/testing/session-fixtures'
+import { makeStudent } from '@/testing/student-fixtures'
+import { isDamaged } from './damaged-session'
 import { createDb, db } from './db'
 import { useDbStatus, useSession, useSessions } from './hooks'
 import { createSession, deleteSession, updateSession } from './sessions'
@@ -28,13 +31,26 @@ describe('useSession', () => {
     await createSession(makeSession())
     const { result } = renderHook(() => useSession('session-1'))
     expect(result.current).toBeUndefined()
-    await waitFor(() => expect(result.current?.name).toBe('Oral de test'))
+    await waitFor(() => expect(healthy(result.current)?.name).toBe('Oral de test'))
 
     await act(() => updateSession('session-1', (s) => ({ ...s, name: 'Renommée' })))
-    await waitFor(() => expect(result.current?.name).toBe('Renommée'))
+    await waitFor(() => expect(healthy(result.current)?.name).toBe('Renommée'))
 
     await act(() => deleteSession('session-1'))
     await waitFor(() => expect(result.current).toBeNull())
+  })
+
+  test('forme endommagée, et bascule de saine à endommagée après corruption', async () => {
+    await createSession(makeSession())
+    const { result } = renderHook(() => useSession('session-1'))
+    await waitFor(() => expect(result.current?.id).toBe('session-1'))
+    expect(result.current && isDamaged(result.current)).toBe(false)
+
+    const corrupted = makeSession({ students: [makeStudent([1])] })
+    delete corrupted.students[0]!.attempts[0]!.score
+    await act(() => db.sessions.put(corrupted))
+    await waitFor(() => expect(result.current && isDamaged(result.current)).toBe(true))
+    expect(result.current).toMatchObject({ id: 'session-1', damaged: true, raw: corrupted })
   })
 
   test('null pour une session absente', async () => {
@@ -48,10 +64,10 @@ describe('useSession', () => {
     const { result, rerender } = renderHook(({ id }) => useSession(id), {
       initialProps: { id: 'a' },
     })
-    await waitFor(() => expect(result.current?.name).toBe('Session A'))
+    await waitFor(() => expect(healthy(result.current)?.name).toBe('Session A'))
     rerender({ id: 'b' })
-    expect(result.current?.name).not.toBe('Session A')
-    await waitFor(() => expect(result.current?.name).toBe('Session B'))
+    expect(healthy(result.current)?.name).not.toBe('Session A')
+    await waitFor(() => expect(healthy(result.current)?.name).toBe('Session B'))
   })
 })
 

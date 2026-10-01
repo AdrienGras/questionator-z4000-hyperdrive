@@ -2,12 +2,14 @@ import 'fake-indexeddb/auto'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { serializeBackup } from '@/domain/backup/serialize'
+import { isDamaged } from '@/lib/db/damaged-session'
 import { getSession, putSession } from '@/lib/db/sessions'
 import type { PersistenceStatus } from '@/lib/db/persistence'
 import { db, type DbStatus } from '@/lib/db/db'
 import type { Session } from '@/domain/session/types'
 import { renderAt } from '@/testing/render-at'
 import { makeSession } from '@/testing/session-fixtures'
+import { makeStudent } from '@/testing/student-fixtures'
 
 const dbState = vi.hoisted((): { status: DbStatus } => ({ status: 'open' }))
 const persistence = vi.hoisted((): { status: PersistenceStatus | undefined } => ({
@@ -67,6 +69,7 @@ function drop(file: File) {
 async function storedSession(id = 'session-1') {
   const session = await getSession(id)
   if (!session) throw new Error(`${id} absente de la base`)
+  if (isDamaged(session)) throw new Error(`${id} endommagée`)
   return session
 }
 
@@ -146,6 +149,18 @@ describe('import de backup', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: 'Remplacer' }))
     await waitFor(async () => expect((await storedSession()).name).toBe('Nouvelle'))
     await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
+  })
+
+  test('conflit sur une session endommagée : remplacer écrit le backup (réparation)', async () => {
+    const damaged = makeSession({ name: 'Oral cassé', students: [makeStudent([1])] })
+    delete damaged.students[0]!.attempts[0]!.score
+    await db.sessions.put(damaged)
+    const input = await renderImport()
+    pick(input, sessionFile(makeSession({ name: 'Réparée' })))
+    const dialog = await screen.findByRole('alertdialog')
+    expect(dialog).toHaveTextContent(/session endommagée « Oral cassé ».*« Réparée »/)
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Remplacer' }))
+    await waitFor(async () => expect((await storedSession()).name).toBe('Réparée'))
   })
 
   test('conflit puis annuler : session existante inchangée', async () => {

@@ -10,13 +10,16 @@ import { renderAt } from '@/testing/render-at'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, makeStudent, type AttemptSpec } from '@/testing/student-fixtures'
 
-/** Catégorie `a` à 3 questions : la fixture par défaut n'en a qu'une, `attempt-2` n'y aurait rien. */
+/**
+ * Catégorie `a` à 4 questions : la fixture par défaut n'en a qu'une, `attempt-2` n'y aurait rien ;
+ * deux passes sur deux questions par étudiant en demandent quatre (F31).
+ */
 const category: NormalizedCategory = {
   id: 'a',
   label: 'A',
   scale: [0, 1, 2],
   order: 1,
-  questions: ['a-1', 'a-2', 'a-3'].map((id) => ({ id, title: id, tags: [], prompt: id })),
+  questions: ['a-1', 'a-2', 'a-3', 'a-4'].map((id) => ({ id, title: id, tags: [], prompt: id })),
 }
 
 beforeEach(async () => {

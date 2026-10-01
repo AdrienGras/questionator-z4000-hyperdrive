@@ -102,17 +102,13 @@ test("en-tête, liste des étudiants et changement d'étudiant actif", async () 
   expect(updated?.activeStudentId).toBe('student-2')
 })
 
-test('activeStudentId inconnu affiche « Aucun étudiant sélectionné » sans planter', async () => {
+test('activeStudentId inconnu : session endommagée, vue examinateur non ouverte (F31)', async () => {
   const config = makeConfig({ questionsPerStudent: 3 })
   await putSession(sessionWith(config, twoStudents(), 'inconnu'))
   renderAt('/session/session-1')
 
-  expect(
-    await screen.findByRole('heading', { name: 'Aucun étudiant sélectionné' }),
-  ).toBeInTheDocument()
-  expect(screen.queryByRole('combobox', { name: 'Étudiant' })).not.toBeInTheDocument()
-  await studentButton('Durand Alice')
-  expectNoCurrentStudent()
+  // Provisoire : la Tâche 5 de F31 remplace ce repli par l'écran « session endommagée ».
+  expect(await screen.findByRole('heading', { name: 'Session introuvable' })).toBeInTheDocument()
   expect(screen.queryByText(/^Question /)).not.toBeInTheDocument()
 })
 
@@ -197,7 +193,8 @@ test('onglet « Étudiants » mémorisé, état absent : ouvert sur « Étudiant
 })
 
 test('étudiant ayant terminé son passage affiche l’écran final', async () => {
-  const config = makeConfig({ questionsPerStudent: 3 })
+  // Barème décimal : 0,5 doit y figurer, sinon la session stockée est endommagée (F31).
+  const config = { ...makeConfig({ questionsPerStudent: 3 }), categories: [answeredCategory] }
   const [alice, bob] = twoStudents([1, 1, 0.5])
   if (alice === undefined || bob === undefined) throw new Error('fixture incomplète')
   // Note déjà révélée : sinon la popup de fin de passage s'ouvre par-dessus l'écran (D66).

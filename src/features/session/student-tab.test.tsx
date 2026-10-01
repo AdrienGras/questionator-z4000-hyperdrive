@@ -307,7 +307,9 @@ test('échec d’écriture sur « Déclarer absent » : dialogue ouvert avec le 
 })
 
 test('dialogue d’absence ouvert pour Alice, Bob devient actif ailleurs : c’est Alice qui est absente', async () => {
-  await mount([makeStudent([2, 1]), { ...bob(), attempts: makeStudent([1]).attempts }])
+  // Ids d'attempts propres à Bob : un id en double rendrait la session endommagée (F31).
+  const bobAttempts = makeStudent([1]).attempts.map((attempt) => ({ ...attempt, id: 'bob-1' }))
+  await mount([makeStudent([2, 1]), { ...bob(), attempts: bobAttempts }])
   await grid()
 
   fireEvent.click(absentBox())
