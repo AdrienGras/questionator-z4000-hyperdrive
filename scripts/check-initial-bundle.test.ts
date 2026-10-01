@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   BUNDLE_TARGETS,
+  HOME_ROUTE_KEY,
   checkTargets,
   findInitialLeaks,
   findVacuityProblems,
@@ -22,6 +23,15 @@ import {
 const RECHARTS_KEY = 'node_modules/.pnpm/recharts@3.8.0/node_modules/recharts/es6/index.js'
 
 describe('findInitialLeaks', () => {
+  it('suit aussi la route d’accueil, chargée aussitôt malgré son découpage paresseux', () => {
+    const manifest: Record<string, ManifestChunk> = {
+      'index.html': { file: 'assets/index.js', isEntry: true, dynamicImports: [HOME_ROUTE_KEY] },
+      [HOME_ROUTE_KEY]: { file: 'assets/routes.js', isDynamicEntry: true, imports: ['_xlsx-a.js'] },
+      '_xlsx-a.js': { file: 'assets/xlsx-a.js' },
+    }
+    expect(findInitialLeaks(manifest, XLSX_FORBIDDEN)).toEqual(['_xlsx-a.js'])
+  })
+
   it('signale un module recharts importé statiquement par l’entrée', () => {
     const manifest: Record<string, ManifestChunk> = {
       'index.html': { file: 'assets/index.js', isEntry: true, imports: [RECHARTS_KEY] },

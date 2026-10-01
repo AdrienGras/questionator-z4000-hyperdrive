@@ -648,3 +648,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : `doHover` de `vscode-json-languageservice` n'utilise que `title`, `markdownDescription` (à défaut `description`) et les descriptions d'enum, jamais `default`.
 **Workaround** : `buildConfigJsonSchema` recopie le défaut dans `markdownDescription` (`description` + « Défaut : `…` ») sur chaque nœud décrit, après `toJSONSchema` et après l'`override` d'icône. `description` reste brut, l'éditeur de l'app s'en sert.
 **Référence** : `src/domain/config/json-schema.ts`, `src/domain/config/json-schema.test.ts`, D87.
+
+## `check:bundle` ne voit pas l'accueil : la route `/` est un chunk paresseux (2026-10-01)
+
+**Découvert** : #86 (budget du bundle), preuve d'acceptation.
+**Symptôme** : `import * as Recharts from 'recharts'` ajouté dans `src/features/home/home-page.tsx` : `pnpm check:bundle` affiche toujours « Bundle initial sans recharts… », alors que l'accueil charge 99 Ko gzip de plus.
+**Cause** : `autoCodeSplitting` de TanStack découpe le composant de chaque route, accueil compris (`src/routes/index.tsx?tsr-split=component`, entrée dynamique). La fermeture statique depuis `index.html` s'arrête avant lui.
+**Workaround** : `check:bundle` et `check:budget` partent tous deux de l'entrée **et** de la route `/` (`HOME_ROUTE_KEY` dans `check-initial-bundle.ts`, D88).
+**Référence** : `scripts/check-bundle-budget.ts`, `scripts/check-initial-bundle.ts`, D88.

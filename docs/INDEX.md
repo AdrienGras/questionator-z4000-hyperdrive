@@ -53,5 +53,6 @@ Voir aussi : `ENVIRONMENT.md` · `DECISIONS.md` · `QUIRKS.md` · `BACKLOG.md` �
 |---|---|---|
 | `.claude/scripts/gh-ticket.sh "<titre>" <corps.md> <P0-P2> <XS-XL> [n° bloquants…]` | 2026-09-24 | Crée une issue `feature`, la range dans le projet n°3 (Status Ready, Priority, Size) et pose les relations « blocked by » |
 | `pnpm check:precache` (`scripts/check-precache.ts`) | 2026-09-30 | Après `pnpm build` : échoue si un fichier de `dist/` manque au manifeste de pré-cache de `dist/sw.js` (garde de non-vacuité) ; lancé en CI après `check:bundle` |
+| `pnpm check:budget` (`scripts/check-bundle-budget.ts`) | 2026-10-01 | Après `pnpm build` : budgets gzip (D88) du premier affichage de l'accueil (≤ 275 Ko, entrée + route `/`) et de chaque chunk (≤ 135 Ko, hors `icons-*` et grammaires/thèmes Shiki), marqueur `IconBrandPhp` confiné aux icônes ; lancé en CI après `check:precache` (#86) |
 | `pnpm icons` (`scripts/render-icons.ts`) | 2026-09-30 | Régénère les PNG de `public/icons/` depuis `icon.svg` via Chromium de Playwright ; à la main, pas en CI |
 | `.claude/scripts/sonar-check.sh [--pr <n>|--branch <b>] [--wait]` | 2026-09-24 | Affiche quality gate, issues ouvertes et hotspots SonarQube Cloud ; code 0 si tout est propre |

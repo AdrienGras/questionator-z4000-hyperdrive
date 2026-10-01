@@ -1324,3 +1324,24 @@ autre encodage 8 bits.
 **Pourquoi** : public francophone, comme `PRODUCT.md`, et un JSON Schema ne porte qu'une langue. Le schéma Zod reste la source unique : le survol ne peut pas diverger de la normalisation. 64 jetons de thème : un texte par jeton n'apporterait rien de plus que son nom. Sans l'`override` corrigé, l'aide disparaît sur `icon`. `codemirror-json-schema` 0.8.1 n'est plus maintenu depuis avril 2025 et tire shiki v1 (doublon de notre v4), `markdown-it`, `yaml`, `json-schema-library`. Pas de réseau ni d'état de chargement : Zod et la liste d'icônes sont déjà chargés par la validation en direct. `vscode-json-languageservice` n'affiche que `title`, `markdownDescription` (ou `description`) et les descriptions d'enum : sans `markdownDescription`, le défaut promis par le README n'apparaîtrait pas dans VS Code.
 
 **Reporté dans** : `PRODUCT.md` F26 et §6.2 ; `README.md`. Impacte F26.
+
+## D88 — #86 : budgets de taille du build en gzip, sur le premier affichage de l'accueil et par chunk (2026-10-01)
+
+**Question** : `check:bundle` garantit que Recharts, xlsx, Shiki et CodeMirror restent hors du bundle initial, mais rien ne surveille les tailles : `chunkSizeWarningLimit` est calé sur le chunk des icônes (D37) et ne voit plus le reste. Que mesurer, sur quel périmètre, avec quelle marge ?
+
+**Décision** :
+- `pnpm check:budget` (`scripts/check-bundle-budget.ts`), après `pnpm build`, en CI après `check:precache`. Lit le manifeste Vite, réutilise `manifestSchema` et `staticClosure` de `check-initial-bundle.ts`.
+- Mesure **gzip** (`zlib`, déterministe), ce qui transite réellement. Marge d'environ **15 %** au-dessus des tailles du 2026-10-01 (choix de l'utilisateur pour les deux).
+- **Premier affichage de l'accueil ≤ 275 Ko** (mesuré 238,5 Ko) : JS et CSS atteints statiquement depuis l'entrée **et** depuis la route `/` (`src/routes/index.tsx?tsr-split=component`). La route est découpée paresseusement par TanStack mais chargée aussitôt ; sans elle, un import lourd dans l'accueil échappait à la fois au budget et à `check:bundle` (vérifié : Recharts importé dans `home-page.tsx` passait `check:bundle` ; `check:budget` le refuse à +98,9 Ko).
+- **Chaque chunk JS ≤ 135 Ko** (plus gros mesuré : `codemirror`, 116 Ko), sauf `icons-*` (D37) et les grammaires et thèmes Shiki (`@shikijs/langs|themes`, chargés un par un à la demande, jusqu'à 194 Ko pour `emacs-lisp`).
+- `IconBrandPhp` (marqueur des icônes Tabler) n'apparaît dans aucun autre chunk.
+- Gardes de non-vacuité : une entrée, la route `/`, un chunk `icons-*` portant le marqueur, au moins une grammaire ou un thème exemptés.
+- Message d'erreur : fichier, taille, budget et écart (`… : 373,9 Ko gzip, budget 275,0 Ko (+98,9 Ko)`) ; en succès, une ligne avec les tailles et budgets.
+- `check:bundle` part lui aussi de la route `/` en plus de l'entrée (`HOME_ROUTE_KEY`, partagé) : une bibliothèque confinée et légère (xlsx, 19 Ko) importée dans l'accueil tiendrait dans la marge du budget.
+- Un fichier n'est exempté du budget par chunk que si **toutes** ses clés du manifeste sont des grammaires ou thèmes Shiki ; l'écart affiché est arrondi au dixième de Ko supérieur.
+- Polices non comptées : seul le sous-ensemble `latin` de Geist se charge (`unicode-range`, ~29 Ko) ; le budget porte sur JS et CSS.
+- Liste blanche du groupe `vendor` relue : rien à ajouter tant que `check:bundle` reste vert.
+
+**Pourquoi** : le gzip est ce que paie l'examinateur au premier chargement ; une marge de 15 % laisse grandir l'app et attrape une bibliothèque lourde. Les grammaires Shiki imposeraient un budget par chunk de ~200 Ko qui ne surveillerait plus rien.
+
+**Reporté dans** : `docs/ENVIRONMENT.md` (commandes), `docs/INDEX.md`, `docs/BACKLOG.md`, `docs/QUIRKS.md`.

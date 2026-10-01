@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-01 — #86 : budgets de taille du build
+
+**Dernière chose faite** : PR #98 (F32) mergée sur go de l'utilisateur. #86 implémenté sur `chore/86-budget-bundle` (D88), ticket borné, design validé en session : `pnpm check:budget` (`scripts/check-bundle-budget.ts`, en CI après `check:precache`) mesure en gzip le premier affichage de l'accueil (entrée + route `/`, ≤ 275 Ko, mesuré 238,5 Ko) et chaque chunk (≤ 135 Ko, hors `icons-*` et grammaires/thèmes Shiki), vérifie que `IconBrandPhp` reste dans le chunk des icônes, avec des gardes de non-vacuité. Choix de l'utilisateur : gzip, marge ~15 %. Écart au design annoncé, signalé : la route `/` est comptée avec l'entrée, car elle est découpée paresseusement et `check:bundle` ne la voit pas (QUIRKS). Preuve : Recharts importé dans l'accueil passait `check:bundle` et `check:budget` le refuse (+98,9 Ko) ; après la revue de branche, `check:bundle` part aussi de la route `/` et le refuse à son tour.
+
+**Trucs en suspens** : PR à ouvrir en brouillon, Sonar, puis « Ready for review » ; ne pas merger sans le go de l'utilisateur.
+
+**Prochaine chose à creuser** : après le merge, #87 (dette de tests et de code : beaucoup de mineurs rangés là, dont les tests instables), puis #88 (outillage) ; #85 (Node 26) à partir du 2026-10-28.
+
+**Notes pour future Claude** : relever un budget se fait dans les constantes de `scripts/check-bundle-budget.ts`, avec la mesure du jour en commentaire ; jamais pour absorber une fuite. `check:bundle` part maintenant aussi de la route `/` (`HOME_ROUTE_KEY`), comme le budget : une route découpée paresseusement mais chargée d'office se traite comme une entrée.
+
 ## 2026-10-01 — F32 (#80) : aide à la saisie depuis le JSON Schema
 
 **Dernière chose faite** : PR #97 (F36) mergée sur go de l'utilisateur. F32 implémentée sur `feat/80-aide-saisie-schema` (D87), avec une spec et un plan courts (`docs/superpowers/`), exécutés par subagents avec une revue par tâche puis une revue finale de branche :
