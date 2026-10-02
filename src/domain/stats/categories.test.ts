@@ -42,6 +42,17 @@ describe('computeCategories', () => {
     ])
   })
 
+  it('donne un taux négatif sur un barème à valeurs négatives (points ÷ maximum)', () => {
+    const config = minimalConfig()
+    config.categories = [
+      { id: 'a', label: 'A', scale: [-2, -1, 1], questions: [{ id: 'a-1', prompt: 'A1' }] },
+    ]
+    const session = sessionWith([[attemptOf('a', 'a-1', -2), attemptOf('a', 'a-1', 1)]], config)
+    expect(computeCategories(session)).toEqual([
+      { categoryId: 'a', choices: 2, scored: 2, successRate: -0.5 },
+    ])
+  })
+
   it('ignore un absent aux attempts résiduels', () => {
     const session = sessionWith([[attemptOf('a', 'a-1', 2)]], minimalConfig(), () => ({
       absent: true,

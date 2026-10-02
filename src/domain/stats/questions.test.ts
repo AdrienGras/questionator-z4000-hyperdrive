@@ -98,6 +98,32 @@ describe('computeSkipped', () => {
     ])
   })
 
+  it('départage par ordre alphabétique seul les motifs hors config à nombre égal', () => {
+    const session = sessionWith(
+      [
+        [
+          attemptOf('a', 'a-1', { skipped: 'Zèbre' }),
+          attemptOf('a', 'a-1', { skipped: 'Malade' }),
+          attemptOf('a', 'a-1', { skipped: 'Absent du cours' }),
+        ],
+      ],
+      manyQuestions(),
+    )
+    const [entry] = computeSkipped(session)
+    expect(entry?.reasons.map((r) => r.reason)).toEqual(['Absent du cours', 'Malade', 'Zèbre'])
+  })
+
+  it('garde une question inconnue après les connues à total égal', () => {
+    const session = sessionWith(
+      [[attemptOf('a', 'fantome', { skipped: 'x' }), attemptOf('a', 'a-2', { skipped: 'x' })]],
+      manyQuestions(),
+    )
+    expect(computeSkipped(session)).toEqual([
+      { categoryId: 'a', questionId: 'a-2', total: 1, reasons: [{ reason: 'x', count: 1 }] },
+      { categoryId: 'a', questionId: 'fantome', total: 1, reasons: [{ reason: 'x', count: 1 }] },
+    ])
+  })
+
   it('trie les questions par total décroissant puis ordre de la config', () => {
     const session = sessionWith(
       [

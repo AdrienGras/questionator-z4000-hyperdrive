@@ -72,6 +72,12 @@ describe('computeHistogram', () => {
     expect(at(bins, 1).count).toBe(1)
   })
 
+  it('/20 : 0,999 reste dans la barre [0 ; 1[, 1 passe dans [1 ; 2[', () => {
+    const bins = computeHistogram([done(999), done(1000)], config20)
+    expect(at(bins, 0).count).toBe(1)
+    expect(at(bins, 1).count).toBe(1)
+  })
+
   it('/100 : 20 barres de largeur 5, 99,999 et 100 dans la dernière', () => {
     const config = makeConfig({ questionsPerStudent: 1, maxRawScore: 100, finalScale: 100 })
     const bins = computeHistogram(

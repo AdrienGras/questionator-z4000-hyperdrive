@@ -118,6 +118,26 @@ test('stratégie à deux catégories : pastilles séparées dans le nom accessib
   expect(within(table).getByRole('rowheader', { name: 'A ×1, B ×1' })).toBeInTheDocument()
 })
 
+test('tags : une ligne par tag avec notés et taux de réussite', async () => {
+  const config = minimalConfig()
+  config.categories = [
+    {
+      id: 'a',
+      label: 'A',
+      scale: [0, 1, 2],
+      questions: [{ id: 'a-1', prompt: 'Question A1', tags: ['boucles', 'tableaux'] }],
+    },
+  ]
+  await putSession(sessionWith([[attemptOf('a', 'a-1', 1)]], config))
+  renderAt('/session/session-1/stats')
+
+  const table = await screen.findByRole('table', { name: 'Tags' })
+  const rate = new Intl.NumberFormat('fr', { style: 'percent' }).format(0.5)
+  expect(rowCells(table, 'boucles')).toEqual(['1', rate])
+  expect(rowCells(table, 'tableaux')).toEqual(['1', rate])
+  expect(screen.queryByText("Aucune question n'a de tag.")).not.toBeInTheDocument()
+})
+
 /** Skip de la question `a-1`, avec ou sans motif. */
 function skipped(reason?: string) {
   return attemptOf('a', 'a-1', reason === undefined ? {} : { skipped: reason })
