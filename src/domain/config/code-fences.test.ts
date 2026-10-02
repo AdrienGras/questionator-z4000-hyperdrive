@@ -42,6 +42,23 @@ describe('fenceLanguages', () => {
     expect(fenceLanguages('````py\n```js\n```\n````')).toEqual(['py'])
   })
 
+  it("lit le langage après une tabulation suivant le marqueur", () => {
+    expect(fenceLanguages('```\tpython\nx = 1\n```')).toEqual(['python'])
+  })
+
+  it("n'ouvre pas un bloc indenté d'une tabulation (4 colonnes en CommonMark)", () => {
+    expect(fenceLanguages('\t```js\nx\n\t```')).toEqual([])
+  })
+
+  it('ferme le bloc sur un marqueur suivi d’espaces ou d’une tabulation', () => {
+    expect(fenceLanguages('```py\nx\n```   \n```js\ny\n```')).toEqual(['py', 'js'])
+    expect(fenceLanguages('```py\nx\n```\t\n```js\ny\n```')).toEqual(['py', 'js'])
+  })
+
+  it('ne ferme pas le bloc sur un marqueur suivi de texte', () => {
+    expect(fenceLanguages('```py\n``` x\n```\n```js\ny\n```')).toEqual(['py', 'js'])
+  })
+
   it('garde les doublons, dans l’ordre', () => {
     expect(fenceLanguages('```python\na\n```\n\n```python\nb\n```')).toEqual(['python', 'python'])
   })
