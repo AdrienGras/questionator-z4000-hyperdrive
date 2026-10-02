@@ -121,6 +121,11 @@ export default defineConfig({
         // Tout ce que le build émet, chunks à la demande compris (Shiki, Tabler, Recharts, xlsx),
         // polices Geist et fichiers de `configSchemaPlugin`. `dist/.vite/` (caché) reste dehors.
         globPatterns: ['**/*.{js,css,html,json,csv,svg,png,webp,woff2}'],
+        // La doc VitePress (`dist/docs/`, F27, D96) n'est pas pré-cachée : elle se consulte en ligne.
+        globIgnores: ['docs/**'],
+        // Repli de navigation : sans cette exclusion, le SW servirait l'app (index.html) à la place
+        // de la doc sur les URL `/docs…`.
+        navigateFallbackDenylist: [/\/docs(?:\/|$)/],
         clientsClaim: true,
         cleanupOutdatedCaches: true,
         // Plafond par fichier (défaut Workbox : 2 Mio), fixé juste au-dessus du plus gros fichier du
