@@ -237,32 +237,36 @@ test('Entrée applique l’option de complétion sélectionnée à la place du m
   await expect(editor.editor).toContainText('"mode": "nearest" }')
 })
 
-test('le survol de finalScoreDisplay affiche sa description et son défaut', async ({ page }) => {
-  const editor = new ConfigEditorPage(page)
-  await editor.goto()
-  await expect(editor.editor).toContainText('"finalScoreDisplay"')
-  await page.locator('.cm-content').getByText('"finalScoreDisplay"').hover()
-  await expect(editor.hoverTooltip).toContainText('écran final : brute, convertie ou les deux.')
-  await expect(editor.hoverTooltip).toContainText('Défaut : "both"')
-})
+// Clés hors écran au chargement : le texte est réordonné pour les amener en tête (CodeMirror ne
+// rend que les lignes visibles).
+const CATEGORY_POINTS_FIRST = exampleWith(',\n    "showCategoryPoints": true', '').replace(
+  '"showCumulativeScore": true,',
+  '"showCategoryPoints": true,\n    "showCumulativeScore": true,',
+)
 
-test('le survol de showCategoryPoints affiche sa description et son défaut', async ({ page }) => {
-  const editor = new ConfigEditorPage(page)
-  await editor.goto()
-  // CodeMirror ne rend que les lignes visibles : la clé, dernière de `presentation`, passe en tête.
-  await editor.replaceText(
-    exampleWith(',\n    "showCategoryPoints": true', '').replace(
-      '"showCumulativeScore": true,',
-      '"showCategoryPoints": true,\n    "showCumulativeScore": true,',
-    ),
-  )
-  // La saisie laisse la vue en bas du texte : revenir en tête.
-  await page.keyboard.press('ControlOrMeta+Home')
-  await expect(editor.editor).toContainText('"showCategoryPoints"')
-  await page.locator('.cm-content').getByText('"showCategoryPoints"').hover()
-  await expect(editor.hoverTooltip).toContainText('maximum de points de chaque catégorie')
-  await expect(editor.hoverTooltip).toContainText('Défaut : true')
-})
+const HOVERS: { key: string; text?: string; expected: string[] }[] = [
+  {
+    key: 'finalScoreDisplay',
+    expected: ['écran final : brute, convertie ou les deux.', 'Défaut : "both"'],
+  },
+  {
+    key: 'showCategoryPoints',
+    text: CATEGORY_POINTS_FIRST,
+    expected: ['maximum de points de chaque catégorie', 'Défaut : true'],
+  },
+  { key: 'mode', expected: ['Valeurs possibles : "nearest", "up", "down"', 'Défaut : "nearest"'] },
+]
+
+for (const { key, text, expected } of HOVERS) {
+  test(`le survol de ${key} affiche sa description, ses valeurs et son défaut`, async ({
+    page,
+  }) => {
+    const editor = new ConfigEditorPage(page)
+    await editor.goto()
+    await editor.hoverKey(key, text)
+    for (const fragment of expected) await expect(editor.hoverTooltip).toContainText(fragment)
+  })
+}
 
 test('un champ obligatoire manquant est nommé dans la liste des erreurs', async ({ page }) => {
   const editor = new ConfigEditorPage(page)
@@ -272,15 +276,6 @@ test('un champ obligatoire manquant est nommé dans la liste des erreurs', async
   await expect(editor.issue('Champ obligatoire manquant : « finalScale ».')).toBeVisible()
 })
 
-test('le survol de rounding.mode liste les valeurs possibles avant le défaut', async ({ page }) => {
-  const editor = new ConfigEditorPage(page)
-  await editor.goto()
-  await expect(editor.editor).toContainText('"mode"')
-  await page.locator('.cm-content').getByText('"mode"').hover()
-  await expect(editor.hoverTooltip).toContainText('Valeurs possibles : "nearest", "up", "down"')
-  await expect(editor.hoverTooltip).toContainText('Défaut : "nearest"')
-})
-
 test('le survol de icon propose la recherche Tabler, sans liste de noms', async ({ page }) => {
   const editor = new ConfigEditorPage(page)
   await editor.goto()
@@ -288,9 +283,7 @@ test('le survol de icon propose la recherche Tabler, sans liste de noms', async 
   const { categories, ...rest } = z
     .looseObject({ categories: z.array(z.unknown()) })
     .parse(JSON.parse(EXAMPLE))
-  await editor.replaceText(JSON.stringify({ categories, ...rest }, null, 2))
-  await page.keyboard.press('ControlOrMeta+Home')
-  await page.locator('.cm-content').getByText('"icon"').first().hover()
+  await editor.hoverKey('icon', JSON.stringify({ categories, ...rest }, null, 2))
 
   const link = editor.hoverTooltip.getByRole('link', { name: 'Rechercher une icône sur tabler.io' })
   await expect(link).toHaveAttribute('href', 'https://tabler.io/icons')

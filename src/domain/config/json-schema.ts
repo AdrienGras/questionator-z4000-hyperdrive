@@ -52,11 +52,11 @@ function addMarkdownDescriptions(node: unknown): void {
     const parts = [record.description]
     const values = hoverValues(toValueNode(record))
     if (values?.kind === 'closed') {
-      parts.push(`Valeurs possibles : ${values.values.map((value) => `\`${value}\``).join(', ')}`)
+      parts.push(`Valeurs possibles : ${values.values.map(inlineCode).join(', ')}`)
     }
     if (values?.kind === 'open')
       parts.push(`[Rechercher une icône sur tabler.io](${TABLER_ICONS_URL})`)
-    if ('default' in record) parts.push(`Défaut : \`${JSON.stringify(record.default)}\``)
+    if ('default' in record) parts.push(`Défaut : ${inlineCode(JSON.stringify(record.default))}`)
     record.markdownDescription = parts.join('\n\n')
   }
   const { properties, items, anyOf } = record
@@ -65,6 +65,11 @@ function addMarkdownDescriptions(node: unknown): void {
   }
   addMarkdownDescriptions(items)
   addMarkdownDescriptions(anyOf)
+}
+
+/** Code Markdown en ligne. */
+function inlineCode(text: string): string {
+  return '`' + text + '`'
 }
 
 /** Champs d'un nœud brut utiles aux valeurs littérales, vérifiés un par un (pas d'assertion). */
