@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { buildConfigJsonSchema } from '@/domain/config/json-schema'
 
@@ -33,6 +34,10 @@ function listSchemaPaths(schema: Record<string, unknown>): string[] {
   return [...out].toSorted()
 }
 
+function escapeRegExp(text: string): string {
+  return text.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)
+}
+
 const THEME_PATH = /^theme\.(?:light|dark)\.(.+)$/
 
 describe('référence de la config du guide', () => {
@@ -47,10 +52,12 @@ describe('référence de la config du guide', () => {
   })
 
   test('chaque champ du schéma est documenté dans la référence', () => {
-    const page = readFileSync('site/guide/reference-config.md', 'utf8')
+    const page = readFileSync(join(import.meta.dirname, 'reference-config.md'), 'utf8')
+    // Un champ compte comme documenté s'il ouvre une ligne de tableau : `| \`chemin\` | …`.
     const missing = paths.filter((path) => {
-      const token = THEME_PATH.exec(path)?.[1]
-      return !page.includes(`\`${token ?? path}\``)
+      const name = THEME_PATH.exec(path)?.[1] ?? path
+      const row = new RegExp(String.raw`^\|\s*\`${escapeRegExp(name)}\`\s*\|`, 'm')
+      return !row.test(page)
     })
     expect(missing).toEqual([])
   })

@@ -21,6 +21,10 @@ Une clé inconnue est refusée : une faute de frappe dans un nom de champ est do
 
 ### Le champ `$schema` et l'aide de l'éditeur
 
+| Champ | Type | Obligatoire | Défaut | Description |
+| --- | --- | --- | --- | --- |
+| `$schema` | texte | non | aucun | URL du JSON Schema, pour l'autocomplétion dans l'éditeur. |
+
 Copiez la ligne `$schema` ci-dessus telle quelle en tête de votre fichier. Un éditeur comme VSCode lit alors le JSON Schema publié avec l'application et vous aide :
 
 - l'autocomplétion des noms de champs et des valeurs possibles (`nearest`, `up`, `down`, etc.) ;
@@ -114,7 +118,8 @@ Questions passées (« skips »). Tous les champs sont facultatifs.
 | `skips` | objet | non | voir ci-dessous | Bloc des questions passées. |
 | `skips.enabled` | booléen | non | `true` | Autorise l'examinateur à passer une question. |
 | `skips.maxPerStudent` | entier ≥ 0 | non | `1` | Nombre maximal de questions passées par étudiant. |
-| `skips.reasons` | liste de textes non vides | non | aucun | Motifs proposés dans la boîte de skip. Chaque élément (`skips.reasons[]`) est un motif. |
+| `skips.reasons` | liste de textes non vides | non | aucun | Motifs proposés dans la boîte de skip. |
+| `skips.reasons[]` | texte non vide | oui, dans la liste | aucun | Un motif proposé dans la boîte de skip. |
 | `skips.allowFreeText` | booléen | non | `true` | Autorise un motif libre. |
 
 ```json
@@ -202,18 +207,21 @@ Surcharge des variables CSS de l'interface, par mode clair et sombre. Tout le bl
 
 ## `categories`
 
-Catégories de difficulté proposées au tirage. Le champ est obligatoire. Chaque élément (`categories[]`) décrit une catégorie.
+Catégories de difficulté proposées au tirage. Le champ est obligatoire. Chaque élément de la liste décrit une catégorie.
 
 | Champ | Type | Obligatoire | Défaut | Description |
 | --- | --- | --- | --- | --- |
 | `categories` | liste d'objets | oui | aucun | Liste des catégories. |
+| `categories[]` | objet | oui, dans la liste | aucun | Une catégorie. |
 | `categories[].id` | texte non vide | oui | aucun | Identifiant stable de la catégorie. |
 | `categories[].label` | texte non vide | oui | aucun | Libellé affiché. |
-| `categories[].scale` | liste de nombres | oui | aucun | Valeurs attribuables, décimales autorisées. La valeur maximale est la valeur de la catégorie (points max) : elle est affichée sur la tuile et utilisée dans les exports et les stats. Chaque élément est `categories[].scale[]`. |
+| `categories[].scale` | liste de nombres | oui | aucun | Valeurs attribuables, décimales autorisées. La valeur maximale est la valeur de la catégorie (points max) : elle est affichée sur la tuile et utilisée dans les exports et les stats. |
+| `categories[].scale[]` | nombre | oui, dans la liste | aucun | Une valeur attribuable. |
 | `categories[].color` | couleur CSS | non | aucun | Couleur de la tuile, validée par le navigateur à la création de session. |
 | `categories[].icon` | texte | non | aucun | Nom d'icône Tabler en kebab-case (par exemple `leaf`, `brand-php`). Un nom inconnu n'affiche aucune icône, avec un avertissement. |
 | `categories[].order` | entier | non | ordre du tableau | Ordre d'affichage. |
 | `categories[].questions` | liste d'objets | oui | aucun | Questions de la catégorie. |
+| `categories[].questions[]` | objet | oui, dans la liste | aucun | Une question de la catégorie. |
 
 ```json
 "categories": [
@@ -230,13 +238,14 @@ Catégories de difficulté proposées au tirage. Le champ est obligatoire. Chaqu
 
 ### Questions
 
-Chaque élément de `categories[].questions` (noté `categories[].questions[]`) est une question.
+Chaque élément de `categories[].questions` est une question.
 
 | Champ | Type | Obligatoire | Défaut | Description |
 | --- | --- | --- | --- | --- |
 | `categories[].questions[].id` | texte non vide | oui | aucun | Identifiant stable de la question, unique dans toute la config. |
 | `categories[].questions[].title` | texte non vide | non | début du `prompt` sans markdown | Libellé court, utilisé dans le side panel et les exports. |
-| `categories[].questions[].tags` | liste de textes non vides | non | aucun | Notions pédagogiques, utilisées dans les stats. Chaque élément est `categories[].questions[].tags[]`. |
+| `categories[].questions[].tags` | liste de textes non vides | non | aucun | Notions pédagogiques, utilisées dans les stats. |
+| `categories[].questions[].tags[]` | texte non vide | oui, dans la liste | aucun | Une notion pédagogique. |
 | `categories[].questions[].prompt` | texte non vide | oui | aucun | Énoncé en markdown, affiché aux deux vues. |
 | `categories[].questions[].answer` | texte | non | aucun | Éléments de réponse en markdown, visibles uniquement dans la vue examinateur. |
 

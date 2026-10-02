@@ -12,6 +12,8 @@
     "skipLibCheck": true,
     "noEmit": true,
     "allowImportingTsExtensions": true,
+    // `@/*` est requis par site/guide/*.test.ts, qui importe des modules de src/. Ils doivent rester
+    // sans dépendance au DOM : ce projet n'a pas la lib "dom".
     "paths": { "@/*": ["./src/*"] }
   },
   "include": [
