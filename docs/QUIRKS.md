@@ -733,7 +733,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 ## Le lien « Aide » mène à une page introuvable sous `pnpm dev` (2026-10-02)
 
 **Découvert** : F27 (#71), ajout du lien dans `PageShell`.
-**Symptôme** : en dev, `…/docs/` répond avec l'application ou une 404 ; le lien « Aide » n'ouvre pas la doc.
+**Symptôme** : en dev, `…/docs/` répond 200 avec l'`index.html` de l'application (repli SPA du serveur de dev) ; le lien « Aide » n'ouvre pas la doc.
 **Cause** : la doc est un site distinct (`site/`), construit dans `dist/docs/` ; le serveur de dev de l'app ne la sert pas.
 **Workaround** : `pnpm docs:dev` (port 5173, base `/questionator-z4000-hyperdrive/docs/`), ou `pnpm build && pnpm docs:build && pnpm preview`.
 **Référence** : D96, `site/.vitepress/config.ts`.
