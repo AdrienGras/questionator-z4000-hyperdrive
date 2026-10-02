@@ -1,16 +1,387 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" role="img" aria-label="Témoin de thème">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" role="img" aria-labelledby="t d">
+  <title id="t">Questionator Z-4000 Hyperdrive</title>
+  <desc id="d">Animation du parcours : on charge une config et une liste d'étudiants, chaque étudiant tire une question par catégorie et reçoit une note, puis on consulte les statistiques et on exporte un fichier Excel.</desc>
+  <!--
+    Animation CSS du README (#74, D95). Une seule boucle (--loop), aucun décalage de départ :
+    chaque scène est séquencée par les pourcentages de ses keyframes (1 s = 6,6667 %).
+    Plages : 1 arrivée 0-2,5 s · 2 config 2,5-5 s · 3 passage 5-8,5 s · 4 note 8,5-11 s
+    · 5 stats 11-13 s · 6 export 13-15 s ; fondus de 0,3 s aux bornes.
+    Scène 1 : palette nuit fixe. Scènes 2-6 : variables seules (src/index.css) + catégories.
+  -->
   <style>
-    .bg { fill: #ffffff; }
-    .label { fill: #000000; font: bold 120px system-ui, sans-serif; }
-    .dark-only { display: none; }
+    svg {
+      --loop: 15s;
+      --bg: oklch(1 0 0);
+      --fg: oklch(0.145 0 0);
+      --card: oklch(1 0 0);
+      --muted: oklch(0.97 0 0);
+      --muted-fg: oklch(0.556 0 0);
+      --border: oklch(0.922 0 0);
+      --ambient: oklch(0.97 0 0);
+      --amb-line: oklch(0.709 0.159 293.5 / 22%);
+      --shadow: oklch(0.145 0 0 / 10%);
+      --cat1: oklch(0.797 0.134 211.5);
+      --cat2: oklch(0.709 0.159 293.5);
+      --cat3: oklch(0.687 0.252 323.9);
+      --cat4: oklch(0.758 0.159 55.9);
+      --night: #1a1033;
+      --ease: cubic-bezier(0.45, 0, 0.25, 1);
+    }
     @media (prefers-color-scheme: dark) {
-      .bg { fill: #111111; }
-      .label { fill: #ffffff; }
-      .light-only { display: none; }
-      .dark-only { display: inline; }
+      svg {
+        --bg: oklch(0.145 0 0);
+        --fg: oklch(0.985 0 0);
+        --card: oklch(0.205 0 0);
+        --muted: oklch(0.269 0 0);
+        --muted-fg: oklch(0.708 0 0);
+        --border: oklch(1 0 0 / 10%);
+        --ambient: oklch(0.145 0 0);
+        --amb-line: oklch(0.687 0.252 323.9 / 16%);
+        --shadow: oklch(0 0 0 / 40%);
+      }
+    }
+
+    text { font-family: system-ui, sans-serif; }
+    .anim {
+      animation-duration: var(--loop);
+      animation-iteration-count: infinite;
+      animation-timing-function: var(--ease);
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    /* Ambiance */
+    .amb-bg { fill: var(--ambient); }
+    .amb-grid { stroke: var(--amb-line); }
+
+    /* Fenêtre */
+    .win-shadow { fill: var(--shadow); }
+    .win { fill: var(--card); stroke: var(--border); stroke-width: 2; }
+    .win-bar { fill: var(--muted); }
+    .win-sep { stroke: var(--border); stroke-width: 2; }
+    .dot { fill: var(--muted-fg); opacity: 0.45; }
+    .url { fill: var(--bg); stroke: var(--border); stroke-width: 2; }
+    .url-mark { fill: var(--muted-fg); opacity: 0.5; }
+    .card { fill: var(--card); stroke: var(--border); stroke-width: 2; }
+    .chip { fill: var(--muted); }
+    .line { fill: var(--muted); }
+    .ico-fg { color: var(--fg); }
+    .ico-muted { color: var(--muted-fg); }
+    .label { fill: var(--fg); font-size: 40px; font-weight: 600; }
+
+    /* Tuiles de catégorie : couleur portée par currentColor */
+    .c1 { color: var(--cat1); }
+    .c2 { color: var(--cat2); }
+    .c3 { color: var(--cat3); }
+    .c4 { color: var(--cat4); }
+    .tile { fill: currentColor; fill-opacity: 0.14; stroke: currentColor; stroke-width: 3; }
+    .tile-bar { fill: currentColor; opacity: 0.55; }
+
+    /* Scène 1 : nuit synthwave (fixe, quel que soit le thème) */
+    .floor-grid { stroke: #b04cff; stroke-width: 2; opacity: 0.75; }
+    .star { fill: #ffffff; }
+    .title {
+      font-size: 112px; font-weight: 900; font-style: italic; letter-spacing: 2px;
+      fill: url(#chrome); stroke: var(--night); stroke-width: 10px; paint-order: stroke;
+      stroke-linejoin: round;
+    }
+    .subtitle {
+      font-size: 48px; font-weight: 800; font-style: italic; letter-spacing: 8px;
+      fill: #7ee8ff; stroke: var(--night); stroke-width: 8px; paint-order: stroke;
+      stroke-linejoin: round;
+    }
+
+    /* Timeline des scènes */
+    #scene-1 { animation-name: scene-1; }
+    @keyframes scene-1 {
+      0%, 13.333% { opacity: 1; transform: none; }
+      16.667% { opacity: 0; transform: scale(0.86); }
+      97.999% { opacity: 0; transform: scale(1.06); }
+      100% { opacity: 1; transform: none; }
+    }
+    .sun { animation-name: sun-rise; transform-origin: 50% 0; }
+    @keyframes sun-rise {
+      0% { transform: translateY(150px); }
+      8% { transform: translateY(0); }
+      30% { transform: translateY(0); }
+      31%, 100% { transform: translateY(150px); }
+    }
+    .title-block { animation-name: title-in; }
+    @keyframes title-in {
+      0%, 4% { opacity: 0; transform: translateY(24px) scale(0.96); }
+      8.667%, 30% { opacity: 1; transform: none; }
+      31%, 100% { opacity: 0; transform: translateY(24px) scale(0.96); }
+    }
+
+    #window { animation-name: window; }
+    @keyframes window {
+      0%, 13.333% { opacity: 0; transform: scale(1.12); }
+      16.667%, 98% { opacity: 1; transform: none; }
+      100% { opacity: 0; transform: scale(0.97); }
+    }
+    #home { animation-name: home; }
+    @keyframes home {
+      0%, 18.667% { opacity: 1; transform: none; }
+      20.667%, 100% { opacity: 0; transform: scale(0.96); }
+    }
+
+    #scene-2 { animation-name: scene-2; }
+    @keyframes scene-2 {
+      0%, 16.667% { opacity: 0; }
+      18.667%, 31.333% { opacity: 1; }
+      33.333%, 100% { opacity: 0; }
+    }
+    .file-left { animation-name: file-left; }
+    @keyframes file-left {
+      0%, 16.667% { transform: translateX(-620px) rotate(-8deg); }
+      22%, 100% { transform: none; }
+    }
+    .file-right { animation-name: file-right; }
+    @keyframes file-right {
+      0%, 17.333% { transform: translateX(620px) rotate(8deg); }
+      22.667%, 100% { transform: none; }
+    }
+    .tile-1 { animation-name: tile-1; }
+    .tile-2 { animation-name: tile-2; }
+    .tile-3 { animation-name: tile-3; }
+    .tile-4 { animation-name: tile-4; }
+    @keyframes tile-1 {
+      0%, 21.333% { opacity: 0; transform: translateY(30px) scale(0.7); }
+      22.667%, 100% { opacity: 1; transform: none; }
+    }
+    @keyframes tile-2 {
+      0%, 22% { opacity: 0; transform: translateY(30px) scale(0.7); }
+      23.333%, 100% { opacity: 1; transform: none; }
+    }
+    @keyframes tile-3 {
+      0%, 22.667% { opacity: 0; transform: translateY(30px) scale(0.7); }
+      24%, 100% { opacity: 1; transform: none; }
+    }
+    @keyframes tile-4 {
+      0%, 23.333% { opacity: 0; transform: translateY(30px) scale(0.7); }
+      24.667%, 100% { opacity: 1; transform: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      svg, svg * { animation: none !important; }
+      #scene-1, #home, #scene-2 { opacity: 0; }
     }
   </style>
-  <rect class="bg" width="1200" height="600" />
-  <text class="label light-only" x="600" y="340" text-anchor="middle">CLAIR</text>
-  <text class="label dark-only" x="600" y="340" text-anchor="middle">SOMBRE</text>
+
+  <defs>
+    <!-- Icônes Tabler 3.48.0 (@tabler/icons-react, __iconNode), tracés recopiés tels quels. -->
+    <symbol id="i-leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 21c.5 -4.5 2.5 -8 7 -10"/>
+      <path d="M9 18c6.218 0 10.5 -3.288 11 -12v-2h-4.014c-9 0 -11.986 4 -12 9c0 1 0 3 2 5h3l.014 0"/>
+    </symbol>
+    <symbol id="i-brand-php" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 12a10 9 0 1 0 20 0a10 9 0 1 0 -20 0"/>
+      <path d="M5.5 15l.395 -1.974l.605 -3.026h1.32a1 1 0 0 1 .986 1.164l-.167 1a1 1 0 0 1 -.986 .836h-1.653"/>
+      <path d="M15.5 15l.395 -1.974l.605 -3.026h1.32a1 1 0 0 1 .986 1.164l-.167 1a1 1 0 0 1 -.986 .836h-1.653"/>
+      <path d="M12 7.5l-1 5.5"/>
+      <path d="M11.6 10h2.4l-.5 3"/>
+    </symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 10.941c2.333 -3.308 .167 -7.823 -1 -8.941c0 3.395 -2.235 5.299 -3.667 6.706c-1.43 1.408 -2.333 3.294 -2.333 5.588c0 3.704 3.134 6.706 7 6.706c3.866 0 7 -3.002 7 -6.706c0 -1.712 -1.232 -4.403 -2.333 -5.588c-2.084 3.353 -3.257 3.353 -4.667 2.235"/>
+    </symbol>
+    <symbol id="i-skull" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 4c4.418 0 8 3.358 8 7.5c0 1.901 -.755 3.637 -2 4.96l0 2.54a1 1 0 0 1 -1 1h-10a1 1 0 0 1 -1 -1v-2.54c-1.245 -1.322 -2 -3.058 -2 -4.96c0 -4.142 3.582 -7.5 8 -7.5"/>
+      <path d="M10 17v3"/>
+      <path d="M14 17v3"/>
+      <path d="M8 11a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
+      <path d="M14 11a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>
+    </symbol>
+    <symbol id="i-file-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
+      <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2"/>
+      <path d="M10 13l-1 2l1 2"/>
+      <path d="M14 13l1 2l-1 2"/>
+    </symbol>
+    <symbol id="i-file-spreadsheet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
+      <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2"/>
+      <path d="M8 11h8v7h-8l0 -7"/>
+      <path d="M8 15h8"/>
+      <path d="M11 11v7"/>
+    </symbol>
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"/>
+      <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/>
+    </symbol>
+    <symbol id="i-chart-bar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 13a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -6"/>
+      <path d="M15 9a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -10"/>
+      <path d="M9 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -14"/>
+      <path d="M4 20h14"/>
+    </symbol>
+    <symbol id="i-presentation" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 4l18 0"/>
+      <path d="M4 4v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-10"/>
+      <path d="M12 16l0 4"/>
+      <path d="M9 20l6 0"/>
+      <path d="M8 12l3 -3l2 2l3 -3"/>
+    </symbol>
+
+    <!-- Ambiance : grille légère -->
+    <pattern id="amb-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path class="amb-grid" d="M40 0H0V40" fill="none" stroke-width="1.5"/>
+    </pattern>
+    <filter id="win-shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+
+    <!-- Scène 1 : palette nuit synthwave -->
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b0620"/>
+      <stop offset="0.6" stop-color="#1a1033"/>
+      <stop offset="1" stop-color="#3b1361"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a0f4a"/>
+      <stop offset="1" stop-color="#0e0722"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffb13b"/>
+      <stop offset="0.55" stop-color="#ff6a4d"/>
+      <stop offset="1" stop-color="#ff2d95"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0.45" stop-color="#ff2d95" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#ff2d95" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="horizon-glow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff4fd8" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#ff4fd8" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#ff4fd8" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="chrome" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4fbff"/>
+      <stop offset="0.48" stop-color="#9fd8ff"/>
+      <stop offset="0.52" stop-color="#ff7ad9"/>
+      <stop offset="1" stop-color="#c06bff"/>
+    </linearGradient>
+    <mask id="sun-bands" maskUnits="userSpaceOnUse" x="0" y="0" width="1200" height="600">
+      <rect width="1200" height="600" fill="#fff"/>
+      <g fill="#000">
+        <rect x="400" y="292" width="400" height="6"/>
+        <rect x="400" y="314" width="400" height="10"/>
+        <rect x="400" y="338" width="400" height="14"/>
+        <rect x="400" y="364" width="400" height="18"/>
+      </g>
+    </mask>
+    <clipPath id="sky-clip">
+      <rect width="1200" height="380"/>
+    </clipPath>
+  </defs>
+
+  <!-- Ambiance derrière la fenêtre -->
+  <g id="ambiance">
+    <rect class="amb-bg" width="1200" height="600"/>
+    <rect width="1200" height="600" fill="url(#amb-grid)"/>
+  </g>
+
+  <!-- Scène 1 : arrivée synthwave -->
+  <g id="scene-1" class="anim">
+    <rect width="1200" height="380" fill="url(#sky)"/>
+    <g class="star">
+      <circle cx="90" cy="70" r="2"/><circle cx="210" cy="150" r="1.5"/><circle cx="330" cy="54" r="2"/>
+      <circle cx="160" cy="260" r="1.5"/><circle cx="420" cy="120" r="1.5"/><circle cx="1110" cy="80" r="2"/>
+      <circle cx="990" cy="160" r="1.5"/><circle cx="860" cy="60" r="2"/><circle cx="1050" cy="270" r="1.5"/>
+      <circle cx="760" cy="110" r="1.5"/><circle cx="40" cy="190" r="1.5"/><circle cx="1160" cy="200" r="1.5"/>
+    </g>
+    <g clip-path="url(#sky-clip)">
+      <g class="sun anim">
+        <circle cx="600" cy="300" r="290" fill="url(#halo)"/>
+        <circle cx="600" cy="300" r="170" fill="url(#sun)" mask="url(#sun-bands)"/>
+      </g>
+    </g>
+    <rect y="380" width="1200" height="220" fill="url(#floor)"/>
+    <path class="floor-grid" fill="none" d="M0 386H1200M0 396H1200M0 410H1200M0 428H1200M0 454H1200M0 490H1200M0 540H1200M124 380L-3320 600M158 380L-3040 600M192 380L-2760 600M226 380L-2480 600M260 380L-2200 600M294 380L-1920 600M328 380L-1640 600M362 380L-1360 600M396 380L-1080 600M430 380L-800 600M464 380L-520 600M498 380L-240 600M532 380L40 600M566 380L320 600M600 380V600M634 380L880 600M668 380L1160 600M702 380L1440 600M736 380L1720 600M770 380L2000 600M804 380L2280 600M838 380L2560 600M872 380L2840 600M906 380L3120 600M940 380L3400 600M974 380L3680 600M1008 380L3960 600M1042 380L4240 600M1076 380L4520 600"/>
+    <rect y="364" width="1200" height="32" fill="url(#horizon-glow)"/>
+    <rect y="378" width="1200" height="4" fill="#ff7ae0"/>
+    <g class="title-block anim">
+      <text class="title" x="600" y="488" text-anchor="middle">QUESTIONATOR</text>
+      <text class="subtitle" x="600" y="552" text-anchor="middle">Z-4000 HYPERDRIVE</text>
+    </g>
+  </g>
+
+  <!-- Fenêtre de navigateur : chrome + scènes 2 à 6 -->
+  <g id="window" class="anim">
+    <rect class="win-shadow" x="100" y="72" width="1000" height="490" rx="20" filter="url(#win-shadow)"/>
+    <rect class="win" x="80" y="50" width="1040" height="500" rx="20"/>
+    <path class="win-bar" d="M100 50H1100A20 20 0 0 1 1120 70V110H80V70A20 20 0 0 1 100 50Z"/>
+    <path class="win-sep" d="M80 110H1120"/>
+    <circle class="dot" cx="116" cy="80" r="8"/>
+    <circle class="dot" cx="144" cy="80" r="8"/>
+    <circle class="dot" cx="172" cy="80" r="8"/>
+    <rect class="url" x="330" y="62" width="540" height="36" rx="18"/>
+    <circle class="url-mark" cx="356" cy="80" r="6"/>
+    <rect class="url-mark" x="374" y="75" width="190" height="10" rx="5"/>
+
+    <!-- Accueil : trois cartes d'action -->
+    <g id="home" class="anim">
+      <g>
+        <rect class="card" x="170" y="210" width="260" height="240" rx="16"/>
+        <circle class="chip" cx="300" cy="290" r="46"/>
+        <use href="#i-file-code" class="ico-fg" x="272" y="262" width="56" height="56"/>
+        <rect class="line" x="225" y="366" width="150" height="14" rx="7"/>
+        <rect class="line" x="250" y="396" width="100" height="14" rx="7"/>
+      </g>
+      <g>
+        <rect class="card" x="470" y="210" width="260" height="240" rx="16"/>
+        <circle class="chip" cx="600" cy="290" r="46"/>
+        <use href="#i-file-spreadsheet" class="ico-fg" x="572" y="262" width="56" height="56"/>
+        <rect class="line" x="525" y="366" width="150" height="14" rx="7"/>
+        <rect class="line" x="550" y="396" width="100" height="14" rx="7"/>
+      </g>
+      <g>
+        <rect class="card" x="770" y="210" width="260" height="240" rx="16"/>
+        <circle class="chip" cx="900" cy="290" r="46"/>
+        <use href="#i-presentation" class="ico-fg" x="872" y="262" width="56" height="56"/>
+        <rect class="line" x="825" y="366" width="150" height="14" rx="7"/>
+        <rect class="line" x="850" y="396" width="100" height="14" rx="7"/>
+      </g>
+    </g>
+
+    <!-- Scène 2 : configuration -->
+    <g id="scene-2" class="anim">
+      <g class="file-left anim">
+        <rect class="card" x="160" y="146" width="420" height="96" rx="16"/>
+        <rect class="chip" x="180" y="162" width="64" height="64" rx="12"/>
+        <use href="#i-file-code" class="ico-fg" x="192" y="174" width="40" height="40"/>
+        <text class="label" x="266" y="208">config.json</text>
+      </g>
+      <g class="file-right anim">
+        <rect class="card" x="620" y="146" width="420" height="96" rx="16"/>
+        <rect class="chip" x="640" y="162" width="64" height="64" rx="12"/>
+        <use href="#i-file-spreadsheet" class="ico-fg" x="652" y="174" width="40" height="40"/>
+        <text class="label" x="726" y="208">etudiants.csv</text>
+      </g>
+      <g class="tile-1 anim c1">
+        <rect class="tile" x="160" y="282" width="202" height="220" rx="16"/>
+        <use href="#i-leaf" x="216" y="320" width="90" height="90"/>
+        <rect class="tile-bar" x="211" y="448" width="100" height="14" rx="7"/>
+      </g>
+      <g class="tile-2 anim c2">
+        <rect class="tile" x="386" y="282" width="202" height="220" rx="16"/>
+        <use href="#i-brand-php" x="442" y="320" width="90" height="90"/>
+        <rect class="tile-bar" x="437" y="448" width="100" height="14" rx="7"/>
+      </g>
+      <g class="tile-3 anim c3">
+        <rect class="tile" x="612" y="282" width="202" height="220" rx="16"/>
+        <use href="#i-flame" x="668" y="320" width="90" height="90"/>
+        <rect class="tile-bar" x="663" y="448" width="100" height="14" rx="7"/>
+      </g>
+      <g class="tile-4 anim c4">
+        <rect class="tile" x="838" y="282" width="202" height="220" rx="16"/>
+        <use href="#i-skull" x="894" y="320" width="90" height="90"/>
+        <rect class="tile-bar" x="889" y="448" width="100" height="14" rx="7"/>
+      </g>
+    </g>
+
+    <g id="scene-3"></g>
+    <g id="scene-4"></g>
+    <g id="scene-5"></g>
+    <g id="scene-6"></g>
+  </g>
 </svg>
