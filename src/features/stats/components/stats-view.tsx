@@ -15,6 +15,7 @@ import { QuestionTables } from './question-tables'
 import { StatsSection } from './stats-section'
 import { StrategyTable } from './strategy-table'
 import { TagTable } from './tag-table'
+import { StatsEmpty } from './stats-empty'
 
 /**
  * Écran des statistiques (F15) : barre de titre de la coque (`PageShell`), puis les blocs sur une colonne en mobile, en grille
@@ -46,7 +47,7 @@ export function StatsView({ session }: Readonly<{ session: Session }>) {
           {(headingId) => (
             <>
               {stats.grades.count === 0 ? (
-                <p className="text-muted-foreground">{text('stats_histogram_empty', {})}</p>
+                <StatsEmpty>{text('stats_histogram_empty', {})}</StatsEmpty>
               ) : (
                 <HistogramChart ui={ui} bins={stats.histogram} />
               )}

@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'vitest'
+import { z } from 'zod'
+import { SessionSchema } from '@/domain/session/schema'
 import { minimalConfig } from '@/testing/config-fixtures'
-import { fromZodIssues } from './from-zod'
+import { fromZodIssues, INTEGER_FIELDS } from './from-zod'
 import { ConfigSchema } from './schema'
 
 function convert(input: unknown) {
@@ -114,5 +116,36 @@ describe('fromZodIssues', () => {
     for (const issue of convert(input)) {
       expect(Object.keys(issue).toSorted()).toEqual(['code', 'params', 'path', 'severity'])
     }
+  })
+})
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+const isInteger = (node: unknown): boolean =>
+  isRecord(node) &&
+  (node.type === 'integer' || (Array.isArray(node.anyOf) && node.anyOf.some(isInteger)))
+
+/** Noms des propriétés `type: "integer"` (donc `z.int()`) à toute profondeur d'un JSON Schema. */
+function integerProperties(node: unknown, found = new Set<string>()): Set<string> {
+  if (!isRecord(node)) return found
+  if (isRecord(node.properties)) {
+    for (const [key, child] of Object.entries(node.properties)) {
+      if (isInteger(child)) found.add(key)
+    }
+  }
+  for (const child of Object.values(node)) integerProperties(child, found)
+  return found
+}
+
+describe('INTEGER_FIELDS', () => {
+  test('liste exactement les champs z.int() des schémas de config et de session', () => {
+    const expected = new Set([
+      ...integerProperties(z.toJSONSchema(ConfigSchema, { io: 'input' })),
+      ...integerProperties(z.toJSONSchema(SessionSchema, { io: 'input' })),
+    ])
+    expect(expected.size).toBeGreaterThan(0)
+    expect([...INTEGER_FIELDS].toSorted()).toEqual([...expected].toSorted())
   })
 })

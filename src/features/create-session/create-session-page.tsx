@@ -1,4 +1,4 @@
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate, useRouter } from '@tanstack/react-router'
 import { useEffect, useId, useRef, type DragEvent, type FormEvent } from 'react'
 import { DbStatusBanner } from '@/components/db-status-banner'
 import { PageShell } from '@/components/page-shell'
@@ -50,11 +50,14 @@ export function CreateSessionPage() {
   const status = useDbStatus()
   const form = useCreateForm(locale, status)
   const navigate = useNavigate()
+  const router = useRouter()
   const nameId = useId()
   const examinerId = useId()
   const examinerHintId = useId()
   const previewTitleId = useId()
-  // Si l'utilisateur a quitté l'écran pendant l'écriture, on ne le ramène pas de force.
+  // Si l'utilisateur a quitté l'écran pendant l'écriture, on ne le ramène pas de force. Le démontage
+  // ne suffit pas : pendant le chargement de la route demandée, l'écran reste monté alors que
+  // `router.state.location` désigne déjà la destination ; on compare donc aussi le chemin.
   const mounted = useRef(false)
   // Dernière version du setter : l'effet de montage ne doit pas se rejouer à chaque rendu.
   const setConfigText = useRef(form.setConfigText)
@@ -75,8 +78,9 @@ export function CreateSessionPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    const from = router.state.location.pathname
     const id = await form.submit()
-    if (id !== undefined && mounted.current) {
+    if (id !== undefined && mounted.current && router.state.location.pathname === from) {
       await navigate({ to: '/session/$sessionId', params: { sessionId: id } })
     }
   }

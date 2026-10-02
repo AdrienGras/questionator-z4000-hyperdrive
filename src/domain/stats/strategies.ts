@@ -1,4 +1,5 @@
 import type { NormalizedConfig } from '@/domain/config/normalize'
+import type { Milli } from '@/domain/scoring/milli'
 import { mean } from './numbers'
 import type { Strategy, StudentScore } from './types'
 
@@ -48,10 +49,7 @@ function compareCompositions(
 export function computeStrategies(scored: StudentScore[], config: NormalizedConfig): Strategy[] {
   const ranks = new Map(config.categories.map((category, index) => [category.id, index]))
   const rankOf = (categoryId: string): number => ranks.get(categoryId) ?? Number.MAX_SAFE_INTEGER
-  const groups = new Map<
-    string,
-    { composition: Composition; finals: NonNullable<StudentScore['scores']['final']>[] }
-  >()
+  const groups = new Map<string, { composition: Composition; finals: [Milli, ...Milli[]] }>()
   for (const { student, status, scores } of scored) {
     if (status !== 'done' || scores.final === null) continue
     const composition = compositionOf(student, rankOf)
@@ -64,7 +62,7 @@ export function computeStrategies(scored: StudentScore[], config: NormalizedConf
     .map(({ composition, finals }) => ({
       composition,
       students: finals.length,
-      meanFinal: mean(finals) ?? 0,
+      meanFinal: mean(finals),
     }))
     .toSorted(
       (a, b) =>

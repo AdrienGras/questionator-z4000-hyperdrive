@@ -8,6 +8,7 @@ import { db, type DbStatus } from '@/lib/db/db'
 import { minimalConfig } from '@/testing/config-fixtures'
 import { expectColorModeToggleLast } from '@/testing/page-shell-assertions'
 import { stashConfigForCreation } from '@/lib/config-handoff'
+import { deferred } from '@/testing/deferred'
 import { renderAt } from '@/testing/render-at'
 import { panelButton } from '@/testing/side-panel-assertions'
 
@@ -325,6 +326,26 @@ describe('écran de création', () => {
     if (finish === undefined) throw new Error('createSession non appelé')
     finish()
     // Laisse `submit` se terminer et une éventuelle navigation partir.
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(router.state.location.pathname).toBe('/')
+  })
+
+  test('retour demandé, accueil pas encore affiché : pas de navigation vers la session (#87)', async () => {
+    const write = deferred<void>()
+    dbState.createSession = () => write.promise
+    const { router } = await renderFilled()
+    fireEvent.click(submitButton())
+    await waitFor(() => expect(submitButton()).toBeDisabled())
+    fireEvent.click(screen.getByRole('link', { name: 'Retour à l’accueil' }))
+    // L'écriture se termine avant le montage de l'accueil : l'écran de création est encore monté.
+    expect(screen.getByRole('heading', { level: 1, name: 'Nouvelle session' })).toBeInTheDocument()
+    write.resolve()
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('heading', { level: 1, name: 'Nouvelle session' }),
+      ).not.toBeInTheDocument(),
+    )
+    // Laisse une éventuelle navigation vers la session partir.
     await new Promise((resolve) => setTimeout(resolve, 50))
     expect(router.state.location.pathname).toBe('/')
   })
