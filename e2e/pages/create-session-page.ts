@@ -37,9 +37,16 @@ export class CreateSessionPage {
     await this.page.getByRole('textbox', { name: 'Nom de la session' }).fill(name)
   }
 
-  /** Crée la session et renvoie l'écran examinateur sur lequel l'application redirige. */
+  /**
+   * Crée la session et renvoie l'écran examinateur, une fois celui-ci monté (bouton « Panneau »,
+   * propre à l'examinateur). Sans cette attente, l'action suivante peut viser l'écran de création
+   * ou l'état de chargement de la route, qui vont être démontés : leur bouton « Mode d'affichage »
+   * porte le même nom que celui de l'examinateur (#88, `color-mode.spec.ts`).
+   */
   async submit(): Promise<ExaminerPage> {
     await this.page.getByRole('button', { name: 'Créer la session' }).click()
+    await this.page.waitForURL(/#\/session\/[^/]+$/)
+    await this.page.getByRole('button', { name: 'Panneau', exact: true }).waitFor()
     return new ExaminerPage(this.page)
   }
 
