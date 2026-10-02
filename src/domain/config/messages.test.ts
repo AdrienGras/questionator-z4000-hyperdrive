@@ -26,6 +26,20 @@ describe('formatConfigIssue', () => {
     expect(formatConfigIssue(issue, 'en')).toContain('"a-1"')
   })
 
+  test('required nomme le champ manquant, et se replie sans nom', () => {
+    const named: ConfigIssue = {
+      severity: 'error',
+      code: 'required',
+      path: ['scoring', 'finalScale'],
+      params: { field: 'finalScale' },
+    }
+    expect(formatConfigIssue(named, 'fr')).toBe('Champ obligatoire manquant : « finalScale ».')
+    expect(formatConfigIssue(named, 'en')).toBe('Required field is missing: "finalScale".')
+    const anonymous: ConfigIssue = { ...named, path: ['categories', 0], params: {} }
+    expect(formatConfigIssue(anonymous, 'fr')).toBe('Champ obligatoire manquant.')
+    expect(formatConfigIssue(anonymous, 'en')).toBe('Required field is missing.')
+  })
+
   test('json_syntax avec et sans position', () => {
     const located: ConfigIssue = {
       severity: 'error',

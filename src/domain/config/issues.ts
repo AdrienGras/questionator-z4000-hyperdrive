@@ -6,7 +6,8 @@ type NoParams = Record<string, never>
 export type ConfigIssueParams = {
   json_syntax: { line?: number; column?: number }
   unsupported_schema_version: { found: number; supported: number }
-  required: NoParams
+  /** `field` : dernier segment du chemin s'il nomme une clé (absent pour un index de tableau). */
+  required: { field?: string }
   invalid_type: { expected: string }
   unknown_key: { key: string }
   invalid_enum: { options: string }
