@@ -33,6 +33,8 @@ export type UiMessageParams = {
   color_mode_light: NoParams
   color_mode_dark: NoParams
   color_mode_system: NoParams
+  help_link: NoParams
+  help_link_label: NoParams
   session_loading: NoParams
   session_not_found: NoParams
   damaged_title: NoParams
@@ -370,6 +372,8 @@ const fr: Dictionary<UiMessageParams> = {
   color_mode_light: () => 'Clair',
   color_mode_dark: () => 'Sombre',
   color_mode_system: () => 'Système',
+  help_link: () => 'Aide',
+  help_link_label: () => 'Aide (nouvel onglet)',
   session_loading: () => 'Chargement de la session…',
   session_not_found: () => 'Session introuvable',
   damaged_title: () => 'Cette session est endommagée',
@@ -666,6 +670,8 @@ const en: Dictionary<UiMessageParams> = {
   color_mode_light: () => 'Light',
   color_mode_dark: () => 'Dark',
   color_mode_system: () => 'System',
+  help_link: () => 'Help',
+  help_link_label: () => 'Help (opens in a new tab)',
   session_loading: () => 'Loading session…',
   session_not_found: () => 'Session not found',
   damaged_title: () => 'This session is damaged',

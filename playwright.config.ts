@@ -15,7 +15,9 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     // `exec` sur le binaire de vite : Playwright arrête alors bien le serveur (via `pnpm preview`, il restait orphelin).
-    command: 'pnpm build && exec node_modules/.bin/vite preview --port 4173 --strictPort',
+    // La doc est construite après l'app : `pnpm build` vide `dist/`, `docs:build` écrit dans `dist/docs/`.
+    command:
+      'pnpm build && pnpm docs:build && exec node_modules/.bin/vite preview --port 4173 --strictPort',
     url: 'http://localhost:4173/questionator-z4000-hyperdrive/',
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

@@ -2,7 +2,13 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { findMissing, listDistFiles, main, readPrecacheUrls } from './check-precache.ts'
+import {
+  findDocsEntries,
+  findMissing,
+  listDistFiles,
+  main,
+  readPrecacheUrls,
+} from './check-precache.ts'
 
 const SW_EXTRACT =
   'e.precacheAndRoute([{url:"students.example.csv",revision:"65a0fb9fcfd6dbe3371e8299bf0158c4"},' +
@@ -95,4 +101,27 @@ describe('main', () => {
     })
     expect(main(root, () => undefined)).toBe(0)
   })
+})
+
+it('ignore le dossier docs/ de premier niveau', () => {
+  const root = makeDist({ 'index.html': '', 'docs/index.html': '', 'docs/assets/a.js': '' })
+  expect(listDistFiles(root)).toEqual(['index.html'])
+})
+
+describe('findDocsEntries', () => {
+  it('nomme les entrées de la doc', () => {
+    expect(findDocsEntries(['index.html', 'docs/index.html'])).toEqual(['docs/index.html'])
+  })
+})
+
+it('main échoue si la doc est pré-cachée', () => {
+  const root = makeDist({ 'sw.js': swWith('index.html', 'docs/index.html'), 'index.html': '' })
+  const errors: string[] = []
+  expect(main(root, (line) => errors.push(line))).not.toBe(0)
+  expect(errors.join('\n')).toContain('docs/index.html')
+})
+
+it('main passe quand la doc est dans dist mais hors pré-cache', () => {
+  const root = makeDist({ 'sw.js': swWith('index.html'), 'index.html': '', 'docs/index.html': '' })
+  expect(main(root, () => {})).toBe(0)
 })

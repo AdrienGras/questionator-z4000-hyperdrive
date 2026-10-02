@@ -8,6 +8,8 @@ Tout tourne dans le navigateur : aucune donnée ne quitte la machine de l'examin
 
 **Application :** https://adriengras.github.io/questionator-z4000-hyperdrive/
 
+**Documentation :** https://adriengras.github.io/questionator-z4000-hyperdrive/docs/
+
 > Projet en cours de construction. La spécification complète est dans [`PRODUCT.md`](PRODUCT.md).
 
 ## Usage prévu
@@ -44,6 +46,8 @@ pnpm check      # format, lint, dépendances, types, tests (comme la CI, hors bu
 pnpm deps       # sens des imports entre dossiers (dependency-cruiser)
 pnpm build      # build de production dans dist/ (avec le service worker)
 pnpm preview    # sert dist/ pour tester le hors ligne
+pnpm docs:dev   # site de documentation (VitePress), sur http://localhost:5173/questionator-z4000-hyperdrive/docs/
+pnpm docs:build # construit la documentation dans dist/docs/ (après pnpm build)
 ```
 
 ## Conventions

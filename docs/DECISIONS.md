@@ -1442,3 +1442,25 @@ autre encodage 8 bits.
 **Pourquoi** : une image unique, légère et autonome, que GitHub affiche sans neutraliser ; les garde-fous automatiques évitent qu'une retouche à la main dégrade le rendu sans que personne ne s'en aperçoive.
 
 **Révision (2026-10-02, spec « Révision 2 — scène de salle »)** : retour de l'utilisateur sur la première version : ni l'oral, ni les deux écrans, ni le principe n'étaient compris. La fenêtre de navigateur cède la place à une salle d'oral vue de côté : un examinateur à son bureau avec son portable, un grand écran projeté, un étudiant debout face à l'écran. Les personnages sont simplifiés mais expressifs (bulle de choix, bulle de réponse orale). Les deux écrans montrent la même question et diffèrent surtout par ce que seul le portable montre (encadré vert de la réponse attendue, boutons de note) et par le score, affiché sur l'écran projeté seul. Puis la vue zoome dans l'écran du portable pour les statistiques et l'export Excel. La boucle passe à 18 s (titre 0-2 s, préparation 2-4 s, passage de A 4-10 s, B et C en accéléré 10-12 s, zoom stats 12-15 s, export 15-18 s, retour au titre 17,7-18 s). Le mouvement réduit fige la salle au moment de la note (question projetée, réponse attendue et note sur le portable, score affiché). Texte alternatif refait pour dire le principe (oral, deux écrans, note), dans `<desc>` et dans le README. Seuls textes visibles : le titre, « +2 », le score et les noms de fichiers « config.json », « etudiants.csv », « .xlsx » (≥ 40 unités). La catégorie Normal prend l'icône Tabler `mountain` et non le `brand-php` de la config d'exemple : l'animation présente l'outil, pas une matière (choix de l'utilisateur).
+
+## D96 — F27 (#71) : site de documentation VitePress (2026-10-02)
+
+**Question** : avec quel outil, où et comment publier une documentation d'usage et de contribution à côté de l'application, sans toucher à son hors ligne ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Générateur | **VitePress `2.0.0-alpha.20`**, épinglé en version exacte | VitePress stable (`1.6.4`, août 2025) dépend de Vite 5 (hors support) et de Shiki 2 : il ajouterait un second Vite et un second Shiki à l'arbre. La 2.0 alpha dépend de Vite 8 et Shiki 4, comme l'application (`pnpm why vite` : une seule version, 8.3.0). Risque assumé : l'API peut bouger d'une alpha à l'autre ; chaque montée est manuelle. Starlight écarté : écosystème Astro en plus pour un site squelette. |
+| Emplacement | Sources dans `site/`, pas dans `docs/` | `docs/` porte la mémoire projet, que VitePress publierait, et le hook `SessionStart` classe les `docs/*.md` de la racine. |
+| URL | `cleanUrls` désactivé (URL en `.html`) ; base `/questionator-z4000-hyperdrive/docs/`, sortie `dist/docs/` | Fonctionne tel quel sur GitHub Pages et en `vite preview` (avec la barre finale), sans réécriture. |
+| Hors ligne | La doc n'est **pas** pré-cachée ; le service worker de l'app la laisse passer au réseau | Le pré-cache vise l'app (F17). La doc hors ligne est au BACKLOG. |
+| Formatage | oxfmt couvre `site/**/*.{ts,css}` ; les `.md` restent ignorés | `**/*.md` est déjà ignoré dans tout le dépôt (`.oxfmtrc.json`). |
+| Accent | Rose du soleil de l'icône : `#c4126e` en clair (5,74:1 sur blanc), `#ff2d95` en sombre (4,96:1 sur `#1b1b1f`) | `#ff2d95` sur blanc tombe à ~3,4:1 ; `#e0197f` aurait donné 4,55 sur blanc mais 3,77 en sombre. Habillage limité au logo et à l'accent. |
+| Vue projetée | Pas de lien « Aide » | Elle n'utilise pas `PageShell` et s'adresse à l'étudiant. |
+| Denylist du service worker | `navigateFallbackDenylist: [/\/docs(?:[/?]\|$)/]` et `globIgnores: ['docs/**']` | Sans cela, le repli de navigation du SW servirait l'`index.html` de l'app sur `/docs/`. Le motif couvre `…/docs/…`, `…/docs` sans barre finale (`$`) et `…/docs?…`, sans écarter `/docsfoo` (constante testée dans `vite/docs-navigation-denylist.ts`). |
+| Garde `check:precache` | Ignore le `dist/docs/` de premier niveau et échoue si une URL du manifeste commence par `docs/` (`findDocsEntries`) | Empêche qu'un changement de config pré-cache la doc sans que la CI le voie. |
+| Garde-fous | Lien mort = `docs:build` en échec (vérifié) ; copie du logo verrouillée par `scripts/site-logo.test.ts` ; libellés du thème et 12 clés de recherche locale traduits, contrôlés contre `default-theme.d.ts` / `local-search.d.ts` | Le build échoue plutôt que de publier une doc cassée ; les traductions sont à refaire à chaque montée de VitePress. |
+| CI et e2e | Étape « Build de la doc » après « Build », avec contrôle de la base des assets ; le `webServer` de Playwright construit l'app puis la doc ; `e2e/docs.spec.ts` (4 tests, sous contrôle du SW) | La doc est testée telle que déployée. |
+
+**Pourquoi** : une doc publiée avec l'app, sans second Vite, sans effet sur le pré-cache ni sur le hors ligne, et dont les régressions probables (lien mort, SW qui avale `/docs/`) font échouer la CI.
