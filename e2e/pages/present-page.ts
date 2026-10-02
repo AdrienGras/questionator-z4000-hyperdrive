@@ -13,7 +13,7 @@ export class PresentPage {
   /** Tous les blocs de code colorés (`pre` marqué `data-highlighted="true"`). */
   readonly highlightedBlocks: Locator
 
-  private readonly page: Page
+  readonly page: Page
 
   constructor(page: Page) {
     this.page = page
