@@ -15,7 +15,7 @@ type StudentTabProps = Readonly<{
   onEditScore: (attemptId: string, score: number) => void
   /** `CommentField` de l'étudiant, monté par l'appelant avec `key={student.id}`. */
   commentSlot?: ReactNode
-  /** `AbsentToggle` de l'étudiant. */
+  /** `AbsentButton` de l'étudiant. */
   absentSlot?: ReactNode
 }>
 

@@ -11,6 +11,7 @@ Voir aussi : `ENVIRONMENT.md` · `DECISIONS.md` · `QUIRKS.md` · `BACKLOG.md` �
 
 | Feature | Date | Spec | Plan | Statut | Notes |
 |---|---|---|---|---|---|
+| F38 — Panneau ouvert sur l'étudiant, absence en bouton d'action (#101) | 2026-10-02 | — (issue) | — | Livré | `useSidePanel` sans mémoire (`show()` → « Étudiant »), `side-panel-state.ts` supprimé ; `AbsentToggle` → `AbsentButton` (plein dans l'onglet « Étudiant », `compact` sur chaque ligne de la liste, sans changer l'étudiant actif) ; D91 |
 | F37 — Barème des catégories en points, affichable sur l'écran étudiant (#100) | 2026-10-02 | — (issue) | — | Livré | « 2 pts » / « 1 pt » sur la grille examinateur (toujours) et les tuiles projetées ; clé `presentation.showCategoryPoints` (défaut `true`), à `false` `maxPoints` est retiré de la vue projetée ; `formatRawScore` extrait de `formatScore` ; D90 |
 | Bug — aperçu de l'éditeur qui déborde sur un mot très long (#109) | 2026-10-02 | — (issue) | — | Livré | `wrap-anywhere` sur la carte `QuestionPreview` (en-tête, énoncé, réponse ; les blocs de code défilent toujours) ; e2e « un mot très long reste dans sa carte d'aperçu » (1280 et 375 px). Même défaut constaté sur l'écran de passage et la vue projetée, non corrigé (BACKLOG) |
 | Bug — pied de la modale de suppression qui déborde (#104) | 2026-10-02 | — (issue) | — | Livré | `DeleteDialog` élargie à `data-[size=default]:sm:max-w-md` (seule modale à trois boutons), titre en `wrap-anywhere` pour un nom insécable ; e2e `delete-dialog.spec.ts` (bureau, tablette, mobile ; boîtes des boutons et du cadre) |

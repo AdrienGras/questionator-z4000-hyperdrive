@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useFreshError, type Failure } from '@/features/session/hooks/use-fresh-error'
-import type { SidePanelTab } from '@/features/session/side-panel-state'
+import type { SidePanelTab } from '@/features/session/hooks/use-side-panel'
 import type { Ui } from '@/lib/i18n/use-ui'
 
 function isSidePanelTab(value: unknown): value is SidePanelTab {
@@ -13,7 +13,7 @@ function isSidePanelTab(value: unknown): value is SidePanelTab {
 
 /**
  * Panneau latéral de l'écran de passage (F21) : tiroir modal à droite, deux onglets. Composant
- * contrôlé : l'ouverture et l'onglet viennent de `useSidePanel` (seul l'onglet est mémorisé).
+ * contrôlé : l'ouverture et l'onglet viennent de `useSidePanel` (rien n'est mémorisé, D91).
  * Le contenu est démonté à la fermeture, ce qui flushe le commentaire en attente.
  *
  * `error` : dernière action refusée, montrée seulement si elle survient tiroir ouvert (une erreur

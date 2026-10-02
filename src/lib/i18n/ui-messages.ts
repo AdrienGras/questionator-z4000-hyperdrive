@@ -188,7 +188,10 @@ export type UiMessageParams = {
   comment_saving: NoParams
   comment_saved: NoParams
   comment_error: NoParams
-  absent_label: NoParams
+  absent_mark: NoParams
+  absent_unmark: NoParams
+  absent_mark_named: { name: string }
+  absent_unmark_named: { name: string }
   absent_title: { name: string }
   /** `count` : nombre de questions tirées que la déclaration d'absence supprime. */
   absent_body: { count: number }
@@ -465,7 +468,7 @@ const fr: Dictionary<UiMessageParams> = {
   passage_no_student_body: () =>
     'Choisissez un étudiant dans l’onglet « Étudiants » du panneau pour commencer le passage.',
   passage_absent_title: () => 'Étudiant absent',
-  passage_absent_body: () => 'Décochez « Absent » dans le panneau pour le faire passer.',
+  passage_absent_body: () => 'Cliquez « Marquer présent » dans le panneau pour le faire passer.',
   passage_done_title: () => 'Passage terminé',
   final_scores_heading: () => 'Notes',
   final_detail_heading: () => 'Détail du passage',
@@ -518,7 +521,10 @@ const fr: Dictionary<UiMessageParams> = {
   comment_saving: () => 'Enregistrement…',
   comment_saved: () => 'Enregistré',
   comment_error: () => 'Échec de l’enregistrement',
-  absent_label: () => 'Absent',
+  absent_mark: () => 'Marquer absent',
+  absent_unmark: () => 'Marquer présent',
+  absent_mark_named: ({ name }) => `Marquer ${name} absent`,
+  absent_unmark_named: ({ name }) => `Marquer ${name} présent`,
   absent_title: ({ name }) => `Déclarer ${name} absent ?`,
   absent_body: ({ count }) =>
     `Ce passage contient ${count} ${plural(count, 'question tirée', 'questions tirées')}. Déclarer l’étudiant absent les supprime. Le commentaire est conservé.`,
@@ -752,7 +758,7 @@ const en: Dictionary<UiMessageParams> = {
   passage_no_student_title: () => 'No student selected',
   passage_no_student_body: () => 'Pick a student in the panel’s “Students” tab to start.',
   passage_absent_title: () => 'Student absent',
-  passage_absent_body: () => 'Uncheck “Absent” in the panel to examine them.',
+  passage_absent_body: () => 'Click “Mark present” in the panel to examine them.',
   passage_done_title: () => 'Exam complete',
   final_scores_heading: () => 'Scores',
   final_detail_heading: () => 'Exam breakdown',
@@ -804,7 +810,10 @@ const en: Dictionary<UiMessageParams> = {
   comment_saving: () => 'Saving…',
   comment_saved: () => 'Saved',
   comment_error: () => 'Saving failed',
-  absent_label: () => 'Absent',
+  absent_mark: () => 'Mark absent',
+  absent_unmark: () => 'Mark present',
+  absent_mark_named: ({ name }) => `Mark ${name} absent`,
+  absent_unmark_named: ({ name }) => `Mark ${name} present`,
   absent_title: ({ name }) => `Mark ${name} as absent?`,
   absent_body: ({ count }) =>
     `This exam has ${count} ${pluralEn(count, 'drawn question', 'drawn questions')}. Marking the student absent deletes them. The comment is kept.`,

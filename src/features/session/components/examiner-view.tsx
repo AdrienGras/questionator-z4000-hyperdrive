@@ -14,7 +14,7 @@ import type { Failure } from '@/features/session/hooks/use-fresh-error'
 import { useSidePanel } from '@/features/session/hooks/use-side-panel'
 import { studentStanding } from '@/features/session/student-standing'
 import { useUi, type Ui } from '@/lib/i18n/use-ui'
-import { AbsentToggle } from './absent-toggle'
+import { AbsentButton } from './absent-button'
 import { CommentField } from './comment-field'
 import { ExportButton } from './export-button'
 import { PassageBody } from './passage-body'
@@ -96,12 +96,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
         title={config.exam.title}
         meta={<PassageMeta ui={ui} config={config} student={student} standing={standing} />}
         actions={
-          <Button
-            ref={panelButton}
-            type="button"
-            variant="outline"
-            onClick={() => panel.setOpen(true)}
-          >
+          <Button ref={panelButton} type="button" variant="outline" onClick={() => panel.show()}>
             <IconLayoutSidebarRight aria-hidden />
             {ui.text('side_panel_open', {})}
           </Button>
@@ -161,6 +156,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
               activeStudentId={student?.id}
               disabled={actions.busy}
               onSelect={(studentId) => void selectStudent(studentId)}
+              onSetAbsent={actions.setAbsent}
               onAdd={addStudent}
               actionsSlot={
                 <div className="flex flex-wrap items-start gap-2">
@@ -202,7 +198,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
               }
               absentSlot={
                 student && (
-                  <AbsentToggle
+                  <AbsentButton
                     ui={ui}
                     student={student}
                     disabled={actions.busy}

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import type { Session } from '@/domain/session/types'
 import type { WriteOutcome } from '@/features/session/hooks/use-passage-actions'
 import type { Ui } from '@/lib/i18n/use-ui'
@@ -10,9 +10,14 @@ type StudentsTabProps = Readonly<{
   session: Session
   /** Id résolu : un id qui ne désigne plus d'étudiant ne surligne aucune ligne. */
   activeStudentId: string | undefined
-  /** Verrouille les seuls boutons d'envoi du dialogue : les lignes gardent le focus clavier. */
+  /**
+   * Verrouille les boutons d'envoi du dialogue et les boutons d'absence : les lignes elles-mêmes
+   * gardent le focus clavier.
+   */
   disabled: boolean
   onSelect: (studentId: string) => void
+  /** Absence d'une ligne, sans changer l'étudiant actif (F38). */
+  onSetAbsent: ComponentProps<typeof StudentRow>['onSetAbsent']
   onAdd: (
     names: { lastName: string; firstName: string },
     options: { activate: boolean },
@@ -21,13 +26,17 @@ type StudentsTabProps = Readonly<{
   actionsSlot?: ReactNode
 }>
 
-/** Onglet « Étudiants » : liste triée par `order`, changement d'étudiant actif au clic. */
+/**
+ * Onglet « Étudiants » : liste triée par `order`, changement d'étudiant actif au clic sur la ligne,
+ * absence par le bouton de la ligne (sans changer l'étudiant actif).
+ */
 export function StudentsTab({
   ui,
   session,
   activeStudentId,
   disabled,
   onSelect,
+  onSetAbsent,
   onAdd,
   actionsSlot,
 }: StudentsTabProps) {
@@ -45,6 +54,8 @@ export function StudentsTab({
             student={student}
             active={student.id === activeStudentId}
             projected={projection.mode === 'student' && projection.studentId === student.id}
+            disabled={disabled}
+            onSetAbsent={onSetAbsent}
             // Garde : recliquer l'étudiant actif n'écrit rien.
             onSelect={(studentId) => {
               if (studentId !== activeStudentId) onSelect(studentId)

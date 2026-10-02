@@ -47,7 +47,7 @@ test('fermé au chargement ; « Panneau » l’ouvre sur l’onglet « Étudiant
   )
 })
 
-test('onglet « Étudiants » mémorisé : rouvert dessus après fermeture et après remontage', async () => {
+test('« Panneau » rouvre sur « Étudiant » après un passage sur « Étudiants », même après remontage (D91)', async () => {
   const { unmount } = await mount(makeStudent([2, 1], { finalRevealedAt: REVEALED }))
 
   await openSidePanel('Étudiants')
@@ -56,21 +56,21 @@ test('onglet « Étudiants » mémorisé : rouvert dessus après fermeture et ap
   await expectPanelClosed()
 
   let dialog = await openSidePanel()
-  expect(within(dialog).getByRole('tab', { name: 'Étudiants' })).toHaveAttribute(
+  expect(within(dialog).getByRole('tab', { name: 'Étudiant' })).toHaveAttribute(
     'aria-selected',
     'true',
   )
+  // Rien n'est mémorisé, pas même l'onglet.
+  expect(localStorage.getItem('questionator:side-panel:tab')).toBeNull()
   unmount()
   await mount(makeStudent([2, 1], { finalRevealedAt: REVEALED }))
 
-  // Fermé au remontage, même ouvert juste avant : seul l'onglet est mémorisé.
   expect(screen.queryByRole('dialog', { name: 'Panneau latéral' })).not.toBeInTheDocument()
   dialog = await openSidePanel()
-  expect(within(dialog).getByRole('tab', { name: 'Étudiants' })).toHaveAttribute(
+  expect(within(dialog).getByRole('tab', { name: 'Étudiant' })).toHaveAttribute(
     'aria-selected',
     'true',
   )
-  expect(within(dialog).getByRole('list', { name: 'Étudiants de la session' })).toBeVisible()
 })
 
 test('onglets sur toute la largeur', async () => {

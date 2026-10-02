@@ -1370,3 +1370,15 @@ autre encodage 8 bits.
 - Sessions et backups antérieurs : rien à migrer, `checkStoredSession` repasse la config par `validateConfig`, qui applique le défaut.
 
 **Pourquoi** : l'unité lève l'ambiguïté sans ajouter de texte. Montrer le barème à l'étudiant l'aide à choisir sa difficulté, mais certains examinateurs préfèrent ne pas l'afficher ; le défaut suit l'usage le plus courant.
+
+## D91 — F38 (#101) : panneau toujours rouvert sur « Étudiant », absence en bouton d'action (2026-10-02)
+
+**Question** : l'onglet mémorisé (D76) rouvrait le panneau sur la liste une fois qu'on y était passé, et déclarer un étudiant absent obligeait à le rendre actif puis à chercher une case à cocher en bas de l'onglet « Étudiant ». Comment rendre ces deux gestes directs ?
+
+**Décision** :
+- Remplace l'onglet mémorisé de D76 : `useSidePanel` ne lit ni n'écrit plus rien, `side-panel-state.ts` est supprimé. `show()` ouvre sur « Étudiant » par défaut, et c'est ce que fait le bouton « Panneau ». Le changement d'onglet tiroir ouvert reste libre ; les ouvertures ciblées (« aucun étudiant » → « Étudiants », absent → « Étudiant ») sont inchangées. L'ancienne clé `questionator:side-panel:tab` n'est plus lue, une valeur orpheline peut subsister.
+- `AbsentToggle` devient `AbsentButton` : « Marquer absent » / « Marquer présent », même dialogue de confirmation (D67, issue `written` / `failed` / `ignored`). Variante pleine dans l'onglet « Étudiant », variante `compact` (icône, infobulle, nom accessible « Marquer Durand Alice absent ») à côté du bouton de chaque ligne de la liste, jamais dedans.
+- Depuis la liste, l'action vise l'étudiant de la ligne, sans le rendre actif : le tiroir reste ouvert (D76 ne le ferme qu'au changement d'étudiant actif). Le bouton est désactivé pendant une écriture, la ligne garde le focus clavier.
+- `absent_label` retiré ; `absent_mark`, `absent_unmark`, `absent_mark_named` et `absent_unmark_named` ajoutés (FR, EN). Le texte de l'état absent renvoie à « Marquer présent ».
+
+**Pourquoi** : pendant un oral, on ouvre le panneau pour l'étudiant en cours ; la liste est un détour ponctuel. L'absence est une action (elle supprime parfois des questions), pas un état à cocher, et elle concerne souvent un étudiant qui n'est pas encore actif.

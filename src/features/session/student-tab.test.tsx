@@ -13,7 +13,7 @@ import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent, makeSecondStudent } from '@/testing/student-fixtures'
 import { storedSession as stored, storedStudent } from '@/testing/stored-session'
 
-const ABSENT_BODY = 'Décochez « Absent » dans le panneau pour le faire passer.'
+const ABSENT_BODY = 'Cliquez « Marquer présent » dans le panneau pour le faire passer.'
 /** Au-delà du délai de sauvegarde différée (500 ms). */
 const AFTER_DELAY = { timeout: 2000 }
 
@@ -42,8 +42,9 @@ function commentBox(): HTMLElement {
   return within(panel()).getByRole('textbox', { name: 'Commentaire' })
 }
 
-function absentBox(): HTMLElement {
-  return within(panel()).getByRole('checkbox', { name: 'Absent' })
+/** Bouton d'absence de l'onglet « Étudiant » (« Marquer absent » ou « Marquer présent »). */
+function absentButton(): HTMLElement {
+  return within(panel()).getByRole('button', { name: /^Marquer (absent|présent)$/ })
 }
 
 beforeEach(async () => {
@@ -152,7 +153,7 @@ test('commentaire tapé puis passage à l’onglet « Étudiants » : enregistr�
 
   fireEvent.change(commentBox(), { target: { value: 'Pour Alice' } })
   fireEvent.click(within(panel()).getByRole('tab', { name: 'Étudiants' }))
-  fireEvent.click(within(panel()).getByRole('button', { name: /Martin Bob/ }))
+  fireEvent.click(within(panel()).getByRole('button', { name: /^Martin Bob/ }))
 
   await waitFor(async () => expect((await stored()).activeStudentId).toBe('student-2'))
   await waitFor(async () => expect((await storedStudent('student-1')).comment).toBe('Pour Alice'))
@@ -167,12 +168,12 @@ test('absent sans question tirée : écrit sans dialogue, écran d’absence', a
   await mount([makeStudent([])])
   await grid()
 
-  fireEvent.click(absentBox())
+  fireEvent.click(absentButton())
 
   expect(await screen.findByText(ABSENT_BODY)).toBeInTheDocument()
   expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
   expect((await storedStudent()).absent).toBe(true)
-  expect(absentBox()).toBeChecked()
+  expect(absentButton()).toHaveAccessibleName('Marquer présent')
 })
 
 test('absent avec questions tirées : « Annuler » n’écrit rien', async () => {
@@ -180,7 +181,7 @@ test('absent avec questions tirées : « Annuler » n’écrit rien', async () =
   await grid()
   const before = await stored()
 
-  fireEvent.click(absentBox())
+  fireEvent.click(absentButton())
   const dialog = await screen.findByRole('alertdialog', { name: 'Déclarer Durand Alice absent ?' })
   expect(dialog).toHaveTextContent(
     'Ce passage contient 2 questions tirées. Déclarer l’étudiant absent les supprime. Le commentaire est conservé.',
@@ -189,14 +190,14 @@ test('absent avec questions tirées : « Annuler » n’écrit rien', async () =
 
   await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
   expect(await stored()).toEqual(before)
-  expect(absentBox()).not.toBeChecked()
+  expect(absentButton()).toHaveAccessibleName('Marquer absent')
 })
 
 test('absent avec questions tirées : « Déclarer absent » vide les attempts, garde le commentaire', async () => {
   await mount([makeStudent([2, 1], { comment: 'À revoir' })])
   await grid()
 
-  fireEvent.click(absentBox())
+  fireEvent.click(absentButton())
   const dialog = await screen.findByRole('alertdialog', { name: 'Déclarer Durand Alice absent ?' })
   fireEvent.click(within(dialog).getByRole('button', { name: 'Déclarer absent' }))
 
@@ -208,7 +209,7 @@ test('absent avec questions tirées : « Déclarer absent » vide les attempts, 
   expect(student.comment).toBe('À revoir')
 })
 
-test('terminé, révélé et ajusté : absent puis décoché revient à la grille, sans ajustement', async () => {
+test('terminé, révélé et ajusté : absent puis présent revient à la grille, sans ajustement', async () => {
   await mount(
     [
       makeStudent([2, 1], {
@@ -221,13 +222,13 @@ test('terminé, révélé et ajusté : absent puis décoché revient à la grill
   )
   await screen.findByRole('heading', { name: 'Passage terminé', hidden: true })
 
-  fireEvent.click(absentBox())
+  fireEvent.click(absentButton())
   const dialog = await screen.findByRole('alertdialog', { name: 'Déclarer Durand Alice absent ?' })
   fireEvent.click(within(dialog).getByRole('button', { name: 'Déclarer absent' }))
   expect(await screen.findByText(ABSENT_BODY)).toBeInTheDocument()
-  await waitFor(() => expect(absentBox()).toBeEnabled())
+  await waitFor(() => expect(absentButton()).toBeEnabled())
 
-  fireEvent.click(absentBox())
+  fireEvent.click(absentButton())
 
   expect(await grid()).toBeInTheDocument()
   const student = await storedStudent()
@@ -243,7 +244,7 @@ test('échec d’écriture sur « Déclarer absent » : dialogue ouvert avec le 
   await mount([makeStudent([2, 1])])
   await grid()
 
-  fireEvent.click(absentBox())
+  fireEvent.click(absentButton())
   const dialog = await screen.findByRole('alertdialog')
   vi.spyOn(db.sessions, 'put').mockRejectedValueOnce(new Error('disque plein'))
   fireEvent.click(within(dialog).getByRole('button', { name: 'Déclarer absent' }))
@@ -257,12 +258,12 @@ test('échec d’écriture sur « Déclarer absent » : dialogue ouvert avec le 
   expect(student.attempts).toHaveLength(2)
 })
 
-test('décocher absent sans dialogue, écriture en échec : l’alerte de page reste affichée', async () => {
+test('marquer présent sans dialogue, écriture en échec : l’alerte de page reste affichée', async () => {
   await mount([makeStudent([], { absent: true })])
   await screen.findByText(ABSENT_BODY)
   vi.spyOn(db.sessions, 'put').mockRejectedValueOnce(new Error('disque plein'))
 
-  fireEvent.click(absentBox())
+  fireEvent.click(absentButton())
 
   expect(await screen.findByRole('alert')).toHaveTextContent('Rechargez la page')
   expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
@@ -275,7 +276,7 @@ test('dialogue d’absence ouvert pour Alice, Bob devient actif ailleurs : c’e
   await mount([makeStudent([2, 1]), { ...makeSecondStudent(), attempts: bobAttempts }])
   await grid()
 
-  fireEvent.click(absentBox())
+  fireEvent.click(absentButton())
   const dialog = await screen.findByRole('alertdialog', { name: 'Déclarer Durand Alice absent ?' })
   // Un autre onglet change l'étudiant actif pendant que le dialogue est ouvert.
   await updateSession('session-1', (s) => setActiveStudent(s, 'student-2'))

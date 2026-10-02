@@ -1,3 +1,4 @@
+import type { ComponentProps } from 'react'
 import { IconDeviceDesktop } from '@tabler/icons-react'
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import { rosterScore } from '@/domain/passage/selectors'
@@ -7,6 +8,7 @@ import type { Student } from '@/domain/session/types'
 import { STATUS_KEY } from '@/features/session/student-status-label'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
+import { AbsentButton } from './absent-button'
 
 type StudentRowProps = Readonly<{
   ui: Ui
@@ -14,7 +16,10 @@ type StudentRowProps = Readonly<{
   student: Student
   active: boolean
   projected: boolean
+  /** Verrouille le bouton d'absence pendant une écriture. */
+  disabled: boolean
   onSelect: (studentId: string) => void
+  onSetAbsent: ComponentProps<typeof AbsentButton>['onChange']
 }>
 
 /** Note de la ligne : « brute · finale » (« — » si non calculée), ou le libellé d'absence (D68). */
@@ -30,17 +35,29 @@ function scoreText(student: Student, config: NormalizedConfig, ui: Ui): string {
   })
 }
 
-/** Ligne de la liste des étudiants : identité, statut, projection, puis notes. */
-export function StudentRow({ ui, config, student, active, projected, onSelect }: StudentRowProps) {
+/**
+ * Ligne de la liste des étudiants : identité, statut, projection, puis notes, et le bouton
+ * d'absence à côté (jamais dans le bouton de sélection : pas de bouton imbriqué).
+ */
+export function StudentRow({
+  ui,
+  config,
+  student,
+  active,
+  projected,
+  disabled,
+  onSelect,
+  onSetAbsent,
+}: StudentRowProps) {
   const { text } = ui
   return (
-    <li>
+    <li className="flex items-start gap-1">
       <button
         type="button"
         aria-current={active ? 'true' : undefined}
         onClick={() => onSelect(student.id)}
         className={cn(
-          'flex w-full flex-col gap-1 rounded-lg border p-2 text-left text-sm transition-colors outline-none',
+          'flex min-w-0 flex-1 flex-col gap-1 rounded-lg border p-2 text-left text-sm transition-colors outline-none',
           'hover:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50',
           active && 'border-primary bg-accent hover:bg-accent',
         )}
@@ -63,6 +80,7 @@ export function StudentRow({ ui, config, student, active, projected, onSelect }:
           {scoreText(student, config, ui)}
         </span>
       </button>
+      <AbsentButton ui={ui} student={student} disabled={disabled} compact onChange={onSetAbsent} />
     </li>
   )
 }
