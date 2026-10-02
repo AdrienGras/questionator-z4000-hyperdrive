@@ -62,6 +62,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Accueil et backup
 
+- [ ] Carte de session de l'accueil : un nom sans espace ni tiret (ex. `Oral_de_rattrapage_…`) semble déborder de la carte sur mobile (vu en arrière-plan des captures de #104). À confirmer, puis `wrap-anywhere` sur le titre de `SessionCard` et `DamagedSessionCard`.
 - [x] Glisser-déposer : filet `window` (`dragleave` avec `relatedTarget === null`, `drop`) qui remet le compteur de `useFileDrop` à zéro si l'élément survolé est démonté pendant le glisser (son `dragleave` n'atteint pas React : la surimpression de l'accueil reste affichée jusqu'au dépôt suivant). Rare (ligne de session re-rendue par un autre onglet). → #87 *Fait en #87 (PR 2).*
 - [x] La clé `back_home` utilise une apostrophe droite alors que le reste de l'interface a `’` : harmoniser (e2e et tests à suivre). → #87 *Fait en #87 (PR 2).*
 - [x] Tests manquants : erreurs d'écriture (renommer, examinateur, suppression), réinitialisation du champ à la réouverture d'un dialogue, « toutes les issues » avec un décompte exact, `score` sur un attempt `skipped`, date locale vs UTC du nom de fichier (cas à 00:30). → #87 *Fait en #87 (PR 2).*
