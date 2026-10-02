@@ -1420,3 +1420,25 @@ autre encodage 8 bits.
 - **Instabilités e2e** : `CreateSessionPage.submit()` attend l'écran examinateur monté. Sans cela, `chooseColorMode` visait le bouton « Mode d'affichage » de l'écran de création ou de l'état de chargement, démonté juste après. Résultat : 1 échec sur 30 avant, 0 sur 100 après. Le test « Prête pour le hors ligne » attend le contrôle du service worker avant d'asserter le message, car le pré-cache dépasse 5 s sous charge. Suite complète rejouée 4 fois : 148 sur 148.
 
 **Pourquoi** : traiter ce qui se fait sans dette, tracer les mesures de ce qui est reporté pour ne pas refaire l'évaluation à l'aveugle.
+
+## D95 — #74 : animation du parcours en tête du README (2026-10-02)
+
+**Question** : comment remplacer `banner.webp` par une animation du parcours (config, étudiants, tirage, note, stats, export) qui s'affiche telle quelle dans le README GitHub ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Direction visuelle | Hybride : scène 1 synthwave (soleil rayé, grille en perspective, en géométrie simple), scènes 2-6 en interface épurée aux tokens de l'app *(scènes 2-6 remplacées par la salle d'oral, voir la Révision ci-dessous ; scène 1 inchangée)* | Garde l'identité du banner au moment où l'on présente le nom ; le parcours reste lisible ensuite. Choix de l'utilisateur. |
+| Cadrage | Scènes 2-6 dans une fenêtre de navigateur stylisée (barre, trois pastilles, fausse URL) ; vignette « vue projetée » pendant le passage | On voit tout de suite une app web, cohérent avec « tout tourne dans le navigateur ». La vignette évoque la double vue sans charger l'image. Choix de l'utilisateur. *(remplacé par la Révision ci-dessous : salle d'oral + zoom)* |
+| Production | SVG écrit à la main, un fichier, une timeline CSS commune (approche A) | Le ticket veut un fichier source unique et modifiable à la main ; un générateur créerait deux sources. SMIL écarté : il faudrait quand même du CSS pour les médias, deux systèmes mêlés. |
+| Emplacement | `assets/readme-hero.svg` (nouveau dossier, hors `public/`) | Pas publié avec l'app (ticket). |
+| Thème GitHub | Levé en premier par un SVG témoin ; résultat : mode `img`, un seul SVG avec son propre `@media (prefers-color-scheme: dark)`, pas de `<picture>` ni de variante sombre | Vérifié sur ordinateur, sur la page de la branche : le SVG affiché par `<img>` suit le thème réglé dans GitHub, pas celui de l'OS (sondes CLAIR / SOMBRE, les deux croisements). Application GitHub mobile non vérifiée (BACKLOG). |
+| Mouvement réduit | Scène 6 (export) figée | Ticket ; image fixe qui résume la fin du parcours. *(remplacé : salle figée au moment de la note)* |
+| `banner.webp` | Supprimé | Plus aucun usage hors plans et archives historiques, non réécrits. |
+
+`pnpm check:hero` (`scripts/check-readme-hero.ts`, dans `pnpm check` et en CI) refuse en plus tout `animation-delay` (les captures figées injectent un délai négatif pour arrêter l'animation à un instant donné) et tout `font-size` inférieur à 40 (lisibilité sur mobile, où l'image est réduite). Il contrôle aussi le poids (≤ 100 Ko), l'absence de script et de ressource externe, et le bloc `prefers-reduced-motion`. Il refuse enfin un `--` dans un commentaire : interdit en XML, il casse l'affichage en `<img>` (QUIRKS). La racine porte `width="1200" height="600"`, sans quoi un `<img>` sans taille l'affiche en 300 × 150.
+
+**Pourquoi** : une image unique, légère et autonome, que GitHub affiche sans neutraliser ; les garde-fous automatiques évitent qu'une retouche à la main dégrade le rendu sans que personne ne s'en aperçoive.
+
+**Révision (2026-10-02, spec « Révision 2 — scène de salle »)** : retour de l'utilisateur sur la première version : ni l'oral, ni les deux écrans, ni le principe n'étaient compris. La fenêtre de navigateur cède la place à une salle d'oral vue de côté : un examinateur à son bureau avec son portable, un grand écran projeté, un étudiant debout face à l'écran. Les personnages sont simplifiés mais expressifs (bulle de choix, bulle de réponse orale). Les deux écrans montrent la même question et diffèrent surtout par ce que seul le portable montre (encadré vert de la réponse attendue, boutons de note) et par le score, affiché sur l'écran projeté seul. Puis la vue zoome dans l'écran du portable pour les statistiques et l'export Excel. La boucle passe à 18 s (titre 0-2 s, préparation 2-4 s, passage de A 4-10 s, B et C en accéléré 10-12 s, zoom stats 12-15 s, export 15-18 s, retour au titre 17,7-18 s). Le mouvement réduit fige la salle au moment de la note (question projetée, réponse attendue et note sur le portable, score affiché). Texte alternatif refait pour dire le principe (oral, deux écrans, note), dans `<desc>` et dans le README. Seuls textes visibles : le titre, « +2 », le score et les noms de fichiers « config.json », « etudiants.csv », « .xlsx » (≥ 40 unités). La catégorie Normal prend l'icône Tabler `mountain` et non le `brand-php` de la config d'exemple : l'animation présente l'outil, pas une matière (choix de l'utilisateur).

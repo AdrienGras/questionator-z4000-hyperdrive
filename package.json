@@ -17,12 +17,13 @@
     "lint": "oxlint --type-aware --deny-warnings",
     "check:bundle": "node scripts/check-initial-bundle.ts",
     "check:precache": "node scripts/check-precache.ts",
+    "check:hero": "node scripts/check-readme-hero.ts",
     "check:budget": "node scripts/check-bundle-budget.ts",
     "icons": "node scripts/render-icons.ts",
     "deps": "depcruise src --config .dependency-cruiser.cjs",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "check": "pnpm format:check && pnpm lint && pnpm deps && pnpm typecheck && pnpm test"
+    "check": "pnpm format:check && pnpm lint && pnpm deps && pnpm typecheck && pnpm check:hero && pnpm test"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

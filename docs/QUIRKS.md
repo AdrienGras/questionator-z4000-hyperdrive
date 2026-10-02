@@ -713,3 +713,19 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : `CreateSessionPage.submit()` rendait la main dès le clic. `chooseColorMode` cliquait alors le bouton « Mode d'affichage » de l'écran de création (ou de l'état de chargement de la route, chargée à la demande), qui porte le même nom que celui de l'examinateur ; la navigation le démontait avec son menu. Attendre l'URL ne suffit pas : l'état de chargement a lui aussi ce bouton.
 **Workaround** : une méthode de Page Object qui mène à un autre écran attend un élément propre à cet écran (`submit()` attend le bouton « Panneau »). Pour vérifier : `pnpm e2e <spec> --repeat-each=100`.
 **Référence** : `e2e/pages/create-session-page.ts`, `e2e/color-mode.spec.ts`.
+
+## Un SVG affiché par `<img>` dans un README GitHub suit le thème GitHub, pas celui de l'OS (2026-10-02)
+
+**Découvert** : sonde CLAIR / SOMBRE sur la page de la branche, avant de dessiner l'animation du README (#74).
+**Symptôme** : on craignait que `@media (prefers-color-scheme: dark)` dans un SVG en `<img>` suive l'OS, ce qui aurait imposé `<picture>` et une variante sombre.
+**Cause** : GitHub évalue ce média selon le thème réglé dans GitHub. Vérifié sur ordinateur dans les deux croisements (GitHub sombre avec OS clair, et l'inverse).
+**Workaround** : aucun besoin. Un seul SVG avec son propre `@media (prefers-color-scheme: dark)` suffit, sans `<picture>`. Application GitHub mobile non vérifiée.
+**Référence** : `assets/readme-hero.svg`, D95.
+
+## Un SVG peut s'afficher inline et échouer en `<img>` : `--` dans un commentaire, taille intrinsèque absente (2026-10-02)
+
+**Découvert** : PR #120, à l'ouverture de `assets/readme-hero.svg` dans le navigateur (« Double hyphen within comment »).
+**Symptôme** : les captures de revue étaient correctes, mais le fichier ouvert seul affichait une erreur d'analyse ; en `<img>`, le README GitHub n'aurait rien montré. Sans `width` / `height` à la racine, un `<img>` sans taille l'affiche en 300 × 150 px.
+**Cause** : les captures inséraient le SVG dans une page HTML, dont l'analyseur tolère `--` dans un commentaire ; un SVG ouvert seul ou en `<img>` passe par l'analyseur XML strict (XML 1.0 §2.5 interdit `--` dans un commentaire, même pour citer une variable CSS). Le `viewBox` seul ne donne qu'un ratio, pas de taille.
+**Workaround** : ne jamais écrire `--` dans un commentaire XML (`check:hero` le refuse désormais) ; poser `width="1200" height="600"` à la racine (GitHub réduit par `max-width: 100%`). Vérifier un SVG par `page.goto('file://…')` ou un `<img>`, pas seulement inline.
+**Référence** : `assets/readme-hero.svg`, `scripts/check-readme-hero.ts`, D95.

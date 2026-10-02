@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-02 — #74 : animation du parcours en tête du README
+
+**Dernière chose faite** : `assets/readme-hero.svg` remplace `banner.webp` en tête du README (`banner.webp` supprimé). Première version (fenêtre de navigateur, 15 s) refaite après retour de l'utilisateur (ni l'oral ni les deux écrans n'étaient compris) : titre synthwave 0-2 s, puis une salle d'oral (groupes `#room` > `#around` (décor, `#projector`, examinateur, bureau, `#students`), `#laptop`, `#zoom`). A passe en entier (choix, tirage, réponse orale, note), B et C en accéléré, puis le portable grandit (12,3-13 s) et `#zoom` prend le relais : stats 13-15 s, export Excel 15-18 s, retour au titre 17,7-18 s. Boucle de 18 s, symboles Tabler 3.48.0. Les deux écrans diffèrent surtout par la réponse attendue et les boutons de note (portable seul) et par le score (écran projeté seul). Mouvement réduit = salle figée au moment de la note. Nouveau texte alternatif (`<desc>` et README). Sonde de thème : le SVG en `<img>` suit le thème GitHub (pas l'OS), donc mode `img`, pas de `<picture>` (QUIRKS, D95 et sa révision). `pnpm check:hero` dans `pnpm check` et la CI. Mémoire à jour (D95, INDEX, BACKLOG, QUIRKS).
+
+**Trucs en suspens** : PR en brouillon (`Closes #74`), Sonar, puis « Ready for review » ; merge sur go de l'utilisateur. Rendu dans l'application GitHub mobile (thème) non vérifié, noté au BACKLOG.
+
+**Prochaine chose à creuser** : #71 (F27), puis #72 / #73 ; ou #85 (Node 26) après le 2026-10-28.
+
+**Notes pour future Claude** : pour itérer sur le SVG, le charger en ligne dans Playwright et figer l'animation à l'instant t : injecter `animation-play-state: paused` et un `animation-delay` négatif sur tous les éléments (1 s = 5,5556 % de la timeline). C'est pourquoi le SVG lui-même ne doit jamais utiliser `animation-delay` (`check:hero` le refuse). Le SVG doit rester du XML strict : un `--` dans un commentaire ou un `&` nu, tolérés par un navigateur qui ouvre le fichier, cassent l'affichage en `<img>` ; vérifier par `python3 -c "import xml.dom.minidom as m; m.parse('assets/readme-hero.svg')"`. `#zoom` est rangé dans `#room` exprès : la salle s'efface d'un bloc sous le titre, sans que le contenu du portable agrandi transparaisse sous l'écran zoomé.
+
 ## 2026-10-02 — #118 : rapidfire du BACKLOG (débordements, « pt », taux)
 
 **Dernière chose faite** : PR #117 (#88) mergée sur go de l'utilisateur. Revue du BACKLOG à sa demande : rien de critique. Le seul bug de calcul (taux sur barème négatif) est inatteignable, car `negative_scale_value` et `zero_max_scale` le refusent. Ticket #118 créé au format des autres (P2, S) pour regrouper les petits correctifs, puis traité sur `fix/118-rapidfire-debordements` :
