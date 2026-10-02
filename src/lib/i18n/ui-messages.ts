@@ -120,7 +120,8 @@ export type UiMessageParams = {
   passage_raw_score: { score: string }
   passage_categories: NoParams
   /** `max` : plus grande valeur du barème, déjà mise en forme par l'appelant. */
-  passage_category_max: { max: string }
+  /** `max` : valeur formatée ; `points` : la même en nombre, pour l'accord (« 1,0 pt »). */
+  passage_category_max: { max: string; points: number }
   passage_category_exhausted: NoParams
   passage_answer: NoParams
   passage_score_heading: NoParams
@@ -451,7 +452,7 @@ const fr: Dictionary<UiMessageParams> = {
   passage_question_index: ({ current, total }) => `Question ${current} / ${total}`,
   passage_raw_score: ({ score }) => `Score brut : ${score}`,
   passage_categories: () => 'Choisir une catégorie',
-  passage_category_max: ({ max }) => `max ${max}`,
+  passage_category_max: ({ max, points }) => `${max} ${plural(points, 'pt', 'pts')}`,
   passage_category_exhausted: () => 'Plus de question disponible dans cette catégorie',
   passage_answer: () => 'Éléments de réponse',
   passage_score_heading: () => 'Note',
@@ -739,7 +740,7 @@ const en: Dictionary<UiMessageParams> = {
   passage_question_index: ({ current, total }) => `Question ${current} / ${total}`,
   passage_raw_score: ({ score }) => `Raw score: ${score}`,
   passage_categories: () => 'Choose a category',
-  passage_category_max: ({ max }) => `max ${max}`,
+  passage_category_max: ({ max, points }) => `${max} ${pluralEn(points, 'pt', 'pts')}`,
   passage_category_exhausted: () => 'No questions left in this category',
   passage_answer: () => 'Answer notes',
   passage_score_heading: () => 'Score',

@@ -114,7 +114,8 @@ Exemple :
     "finalScoreDisplay": "both",
     "showStatsOnFinal": false,
     "drawAnimation": true,
-    "defaultColorMode": "dark"
+    "defaultColorMode": "dark",
+    "showCategoryPoints": true
   },
   "theme": {
     "light": {
@@ -234,6 +235,7 @@ Champs :
 | `presentation.showStatsOnFinal` | booléen | non | Affiche le détail du passage sur l'écran final projeté. Défaut : `false`. |
 | `presentation.drawAnimation` | booléen | non | Animation lors du tirage. Défaut : `true`. |
 | `presentation.defaultColorMode` | `"light"` \| `"dark"` \| `"system"` | non | Défaut : `system`. |
+| `presentation.showCategoryPoints` | booléen | non | Affiche le maximum de points de chaque catégorie sur la vue projetée (« 2 pts »). L'écran examinateur l'affiche toujours. Défaut : `true`. |
 | `theme.light`, `theme.dark` | objet token → valeur CSS | non | Surcharge des variables CSS de shadcn/ui. Seuls les noms de tokens d'une liste blanche sont acceptés, alignée sur la version de shadcn/ui utilisée (couleurs de base, `chart-*`, `sidebar-*`, `radius`). Un token absent garde la valeur par défaut de shadcn. Les valeurs sont validées par le navigateur (`CSS.supports('color', …)`, `border-radius` pour `radius`) à la création de session. |
 | `categories[].id` | string | oui | Identifiant stable. |
 | `categories[].label` | string | oui | Libellé affiché. |
@@ -429,7 +431,7 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 **Contenu.**
 - Route `#/session/$sessionId` ; l'étudiant affiché est `session.activeStudentId`, lu en base (pas de paramètre d'URL).
 - En-tête : nom de l'étudiant, numéro de question (`2 / 3`), score cumulé brut.
-- Grille des catégories triées par `order`, avec libellé, valeur max, couleur et icône. Disposition selon leur nombre `n`, identique dans la vue projetée (F14) : 1 ligne jusqu'à 3 catégories, 2 jusqu'à 10, 3 au-delà ; chaque ligne compte ⌈n/r⌉ ou ⌊n/r⌋ tuiles, les plus longues en premier, tuiles de même largeur, ligne courte centrée (ex. 4 → 2 + 2, 7 → 4 + 3, 13 → 5 + 4 + 4). Toutes les catégories comptent, épuisées comprises : la disposition ne bouge pas pendant un passage. Une seule colonne sous 640 px (D74).
+- Grille des catégories triées par `order`, avec libellé, maximum du barème en points (« 2 pts », « 1 pt » ; toujours affiché), couleur et icône. Disposition selon leur nombre `n`, identique dans la vue projetée (F14) : 1 ligne jusqu'à 3 catégories, 2 jusqu'à 10, 3 au-delà ; chaque ligne compte ⌈n/r⌉ ou ⌊n/r⌋ tuiles, les plus longues en premier, tuiles de même largeur, ligne courte centrée (ex. 4 → 2 + 2, 7 → 4 + 3, 13 → 5 + 4 + 4). Toutes les catégories comptent, épuisées comprises : la disposition ne bouge pas pendant un passage. Une seule colonne sous 640 px (D74).
 - Une catégorie est grisée, avec une infobulle, si elle n'a plus de question disponible pour cet étudiant (toutes tirées, notées ou skippées).
 - Au clic sur une catégorie : tirage uniforme parmi les questions disponibles pour cet étudiant, via `crypto.getRandomValues` avec rejet des valeurs hors plage (pas de biais de modulo), source d'aléa injectable pour les tests. L'attempt `pending` est persisté immédiatement.
 - Tant qu'une question est `pending`, la grille est désactivée : il faut noter ou skipper.
@@ -516,7 +518,7 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 - Elle n'affiche que l'étudiant projeté (`projection`), jamais l'étudiant actif par défaut. Tout changement d'étudiant actif (liste, « Étudiant suivant », « Ajouter et faire passer ») remet la projection en attente si elle montrait un autre étudiant ; projection en attente ou déjà sur le nouvel actif : inchangée (D73).
 - Dans la vue examinateur, un bouton « Projeter cet étudiant » pousse l'étudiant actif, et un bouton « Écran d'attente » repasse en attente. Si l'étudiant actif n'est pas celui qui est projeté, un bandeau le signale.
 - Écran d'attente : titre de l'épreuve et message d'attente.
-- Écran étudiant : grille des catégories (même disposition que F09, D74), question tirée (énoncé seul), score cumulé si `showCumulativeScore`, note finale selon `finalScoreDisplay`, détail du passage si `showStatsOnFinal`. `converted` désigne ici la **note finale, ajustement compris** (« Note : 14,5 / 20 ») ; le montant et la justification de l'ajustement ne sont jamais affichés.
+- Écran étudiant : grille des catégories (même disposition que F09, D74), avec le maximum de points de chaque catégorie si `showCategoryPoints` (même libellé que l'examinateur, « 2 pts », « 1 pt »), question tirée (énoncé seul), score cumulé si `showCumulativeScore`, note finale selon `finalScoreDisplay`, détail du passage si `showStatsOnFinal`. `converted` désigne ici la **note finale, ajustement compris** (« Note : 14,5 / 20 ») ; le montant et la justification de l'ajustement ne sont jamais affichés.
 - La note finale n'apparaît qu'une fois `finalRevealedAt` renseigné, c'est-à-dire à la fermeture de la popup d'ajustement de F11 (enregistrer ou annuler). Avant : « Passage terminé » et, si `showCumulativeScore`, le score cumulé brut. Une modification ultérieure met à jour la note affichée sans la masquer.
 - Animation de tirage si `drawAnimation` : **neutre**, sans jamais afficher d'autre question que celle tirée (cartes retournées aux couleurs de la catégorie qui se mélangent ~1,5 s, puis l'une se retourne sur l'énoncé). Fondu simple si `prefers-reduced-motion`.
 - Synchronisation : la vue projetée lit IndexedDB via `liveQuery`. La réactivité entre fenêtres est vérifiée par F04 ; le repli sur BroadcastChannel n'est ajouté que si ce critère a échoué.

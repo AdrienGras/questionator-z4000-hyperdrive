@@ -137,6 +137,15 @@ describe('toProjectedView', () => {
     expect(view.categories.map((category) => category.exhausted)).toEqual([false, true])
   })
 
+  test('points des catégories : transmis par défaut, absents (pas seulement vides) sans showCategoryPoints', () => {
+    const student = makeStudent([])
+    const on = studentView(sessionOf(student))
+    expect(on.categories.map((category) => category.maxPoints)).toEqual([2, 4])
+    const off = studentView(sessionOf(student, { presentation: { showCategoryPoints: false } }))
+    expect(off.categories).toHaveLength(2)
+    for (const category of off.categories) expect('maxPoints' in category).toBe(false)
+  })
+
   test('cumul : absent sans showCumulativeScore, somme des points notés sinon', () => {
     const student = makeStudent([1.5, 2])
     const scoring = { questionsPerStudent: 3 } // passage en cours : le cumul reste affiché

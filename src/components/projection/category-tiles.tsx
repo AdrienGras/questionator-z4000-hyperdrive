@@ -2,6 +2,8 @@ import type { CSSProperties } from 'react'
 import { CategoryIcon } from '@/components/category-icon'
 import { CategoryLayout } from '@/components/category-layout'
 import type { ProjectedStudentView } from '@/domain/presentation/projected-view'
+import { formatRawScore } from '@/domain/scoring/format'
+import { toMilli } from '@/domain/scoring/milli'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
 
@@ -78,6 +80,15 @@ export function CategoryTiles({
               />
             )}
             <span className="font-semibold">{category.label}</span>
+            {/* Même libellé que la grille examinateur ; absent sans `showCategoryPoints`. */}
+            {category.maxPoints !== undefined && (
+              <span className="text-base text-muted-foreground">
+                {ui.text('passage_category_max', {
+                  max: formatRawScore(toMilli(category.maxPoints), ui.locale),
+                  points: category.maxPoints,
+                })}
+              </span>
+            )}
             {state === 'exhausted' && (
               <span className="text-base text-muted-foreground">
                 {ui.text('present_category_exhausted', {})}

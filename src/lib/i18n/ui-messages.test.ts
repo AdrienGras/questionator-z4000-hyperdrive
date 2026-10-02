@@ -116,7 +116,7 @@ const SAMPLE: UiMessageParams = {
   passage_question_index: { current: 1, total: 3 },
   passage_raw_score: { score: '2,5' },
   passage_categories: {},
-  passage_category_max: { max: '2' },
+  passage_category_max: { max: '2', points: 2 },
   passage_category_exhausted: {},
   passage_answer: {},
   passage_score_heading: {},
@@ -338,6 +338,17 @@ describe('UI_MESSAGES', () => {
     expect(t(UI_MESSAGES, 'en', 'preview_rounding', { mode: 'up', step: null, decimals: 2 })).toBe(
       'Rounded up, 2 decimals',
     )
+  })
+
+  test('passage_category_max : « pts » au pluriel, « pt » pour une valeur de 1, même formatée « 1,0 »', () => {
+    expect(t(UI_MESSAGES, 'fr', 'passage_category_max', { max: '2', points: 2 })).toBe('2 pts')
+    expect(t(UI_MESSAGES, 'fr', 'passage_category_max', { max: '1', points: 1 })).toBe('1 pt')
+    expect(t(UI_MESSAGES, 'fr', 'passage_category_max', { max: '1,0', points: 1 })).toBe('1,0 pt')
+    expect(t(UI_MESSAGES, 'fr', 'passage_category_max', { max: '2,5', points: 2.5 })).toBe(
+      '2,5 pts',
+    )
+    expect(t(UI_MESSAGES, 'en', 'passage_category_max', { max: '2', points: 2 })).toBe('2 pts')
+    expect(t(UI_MESSAGES, 'en', 'passage_category_max', { max: '1.0', points: 1 })).toBe('1.0 pt')
   })
 
   test('absent_body accorde le singulier et le pluriel', () => {

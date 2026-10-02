@@ -24,6 +24,21 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-02 — F37 (#100) : barème des catégories en points
+
+**Dernière chose faite** : PR #112 (#109) mergée sur go de l'utilisateur. #100 est passé en « In progress », branche `feat/f37-bareme-points`.
+- Libellé `passage_category_max` : « 2 pts », « 1 pt », avec un paramètre `points` pour l'accord.
+- La grille examinateur l'affiche toujours. Les tuiles projetées l'affichent selon la nouvelle clé `presentation.showCategoryPoints` (défaut `true`) : à `false`, `toProjectedView` ne transmet pas `maxPoints`.
+- `formatRawScore` est extrait de `formatScore` : la vue projetée n'a pas la config.
+- La clé est ajoutée au schéma, avec description et défaut, et documentée dans PRODUCT.md §6.2 et F09/F14 ainsi que dans `examples/config.example.json`. Décision D90.
+- Tests : i18n, normalisation, vue projetée (champ absent), tuiles, nouveau `category-grid.test.tsx`, session stockée sans la clé, e2e de survol dans l'éditeur.
+
+**Trucs en suspens** : PR en brouillon, Sonar, puis « Ready for review » ; merge sur go de l'utilisateur. Point à faire valider : l'accord français suit le helper `plural` existant (`> 1` donne le pluriel), donc « 1,5 pts ». La règle typographique stricte voudrait « 1,5 point » (singulier sous 2). Toujours en attente : le débordement sur un mot long dans l'écran de passage et la vue projetée (BACKLOG, #109), la carte de session de l'accueil (BACKLOG) et le taux de réussite avec un barème négatif.
+
+**Prochaine chose à creuser** : #101 (F38, panneau latéral ouvert sur l'étudiant, absence en bouton d'action), puis #102, #103, #88, #85.
+
+**Notes pour future Claude** : le test ponctuel `e2e/zz-adhoc.spec.ts`, avec captures dans le scratchpad puis supprimé, reste le moyen le plus rapide de regarder la vue projetée. `PresentPage.page` est privé, il faut passer par `page.waitForEvent('popup')`.
+
 ## 2026-10-02 — #109 : l'aperçu de l'éditeur coupe les mots très longs
 
 **Dernière chose faite** : PR #111 (#104) mergée sur go de l'utilisateur. #109 est passé en « In progress », branche `fix/109-apercu-mot-long`. Le correctif pose `wrap-anywhere` sur l'`article` de `QuestionPreview` : la propriété est héritée par l'en-tête (`id`, libellé) et par les Markdown, et les blocs de code continuent de défiler. Deux e2e dans `config-editor.spec.ts`, à 1280 et 375 px, avec une URL de 200 caractères, un `id` de 127 caractères et une ligne de code longue. Ils étaient rouges avant le correctif (2231 px de débordement).

@@ -15,6 +15,18 @@ describe('checkStoredSession', () => {
     expect(result).toEqual({ ok: true, session: richSession() })
   })
 
+  test('session créée avant showCategoryPoints (F37) : relue avec le défaut true', () => {
+    const session = richSession()
+    const { showCategoryPoints: _absent, ...older } = session.config.presentation
+    const result = checkStoredSession(
+      { ...session, config: { ...session.config, presentation: older } },
+      deps,
+    )
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.session.config.presentation.showCategoryPoints).toBe(true)
+  })
+
   test('question notée sans note', () => {
     const session = richSession()
     delete session.students[0]!.attempts[0]!.score

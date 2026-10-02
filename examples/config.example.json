@@ -33,7 +33,8 @@
     "finalScoreDisplay": "both",
     "showStatsOnFinal": false,
     "drawAnimation": true,
-    "defaultColorMode": "dark"
+    "defaultColorMode": "dark",
+    "showCategoryPoints": true
   },
   "theme": {
     "light": {

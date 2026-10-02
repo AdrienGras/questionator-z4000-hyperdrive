@@ -27,7 +27,8 @@ export type ProjectedView =
       categories: {
         id: string
         label: string
-        maxPoints: number
+        /** Absent sans `presentation.showCategoryPoints`. */
+        maxPoints?: number
         color?: string
         icon?: string
         exhausted: boolean
@@ -108,6 +109,7 @@ export function toProjectedView(session: Session): ProjectedView {
       : undefined
   if (student === undefined || student.absent) return { mode: 'waiting', examTitle, appearance }
 
+  const { presentation } = config
   const pending = currentPending(student)
   const finished = studentStatus(student, config) === 'done'
   // Une seule fois : score cumulé en cours de passage, note finale une fois révélée.
@@ -118,7 +120,6 @@ export function toProjectedView(session: Session): ProjectedView {
       : config.categories
           .find((c) => c.id === pending.categoryId)
           ?.questions.find((q) => q.id === pending.questionId)
-  const { presentation } = config
   const revealed = finished && student.finalRevealedAt !== undefined
 
   return {
@@ -129,7 +130,7 @@ export function toProjectedView(session: Session): ProjectedView {
     categories: config.categories.map((category) => ({
       id: category.id,
       label: category.label,
-      maxPoints: maxPointsOf(category),
+      ...(presentation.showCategoryPoints && { maxPoints: maxPointsOf(category) }),
       ...(category.color !== undefined && { color: category.color }),
       ...(category.icon !== undefined && { icon: category.icon }),
       exhausted: isCategoryExhausted(student, category),

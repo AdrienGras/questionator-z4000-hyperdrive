@@ -542,7 +542,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Découvert** : e2e de l'éditeur de config (F26).
 **Symptôme** : après avoir remplacé tout le texte (Ctrl+A puis saisie), un `.cm-lintRange-error` attendu près du début du document est introuvable dans le DOM, alors que l'issue est bien dans la liste.
 **Cause** : CodeMirror virtualise le rendu : seules les lignes proches de la zone visible existent dans le DOM. Après un remplacement, la vue est en fin de document.
-**Workaround** : amener la ligne à l'écran avant d'asserter (clic sur l'issue, qui appelle `reveal` et fait défiler), ou asserter sur l'état de l'éditeur plutôt que sur le DOM. Même chose pour la ligne active et les numéros de ligne.
+**Workaround** : amener la ligne à l'écran avant d'asserter (clic sur l'issue, qui appelle `reveal` et fait défiler), ou asserter sur l'état de l'éditeur plutôt que sur le DOM. Même chose pour la ligne active et les numéros de ligne. Pour un survol, `ControlOrMeta+Home` ramène en tête de document (survol de `showCategoryPoints`, F37). Une config réduite à la seule clé ne convient pas : ses erreurs à la racine empêchent l'infobulle du schéma.
 **Référence** : `e2e/config-editor.spec.ts`, `src/features/config-editor/components/json-editor.tsx`.
 
 ## Un fichier déposé sur CodeMirror est inséré par l'éditeur lui-même (2026-10-01)

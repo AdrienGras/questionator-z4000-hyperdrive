@@ -25,6 +25,7 @@ describe('normalize', () => {
         showStatsOnFinal: false,
         drawAnimation: true,
         defaultColorMode: 'system',
+        showCategoryPoints: true,
       },
       theme: { light: {}, dark: {} },
       categories: [
@@ -37,6 +38,12 @@ describe('normalize', () => {
         },
       ],
     })
+  })
+
+  test('showCategoryPoints : true par défaut, valeur explicite conservée', () => {
+    expect(normalize(minimalConfig()).presentation.showCategoryPoints).toBe(true)
+    const hidden = { ...minimalConfig(), presentation: { showCategoryPoints: false } }
+    expect(normalize(hidden).presentation.showCategoryPoints).toBe(false)
   })
 
   test('retire $schema et laisse locale absente', () => {
