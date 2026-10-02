@@ -215,6 +215,9 @@ test('premier chargement : « Prête pour le hors ligne » une seule fois, jusqu
 }) => {
   const offline = page.getByRole('status').filter({ hasText: 'Prête pour le hors ligne' })
   await new HomePage(page).goto()
+  // Le message suit la fin du pré-cache, qui peut dépasser le délai d'`expect` (5 s) quand la
+  // machine est chargée (#88) : attendre d'abord que le service worker contrôle la page.
+  await waitForController(page)
   await expect(offline).toBeVisible()
   await offline.getByRole('button', { name: 'OK' }).click()
   await expect(offline).toHaveCount(0)

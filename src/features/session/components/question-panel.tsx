@@ -46,7 +46,8 @@ export function QuestionPanel({
   }
 
   return (
-    <section className="flex flex-col gap-4">
+    // Région nommée comme sur la vue projetée : la question en cours s'atteint par son rôle.
+    <section aria-label={text('present_prompt_label', {})} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <span className="text-sm text-muted-foreground">{category.label}</span>
         <h2 className="text-lg font-semibold">{question.title}</h2>

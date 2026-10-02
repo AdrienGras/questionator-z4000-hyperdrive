@@ -141,7 +141,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 ## Le hook RTK réécrit `pnpm vitest` : sortie illisible et `.vitest/json/output.json` qui casse `pnpm check` (2026-09-25)
 
 **Découvert** : F03, implémentation en subagents.
-**Symptôme** : `pnpm vitest run <fichier>` (ou `rtk proxy pnpm vitest`) ne rend aucune sortie lisible, puis `pnpm check` échoue à l'étape Prettier sur `.vitest/json/output.json`.
+**Symptôme** : `pnpm vitest run <fichier>` (ou `rtk proxy pnpm vitest`) ne rend aucune sortie lisible, puis `pnpm check` échoue à l'étape de formatage (Prettier à l'époque, oxfmt depuis #88) sur `.vitest/json/output.json`.
 **Cause** : le hook Claude Code RTK réécrit la commande vers son filtre vitest, qui écrit un rapport JSON dans `.vitest/` à la racine.
 **Workaround** : lancer un test ciblé avec `./node_modules/.bin/vitest run <fichier>` ; `pnpm test` / `pnpm check` restent sûrs. `.vitest/` est désormais dans `.gitignore` ; supprimer le dossier s'il traîne. Autre forme lisible : `rtk proxy pnpm exec vitest run <fichier>` (sans `pnpm vitest`). **Ne pas lire `.vitest/json/output.json` pour conclure** : si le fichier de test échoue à l'import (module absent, phase rouge du TDD), le rapport n'est pas réécrit et montre encore le « passed » du lancement précédent (vu en F25, 2026-09-30).
 **Référence** : `.gitignore`, `docs/superpowers/plans/2026-09-25-f03-scoring.md`.
@@ -705,3 +705,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Workaround** : ancrer la regex au début (`/^Martin Bob/`, le bouton de sélection commence par le nom). Pour les lignes, partir des `listitem` et prendre le premier bouton de chacun (`buttons()` de `students-tab.test.tsx`).
 **Référence** : `src/features/session/components/student-row.tsx`, `src/features/session/students-tab.test.tsx`.
 
+
+## e2e : une action qui navigue doit attendre l'écran d'arrivée, sinon l'action suivante vise un bouton homonyme démonté (2026-10-02)
+
+**Découvert** : #88, `color-mode.spec.ts`, 1 échec sur 30 en `--repeat-each`.
+**Symptôme** : `waiting for getByRole('menuitemradio', { name: 'Sombre' })` jusqu'au délai de 30 s ; le snapshot montre l'examinateur, menu fermé.
+**Cause** : `CreateSessionPage.submit()` rendait la main dès le clic. `chooseColorMode` cliquait alors le bouton « Mode d'affichage » de l'écran de création (ou de l'état de chargement de la route, chargée à la demande), qui porte le même nom que celui de l'examinateur ; la navigation le démontait avec son menu. Attendre l'URL ne suffit pas : l'état de chargement a lui aussi ce bouton.
+**Workaround** : une méthode de Page Object qui mène à un autre écran attend un élément propre à cet écran (`submit()` attend le bouton « Panneau »). Pour vérifier : `pnpm e2e <spec> --repeat-each=100`.
+**Référence** : `e2e/pages/create-session-page.ts`, `e2e/color-mode.spec.ts`.

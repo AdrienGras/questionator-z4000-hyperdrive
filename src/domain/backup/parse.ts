@@ -9,7 +9,8 @@ import { checkStudentOrders } from './rules'
 import { checkStoredSession } from './stored-session'
 
 export type BackupParseResult =
-  { ok: true; session: Session } | { ok: false; issues: BackupIssue[] }
+  | { ok: true; session: Session }
+  | { ok: false; issues: BackupIssue[] }
 
 const BackupEnvelopeSchema = z.strictObject({
   format: z.literal(BACKUP_FORMAT),
