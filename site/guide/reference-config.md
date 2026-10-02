@@ -265,19 +265,19 @@ Le JSON Schema ne contrôle que la forme du fichier. À la création de la sessi
 
 Erreurs :
 
-- Les identifiants de catégories sont uniques, et ceux des questions le sont dans toute la config.
-- Deux identifiants qui ne diffèrent que par la façon dont un accent est saisi sont refusés.
-- Un identifiant ne commence ni ne finit par une espace.
-- Le barème (`scale`) d'une catégorie n'est pas vide, ne contient aucune valeur négative ni aucun doublon, et sa valeur maximale est supérieure à 0.
-- Chaque catégorie contient au moins une question.
-- La config contient au moins `scoring.questionsPerStudent` questions, plus `skips.maxPerStudent` si les skips sont activés.
-- `absent.value` est renseigné quand `absent.export` vaut `value`.
-- Chaque valeur de notation (`maxRawScore`, `finalScale`, `rounding.step`, `absent.value` et les valeurs des barèmes) a au plus trois décimales et ne dépasse pas 10 000 en valeur absolue.
-- Chaque couleur, `radius` compris, est une valeur CSS reconnue par le navigateur.
-- `scoring.finalScale` est un multiple du pas d'arrondi (`rounding.step`, ou 10 puissance moins `decimals` à défaut).
+- Les identifiants de catégories sont uniques, et ceux des questions le sont dans toute la config ([duplicate_category_id](./depannage#duplicate_category_id), [duplicate_question_id](./depannage#duplicate_question_id)).
+- Deux identifiants qui ne diffèrent que par la façon dont un accent est saisi sont refusés ([unicode_variant_id](./depannage#unicode_variant_id)).
+- Un identifiant ne commence ni ne finit par une espace ([padded_id](./depannage#padded_id)).
+- Le barème (`scale`) d'une catégorie n'est pas vide, ne contient aucune valeur négative ni aucun doublon, et sa valeur maximale est supérieure à 0 ([empty_scale](./depannage#empty_scale), [negative_scale_value](./depannage#negative_scale_value), [duplicate_scale_value](./depannage#duplicate_scale_value), [zero_max_scale](./depannage#zero_max_scale)).
+- Chaque catégorie contient au moins une question ([category_without_questions](./depannage#category_without_questions)).
+- La config contient au moins `scoring.questionsPerStudent` questions, plus `skips.maxPerStudent` si les skips sont activés ([not_enough_questions](./depannage#not_enough_questions)).
+- `absent.value` est renseigné quand `absent.export` vaut `value` ([missing_absent_value](./depannage#missing_absent_value)).
+- Chaque valeur de notation (`maxRawScore`, `finalScale`, `rounding.step`, `absent.value` et les valeurs des barèmes) a au plus trois décimales et ne dépasse pas 10 000 en valeur absolue ([too_many_decimals](./depannage#too_many_decimals), [scoring_value_too_large](./depannage#scoring_value_too_large)).
+- Chaque couleur, `radius` compris, est une valeur CSS reconnue par le navigateur ([invalid_css_value](./depannage#invalid_css_value)).
+- `scoring.finalScale` est un multiple du pas d'arrondi (`rounding.step`, ou 10 puissance moins `decimals` à défaut) ([final_scale_off_grid](./depannage#final_scale_off_grid)).
 
 Avertissements :
 
-- La note brute maximale est atteignable : `questionsPerStudent` fois la plus grande valeur de barème doit atteindre `maxRawScore`.
-- Le nom d'icône est connu de Tabler ; sinon la catégorie s'affiche sans icône.
-- Le langage d'un bloc de code des énoncés et réponses est reconnu ; sinon le bloc s'affiche en texte brut.
+- La note brute maximale est atteignable : `questionsPerStudent` fois la plus grande valeur de barème doit atteindre `maxRawScore` ([unreachable_max_score](./depannage#unreachable_max_score)).
+- Le nom d'icône est connu de Tabler ; sinon la catégorie s'affiche sans icône ([unknown_icon](./depannage#unknown_icon)).
+- Le langage d'un bloc de code des énoncés et réponses est reconnu ; sinon le bloc s'affiche en texte brut ([unknown_code_language](./depannage#unknown_code_language)).
