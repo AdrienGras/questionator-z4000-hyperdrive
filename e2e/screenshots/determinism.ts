@@ -58,6 +58,9 @@ export { expect } from '@playwright/test'
 
 /** Capture `site/public/screenshots/<name>.png` (page entière visible ou élément). */
 export async function capture(target: Page | Locator, name: string): Promise<void> {
+  // Polices chargées avant la prise de vue (garde contre une variation de rendu du texte).
+  if ('goto' in target) await target.evaluate(() => document.fonts.ready)
+  else await target.evaluate(() => document.fonts.ready)
   await target.screenshot({
     path: `${OUT_DIR}/${name}.png`,
     animations: 'disabled',

@@ -1,7 +1,27 @@
 import { readFileSync, writeFileSync } from 'node:fs'
+import type { Page } from '@playwright/test'
 import { examplePath } from '../fixtures.ts'
 import { HomePage } from '../pages/home-page.ts'
 import { capture, expect, test } from './determinism.ts'
+
+/**
+ * Attend que l'animation d'entrée de recharts ait fini : la barre est visible et sa hauteur, non
+ * nulle, est la même à 400 ms d'intervalle (l'animation dure moins). `animations: 'disabled'` ne
+ * couvre que CSS et Web Animations, pas cette animation JS.
+ */
+async function expectBarDrawn(page: Page): Promise<void> {
+  const bar = page.locator('.recharts-bar-rectangle path').first()
+  await expect(bar).toBeVisible()
+  await expect
+    .poll(() =>
+      bar.evaluate(async (path) => {
+        const before = path.getBoundingClientRect().height
+        await new Promise((resolve) => setTimeout(resolve, 400))
+        return before > 0 && before === path.getBoundingClientRect().height
+      }),
+    )
+    .toBe(true)
+}
 
 const SESSION_NAME = 'Oral de démonstration'
 
@@ -22,6 +42,7 @@ test('parcours complet : création, passage, vue projetée, statistiques, édite
   await create.uploadConfig(examplePath('config.example.json'))
   await create.fillName(SESSION_NAME)
   await expect(page.getByRole('textbox', { name: 'Nom de la session' })).toHaveValue(SESSION_NAME)
+  await page.getByRole('textbox', { name: 'Nom de la session' }).blur()
   await capture(page, 'creation-session')
 
   const examiner = await create.submit()
@@ -58,6 +79,7 @@ test('parcours complet : création, passage, vue projetée, statistiques, édite
   const stats = await examiner.openStats()
   await expect(stats.headcount('Terminés')).toHaveText('1')
   await expect(stats.histogram).toBeAttached()
+  await expectBarDrawn(page)
   await capture(page, 'statistiques')
 
   await home.goto()
@@ -82,5 +104,6 @@ test('création : un CSV avec un doublon affiche un avertissement', async ({ pag
   await create.uploadConfig(examplePath('config.example.json'))
   await create.fillName(SESSION_NAME)
   await expect(page.getByText('Fichier valide, avec avertissements')).toBeVisible()
+  await page.getByRole('textbox', { name: 'Nom de la session' }).blur()
   await capture(page, 'creation-avertissements')
 })
