@@ -24,6 +24,37 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-02 — #87 terminé (PR 4) et grooming : ordre de la suite fixé
+
+**Dernière chose faite** : PR #108 (#87 PR 3) mergée sur go de l'utilisateur. Grooming du projet à sa demande :
+- #88 repassé en Ready, et sa description complétée (Vitest `vmThreads`/`isolate`, garde-fou des doublures, e2e `color-mode`) ;
+- #77 complété de 5 vérifications manuelles (Safari/Firefox, vidéoprojecteur, pastille hors ligne sur GitHub Pages, survol VS Code, autocomplétion en sombre) ;
+- #101 annoté : son « retour d'échec » est déjà fait par #108 ;
+- #71 à #74 en P2 avec une taille ;
+- nouveau bug #109 (aperçu de l'éditeur qui déborde sur un énoncé long sans espace) ;
+- deux lignes orphelines du BACKLOG rattachées à #87.
+
+La PR 4 de #87 est faite sur `chore/87-dette-stats` : tests de stats, nettoyages de `domain/stats/`, `StatsEmpty`, test d'alignement `INTEGER_FIELDS`, et un vrai bug corrigé. Quand on quittait l'écran de création pendant l'écriture, l'app naviguait quand même vers la session créée ; la garde compare maintenant le chemin du routeur. Cette PR ferme #87.
+
+**Trucs en suspens** : PR 4 à ouvrir (`Closes #87`), Sonar, puis « Ready for review » ; l'utilisateur merge tout, puis vide le contexte. Décision produit en attente, au BACKLOG sans ticket : sur un barème entièrement négatif, le taux de réussite sort faux (−2 donne 200 %). Deux options : afficher « — » quand le maximum est ≤ 0, ou interdire ce barème dans la config.
+
+**Prochaine chose à creuser** : **ordre fixé avec l'utilisateur**, un ticket à la fois, une branche et une PR par ticket depuis `main` à jour :
+1. #104 — bug XS, pied de la modale de suppression qui déborde ;
+2. #109 — bug XS, aperçu de l'éditeur qui déborde (placé après #104 par le contrôleur, l'utilisateur n'a pas objecté) ;
+3. #100 — F37, barème des catégories en points ;
+4. #101 — F38, panneau latéral ouvert sur l'étudiant, absence en bouton d'action ;
+5. #102 — F39, contrôles de la vue projetée ;
+6. #103 — F40, éditeur : champ manquant nommé, valeurs possibles au survol ;
+7. #88 — outillage ;
+8. #85 — Node 26, pas avant sa sortie LTS le 2026-10-28.
+
+Restent hors planification : #77 (vérifications manuelles de l'utilisateur) et #71 à #74 (documentation, en Backlog).
+
+**Notes pour future Claude** : méthode qui a marché tout au long de #87.
+- Brief = lignes exactes du BACKLOG (numéros sur `main`) plus des arbitrages explicites ; implémenteur Opus en subagent ; relecteur Opus neuf, sans suite complète ; re-revue ciblée des correctifs ; Sonar jusqu'à 0 issue. La duplication et la complexité cognitive y font rougir des PR que `pnpm check` laisse passer.
+- Jamais deux suites complètes en même temps.
+- Une erreur API 529 sur un subagent se rattrape en le relançant par `SendMessage` : il garde son contexte.
+
 ## 2026-10-02 — #87 PR 3 : projection, rendu, éditeur
 
 **Dernière chose faite** : PR #107 (#87 PR 2) mergée sur go de l'utilisateur. La PR 3 de #87 est faite sur `chore/87-dette-projection-rendu-editeur` par un subagent ; la revue la juge Ready. Les 8 lignes du BACKLOG sont traitées :
