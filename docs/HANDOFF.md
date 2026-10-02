@@ -28,7 +28,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 **Dernière chose faite** : `assets/readme-hero.svg` remplace `banner.webp` en tête du README (`banner.webp` supprimé). Première version (fenêtre de navigateur, 15 s) refaite après retour de l'utilisateur (ni l'oral ni les deux écrans n'étaient compris) : titre synthwave 0-2 s, puis une salle d'oral (groupes `#room` > `#around` (décor, `#projector`, examinateur, bureau, `#students`), `#laptop`, `#zoom`). A passe en entier (choix, tirage, réponse orale, note), B et C en accéléré, puis le portable grandit (12,3-13 s) et `#zoom` prend le relais : stats 13-15 s, export Excel 15-18 s, retour au titre 17,7-18 s. Boucle de 18 s, symboles Tabler 3.48.0. Les deux écrans diffèrent surtout par la réponse attendue et les boutons de note (portable seul) et par le score (écran projeté seul). Mouvement réduit = salle figée au moment de la note. Nouveau texte alternatif (`<desc>` et README). Sonde de thème : le SVG en `<img>` suit le thème GitHub (pas l'OS), donc mode `img`, pas de `<picture>` (QUIRKS, D95 et sa révision). `pnpm check:hero` dans `pnpm check` et la CI. Mémoire à jour (D95, INDEX, BACKLOG, QUIRKS).
 
-**Trucs en suspens** : PR en brouillon (`Closes #74`), Sonar, puis « Ready for review » ; merge sur go de l'utilisateur. Rendu dans l'application GitHub mobile (thème) non vérifié, noté au BACKLOG.
+**Trucs en suspens** : PR #120 mergée sur go de l'utilisateur, #74 fermé. Restent au BACKLOG : le rendu dans l'application GitHub mobile (thème), non vérifié, et un contrôle XML complet dans `check:hero` (`&` nu, balises, `width` / `height`).
 
 **Prochaine chose à creuser** : #71 (F27), puis #72 / #73 ; ou #85 (Node 26) après le 2026-10-28.
 
