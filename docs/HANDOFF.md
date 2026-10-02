@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-02 — #71 : F27, site de documentation (socle)
+
+**Dernière chose faite** : socle du site de documentation livré sur `feat/71-site-doc`, complet en local, non poussé. Lien « Aide » dans `PageShell` (avant le sélecteur de thème, nouvel onglet, clés `help_link` / `help_link_label`) ; service worker qui laisse passer `/docs/` (denylist + `globIgnores`) et `check:precache` qui échoue si la doc entre dans le manifeste ; `site/` en VitePress 2.0.0-alpha.20 (10 pages guide et 7 pages contribuer en squelette, thème et recherche en français, accent rose contrasté) ; CI et e2e qui construisent l'app puis la doc ; `e2e/docs.spec.ts`. Décision D96, six QUIRKS, trois lignes de BACKLOG.
+
+**Trucs en suspens** : revue finale, push, PR brouillon `Closes #71`, puis `.claude/scripts/sonar-check.sh --pr <n> --wait` jusqu'à « Quality gate OK », 0 issue, 0 hotspot, et seulement alors « Ready for review ». Ne pas merger sans le go explicite de l'utilisateur.
+
+**Prochaine chose à creuser** : #72 (F28) et #73 (F29) remplissent les pages squelettes (`site/guide/`, `site/contribuer/`).
+
+**Notes pour future Claude** : la doc se construit après l'app (`pnpm build && pnpm docs:build`), car `vite build` vide `dist/`. `docs:dev` sert une coquille vide : vérifier le contenu sur le build. En local, seule l'URL avec barre finale (`…/docs/`) est fiable sous `vite preview`. À chaque montée de VitePress : refaire le contrôle des libellés de thème et des 12 clés de recherche contre `default-theme.d.ts` et `local-search.d.ts`. Un lien mort fait échouer `docs:build` (voulu). Le logo du site est une copie de `public/icons/icon.svg`, verrouillée par `scripts/site-logo.test.ts`.
+
 ## 2026-10-02 — #74 : animation du parcours en tête du README
 
 **Dernière chose faite** : `assets/readme-hero.svg` remplace `banner.webp` en tête du README (`banner.webp` supprimé). Première version (fenêtre de navigateur, 15 s) refaite après retour de l'utilisateur (ni l'oral ni les deux écrans n'étaient compris) : titre synthwave 0-2 s, puis une salle d'oral (groupes `#room` > `#around` (décor, `#projector`, examinateur, bureau, `#students`), `#laptop`, `#zoom`). A passe en entier (choix, tirage, réponse orale, note), B et C en accéléré, puis le portable grandit (12,3-13 s) et `#zoom` prend le relais : stats 13-15 s, export Excel 15-18 s, retour au titre 17,7-18 s. Boucle de 18 s, symboles Tabler 3.48.0. Les deux écrans diffèrent surtout par la réponse attendue et les boutons de note (portable seul) et par le score (écran projeté seul). Mouvement réduit = salle figée au moment de la note. Nouveau texte alternatif (`<desc>` et README). Sonde de thème : le SVG en `<img>` suit le thème GitHub (pas l'OS), donc mode `img`, pas de `<picture>` (QUIRKS, D95 et sa révision). `pnpm check:hero` dans `pnpm check` et la CI. Mémoire à jour (D95, INDEX, BACKLOG, QUIRKS).

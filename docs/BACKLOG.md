@@ -134,3 +134,9 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [x] Helper de test `deferred<T>()` dupliqué dans `import-controller.test.tsx` et `add-student.test.tsx` : le sortir dans `src/testing/` (F30). → #87 *Fait en #87 (PR 1).*
 - [x] `stale-errors.test.tsx` attend avec `setTimeout(100)` : attendre un état observable à la place (F30). → #87 *Fait en #87 (PR 1).*
 - [x] Commenter sur `PassageActions` que `adjust` et `revealFinal` laissent l'affichage de l'erreur à l'appelant (`ownError`) (F30). → #87 *Fait en #87 (PR 1).*
+
+## Documentation
+
+- [ ] Documentation hors ligne : la pré-cacher dans un second service worker de portée `/docs/` (D96 la laisse au réseau). Il faudrait adapter `check:precache` et retirer la denylist.
+- [ ] Documentation en anglais (le site est en français seul) : i18n VitePress `locales`, libellés de thème et clés de recherche à doubler.
+- [ ] Passer à VitePress 2 stable à sa sortie (aujourd'hui `2.0.0-alpha.20` exact, D96) ; refaire alors le contrôle des libellés contre `default-theme.d.ts` / `local-search.d.ts`.

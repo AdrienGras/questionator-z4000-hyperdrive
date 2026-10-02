@@ -729,3 +729,58 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : les captures inséraient le SVG dans une page HTML, dont l'analyseur tolère `--` dans un commentaire ; un SVG ouvert seul ou en `<img>` passe par l'analyseur XML strict (XML 1.0 §2.5 interdit `--` dans un commentaire, même pour citer une variable CSS). Le `viewBox` seul ne donne qu'un ratio, pas de taille.
 **Workaround** : ne jamais écrire `--` dans un commentaire XML (`check:hero` le refuse désormais) ; poser `width="1200" height="600"` à la racine (GitHub réduit par `max-width: 100%`). Vérifier un SVG par `page.goto('file://…')` ou un `<img>`, pas seulement inline.
 **Référence** : `assets/readme-hero.svg`, `scripts/check-readme-hero.ts`, D95.
+
+## Le lien « Aide » mène à une page introuvable sous `pnpm dev` (2026-10-02)
+
+**Découvert** : F27 (#71), ajout du lien dans `PageShell`.
+**Symptôme** : en dev, `…/docs/` répond avec l'application ou une 404 ; le lien « Aide » n'ouvre pas la doc.
+**Cause** : la doc est un site distinct (`site/`), construit dans `dist/docs/` ; le serveur de dev de l'app ne la sert pas.
+**Workaround** : `pnpm docs:dev` (port 5173, base `/questionator-z4000-hyperdrive/docs/`), ou `pnpm build && pnpm docs:build && pnpm preview`.
+**Référence** : D96, `site/.vitepress/config.ts`.
+
+## `vite build` efface `dist/docs/` : la doc se construit après l'app (2026-10-02)
+
+**Découvert** : F27 (#71), ordre des étapes de la CI et du `webServer` Playwright.
+**Symptôme** : après `pnpm build`, `dist/docs/` a disparu ; `pnpm docs:build` seul laisse `dist/` sans l'app.
+**Cause** : `emptyOutDir` de Vite vide `dist/` ; VitePress écrit dans `dist/docs/` sans toucher au reste.
+**Workaround** : toujours `pnpm build && pnpm docs:build`. `check:precache` ignore `dist/docs/` de premier niveau et échoue si le manifeste du SW contient une URL `docs/…`.
+**Référence** : `scripts/check-precache.ts` (`findDocsEntries`), `.github/workflows/ci.yml`, `playwright.config.ts`.
+
+## Un ancien service worker (mode `prompt`) sert l'app sur `/docs/` tant que la mise à jour n'est pas acceptée (2026-10-02)
+
+**Découvert** : F27 (#71), conception de la denylist.
+**Symptôme** : un navigateur qui a installé une version d'avant F27 ouvre `…/docs/` et obtient l'application, pas la documentation.
+**Cause** : `registerType: 'prompt'` ; l'ancien SW garde le contrôle et son repli de navigation renvoie `index.html` pour toute URL. La denylist n'existe que dans le nouveau SW.
+**Workaround** : accepter la mise à jour proposée par l'app (ou fermer tous les onglets, ou « Unregister » dans les outils de développement). Ne concerne que la transition.
+**Référence** : D96, `vite.config.ts` (`navigateFallbackDenylist`).
+
+## `tsconfig.node.json` : un dossier à point seul dans `include` ne matche rien sous tsc 7 (2026-10-02)
+
+**Découvert** : F27 (#71), typage de `site/.vitepress/`.
+**Symptôme** : `"include": ["site/.vitepress"]` ne liste aucun fichier (`tsc --listFilesOnly`), et `tsc -b` ne signale pas une erreur de type volontaire dans ce dossier.
+**Cause** : le tsc natif (TS 7) n'explore pas un dossier à point nu.
+**Workaround** : le glob explicite `site/.vitepress/**/*.ts`. Vérifier en glissant une erreur de type dans un fichier du dossier.
+**Référence** : `tsconfig.node.json`.
+
+## `import './custom.css'` dans le thème VitePress exige `env.d.ts` (2026-10-02)
+
+**Découvert** : F27 (#71).
+**Symptôme** : TS2882 sur l'import de la feuille de style sous `tsconfig.node.json`.
+**Cause** : sans types Vite, un import de `.css` n'a pas de déclaration.
+**Workaround** : `site/.vitepress/env.d.ts` avec `/// <reference types="vite/client" />`.
+**Référence** : `site/.vitepress/env.d.ts`.
+
+## `docs:dev` sert une coquille HTML vide : vérifier le contenu sur le build (2026-10-02)
+
+**Découvert** : F27 (#71).
+**Symptôme** : `curl` sur le serveur de dev ne trouve ni titre ni texte (`<title></title>`).
+**Cause** : en dev, VitePress rend côté client.
+**Workaround** : construire (`pnpm docs:build`) et chercher dans `dist/docs/*.html`.
+
+## `vite preview` répond à `…/docs` (sans barre finale) par l'`index.html` de l'app (2026-10-02)
+
+**Découvert** : F27 (#71), `e2e/docs.spec.ts`.
+**Symptôme** : `http://localhost:4173/questionator-z4000-hyperdrive/docs` renvoie 200 avec l'application (1 297 octets), même sans service worker.
+**Cause** : repli SPA de `vite preview`. GitHub Pages, lui, redirige `docs` vers `docs/`.
+**Workaround** : ne tester en local que `docs/` (avec la barre finale) ; le lien « Aide » pointe déjà vers `${BASE_URL}docs/`.
+**Référence** : `e2e/docs.spec.ts`.
