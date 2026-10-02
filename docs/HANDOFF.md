@@ -28,7 +28,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 **Dernière chose faite** : guide complet sur `feat/72-guide-utilisateur`, en local, non poussé. Les 10 pages de `site/guide/` sont rédigées d'après le code (libellés du dictionnaire `fr`), avec 10 captures déterministes générées par `pnpm docs:screenshots` ; `reference-config.test.ts` et `depannage.test.ts` verrouillent la couverture du schéma et des codes d'erreur ; README réduit à un renvoi vers la référence ; D97, trois QUIRKS, deux lignes de BACKLOG.
 
-**Trucs en suspens** : revue finale, push, PR en brouillon `Closes #72`, `.claude/scripts/sonar-check.sh --pr <n> --wait` jusqu'à « Quality gate OK » (0 issue, 0 hotspot), puis « Ready for review ». Ne pas merger sans le go explicite de l'utilisateur.
+**Trucs en suspens** : PR #123, revue finale faite et corrigée (parcours *Prise en main* suivi jusqu'au `.xlsx`), une issue SonarQube corrigée (condition aux branches identiques dans `determinism.ts`), passée en « Ready for review » une fois Sonar et la CI verts. Ne pas merger sans le go explicite de l'utilisateur.
 
 **Prochaine chose à creuser** : #73 (F29, section Contribuer de `site/contribuer/`), qui part de `main` à jour après le merge de #72.
 
