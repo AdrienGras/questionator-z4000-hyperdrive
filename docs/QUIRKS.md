@@ -696,3 +696,12 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : `AlertDialogHeader` est une grille (`grid place-items-…`) ; un élément de grille a `min-width: auto`, donc sa piste prend la largeur min-content du titre. `break-words` (`overflow-wrap: break-word`) ne réduit pas cette largeur min-content, seul `overflow-wrap: anywhere` le fait. Mesurer `scrollWidth` du titre ne détecte rien : c'est la grille qui grandit, pas le titre qui déborde.
 **Workaround** : `className="wrap-anywhere"` sur le titre (Tailwind v4). La propriété est héritée : posée sur un conteneur (carte d'aperçu, #109), elle couvre tout son texte, et les blocs de code (`white-space: pre`) n'y sont pas sensibles, ils gardent leur défilement. En e2e, comparer les boîtes des boutons au cadre de la modale, avec un nom sans espace ni tiret.
 **Référence** : `src/features/home/components/delete-dialog.tsx`, `e2e/delete-dialog.spec.ts`. Même famille de piège que les largeurs du `Sheet` (D76) : la largeur du vendor porte le préfixe `data-[size=default]:`, une classe `sm:max-w-md` nue perdrait.
+
+## Une ligne de la liste « Étudiants » porte deux boutons qui contiennent le nom de l'étudiant (2026-10-02)
+
+**Découvert** : F38 (#101), bouton d'absence compact nommé « Marquer Martin Bob absent ».
+**Symptôme** : « Found multiple elements with the role "button" and name `/Martin Bob/` » dans des tests qui passaient, et des listes de boutons de ligne qui comptent le double.
+**Cause** : le nom accessible du bouton d'absence contient le nom de l'étudiant, celui du bouton de sélection aussi. Une regex non ancrée trouve les deux, et `getAllByRole('button')` sur la liste renvoie deux boutons par ligne.
+**Workaround** : ancrer la regex au début (`/^Martin Bob/`, le bouton de sélection commence par le nom). Pour les lignes, partir des `listitem` et prendre le premier bouton de chacun (`buttons()` de `students-tab.test.tsx`).
+**Référence** : `src/features/session/components/student-row.tsx`, `src/features/session/students-tab.test.tsx`.
+

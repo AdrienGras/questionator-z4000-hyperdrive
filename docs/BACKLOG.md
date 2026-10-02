@@ -38,7 +38,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Écran de passage
 
-- [ ] Énoncé avec un mot très long sans espace (URL de 200 caractères) : l'écran de passage (`QuestionPanel`) et la vue projetée (`StudentScreen`) s'élargissent et défilent horizontalement (1823 px et 2809 px pour 1280 px de large). Constaté en #109 et noté dans le ticket ; remède probable : `wrap-anywhere` sur le conteneur de l'énoncé. Décision à prendre.
+- [ ] Énoncé avec un mot très long sans espace (URL de 200 caractères) : l'écran de passage (`QuestionPanel`) et la vue projetée (`StudentScreen`) s'élargissent et défilent horizontalement (1823 px et 2809 px pour 1280 px de large). Constaté en #109 et noté dans le ticket ; remède probable : `wrap-anywhere` sur le conteneur de l'énoncé. Décision à prendre. Marginal, pas urgent (avis de l'utilisateur) : à traiter dans le rapidfire du BACKLOG.
 - [x] `ResetDialog`, `AdjustmentDialog` et confirmation d'absence : un appel écarté par le verrou (`run` renvoie `false`) est traité comme un échec ou un succès ; faire remonter l'issue `'written' | 'failed' | 'ignored'` comme l'ajout d'étudiant (#87 PR 1), via `FinalScreen` et `PassageBody`. Rare : boutons désactivés pendant une écriture. → #87 *Fait en #87 (PR 3).*
 - [ ] Raccourcis clavier : chiffres pour les valeurs du barème, touches pour les catégories, raccourci de skip.
 - [x] Helper `requireStudent(session, studentId)` dans `domain/passage/` : la recherche + `student_not_found` est copiée dans `drawQuestion`, `scoreAttempt`, `setActiveStudent` ; F10 et F11 en ajouteront deux copies. *Fait en F10.*
@@ -76,6 +76,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Thème et langue
 
+- [ ] Accord de « pt » (F37, D90) : le helper `plural` (pluriel au-delà de 1) donne « 1,5 pts » ; la règle française stricte voudrait « 1,5 point » (singulier sous 2). Décider, et, si on change, revoir aussi les autres usages de `plural` à valeur décimale. À traiter dans le rapidfire du BACKLOG.
 - [x] Garde-fou de build : un script de fin de build qui échoue si un chunk autre que `icons-*` contient `IconBrandPhp`, ou si `index-*` dépasse un budget. *Livré en #86 (`pnpm check:budget`, D88).* `chunkSizeWarningLimit: 2400` ne surveille plus les autres chunks (D37). → #86
 - [ ] Synchroniser le mode entre deux fenêtres d'une même vue (événement `storage`, via `useSyncExternalStore`). Aujourd'hui, la valeur est lue une fois par clé.
 - [x] Tests manquants de `LocaleProvider` : changement de la locale du propriétaire avec une déclaration active, deux imbriqués frères de même locale. → #87 *Fait en #87 (PR 2).*

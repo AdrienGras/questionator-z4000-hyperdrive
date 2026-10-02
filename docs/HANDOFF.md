@@ -24,6 +24,21 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-02 — F38 (#101) : panneau ouvert sur l'étudiant, absence en bouton d'action
+
+**Dernière chose faite** : PR #113 (F37) mergée sur go de l'utilisateur. À sa demande, les points en suspens sont au BACKLOG, pour un rapidfire plus tard : accord « 1,5 pts » (§ Thème et langue), mots très longs dans l'écran de passage et la vue projetée (marqué non urgent), carte de l'accueil, barème négatif.
+#101 est passé en « In progress », branche `feat/f38-panneau-absence`, avec deux changements :
+- **Onglet par défaut :** `useSidePanel` ne mémorise plus rien (`side-panel-state.ts` supprimé). « Panneau » appelle `show()`, qui ouvre toujours sur « Étudiant ».
+- **Absence :** `AbsentToggle` devient `AbsentButton`, en version pleine dans l'onglet « Étudiant » et en version `compact` sur chaque ligne de la liste, à côté du bouton de sélection. Libellés `absent_mark*` / `absent_unmark*` ; `absent_label` est retiré.
+
+Décision D91 (remplace l'onglet mémorisé de D76), PRODUCT.md F12, F13 et F21 à jour. Tests : hook, réouverture même après remontage, absence depuis la liste avec et sans questions tirées, bouton compact `ignored`, bouton désactivé pendant une écriture ; une quinzaine de tests existants adaptés (QUIRK du jour).
+
+**Trucs en suspens** : PR en brouillon, Sonar, puis « Ready for review » ; merge sur go de l'utilisateur. L'utilisateur prévoit plus tard un rapidfire de tickets sur le BACKLOG.
+
+**Prochaine chose à creuser** : #102 (F39, contrôles de la vue projetée ; touche aussi `examiner-view.tsx`), puis #103, #88, #85.
+
+**Notes pour future Claude** : l'absence depuis la liste passe par `actions.setAbsent(studentId, …)` sans `ownError` hors dialogue : un échec s'affiche dans l'alerte du tiroir (D82). Le bouton compact utilise `Tooltip` sans provider local, sous le `TooltipProvider` d'`ExaminerView`.
+
 ## 2026-10-02 — F37 (#100) : barème des catégories en points
 
 **Dernière chose faite** : PR #112 (#109) mergée sur go de l'utilisateur. #100 est passé en « In progress », branche `feat/f37-bareme-points`.
