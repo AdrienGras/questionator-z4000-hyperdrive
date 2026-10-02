@@ -34,6 +34,8 @@ const SAMPLE: UiMessageParams = {
   color_mode_light: {},
   color_mode_dark: {},
   color_mode_system: {},
+  help_link: {},
+  help_link_label: {},
   session_loading: {},
   session_not_found: {},
   damaged_title: {},

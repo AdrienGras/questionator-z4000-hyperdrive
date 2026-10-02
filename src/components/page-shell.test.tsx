@@ -46,7 +46,18 @@ test('retour, infos et actions rendus ; thème après les actions', () => {
   expect(screen.getByText('Projeter')).toBeInTheDocument()
   const names = bannerInteractiveNames()
   expect(names.slice(0, 2)).toEqual(['Retour', 'Projeter'])
-  expect(names).toHaveLength(3)
+  expect(names).toHaveLength(4)
+  expectColorModeToggleLast()
+})
+
+test('lien Aide : ouvre la doc dans un nouvel onglet, juste avant le thème', () => {
+  mount(<Harness title="Oral">x</Harness>)
+  const link = screen.getByRole('link', { name: 'Aide (nouvel onglet)' })
+  expect(link).toHaveAttribute('href', `${import.meta.env.BASE_URL}docs/`)
+  expect(link).toHaveAttribute('target', '_blank')
+  expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+  expect(link).toHaveTextContent('Aide')
+  expect(bannerInteractiveNames().at(-2)).toBe('Aide (nouvel onglet)')
   expectColorModeToggleLast()
 })
 

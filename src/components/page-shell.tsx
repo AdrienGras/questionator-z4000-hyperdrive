@@ -1,5 +1,7 @@
+import { IconHelp } from '@tabler/icons-react'
 import type { ComponentProps, ReactNode } from 'react'
 import { ColorModeToggle } from '@/components/color-mode-toggle'
+import { buttonVariants } from '@/components/ui/button'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
 
@@ -19,9 +21,10 @@ type PageShellProps = Readonly<{
 
 /**
  * Coque commune des pages examinateur (F19, D75) : `main` centré et borné en
- * largeur, barre de titre (retour, titre, infos à gauche ; actions puis thème
- * à droite), puis le contenu. Le bouton de thème est toujours le dernier de la
- * barre et n'est pas paramétrable. `...rest` est transmis au `main` (ex. la
+ * largeur, barre de titre (retour, titre, infos à gauche ; actions, aide puis
+ * thème à droite), puis le contenu. Le lien d'aide ouvre la documentation dans
+ * un nouvel onglet ; le bouton de thème est toujours le dernier de la barre et
+ * n'est pas paramétrable. `...rest` est transmis au `main` (ex. la
  * garde de dépôt de la création).
  */
 export function PageShell({
@@ -50,6 +53,16 @@ export function PageShell({
         </div>
         <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
           {actions}
+          <a
+            href={`${import.meta.env.BASE_URL}docs/`}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={ui.text('help_link_label', {})}
+            className={buttonVariants({ variant: 'ghost' })}
+          >
+            <IconHelp aria-hidden />
+            {ui.text('help_link', {})}
+          </a>
           <ColorModeToggle ui={ui} />
         </div>
       </header>
