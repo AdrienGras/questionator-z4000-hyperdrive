@@ -25,8 +25,14 @@ function valueAt(root: unknown, path: IssuePath): unknown {
  * `expected: 'int'` face à une valeur d'un tout autre type (chaîne, booléen, null…) : la
  * vérification de base y rapporte `expected: 'number'`, faute de plus de précision — `'int'`
  * n'apparaît que lorsque la valeur est déjà un nombre (cas `not_integer`). Vérifié en bac à sable.
+ * Couvre aussi `SessionSchema` (backups, F31). Exporté pour le test d'alignement avec les schémas.
  */
-const INTEGER_FIELDS = new Set(['questionsPerStudent', 'order', 'decimals', 'maxPerStudent'])
+export const INTEGER_FIELDS: ReadonlySet<string> = new Set([
+  'questionsPerStudent',
+  'order',
+  'decimals',
+  'maxPerStudent',
+])
 
 function fromInvalidType(expected: string, path: IssuePath, input: unknown): ConfigIssue {
   const value = valueAt(input, path)
