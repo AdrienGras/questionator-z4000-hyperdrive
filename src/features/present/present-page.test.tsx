@@ -192,7 +192,7 @@ function sourceFiles(dir: string): string[] {
     .map((f) => join(dir, f))
 }
 
-/** Spécificateurs des `import … from`, `export … from` et `import()` d'un source formaté par Prettier. */
+/** Spécificateurs des `import … from`, `export … from` et `import()` d'un source formaté (oxfmt). */
 function specifiers(source: string): string[] {
   const found = source.matchAll(/(?:\bfrom |\bimport\(|^import )'([^']+)'/gm)
   return [...found].map((match) => match[1] ?? '')

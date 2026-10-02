@@ -8,7 +8,8 @@ import type { BackupIssue, BackupRuleIssue } from './issues'
 import { checkSessionRules } from './rules'
 
 export type StoredSessionResult =
-  { ok: true; session: Session } | { ok: false; issues: BackupIssue[] }
+  | { ok: true; session: Session }
+  | { ok: false; issues: BackupIssue[] }
 
 function prefixed(issue: ConfigIssue, prefix: ConfigIssue['path']): ConfigIssue {
   return { ...issue, path: [...prefix, ...issue.path] }
