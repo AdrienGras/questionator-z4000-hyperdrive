@@ -2,49 +2,40 @@ import { describe, expect, test } from 'vitest'
 import { configFileName } from '@/domain/config/config-file-name'
 
 describe('configFileName', () => {
-  test('slug du titre de l’examen', () => {
-    expect(configFileName('{"exam": {"title": "Oral PHP"}}')).toBe('oral-php.json')
-    expect(configFileName('{"exam": {"title": "  Écrit d’algèbre  "}}')).toBe(
+  test.each([
+    ['slug du titre de l’examen', '{"exam": {"title": "Oral PHP"}}', 'oral-php.json'],
+    [
+      'titre accentué et entouré de blancs',
+      '{"exam": {"title": "  Écrit d’algèbre  "}}',
       'ecrit-d-algebre.json',
-    )
-  })
-
-  test('texte qui ne se parse pas : config.json', () => {
-    expect(configFileName('pas du JSON')).toBe('config.json')
-    expect(configFileName('')).toBe('config.json')
-  })
-
-  test('racine qui n’est pas un objet : config.json', () => {
-    expect(configFileName('null')).toBe('config.json')
-    expect(configFileName('[{"exam": {"title": "Oral"}}]')).toBe('config.json')
-    expect(configFileName('"Oral"')).toBe('config.json')
-  })
-
-  test('exam absent ou qui n’est pas un objet : config.json', () => {
-    expect(configFileName('{"schemaVersion": 1}')).toBe('config.json')
-    expect(configFileName('{"exam": null}')).toBe('config.json')
-    expect(configFileName('{"exam": "Oral"}')).toBe('config.json')
-  })
-
-  test('titre absent, vide, blanc ou qui n’est pas une chaîne : config.json', () => {
-    expect(configFileName('{"exam": {}}')).toBe('config.json')
-    expect(configFileName('{"exam": {"title": ""}}')).toBe('config.json')
-    expect(configFileName('{"exam": {"title": "   "}}')).toBe('config.json')
-    expect(configFileName('{"exam": {"title": 42}}')).toBe('config.json')
-  })
-
-  test('titre sans aucun caractère retenu par le slug : config.json, pas session.json', () => {
-    expect(configFileName('{"exam": {"title": "!!!"}}')).toBe('config.json')
-    expect(configFileName('{"exam": {"title": "日本語"}}')).toBe('config.json')
-  })
-
-  test('BOM en tête, accepté par la validation : le titre est lu', () => {
-    expect(configFileName('﻿{"exam": {"title": "Oral PHP"}}')).toBe('oral-php.json')
-  })
-
-  test('le titre peut être n’importe où dans exam, le reste de la config est ignoré', () => {
-    expect(configFileName('{"categories": [], "exam": {"date": "x", "title": "Oral"}}')).toBe(
+    ],
+    ['BOM en tête, accepté par la validation', '﻿{"exam": {"title": "Oral PHP"}}', 'oral-php.json'],
+    [
+      'titre n’importe où dans exam, reste de la config ignoré',
+      '{"categories": [], "exam": {"date": "x", "title": "Oral"}}',
       'oral.json',
-    )
+    ],
+  ])('%s', (_case, text, expected) => {
+    expect(configFileName(text)).toBe(expected)
+  })
+
+  // Repli `config.json` : rien d'exploitable pour nommer le fichier.
+  test.each([
+    ['texte qui ne se parse pas', 'pas du JSON'],
+    ['texte vide', ''],
+    ['racine null', 'null'],
+    ['racine tableau', '[{"exam": {"title": "Oral"}}]'],
+    ['racine chaîne', '"Oral"'],
+    ['exam absent', '{"schemaVersion": 1}'],
+    ['exam null', '{"exam": null}'],
+    ['exam chaîne', '{"exam": "Oral"}'],
+    ['titre absent', '{"exam": {}}'],
+    ['titre vide', '{"exam": {"title": ""}}'],
+    ['titre blanc', '{"exam": {"title": "   "}}'],
+    ['titre non textuel', '{"exam": {"title": 42}}'],
+    ['titre sans caractère retenu par le slug (pas session.json)', '{"exam": {"title": "!!!"}}'],
+    ['titre en écriture non latine', '{"exam": {"title": "日本語"}}'],
+  ])('%s : config.json', (_case, text) => {
+    expect(configFileName(text)).toBe('config.json')
   })
 })
