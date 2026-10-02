@@ -28,7 +28,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 **Dernière chose faite** : socle du site de documentation livré sur `feat/71-site-doc`, complet en local, non poussé. Lien « Aide » dans `PageShell` (avant le sélecteur de thème, nouvel onglet, clés `help_link` / `help_link_label`) ; service worker qui laisse passer `/docs/` (denylist + `globIgnores`) et `check:precache` qui échoue si la doc entre dans le manifeste ; `site/` en VitePress 2.0.0-alpha.20 (10 pages guide et 7 pages contribuer en squelette, thème et recherche en français, accent rose contrasté) ; CI et e2e qui construisent l'app puis la doc ; `e2e/docs.spec.ts`. Décision D96, sept QUIRKS, trois lignes de BACKLOG.
 
-**Trucs en suspens** : revue finale, push, PR brouillon `Closes #71`, puis `.claude/scripts/sonar-check.sh --pr <n> --wait` jusqu'à « Quality gate OK », 0 issue, 0 hotspot, et seulement alors « Ready for review ». Ne pas merger sans le go explicite de l'utilisateur.
+**Trucs en suspens** : PR #122, revue finale faite et corrigée (test « Aide » discriminant, motif étendu à `docs?…`), SonarQube Cloud OK (0 issue, 0 hotspot), passée en « Ready for review ». Ne pas merger sans le go explicite de l'utilisateur.
 
 **Prochaine chose à creuser** : #72 (F28) et #73 (F29) remplissent les pages squelettes (`site/guide/`, `site/contribuer/`).
 
