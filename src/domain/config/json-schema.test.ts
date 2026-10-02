@@ -74,7 +74,7 @@ describe('JSON Schema de config : aide à la saisie', () => {
     expect(mode.description).not.toContain('Défaut :')
     const locale = property(root(), 'locale')
     expect(locale.markdownDescription).toBe(
-      locale.description +
+      `${locale.description}\n\nValeurs possibles : \`"fr"\`, \`"en"\`` +
         ('default' in locale ? `\n\nDéfaut : \`${JSON.stringify(locale.default)}\`` : ''),
     )
     const scoring = property(root(), 'scoring')
@@ -83,6 +83,22 @@ describe('JSON Schema de config : aide à la saisie', () => {
     expect(missingMarkdown(root())).toEqual([])
     const icon = property(property(root(), 'categories').items, 'icon')
     expect(icon.markdownDescription).toBeDefined()
+  })
+
+  test('markdownDescription ajoute les valeurs possibles avant le défaut', () => {
+    const rounding = property(property(root(), 'scoring'), 'rounding')
+    expect(property(rounding, 'mode').markdownDescription).toBe(
+      `${property(rounding, 'mode').description}\n\nValeurs possibles : \`"nearest"\`, \`"up"\`, \`"down"\`\n\nDéfaut : \`"nearest"\``,
+    )
+    expect(property(rounding, 'step').markdownDescription).toContain('Valeurs possibles : `null`')
+    const drawAnimation = property(property(root(), 'presentation'), 'drawAnimation')
+    expect(drawAnimation.markdownDescription).not.toContain('Valeurs possibles')
+  })
+
+  test('icon : lien vers la recherche Tabler, aucune liste de noms', () => {
+    const icon = property(property(root(), 'categories').items, 'icon')
+    expect(icon.markdownDescription).toContain('(https://tabler.io/icons)')
+    expect(icon.markdownDescription).not.toContain('Valeurs possibles')
   })
 
   test('icon garde sa description à côté de son anyOf', () => {

@@ -264,6 +264,40 @@ test('le survol de showCategoryPoints affiche sa description et son défaut', as
   await expect(editor.hoverTooltip).toContainText('Défaut : true')
 })
 
+test('un champ obligatoire manquant est nommé dans la liste des erreurs', async ({ page }) => {
+  const editor = new ConfigEditorPage(page)
+  await editor.goto()
+  await editor.replaceText(exampleWith('"finalScale": 20,', ''))
+
+  await expect(editor.issue('Champ obligatoire manquant : « finalScale ».')).toBeVisible()
+})
+
+test('le survol de rounding.mode liste les valeurs possibles avant le défaut', async ({ page }) => {
+  const editor = new ConfigEditorPage(page)
+  await editor.goto()
+  await expect(editor.editor).toContainText('"mode"')
+  await page.locator('.cm-content').getByText('"mode"').hover()
+  await expect(editor.hoverTooltip).toContainText('Valeurs possibles : "nearest", "up", "down"')
+  await expect(editor.hoverTooltip).toContainText('Défaut : "nearest"')
+})
+
+test('le survol de icon propose la recherche Tabler, sans liste de noms', async ({ page }) => {
+  const editor = new ConfigEditorPage(page)
+  await editor.goto()
+  // `categories` en tête : CodeMirror ne rend que les lignes visibles.
+  const { categories, ...rest } = z
+    .looseObject({ categories: z.array(z.unknown()) })
+    .parse(JSON.parse(EXAMPLE))
+  await editor.replaceText(JSON.stringify({ categories, ...rest }, null, 2))
+  await page.keyboard.press('ControlOrMeta+Home')
+  await page.locator('.cm-content').getByText('"icon"').first().hover()
+
+  const link = editor.hoverTooltip.getByRole('link', { name: 'Rechercher une icône sur tabler.io' })
+  await expect(link).toHaveAttribute('href', 'https://tabler.io/icons')
+  await expect(link).toHaveAttribute('target', '_blank')
+  await expect(editor.hoverTooltip).not.toContainText('Valeurs possibles')
+})
+
 // Ni espace ni tiret : aucun point de coupure naturel (#109).
 const LONG_ID = `facile_${'x'.repeat(120)}`
 const LONG_URL = `https://example.com/${'a'.repeat(180)}`

@@ -48,6 +48,7 @@ export const editorChrome = EditorView.theme({
     padding: '0.5rem 0.75rem',
   },
   '.cm-schema-hover p + p': { marginTop: '0.25rem' },
+  '.cm-schema-hover a': { textDecoration: 'underline', textUnderlineOffset: '2px' },
 })
 
 export const highlightStyle = HighlightStyle.define([

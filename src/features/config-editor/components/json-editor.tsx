@@ -21,12 +21,8 @@ import {
 } from '@codemirror/view'
 import { useEffect, useImperativeHandle, useRef, type Ref } from 'react'
 import { editorTheme } from '@/features/config-editor/editor-theme'
-import {
-  completionsAt,
-  configJsonSchema,
-  type AssistHover,
-  hoverAt,
-} from '@/features/config-editor/schema-assist'
+import { completionsAt, configJsonSchema, hoverAt } from '@/features/config-editor/schema-assist'
+import { hoverDom, type HoverLabels } from './hover-dom'
 
 export type JsonEditorApi = {
   /** Remplace tout le texte (transaction annulable). */
@@ -49,7 +45,8 @@ type JsonEditorProps = {
   diagnostics: readonly JsonEditorDiagnostic[]
   ariaLabel: string
   /** Libellé localisé de « Défaut : » (ponctuation comprise), affiché dans la bulle de survol. */
-  defaultLabel: string
+  /** Libellés traduits de la bulle de survol. */
+  hoverLabels: HoverLabels
   apiRef: Ref<JsonEditorApi>
   /** Classes du conteneur ; l'éditeur en occupe toute la hauteur. */
   className?: string
@@ -65,7 +62,7 @@ export function JsonEditor({
   onChange,
   diagnostics,
   ariaLabel,
-  defaultLabel,
+  hoverLabels,
   apiRef,
   className,
 }: Readonly<JsonEditorProps>) {
@@ -76,11 +73,11 @@ export function JsonEditor({
   // Libellé appliqué à la vue : le compartiment n'est reconfiguré que s'il change.
   const ariaLabelRef = useRef(ariaLabel)
   const ariaCompartment = useRef(new Compartment())
-  const defaultLabelRef = useRef(defaultLabel)
+  const hoverLabelsRef = useRef(hoverLabels)
 
   useEffect(() => {
     onChangeRef.current = onChange
-    defaultLabelRef.current = defaultLabel
+    hoverLabelsRef.current = hoverLabels
   })
 
   useEffect(() => {
@@ -117,7 +114,7 @@ export function JsonEditor({
               pos: hover.from,
               end: hover.to,
               above: true,
-              create: () => ({ dom: hoverDom(hover, defaultLabelRef.current) }),
+              create: () => ({ dom: hoverDom(hover, hoverLabelsRef.current) }),
             }
           }),
           keymap.of([
@@ -195,24 +192,6 @@ export function configCompletionSource(context: CompletionContext): CompletionRe
     options: found.options,
     validFor: /^["\w-]*$/,
   }
-}
-
-/** Contenu de la bulle de survol ; texte posé via `textContent`, jamais `innerHTML`. */
-function hoverDom(hover: AssistHover, defaultLabel: string): HTMLElement {
-  const dom = document.createElement('div')
-  dom.className = 'cm-schema-hover'
-  const description = document.createElement('p')
-  description.textContent = hover.description
-  dom.append(description)
-  if ('default' in hover) {
-    const line = document.createElement('p')
-    line.append(`${defaultLabel} `)
-    const code = document.createElement('code')
-    code.textContent = JSON.stringify(hover.default)
-    line.append(code)
-    dom.append(line)
-  }
-  return dom
 }
 
 /** Borne les plages au document courant : un diagnostic périmé ne doit pas faire échouer la vue. */

@@ -192,7 +192,12 @@ export function ConfigEditorPage() {
               onChange={handleChange}
               diagnostics={diagnostics}
               ariaLabel={t('editor_label', {})}
-              defaultLabel={t('editor_hover_default', {})}
+              hoverLabels={{
+                default: t('editor_hover_default', {}),
+                values: t('editor_hover_values', {}),
+                iconSearch: t('editor_hover_icon_search', {}),
+                iconHint: t('editor_hover_icon_hint', {}),
+              }}
               apiRef={editor}
               className="h-[60vh] lg:h-auto lg:min-h-0 lg:flex-1"
             />

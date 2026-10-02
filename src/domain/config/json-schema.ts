@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { ICON_NAMES } from './icon-names'
 import { ConfigSchema, IconSchema } from './schema'
+import { hoverValues, TABLER_ICONS_URL, type SchemaValueNode } from './schema-values'
 
 export const CONFIG_SCHEMA_URL =
   'https://adriengras.github.io/questionator-z4000-hyperdrive/config.schema.json'
@@ -36,8 +37,9 @@ export function buildConfigJsonSchema(): Record<string, unknown> {
 
 /**
  * Le survol de vscode-json-languageservice n'affiche que `title`, `markdownDescription` (à défaut
- * `description`) et les descriptions d'enum, jamais `default` : on le recopie dans
- * `markdownDescription`. `description` reste brut (l'éditeur de l'app l'affiche tel quel).
+ * `description`) et les descriptions d'enum, jamais `default` : on recopie dans
+ * `markdownDescription` les valeurs possibles (lien de recherche Tabler pour `icon`) et le défaut,
+ * comme le survol de l'éditeur de l'app (F40). `description` reste brut (l'éditeur de l'app l'affiche tel quel).
  */
 function addMarkdownDescriptions(node: unknown): void {
   if (Array.isArray(node)) {
@@ -47,10 +49,15 @@ function addMarkdownDescriptions(node: unknown): void {
   if (!isRecord(node)) return
   const record = node
   if (typeof record.description === 'string') {
-    record.markdownDescription =
-      'default' in record
-        ? `${record.description}\n\nDéfaut : \`${JSON.stringify(record.default)}\``
-        : record.description
+    const parts = [record.description]
+    const values = hoverValues(toValueNode(record))
+    if (values?.kind === 'closed') {
+      parts.push(`Valeurs possibles : ${values.values.map((value) => `\`${value}\``).join(', ')}`)
+    }
+    if (values?.kind === 'open')
+      parts.push(`[Rechercher une icône sur tabler.io](${TABLER_ICONS_URL})`)
+    if ('default' in record) parts.push(`Défaut : \`${JSON.stringify(record.default)}\``)
+    record.markdownDescription = parts.join('\n\n')
   }
   const { properties, items, anyOf } = record
   if (isRecord(properties)) {
@@ -58,6 +65,18 @@ function addMarkdownDescriptions(node: unknown): void {
   }
   addMarkdownDescriptions(items)
   addMarkdownDescriptions(anyOf)
+}
+
+/** Champs d'un nœud brut utiles aux valeurs littérales, vérifiés un par un (pas d'assertion). */
+function toValueNode(record: Record<string, unknown>): SchemaValueNode {
+  const { type, enum: values, anyOf } = record
+  const node: SchemaValueNode = {}
+  if (typeof type === 'string') node.type = type
+  else if (Array.isArray(type)) node.type = type.filter((item) => typeof item === 'string')
+  if (Array.isArray(values)) node.enum = values
+  if ('const' in record) node.const = record.const
+  if (Array.isArray(anyOf)) node.anyOf = anyOf.filter(isRecord).map(toValueNode)
+  return node
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

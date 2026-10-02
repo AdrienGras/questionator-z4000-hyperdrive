@@ -4,6 +4,13 @@ import { EditorView } from '@codemirror/view'
 import { act, render, screen } from '@testing-library/react'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
+
+const HOVER_LABELS = {
+  default: 'Défaut :',
+  values: 'Valeurs possibles :',
+  iconSearch: 'Rechercher une icône sur tabler.io',
+  iconHint: 'Ctrl+Espace propose les noms connus.',
+}
 import { configCompletionSource, JsonEditor, type JsonEditorApi } from './json-editor'
 
 type Props = Parameters<typeof JsonEditor>[0]
@@ -17,7 +24,7 @@ function mount(overrides: Partial<Props> = {}) {
       onChange={onChange}
       diagnostics={[]}
       ariaLabel="Configuration JSON"
-      defaultLabel="Défaut :"
+      hoverLabels={HOVER_LABELS}
       apiRef={apiRef}
       {...overrides}
     />,
@@ -88,14 +95,14 @@ describe('JsonEditor', () => {
     rerender(
       <JsonEditor
         {...props}
-        defaultLabel="Défaut :"
+        hoverLabels={HOVER_LABELS}
         apiRef={apiRef}
         diagnostics={[{ from: 1, to: 4, severity: 'warning', message: 'Attention' }]}
       />,
     )
     expect(container.querySelector('.cm-lintRange-warning')).not.toBeNull()
 
-    rerender(<JsonEditor {...props} defaultLabel="Défaut :" apiRef={apiRef} diagnostics={[]} />)
+    rerender(<JsonEditor {...props} hoverLabels={HOVER_LABELS} apiRef={apiRef} diagnostics={[]} />)
     expect(container.querySelector('.cm-lintRange-warning')).toBeNull()
   })
 
@@ -118,7 +125,7 @@ describe('JsonEditor', () => {
         onChange={onChange}
         diagnostics={[]}
         ariaLabel="JSON configuration"
-        defaultLabel="Default:"
+        hoverLabels={HOVER_LABELS}
         apiRef={apiRef}
       />,
     )
