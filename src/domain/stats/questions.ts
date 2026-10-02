@@ -20,7 +20,10 @@ function byConfigOrder(ranks: Ranks, a: Keyed, b: Keyed): number {
 }
 
 /** Regroupe les éléments par clé, dans l'ordre de première apparition, en gardant le premier. */
-function groupByKey<T>(items: T[], keyOf: (item: T) => string): Map<string, { first: T; items: T[] }> {
+function groupByKey<T>(
+  items: T[],
+  keyOf: (item: T) => string,
+): Map<string, { first: T; items: T[] }> {
   const groups = new Map<string, { first: T; items: T[] }>()
   for (const item of items) {
     const key = keyOf(item)
@@ -34,7 +37,9 @@ function groupByKey<T>(items: T[], keyOf: (item: T) => string): Map<string, { fi
 /** Les 10 questions les plus tirées (tous résultats), ex æquo dans l'ordre de la config. */
 export function computeTopDrawn(session: Session): DrawnQuestion[] {
   const ranks = questionRanks(session.config)
-  const groups = groupByKey(presentAttempts(session), (a) => questionKey(a.categoryId, a.questionId))
+  const groups = groupByKey(presentAttempts(session), (a) =>
+    questionKey(a.categoryId, a.questionId),
+  )
   return [...groups.values()]
     .map(({ first, items }) => ({
       categoryId: first.categoryId,
