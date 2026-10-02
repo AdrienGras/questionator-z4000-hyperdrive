@@ -17,13 +17,12 @@ export class StatsPage {
 
   /** Valeur (`dd`) de l'indicateur d'effectif de libellé `label` (ex. « Terminés »). */
   headcount(label: string): Locator {
-    // Le `dd` suit son `dt` dans un même `div` : le `div` le plus profond est le dernier trouvé.
+    // Le `dd` qui suit immédiatement le `dt` du libellé, sans dépendre de l'imbrication des `div`.
     return this.page
       .getByRole('region', { name: 'Effectifs' })
-      .locator('div')
-      .filter({ has: this.page.getByRole('term').getByText(label, { exact: true }) })
-      .last()
-      .getByRole('definition')
+      .getByRole('term')
+      .filter({ hasText: new RegExp(`^${label}$`) })
+      .locator('xpath=following-sibling::dd[1]')
   }
 
   /** Retour à l'écran de passage. */

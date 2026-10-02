@@ -1,14 +1,11 @@
 import { fileURLToPath } from 'node:url'
-import { readFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { z } from 'zod'
 import { examplePath, expect, test } from './fixtures.ts'
 import { HomePage } from './pages/home-page.ts'
 
 const pythonConfig = fileURLToPath(
   new URL('./fixtures/languages-python.config.json', import.meta.url),
-)
-const unknownConfig = fileURLToPath(
-  new URL('./fixtures/languages-unknown.config.json', import.meta.url),
 )
 
 // Sans service worker : le pré-cache (F17) télécharge toutes les grammaires et fausserait le décompte.
@@ -150,7 +147,16 @@ test('seul le chunk de la grammaire python est chargé', async ({ page }) => {
   )
 })
 
-test('un langage inconnu reste en texte brut et est signalé', async ({ page }) => {
+/** Fixture python dont le bloc de code annonce un langage mal orthographié (« pyhton »). */
+function writeUnknownLanguageConfig(path: string): void {
+  const text = readFileSync(pythonConfig, 'utf8')
+  if (!text.includes('```python')) throw new Error('fixture python sans bloc python')
+  writeFileSync(path, text.replace('```python', '```pyhton'))
+}
+
+test('un langage inconnu reste en texte brut et est signalé', async ({ page }, testInfo) => {
+  const unknownConfig = testInfo.outputPath('languages-unknown.config.json')
+  writeUnknownLanguageConfig(unknownConfig)
   const home = new HomePage(page)
   await home.goto()
   const create = await home.createSession()

@@ -10,7 +10,7 @@ export class ExaminerPage {
   /** Titre de l'écran de fin de passage. */
   readonly passageDone: Locator
 
-  /** Un jeton de code colorié par Shiki (`span` aux variables `--shiki-*` dans un `pre`). */
+  /** Un jeton de code colorié par Shiki dans la question en cours (région « Question en cours »). */
   readonly highlightedCode: Locator
 
   /** Tous les blocs de code colorés (`pre` marqué `data-highlighted="true"`). */
@@ -37,8 +37,10 @@ export class ExaminerPage {
     )
     this.plainCode = page.locator(`pre[data-highlighted="false"]${ExaminerPage.OUTSIDE_PREVIEW}`)
     this.passageDone = page.getByRole('heading', { level: 2, name: 'Passage terminé' })
+    // La région est hors de l'aperçu (inerte, `aria-hidden`) : pas besoin d'`OUTSIDE_PREVIEW`.
     this.highlightedCode = page
-      .locator(`pre${ExaminerPage.OUTSIDE_PREVIEW} span[style*="--shiki-"]`)
+      .getByRole('region', { name: 'Question en cours' })
+      .locator('pre span[style*="--shiki-"]')
       .first()
     this.banner = page.getByRole('status').filter({ hasText: 'La vue projetée montre' })
     this.commentField = page.getByRole('textbox', { name: 'Commentaire' })
