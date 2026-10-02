@@ -1,0 +1,23 @@
+/*
+ * Accent rose de l'app (--vp-c-brand-*), seul écart avec le thème par défaut.
+ * Rapports de contraste mesurés (WCAG 2.x), seuil visé : 4,5:1.
+ */
+:root {
+  /* Texte des liens : #c4126e sur #ffffff = 5,74:1 */
+  --vp-c-brand-1: #c4126e;
+  /* Survol : #a50f5b sur #ffffff = 7,45:1 */
+  --vp-c-brand-2: #a50f5b;
+  /* Fond des boutons, texte blanc dessus : #c4126e = 5,74:1 */
+  --vp-c-brand-3: #c4126e;
+  --vp-c-brand-soft: rgba(196, 18, 110, 0.14);
+}
+
+.dark {
+  /* Texte des liens : #ff2d95 sur le fond sombre #1b1b1f = 4,96:1 */
+  --vp-c-brand-1: #ff2d95;
+  /* Survol : #ff5aae sur #1b1b1f = 5,99:1 */
+  --vp-c-brand-2: #ff5aae;
+  /* Fond des boutons, texte blanc dessus : #c4126e = 5,74:1 */
+  --vp-c-brand-3: #c4126e;
+  --vp-c-brand-soft: rgba(255, 45, 149, 0.16);
+}

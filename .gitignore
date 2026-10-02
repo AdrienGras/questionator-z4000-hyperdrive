@@ -13,3 +13,6 @@ coverage
 # Sorties de Playwright (F14)
 test-results/
 playwright-report/
+
+# Cache de VitePress (F27)
+site/.vitepress/cache
