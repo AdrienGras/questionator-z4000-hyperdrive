@@ -59,6 +59,16 @@ describe('findHeroIssues', () => {
     expect(findHeroIssues(svgWith(".a{fill:url( '#grad' )}"))).toEqual([])
   })
 
+  it('accepte url( #x) et url( " #x") avec espaces', () => {
+    expect(findHeroIssues(svgWith('fill: url( #a); stroke: url( " #b");'))).toEqual([])
+  })
+
+  it('refuse url( "https://x")', () => {
+    const issues = findHeroIssues(svgWith('fill: url( "https://x");'))
+    expect(issues).toHaveLength(1)
+    expect(issues.join()).toContain('url(')
+  })
+
   it('refuse plus de 102 400 octets (UTF-8)', () => {
     const ok = svgWith('', `<!--${'a'.repeat(102_400 - svgWith('', '<!---->').length)}-->`)
     expect(Buffer.byteLength(ok)).toBe(102_400)

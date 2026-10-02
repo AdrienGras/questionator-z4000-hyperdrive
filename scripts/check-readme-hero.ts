@@ -20,7 +20,7 @@ const REDUCED_MOTION = /@media\s*\(\s*prefers-reduced-motion\s*:\s*reduce\s*\)/
 /** Tout `href` (y compris `xlink:href`) dont la valeur ne commence pas par `#`. */
 const EXTERNAL_HREF = /href\s*=\s*(?:"(?!\s*#)[^"]*"|'(?!\s*#)[^']*')/i
 /** Tout `url(` dont l'argument ne commence pas par `#` (guillemets et espaces tolérés). */
-const EXTERNAL_URL = /url\((?!\s*["']?\s*#)/i
+const EXTERNAL_URL = /url\((?!\s*#|\s*["']\s*#)/i
 const CSS_IMPORT = /@import/i
 const FONT_SIZE = /font-size\s*(?:=\s*["']|:)\s*(\d+(?:\.\d+)?)/g
 
