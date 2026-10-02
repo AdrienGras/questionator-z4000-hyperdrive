@@ -116,7 +116,7 @@ Ordre imposé : `vite build` vide `dist/` ; la doc doit être construite **aprè
 
 Dans `vite.config.ts`, `workbox` :
 
-- `navigateFallbackDenylist: [/\/docs(?:\/|$)/]` (couvre aussi `…/docs` sans barre finale) : sans cela, le repli de navigation du service worker sert `index.html` de l'app pour toute navigation sous son scope, doc comprise.
+- `navigateFallbackDenylist: [/\/docs(?:[/?]|$)/]` (couvre aussi `…/docs` sans barre finale et `…/docs?…`) : sans cela, le repli de navigation du service worker sert `index.html` de l'app pour toute navigation sous son scope, doc comprise.
 - `globIgnores: ['docs/**']` : défense en profondeur (la doc n'est pas dans `dist/` au moment où Workbox génère le manifeste, puisqu'elle est construite après).
 
 `scripts/check-precache.ts` :

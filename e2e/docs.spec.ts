@@ -21,6 +21,9 @@ test("lien Aide : nouvel onglet sur l'accueil de la doc", async ({ page, context
   await expect(
     docs.getByRole('heading', { level: 1, name: /Questionator Z-4000 Hyperdrive/ }),
   ).toBeVisible()
+  // Le h1 de l'app porte le même titre : on discrimine sur le hero VitePress et l'absence du rendu de l'app.
+  await expect(docs.locator('.VPHero')).toBeVisible()
+  await expect(docs.locator('#root')).toHaveCount(0)
 })
 
 // `docs` sans barre finale n'est pas testé : `vite preview` répond alors par son repli SPA (index.html de l'app, 200),

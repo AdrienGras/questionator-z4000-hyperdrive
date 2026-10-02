@@ -6,6 +6,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { configDefaults, defineConfig } from 'vitest/config'
 import { configSchemaPlugin } from './vite/config-schema-plugin.ts'
+import { DOCS_NAVIGATION_DENYLIST } from './vite/docs-navigation-denylist.ts'
 
 /** Lit la version de `package.json` sans passer par un cast (oxlint `no-unsafe-type-assertion`). */
 function readPackageVersion(): string {
@@ -125,7 +126,7 @@ export default defineConfig({
         globIgnores: ['docs/**'],
         // Repli de navigation : sans cette exclusion, le SW servirait l'app (index.html) à la place
         // de la doc sur les URL `/docs…`.
-        navigateFallbackDenylist: [/\/docs(?:\/|$)/],
+        navigateFallbackDenylist: [DOCS_NAVIGATION_DENYLIST],
         clientsClaim: true,
         cleanupOutdatedCaches: true,
         // Plafond par fichier (défaut Workbox : 2 Mio), fixé juste au-dessus du plus gros fichier du
