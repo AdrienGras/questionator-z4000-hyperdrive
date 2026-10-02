@@ -93,12 +93,17 @@ export default defineConfig({
       text: 'Modifier cette page sur GitHub',
     },
     search: { provider: 'local', options: { translations } },
+    // Libellés vérifiés contre `DefaultTheme.Config` (node_modules/vitepress/types/default-theme.d.ts) :
+    // à refaire à chaque montée de version de VitePress.
     outline: { label: 'Sur cette page' },
     docFooter: { prev: 'Page précédente', next: 'Page suivante' },
     darkModeSwitchLabel: 'Apparence',
     lightModeSwitchTitle: 'Passer en mode clair',
     darkModeSwitchTitle: 'Passer en mode sombre',
     sidebarMenuLabel: 'Menu',
+    navMenuLabel: 'Navigation principale',
+    mobileMenuLabel: 'Menu',
+    extraMenuLabel: 'Plus d’options',
     returnToTopLabel: 'Retour en haut',
     langMenuLabel: 'Changer de langue',
     skipToContentLabel: 'Aller au contenu',
