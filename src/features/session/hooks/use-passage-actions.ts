@@ -25,7 +25,9 @@ export type WriteOutcome = 'written' | 'failed' | 'ignored'
  * Actions de l'écran de passage. Un échec renseigne `error` (alerte de la page et du tiroir), sauf
  * pour `adjust`, `revealFinal`, `reset` et `addStudent`, et `setAbsent` appelé avec `ownError` :
  * passés en `ownError`, ils laissent l'affichage de l'échec à l'appelant (leur dialogue, qui
- * affiche `write_error` quand le booléen revient à `false`) et `error` reste à `null`.
+ * affiche `write_error` sur `failed`) et `error` reste à `null`. Ces actions de dialogue renvoient
+ * l'issue complète (`WriteOutcome`) : un appel écarté par le verrou (`ignored`) ne ferme rien et
+ * n'affiche rien.
  * `setComment` ne touche jamais `error` : son champ annonce lui-même l'échec (D67).
  */
 export type PassageActions = {
@@ -37,16 +39,16 @@ export type PassageActions = {
     value: number,
     reason: string | undefined,
     options: { reveal: boolean },
-  ) => Promise<boolean>
-  revealFinal: () => Promise<boolean>
-  reset: () => Promise<boolean>
+  ) => Promise<WriteOutcome>
+  revealFinal: () => Promise<WriteOutcome>
+  reset: () => Promise<WriteOutcome>
   editScore: (attemptId: string, score: number) => Promise<void>
   setComment: (studentId: string, comment: string) => Promise<boolean>
   setAbsent: (
     studentId: string,
     absent: boolean,
     options?: { ownError?: boolean },
-  ) => Promise<boolean>
+  ) => Promise<WriteOutcome>
   addStudent: (
     names: { lastName: string; firstName: string },
     options: { activate: boolean },
@@ -103,6 +105,8 @@ export function usePassageActions(
   )
 
   // Booléen de succès : un appel écarté par le verrou se confond avec un échec (voir `attempt`).
+  // Réservé aux actions sans dialogue ; un dialogue qui doit distinguer `ignored` passe par
+  // `attempt`.
   const run = useCallback(
     async (mutator: (session: Session) => Session, options: { ownError?: boolean } = {}) =>
       (await attempt(mutator, options)) === 'written',
@@ -153,8 +157,8 @@ export function usePassageActions(
   // Enregistrer en fin de passage = ajustement + révélation dans UNE écriture (D66).
   const adjust = useCallback(
     (value: number, reason: string | undefined, options: { reveal: boolean }) => {
-      if (studentId === undefined) return Promise.resolve(false)
-      return run(
+      if (studentId === undefined) return Promise.resolve<WriteOutcome>('failed')
+      return attempt(
         (session) => {
           const adjusted = setAdjustment(session, { studentId, value, reason })
           if (!options.reveal) return adjusted
@@ -163,21 +167,21 @@ export function usePassageActions(
         { ownError: true },
       )
     },
-    [run, studentId],
+    [attempt, studentId],
   )
 
   const revealFinal = useCallback(() => {
-    if (studentId === undefined) return Promise.resolve(false)
-    return run(
+    if (studentId === undefined) return Promise.resolve<WriteOutcome>('failed')
+    return attempt(
       (session) => revealFinalTransition(session, { studentId }, { now: () => new Date() }),
       { ownError: true },
     )
-  }, [run, studentId])
+  }, [attempt, studentId])
 
   const reset = useCallback(() => {
-    if (studentId === undefined) return Promise.resolve(false)
-    return run((session) => resetStudent(session, studentId), { ownError: true })
-  }, [run, studentId])
+    if (studentId === undefined) return Promise.resolve<WriteOutcome>('failed')
+    return attempt((session) => resetStudent(session, studentId), { ownError: true })
+  }, [attempt, studentId])
 
   const next = useCallback(async () => {
     if (studentId === undefined) return
@@ -219,11 +223,11 @@ export function usePassageActions(
   // dialogue garde l'alerte de page (D82).
   const setAbsent = useCallback(
     (targetStudentId: string, absent: boolean, options: { ownError?: boolean } = {}) =>
-      run(
+      attempt(
         (session) => setAbsentTransition(session, { studentId: targetStudentId, absent }),
         options,
       ),
-    [run],
+    [attempt],
   )
 
   // Même projection : `setProjection` renvoie la même session, rien n'est écrit (D67).

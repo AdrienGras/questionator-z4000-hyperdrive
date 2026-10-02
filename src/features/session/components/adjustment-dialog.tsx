@@ -17,6 +17,7 @@ import { formatScore } from '@/domain/scoring/format'
 import { asMilli, fromMilli, toMilli } from '@/domain/scoring/milli'
 import { stepMilli } from '@/domain/scoring/rounding'
 import type { Student } from '@/domain/session/types'
+import type { WriteOutcome } from '@/features/session/hooks/use-passage-actions'
 import type { Ui } from '@/lib/i18n/use-ui'
 
 export type AdjustmentMode = 'final' | 'adjust'
@@ -28,14 +29,15 @@ type AdjustmentDialogProps = Readonly<{
   open: boolean
   /** `final` : ouverture automatique de fin de passage, annuler révèle la note (D66). */
   mode: AdjustmentMode
-  onSave: (value: number, reason: string | undefined) => Promise<boolean>
-  onCancel: () => Promise<boolean>
+  onSave: (value: number, reason: string | undefined) => Promise<WriteOutcome>
+  onCancel: () => Promise<WriteOutcome>
   onClose: () => void
 }>
 
 /**
- * Popup d'ajustement (F11). Enregistrer, ou annuler en fin de passage, écrit en base : succès →
- * `onClose` ; échec → `write_error`, popup ouverte. Échap et clic hors du dialogue passent par
+ * Popup d'ajustement (F11). Enregistrer, ou annuler en fin de passage, écrit en base : `written` →
+ * `onClose` ; `failed` → `write_error`, popup ouverte ; `ignored` (écartée par le verrou du hook)
+ * → popup ouverte sans alerte, boutons réactivés. Échap et clic hors du dialogue passent par
  * `onOpenChange(false)`, donc par le même chemin qu'« Annuler ».
  */
 export function AdjustmentDialog({
@@ -73,21 +75,21 @@ export function AdjustmentDialog({
     if (open) inFlight.current = false
   }, [open])
 
-  async function write(action: () => Promise<boolean>) {
+  async function write(action: () => Promise<WriteOutcome>) {
     if (inFlight.current) return
     inFlight.current = true
     setPending(true)
     setFailed(false)
-    let succeeded = false
+    let outcome: WriteOutcome
     try {
-      succeeded = await action()
+      outcome = await action()
     } catch {
-      succeeded = false
+      outcome = 'failed'
     }
-    if (!succeeded) {
+    if (outcome !== 'written') {
       inFlight.current = false
       setPending(false)
-      setFailed(true)
+      setFailed(outcome === 'failed')
       return
     }
     // Succès : les boutons restent désactivés jusqu'à la fermeture. En fin de passage, la popup

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { nextStudent, shouldAutoOpenAdjustment } from '@/domain/passage/selectors'
 import type { ScoreBreakdown } from '@/domain/scoring/score'
 import type { Session, Student } from '@/domain/session/types'
+import type { WriteOutcome } from '@/features/session/hooks/use-passage-actions'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { AdjustmentDialog } from './adjustment-dialog'
 import { AttemptList } from './attempt-list'
@@ -20,9 +21,9 @@ type FinalScreenProps = Readonly<{
     value: number,
     reason: string | undefined,
     options: { reveal: boolean },
-  ) => Promise<boolean>
-  onRevealFinal: () => Promise<boolean>
-  onReset: () => Promise<boolean>
+  ) => Promise<WriteOutcome>
+  onRevealFinal: () => Promise<WriteOutcome>
+  onReset: () => Promise<WriteOutcome>
   onNext: () => void
 }>
 

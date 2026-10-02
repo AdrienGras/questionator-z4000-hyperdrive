@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import type { WriteOutcome } from '@/features/session/hooks/use-passage-actions'
 import type { Ui } from '@/lib/i18n/use-ui'
 
 type ResetDialogProps = Readonly<{
@@ -16,13 +17,14 @@ type ResetDialogProps = Readonly<{
   studentName: string
   open: boolean
   onOpenChange: (open: boolean) => void
-  onConfirm: () => Promise<boolean>
+  onConfirm: () => Promise<WriteOutcome>
 }>
 
 /**
- * Confirmation de réinitialisation d'un étudiant (F11). `onConfirm` renvoie `false` si l'écriture
- * a échoué : le dialogue reste alors ouvert avec `write_error`. Pendant l'écriture, ni « Annuler »
- * ni Échap ne ferment le dialogue.
+ * Confirmation de réinitialisation d'un étudiant (F11). `onConfirm` renvoie l'issue de l'écriture :
+ * `written` ferme, `failed` garde le dialogue ouvert avec `write_error`, `ignored` (écartée par le
+ * verrou, rien n'est parti) ne ferme ni n'alerte. Pendant l'écriture, ni « Annuler » ni Échap ne
+ * ferment le dialogue.
  */
 export function ResetDialog({ ui, studentName, open, onOpenChange, onConfirm }: ResetDialogProps) {
   const { text } = ui
@@ -39,10 +41,10 @@ export function ResetDialog({ ui, studentName, open, onOpenChange, onConfirm }: 
     if (pending) return
     setPending(true)
     setFailed(false)
-    const succeeded = await onConfirm()
+    const outcome = await onConfirm()
     setPending(false)
-    if (succeeded) onOpenChange(false)
-    else setFailed(true)
+    if (outcome === 'written') onOpenChange(false)
+    else if (outcome === 'failed') setFailed(true)
   }
 
   return (

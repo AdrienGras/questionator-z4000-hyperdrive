@@ -38,7 +38,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Écran de passage
 
-- [ ] `ResetDialog`, `AdjustmentDialog` et confirmation d'absence : un appel écarté par le verrou (`run` renvoie `false`) est traité comme un échec ou un succès ; faire remonter l'issue `'written' | 'failed' | 'ignored'` comme l'ajout d'étudiant (#87 PR 1), via `FinalScreen` et `PassageBody`. Rare : boutons désactivés pendant une écriture. → #87
+- [x] `ResetDialog`, `AdjustmentDialog` et confirmation d'absence : un appel écarté par le verrou (`run` renvoie `false`) est traité comme un échec ou un succès ; faire remonter l'issue `'written' | 'failed' | 'ignored'` comme l'ajout d'étudiant (#87 PR 1), via `FinalScreen` et `PassageBody`. Rare : boutons désactivés pendant une écriture. → #87 *Fait en #87 (PR 3).*
 - [ ] Raccourcis clavier : chiffres pour les valeurs du barème, touches pour les catégories, raccourci de skip.
 - [x] Helper `requireStudent(session, studentId)` dans `domain/passage/` : la recherche + `student_not_found` est copiée dans `drawQuestion`, `scoreAttempt`, `setActiveStudent` ; F10 et F11 en ajouteront deux copies. *Fait en F10.*
 - [x] Test de la branche défensive `category_not_found` de `scoreAttempt` (inatteignable avec une config figée valide). → #87 *Fait en #87 (PR 1).*
