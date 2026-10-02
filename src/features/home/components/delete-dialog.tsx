@@ -62,9 +62,15 @@ export function DeleteDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={changeOpen}>
-      <AlertDialogContent>
+      {/* Seule modale à trois boutons : la largeur du vendor (24 rem) ne les tient pas sur une ligne.
+          Préfixe `data-[size=default]:` : sans lui, `sm:max-w-sm` du vendor (sous ce variant)
+          l'emporterait. */}
+      <AlertDialogContent className="data-[size=default]:sm:max-w-md">
         <AlertDialogHeader>
-          <AlertDialogTitle>{text('delete_title', { name })}</AlertDialogTitle>
+          {/* `wrap-anywhere` : un nom sans espace élargirait la grille de l'en-tête, et la modale avec. */}
+          <AlertDialogTitle className="wrap-anywhere">
+            {text('delete_title', { name })}
+          </AlertDialogTitle>
           <AlertDialogDescription>{text('delete_body', {})}</AlertDialogDescription>
         </AlertDialogHeader>
         {failed && (
