@@ -11,7 +11,14 @@
     "erasableSyntaxOnly": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "paths": { "@/*": ["./src/*"] }
   },
-  "include": ["vite.config.ts", "vite", "scripts", "site/.vitepress/**/*.ts"]
+  "include": [
+    "vite.config.ts",
+    "vite",
+    "scripts",
+    "site/.vitepress/**/*.ts",
+    "site/guide/*.test.ts"
+  ]
 }
