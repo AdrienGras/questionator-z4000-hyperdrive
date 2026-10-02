@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" role="img" aria-labelledby="t d">
   <title id="t">Questionator Z-4000 Hyperdrive</title>
   <desc id="d">Animation du parcours : on charge une config et une liste d'étudiants, chaque étudiant tire une question par catégorie et reçoit une note, puis on consulte les statistiques et on exporte un fichier Excel.</desc>
   <!--
-    Animation CSS du README (#74, D95). Une seule boucle (--loop), aucun décalage de départ :
+    Animation CSS du README (#74, D95). Une seule boucle (variable loop), aucun décalage de départ :
     chaque scène est séquencée par les pourcentages de ses keyframes (1 s = 6,6667 %).
     Plages : 1 arrivée 0-2,5 s · 2 config 2,5-5 s · 3 passage 5-8,5 s · 4 note 8,5-11 s
     · 5 stats 11-13 s · 6 export 13-15 s ; fondus de 0,3 s aux bornes.

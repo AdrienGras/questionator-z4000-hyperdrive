@@ -23,6 +23,11 @@ const EXTERNAL_HREF = /href\s*=\s*(?:"(?!\s*#)[^"]*"|'(?!\s*#)[^']*')/i
 const EXTERNAL_URL = /url\((?!\s*#|\s*["']\s*#)/i
 const CSS_IMPORT = /@import/i
 const FONT_SIZE = /font-size\s*(?:=\s*["']|:)\s*(\d+(?:\.\d+)?)/g
+/**
+ * Corps des commentaires XML. Un `--` y est interdit (XML 1.0 §2.5) : le fichier ne s'affiche plus
+ * en `<img>` ni ouvert seul, alors qu'un SVG inséré dans du HTML le tolère.
+ */
+const XML_COMMENT = /<!--([\s\S]*?)-->/g
 
 /** Problèmes (messages en français) d'un SVG d'animation ; vide s'il est conforme. */
 export function findHeroIssues(svg: string): string[] {
@@ -45,6 +50,13 @@ export function findHeroIssues(svg: string): string[] {
   for (const match of svg.matchAll(FONT_SIZE)) {
     if (Number(match[1]) < MIN_FONT_SIZE) {
       issues.push(`font-size ${match[1]} inférieur au minimum de ${MIN_FONT_SIZE}.`)
+    }
+  }
+  for (const [, body] of svg.matchAll(XML_COMMENT)) {
+    if (body.includes('--') || body.endsWith('-')) {
+      issues.push(
+        `Double tiret dans un commentaire, XML invalide : « ${body.trim().slice(0, 40)} ».`,
+      )
     }
   }
   return issues

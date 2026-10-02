@@ -91,6 +91,13 @@ describe('findHeroIssues', () => {
     expect(findHeroIssues(svgWith('.a{font-size: 32px}')).join()).toContain('font-size')
     expect(findHeroIssues(svgWith('.a{font-size:40px}', '<text font-size="40"/>'))).toEqual([])
   })
+
+  it('refuse un double tiret dans un commentaire (XML invalide), accepte les variables CSS', () => {
+    const issues = findHeroIssues(svgWith('.a{fill:var(--bg)}', '<!-- boucle (--loop) -->'))
+    expect(issues).toHaveLength(1)
+    expect(issues.join()).toContain('commentaire')
+    expect(findHeroIssues(svgWith('.a{fill:var(--bg)}', '<!-- boucle unique -->'))).toEqual([])
+  })
 })
 
 describe('main', () => {
