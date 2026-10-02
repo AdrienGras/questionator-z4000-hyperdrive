@@ -24,6 +24,25 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-02 — #88 : outillage, reports tracés et e2e stabilisés
+
+**Dernière chose faite** : PR #116 (F40) mergée sur go de l'utilisateur. #88 est passé en « In progress », branche `chore/88-outillage`.
+- **Fait :**
+  - garde-fou `src/testing/heavy-doubles.test.ts`, vérifié en retirant une doublure ;
+  - fixture `languages-unknown` supprimée, la variante est écrite par le test ;
+  - `StatsPage.headcount` par `term` → `dd` ;
+  - région « Question en cours » sur `QuestionPanel`, et `highlightedCode` scopé dessus ;
+  - `CreateSessionPage.submit()` attend le bouton « Panneau » : `color-mode` passe de 1 échec sur 30 à 0 sur 100 ;
+  - `update.spec` attend le contrôleur avant « Prête pour le hors ligne ».
+  La suite e2e rejouée 4 fois passe 148 fois sur 148.
+- **Reporté avec mesures (D94) :** oxfmt (0.71), avertissement dependency-cruiser (`typescript <7`), `vmThreads` (2,5× plus rapide mais `examiner-view` instable). `isolate: false` est écarté (15 tests cassés).
+
+**Trucs en suspens** : PR en brouillon, Sonar, puis « Ready for review » ; merge sur go de l'utilisateur. #88 reste partiellement ouvert sur le fond : oxfmt et l'avertissement attendent des sorties externes. À voir avec l'utilisateur : fermer #88 par la PR et rouvrir un ticket « à la sortie d'oxfmt 1.0 / dependency-cruiser TS 7 », ou laisser #88 ouvert. Par défaut, la PR dit `Closes #88` et les reports sont au BACKLOG.
+
+**Prochaine chose à creuser** : #85 (Node 26) pas avant le 2026-10-28. Sinon, le rapidfire du BACKLOG annoncé par l'utilisateur.
+
+**Notes pour future Claude** : pour réévaluer `vmThreads`, la config en projets (`app` en `vmThreads` sur `src/`, `tooling` en pool par défaut sur `vite/` et `scripts/`) et le `toEqual` de `create-session-page.test.tsx` sont décrits dans D94 ; ils ne sont pas dans le code.
+
 ## 2026-10-02 — F40 (#103) : champ manquant nommé, valeurs possibles au survol
 
 **Dernière chose faite** : PR #115 (F39) mergée sur go de l'utilisateur. #103 est passé en « In progress », branche `feat/f40-editeur-survol`.

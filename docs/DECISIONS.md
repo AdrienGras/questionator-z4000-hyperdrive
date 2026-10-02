@@ -1405,3 +1405,18 @@ autre encodage 8 bits.
 - Bulle construite dans `hover-dom.ts` par `createElement` / `textContent`, libellés traduits passés en `hoverLabels` (remplace `defaultLabel`).
 
 **Pourquoi** : on écrit le JSON avec les littéraux, pas avec leur paraphrase ; un seul parcours du schéma garde les trois aides cohérentes.
+
+## D94 — #88 : outillage, ce qui est fait et ce qui est reporté (2026-10-02)
+
+**Question** : quels points d'outillage du BACKLOG traiter maintenant, et que décider pour ceux qui dépendent d'outils pas encore prêts ?
+
+**Décision** :
+- **oxfmt : reporté.** Version 0.71, pas de 1.0 ; Prettier et `prettier-plugin-tailwindcss` restent. À réévaluer à la 1.0.
+- **Avertissement `missing-typescript-transpiler` : reporté.** dependency-cruiser 18.5 déclare `typescript >=2 <7`, le projet est en TypeScript 7. Pas de contournement (épingler un TypeScript 6 pour le seul outil ajouterait une seconde version du compilateur).
+- **Vitest `pool: 'vmThreads'` : reporté.** Mesuré sur 16 cœurs : 13 à 15 s au lieu de 36 s. Il a fallu des projets séparés (le plugin Vite et les scripts de build en pool par défaut, car les bindings natifs de Rolldown refusent une `RegExp` d'un autre contexte `vm`), et `toEqual` au lieu de `toStrictEqual` sur un objet relu de fake-indexeddb. Malgré cela, un test de `examiner-view.test.tsx` expire une passe sur deux à trois, même à 33 % de workers. Le gain ne vaut pas une suite instable.
+- **Vitest `isolate: false` : écarté.** 15 tests cassent : les doublures (`vi.mock`, globals) fuient d'un fichier à l'autre.
+- **Garde-fou des doublures d'icônes et de Shiki** : `src/testing/heavy-doubles.test.ts` lit les sources des `.test.tsx`. Un fichier qui rend la config d'exemple (`config.example.json`, `<ConfigEditorPage`) doit déclarer les deux `vi.mock`. C'est une vérification textuelle, sans règle de lint maison.
+- **e2e** : fixture de langages unique (la variante « pyhton » est écrite par le test) ; `StatsPage.headcount` par `term` puis `dd` suivant ; `highlightedCode` scopé à la région « Question en cours », désormais aussi posée sur le panneau de question de l'examinateur ; `categoryButton` inchangé (CI stable).
+- **Instabilités e2e** : `CreateSessionPage.submit()` attend l'écran examinateur monté. Sans cela, `chooseColorMode` visait le bouton « Mode d'affichage » de l'écran de création ou de l'état de chargement, démonté juste après. Résultat : 1 échec sur 30 avant, 0 sur 100 après. Le test « Prête pour le hors ligne » attend le contrôle du service worker avant d'asserter le message, car le pré-cache dépasse 5 s sous charge. Suite complète rejouée 4 fois : 148 sur 148.
+
+**Pourquoi** : traiter ce qui se fait sans dette, tracer les mesures de ce qui est reporté pour ne pas refaire l'évaluation à l'aveugle.

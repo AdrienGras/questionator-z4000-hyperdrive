@@ -313,6 +313,7 @@ vi.mock('@/lib/markdown/highlighter', async (importOriginal) => ({
 
 - Un test qui rend la config d'exemple (ou toute config dont une catégorie porte une `icon` ou dont un énoncé contient un bloc de code coloré) double l'index des icônes et `highlight`, sauf s'il vérifie précisément l'icône ou la coloration (`category-icon`, `code-block`, `markdown`, `highlighter` gardent le vrai module). Sinon chaque fichier recharge des milliers de modules d'icônes et la grammaire PHP, et frôle le délai de 5 s sous la suite (QUIRKS 2026-10-01).
 - Pas de doublure globale dans `src/testing/setup.ts` : elle masquerait ces modules aux tests qui les vérifient.
+- Garde-fou : `src/testing/heavy-doubles.test.ts` échoue si un `.test.tsx` qui rend la config d'exemple (`config.example.json`, `<ConfigEditorPage`) n'a pas les deux `vi.mock` (#88, D94).
 - Après une action qui navigue ou écrit, attendre un état qui n'existe qu'après elle (`router.state.location.pathname`, écran d'arrivée, nouveau nom), jamais un texte déjà affiché avant : sinon le test se termine avant l'écriture et la suite de l'action déborde sur le test ou le fichier suivant.
 - Ne pas relever `testTimeout` pour un test lent sous la suite : chercher d'abord ce qu'il charge (`vitest run <fichier> --experimental.importDurations.print`, `--reporter=verbose` seul et sous la suite).
 
@@ -529,3 +530,5 @@ export class ExaminerPage {
 - Élément inatteignable par rôle ou nom : défaut d'accessibilité à corriger dans l'application (ex. région `aria-label` « Question en cours »), pas de `data-testid`.
 - `e2e/fixtures.ts` : contexte neuf par test (IndexedDB vide), session créée depuis `examples/`.
 - Pas d'attente fixe : assertions auto-attendantes (`expect(...).toBeVisible()`, `expect.poll`).
+- Une action qui mène à un autre écran attend un élément propre à l'écran d'arrivée avant de renvoyer son objet (`waitFor()`, pas d'`expect`) : l'URL seule ne suffit pas quand la route passe par un état de chargement (QUIRKS 2026-10-02).
+- Une instabilité se vérifie par `pnpm e2e <spec> --repeat-each=100`, puis sur la suite complète (`--repeat-each=4`).

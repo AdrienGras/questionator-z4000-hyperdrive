@@ -13,13 +13,13 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Outillage
 
-- [ ] Vitest plus rapide et plus robuste à la charge : `isolate: false` ou `pool: 'vmThreads'` (~2× plus rapide, 15 s au lieu de 32 s), mais 5 tests à adapter (`toStrictEqual` entre royaumes, test du plugin de config, timings) et l'isolation entre fichiers à revérifier. Sous forte charge, la marge reste mince (test le plus lent 4,6 s contre 5 s). → #88
-- [ ] Convention « doublures d'icônes et de Shiki pour un écran qui rend une config avec `icon` ou bloc de code » (CONVENTIONS, #87) appliquée à la main : un garde-fou (test de lenteur, règle de lint) si elle est oubliée. → #88
+- [ ] Vitest plus rapide et plus robuste à la charge : `isolate: false` ou `pool: 'vmThreads'` (~2× plus rapide, 15 s au lieu de 32 s), mais 5 tests à adapter (`toStrictEqual` entre royaumes, test du plugin de config, timings) et l'isolation entre fichiers à revérifier. Sous forte charge, la marge reste mince (test le plus lent 4,6 s contre 5 s). → #88 *Évalué en #88 (D94) : `vmThreads` 13-15 s au lieu de 36 s, mais un test de `examiner-view.test.tsx` expire une passe sur deux à trois, même à 33 % de workers ; `isolate: false` casse 15 tests (doublures partagées). Reporté.*
+- [x] Convention « doublures d'icônes et de Shiki pour un écran qui rend une config avec `icon` ou bloc de code » (CONVENTIONS, #87) appliquée à la main : un garde-fou (test de lenteur, règle de lint) si elle est oubliée. → #88 *Fait en #88 : `src/testing/heavy-doubles.test.ts` (un `.test.tsx` qui rend la config d'exemple ou l'éditeur doit déclarer les deux doublures).*
 - [x] Échec isolé `getByRole('banner')` dans `config-editor-page.test.tsx` (vu une fois pendant F31), cause inconnue, jamais reproduit sur ~90 suites. → #87 *Fait en #87 (PR 3) : l'aperçu ajoute ses propres `header` (`QuestionPreview`, `StudentScreen`) après la validation différée (300 ms + imports) ; si elle finissait avant l'assertion, `getByRole('banner')` trouvait plusieurs éléments. Reproduit en asserant après l'aperçu ; la barre se cherche désormais par le `header` du `h1`.*
 - [x] Tests instables vus pendant F31 : `src/features/create-session/create-session-page.test.tsx` (rejet non géré « window is not defined » au démontage du routeur) et `src/features/config-editor/config-editor-page.test.tsx` (`getByRole('banner')`, une fois). → #87 *Fait en #87 (tests instables).*
 - [x] Tests instables vus pendant F36, une fois chacun sous `pnpm check`, jamais seuls ni en trois relances de `pnpm test` : `src/features/session/add-student.test.tsx` (« Ajouter et faire passer » active le nouvel étudiant…) et `config-editor-page.test.tsx` (« marque l'aperçu périmé… », 5 s). Même e2e : `color-mode.spec.ts` a expiré une fois (30 s) sur une suite complète, puis 15/15 seul et 3 suites complètes vertes. → #87 *Fait en #87 (tests instables).*
 - [ ] Passer `.nvmrc` (et la CI) à Node 26 une fois LTS (prévu le 2026-10-28) ; Node 24 passe en maintenance le 2026-10-20. → #85
-- [ ] Évaluer oxfmt en remplacement de Prettier + prettier-plugin-tailwindcss quand il sort en 1.0 (tri Tailwind natif via `sortTailwindcss`). → #88
+- [ ] Évaluer oxfmt en remplacement de Prettier + prettier-plugin-tailwindcss quand il sort en 1.0 (tri Tailwind natif via `sortTailwindcss`). → #88 *Revu en #88 (D94) : oxfmt en 0.71, pas de 1.0. Reporté.*
 
 ## Config
 
@@ -56,7 +56,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [x] Vue projetée (F14) : `cursor-none` non testé au niveau page ; test de réinitialisation qui n'attend pas la disparition de l'énoncé. → #87 *Fait en #87 (PR 1).*
 - [x] Pilotage (F14) : `?search` conservé dans l'URL de la fenêtre projetée ; tests manquants (boutons pendant `busy`, bandeau quand l'étudiant projeté a disparu). *Popup bloquée effacée au clic suivant et référence de fenêtre liée à la session : livrés en F22.* → #87 *Fait en #87 (PR 1).*
 - [x] Tests F14 : marqueur `0.37` du test d'étanchéité en sous-chaîne (échec bruyant si un score le contient) ; pas de mutation vérifiée pour `editedAt` et le montant d'ajustement ; test d'architecture aveugle aux réexports de `Session` ; `computeScores` appelé deux fois dans `toProjectedView`. → #87 *Fait en #87 (PR 1).*
-- [ ] `categoryButton` (`src/testing/passage-assertions.ts`) : `waitFor` au délai par défaut (1 s), à allonger si la CI devient lente. → #88
+- [ ] `categoryButton` (`src/testing/passage-assertions.ts`) : `waitFor` au délai par défaut (1 s), à allonger si la CI devient lente. → #88 *Revu en #88 : CI stable, pas de changement.*
 - [x] Tuiles de catégorie (F25, D74) : seuil du repli sur une colonne à revoir avec l'aperçu de #56. *Livré en F22 : seuil mesuré sur le conteneur (`@min-[40rem]:`, D77).*
 - [ ] Aperçu de la vue projetée (F22) : suit le mode clair / sombre de l'examinateur, pas celui mémorisé par la vue projetée (D77) ; à reprendre si l'écart gêne.
 - [x] Tests F22 : `FauxResizeObserver` recopié entre `projection.test.tsx` et `projection-preview-leak.test.tsx` (à sortir dans `src/testing/`) ; commentaire et motif de skip prouvés absents de l'aperçu mais seulement présents en base, pas dans le DOM examinateur ; `useElementWidth` garde la dernière largeur après `ref(null)`. → #87 *Fait en #87 (PR 1).*
@@ -81,7 +81,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Synchroniser le mode entre deux fenêtres d'une même vue (événement `storage`, via `useSyncExternalStore`). Aujourd'hui, la valeur est lue une fois par clé.
 - [x] Tests manquants de `LocaleProvider` : changement de la locale du propriétaire avec une déclaration active, deux imbriqués frères de même locale. → #87 *Fait en #87 (PR 2).*
 - [ ] `isIconComponent` accepte tout objet non nul : vérifier `$$typeof` si Tabler exporte un jour autre chose que des composants sous un nom `Icon…`.
-- [ ] Faire disparaître l'avertissement `missing-typescript-transpiler` de `pnpm deps`, quand dependency-cruiser gérera typescript@7. → #88
+- [ ] Faire disparaître l'avertissement `missing-typescript-transpiler` de `pnpm deps`, quand dependency-cruiser gérera typescript@7. → #88 *Revu en #88 (D94) : dependency-cruiser 18.5 accepte typescript `>=2 <7`. Reporté.*
 
 ## Rendu markdown
 
@@ -90,7 +90,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Taille de projection : `prose-2xl` est provisoire, à caler sur un vrai vidéoprojecteur en F14 (D62). → #77
 - [x] Test de régression multi-ligne des offsets de `toHighlightedCode` (clés React), vérifié à la main par la revue finale. → #87 *Fait en #87 (PR 3) : Shiki réel, LF avec ligne vide et CRLF ; le CRLF a révélé un offset de ligne décalé d'un caractère par ligne (clés restées uniques), corrigé.*
 - [x] F18 : tests manquants, sans bogue connu : import de grammaire en échec puis nouvel essai ; rerender `Python` → `python` de `CodeBlock` ; tabulation et fermeture suivie d'espaces dans `code-fences.test.ts`. → #87 *Fait en #87 (PR 3), sans bogue trouvé.*
-- [ ] e2e F18 : deux fixtures de 178 lignes presque identiques (`e2e/fixtures/languages-*.config.json`), à générer depuis une base commune. → #88
+- [x] e2e F18 : deux fixtures de 178 lignes presque identiques (`e2e/fixtures/languages-*.config.json`), à générer depuis une base commune. → #88 *Fait en #88 : seule `languages-python.config.json` reste, la variante « pyhton » est écrite par le test.*
 - [x] Test du libellé de retour d'une note citée deux fois (suffixe `-2` de `footnoteBackLabel`, calqué sur `mdast-util-to-hast`, où `rereferenceIndex` commence à 1). → #87 *Fait en #87 (PR 3).*
 
 ## Éditeur de config
@@ -104,7 +104,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 - [x] `check:bundle` ne connaît que Recharts : généraliser (liste de couples bibliothèque → route) quand une deuxième bibliothèque lourde sera confinée à une route. *Fait au fil de F16, F18 et F26 : Recharts, xlsx, Shiki, CodeMirror.*
 - [x] Liste blanche du groupe `vendor` (`vite.config.ts`) à étendre si `check:bundle` rougit après l'ajout d'une dépendance partagée avec Recharts (voir QUIRKS 2026-09-30). → #86 *Relue en #86 (D88) : rien à ajouter, `check:bundle` vert.*
-- [ ] e2e : `StatsPage.headcount()` s'appuie sur `.last()` parmi des `div` imbriqués ; passer par `term` → `dd` suivant. → #88
+- [x] e2e : `StatsPage.headcount()` s'appuie sur `.last()` parmi des `div` imbriqués ; passer par `term` → `dd` suivant. → #88 *Fait en #88 : `term` filtré puis `following-sibling::dd[1]`.*
 - [x] Tests manquants : taux négatif (barème à valeurs négatives), frontière 0,999 / 1 sur /20, id inconnu dans `computeSkipped`, départage alphabétique seul des motifs, table des tags non vide à l'écran. → #87 *Fait en #87 (PR 4).*
 - [ ] Taux de réussite sur un barème entièrement négatif : le maximum est négatif, `points ÷ max` donne un taux positif trompeur (ex. barème `[-2, -1]`, note −2 → 200 %). Décider : `null` dès que `max ≤ 0`, ou refuser un tel barème (règle de config).
 - [x] Petits nettoyages de `domain/stats/` : `mean` en une seule division, `?? 0` inatteignable dans `strategies.ts`, `countBy` renommé, `Tally` au lieu de `ReturnType<typeof emptyTally>`, commentaire de limite 2^53 de `populationStdDev`. → #87 *Fait en #87 (PR 4) : `mean` surchargée (liste non vide → `number`), `countBy` → `groupByKey` ; `Tally` existait déjà.*
@@ -127,7 +127,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Icônes du manifeste pré-cachées deux fois (motif glob + `includeManifestIcons`), sans effet ; `includeManifestIcons: false` pour un manifeste net.
 - [x] Vérification périodique des mises à jour pendant la journée, message « prêt hors ligne » (hors périmètre F17). → #84 *Livré en F36 (D86).*
 - [ ] Première installation interrompue (réseau coupé pendant le pré-cache) : le navigateur supprime l'enregistrement, les vérifications de F36 échouent alors sans bruit (`InvalidStateError`) et rien ne relance l'installation avant un rechargement. Relancer `register` au retour du réseau si le cas se présente.
-- [ ] e2e : `highlightedCode` (`.first()`) peut se satisfaire d'un bloc de la question précédente ; le scoper à la question courante. → #88
+- [x] e2e : `highlightedCode` (`.first()`) peut se satisfaire d'un bloc de la question précédente ; le scoper à la question courante. → #88 *Fait en #88 : région « Question en cours » ajoutée au panneau de l'examinateur, `highlightedCode` y est scopé (examinateur et vue projetée).*
 - [x] Helper de test `deferred<T>()` dupliqué dans `import-controller.test.tsx` et `add-student.test.tsx` : le sortir dans `src/testing/` (F30). → #87 *Fait en #87 (PR 1).*
 - [x] `stale-errors.test.tsx` attend avec `setTimeout(100)` : attendre un état observable à la place (F30). → #87 *Fait en #87 (PR 1).*
 - [x] Commenter sur `PassageActions` que `adjust` et `revealFinal` laissent l'affichage de l'erreur à l'appelant (`ownError`) (F30). → #87 *Fait en #87 (PR 1).*

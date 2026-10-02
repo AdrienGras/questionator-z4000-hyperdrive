@@ -705,3 +705,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Workaround** : ancrer la regex au début (`/^Martin Bob/`, le bouton de sélection commence par le nom). Pour les lignes, partir des `listitem` et prendre le premier bouton de chacun (`buttons()` de `students-tab.test.tsx`).
 **Référence** : `src/features/session/components/student-row.tsx`, `src/features/session/students-tab.test.tsx`.
 
+
+## e2e : une action qui navigue doit attendre l'écran d'arrivée, sinon l'action suivante vise un bouton homonyme démonté (2026-10-02)
+
+**Découvert** : #88, `color-mode.spec.ts`, 1 échec sur 30 en `--repeat-each`.
+**Symptôme** : `waiting for getByRole('menuitemradio', { name: 'Sombre' })` jusqu'au délai de 30 s ; le snapshot montre l'examinateur, menu fermé.
+**Cause** : `CreateSessionPage.submit()` rendait la main dès le clic. `chooseColorMode` cliquait alors le bouton « Mode d'affichage » de l'écran de création (ou de l'état de chargement de la route, chargée à la demande), qui porte le même nom que celui de l'examinateur ; la navigation le démontait avec son menu. Attendre l'URL ne suffit pas : l'état de chargement a lui aussi ce bouton.
+**Workaround** : une méthode de Page Object qui mène à un autre écran attend un élément propre à cet écran (`submit()` attend le bouton « Panneau »). Pour vérifier : `pnpm e2e <spec> --repeat-each=100`.
+**Référence** : `e2e/pages/create-session-page.ts`, `e2e/color-mode.spec.ts`.
