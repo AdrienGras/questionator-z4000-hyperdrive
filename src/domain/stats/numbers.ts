@@ -1,10 +1,12 @@
 import type { Milli } from '@/domain/scoring/milli'
 
-/** Moyenne décimale d'une liste de millièmes ; `null` si vide. */
-export function mean(values: Milli[]): number | null {
+/** Moyenne décimale d'une liste de millièmes ; `null` si vide (jamais pour une liste non vide). */
+export function mean(values: readonly [Milli, ...Milli[]]): number
+export function mean(values: readonly Milli[]): number | null
+export function mean(values: readonly Milli[]): number | null {
   if (values.length === 0) return null
   const sum = values.reduce((total, value) => total + value, 0)
-  return sum / values.length / 1000
+  return sum / (values.length * 1000)
 }
 
 /** Médiane décimale ; moyenne des deux valeurs centrales si l'effectif est pair ; `null` si vide. */
@@ -19,6 +21,9 @@ export function median(values: Milli[]): number | null {
 /**
  * Écart-type de population (÷ n) décimal ; `null` si vide. Variance sur les millièmes entiers :
  * Σ(n·x − Σx)² / n³, une seule opération flottante (la racine) avant le ÷ 1000.
+ * Exact tant que Σ(n·x − Σx)² reste sous 2^53 (`Number.MAX_SAFE_INTEGER`). Pire cas : moitié à 0,
+ * moitié au maximum M (millièmes), soit n³ · (M/2)² ; pour /20, environ 450 étudiants. Au-delà, le
+ * cumul devient flottant et l'erreur d'arrondi reste invisible à 2 décimales.
  */
 export function populationStdDev(values: Milli[]): number | null {
   const n = values.length
