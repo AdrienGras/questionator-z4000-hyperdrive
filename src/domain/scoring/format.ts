@@ -17,15 +17,18 @@ export function stepDecimals(step: Milli): number {
   return decimals
 }
 
+/** Note brute, ou maximum d'un barème : jusqu'à 3 décimales, sans zéro final (« 2,5 », « 1 »). */
+export function formatRawScore(value: Milli, locale: Locale): string {
+  return new Intl.NumberFormat(locale, { maximumFractionDigits: 3 }).format(fromMilli(value))
+}
+
 export function formatScore(
   value: Milli,
   kind: ScoreKind,
   config: NormalizedConfig,
   locale: Locale,
 ): string {
-  if (kind === 'raw') {
-    return new Intl.NumberFormat(locale, { maximumFractionDigits: 3 }).format(fromMilli(value))
-  }
+  if (kind === 'raw') return formatRawScore(value, locale)
   const decimals = stepDecimals(stepMilli(config))
   return new Intl.NumberFormat(locale, {
     minimumFractionDigits: decimals,

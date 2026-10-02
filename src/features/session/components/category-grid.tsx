@@ -44,7 +44,8 @@ export function CategoryGrid({ ui, config, student, disabled, onDraw }: Category
         const { color } = category
         const accent: (CSSProperties & Record<'--category-color', string>) | undefined =
           color === undefined ? undefined : { '--category-color': color }
-        const max = formatScore(toMilli(Math.max(...category.scale)), 'raw', config, locale)
+        const points = Math.max(...category.scale)
+        const max = formatScore(toMilli(points), 'raw', config, locale)
         const reasonId = `passage-category-exhausted-${category.id}`
 
         const content = (
@@ -57,7 +58,7 @@ export function CategoryGrid({ ui, config, student, disabled, onDraw }: Category
             )}
             <span>{category.label}</span>
             <span className="text-xs text-muted-foreground">
-              {text('passage_category_max', { max })}
+              {text('passage_category_max', { max, points })}
             </span>
           </>
         )
