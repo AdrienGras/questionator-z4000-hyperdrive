@@ -29,6 +29,7 @@ Carte des paths, services, accès, commandes. À jour au fil des découvertes.
   - `pnpm build` / `pnpm preview` — build de prod dans `dist/` et prévisualisation sous `/questionator-z4000-hyperdrive/`
   - Après `pnpm build` (comme la CI) : `pnpm check:bundle` (Recharts, xlsx, Shiki, CodeMirror hors du bundle initial), `pnpm check:precache` (tout `dist/` pré-caché), `pnpm check:budget` (budgets gzip, D88 : premier affichage de l'accueil ≤ 275 Ko, chaque chunk ≤ 135 Ko hors `icons-*` et grammaires/thèmes Shiki ; valeurs et mesures en tête de `scripts/check-bundle-budget.ts`)
   - `pnpm docs:dev` / `pnpm docs:build` / `pnpm docs:preview` — site de documentation VitePress (F27, sources dans `site/`) : `docs:dev` sert sur le port 5173 à `http://localhost:5173/questionator-z4000-hyperdrive/docs/` ; `docs:build` écrit dans `dist/docs/` et doit passer **après** `pnpm build` (qui vide `dist/`)
+  - `pnpm docs:screenshots` — régénère les 10 captures du guide dans `site/public/screenshots/` (F28) : `playwright test -c playwright.screenshots.config.ts`, le `webServer` construit l'app puis la doc ; Chromium requis ; **non lancé en CI**, les PNG sont commités
   - `pnpm test` — tests (régénère aussi l'arbre de routes)
   - `pnpm e2e` — Playwright (`e2e/`, pages POM dans `e2e/pages/`) : build puis `vite preview` sur le port 4173 ; job CI `e2e`, dont dépend `deploy`
   - `.claude/scripts/sonar-check.sh --pr <n> --wait` — état SonarQube Cloud d'une PR

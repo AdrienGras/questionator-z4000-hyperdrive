@@ -1464,3 +1464,21 @@ autre encodage 8 bits.
 | CI et e2e | Étape « Build de la doc » après « Build », avec contrôle de la base des assets ; le `webServer` de Playwright construit l'app puis la doc ; `e2e/docs.spec.ts` (4 tests, sous contrôle du SW) | La doc est testée telle que déployée. |
 
 **Pourquoi** : une doc publiée avec l'app, sans second Vite, sans effet sur le pré-cache ni sur le hors ligne, et dont les régressions probables (lien mort, SW qui avale `/docs/`) font échouer la CI.
+
+## D97 — F28 (#72) : guide utilisateur, captures et garde-fous (2026-10-02)
+
+**Question** : comment rédiger le guide d'usage de `site/guide/` pour qu'il reste exact quand l'application évolue ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Captures | Playwright, config dédiée `playwright.screenshots.config.ts` (qui réutilise `webServer` et `baseURL` exportés par `playwright.config.ts`, lequel ignore `e2e/screenshots/**`), specs dans `e2e/screenshots/`, page objects des e2e réutilisés | Même serveur et mêmes sélecteurs : une capture casse quand l'UI casse, pas silencieusement. |
+| Format | PNG, 1280×800, `deviceScaleFactor: 2`, Chromium, locale `fr-FR`, animations désactivées ; 10 images, ~1,9 Mo, dans `site/public/screenshots/`. Mode sombre hors périmètre | Net sur écran HiDPI. Les écrans de session sont sombres parce que la config d'exemple fixe `presentation.defaultColorMode` à sombre : c'est ce que voit l'utilisateur. |
+| Déterminisme | `crypto.getRandomValues` remplacé par mulberry32 (graine 72) via `context.addInitScript` (la popup projetée est couverte) ; horloge fixée par `context.clock.setFixedTime('2026-09-15T09:00:00+02:00')` ; `storage.persisted/persist` forcés à vrai ; `serviceWorkers: 'block'` ; `document.fonts.ready` attendu ; données = fichiers d'exemple. Aucun code de l'app ne change | Le tirage et les dates affichées sont les seules sources de variation. `clock.install` aurait figé ou fait dériver les minuteries. Prouvé par deux exécutions sans diff. |
+| CI | `docs:screenshots` n'est pas lancé en CI | Coûteux et dépendant du rendu de la machine ; les PNG sont commités. `docs:build` échoue déjà si une image référencée manque. |
+| Référence | Rédigée à la main ; `site/guide/reference-config.test.ts` exige que chaque chemin du JSON Schema soit la première cellule d'une ligne de tableau de `reference-config.md` (jetons de thème par leur nom seul) | Une page générée perdrait les exemples et les explications ; retirer un champ fait échouer le test. |
+| Dépannage | Une ancre par code d'erreur (config et CSV) dans `depannage.md`, verrouillée par `site/guide/depannage.test.ts` (aucun doublon, tout lien `depannage#id` des pages résolu) | Rend vérifiable le critère « chaque message d'erreur a une entrée ». |
+| Voix | Vouvoiement, phrases courtes, libellés exacts de l'interface ; relecture `humanize-fr` de chaque page | Cohérence avec les messages de l'app. |
+
+**Pourquoi** : un guide qui décrit ce que fait le code, avec des captures régénérables à l'identique et des tests qui échouent quand la référence ou le dépannage prennent du retard sur le schéma.

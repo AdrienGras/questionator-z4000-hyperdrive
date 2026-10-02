@@ -24,11 +24,21 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-02 — #72 : F28, guide utilisateur
+
+**Dernière chose faite** : guide complet sur `feat/72-guide-utilisateur`, en local, non poussé. Les 10 pages de `site/guide/` sont rédigées d'après le code (libellés du dictionnaire `fr`), avec 10 captures déterministes générées par `pnpm docs:screenshots` ; `reference-config.test.ts` et `depannage.test.ts` verrouillent la couverture du schéma et des codes d'erreur ; README réduit à un renvoi vers la référence ; D97, trois QUIRKS, deux lignes de BACKLOG.
+
+**Trucs en suspens** : revue finale, push, PR en brouillon `Closes #72`, `.claude/scripts/sonar-check.sh --pr <n> --wait` jusqu'à « Quality gate OK » (0 issue, 0 hotspot), puis « Ready for review ». Ne pas merger sans le go explicite de l'utilisateur.
+
+**Prochaine chose à creuser** : #73 (F29, section Contribuer de `site/contribuer/`), qui part de `main` à jour après le merge de #72.
+
+**Notes pour future Claude** : les captures ne sont pas lancées en CI ; après un changement d'interface visible dans le guide, relancer `pnpm docs:screenshots` et commiter les PNG (deux exécutions successives ne doivent laisser aucun diff). Ajouter un champ au schéma ou un code d'erreur sans l'ajouter à `reference-config.md` / `depannage.md` fait échouer `pnpm check`. VitePress ne contrôle pas les ancres `#` (voir QUIRKS). Les écrans de session des captures sont sombres (config d'exemple).
+
 ## 2026-10-02 — #71 : F27, site de documentation (socle)
 
 **Dernière chose faite** : socle du site de documentation livré sur `feat/71-site-doc`, complet en local, non poussé. Lien « Aide » dans `PageShell` (avant le sélecteur de thème, nouvel onglet, clés `help_link` / `help_link_label`) ; service worker qui laisse passer `/docs/` (denylist + `globIgnores`) et `check:precache` qui échoue si la doc entre dans le manifeste ; `site/` en VitePress 2.0.0-alpha.20 (10 pages guide et 7 pages contribuer en squelette, thème et recherche en français, accent rose contrasté) ; CI et e2e qui construisent l'app puis la doc ; `e2e/docs.spec.ts`. Décision D96, sept QUIRKS, trois lignes de BACKLOG.
 
-**Trucs en suspens** : PR #122, revue finale faite et corrigée (test « Aide » discriminant, motif étendu à `docs?…`), SonarQube Cloud OK (0 issue, 0 hotspot), passée en « Ready for review ». Ne pas merger sans le go explicite de l'utilisateur.
+**Trucs en suspens** : rien. PR #122 mergée sur le go de l'utilisateur, #71 fermé ; la documentation est en ligne sur https://adriengras.github.io/questionator-z4000-hyperdrive/docs/.
 
 **Prochaine chose à creuser** : #72 (F28) et #73 (F29) remplissent les pages squelettes (`site/guide/`, `site/contribuer/`).
 
