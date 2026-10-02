@@ -2,6 +2,7 @@
  * Sens des imports de src/ (#31, D59) : lib ← domain ← components ← features ← routes / app.
  * Détail et raisons : docs/CONVENTIONS.md § « Arborescence et imports ».
  */
+
 const TEST = String.raw`\.test\.tsx?$`
 
 /** @type {import('dependency-cruiser').IConfiguration} */
@@ -149,9 +150,9 @@ module.exports = {
   ],
   options: {
     doNotFollow: { path: 'node_modules' },
+    // swc lit le TypeScript et voit les imports de type. Résolution (extensions, alias `@/`)
+    // dans `depcruise.resolve.cjs`, sans l'option `tsConfig` qui exige TypeScript < 7 (D94).
     parser: 'swc',
-    tsPreCompilationDeps: true,
-    tsConfig: { fileName: 'tsconfig.app.json' },
-    enhancedResolveOptions: { extensions: ['.ts', '.tsx', '.js', '.json'] },
+    webpackConfig: { fileName: 'depcruise.resolve.cjs' },
   },
 }
