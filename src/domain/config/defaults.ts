@@ -9,5 +9,6 @@ export const CONFIG_DEFAULTS = {
     showStatsOnFinal: false,
     drawAnimation: true,
     defaultColorMode: 'system',
+    showCategoryPoints: true,
   },
 } as const

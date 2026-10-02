@@ -48,6 +48,7 @@ export type NormalizedConfig = {
     showStatsOnFinal: boolean
     drawAnimation: boolean
     defaultColorMode: 'light' | 'dark' | 'system'
+    showCategoryPoints: boolean
   }
   theme: { light: ThemeOverrides; dark: ThemeOverrides }
   categories: NormalizedCategory[]
@@ -123,6 +124,8 @@ export function normalize(config: ParsedConfig): NormalizedConfig {
       showStatsOnFinal: presentation?.showStatsOnFinal ?? defaults.presentation.showStatsOnFinal,
       drawAnimation: presentation?.drawAnimation ?? defaults.presentation.drawAnimation,
       defaultColorMode: presentation?.defaultColorMode ?? defaults.presentation.defaultColorMode,
+      showCategoryPoints:
+        presentation?.showCategoryPoints ?? defaults.presentation.showCategoryPoints,
     },
     theme: { light: { ...theme?.light }, dark: { ...theme?.dark } },
     categories: sortCategories(config.categories).map((category, index) =>

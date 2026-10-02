@@ -246,6 +246,24 @@ test('le survol de finalScoreDisplay affiche sa description et son défaut', asy
   await expect(editor.hoverTooltip).toContainText('Défaut : "both"')
 })
 
+test('le survol de showCategoryPoints affiche sa description et son défaut', async ({ page }) => {
+  const editor = new ConfigEditorPage(page)
+  await editor.goto()
+  // CodeMirror ne rend que les lignes visibles : la clé, dernière de `presentation`, passe en tête.
+  await editor.replaceText(
+    exampleWith(',\n    "showCategoryPoints": true', '').replace(
+      '"showCumulativeScore": true,',
+      '"showCategoryPoints": true,\n    "showCumulativeScore": true,',
+    ),
+  )
+  // La saisie laisse la vue en bas du texte : revenir en tête.
+  await page.keyboard.press('ControlOrMeta+Home')
+  await expect(editor.editor).toContainText('"showCategoryPoints"')
+  await page.locator('.cm-content').getByText('"showCategoryPoints"').hover()
+  await expect(editor.hoverTooltip).toContainText('maximum de points de chaque catégorie')
+  await expect(editor.hoverTooltip).toContainText('Défaut : true')
+})
+
 // Ni espace ni tiret : aucun point de coupure naturel (#109).
 const LONG_ID = `facile_${'x'.repeat(120)}`
 const LONG_URL = `https://example.com/${'a'.repeat(180)}`

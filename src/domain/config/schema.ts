@@ -227,6 +227,10 @@ export const ConfigSchema = z.strictObject({
           "Mode d'affichage clair, sombre ou celui du système à l'ouverture de la session.",
         default: CONFIG_DEFAULTS.presentation.defaultColorMode,
       }),
+      showCategoryPoints: z.boolean().optional().meta({
+        description: 'Affiche le maximum de points de chaque catégorie sur la vue projetée.',
+        default: CONFIG_DEFAULTS.presentation.showCategoryPoints,
+      }),
     })
     .optional()
     .meta({

@@ -76,3 +76,25 @@ test('tirage possible : tuiles normales', () => {
   render(<CategoryTiles ui={makeUi()} categories={[category('a')]} />)
   expect(tile('Catégorie a')).toHaveAttribute('data-state', 'available')
 })
+
+test('points du barème sous le libellé, au format de l’examinateur', () => {
+  render(
+    <CategoryTiles
+      ui={makeUi()}
+      categories={[category('a', { maxPoints: 1 }), category('b', { maxPoints: 2.5 })]}
+    />,
+  )
+  expect(tile('Catégorie a')).toHaveTextContent('1 pt')
+  expect(tile('Catégorie b')).toHaveTextContent('2,5 pts')
+})
+
+test('points en anglais', () => {
+  render(<CategoryTiles ui={makeUi('en')} categories={[category('a', { maxPoints: 2.5 })]} />)
+  expect(tile('Catégorie a')).toHaveTextContent('2.5 pts')
+})
+
+test('sans maxPoints (showCategoryPoints à false) : aucun point affiché', () => {
+  const { maxPoints: _maxPoints, ...hidden } = category('a')
+  render(<CategoryTiles ui={makeUi()} categories={[hidden]} />)
+  expect(tile('Catégorie a')).not.toHaveTextContent(/\bpts?\b/)
+})

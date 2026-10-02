@@ -48,7 +48,7 @@ export class ExaminerPage {
       .first()
   }
 
-  /** Tire une question dans la catégorie (`Normal` pour le bouton « Normal max 2 »). */
+  /** Tire une question dans la catégorie (`Normal` pour le bouton « Normal 2 pts »). */
   async draw(categoryLabel: string): Promise<void> {
     await this.page
       .getByRole('list', { name: 'Choisir une catégorie' })
