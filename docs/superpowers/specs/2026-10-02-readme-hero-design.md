@@ -3,7 +3,7 @@
 - **Date** : 2026-10-02
 - **Ticket** : [#74](https://github.com/AdrienGras/questionator-z4000-hyperdrive/issues/74)
 - **Branche** : `feat/74-animation-readme`
-- **Statut** : design validé en conversation, figé ici avant le plan d'implémentation.
+- **Statut** : design validé en conversation, figé ici avant le plan d'implémentation. **Révisé** après la première version (PR #120) : la section « Révision 2 » remplace le cadrage en fenêtre de navigateur et la timeline de 15 s (§1, §2, §4 pour la structure des scènes) ; le reste tient.
 
 ## Contexte
 
@@ -21,6 +21,47 @@ Références : `PRODUCT.md` §2, §8 · ticket #74.
 ## Objectif
 
 Un visiteur du dépôt comprend en ~15 s ce que fait l'application, sans lire le README.
+
+## Révision 2 — scène de salle (2026-10-02)
+
+**Pourquoi** : retour de l'utilisateur sur la première version. On voyait une interface qui s'anime dans une fenêtre, sans comprendre qu'il s'agit d'un **oral** (un étudiant face à un examinateur), qu'il se joue sur **deux écrans** (l'examinateur pilote et note, l'étudiant voit la question projetée), ni le **fonctionnement** (choix de la difficulté → tirage → réponse orale → note → score cumulé). Le cadrage en fenêtre unique avec vignette de projection, recommandé au départ, était le mauvais choix.
+
+**Décisions** (choix de l'utilisateur) :
+
+| Sujet | Décision |
+|---|---|
+| Mise en scène | Mélange : vue de la salle pour le passage, puis zoom dans l'écran de l'examinateur pour les stats et l'export. |
+| Personnages | Simplifiés et expressifs : formes géométriques (tête ronde, buste arrondi) avec quelques détails qui racontent (lunettes et tasse pour l'examinateur, une couleur par étudiant, bulles). Pas de membres articulés. |
+| Durée | `--loop: 18s` (1 s = 5,5556 %). |
+
+**Décor de la salle** (une seule scène, sans changement de plan pendant le passage) :
+- à gauche, l'examinateur assis derrière un ordinateur portable vu de trois quarts (écran ~280 × 170) ;
+- en haut à droite, le grand écran projeté au mur (~560 × 320), toujours sombre (il est éclairé), quel que soit le thème ;
+- au centre, la place de l'étudiant, face à l'écran ; les étudiants entrent par la droite et ressortent par la droite ;
+- mur, sol et mobilier en variables CSS, clair / sombre comme les tokens de l'app.
+
+**Timeline (boucle de 18 s)** :
+
+| Plage | Moment | Contenu |
+|---|---|---|
+| 0 – 2 s | Titre | Écran synthwave existant (soleil, grille, titre), raccourci. |
+| 2 – 4 s | Préparation | La salle apparaît. `config.json` et `etudiants.csv` volent dans le portable ; les 4 tuiles de catégorie s'allument sur l'écran projeté. |
+| 4 – 6 s | L'étudiant choisit | L'étudiant A (couleur `--cat1`) entre et se place. Bulle avec l'icône « flamme » au-dessus de lui ; la tuile Difficile s'allume sur l'écran projeté et sur le portable. |
+| 6 – 8,5 s | Tirage et réponse | Sur l'écran projeté, cartes mélangées puis carte question retenue (énoncé seul). Sur le portable, la même question **plus une barre « réponse attendue »** de couleur distincte. L'étudiant répond : bulle « … » animée. |
+| 8,5 – 10 s | Note | L'examinateur « clique » une note sur son portable (bouton qui s'allume) ; « +2 » monte au-dessus du portable ; le score s'affiche sur l'écran projeté. |
+| 10 – 12 s | Suivants en accéléré | A sort ; B (`--cat2`) puis C (`--cat4`) passent vite : tuile, question, note qui clignotent ; le score se met à jour pour chacun. |
+| 12 – 15 s | Zoom : stats | Le portable s'agrandit jusqu'à remplir l'image (`scale` sur son groupe, centré sur son écran), le décor s'efface ; barres par catégorie et courbe de distribution dans l'écran. |
+| 15 – 18 s | Export | Un fichier Excel sort de l'écran zoomé ; fondu vers le titre à 17,7 – 18 s. |
+
+**Lisibilité** : personnages ~160 unités de haut ; bulles ≥ 80 unités avec une icône ou « … » ; seuls textes : le titre, « +2 » et le score (≥ 40 unités). Le contenu des écrans est schématique (barres de texte simulées, icônes).
+
+**Structure** : chaque personnage défini une fois dans `<defs>` (`#p-student`, `#p-examiner`), instancié par `<use>`, couleur passée par `color`. Déplacements par `transform` (glissement + léger rebond). Groupes de premier niveau : `ambiance`, `scene-title`, `room` (décor, `examiner`, `laptop`, `projector`, `students`), `zoom` (stats et export dans l'écran agrandi). La fenêtre de navigateur, l'accueil et les scènes 2 à 4 de la première version disparaissent ; on réutilise le titre, les symboles Tabler, les tuiles, les stats et l'export.
+
+**Mouvement réduit** : image fixe de la salle au moment de la note : l'étudiant A en place, la question projetée, la réponse côté portable, le score affiché. (Remplace « scène d'export figée ».)
+
+**Inchangé** : SVG écrit à la main, un fichier, timeline CSS unique sans `animation-delay`, variables CSS, icônes Tabler 3.48.0, `width="1200" height="600"` + `viewBox`, aucun `--` dans un commentaire, < 100 Ko, `check:hero`, texte alternatif (reformulé ci-dessous), mode `<img>`.
+
+**Texte alternatif** (remplace le précédent) : « Animation du principe : un étudiant choisit une difficulté, une question est tirée et projetée sur grand écran, il répond à l'oral pendant que l'examinateur voit la réponse attendue et note sur son ordinateur ; puis on consulte les statistiques et on exporte un fichier Excel. »
 
 ## Décisions (D95)
 
