@@ -655,8 +655,8 @@
         </g>
         <path class="curve s5-curve anim" pathLength="1" d="M640 448C720 446 770 236 850 236S980 444 1040 448"/>
       </g>
+    </g><!-- fin de la scène 5 -->
     </g><!-- fin du découpage de la fenêtre : la scène 6 en sort volontairement -->
-    </g>
 
     <!-- Scène 6 : export (13-15 s). Le tableau des notes donne un fichier Excel qui sort de la fenêtre. -->
     <g id="scene-6" class="anim">
