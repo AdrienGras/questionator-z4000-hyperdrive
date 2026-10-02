@@ -651,7 +651,7 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 **Contenu.**
 - Aperçu réduit de la vue projetée dans la vue de passage, en haut à droite à partir de 1024 px, empilé en haut en dessous (D77). Mêmes composants et même `toProjectedView` que la vue projetée ; pas d'iframe ni de second chargement.
 - Canevas virtuel 1280 × 720 réduit à la largeur de la colonne ; un contenu plus haut est coupé. Mode clair / sombre de la vue examinateur ; animation de tirage désactivée dans l'aperçu.
-- Boutons « Ouvrir la vue projetée », « Projeter cet étudiant » et « Écran d'attente » sous l'aperçu (retirés de la barre de titre), puis le bandeau « autre étudiant projeté ».
+- « Ouvrir la vue projetée » sur la ligne du titre de l'aperçu, à droite (F39) ; « Projeter cet étudiant » et « Écran d'attente » sous l'aperçu (retirés de la barre de titre), puis le bandeau « autre étudiant projeté ». Chaque bouton porte une icône décorative à côté de son libellé (lien externe, lecture, pause).
 - Le message de popup bloquée s'efface au clic suivant sur l'un de ces boutons. « Ouvrir » ne ramène au premier plan que la fenêtre ouverte pour cette session ; sinon la fenêtre est rouverte sur la bonne session.
 
 **Critères d'acceptation.**

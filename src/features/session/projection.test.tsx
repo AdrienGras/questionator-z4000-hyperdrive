@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto'
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, render, renderHook, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { db } from '@/lib/db/db'
 import { makeUi } from '@/testing/make-ui'
@@ -12,6 +12,7 @@ import { makeSession } from '@/testing/session-fixtures'
 import { config, mountSession } from '@/testing/students-tab-harness'
 import { ProjectionBanner } from './components/projection-banner'
 import { ProjectionControls } from './components/projection-controls'
+import { usePresentWindow } from './hooks/use-present-window'
 
 const A = makeListStudent('s-a', 'Aba', 1)
 const B = makeListStudent('s-b', 'Bec', 2)
@@ -162,28 +163,22 @@ test('popup bloquée puis ouverture réussie : message effacé', async () => {
 test('fenêtre d’une autre session : rouverte, pas ramenée', () => {
   const { win, focus } = fakeWindow()
   const openSpy = stubOpen(win)
-  const props = {
-    ui: makeUi(),
-    projection: { mode: 'waiting' } as const,
-    activeStudentId: undefined,
-    disabled: false,
-    onProject: vi.fn<() => Promise<boolean>>(() => Promise.resolve(true)),
-  }
-  const { rerender } = render(<ProjectionControls {...props} sessionId="s1" />)
+  const { result, rerender } = renderHook(({ sessionId }) => usePresentWindow(sessionId), {
+    initialProps: { sessionId: 's1' },
+  })
 
-  fireEvent.click(open())
-  rerender(<ProjectionControls {...props} sessionId="s2" />)
-  fireEvent.click(open())
+  act(() => result.current.openWindow())
+  rerender({ sessionId: 's2' })
+  act(() => result.current.openWindow())
 
   expect(openSpy).toHaveBeenCalledTimes(2)
   expect(String(openSpy.mock.calls[1]?.[0])).toContain('#/present/s2')
   expect(focus).not.toHaveBeenCalled()
 })
 
-test('écriture en cours (`disabled`) : projeter et attente désactivés, ouverture toujours possible', () => {
+test('écriture en cours (`disabled`) : projeter et attente désactivés', () => {
   const props = {
     ui: makeUi(),
-    sessionId: 'session-1',
     // Les deux boutons seraient actifs sans écriture en cours : B projeté, A actif.
     projection: { mode: 'student', studentId: 's-b' } as const,
     activeStudentId: 's-a',
@@ -197,6 +192,11 @@ test('écriture en cours (`disabled`) : projeter et attente désactivés, ouvert
 
   expect(project()).toBeDisabled()
   expect(waiting()).toBeDisabled()
+})
+
+test('« Ouvrir la vue projetée » n’écrit rien : jamais désactivé, même sans étudiant actif', async () => {
+  await mountSession([A, B], { activeStudentId: undefined })
+
   expect(open()).toBeEnabled()
 })
 
@@ -288,11 +288,44 @@ test('aperçu : étudiant projeté inconnu → session endommagée, aucun aperç
   expect(screen.getByRole('button', { name: 'Exporter un backup' })).toBeInTheDocument()
 })
 
-test('contrôles sous l’aperçu, hors de l’en-tête', async () => {
+test('« Ouvrir » sur la ligne du titre de l’aperçu, pilotage sous l’aperçu, hors de l’en-tête', async () => {
   await mountSession([A, B])
 
   expect(
     within(screen.getByRole('banner')).queryByRole('button', { name: 'Ouvrir la vue projetée' }),
   ).toBeNull()
-  expect(preview().compareDocumentPosition(open()) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+  // Dans l'en-tête de la région, juste après le titre et avant le canevas.
+  const title = within(preview()).getByRole('heading', { name: 'Vue projetée' })
+  expect(within(preview()).getByRole('button', { name: 'Ouvrir la vue projetée' })).toBe(open())
+  expect(title.compareDocumentPosition(open()) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+  expect(open().compareDocumentPosition(canvas()) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+  // Les deux boutons de pilotage restent sous l'aperçu, hors de sa région.
+  for (const button of [project(), waiting()]) {
+    expect(preview()).not.toContainElement(button)
+    expect(preview().compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+  }
+})
+
+test('chaque bouton a son icône, masquée aux lecteurs d’écran, et garde son libellé', async () => {
+  await mountSession([A, B])
+
+  for (const [button, name] of [
+    [open(), 'Ouvrir la vue projetée'],
+    [project(), 'Projeter cet étudiant'],
+    [waiting(), 'Écran d’attente'],
+  ] as const) {
+    const icon = button.querySelector('svg')
+    expect(icon).not.toBeNull()
+    expect(icon).toHaveAttribute('aria-hidden', 'true')
+    expect(button).toHaveAccessibleName(name)
+  }
+})
+
+test('popup bloquée : le message suit le bouton d’ouverture, dans la région de l’aperçu', async () => {
+  stubOpen(null)
+  await mountSession([A, B])
+
+  fireEvent.click(open())
+
+  expect(await within(preview()).findByRole('alert')).toHaveTextContent('Autorisez les fenêtres')
 })
