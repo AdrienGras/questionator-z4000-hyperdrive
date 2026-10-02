@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { afterEach, beforeEach, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { formatScore } from '@/domain/scoring/format'
 import { computeScores } from '@/domain/scoring/score'
 import type { Student } from '@/domain/session/types'
@@ -22,8 +22,11 @@ function list(): HTMLElement {
   return screen.getByRole('list', { name: 'Étudiants de la session' })
 }
 
+/** Boutons de sélection, un par ligne (le bouton d'absence de la ligne est à part, F38). */
 function buttons(): HTMLElement[] {
-  return within(list()).getAllByRole('button')
+  return within(list())
+    .getAllByRole('listitem')
+    .map((item) => within(item).getAllByRole('button')[0]!)
 }
 
 function rowOf(lastName: string): HTMLElement {
@@ -86,12 +89,8 @@ test('cliquer un autre étudiant l’active et remet la projection en attente (D
   await waitFor(async () => expect((await stored()).activeStudentId).toBe('s-b'))
   expect((await stored()).projection).toEqual({ mode: 'waiting' })
   await expectPanelClosed()
-  // Rouvert sur l'onglet mémorisé.
-  const dialog = await openSidePanel()
-  expect(within(dialog).getByRole('tab', { name: 'Étudiants' })).toHaveAttribute(
-    'aria-selected',
-    'true',
-  )
+  // Rouvert sur « Étudiant » (D91) : retour à la liste.
+  await openSidePanel('Étudiants')
   expect(rowOf('Bec')).toHaveAttribute('aria-current', 'true')
 
   fireEvent.click(rowOf('Aba'))
@@ -124,6 +123,7 @@ test('l’onglet ne relaie pas le clic sur l’étudiant actif, mais relaie celu
       disabled={false}
       onSelect={onSelect}
       onAdd={vi.fn<() => Promise<WriteOutcome>>()}
+      onSetAbsent={vi.fn<() => Promise<WriteOutcome>>()}
     />,
   )
 
@@ -157,7 +157,7 @@ test('aller-retour A → B → A avec une question en cours : rien n’est perdu
   await waitFor(() =>
     expect(screen.queryByRole('heading', { level: 2, name: 'Titre a-1' })).not.toBeInTheDocument(),
   )
-  await openSidePanel()
+  await openSidePanel('Étudiants')
   fireEvent.click(rowOf('Aba'))
 
   expect(await screen.findByRole('heading', { level: 2, name: 'Titre a-1' })).toBeInTheDocument()
@@ -198,8 +198,80 @@ test('activeStudentId orphelin : aucune ligne en aria-current', () => {
       disabled={false}
       onSelect={vi.fn<(id: string) => void>()}
       onAdd={vi.fn<() => Promise<WriteOutcome>>()}
+      onSetAbsent={vi.fn<() => Promise<WriteOutcome>>()}
     />,
   )
 
   for (const button of buttons()) expect(button).not.toHaveAttribute('aria-current')
+})
+
+/** Bouton d'absence de la ligne (prénom « X » de `makeListStudent`). */
+function absentButtonOf(lastName: string, action: 'absent' | 'présent' = 'absent'): HTMLElement {
+  return within(list()).getByRole('button', { name: `Marquer ${lastName} X ${action}` })
+}
+
+describe('absence depuis la liste (F38)', () => {
+  test('chaque ligne a son bouton, nommé d’après l’étudiant', async () => {
+    await mount([student('s-a', 'Aba', 1), student('s-b', 'Bec', 2, { absent: true })])
+
+    expect(absentButtonOf('Aba')).toBeInTheDocument()
+    expect(absentButtonOf('Bec', 'présent')).toBeInTheDocument()
+  })
+
+  test('sans question tirée : absent puis présent, sans activer l’étudiant ni fermer le tiroir', async () => {
+    await mount([student('s-a', 'Aba', 1), student('s-b', 'Bec', 2)])
+
+    fireEvent.click(absentButtonOf('Bec'))
+
+    await waitFor(async () => expect((await stored()).students[1]?.absent).toBe(true))
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+    expect((await stored()).activeStudentId).toBe('s-a')
+    expect(screen.getByRole('dialog', { name: 'Panneau latéral' })).toBeInTheDocument()
+
+    fireEvent.click(await waitFor(() => absentButtonOf('Bec', 'présent')))
+
+    await waitFor(async () => expect((await stored()).students[1]?.absent).toBe(false))
+    expect((await stored()).activeStudentId).toBe('s-a')
+    expect(rowOf('Aba')).toHaveAttribute('aria-current', 'true')
+  })
+
+  test('avec questions tirées : confirmation, puis attempts supprimés, étudiant actif inchangé', async () => {
+    await mount([student('s-a', 'Aba', 1), makeListStudent('s-b', 'Bec', 2, [2, 1])])
+
+    fireEvent.click(absentButtonOf('Bec'))
+    const dialog = await screen.findByRole('alertdialog', { name: 'Déclarer Bec X absent ?' })
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Déclarer absent' }))
+
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
+    const bec = (await stored()).students[1]
+    expect(bec?.absent).toBe(true)
+    expect(bec?.attempts).toEqual([])
+    expect((await stored()).activeStudentId).toBe('s-a')
+    expect(screen.getByRole('dialog', { name: 'Panneau latéral' })).toBeInTheDocument()
+  })
+
+  test('cliquer la ligne sélectionne sans toucher à l’absence', async () => {
+    await mount([student('s-a', 'Aba', 1), student('s-b', 'Bec', 2)])
+
+    fireEvent.click(rowOf('Bec'))
+
+    await waitFor(async () => expect((await stored()).activeStudentId).toBe('s-b'))
+    expect((await stored()).students.every((s) => !s.absent)).toBe(true)
+  })
+
+  test('boutons d’absence désactivés pendant une écriture', () => {
+    render(
+      <StudentsTab
+        ui={makeUi()}
+        session={makeSession({ config, students: [student('s-a', 'Aba', 1)] })}
+        activeStudentId="s-a"
+        disabled
+        onSelect={vi.fn<(id: string) => void>()}
+        onAdd={vi.fn<() => Promise<WriteOutcome>>()}
+        onSetAbsent={vi.fn<() => Promise<WriteOutcome>>()}
+      />,
+    )
+    expect(screen.getByRole('button', { name: 'Marquer Aba X absent' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /^Aba/ })).toBeEnabled()
+  })
 })

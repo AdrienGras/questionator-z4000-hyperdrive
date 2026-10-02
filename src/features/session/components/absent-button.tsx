@@ -1,4 +1,5 @@
-import { useId, useState } from 'react'
+import { useState } from 'react'
+import { IconUserCheck, IconUserX } from '@tabler/icons-react'
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -9,15 +10,17 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { Student } from '@/domain/session/types'
 import type { WriteOutcome } from '@/features/session/hooks/use-passage-actions'
 import type { Ui } from '@/lib/i18n/use-ui'
 
-type AbsentToggleProps = Readonly<{
+type AbsentButtonProps = Readonly<{
   ui: Ui
   student: Student
   disabled: boolean
+  /** Icône seule, nommée d'après l'étudiant : une par ligne de la liste « Étudiants ». */
+  compact?: boolean
   onChange: (
     studentId: string,
     absent: boolean,
@@ -26,35 +29,38 @@ type AbsentToggleProps = Readonly<{
 }>
 
 /**
- * Case « Absent » (F12). Cocher un étudiant qui a des questions tirées demande confirmation, car
- * l'absence les supprime ; sinon, cocher comme décocher écrit tout de suite. Dialogue au motif
- * F11 (`ResetDialog`) : échec → `write_error` dans le dialogue, rien ne ferme pendant l'écriture,
- * un appel écarté par le verrou (`ignored`) ne ferme ni n'alerte.
+ * Action « Marquer absent » / « Marquer présent » (F12, F38). Marquer absent un étudiant qui a des
+ * questions tirées demande confirmation, car l'absence les supprime ; sinon, l'action écrit tout
+ * de suite. Dialogue au motif F11 (`ResetDialog`) : échec → `write_error` dans le dialogue, rien ne
+ * ferme pendant l'écriture, un appel écarté par le verrou (`ignored`) ne ferme ni n'alerte.
  * L'étudiant visé est figé à l'ouverture : si l'étudiant actif change pendant que le dialogue est
  * ouvert (autre onglet), c'est bien celui du dialogue qui est déclaré absent (D67).
  */
-export function AbsentToggle({ ui, student, disabled, onChange }: AbsentToggleProps) {
+export function AbsentButton({
+  ui,
+  student,
+  disabled,
+  compact = false,
+  onChange,
+}: AbsentButtonProps) {
   const { text } = ui
-  const id = useId()
   const [open, setOpen] = useState(false)
   const [pending, setPending] = useState(false)
   const [failed, setFailed] = useState(false)
   // Figé à l'ouverture : après l'écriture, la liveQuery vide les attempts pendant la fermeture, et
   // l'étudiant actif peut changer pendant que le dialogue est ouvert.
   const [target, setTarget] = useState({ id: student.id, name: '', count: 0 })
+  const name = `${student.lastName} ${student.firstName}`
+  const markAbsent = !student.absent
 
-  function toggle(absent: boolean) {
-    if (absent && student.attempts.length > 0) {
-      setTarget({
-        id: student.id,
-        name: `${student.lastName} ${student.firstName}`,
-        count: student.attempts.length,
-      })
+  function act() {
+    if (markAbsent && student.attempts.length > 0) {
+      setTarget({ id: student.id, name, count: student.attempts.length })
       setFailed(false)
       setOpen(true)
       return
     }
-    void onChange(student.id, absent)
+    void onChange(student.id, markAbsent)
   }
 
   function changeOpen(next: boolean) {
@@ -73,19 +79,42 @@ export function AbsentToggle({ ui, student, disabled, onChange }: AbsentTogglePr
     else if (outcome === 'failed') setFailed(true)
   }
 
+  const Icon = markAbsent ? IconUserX : IconUserCheck
+  const label = text(markAbsent ? 'absent_mark' : 'absent_unmark', {})
+  const trigger = compact ? (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            disabled={disabled}
+            aria-label={text(markAbsent ? 'absent_mark_named' : 'absent_unmark_named', { name })}
+            onClick={act}
+          />
+        }
+      >
+        <Icon aria-hidden />
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  ) : (
+    <Button
+      type="button"
+      variant="outline"
+      className="self-start"
+      disabled={disabled}
+      onClick={act}
+    >
+      <Icon aria-hidden />
+      {label}
+    </Button>
+  )
+
   return (
     <>
-      <div className="flex items-center gap-2">
-        <input
-          id={id}
-          type="checkbox"
-          className="size-4 accent-primary disabled:cursor-not-allowed disabled:opacity-50"
-          checked={student.absent}
-          disabled={disabled}
-          onChange={(event) => toggle(event.target.checked)}
-        />
-        <Label htmlFor={id}>{text('absent_label', {})}</Label>
-      </div>
+      {trigger}
       <AlertDialog open={open} onOpenChange={changeOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

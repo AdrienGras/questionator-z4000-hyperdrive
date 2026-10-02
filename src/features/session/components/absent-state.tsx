@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/button'
-import type { SidePanelTab } from '@/features/session/side-panel-state'
+import type { SidePanelTab } from '@/features/session/hooks/use-side-panel'
 import type { Ui } from '@/lib/i18n/use-ui'
 
 /**
  * État affiché dans la zone de passage quand l'étudiant actif est marqué absent (§7). Le bouton
- * ouvre le tiroir sur l'onglet « Étudiant », où se décoche la case « Absent » (F21).
+ * ouvre le tiroir sur l'onglet « Étudiant », où se trouve « Marquer présent » (F21, F38).
  */
 export function AbsentState({
   ui,

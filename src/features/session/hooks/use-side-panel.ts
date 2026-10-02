@@ -1,31 +1,20 @@
 import { useCallback, useState } from 'react'
-import {
-  readSidePanelTab,
-  writeSidePanelTab,
-  type SidePanelTab,
-} from '@/features/session/side-panel-state'
+
+export type SidePanelTab = 'student' | 'students'
 
 /**
- * État du tiroir latéral : fermé à chaque montage (rien n'est mémorisé), seul l'onglet actif
- * l'est. `show(tab)` ouvre le tiroir directement sur un onglet.
+ * État du tiroir latéral : fermé à chaque montage, rien n'est mémorisé (D91). `show(tab)` ouvre le
+ * tiroir sur un onglet, « Étudiant » par défaut : le bouton « Panneau » rouvre toujours sur
+ * l'étudiant en cours, quel que soit l'onglet laissé à la fermeture.
  */
 export function useSidePanel() {
   const [open, setOpen] = useState(false)
-  const [tab, setTab] = useState<SidePanelTab>(readSidePanelTab)
+  const [tab, setTab] = useState<SidePanelTab>('student')
 
-  // Change l'onglet et le mémorise ; exposé sous le nom `setTab`.
-  const selectTab = useCallback((next: SidePanelTab) => {
-    writeSidePanelTab(next)
+  const show = useCallback((next: SidePanelTab = 'student') => {
     setTab(next)
+    setOpen(true)
   }, [])
 
-  const show = useCallback(
-    (next: SidePanelTab) => {
-      selectTab(next)
-      setOpen(true)
-    },
-    [selectTab],
-  )
-
-  return { open, tab, setOpen, setTab: selectTab, show }
+  return { open, tab, setOpen, setTab, show }
 }

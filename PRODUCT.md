@@ -483,10 +483,10 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 **Contenu.**
 - Liste des questions tirées : ordre, catégorie, titre, points obtenus sur points max, ou motif de skip.
 - Modification d'une note déjà saisie (sélection parmi les valeurs du barème), avec recalcul immédiat. La date de modification est conservée pour l'export. Uniquement sur un attempt `scored` : ni un skip ni une question en cours ne se modifient ici.
-- Panneau en tiroir à deux onglets (« Étudiant », « Étudiants »), ouvert par le bouton « Panneau » de la barre de titre (F21, D76) ; fermé à chaque chargement, onglet actif mémorisé en `localStorage`.
+- Panneau en tiroir à deux onglets (« Étudiant », « Étudiants »), ouvert par le bouton « Panneau » de la barre de titre (F21, D76) ; fermé à chaque chargement, toujours rouvert sur « Étudiant » (F38, D91).
 - Totaux : brute, plafonnée, convertie, ajustement, finale.
 - Commentaire libre sur l'étudiant, sauvegardé automatiquement (délai d'environ 500 ms et à la sortie du champ), avec un indicateur « Enregistré ».
-- Bascule du statut absent, réversible. Sans attempt, elle est directe. Si le passage est entamé, une confirmation indique le nombre de questions tirées qui seront supprimées ; l'accepter réinitialise l'étudiant (comme F11, commentaire conservé) puis le marque absent. Un étudiant absent n'a donc jamais d'attempt.
+- Bouton d'action « Marquer absent » / « Marquer présent », réversible, dans l'onglet « Étudiant » et sur chaque ligne de la liste « Étudiants » (F38), sans changer l'étudiant actif. Sans attempt, l'action est directe. Si le passage est entamé, une confirmation indique le nombre de questions tirées qui seront supprimées ; l'accepter réinitialise l'étudiant (comme F11, commentaire conservé) puis le marque absent. Un étudiant absent n'a donc jamais d'attempt.
 
 **Critères d'acceptation.**
 - Modifier une note d'un étudiant terminé met à jour sa note finale partout, vue projetée comprise si elle l'affiche.
@@ -627,7 +627,7 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 **Objectif.** Rendre toute la largeur de la coque à la vue de passage : le panneau latéral devient un tiroir modal ouvert à la demande.
 
 **Contenu.**
-- `Sheet` modal à droite (D76), fermé à chaque chargement, ouvert par le bouton « Panneau » placé en premier dans la barre de titre ; onglet choisi mémorisé.
+- `Sheet` modal à droite (D76), fermé à chaque chargement, ouvert par le bouton « Panneau » placé en premier dans la barre de titre, toujours sur l'onglet « Étudiant » (F38, D91 ; l'onglet n'est plus mémorisé).
 - Fermeture par Échap, par le bouton « Fermer le panneau » et par un clic à l'extérieur ; le focus revient au bouton « Panneau ».
 - Les deux onglets se partagent toute la largeur du panneau (28 rem au-delà de 640 px, pleine largeur en dessous).
 - Choisir un autre étudiant (liste, « Ajouter et faire passer ») referme le tiroir.
@@ -636,7 +636,7 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 
 **Critères d'acceptation.**
 - Le panneau s'ouvre par-dessus la vue depuis le bouton « Panneau », se ferme par Échap, par le bouton de fermeture et par un clic à l'extérieur, et rend le focus au bouton d'ouverture.
-- Fermé à chaque chargement ; l'onglet choisi est mémorisé.
+- Fermé à chaque chargement ; « Panneau » le rouvre toujours sur « Étudiant » (F38).
 - Les deux onglets se partagent toute la largeur du panneau.
 - Choisir un autre étudiant (liste, « Ajouter et faire passer ») referme le tiroir.
 - Depuis l'état absent ou « aucun étudiant », un bouton ouvre le panneau sur l'onglet utile.

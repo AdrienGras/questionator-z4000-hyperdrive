@@ -112,7 +112,7 @@ test('« Ajouter et faire passer » ferme le tiroir', async () => {
   expect((await stored()).students).toHaveLength(3)
 })
 
-test('« Ajouter et faire passer » active le nouvel étudiant, remet la projection en attente (D73), onglet gardé', async () => {
+test('« Ajouter et faire passer » active le nouvel étudiant, remet la projection en attente (D73), tiroir rouvert sur « Étudiant »', async () => {
   const projection = { mode: 'student', studentId: 's-a' } as const
   await mount([alice, durand], { projection })
   openDialog()
@@ -129,12 +129,14 @@ test('« Ajouter et faire passer » active le nouvel étudiant, remet la project
   )
   expect((await stored()).projection).toEqual({ mode: 'waiting' })
 
+  // Rouvert sur « Étudiant » (D91) : retour à la liste.
   const reopened = await openSidePanel()
-  expect(within(reopened).getByRole('tab', { name: 'Étudiants' })).toHaveAttribute(
+  expect(within(reopened).getByRole('tab', { name: 'Étudiant' })).toHaveAttribute(
     'aria-selected',
     'true',
   )
-  fireEvent.click(within(reopened).getByRole('button', { name: /Aba/ }))
+  fireEvent.click(within(reopened).getByRole('tab', { name: 'Étudiants' }))
+  fireEvent.click(within(reopened).getByRole('button', { name: /^Aba/ }))
   expect(await screen.findByRole('heading', { level: 2, name: 'Titre a-1' })).toBeInTheDocument()
 })
 

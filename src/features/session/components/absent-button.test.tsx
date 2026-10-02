@@ -3,19 +3,19 @@ import { expect, test, vi } from 'vitest'
 import type { WriteOutcome } from '@/features/session/hooks/use-passage-actions'
 import { makeUi } from '@/testing/make-ui'
 import { makeStudent } from '@/testing/student-fixtures'
-import { AbsentToggle } from './absent-toggle'
+import { AbsentButton } from './absent-button'
 
 function confirmAbsence(outcome: WriteOutcome) {
   const onChange = vi.fn<() => Promise<WriteOutcome>>().mockResolvedValue(outcome)
   render(
-    <AbsentToggle
+    <AbsentButton
       ui={makeUi()}
       student={makeStudent([13.5])}
       disabled={false}
       onChange={onChange}
     />,
   )
-  fireEvent.click(screen.getByLabelText('Absent'))
+  fireEvent.click(screen.getByRole('button', { name: 'Marquer absent' }))
   fireEvent.click(screen.getByRole('button', { name: 'Déclarer absent' }))
   return onChange
 }
@@ -44,4 +44,39 @@ test('absence écartée par le verrou : ni fermeture ni alerte, bouton réactiv�
   expect(confirmDialog()).toBeInTheDocument()
   expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Déclarer absent' })).toBeEnabled()
+})
+
+test('compact : icône nommée d’après l’étudiant, appel écarté sans alerte', async () => {
+  const onChange = vi.fn<() => Promise<WriteOutcome>>().mockResolvedValue('ignored')
+  render(
+    <AbsentButton
+      ui={makeUi()}
+      student={makeStudent([13.5])}
+      disabled={false}
+      compact
+      onChange={onChange}
+    />,
+  )
+  fireEvent.click(screen.getByRole('button', { name: 'Marquer Durand Alice absent' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Déclarer absent' }))
+
+  await waitFor(() => expect(onChange).toHaveBeenCalledTimes(1))
+  await act(() => Promise.resolve())
+  expect(confirmDialog()).toBeInTheDocument()
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+})
+
+test('étudiant absent : « Marquer présent » écrit tout de suite, sans dialogue', () => {
+  const onChange = vi.fn<() => Promise<WriteOutcome>>().mockResolvedValue('written')
+  render(
+    <AbsentButton
+      ui={makeUi()}
+      student={makeStudent([], { absent: true })}
+      disabled={false}
+      onChange={onChange}
+    />,
+  )
+  fireEvent.click(screen.getByRole('button', { name: 'Marquer présent' }))
+  expect(onChange).toHaveBeenCalledWith('student-1', false)
+  expect(confirmDialog()).not.toBeInTheDocument()
 })

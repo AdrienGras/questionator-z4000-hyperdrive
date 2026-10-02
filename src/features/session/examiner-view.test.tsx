@@ -89,9 +89,10 @@ test("en-tête, liste des étudiants et changement d'étudiant actif", async () 
 
   expect(screen.queryByRole('combobox', { name: 'Étudiant' })).not.toBeInTheDocument()
   const dialog = await openSidePanel('Étudiants')
-  const rows = within(
-    within(dialog).getByRole('list', { name: 'Étudiants de la session' }),
-  ).getAllByRole('button')
+  // Premier bouton de chaque ligne : le second est le bouton d'absence (F38).
+  const rows = within(within(dialog).getByRole('list', { name: 'Étudiants de la session' }))
+    .getAllByRole('listitem')
+    .map((item) => within(item).getAllByRole('button')[0])
   expect(rows).toHaveLength(2)
   expect(rows[0]).toHaveTextContent('Durand Alice')
   expect(rows[0]).toHaveTextContent('à passer')
@@ -176,7 +177,7 @@ test('étudiant absent : « Afficher le panneau » ouvre l’onglet « Étudiant
     'aria-selected',
     'true',
   )
-  expect(within(dialog).getByRole('checkbox', { name: 'Absent' })).toBeVisible()
+  expect(within(dialog).getByRole('button', { name: 'Marquer présent' })).toBeVisible()
 })
 
 test('aucun étudiant : « Afficher le panneau » ouvre l’onglet « Étudiants »', async () => {
@@ -192,23 +193,6 @@ test('aucun étudiant : « Afficher le panneau » ouvre l’onglet « Étudiants
     'aria-selected',
     'true',
   )
-})
-
-test('onglet « Étudiants » mémorisé, état absent : ouvert sur « Étudiant » et ce choix est mémorisé', async () => {
-  localStorage.setItem('questionator:side-panel:tab', 'students')
-  await absentAliceSession()
-  renderAt('/session/session-1')
-
-  await screen.findByRole('heading', { name: 'Étudiant absent' })
-  fireEvent.click(screen.getByRole('button', { name: 'Afficher le panneau' }))
-
-  const dialog = await screen.findByRole('dialog', { name: 'Panneau latéral' })
-  expect(within(dialog).getByRole('tab', { name: 'Étudiant' })).toHaveAttribute(
-    'aria-selected',
-    'true',
-  )
-  expect(localStorage.getItem('questionator:side-panel:tab')).toBe('student')
-  localStorage.clear()
 })
 
 test('étudiant ayant terminé son passage affiche l’écran final', async () => {

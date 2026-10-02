@@ -52,7 +52,7 @@ test('tiroir : une erreur survenue tiroir ouvert est affichée', async () => {
   const dialog = await openSidePanel('Étudiants')
   failing.on = true
 
-  fireEvent.click(within(dialog).getByRole('button', { name: /Bob/u }))
+  fireEvent.click(within(dialog).getByRole('button', { name: /^Bob/u }))
 
   expect(await within(dialog).findByRole('alert')).toBeInTheDocument()
 })
