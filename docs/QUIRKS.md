@@ -713,3 +713,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : `CreateSessionPage.submit()` rendait la main dès le clic. `chooseColorMode` cliquait alors le bouton « Mode d'affichage » de l'écran de création (ou de l'état de chargement de la route, chargée à la demande), qui porte le même nom que celui de l'examinateur ; la navigation le démontait avec son menu. Attendre l'URL ne suffit pas : l'état de chargement a lui aussi ce bouton.
 **Workaround** : une méthode de Page Object qui mène à un autre écran attend un élément propre à cet écran (`submit()` attend le bouton « Panneau »). Pour vérifier : `pnpm e2e <spec> --repeat-each=100`.
 **Référence** : `e2e/pages/create-session-page.ts`, `e2e/color-mode.spec.ts`.
+
+## Un SVG affiché par `<img>` dans un README GitHub suit le thème GitHub, pas celui de l'OS (2026-10-02)
+
+**Découvert** : sonde CLAIR / SOMBRE sur la page de la branche, avant de dessiner l'animation du README (#74).
+**Symptôme** : on craignait que `@media (prefers-color-scheme: dark)` dans un SVG en `<img>` suive l'OS, ce qui aurait imposé `<picture>` et une variante sombre.
+**Cause** : GitHub évalue ce média selon le thème réglé dans GitHub. Vérifié sur ordinateur dans les deux croisements (GitHub sombre avec OS clair, et l'inverse).
+**Workaround** : aucun besoin. Un seul SVG avec son propre `@media (prefers-color-scheme: dark)` suffit, sans `<picture>`. Application GitHub mobile non vérifiée.
+**Référence** : `assets/readme-hero.svg`, D95.

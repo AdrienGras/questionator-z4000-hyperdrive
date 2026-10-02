@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-02 — #74 : animation du parcours en tête du README
+
+**Dernière chose faite** : `assets/readme-hero.svg` remplace `banner.webp` en tête du README (`banner.webp` supprimé). Scène 1 synthwave hybride, scènes 2-6 d'interface épurée dans une fenêtre de navigateur, boucle de 15 s sur une seule timeline CSS, symboles Tabler 3.48.0, mouvement réduit = scène d'export figée. Sonde de thème sur la page de la branche : le SVG en `<img>` suit le thème GitHub (pas l'OS), donc mode `img`, pas de `<picture>` (QUIRKS, D95). `pnpm check:hero` ajouté à `pnpm check`. Mémoire à jour (D95, INDEX, BACKLOG, QUIRKS).
+
+**Trucs en suspens** : PR en brouillon (`Closes #74`), Sonar, puis « Ready for review » ; merge sur go de l'utilisateur. Rendu dans l'application GitHub mobile (thème) non vérifié, noté au BACKLOG.
+
+**Prochaine chose à creuser** : #71 (F27), puis #72 / #73 ; ou #85 (Node 26) après le 2026-10-28.
+
+**Notes pour future Claude** : pour itérer sur le SVG, le charger en ligne dans Playwright et figer l'animation à l'instant t : injecter `animation-play-state: paused` et un `animation-delay` négatif sur tous les éléments (1 s = 6,6667 % de la timeline). C'est pourquoi le SVG lui-même ne doit jamais utiliser `animation-delay` (`check:hero` le refuse). Astuce du groupe `win-clip` : le fichier de la scène 6 est dessiné hors du clip, ce qui lui permet de quitter la fenêtre.
+
 ## 2026-10-02 — #118 : rapidfire du BACKLOG (débordements, « pt », taux)
 
 **Dernière chose faite** : PR #117 (#88) mergée sur go de l'utilisateur. Revue du BACKLOG à sa demande : rien de critique. Le seul bug de calcul (taux sur barème négatif) est inatteignable, car `negative_scale_value` et `zero_max_scale` le refusent. Ticket #118 créé au format des autres (P2, S) pour regrouper les petits correctifs, puis traité sur `fix/118-rapidfire-debordements` :

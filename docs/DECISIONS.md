@@ -1420,3 +1420,23 @@ autre encodage 8 bits.
 - **Instabilités e2e** : `CreateSessionPage.submit()` attend l'écran examinateur monté. Sans cela, `chooseColorMode` visait le bouton « Mode d'affichage » de l'écran de création ou de l'état de chargement, démonté juste après. Résultat : 1 échec sur 30 avant, 0 sur 100 après. Le test « Prête pour le hors ligne » attend le contrôle du service worker avant d'asserter le message, car le pré-cache dépasse 5 s sous charge. Suite complète rejouée 4 fois : 148 sur 148.
 
 **Pourquoi** : traiter ce qui se fait sans dette, tracer les mesures de ce qui est reporté pour ne pas refaire l'évaluation à l'aveugle.
+
+## D95 — #74 : animation du parcours en tête du README (2026-10-02)
+
+**Question** : comment remplacer `banner.webp` par une animation du parcours (config, étudiants, tirage, note, stats, export) qui s'affiche telle quelle dans le README GitHub ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Direction visuelle | Hybride : scène 1 synthwave (soleil rayé, grille en perspective, en géométrie simple), scènes 2-6 en interface épurée aux tokens de l'app | Garde l'identité du banner au moment où l'on présente le nom ; le parcours reste lisible ensuite. Choix de l'utilisateur. |
+| Cadrage | Scènes 2-6 dans une fenêtre de navigateur stylisée (barre, trois pastilles, fausse URL) ; vignette « vue projetée » pendant le passage | On voit tout de suite une app web, cohérent avec « tout tourne dans le navigateur ». La vignette évoque la double vue sans charger l'image. Choix de l'utilisateur. |
+| Production | SVG écrit à la main, un fichier, une timeline CSS commune (approche A) | Le ticket veut un fichier source unique et modifiable à la main ; un générateur créerait deux sources. SMIL écarté : il faudrait quand même du CSS pour les médias, deux systèmes mêlés. |
+| Emplacement | `assets/readme-hero.svg` (nouveau dossier, hors `public/`) | Pas publié avec l'app (ticket). |
+| Thème GitHub | Levé en premier par un SVG témoin ; résultat : mode `img`, un seul SVG avec son propre `@media (prefers-color-scheme: dark)`, pas de `<picture>` ni de variante sombre | Vérifié sur ordinateur, sur la page de la branche : le SVG affiché par `<img>` suit le thème réglé dans GitHub, pas celui de l'OS (sondes CLAIR / SOMBRE, les deux croisements). Application GitHub mobile non vérifiée (BACKLOG). |
+| Mouvement réduit | Scène 6 (export) figée | Ticket ; image fixe qui résume la fin du parcours. |
+| `banner.webp` | Supprimé | Plus aucun usage hors plans et archives historiques, non réécrits. |
+
+`pnpm check:hero` (`scripts/check-readme-hero.ts`, dans `pnpm check`) refuse en plus tout `animation-delay` (les captures figées injectent un délai négatif pour arrêter l'animation à un instant donné) et tout `font-size` inférieur à 40 (lisibilité sur mobile, où l'image est réduite). Il contrôle aussi le poids (≤ 100 Ko), l'absence de script et de ressource externe, et le bloc `prefers-reduced-motion`.
+
+**Pourquoi** : une image unique, légère et autonome, que GitHub affiche sans neutraliser ; les garde-fous automatiques évitent qu'une retouche à la main dégrade le rendu sans que personne ne s'en aperçoive.

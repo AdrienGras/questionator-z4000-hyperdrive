@@ -20,6 +20,8 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [x] Tests instables vus pendant F36, une fois chacun sous `pnpm check`, jamais seuls ni en trois relances de `pnpm test` : `src/features/session/add-student.test.tsx` (« Ajouter et faire passer » active le nouvel étudiant…) et `config-editor-page.test.tsx` (« marque l'aperçu périmé… », 5 s). Même e2e : `color-mode.spec.ts` a expiré une fois (30 s) sur une suite complète, puis 15/15 seul et 3 suites complètes vertes. → #87 *Fait en #87 (tests instables).*
 - [ ] Passer `.nvmrc` (et la CI) à Node 26 une fois LTS (prévu le 2026-10-28) ; Node 24 passe en maintenance le 2026-10-20. → #85
 - [x] Évaluer oxfmt en remplacement de Prettier + prettier-plugin-tailwindcss quand il sort en 1.0 (tri Tailwind natif via `sortTailwindcss`). → #88 *Fait en #88 (D94) : adopté en 0.71, Prettier et son plugin retirés.*
+- [ ] Réutiliser `assets/readme-hero.svg` en en-tête du site de doc (F27, #71).
+- [ ] Vérifier l'animation du README dans l'application GitHub mobile (thème clair / sombre) : seul l'affichage sur ordinateur a été contrôlé en #74 (D95).
 
 ## Config
 
