@@ -31,6 +31,20 @@ vi.mock('@/lib/db/sessions', async (importOriginal) => {
   }
 })
 
+const validatorLoad = vi.hoisted(() => ({ fail: false }))
+
+// Simule l'échec du chargement dynamique du validateur (chunk introuvable après un déploiement).
+vi.mock('@/domain/config/validate', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/domain/config/validate')>()
+  return {
+    ...actual,
+    get validateConfig() {
+      if (validatorLoad.fail) throw new Error('chargement impossible')
+      return actual.validateConfig
+    },
+  }
+})
+
 const STUDENTS_LABEL = "Liste d'étudiants (CSV)"
 const VALID_CSV = 'Nom;Prénom\nDupont;Marie\nMartin;Paul\n'
 const VALID_CONFIG = JSON.stringify(minimalConfig())
@@ -46,6 +60,14 @@ function fileInputs(container: HTMLElement) {
 
 function choose(input: HTMLInputElement, name: string, content: string) {
   fireEvent.change(input, { target: { files: [new File([content], name)] } })
+}
+
+/** Fichier dont toute lecture échoue (fichier déplacé, permissions). */
+function chooseUnreadable(input: HTMLInputElement, name: string) {
+  const file = new File([''], name)
+  vi.spyOn(file, 'text').mockRejectedValue(new Error('lecture'))
+  vi.spyOn(file, 'arrayBuffer').mockRejectedValue(new Error('lecture'))
+  fireEvent.change(input, { target: { files: [file] } })
 }
 
 async function renderPage() {
@@ -81,11 +103,13 @@ beforeEach(async () => {
   await db.sessions.clear()
   dbState.status = 'open'
   dbState.createSession = undefined
+  validatorLoad.fail = false
   vi.stubGlobal('CSS', { supports: cssSupports })
 })
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  vi.restoreAllMocks()
 })
 
 describe('écran de création', () => {
@@ -98,7 +122,7 @@ describe('écran de création', () => {
 
   test('titre, retour à l’accueil et fichiers d’exemple', async () => {
     await renderPage()
-    expect(screen.getByRole('link', { name: "Retour à l'accueil" })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
     const students = screen.getByRole('link', { name: "Télécharger la liste d'exemple" })
     expect(students.getAttribute('href')).toMatch(/students\.example\.csv$/)
     expect(students).toHaveAttribute('download')
@@ -111,7 +135,7 @@ describe('écran de création', () => {
     await renderPage()
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Nouvelle session')
     const banner = screen.getByRole('banner')
-    expect(within(banner).getByRole('link', { name: "Retour à l'accueil" })).toBeInTheDocument()
+    expect(within(banner).getByRole('link', { name: 'Retour à l’accueil' })).toBeInTheDocument()
     expectColorModeToggleLast()
   })
 
@@ -245,6 +269,7 @@ describe('écran de création', () => {
       'Martin Paul',
     ])
     expect(session.examiner).toBe('Mme Durand')
+    expect(session.activeStudentId).toBe(session.students[0]?.id)
     const expected = validateConfig(VALID_CONFIG, { cssSupports })
     if (!expected.ok) throw new Error('config de test invalide')
     expect(session.config).toStrictEqual(expected.config)
@@ -289,7 +314,7 @@ describe('écran de création', () => {
     const { router } = await renderFilled()
     fireEvent.click(submitButton())
     await waitFor(() => expect(submitButton()).toBeDisabled())
-    fireEvent.click(screen.getByRole('link', { name: "Retour à l'accueil" }))
+    fireEvent.click(screen.getByRole('link', { name: 'Retour à l’accueil' }))
     // Attendre le démontage effectif de l'écran (le composant de l'accueil est chargé à la demande).
     await waitFor(() =>
       expect(
@@ -302,6 +327,42 @@ describe('écran de création', () => {
     // Laisse `submit` se terminer et une éventuelle navigation partir.
     await new Promise((resolve) => setTimeout(resolve, 50))
     expect(router.state.location.pathname).toBe('/')
+  })
+
+  test('fichiers illisibles : message de lecture sous chaque zone, création impossible (#87)', async () => {
+    const page = await renderPage()
+    chooseUnreadable(page.students, 'etudiants.csv')
+    chooseUnreadable(page.config, 'config.json')
+    await waitFor(() =>
+      expect(screen.getAllByRole('alert').map((alert) => alert.textContent)).toEqual([
+        "Le fichier n'a pas pu être lu.",
+        "Le fichier n'a pas pu être lu.",
+      ]),
+    )
+    expect(screen.getAllByText('Fichier invalide')).toHaveLength(2)
+    expect(submitButton()).toBeDisabled()
+  })
+
+  test('validateur impossible à charger : message sous la zone de config (#87)', async () => {
+    validatorLoad.fail = true
+    const page = await renderPage()
+    choose(page.students, 'etudiants.csv', VALID_CSV)
+    choose(page.config, 'config.json', VALID_CONFIG)
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      "La validation n'a pas pu démarrer. Rechargez la page.",
+    )
+    expect(screen.getByText('config.json')).toBeInTheDocument()
+    await screen.findByText('2 étudiants')
+    expect(submitButton()).toBeDisabled()
+  })
+
+  test('stockage indisponible : bandeau, création impossible même avec deux fichiers valides (#87)', async () => {
+    dbState.status = 'unavailable'
+    await renderFilled()
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Le stockage local est indisponible (navigation privée ou cookies bloqués ?).',
+    )
+    expect(submitButton()).toBeDisabled()
   })
 
   test('base obsolète : bandeau et bouton désactivé', async () => {

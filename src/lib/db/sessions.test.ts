@@ -22,6 +22,7 @@ beforeEach(async () => {
 
 afterEach(() => {
   vi.useRealTimers()
+  vi.restoreAllMocks()
 })
 
 describe('CRUD', () => {
@@ -102,6 +103,26 @@ describe('lecture validée', () => {
     const sessions = await listSessions()
     expect(sessions.map((session) => session.id)).toEqual(['a', 'x'])
     expect(isDamaged(sessions[1]!)).toBe(true)
+  })
+
+  test('ordre complet : updatedAt décroissant, égalité par id décroissant, sans updatedAt en fin par id', async () => {
+    const table = db.table('sessions')
+    await table.put({ id: 'y' })
+    await db.sessions.put(makeSession({ id: 'a', updatedAt: '2026-09-25T09:00:00.000Z' }))
+    await table.put({ id: 'w', name: 'sans date' })
+    await db.sessions.put(makeSession({ id: 'b', updatedAt: '2026-09-25T09:00:00.000Z' }))
+    await db.sessions.put(makeSession({ id: 'c', updatedAt: '2026-09-25T10:00:00.000Z' }))
+    const sessions = await listSessions()
+    expect(sessions.map((session) => session.id)).toEqual(['c', 'b', 'a', 'w', 'y'])
+  })
+
+  test('une seule lecture de la table, sans passer par l’index (#87)', async () => {
+    await db.sessions.put(makeSession({ id: 'a' }))
+    const toArray = vi.spyOn(db.sessions, 'toArray')
+    const orderBy = vi.spyOn(db.sessions, 'orderBy')
+    await listSessions()
+    expect(toArray).toHaveBeenCalledTimes(1)
+    expect(orderBy).not.toHaveBeenCalled()
   })
 })
 

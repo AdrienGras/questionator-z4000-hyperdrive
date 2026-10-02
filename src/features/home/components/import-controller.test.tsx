@@ -131,6 +131,33 @@ describe('import de backup', () => {
     expect(await storedSession()).toEqual(before)
   })
 
+  test('toutes les issues affichées, une par ligne, décompte exact (#87)', async () => {
+    const session = makeSession({
+      activeStudentId: 'ghost',
+      projection: { mode: 'student' },
+      students: [
+        makeStudent([{ skipped: 'Déjà vue' }]),
+        makeStudent([], { id: 'student-2', order: 1 }),
+      ],
+    })
+    session.students[0]!.attempts[0]!.score = 1
+    const input = await renderImport()
+    pick(input, sessionFile(session))
+    const dialog = await screen.findByRole('dialog')
+    const items = within(dialog).getAllByRole('listitem')
+    expect(items.map((item) => item.querySelector('code')?.textContent)).toEqual([
+      'session.students[0].attempts[0].score',
+      'session.activeStudentId',
+      'session.projection',
+      'session.students[1].order',
+    ])
+    expect(items[0]).toHaveTextContent('Une question « skipped » ne doit pas avoir de note.')
+    expect(items[3]).toHaveTextContent(
+      'Rang de passage 1 en double (déjà utilisé en session.students[0].order).',
+    )
+    expect(await db.sessions.count()).toBe(0)
+  })
+
   test('chemin de l’issue affiché en code', async () => {
     const input = await renderImport()
     pick(input, sessionFile(makeSession({ name: '' })))

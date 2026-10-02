@@ -65,7 +65,7 @@ describe('ConfigEditorPage', () => {
   it('ouvre l’exemple sur deux colonnes, puis en affiche l’aperçu', async () => {
     await renderEditor()
     expectColorModeToggleLast()
-    expect(screen.getByRole('link', { name: "Retour à l'accueil" })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
     expect(screen.getByRole('heading', { level: 2, name: 'Configuration' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 2, name: 'Aperçu' })).toBeInTheDocument()
     expect(editorView().state.doc.toString()).toBe(EXAMPLE_TEXT)

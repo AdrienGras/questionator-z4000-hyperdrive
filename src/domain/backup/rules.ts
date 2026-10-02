@@ -132,3 +132,27 @@ export function checkSessionRules(session: Session): BackupRuleIssue[] {
   issues.push(...checkSessionLinks(session, studentIds))
   return issues
 }
+
+/**
+ * Rangs de passage uniques (#87). Contrôle d'import seulement : les parcours de l'application
+ * gardent `order` unique (création : rang + 1, ajout : max + 1) ; seul un backup édité à la main
+ * peut en dupliquer un. Une session déjà en base n'est jamais déclarée endommagée pour ça :
+ * l'utilisateur garderait l'accès à ses données.
+ */
+export function checkStudentOrders(session: Session): BackupRuleIssue[] {
+  const seen = new Map<string, IssuePath>()
+  const issues: BackupRuleIssue[] = []
+  session.students.forEach((student, s) => {
+    const path: IssuePath = ['session', 'students', s, 'order']
+    const first = trackId(seen, String(student.order), path)
+    if (first) {
+      issues.push(
+        backupError('duplicate_student_order', path, {
+          order: student.order,
+          firstPath: formatPath(first),
+        }),
+      )
+    }
+  })
+  return issues
+}

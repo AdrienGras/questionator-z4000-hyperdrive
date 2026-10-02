@@ -326,7 +326,7 @@ function roundingEn({ mode, step, decimals }: RoundingParams): string {
 const fr: Dictionary<UiMessageParams> = {
   app_title: () => 'Questionator Z-4000 Hyperdrive',
   not_found_title: () => 'Page introuvable',
-  back_home: () => "Retour à l'accueil",
+  back_home: () => 'Retour à l’accueil',
   home_create: () => 'Créer une session',
   home_import: () => 'Importer un backup',
   home_actions_title: () => 'Actions',

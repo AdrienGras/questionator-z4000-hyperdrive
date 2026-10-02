@@ -16,8 +16,8 @@ import { hasFiles } from '@/hooks/use-file-drop'
 import { StudentsPreview } from '@/features/create-session/components/students-preview'
 import { configSlotStatus, studentsSlotStatus } from './slot-status'
 import { useCreateForm, type FileSlot } from '@/features/create-session/hooks/use-create-form'
-
-const EXAMPLE_LINK_CLASS = 'text-sm text-primary underline underline-offset-4'
+import { SMALL_TEXT_LINK_CLASS } from '@/components/text-link'
+import { cn } from '@/lib/utils'
 
 function fileNameOf(slot: FileSlot<unknown>): string | undefined {
   return slot.kind === 'empty' ? undefined : slot.fileName
@@ -90,7 +90,7 @@ export function CreateSessionPage() {
       ui={ui}
       title={text('create_title', {})}
       back={
-        <Link to="/" className="self-start text-sm text-primary underline underline-offset-4">
+        <Link to="/" className={cn('self-start', SMALL_TEXT_LINK_CLASS)}>
           {text('back_home', {})}
         </Link>
       }
@@ -136,14 +136,14 @@ export function CreateSessionPage() {
             <a
               href={`${import.meta.env.BASE_URL}students.example.csv`}
               download
-              className={EXAMPLE_LINK_CLASS}
+              className={SMALL_TEXT_LINK_CLASS}
             >
               {text('create_students_example_link', {})}
             </a>
             <a
               href={`${import.meta.env.BASE_URL}config.example.json`}
               download
-              className={EXAMPLE_LINK_CLASS}
+              className={SMALL_TEXT_LINK_CLASS}
             >
               {text('create_config_example_link', {})}
             </a>

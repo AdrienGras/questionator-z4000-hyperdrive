@@ -101,7 +101,7 @@ test("la route / affiche l'accueil", async () => {
 test('une route inconnue affiche la page 404 avec un lien de retour', async () => {
   renderAt('/nimporte-quoi')
   expect(await screen.findByRole('heading', { name: 'Page introuvable' })).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: "Retour à l'accueil" })).toHaveAttribute('href', '/')
+  expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
 })
 
 test("la route /new affiche l'écran de création", async () => {
@@ -121,7 +121,7 @@ test('la route /session/$sessionId affiche la session thémée', async () => {
 test('une session inconnue affiche « Session introuvable » avec un lien de retour', async () => {
   renderAt('/session/inconnue')
   expect(await screen.findByRole('heading', { name: 'Session introuvable' })).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: "Retour à l'accueil" })).toHaveAttribute('href', '/')
+  expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
 })
 
 test('une config en anglais donne une vue examinateur entièrement en anglais', async () => {

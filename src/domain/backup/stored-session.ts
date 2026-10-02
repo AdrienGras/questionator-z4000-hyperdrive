@@ -4,7 +4,7 @@ import type { CssSupports } from '@/domain/config/rules'
 import { validateConfig } from '@/domain/config/validate'
 import { SessionSchema } from '@/domain/session/schema'
 import type { Session } from '@/domain/session/types'
-import type { BackupIssue } from './issues'
+import type { BackupIssue, BackupRuleIssue } from './issues'
 import { checkSessionRules } from './rules'
 
 export type StoredSessionResult =
@@ -14,14 +14,18 @@ function prefixed(issue: ConfigIssue, prefix: ConfigIssue['path']): ConfigIssue 
   return { ...issue, path: [...prefix, ...issue.path] }
 }
 
+/** Règle croisée supplémentaire, appliquée après `checkSessionRules` (ex. contrôles d'import). */
+export type ExtraSessionRule = (session: Session) => BackupRuleIssue[]
+
 /**
  * Valide une session sortie du stockage ou d'un backup : schéma → config figée (F02) → règles
- * croisées. Pure, ne lève jamais. Les chemins d'issues commencent par `session`. La config
- * renvoyée est celle du validateur.
+ * croisées (plus `extraRules`, que l'import ajoute). Pure, ne lève jamais. Les chemins d'issues
+ * commencent par `session`. La config renvoyée est celle du validateur.
  */
 export function checkStoredSession(
   raw: unknown,
   deps: { cssSupports: CssSupports },
+  extraRules: readonly ExtraSessionRule[] = [],
 ): StoredSessionResult {
   const parsed = SessionSchema.safeParse(raw)
   if (!parsed.success) {
@@ -39,7 +43,10 @@ export function checkStoredSession(
   }
 
   const candidate: Session = { ...session, config: validated.config }
-  const ruleIssues = checkSessionRules(candidate)
+  const ruleIssues = [
+    ...checkSessionRules(candidate),
+    ...extraRules.flatMap((rule) => rule(candidate)),
+  ]
   if (ruleIssues.length > 0) return { ok: false, issues: ruleIssues }
   return { ok: true, session: candidate }
 }

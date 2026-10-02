@@ -256,6 +256,7 @@ export function SessionToolbar({ ui, disabled, onExport }: SessionToolbarProps) 
 - `useUi()` (`@/lib/i18n/use-ui`) une seule fois par écran, au composant de page ; les sous-composants reçoivent `ui: Ui` en prop. Langue : celle du navigateur hors session (D51) ; F07 ajoutera `config.locale`.
 - Toute chaîne visible, `aria-label` compris, passe par `text(clé, params)` ; nouvelle clé = ajout dans `UiMessageParams` et dans les dictionnaires `fr` **et** `en` de `src/lib/i18n/ui-messages.ts` (le test échoue sinon).
 - Props en `Readonly<{…}>` (SonarQube S6759) ; jamais `const [x] = useState(...)` sans le setter, et le setter nommé `setX` (S6754 signale aussi `[name, setNameValue]`) : `useMemo` ou une constante de module.
+- Lien texte (retour à l'accueil, fichier d'exemple) : `TEXT_LINK_CLASS` ou `SMALL_TEXT_LINK_CLASS` (`@/components/text-link`, #87), placement en plus par `cn('self-start', …)` ; ne pas recopier la liste de classes.
 - Tests : `src/testing/setup.ts` force `navigator.languages = ['fr-FR']` ; un test en anglais redéfinit la propriété puis la restaure. Monter un écran routé via `createAppRouter(createMemoryHistory(...))` (voir `src/testing/render-home.tsx`).
 
 ## Dialogue de saisie — squelette

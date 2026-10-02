@@ -1,4 +1,4 @@
-import { useRef, useState, type DragEvent } from 'react'
+import { useEffect, useRef, useState, type DragEvent } from 'react'
 
 /** Un fichier est survolé ou déposé (par opposition à du texte, une image glissée, etc.). */
 export function hasFiles(event: DragEvent<HTMLElement>): boolean {
@@ -20,10 +20,63 @@ type DropProps<T extends HTMLElement> = {
   onDrop: (event: DragEvent<T>) => void
 }
 
+/** Délai sans `dragenter` ni `dragover` après lequel un `dragleave` sans cible vaut sortie de fenêtre. */
+export const WINDOW_EXIT_DELAY_MS = 100
+
+/**
+ * Filet `window` pendant un survol (#87) : si l'élément survolé est démonté, son `dragleave`
+ * n'atteint jamais React et le compteur reste positif. On remet tout à zéro quand un fichier est
+ * déposé n'importe où, ou quand le glisser quitte la fenêtre. Sortie de fenêtre : un `dragleave`
+ * sans `relatedTarget` lance un délai, qu'annule tout `dragenter` ou `dragover` (le navigateur en
+ * envoie un toutes les ~50 ms tant que le pointeur est dans la fenêtre). Indépendant de l'ordre
+ * des événements : WebKit laisse aussi `relatedTarget` à `null` en passant d'un élément à un enfant,
+ * mais le `dragover` suivant annule le délai. Écoute en capture : un `stopPropagation` (`isolate`,
+ * garde de page) ne le masque pas.
+ */
+function useWindowDragReset(active: boolean, reset: () => void) {
+  const resetRef = useRef(reset)
+  useEffect(() => {
+    resetRef.current = reset
+  })
+  useEffect(() => {
+    if (!active) return undefined
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const cancel = () => {
+      clearTimeout(timer)
+      timer = undefined
+    }
+    const onLeave = (event: globalThis.DragEvent) => {
+      // `relatedTarget` peut manquer (jsdom, événements synthétiques) : traité comme `null`.
+      if (event.relatedTarget) return
+      cancel()
+      timer = setTimeout(() => {
+        timer = undefined
+        resetRef.current()
+      }, WINDOW_EXIT_DELAY_MS)
+    }
+    const onDrop = () => {
+      cancel()
+      resetRef.current()
+    }
+    window.addEventListener('dragenter', cancel, true)
+    window.addEventListener('dragover', cancel, true)
+    window.addEventListener('dragleave', onLeave, true)
+    window.addEventListener('drop', onDrop, true)
+    return () => {
+      cancel()
+      window.removeEventListener('dragenter', cancel, true)
+      window.removeEventListener('dragover', cancel, true)
+      window.removeEventListener('dragleave', onLeave, true)
+      window.removeEventListener('drop', onDrop, true)
+    }
+  }, [active])
+}
+
 /**
  * Zone de dépôt d'un fichier (F34) : surimpression et dépôt du premier fichier. La surimpression
  * suit un compteur `dragenter` / `dragleave` plutôt que `relatedTarget`, que WebKit laisse à `null`
- * en passant d'un élément à un enfant (la surimpression clignotait).
+ * en passant d'un élément à un enfant (la surimpression clignotait). Filet `window` en plus
+ * (`useWindowDragReset`).
  */
 export function useFileDrop<T extends HTMLElement = HTMLDivElement>({
   disabled = false,
@@ -37,6 +90,8 @@ export function useFileDrop<T extends HTMLElement = HTMLDivElement>({
     depth.current = 0
     setDragging(false)
   }
+
+  useWindowDragReset(dragging, reset)
 
   return {
     dragging: dragging && !disabled,

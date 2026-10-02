@@ -28,6 +28,7 @@ import { stashConfigForCreation } from '@/lib/config-handoff'
 import { downloadText } from '@/lib/download'
 import { useUi } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
+import { SMALL_TEXT_LINK_CLASS } from '@/components/text-link'
 
 /** `<slug du titre>.json` si le texte se parse et porte un `exam.title`, sinon `config.json`. */
 function configFileName(text: string): string {
@@ -141,7 +142,7 @@ export function ConfigEditorPage() {
       ui={ui}
       title={t('editor_title', {})}
       back={
-        <Link to="/" className="self-start text-sm text-primary underline underline-offset-4">
+        <Link to="/" className={cn('self-start', SMALL_TEXT_LINK_CLASS)}>
           {t('back_home', {})}
         </Link>
       }

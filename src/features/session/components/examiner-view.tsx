@@ -25,6 +25,8 @@ import { ProjectionPreview } from './projection-preview'
 import { SidePanel } from './side-panel'
 import { StudentTab } from './student-tab'
 import { StudentsTab } from './students-tab'
+import { SMALL_TEXT_LINK_CLASS } from '@/components/text-link'
+import { cn } from '@/lib/utils'
 
 /**
  * Message de la dernière action refusée, ou `undefined` (spec F09 §7). En if/return plutôt qu'en
@@ -87,7 +89,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
       <PageShell
         ui={ui}
         back={
-          <Link to="/" className="self-start text-sm text-primary underline underline-offset-4">
+          <Link to="/" className={cn('self-start', SMALL_TEXT_LINK_CLASS)}>
             {ui.text('back_home', {})}
           </Link>
         }

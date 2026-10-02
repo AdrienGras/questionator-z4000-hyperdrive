@@ -12,6 +12,10 @@ function ShowLocale() {
   )
 }
 
+function CurrentLocale() {
+  return <>{useLocale()}</>
+}
+
 describe('resolveSessionLocale', () => {
   test('la langue de la config prime', () => {
     expect(resolveSessionLocale('en', ['fr-FR'])).toBe('en')
@@ -27,7 +31,7 @@ describe('resolveSessionLocale', () => {
 describe('LocaleProvider', () => {
   test('hors provider : langue du navigateur (fr sous setup)', () => {
     render(<ShowLocale />)
-    expect(screen.getByText("fr fr Retour à l'accueil")).toBeInTheDocument()
+    expect(screen.getByText('fr fr Retour à l’accueil')).toBeInTheDocument()
   })
 
   test('useUi suit la locale du provider', () => {
@@ -81,6 +85,50 @@ describe('LocaleProvider', () => {
     )
     expect(screen.getByText('en en Back to home')).toBeInTheDocument()
     expect(document.documentElement.lang).toBe('en')
+  })
+})
+
+/** Propriétaire `owner` et un `LocaleProvider` imbriqué par entrée de `nested`, frères. */
+function Owner({
+  owner,
+  nested,
+}: Readonly<{ owner: 'fr' | 'en'; nested: ReadonlyArray<'fr' | 'en'> }>) {
+  return (
+    <LocaleProvider locale={owner}>
+      <span data-testid="owner">
+        <CurrentLocale />
+      </span>
+      {nested.map((locale, index) => (
+        // oxlint-disable-next-line react/no-array-index-key -- liste figée par le test, rang = identité.
+        <LocaleProvider key={index} locale={locale}>
+          <ShowLocale />
+        </LocaleProvider>
+      ))}
+    </LocaleProvider>
+  )
+}
+
+describe('LocaleProvider : déclarations (#87)', () => {
+  test('locale du propriétaire changée pendant une déclaration active : la déclaration garde lang', () => {
+    document.documentElement.lang = ''
+    const { rerender } = render(<Owner owner="fr" nested={['fr']} />)
+    expect(document.documentElement.lang).toBe('fr')
+    rerender(<Owner owner="en" nested={['fr']} />)
+    expect(screen.getByTestId('owner')).toHaveTextContent('en')
+    expect(document.documentElement.lang).toBe('fr')
+    rerender(<Owner owner="en" nested={[]} />)
+    expect(document.documentElement.lang).toBe('en')
+  })
+
+  test('deux imbriqués frères de même locale : retirer l’un garde la déclaration de l’autre', () => {
+    document.documentElement.lang = ''
+    const { rerender } = render(<Owner owner="fr" nested={['en', 'en']} />)
+    expect(screen.getAllByText('en en Back to home')).toHaveLength(2)
+    expect(document.documentElement.lang).toBe('en')
+    rerender(<Owner owner="fr" nested={['en']} />)
+    expect(document.documentElement.lang).toBe('en')
+    rerender(<Owner owner="fr" nested={[]} />)
+    expect(document.documentElement.lang).toBe('fr')
   })
 })
 

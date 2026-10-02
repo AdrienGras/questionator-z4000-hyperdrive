@@ -24,6 +24,22 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-02 — #87 PR 2 : accueil, création, persistance, langue
+
+**Dernière chose faite** : PR #106 (tests instables) mergée sur go de l'utilisateur. La PR 2 de #87 est faite sur `chore/87-dette-accueil-creation` par un subagent, puis relue ; les 8 lignes du BACKLOG sont traitées :
+- un backup où deux étudiants partagent un `order` est refusé à l'import (`duplicate_student_order`, D89, qui nuance D81). Une session déjà stockée n'est jamais marquée endommagée pour cette raison (arbitrage du contrôleur) ;
+- `listSessions` lit la table en une seule fois et trie en mémoire. Un `updatedAt` non textuel, donc déjà endommagé, se range désormais avec les sessions sans date ;
+- filet `window` du glisser-déposer : une sortie de fenêtre arme une minuterie de 100 ms, annulée par tout `dragenter` ou `dragover`. La revue a montré que la première version, à drapeau, ne marchait pas dans Chromium ni Firefox ;
+- `back_home` avec `’` ;
+- classe de lien partagée (`text-link.ts`, 10 liens) ;
+- tests manquants de l'accueil, de la création et de `LocaleProvider`.
+
+**Trucs en suspens** : PR à ouvrir, Sonar, puis « Ready for review » ; ne pas merger sans le go de l'utilisateur. Le comportement réel du filet de glisser-déposer dans Safari et Firefox reste à vérifier à la main (#77).
+
+**Prochaine chose à creuser** : après le merge, la PR 3 de #87 (projection, rendu markdown, éditeur, et le cas « appel écarté » de `ResetDialog`/`AdjustmentDialog`/absence), puis la PR 4 (stats).
+
+**Notes pour future Claude** : jsdom n'a pas de `DragEvent`, et le `relatedTarget` passé à `fireEvent` est ignoré sans bruit (QUIRKS). Pour des tests de glisser-déposer réalistes, construire l'événement avec `createEvent` puis `defineProperty`.
+
 ## 2026-10-02 — #87 : tests instables expliqués et corrigés
 
 **Dernière chose faite** : PR #105 (#87 PR 1) mergée sur go de l'utilisateur. À sa demande, investigation dédiée des tests instables sur `chore/87-tests-instables`, par un subagent, mesures à l'appui (environ 90 suites complètes) :
