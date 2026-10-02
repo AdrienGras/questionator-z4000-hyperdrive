@@ -50,7 +50,8 @@ export function SessionCard({ ui, session }: SessionCardProps) {
     <Card>
       <CardHeader>
         <CardTitle>
-          <h3 className="text-lg font-semibold">{session.name}</h3>
+          {/* `wrap-anywhere` : un nom sans espace coupe au lieu de déborder de la carte (#118). */}
+          <h3 className="text-lg font-semibold wrap-anywhere">{session.name}</h3>
         </CardTitle>
         <CardDescription>{session.config.exam.title}</CardDescription>
         <CardAction>
