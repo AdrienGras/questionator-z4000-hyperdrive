@@ -38,6 +38,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Écran de passage
 
+- [ ] Énoncé avec un mot très long sans espace (URL de 200 caractères) : l'écran de passage (`QuestionPanel`) et la vue projetée (`StudentScreen`) s'élargissent et défilent horizontalement (1823 px et 2809 px pour 1280 px de large). Constaté en #109 et noté dans le ticket ; remède probable : `wrap-anywhere` sur le conteneur de l'énoncé. Décision à prendre.
 - [x] `ResetDialog`, `AdjustmentDialog` et confirmation d'absence : un appel écarté par le verrou (`run` renvoie `false`) est traité comme un échec ou un succès ; faire remonter l'issue `'written' | 'failed' | 'ignored'` comme l'ajout d'étudiant (#87 PR 1), via `FinalScreen` et `PassageBody`. Rare : boutons désactivés pendant une écriture. → #87 *Fait en #87 (PR 3).*
 - [ ] Raccourcis clavier : chiffres pour les valeurs du barème, touches pour les catégories, raccourci de skip.
 - [x] Helper `requireStudent(session, studentId)` dans `domain/passage/` : la recherche + `student_not_found` est copiée dans `drawQuestion`, `scoreAttempt`, `setActiveStudent` ; F10 et F11 en ajouteront deux copies. *Fait en F10.*
@@ -95,7 +96,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 - [x] `locateIssue` : BOM en tête (colonne de `json_syntax` décalée d'un caractère en ligne 1), colonne au-delà de la ligne bornée à la fin du texte plutôt qu'à la fin de ligne ; pas de tests CRLF / BOM / index hors limites. → #87 *Fait en #87 (PR 3).*
 - [x] `JsonEditor` : `aria-label` figé au montage, diagnostics envoyés deux fois au montage ; tests de `reveal` et des diagnostics après montage à ajouter. → #87 *Fait en #87 (PR 3).*
-- [ ] Aperçu : énoncé très long sans `break-words`. → #109
+- [x] Aperçu : énoncé très long sans `break-words`. → #109 *Fait en #109 (`wrap-anywhere` sur la carte).*
 - [x] Nom du fichier téléchargé (`configFileName`) : règle pure à sortir dans `domain/config/` avec ses tests (exam absent, titre vide). → #87 *Fait en #87 (PR 3) : `src/domain/config/config-file-name.ts` ; au passage, BOM accepté (lu via `parseJson`) et titre sans caractère retenu → `config.json` au lieu de `session.json`.*
 
 ## Statistiques

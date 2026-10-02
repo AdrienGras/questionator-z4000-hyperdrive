@@ -25,7 +25,9 @@ export const QuestionPreview = memo(function QuestionPreview({
   const accent: (CSSProperties & Record<'--category-color', string>) | undefined =
     color === undefined ? undefined : { '--category-color': color }
   return (
-    <article className="space-y-3 rounded-md border bg-card p-4 text-card-foreground">
+    // `wrap-anywhere`, hérité par l'en-tête et les Markdown : une URL ou un `id` sans espace coupe
+    // au lieu de déborder. Les blocs de code (`white-space: pre`) n'y sont pas sensibles et défilent.
+    <article className="space-y-3 rounded-md border bg-card p-4 wrap-anywhere text-card-foreground">
       <header className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
         {color !== undefined && (
           <span

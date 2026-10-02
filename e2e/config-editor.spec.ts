@@ -245,3 +245,31 @@ test('le survol de finalScoreDisplay affiche sa description et son défaut', asy
   await expect(editor.hoverTooltip).toContainText('écran final : brute, convertie ou les deux.')
   await expect(editor.hoverTooltip).toContainText('Défaut : "both"')
 })
+
+// Ni espace ni tiret : aucun point de coupure naturel (#109).
+const LONG_ID = `facile_${'x'.repeat(120)}`
+const LONG_URL = `https://example.com/${'a'.repeat(180)}`
+const LONG_WORDS = exampleWith('"id": "facile-002"', `"id": "${LONG_ID}"`).replace(
+  '"prompt": "Quelle est la différence entre `echo` et `print` ?"',
+  `"prompt": "Voir ${LONG_URL}\\n\\n\`\`\`php\\n$${'b'.repeat(200)} = 1;\\n\`\`\`"`,
+)
+
+for (const width of [1280, 375]) {
+  test(`un mot très long reste dans sa carte d'aperçu (${width} px)`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 })
+    const editor = new ConfigEditorPage(page)
+    await editor.goto()
+    await editor.replaceText(LONG_WORDS)
+    const card = editor.previewQuestions.filter({ hasText: LONG_ID })
+    await expect(card).toContainText(LONG_URL)
+
+    const column = await editor.preview.boundingBox()
+    const box = await card.boundingBox()
+    if (column === null || box === null) throw new Error('aperçu non affiché')
+    expect(box.x + box.width).toBeLessThanOrEqual(column.x + column.width)
+    // Rien ne dépasse de la carte, sauf le bloc de code, qui défile dans son propre cadre.
+    expect(await card.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(0)
+    const code = card.locator('pre')
+    expect(await code.evaluate((el) => el.scrollWidth > el.clientWidth)).toBe(true)
+  })
+}
