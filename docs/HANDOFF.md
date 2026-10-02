@@ -24,6 +24,20 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-02 — #87 PR 3 : projection, rendu, éditeur
+
+**Dernière chose faite** : PR #107 (#87 PR 2) mergée sur go de l'utilisateur. La PR 3 de #87 est faite sur `chore/87-dette-projection-rendu-editeur` par un subagent ; la revue la juge Ready. Les 8 lignes du BACKLOG sont traitées :
+- `ResetDialog`, `AdjustmentDialog` et l'absence suivent l'issue `written` / `failed` / `ignored` : plus de fausse erreur quand un appel est écarté par le verrou (CONVENTIONS § Transition de passage) ;
+- l'échec isolé `getByRole('banner')` est expliqué : les `header` des cartes de l'aperçu arrivent après la validation différée. L'outil de test cherche désormais le seul `h1` placé dans un `header` (QUIRKS) ;
+- tests manquants du rendu markdown ;
+- quatre vrais petits bugs trouvés par les nouveaux tests et corrigés : décalage CRLF des offsets de `toHighlightedCode`, `locateIssue` après un BOM et pour une colonne au-delà de la ligne, `JsonEditor` (`aria-label` figé, diagnostics envoyés deux fois), et `configFileName`, sorti dans `domain/config/`, qui gère maintenant un BOM et un titre sans caractère utile.
+
+**Trucs en suspens** : PR à ouvrir, Sonar, puis « Ready for review » ; ne pas merger sans le go de l'utilisateur. Reste connu, non traité : si le brouillon initial contient des CRLF, la première validation tourne sur ce texte alors que CodeMirror affiche du LF, donc les diagnostics dérivent d'un caractère par ligne jusqu'à la première frappe. Cas rare.
+
+**Prochaine chose à creuser** : après le merge, la PR 4 de #87 (stats : tests manquants, nettoyages de `domain/stats/`, `StatsEmpty`), qui fermera #87. Puis #88 (outillage), et #85 (Node 26) à partir du 2026-10-28.
+
+**Notes pour future Claude** : CodeMirror normalise CRLF et CR seul en LF dans son document, mais garde un BOM : la localisation d'une issue doit raisonner sur le texte de l'éditeur, pas sur le fichier d'origine.
+
 ## 2026-10-02 — #87 PR 2 : accueil, création, persistance, langue
 
 **Dernière chose faite** : PR #106 (tests instables) mergée sur go de l'utilisateur. La PR 2 de #87 est faite sur `chore/87-dette-accueil-creation` par un subagent, puis relue ; les 8 lignes du BACKLOG sont traitées :
