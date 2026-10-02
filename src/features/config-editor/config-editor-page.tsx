@@ -10,9 +10,9 @@ import {
 } from 'react'
 import { PageShell } from '@/components/page-shell'
 import { Button } from '@/components/ui/button'
+import { configFileName } from '@/domain/config/config-file-name'
 import type { ConfigIssue } from '@/domain/config/issues'
 import { formatConfigIssue } from '@/domain/config/messages'
-import { slugify } from '@/domain/session/file-name'
 import { ConfigPreview } from '@/features/config-editor/components/config-preview'
 import { IssueList } from '@/features/config-editor/components/issue-list'
 import {
@@ -29,21 +29,6 @@ import { downloadText } from '@/lib/download'
 import { useUi } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
 import { SMALL_TEXT_LINK_CLASS } from '@/components/text-link'
-
-/** `<slug du titre>.json` si le texte se parse et porte un `exam.title`, sinon `config.json`. */
-function configFileName(text: string): string {
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(text)
-  } catch {
-    return 'config.json'
-  }
-  if (typeof parsed !== 'object' || parsed === null || !('exam' in parsed)) return 'config.json'
-  const exam = parsed.exam
-  if (typeof exam !== 'object' || exam === null || !('title' in exam)) return 'config.json'
-  const title = exam.title
-  return typeof title === 'string' && title.trim() !== '' ? `${slugify(title)}.json` : 'config.json'
-}
 
 // Garde de page : un fichier lâché hors de la colonne de l'éditeur ne doit jamais être ouvert par
 // le navigateur (le texte en cours serait quitté). La colonne gère son propre dépôt avant.

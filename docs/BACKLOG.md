@@ -95,7 +95,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [x] `locateIssue` : BOM en tête (colonne de `json_syntax` décalée d'un caractère en ligne 1), colonne au-delà de la ligne bornée à la fin du texte plutôt qu'à la fin de ligne ; pas de tests CRLF / BOM / index hors limites. → #87 *Fait en #87 (PR 3).*
 - [x] `JsonEditor` : `aria-label` figé au montage, diagnostics envoyés deux fois au montage ; tests de `reveal` et des diagnostics après montage à ajouter. → #87 *Fait en #87 (PR 3).*
 - [ ] Aperçu : énoncé très long sans `break-words`.
-- [ ] Nom du fichier téléchargé (`configFileName`) : règle pure à sortir dans `domain/config/` avec ses tests (exam absent, titre vide). → #87
+- [x] Nom du fichier téléchargé (`configFileName`) : règle pure à sortir dans `domain/config/` avec ses tests (exam absent, titre vide). → #87 *Fait en #87 (PR 3) : `src/domain/config/config-file-name.ts` ; au passage, BOM accepté (lu via `parseJson`) et titre sans caractère retenu → `config.json` au lieu de `session.json`.*
 
 ## Statistiques
 

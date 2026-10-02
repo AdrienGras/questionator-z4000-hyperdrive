@@ -13,6 +13,11 @@ describe('slugify', () => {
   ])('%s → %s', (name, slug) => {
     expect(slugify(name)).toBe(slug)
   })
+
+  test('repli fourni quand rien ne reste, ignoré sinon', () => {
+    expect(slugify('—', 'config')).toBe('config')
+    expect(slugify('Oral', 'config')).toBe('oral')
+  })
 })
 
 describe('localDateStamp', () => {
