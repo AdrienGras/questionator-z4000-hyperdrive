@@ -409,7 +409,7 @@
       62.556%, 66.778% { opacity: 0; transform: scale(0.4); }
       67.056%, 100% { opacity: 1; transform: none; }
     }
-    /* Icône de catégorie de la question : flamme pour A, feuille pour B, PHP pour C */
+    /* Icône de catégorie de la question : flamme pour A, feuille pour B, montagne pour C */
     .qi-a { animation-name: qi-a; }
     @keyframes qi-a {
       0%, 56.389% { opacity: 1; }
@@ -625,13 +625,7 @@
       <path d="M5 21c.5 -4.5 2.5 -8 7 -10"/>
       <path d="M9 18c6.218 0 10.5 -3.288 11 -12v-2h-4.014c-9 0 -11.986 4 -12 9c0 1 0 3 2 5h3l.014 0"/>
     </symbol>
-    <symbol id="i-brand-php" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M2 12a10 9 0 1 0 20 0a10 9 0 1 0 -20 0"/>
-      <path d="M5.5 15l.395 -1.974l.605 -3.026h1.32a1 1 0 0 1 .986 1.164l-.167 1a1 1 0 0 1 -.986 .836h-1.653"/>
-      <path d="M15.5 15l.395 -1.974l.605 -3.026h1.32a1 1 0 0 1 .986 1.164l-.167 1a1 1 0 0 1 -.986 .836h-1.653"/>
-      <path d="M12 7.5l-1 5.5"/>
-      <path d="M11.6 10h2.4l-.5 3"/>
-    </symbol>
+    <symbol id="i-mountain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18l-6.921 -14.612a2.3 2.3 0 0 0 -4.158 0l-6.921 14.612"/><path d="M7.5 11l2 2.5l2.5 -2.5l2 3l2.5 -2"/></symbol>
     <symbol id="i-flame" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M12 10.941c2.333 -3.308 .167 -7.823 -1 -8.941c0 3.395 -2.235 5.299 -3.667 6.706c-1.43 1.408 -2.333 3.294 -2.333 5.588c0 3.704 3.134 6.706 7 6.706c3.866 0 7 -3.002 7 -6.706c0 -1.712 -1.232 -4.403 -2.333 -5.588c-2.084 3.353 -3.257 3.353 -4.667 2.235"/>
     </symbol>
@@ -813,7 +807,7 @@
             <g class="sel-2 anim">
               <g class="proj-tile-2 anim c2">
                 <rect class="proj-tile" x="760" y="120" width="110" height="140" rx="14"/>
-                <use href="#i-brand-php" x="783" y="140" width="64" height="64"/>
+                <use href="#i-mountain" x="783" y="140" width="64" height="64"/>
                 <rect class="tile-bar" x="785" y="226" width="60" height="12" rx="6"/>
               </g>
             </g>
@@ -850,7 +844,7 @@
             <rect class="q-chip" x="692" y="88" width="76" height="76" rx="16"/>
             <use href="#i-flame" class="qi-a anim c3" x="698" y="94" width="64" height="64"/>
             <use href="#i-leaf" class="qi-b anim c1" x="698" y="94" width="64" height="64"/>
-            <use href="#i-brand-php" class="qi-c anim c2" x="698" y="94" width="64" height="64"/>
+            <use href="#i-mountain" class="qi-c anim c2" x="698" y="94" width="64" height="64"/>
             <rect class="q-bar" x="790" y="100" width="250" height="20" rx="10"/>
             <rect class="q-bar" x="790" y="134" width="190" height="20" rx="10"/>
             <rect class="q-bar" x="692" y="196" width="348" height="20" rx="10"/>
@@ -928,7 +922,7 @@
           <g class="sel-2 anim">
             <g class="lap-tile-2 anim c2">
               <rect class="tile" x="277" y="236" width="58" height="84" rx="10"/>
-              <use href="#i-brand-php" x="288" y="248" width="36" height="36"/>
+              <use href="#i-mountain" x="288" y="248" width="36" height="36"/>
               <rect class="tile-bar" x="291" y="298" width="30" height="8" rx="4"/>
             </g>
           </g>
@@ -952,7 +946,7 @@
           <rect class="lap-chip" x="210" y="210" width="40" height="40" rx="9"/>
           <use href="#i-flame" class="qi-a anim c3" x="214" y="214" width="32" height="32"/>
           <use href="#i-leaf" class="qi-b anim c1" x="214" y="214" width="32" height="32"/>
-          <use href="#i-brand-php" class="qi-c anim c2" x="214" y="214" width="32" height="32"/>
+          <use href="#i-mountain" class="qi-c anim c2" x="214" y="214" width="32" height="32"/>
           <rect class="lap-bar" x="262" y="214" width="196" height="12" rx="6"/>
           <rect class="lap-bar" x="262" y="234" width="140" height="12" rx="6"/>
           <g class="answer anim">
@@ -1006,7 +1000,7 @@
         <rect class="ui-bar" x="262" y="80" width="200" height="16" rx="8"/>
         <path class="sep" d="M640 170V520M178 472H610M670 472H1022"/>
         <g class="c1"><rect class="bar stat-bar stat-bar-1 anim" x="196" y="290" width="80" height="180" rx="12"/><use href="#i-leaf" x="216" y="488" width="40" height="40"/></g>
-        <g class="c2"><rect class="bar stat-bar stat-bar-2 anim" x="302" y="220" width="80" height="250" rx="12"/><use href="#i-brand-php" x="322" y="488" width="40" height="40"/></g>
+        <g class="c2"><rect class="bar stat-bar stat-bar-2 anim" x="302" y="220" width="80" height="250" rx="12"/><use href="#i-mountain" x="322" y="488" width="40" height="40"/></g>
         <g class="c3"><rect class="bar stat-bar stat-bar-3 anim" x="408" y="260" width="80" height="210" rx="12"/><use href="#i-flame" x="428" y="488" width="40" height="40"/></g>
         <g class="c4"><rect class="bar stat-bar stat-bar-4 anim" x="514" y="350" width="80" height="120" rx="12"/><use href="#i-skull" x="534" y="488" width="40" height="40"/></g>
         <g class="c2">
@@ -1028,7 +1022,7 @@
         <circle class="avatar" cx="218" cy="390" r="24"/><use href="#i-user" class="ico-muted" x="204" y="376" width="28" height="28"/><rect class="ui-bar" x="258" y="383" width="120" height="14" rx="7"/>
         <circle class="avatar" cx="218" cy="470" r="24"/><use href="#i-user" class="ico-muted" x="204" y="456" width="28" height="28"/><rect class="ui-bar" x="258" y="463" width="120" height="14" rx="7"/>
         <g class="c1"><use href="#i-leaf" x="418" y="150" width="40" height="40"/><rect class="tile-bar" x="410" y="222" width="56" height="16" rx="8"/><rect class="tile-bar" x="410" y="302" width="56" height="16" rx="8"/><rect class="tile-bar" x="410" y="382" width="40" height="16" rx="8"/><rect class="tile-bar" x="410" y="462" width="56" height="16" rx="8"/></g>
-        <g class="c2"><use href="#i-brand-php" x="518" y="150" width="40" height="40"/><rect class="tile-bar" x="510" y="222" width="40" height="16" rx="8"/><rect class="tile-bar" x="510" y="302" width="56" height="16" rx="8"/><rect class="tile-bar" x="510" y="382" width="28" height="16" rx="8"/><rect class="tile-bar" x="510" y="462" width="48" height="16" rx="8"/></g>
+        <g class="c2"><use href="#i-mountain" x="518" y="150" width="40" height="40"/><rect class="tile-bar" x="510" y="222" width="40" height="16" rx="8"/><rect class="tile-bar" x="510" y="302" width="56" height="16" rx="8"/><rect class="tile-bar" x="510" y="382" width="28" height="16" rx="8"/><rect class="tile-bar" x="510" y="462" width="48" height="16" rx="8"/></g>
         <g class="c3"><use href="#i-flame" x="618" y="150" width="40" height="40"/><rect class="tile-bar" x="610" y="222" width="56" height="16" rx="8"/><rect class="tile-bar" x="610" y="302" width="20" height="16" rx="8"/><rect class="tile-bar" x="610" y="382" width="48" height="16" rx="8"/><rect class="tile-bar" x="610" y="462" width="36" height="16" rx="8"/></g>
         <g class="c4"><use href="#i-skull" x="718" y="150" width="40" height="40"/><rect class="tile-bar" x="710" y="222" width="28" height="16" rx="8"/><rect class="tile-bar" x="710" y="302" width="44" height="16" rx="8"/><rect class="tile-bar" x="710" y="382" width="12" height="16" rx="8"/><rect class="tile-bar" x="710" y="462" width="52" height="16" rx="8"/></g>
         <!-- Le fichier franchit le bord droit de l'écran agrandi, sans atteindre celui de l'image -->
