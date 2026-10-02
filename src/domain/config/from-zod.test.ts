@@ -16,7 +16,20 @@ describe('fromZodIssues', () => {
     const withoutExam: Record<string, unknown> = { ...minimalConfig() }
     delete withoutExam.exam
     expect(convert(withoutExam)).toEqual([
-      { severity: 'error', code: 'required', path: ['exam'], params: {} },
+      { severity: 'error', code: 'required', path: ['exam'], params: { field: 'exam' } },
+    ])
+  })
+
+  test('champ imbriqué manquant → required nommé par le dernier segment du chemin', () => {
+    const config = minimalConfig()
+    const { finalScale: _finalScale, ...scoring } = config.scoring
+    expect(convert({ ...config, scoring })).toEqual([
+      {
+        severity: 'error',
+        code: 'required',
+        path: ['scoring', 'finalScale'],
+        params: { field: 'finalScale' },
+      },
     ])
   })
 
@@ -24,7 +37,12 @@ describe('fromZodIssues', () => {
     const withoutVersion: Record<string, unknown> = { ...minimalConfig() }
     delete withoutVersion.schemaVersion
     expect(convert(withoutVersion)).toEqual([
-      { severity: 'error', code: 'required', path: ['schemaVersion'], params: {} },
+      {
+        severity: 'error',
+        code: 'required',
+        path: ['schemaVersion'],
+        params: { field: 'schemaVersion' },
+      },
     ])
   })
 

@@ -1393,3 +1393,15 @@ autre encodage 8 bits.
 - Icônes Tabler décoratives à côté du libellé : `IconExternalLink`, `IconPlayerPlay`, `IconPlayerPause`.
 
 **Pourquoi** : ouvrir une fenêtre et piloter ce qu'elle montre sont deux gestes distincts ; un hook unique évite de dupliquer la logique de fenêtre entre deux composants.
+
+## D93 — F40 (#103) : champ manquant nommé, valeurs possibles au survol (2026-10-02)
+
+**Question** : « Champ obligatoire manquant. » ne disait pas quel champ manque, et le survol d'une clé n'affichait que la description et le défaut, alors que les descriptions paraphrasent les valeurs à écrire. Comment donner ces deux informations sans dupliquer le parcours du schéma ?
+
+**Décision** :
+- `required` prend un paramètre `field`, le dernier segment du chemin quand c'est une clé (`requiredIssue`, `from-zod.ts`). Message FR « Champ obligatoire manquant : « finalScale ». », EN `Required field is missing: "finalScale".`, avec les guillemets des autres messages (`unknown_key`). Sans clé (index de tableau, chemin vide) : message d'avant. Le message partagé change aussi à la création de session, à l'import de backup et à la relecture d'une session.
+- `collectValues` quitte `features/config-editor` pour `domain/config/schema-values.ts`, avec `hoverValues` : littéraux JSON d'une liste fermée (`enum`, `const`, `null` d'un nullable, sans `true` / `false`), `open` pour un `anyOf` qui accepte aussi une chaîne libre, rien sinon. Les mêmes valeurs alimentent l'autocomplétion, le survol de l'app et le `markdownDescription` publié (VS Code), dans l'ordre description, valeurs, défaut.
+- Liste ouverte : pas de liste (6 000 noms d'icônes), mais un lien vers https://tabler.io/icons (nouvel onglet, `noopener noreferrer`) et le rappel de Ctrl+Espace. `icon` est aujourd'hui la seule liste ouverte du schéma : le lien Tabler lui est attaché d'office ; une deuxième liste ouverte demanderait de rendre ce lien propre au champ.
+- Bulle construite dans `hover-dom.ts` par `createElement` / `textContent`, libellés traduits passés en `hoverLabels` (remplace `defaultLabel`).
+
+**Pourquoi** : on écrit le JSON avec les littéraux, pas avec leur paraphrase ; un seul parcours du schéma garde les trois aides cohérentes.

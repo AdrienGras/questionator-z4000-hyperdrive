@@ -77,7 +77,19 @@ export class ConfigEditorPage {
     return this.page.getByRole('option', { name })
   }
 
-  /** Infobulle de survol (description et défaut). */
+  /**
+   * Survole la (première) clé `key`. Avec `text`, remplace d'abord le texte et revient en tête :
+   * CodeMirror ne rend que les lignes visibles, la clé doit y être.
+   */
+  async hoverKey(key: string, text?: string): Promise<void> {
+    if (text !== undefined) {
+      await this.replaceText(text)
+      await this.page.keyboard.press('ControlOrMeta+Home')
+    }
+    await this.page.locator('.cm-content').getByText(`"${key}"`).first().hover()
+  }
+
+  /** Infobulle de survol (description, valeurs possibles et défaut). */
   get hoverTooltip(): Locator {
     return this.page.locator('.cm-tooltip-hover')
   }

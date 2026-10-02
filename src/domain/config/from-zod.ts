@@ -34,9 +34,15 @@ export const INTEGER_FIELDS: ReadonlySet<string> = new Set([
   'maxPerStudent',
 ])
 
+/** Champ manquant, nommé par le dernier segment du chemin quand c'est une clé. */
+function requiredIssue(path: IssuePath): ConfigIssue {
+  const field = path.at(-1)
+  return configError('required', path, typeof field === 'string' ? { field } : {})
+}
+
 function fromInvalidType(expected: string, path: IssuePath, input: unknown): ConfigIssue {
   const value = valueAt(input, path)
-  if (value === undefined) return configError('required', path, {})
+  if (value === undefined) return requiredIssue(path)
   const lastSegment = path.at(-1)
   const isIntegerField =
     expected === 'int' ||
@@ -61,7 +67,7 @@ function fromZodIssue(issue: ZodIssue, input: unknown): ConfigIssue[] {
     case 'invalid_type':
       return [fromInvalidType(issue.expected, path, input)]
     case 'invalid_value':
-      if (valueAt(input, path) === undefined) return [configError('required', path, {})]
+      if (valueAt(input, path) === undefined) return [requiredIssue(path)]
       return [
         configError('invalid_enum', path, {
           options: issue.values

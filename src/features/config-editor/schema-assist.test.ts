@@ -207,6 +207,34 @@ describe('hoverAt', () => {
     expect(step?.default).toBeNull()
   })
 
+  test('valeurs possibles : enum, const et nullable', () => {
+    expect(hover('{ "scoring": { "rounding": { "mo|de": "up" } } }').hover?.values).toEqual([
+      '"nearest"',
+      '"up"',
+      '"down"',
+    ])
+    expect(hover('{ "scoring": { "rounding": { "st|ep": 1 } } }').hover?.values).toEqual(['null'])
+    expect(hover('{ "schema|Version": 1 }').hover?.values).toEqual(['1'])
+    expect(hover('{ "absent": { "exp|ort": "label" } }').hover?.values).toEqual([
+      '"label"',
+      '"zero"',
+      '"value"',
+    ])
+  })
+
+  test('booléen : ni valeurs ni liste ouverte', () => {
+    const h = hover('{ "presentation": { "drawAni|mation": true } }').hover
+    expect(h?.description).toBeTruthy()
+    expect(h?.values).toBeUndefined()
+    expect(h?.openValues).toBeUndefined()
+  })
+
+  test('icône : liste ouverte, aucune valeur énumérée', () => {
+    const h = hover('{ "categories": [ { "ic|on": "leaf" } ] }').hover
+    expect(h?.openValues).toBe(true)
+    expect(h?.values).toBeUndefined()
+  })
+
   test('pas de survol sur une valeur', () => {
     expect(hover('{ "scoring": { "rounding": { "mode": "ne|arest" } } }').hover).toBeUndefined()
   })

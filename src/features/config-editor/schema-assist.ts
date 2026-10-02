@@ -1,5 +1,6 @@
 import { findNodeAtLocation, getLocation, parseTree, type Node } from 'jsonc-parser'
 import { buildConfigJsonSchema } from '@/domain/config/json-schema'
+import { collectValues, hoverValues } from '@/domain/config/schema-values'
 
 /** Sous-ensemble du JSON Schema produit par `buildConfigJsonSchema()` (schéma entièrement inliné). */
 export type SchemaNode = {
@@ -15,7 +16,16 @@ export type SchemaNode = {
 
 export type AssistCompletion = { label: string; apply: string; detail?: string; info?: string }
 export type AssistCompletions = { from: number; to: number; options: AssistCompletion[] }
-export type AssistHover = { from: number; to: number; description: string; default?: unknown }
+export type AssistHover = {
+  from: number
+  to: number
+  description: string
+  default?: unknown
+  /** Valeurs possibles, en littéraux JSON (liste fermée). */
+  values?: string[]
+  /** Liste ouverte (noms d'icônes) : lien de recherche à la place des valeurs. */
+  openValues?: true
+}
 
 type Path = readonly (string | number)[]
 
@@ -138,22 +148,6 @@ function wordAround(text: string, offset: number): { from: number; to: number } 
   return { from, to }
 }
 
-/** Types déclarés d'un nœud, toujours sous forme de tableau. */
-function typesOf(node: SchemaNode): readonly string[] {
-  if (Array.isArray(node.type)) return node.type
-  return node.type === undefined ? [] : [node.type]
-}
-
-/** Valeurs littérales proposables, en parcourant récursivement les `anyOf`. */
-function collectValues(node: SchemaNode, out: unknown[]): void {
-  if (node.enum) out.push(...node.enum)
-  if (node.const !== undefined) out.push(node.const)
-  const types = typesOf(node)
-  if (types.includes('boolean')) out.push(true, false)
-  if (types.includes('null')) out.push(null)
-  for (const branch of node.anyOf ?? []) collectValues(branch, out)
-}
-
 function valueCompletions(root: SchemaNode, path: Path): AssistCompletion[] {
   const node = schemaAt(root, path)
   if (!node) return []
@@ -187,7 +181,7 @@ export function completionsAt(
   }
 }
 
-/** Description (et défaut) de la propriété dont la clé est sous `offset`. */
+/** Description, valeurs possibles et défaut de la propriété dont la clé est sous `offset`. */
 export function hoverAt(text: string, offset: number, root: SchemaNode): AssistHover | undefined {
   const ctx = contextAt(text, offset)
   if (!ctx.isKey || !ctx.string || !ctx.range) return undefined
@@ -199,6 +193,9 @@ export function hoverAt(text: string, offset: number, root: SchemaNode): AssistH
     description: node.description,
   }
   if ('default' in node) hover.default = node.default
+  const values = hoverValues(node)
+  if (values?.kind === 'closed') hover.values = values.values
+  if (values?.kind === 'open') hover.openValues = true
   return hover
 }
 

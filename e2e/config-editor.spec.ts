@@ -237,31 +237,58 @@ test('Entrée applique l’option de complétion sélectionnée à la place du m
   await expect(editor.editor).toContainText('"mode": "nearest" }')
 })
 
-test('le survol de finalScoreDisplay affiche sa description et son défaut', async ({ page }) => {
+// Clés hors écran au chargement : le texte est réordonné pour les amener en tête (CodeMirror ne
+// rend que les lignes visibles).
+const CATEGORY_POINTS_FIRST = exampleWith(',\n    "showCategoryPoints": true', '').replace(
+  '"showCumulativeScore": true,',
+  '"showCategoryPoints": true,\n    "showCumulativeScore": true,',
+)
+
+const HOVERS: { key: string; text?: string; expected: string[] }[] = [
+  {
+    key: 'finalScoreDisplay',
+    expected: ['écran final : brute, convertie ou les deux.', 'Défaut : "both"'],
+  },
+  {
+    key: 'showCategoryPoints',
+    text: CATEGORY_POINTS_FIRST,
+    expected: ['maximum de points de chaque catégorie', 'Défaut : true'],
+  },
+  { key: 'mode', expected: ['Valeurs possibles : "nearest", "up", "down"', 'Défaut : "nearest"'] },
+]
+
+for (const { key, text, expected } of HOVERS) {
+  test(`le survol de ${key} affiche sa description, ses valeurs et son défaut`, async ({
+    page,
+  }) => {
+    const editor = new ConfigEditorPage(page)
+    await editor.goto()
+    await editor.hoverKey(key, text)
+    for (const fragment of expected) await expect(editor.hoverTooltip).toContainText(fragment)
+  })
+}
+
+test('un champ obligatoire manquant est nommé dans la liste des erreurs', async ({ page }) => {
   const editor = new ConfigEditorPage(page)
   await editor.goto()
-  await expect(editor.editor).toContainText('"finalScoreDisplay"')
-  await page.locator('.cm-content').getByText('"finalScoreDisplay"').hover()
-  await expect(editor.hoverTooltip).toContainText('écran final : brute, convertie ou les deux.')
-  await expect(editor.hoverTooltip).toContainText('Défaut : "both"')
+  await editor.replaceText(exampleWith('"finalScale": 20,', ''))
+
+  await expect(editor.issue('Champ obligatoire manquant : « finalScale ».')).toBeVisible()
 })
 
-test('le survol de showCategoryPoints affiche sa description et son défaut', async ({ page }) => {
+test('le survol de icon propose la recherche Tabler, sans liste de noms', async ({ page }) => {
   const editor = new ConfigEditorPage(page)
   await editor.goto()
-  // CodeMirror ne rend que les lignes visibles : la clé, dernière de `presentation`, passe en tête.
-  await editor.replaceText(
-    exampleWith(',\n    "showCategoryPoints": true', '').replace(
-      '"showCumulativeScore": true,',
-      '"showCategoryPoints": true,\n    "showCumulativeScore": true,',
-    ),
-  )
-  // La saisie laisse la vue en bas du texte : revenir en tête.
-  await page.keyboard.press('ControlOrMeta+Home')
-  await expect(editor.editor).toContainText('"showCategoryPoints"')
-  await page.locator('.cm-content').getByText('"showCategoryPoints"').hover()
-  await expect(editor.hoverTooltip).toContainText('maximum de points de chaque catégorie')
-  await expect(editor.hoverTooltip).toContainText('Défaut : true')
+  // `categories` en tête : CodeMirror ne rend que les lignes visibles.
+  const { categories, ...rest } = z
+    .looseObject({ categories: z.array(z.unknown()) })
+    .parse(JSON.parse(EXAMPLE))
+  await editor.hoverKey('icon', JSON.stringify({ categories, ...rest }, null, 2))
+
+  const link = editor.hoverTooltip.getByRole('link', { name: 'Rechercher une icône sur tabler.io' })
+  await expect(link).toHaveAttribute('href', 'https://tabler.io/icons')
+  await expect(link).toHaveAttribute('target', '_blank')
+  await expect(editor.hoverTooltip).not.toContainText('Valeurs possibles')
 })
 
 // Ni espace ni tiret : aucun point de coupure naturel (#109).

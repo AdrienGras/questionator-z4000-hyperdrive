@@ -31,7 +31,10 @@ const fr: Dictionary<ConfigIssueParams> = {
       : `Le fichier n’est pas un JSON valide (ligne ${line}, colonne ${column ?? '?'}).`,
   unsupported_schema_version: ({ found, supported }) =>
     `Cette configuration utilise la version ${found} du format, mais l’application ne connaît que la version ${supported}. Rechargez la page pour mettre l’application à jour.`,
-  required: () => 'Champ obligatoire manquant.',
+  required: ({ field }) =>
+    field === undefined
+      ? 'Champ obligatoire manquant.'
+      : `Champ obligatoire manquant : « ${field} ».`,
   invalid_type: ({ expected }) =>
     `Type invalide : la valeur doit être ${typeName('fr', expected)}.`,
   unknown_key: ({ key }) => `Clé inconnue « ${key} » : vérifiez l’orthographe du nom de champ.`,
@@ -93,7 +96,8 @@ const en: Dictionary<ConfigIssueParams> = {
       : `The file is not valid JSON (line ${line}, column ${column ?? '?'}).`,
   unsupported_schema_version: ({ found, supported }) =>
     `This configuration uses format version ${found}, but the application only knows version ${supported}. Reload the page to update the application.`,
-  required: () => 'Required field is missing.',
+  required: ({ field }) =>
+    field === undefined ? 'Required field is missing.' : `Required field is missing: "${field}".`,
   invalid_type: ({ expected }) => `Invalid type: ${typeName('en', expected)} is required.`,
   unknown_key: ({ key }) => `Unknown key "${key}": check the spelling of the field name.`,
   invalid_enum: ({ options }) => `Value not allowed. Allowed values: ${options}.`,

@@ -244,6 +244,9 @@ export type UiMessageParams = {
   editor_final_screen: NoParams
   editor_validator_error: NoParams
   editor_hover_default: NoParams
+  editor_hover_values: NoParams
+  editor_hover_icon_search: NoParams
+  editor_hover_icon_hint: NoParams
   stats_back: NoParams
   stats_error: NoParams
   stats_headcount: NoParams
@@ -573,6 +576,9 @@ const fr: Dictionary<UiMessageParams> = {
   editor_final_screen: () => 'Écran final',
   editor_validator_error: () => "Le validateur n'a pas pu être chargé. Rechargez la page.",
   editor_hover_default: () => 'Défaut :',
+  editor_hover_values: () => 'Valeurs possibles :',
+  editor_hover_icon_search: () => 'Rechercher une icône sur tabler.io',
+  editor_hover_icon_hint: () => 'Ctrl+Espace propose les noms connus.',
   stats_back: () => 'Retour au passage',
   stats_error: () => "Les statistiques n'ont pas pu être chargées.",
   stats_headcount: () => 'Effectifs',
@@ -862,6 +868,9 @@ const en: Dictionary<UiMessageParams> = {
   editor_final_screen: () => 'Final screen',
   editor_validator_error: () => 'The validator could not be loaded. Reload the page.',
   editor_hover_default: () => 'Default:',
+  editor_hover_values: () => 'Possible values:',
+  editor_hover_icon_search: () => 'Search icons on tabler.io',
+  editor_hover_icon_hint: () => 'Ctrl+Space suggests known names.',
   stats_back: () => 'Back to the exam',
   stats_error: () => 'The statistics could not be loaded.',
   stats_headcount: () => 'Headcount',

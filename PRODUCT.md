@@ -685,7 +685,7 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 **Contenu.**
 - Page `#/editor`, ouverte par la carte « Éditer une config » de l'accueil (toujours affichée). CodeMirror n'est chargé que sur cette page, et pré-caché pour le hors ligne (D80).
 - Éditeur JSON (gauche) : validation 300 ms après la frappe avec le validateur de la création ; erreurs et avertissements soulignés dans le texte et dans la marge, à la position du nœud concerné ; liste des issues (mêmes messages qu'à la création) dont chaque ligne place le curseur sur le nœud.
-- Autocomplétion (Ctrl+Espace) des clés et des valeurs d'énumération, aide au survol (description, défaut), tirées du JSON Schema (D87).
+- Autocomplétion (Ctrl+Espace) des clés et des valeurs d'énumération, aide au survol (description, valeurs possibles d'une liste fermée, lien de recherche Tabler pour `icon`, défaut ; F40), tirées du JSON Schema (D87).
 - Brouillon enregistré en local ; au retour, brouillon repris, sinon config d'exemple. « Charger un fichier » (ou glisser-déposer) et « Repartir de l'exemple » remplacent le texte, annulable par Ctrl+Z.
 - Aperçu (droite), au thème de la config : toutes les questions groupées par catégorie (en-tête, énoncé au rendu de la projection, réponse attendue repliée), puis l'écran final projeté d'une étudiante fictive. Config invalide : dernier aperçu valide, marqué comme périmé.
 - « Télécharger » : le texte exact de l'éditeur, nommé d'après le titre de l'examen. « Créer une session avec cette config » (config valide) : ouvre la création avec la config chargée.

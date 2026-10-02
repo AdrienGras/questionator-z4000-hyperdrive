@@ -24,6 +24,21 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-02 — F40 (#103) : champ manquant nommé, valeurs possibles au survol
+
+**Dernière chose faite** : PR #115 (F39) mergée sur go de l'utilisateur. #103 est passé en « In progress », branche `feat/f40-editeur-survol`.
+- **Champ manquant :** `required` porte `field`, d'où le message « Champ obligatoire manquant : « finalScale ». » (FR et EN), partagé avec la création, l'import et la relecture d'une session.
+- **Valeurs possibles :** `collectValues` est déplacé dans `domain/config/schema-values.ts`, avec un nouveau `hoverValues` (liste fermée, `open`, rien). `hoverAt` renvoie `values` / `openValues`, et `hover-dom.ts` rend la bulle : valeurs en `code`, et pour `icon` un lien Tabler souligné et le rappel Ctrl+Espace. Le `markdownDescription` publié ajoute les mêmes valeurs, et le lien pour `icon`.
+- **Libellés :** `editor_hover_values`, `editor_hover_icon_search`, `editor_hover_icon_hint` ; la prop `defaultLabel` de `JsonEditor` devient `hoverLabels`.
+- **Documentation :** D93, PRODUCT.md F26 et README à jour.
+- **Tests :** domaine, assistant, JSON Schema, bulle, et 3 e2e (champ manquant, survol de `mode`, lien d'`icon`).
+
+**Trucs en suspens** : PR en brouillon, Sonar, puis « Ready for review » ; merge sur go de l'utilisateur. Le BACKLOG attend un rapidfire. Écart assumé avec le ticket : le nom du champ est entre « » (FR) et "" (EN), comme `unknown_key`, et non entre backticks, puisque les messages sont du texte brut.
+
+**Prochaine chose à creuser** : #88 (outillage : Vitest `vmThreads`/`isolate`, garde-fou des doublures, e2e `color-mode`), puis #85 (Node 26, pas avant le 2026-10-28).
+
+**Notes pour future Claude** : pour survoler une clé lointaine de l'exemple en e2e, réordonner l'objet (`JSON.stringify({ categories, ...rest })`) puis `ControlOrMeta+Home` : CodeMirror ne rend que les lignes visibles.
+
 ## 2026-10-02 — F39 (#102) : ouverture de la vue projetée à côté du titre, icônes
 
 **Dernière chose faite** : PR #114 (F38) mergée sur go de l'utilisateur. #102 est passé en « In progress », branche `feat/f39-controles-projection`.
