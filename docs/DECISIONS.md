@@ -1358,3 +1358,15 @@ autre encodage 8 bits.
 **Pourquoi** : les parcours de l'application gardent `order` unique (création : rang + 1, ajout : max + 1) ; seul un fichier édité à la main peut le casser, et l'import est le seul endroit où l'utilisateur peut encore le corriger.
 
 **Reporté dans** : `docs/BACKLOG.md` (§ Persistance).
+
+## D90 — F37 (#100) : barème des catégories en points, affichage côté étudiant piloté par la config (2026-10-02)
+
+**Question** : « max 2 » sous chaque case de l'examinateur se lisait « 2 questions au maximum », et la vue projetée ne montrait pas ce maximum. Comment l'écrire, et qui décide de le montrer à l'étudiant ?
+
+**Décision** :
+- Libellé `passage_category_max` : « 2 pts », « 1 pt », commun à la grille examinateur et aux tuiles projetées. Le paramètre `points` (nombre) porte l'accord, à côté de `max` (chaîne formatée) : « 1,0 pt ». Accord avec les helpers existants : en français, singulier jusqu'à 1 (« 0,5 pt », « 1,5 pts ») ; en anglais, singulier pour 1 seulement.
+- Examinateur : toujours affiché. Vue projetée : nouvelle clé `presentation.showCategoryPoints`, défaut `true`. À `false`, `toProjectedView` ne transmet pas `categories[].maxPoints` (champ optionnel), comme `showCumulativeScore` et `showStatsOnFinal` retirent leurs données (D69).
+- Format : `formatRawScore` (extrait de `formatScore` en `raw`), utilisable par la vue projetée, qui ne reçoit pas la config.
+- Sessions et backups antérieurs : rien à migrer, `checkStoredSession` repasse la config par `validateConfig`, qui applique le défaut.
+
+**Pourquoi** : l'unité lève l'ambiguïté sans ajouter de texte. Montrer le barème à l'étudiant l'aide à choisir sa difficulté, mais certains examinateurs préfèrent ne pas l'afficher ; le défaut suit l'usage le plus courant.
