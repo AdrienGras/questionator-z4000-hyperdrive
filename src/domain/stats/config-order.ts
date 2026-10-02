@@ -46,7 +46,11 @@ export function addToTally(tally: Tally, attempt: Attempt, scale: number[]): voi
   tally.max += toMilli(Math.max(...scale))
 }
 
-/** Taux de réussite 0–1, `null` sans note ou si le total possible vaut 0. */
+/**
+ * Taux de réussite 0–1, `null` sans note ou si le total possible est ≤ 0 : un maximum négatif
+ * donnerait un taux positif trompeur (−2 ÷ −1 = 200 %). Les règles de config refusent déjà un tel
+ * barème ; la garde est défensive (#118).
+ */
 export function successRate(tally: Tally): number | null {
-  return tally.scored === 0 || tally.max === 0 ? null : tally.points / tally.max
+  return tally.scored === 0 || tally.max <= 0 ? null : tally.points / tally.max
 }
