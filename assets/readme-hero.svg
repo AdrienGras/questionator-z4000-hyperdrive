@@ -24,6 +24,7 @@
       --cat2: oklch(0.709 0.159 293.5);
       --cat3: oklch(0.687 0.252 323.9);
       --cat4: oklch(0.758 0.159 55.9);
+      --xlsx: oklch(0.58 0.15 152);
       --night: #1a1033;
       --ease: cubic-bezier(0.45, 0, 0.25, 1);
     }
@@ -38,6 +39,7 @@
         --ambient: oklch(0.145 0 0);
         --amb-line: oklch(0.687 0.252 323.9 / 16%);
         --shadow: oklch(0 0 0 / 40%);
+        --xlsx: oklch(0.72 0.17 152);
       }
     }
 
@@ -77,6 +79,27 @@
     .c4 { color: var(--cat4); }
     .tile { fill: currentColor; fill-opacity: 0.14; stroke: currentColor; stroke-width: 3; }
     .tile-bar { fill: currentColor; opacity: 0.55; }
+    .chip-sm { fill: currentColor; fill-opacity: 0.14; stroke: currentColor; stroke-width: 2; }
+
+    /* Scènes 3 à 6 : éléments d'interface */
+    .text-bar { fill: var(--fg); opacity: 0.7; }
+    .avatar { fill: var(--muted); stroke: var(--border); stroke-width: 2; }
+    .avatar-on { fill: var(--muted); stroke: var(--fg); stroke-width: 3; }
+    .proj { fill: var(--muted); stroke: var(--border); stroke-width: 2; }
+    .label-muted { fill: var(--muted-fg); font-size: 40px; font-weight: 600; text-anchor: middle; }
+    .btn { fill: var(--muted); stroke: var(--border); stroke-width: 2; }
+    .btn-on { fill: var(--fg); }
+    .btn-num { fill: var(--fg); font-size: 48px; font-weight: 700; text-anchor: middle; }
+    .btn-num-on { fill: var(--card); }
+    .score-num { fill: var(--fg); font-size: 150px; font-weight: 800; text-anchor: middle; }
+    .gauge { fill: var(--fg); }
+    .bar { fill: currentColor; }
+    .curve { fill: none; stroke: currentColor; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 1; }
+    .area { fill: currentColor; fill-opacity: 0.14; }
+    .mean { stroke: var(--muted-fg); stroke-width: 2; stroke-dasharray: 6 8; }
+    .xlsx { color: var(--xlsx); }
+    .xlsx-card { fill: var(--card); stroke: currentColor; stroke-width: 3; }
+    .xlsx-label { fill: currentColor; font-size: 44px; font-weight: 800; text-anchor: middle; }
 
     /* Scène 1 : nuit synthwave (fixe, quel que soit le thème) */
     .floor-grid { stroke: #b04cff; stroke-width: 2; opacity: 0.75; }
@@ -163,9 +186,155 @@
       26.667%, 100% { opacity: 1; transform: none; }
     }
 
+    /* Scène 3 : passage (5-8,5 s) */
+    #scene-3 { animation-name: scene-3; }
+    @keyframes scene-3 {
+      0%, 33.333% { opacity: 0; }
+      35.333%, 54.667% { opacity: 1; }
+      56.667%, 100% { opacity: 0; }
+    }
+    .s3-first { animation-name: s3-first; }
+    @keyframes s3-first {
+      0%, 34.667% { transform: none; }
+      37.333%, 100% { transform: translateX(110px) scale(1.2); }
+    }
+    .s3-queue { animation-name: s3-queue; }
+    @keyframes s3-queue {
+      0%, 36% { transform: none; }
+      38.667%, 100% { transform: translateY(-95px); }
+    }
+    .s3-pulse { animation-name: s3-pulse; }
+    @keyframes s3-pulse {
+      0%, 37.333% { transform: none; }
+      38.667% { transform: scale(1.1); }
+      40% { transform: none; }
+      41.333% { transform: scale(1.1); }
+      42.667%, 100% { transform: none; }
+    }
+    .s3-dim { animation-name: s3-dim; }
+    @keyframes s3-dim {
+      0%, 40% { opacity: 1; }
+      41.333%, 100% { opacity: 0.3; }
+    }
+    .s3-card { animation-name: s3-card; }
+    @keyframes s3-card {
+      0%, 39.333% { opacity: 0; transform: translateY(24px); }
+      42%, 100% { opacity: 1; transform: none; }
+    }
+    .s3-proj { animation-name: s3-proj; }
+    @keyframes s3-proj {
+      0%, 40.667% { opacity: 0; transform: translateY(24px); }
+      43.333%, 100% { opacity: 1; transform: none; }
+    }
+    .s3-answer { animation-name: s3-answer; transform-origin: 0 50%; }
+    @keyframes s3-answer {
+      0%, 42.667% { opacity: 0; transform: scaleX(0); }
+      44.667%, 100% { opacity: 1; transform: none; }
+    }
+
+    /* Scène 4 : note (8,5-11 s) */
+    #scene-4 { animation-name: scene-4; }
+    @keyframes scene-4 {
+      0%, 56.667% { opacity: 0; }
+      58.667%, 71.333% { opacity: 1; }
+      73.333%, 100% { opacity: 0; }
+    }
+    .s4-press-3 { animation-name: s4-press-3; }
+    @keyframes s4-press-3 {
+      0%, 59.333% { opacity: 0; transform: scale(0.9); }
+      60.333%, 63.333% { opacity: 1; transform: none; }
+      64%, 100% { opacity: 0; transform: none; }
+    }
+    .s4-press-2 { animation-name: s4-press-2; }
+    @keyframes s4-press-2 {
+      0%, 63.333% { opacity: 0; transform: scale(0.9); }
+      64.333%, 66.667% { opacity: 1; transform: none; }
+      67.333%, 100% { opacity: 0; transform: none; }
+    }
+    .s4-n0 { animation-name: s4-n0; }
+    @keyframes s4-n0 {
+      0%, 61% { opacity: 1; }
+      61.667%, 100% { opacity: 0; }
+    }
+    .s4-n3 { animation-name: s4-n3; }
+    @keyframes s4-n3 {
+      0%, 61% { opacity: 0; transform: scale(1.3); }
+      62.333%, 64.333% { opacity: 1; transform: none; }
+      65%, 100% { opacity: 0; transform: none; }
+    }
+    .s4-n5 { animation-name: s4-n5; }
+    @keyframes s4-n5 {
+      0%, 64.333% { opacity: 0; transform: scale(1.3); }
+      65.667%, 100% { opacity: 1; transform: none; }
+    }
+    .s4-gauge { animation-name: s4-gauge; transform-origin: 0 50%; }
+    @keyframes s4-gauge {
+      0%, 61% { transform: scaleX(0); }
+      62.333%, 64.333% { transform: scaleX(0.6); }
+      65.667%, 100% { transform: none; }
+    }
+    /* Deux étudiants défilent en accéléré : l'actuel sort, le suivant monte prendre sa place. */
+    .s4-current { animation-name: s4-current; }
+    @keyframes s4-current {
+      0%, 66.667% { opacity: 1; transform: none; }
+      67.333% { opacity: 0; transform: translateX(80px); }
+      67.667% { opacity: 0; transform: translateX(-110px) scale(0.83); }
+      68.667%, 69% { opacity: 1; transform: none; }
+      69.667% { opacity: 0; transform: translateX(80px); }
+      70% { opacity: 0; transform: translateX(-110px) scale(0.83); }
+      71%, 100% { opacity: 1; transform: none; }
+    }
+    .s4-queue { animation-name: s4-queue; }
+    @keyframes s4-queue {
+      0%, 67.333% { transform: none; }
+      68.667%, 69.667% { transform: translateY(-95px); }
+      71%, 100% { transform: translateY(-190px); }
+    }
+
+    /* Scène 5 : stats (11-13 s) */
+    #scene-5 { animation-name: scene-5; }
+    @keyframes scene-5 {
+      0%, 73.333% { opacity: 0; }
+      75.333%, 84.667% { opacity: 1; }
+      86.667%, 100% { opacity: 0; }
+    }
+    .s5-bar { transform-origin: 50% 100%; }
+    .s5-bar-1 { animation-name: s5-bar-1; }
+    .s5-bar-2 { animation-name: s5-bar-2; }
+    .s5-bar-3 { animation-name: s5-bar-3; }
+    .s5-bar-4 { animation-name: s5-bar-4; }
+    @keyframes s5-bar-1 { 0%, 74% { transform: scaleY(0); } 77.333%, 100% { transform: none; } }
+    @keyframes s5-bar-2 { 0%, 74.667% { transform: scaleY(0); } 78%, 100% { transform: none; } }
+    @keyframes s5-bar-3 { 0%, 75.333% { transform: scaleY(0); } 78.667%, 100% { transform: none; } }
+    @keyframes s5-bar-4 { 0%, 76% { transform: scaleY(0); } 79.333%, 100% { transform: none; } }
+    .s5-curve { animation-name: s5-curve; }
+    @keyframes s5-curve {
+      0%, 75.333% { stroke-dashoffset: 1; }
+      79.333%, 100% { stroke-dashoffset: 0; }
+    }
+    .s5-area { animation-name: s5-area; }
+    @keyframes s5-area {
+      0%, 78.667% { opacity: 0; }
+      80%, 100% { opacity: 1; }
+    }
+
+    /* Scène 6 : export (13-15 s) ; le fondu final est porté par #window */
+    #scene-6 { animation-name: scene-6; }
+    @keyframes scene-6 {
+      0%, 86.667% { opacity: 0; }
+      88.667%, 100% { opacity: 1; }
+    }
+    .s6-file { animation-name: s6-file; }
+    @keyframes s6-file {
+      0%, 88% { opacity: 0; transform: translateX(-480px) rotate(-6deg) scale(0.6); }
+      90%, 90.667% { opacity: 1; transform: translateX(-480px) rotate(-6deg); }
+      93.333%, 100% { opacity: 1; transform: none; }
+    }
+
+    /* Mouvement réduit : image fixe de la fin du parcours (scène 6, fichier sorti). */
     @media (prefers-reduced-motion: reduce) {
       svg, svg * { animation: none !important; }
-      #scene-1, #home, #scene-2 { opacity: 0; }
+      #scene-1, #home, #scene-2, #scene-3, #scene-4, #scene-5 { opacity: 0; }
     }
   </style>
 
@@ -281,6 +450,9 @@
     <clipPath id="win-clip">
       <path d="M80 110H1120V530A20 20 0 0 1 1100 550H100A20 20 0 0 1 80 530Z"/>
     </clipPath>
+    <clipPath id="queue-clip">
+      <rect x="100" y="150" width="100" height="400"/>
+    </clipPath>
     <clipPath id="sky-clip">
       <rect width="1200" height="380"/>
     </clipPath>
@@ -393,10 +565,121 @@
       </g>
     </g>
 
-    <g id="scene-3"></g>
-    <g id="scene-4"></g>
-    <g id="scene-5"></g>
-    <g id="scene-6"></g>
+    <!-- Scène 3 : passage (5-8,5 s). File d'attente, tirage dans une catégorie, question puis réponse, vue projetée. -->
+    <g id="scene-3" class="anim">
+      <g class="s3-queue anim">
+        <circle class="avatar" cx="150" cy="285" r="36"/><use href="#i-user" class="ico-muted" x="130" y="265" width="40" height="40"/>
+        <circle class="avatar" cx="150" cy="380" r="36"/><use href="#i-user" class="ico-muted" x="130" y="360" width="40" height="40"/>
+        <circle class="avatar" cx="150" cy="475" r="36"/><use href="#i-user" class="ico-muted" x="130" y="455" width="40" height="40"/>
+      </g>
+      <g class="s3-first anim"><circle class="avatar-on" cx="150" cy="190" r="36"/><use href="#i-user" class="ico-fg" x="130" y="170" width="40" height="40"/></g>
+      <g class="s3-dim anim c1"><rect class="tile" x="340" y="140" width="170" height="100" rx="16"/><use href="#i-leaf" x="397" y="162" width="56" height="56"/></g>
+      <g class="s3-dim anim c2"><rect class="tile" x="530" y="140" width="170" height="100" rx="16"/><use href="#i-brand-php" x="587" y="162" width="56" height="56"/></g>
+      <g class="s3-pulse anim c3"><rect class="tile" x="720" y="140" width="170" height="100" rx="16"/><use href="#i-flame" x="777" y="162" width="56" height="56"/></g>
+      <g class="s3-dim anim c4"><rect class="tile" x="910" y="140" width="170" height="100" rx="16"/><use href="#i-skull" x="967" y="162" width="56" height="56"/></g>
+      <g class="s3-card anim">
+        <rect class="card" x="340" y="268" width="460" height="252" rx="16"/>
+        <g class="c3"><rect class="chip-sm" x="364" y="290" width="56" height="56" rx="12"/><use href="#i-flame" x="374" y="300" width="36" height="36"/></g>
+        <rect class="url-mark" x="436" y="312" width="150" height="12" rx="6"/>
+        <rect class="text-bar" x="364" y="372" width="412" height="18" rx="9"/>
+        <rect class="text-bar" x="364" y="404" width="300" height="18" rx="9"/>
+        <g class="s3-answer anim c3">
+          <rect class="tile" x="364" y="446" width="412" height="52" rx="12"/>
+          <rect class="tile-bar" x="384" y="465" width="240" height="14" rx="7"/>
+        </g>
+      </g>
+      <!-- Vue projetée : la question seule, jamais la réponse -->
+      <g class="s3-proj anim">
+        <rect class="proj" x="830" y="300" width="250" height="220" rx="16"/>
+        <use href="#i-presentation" class="ico-muted" x="850" y="316" width="36" height="36"/>
+        <rect class="url-mark" x="898" y="329" width="90" height="10" rx="5"/>
+        <rect class="card" x="850" y="366" width="210" height="134" rx="10"/>
+        <g class="c3"><rect class="chip-sm" x="866" y="382" width="32" height="32" rx="8"/><use href="#i-flame" x="872" y="388" width="20" height="20"/></g>
+        <rect class="text-bar" x="866" y="432" width="178" height="10" rx="5"/>
+        <rect class="text-bar" x="866" y="452" width="120" height="10" rx="5"/>
+      </g>
+    </g>
+
+    <!-- Scène 4 : note (8,5-11 s). Note 3 puis 2, score cumulé 0 → 3 → 5, deux étudiants défilent. -->
+    <g id="scene-4" class="anim">
+      <g clip-path="url(#queue-clip)">
+        <g class="s4-queue anim">
+          <circle class="avatar" cx="150" cy="190" r="36"/><use href="#i-user" class="ico-muted" x="130" y="170" width="40" height="40"/>
+          <circle class="avatar" cx="150" cy="285" r="36"/><use href="#i-user" class="ico-muted" x="130" y="265" width="40" height="40"/>
+          <circle class="avatar" cx="150" cy="380" r="36"/><use href="#i-user" class="ico-muted" x="130" y="360" width="40" height="40"/>
+          <circle class="avatar" cx="150" cy="475" r="36"/><use href="#i-user" class="ico-muted" x="130" y="455" width="40" height="40"/>
+          <circle class="avatar" cx="150" cy="570" r="36"/><use href="#i-user" class="ico-muted" x="130" y="550" width="40" height="40"/>
+        </g>
+      </g>
+      <g class="s4-current anim"><circle class="avatar-on" cx="260" cy="190" r="43"/><use href="#i-user" class="ico-fg" x="236" y="166" width="48" height="48"/></g>
+      <g>
+        <rect class="card" x="340" y="140" width="460" height="380" rx="16"/>
+        <g class="c3"><rect class="chip-sm" x="364" y="164" width="56" height="56" rx="12"/><use href="#i-flame" x="374" y="174" width="36" height="36"/></g>
+        <rect class="url-mark" x="436" y="186" width="150" height="12" rx="6"/>
+        <rect class="text-bar" x="364" y="252" width="412" height="18" rx="9"/>
+        <rect class="text-bar" x="364" y="284" width="300" height="18" rx="9"/>
+        <rect class="btn" x="364" y="380" width="94" height="100" rx="14"/><text class="btn-num" x="411" y="447">0</text>
+        <rect class="btn" x="470" y="380" width="94" height="100" rx="14"/><text class="btn-num" x="517" y="447">1</text>
+        <rect class="btn" x="576" y="380" width="94" height="100" rx="14"/><text class="btn-num" x="623" y="447">2</text>
+        <rect class="btn" x="682" y="380" width="94" height="100" rx="14"/><text class="btn-num" x="729" y="447">3</text>
+        <g class="s4-press-3 anim"><rect class="btn-on" x="682" y="380" width="94" height="100" rx="14"/><text class="btn-num btn-num-on" x="729" y="447">3</text></g>
+        <g class="s4-press-2 anim"><rect class="btn-on" x="576" y="380" width="94" height="100" rx="14"/><text class="btn-num btn-num-on" x="623" y="447">2</text></g>
+      </g>
+      <g>
+        <rect class="card" x="830" y="140" width="250" height="380" rx="16"/>
+        <text class="label-muted" x="955" y="212">Score</text>
+        <text class="score-num s4-n0 anim" x="955" y="390">0</text>
+        <text class="score-num s4-n3 anim" x="955" y="390">3</text>
+        <text class="score-num s4-n5 anim" x="955" y="390">5</text>
+        <rect class="btn" x="870" y="440" width="170" height="16" rx="8"/>
+        <rect class="gauge s4-gauge anim" x="870" y="440" width="85" height="16" rx="8"/>
+      </g>
+    </g>
+
+    <!-- Scène 5 : stats (11-13 s). Moyenne par catégorie, distribution des notes. -->
+    <g id="scene-5" class="anim">
+      <rect class="card" x="120" y="140" width="960" height="380" rx="16"/>
+      <rect class="chip" x="144" y="160" width="52" height="52" rx="12"/>
+      <use href="#i-chart-bar" class="ico-fg" x="156" y="172" width="28" height="28"/>
+      <rect class="url-mark" x="212" y="180" width="150" height="12" rx="6"/>
+      <path class="win-sep" d="M600 236V496M150 452H570M630 452H1050"/>
+      <g class="c1"><rect class="bar s5-bar s5-bar-1 anim" x="160" y="300" width="70" height="150" rx="10"/><use href="#i-leaf" x="177" y="464" width="36" height="36"/></g>
+      <g class="c2"><rect class="bar s5-bar s5-bar-2 anim" x="270" y="240" width="70" height="210" rx="10"/><use href="#i-brand-php" x="287" y="464" width="36" height="36"/></g>
+      <g class="c3"><rect class="bar s5-bar s5-bar-3 anim" x="380" y="280" width="70" height="170" rx="10"/><use href="#i-flame" x="397" y="464" width="36" height="36"/></g>
+      <g class="c4"><rect class="bar s5-bar s5-bar-4 anim" x="490" y="350" width="70" height="100" rx="10"/><use href="#i-skull" x="507" y="464" width="36" height="36"/></g>
+      <g class="c2">
+        <g class="s5-area anim">
+          <path class="area" d="M640 448C720 446 770 236 850 236S980 444 1040 448L1040 450L640 450Z"/>
+          <path class="mean" d="M850 244V450"/>
+        </g>
+        <path class="curve s5-curve anim" pathLength="1" d="M640 448C720 446 770 236 850 236S980 444 1040 448"/>
+      </g>
+    </g>
+    </g>
+
+    <!-- Scène 6 : export (13-15 s). Le tableau des notes donne un fichier Excel qui sort de la fenêtre. -->
+    <g id="scene-6" class="anim">
+      <rect class="card" x="140" y="150" width="580" height="360" rx="16"/>
+      <rect class="chip" x="164" y="170" width="52" height="52" rx="12"/>
+      <use href="#i-file-spreadsheet" class="ico-fg" x="176" y="182" width="28" height="28"/>
+      <path class="win-sep" d="M164 240H696M164 300H696M164 360H696M164 420H696"/>
+      <circle class="avatar" cx="188" cy="270" r="18"/><use href="#i-user" class="ico-muted" x="176" y="258" width="24" height="24"/><rect class="url-mark" x="220" y="264" width="120" height="12" rx="6"/>
+      <circle class="avatar" cx="188" cy="330" r="18"/><use href="#i-user" class="ico-muted" x="176" y="318" width="24" height="24"/><rect class="url-mark" x="220" y="324" width="120" height="12" rx="6"/>
+      <circle class="avatar" cx="188" cy="390" r="18"/><use href="#i-user" class="ico-muted" x="176" y="378" width="24" height="24"/><rect class="url-mark" x="220" y="384" width="120" height="12" rx="6"/>
+      <circle class="avatar" cx="188" cy="450" r="18"/><use href="#i-user" class="ico-muted" x="176" y="438" width="24" height="24"/><rect class="url-mark" x="220" y="444" width="120" height="12" rx="6"/>
+      <g class="c1"><use href="#i-leaf" x="410" y="178" width="36" height="36"/><rect class="tile-bar" x="400" y="263" width="56" height="14" rx="7"/><rect class="tile-bar" x="400" y="323" width="56" height="14" rx="7"/><rect class="tile-bar" x="400" y="383" width="40" height="14" rx="7"/><rect class="tile-bar" x="400" y="443" width="56" height="14" rx="7"/></g>
+      <g class="c2"><use href="#i-brand-php" x="490" y="178" width="36" height="36"/><rect class="tile-bar" x="480" y="263" width="40" height="14" rx="7"/><rect class="tile-bar" x="480" y="323" width="56" height="14" rx="7"/><rect class="tile-bar" x="480" y="383" width="28" height="14" rx="7"/><rect class="tile-bar" x="480" y="443" width="48" height="14" rx="7"/></g>
+      <g class="c3"><use href="#i-flame" x="570" y="178" width="36" height="36"/><rect class="tile-bar" x="560" y="263" width="56" height="14" rx="7"/><rect class="tile-bar" x="560" y="323" width="20" height="14" rx="7"/><rect class="tile-bar" x="560" y="383" width="48" height="14" rx="7"/><rect class="tile-bar" x="560" y="443" width="36" height="14" rx="7"/></g>
+      <g class="c4"><use href="#i-skull" x="650" y="178" width="36" height="36"/><rect class="tile-bar" x="640" y="263" width="28" height="14" rx="7"/><rect class="tile-bar" x="640" y="323" width="44" height="14" rx="7"/><rect class="tile-bar" x="640" y="383" width="12" height="14" rx="7"/><rect class="tile-bar" x="640" y="443" width="52" height="14" rx="7"/></g>
+      <!-- Hors du découpage de la fenêtre : le fichier en franchit le bord droit. -->
+      <g class="s6-file anim xlsx">
+        <g transform="rotate(5 1075 311)">
+          <rect class="win-shadow" x="995" y="210" width="170" height="226" rx="16" filter="url(#win-shadow)"/>
+          <rect class="xlsx-card" x="985" y="196" width="180" height="230" rx="16"/>
+          <use href="#i-file-spreadsheet" x="1020" y="222" width="110" height="110"/>
+          <text class="xlsx-label" x="1075" y="394">.xlsx</text>
+        </g>
+      </g>
     </g>
   </g>
 </svg>
