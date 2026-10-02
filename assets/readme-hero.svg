@@ -100,10 +100,10 @@
     .amb-bg { fill: var(--ambient); }
     .amb-grid { stroke: var(--amb-line); }
 
-    /* Interface générique (fichiers, stats, export) */
-    .win-shadow { fill: var(--shadow); }
-    .win-sep { stroke: var(--border); stroke-width: 2; }
-    .url-mark { fill: var(--muted-fg); opacity: 0.5; }
+    /* Interface générique (fichiers de la préparation, écran agrandi) */
+    .drop { fill: var(--shadow); }
+    .sep { stroke: var(--border); stroke-width: 2; }
+    .ui-bar { fill: var(--muted-fg); opacity: 0.5; }
     .card { fill: var(--card); stroke: var(--border); stroke-width: 2; }
     .chip { fill: var(--muted); }
     .ico-fg { color: var(--fg); }
@@ -120,7 +120,7 @@
     .tile-bar { fill: currentColor; opacity: 0.55; }
     .proj-tile { fill: currentColor; fill-opacity: 0.2; stroke: currentColor; stroke-width: 4; }
 
-    /* Stats et export (réutilisés par le zoom) */
+    /* Stats et export, dans l'écran agrandi */
     .bar { fill: currentColor; }
     .curve { fill: none; stroke: currentColor; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 1; }
     .area { fill: currentColor; fill-opacity: 0.14; }
@@ -165,7 +165,7 @@
     .lap { fill: var(--lap); }
     .lap-edge { fill: var(--lap-edge); }
     .lap-off { fill: var(--screen-off); }
-    .lap-on { fill: var(--card); }
+    .lap-on, .zoom-screen { fill: var(--card); }
     .lap-chip { fill: var(--muted); }
     .lap-bar { fill: var(--muted-fg); opacity: 0.6; }
     /* Réponse attendue : visible du seul examinateur, dans une couleur à part */
@@ -273,36 +273,6 @@
     @keyframes proj-tile-2 { 0%, 19.722% { opacity: 0; transform: translateY(30px) scale(0.7); } 21.111%, 100% { opacity: 1; transform: none; } }
     @keyframes proj-tile-3 { 0%, 20.278% { opacity: 0; transform: translateY(30px) scale(0.7); } 21.667%, 100% { opacity: 1; transform: none; } }
     @keyframes proj-tile-4 { 0%, 20.833% { opacity: 0; transform: translateY(30px) scale(0.7); } 22.222%, 100% { opacity: 1; transform: none; } }
-
-    /*
-      Stats et export de la première version (boucle de 15 s), gardés hors affichage (scene-5 et
-      scene-6 à opacité 0) : la tâche du zoom les réutilise et recale ces pourcentages.
-    */
-    .s5-bar { transform-origin: 50% 100%; }
-    .s5-bar-1 { animation-name: s5-bar-1; }
-    .s5-bar-2 { animation-name: s5-bar-2; }
-    .s5-bar-3 { animation-name: s5-bar-3; }
-    .s5-bar-4 { animation-name: s5-bar-4; }
-    @keyframes s5-bar-1 { 0%, 74% { transform: scaleY(0); } 77.333%, 100% { transform: none; } }
-    @keyframes s5-bar-2 { 0%, 74.667% { transform: scaleY(0); } 78%, 100% { transform: none; } }
-    @keyframes s5-bar-3 { 0%, 75.333% { transform: scaleY(0); } 78.667%, 100% { transform: none; } }
-    @keyframes s5-bar-4 { 0%, 76% { transform: scaleY(0); } 79.333%, 100% { transform: none; } }
-    .s5-curve { animation-name: s5-curve; }
-    @keyframes s5-curve {
-      0%, 75.333% { stroke-dashoffset: 1; }
-      79.333%, 100% { stroke-dashoffset: 0; }
-    }
-    .s5-area { animation-name: s5-area; }
-    @keyframes s5-area {
-      0%, 78.667% { opacity: 0; }
-      80%, 100% { opacity: 1; }
-    }
-    .s6-file { animation-name: s6-file; }
-    @keyframes s6-file {
-      0%, 88% { opacity: 0; transform: translateX(-480px) rotate(-6deg) scale(0.6); }
-      90%, 90.667% { opacity: 1; transform: translateX(-480px) rotate(-6deg); }
-      93.333%, 100% { opacity: 1; transform: none; }
-    }
 
     /* Choix (4-6 s) : A entre par la droite et se place, bulle flamme, Difficile s'allume sur les deux écrans */
     .stu { animation-timing-function: linear; }
@@ -575,13 +545,77 @@
     }
 
     /*
+      Zoom (12,3-13 s) : C a reçu sa note, le portable grandit autour du centre de son écran
+      (340,285 amené en 600,300, facteur 3,3) pendant que le reste de la salle s'efface.
+    */
+    #laptop { animation-name: laptop-zoom; transform-box: view-box; transform-origin: 340px 285px; }
+    @keyframes laptop-zoom {
+      0%, 68.333% { transform: none; }
+      72.222%, 100% { transform: translate(260px, 15px) scale(3.3); }
+    }
+    #around { animation-name: around; }
+    @keyframes around {
+      0%, 68.333% { opacity: 1; }
+      71.667%, 100% { opacity: 0; }
+    }
+    /*
+      L'écran agrandi prend le relais du portable à 13-13,2 s. Rangé dans la salle, il s'efface avec elle
+      sous le titre à 17,7-18 s, d'un seul bloc : le portable agrandi qu'il recouvre ne transparaît pas.
+    */
+    #zoom { animation-name: zoom; }
+    @keyframes zoom {
+      0%, 72.222% { opacity: 0; }
+      73.333%, 100% { opacity: 1; }
+    }
+
+    /* Stats (13-15 s) : barres par catégorie (13,1-13,7 s), puis courbe des notes (13,3-13,8 s), tenues jusqu'à 15 s */
+    .stat-bar { transform-origin: 50% 100%; }
+    .stat-bar-1 { animation-name: stat-bar-1; }
+    .stat-bar-2 { animation-name: stat-bar-2; }
+    .stat-bar-3 { animation-name: stat-bar-3; }
+    .stat-bar-4 { animation-name: stat-bar-4; }
+    @keyframes stat-bar-1 { 0%, 72.778% { transform: scaleY(0); } 74.444%, 100% { transform: none; } }
+    @keyframes stat-bar-2 { 0%, 73.333% { transform: scaleY(0); } 75%, 100% { transform: none; } }
+    @keyframes stat-bar-3 { 0%, 73.889% { transform: scaleY(0); } 75.556%, 100% { transform: none; } }
+    @keyframes stat-bar-4 { 0%, 74.444% { transform: scaleY(0); } 76.111%, 100% { transform: none; } }
+    .stat-curve { animation-name: stat-curve; }
+    @keyframes stat-curve {
+      0%, 73.889% { stroke-dashoffset: 1; }
+      76.667%, 100% { stroke-dashoffset: 0; }
+    }
+    .stat-area { animation-name: stat-area; }
+    @keyframes stat-area {
+      0%, 76.111% { opacity: 0; }
+      77.222%, 100% { opacity: 1; }
+    }
+    .stats { animation-name: stats; }
+    @keyframes stats {
+      0%, 83.333% { opacity: 1; }
+      84.444%, 100% { opacity: 0; }
+    }
+
+    /* Export (15-18 s) : le tableau des notes, puis le fichier Excel qui sort de l'écran (15,5-16,7 s) */
+    .export { animation-name: export; }
+    @keyframes export {
+      0%, 84.444% { opacity: 0; }
+      85.556%, 100% { opacity: 1; }
+    }
+    .xlsx-file { animation-name: xlsx-file; }
+    @keyframes xlsx-file {
+      0%, 86.111% { opacity: 0; transform: translateX(-400px) rotate(-6deg) scale(0.6); }
+      87.778%, 88.889% { opacity: 1; transform: translateX(-400px) rotate(-6deg); }
+      92.778%, 100% { opacity: 1; transform: none; }
+    }
+
+    /*
       Mouvement réduit : animations coupées, salle figée au moment de la note. A est à sa place, la
-      question est projetée, le portable montre la réponse attendue et la note, le score est affiché.
+      question est projetée, le portable montre la réponse attendue et la note, le score est affiché ;
+      l'écran agrandi (zoom) reste caché.
     */
     @media (prefers-reduced-motion: reduce) {
       svg, svg * { animation: none !important; }
       #scene-title, .prep-file, .tiles-vis, .deck-card, .bub, .qi-b, .qi-c,
-      .stu-b, .stu-c, .lit-b, .lit-c, .score-b, .score-c { opacity: 0; }
+      .stu-b, .stu-c, .lit-b, .lit-c, .score-b, .score-c, #zoom { opacity: 0; }
     }
   </style>
 
@@ -638,7 +672,7 @@
     <pattern id="amb-grid" width="40" height="40" patternUnits="userSpaceOnUse">
       <path class="amb-grid" d="M40 0H0V40" fill="none" stroke-width="1.5"/>
     </pattern>
-    <filter id="win-shadow" x="-10%" y="-10%" width="120%" height="130%">
+    <filter id="blur" x="-10%" y="-10%" width="120%" height="130%">
       <feGaussianBlur stdDeviation="14"/>
     </filter>
 
@@ -699,6 +733,13 @@
       <circle class="eye" cx="21" cy="-140" r="4"/>
       <path class="mouth" d="M18 -121q5 2 9 -2"/>
     </g>
+    <!-- Dos de carte du tirage (catégorie Difficile), couleur portée par le groupe -->
+    <g id="card-back">
+      <rect class="card-back" x="810" y="110" width="116" height="164" rx="14"/>
+      <use href="#i-flame" x="840" y="164" width="56" height="56"/>
+    </g>
+    <!-- Bulle de l'étudiant (104x88 en 836,358), pointe vers sa bouche ; style porté par le use -->
+    <path id="bubble" d="M856 358H920A20 20 0 0 1 940 378V426A20 20 0 0 1 920 446H856A20 20 0 0 1 836 426L812 448L836 398V378A20 20 0 0 1 856 358Z"/>
     <g id="p-examiner">
       <path class="body" d="M-50 0V-46A50 50 0 0 1 50 -46V0Z"/>
       <path class="shirt" d="M-15 -95L5 -66L22 -93Z"/>
@@ -742,109 +783,135 @@
     </g>
   </g>
 
-  <!-- Salle d'oral : une seule scène, sans changement de plan pendant le passage -->
+  <!-- Salle d'oral : une seule scène pendant le passage (2-12 s), puis zoom sur le portable (12-18 s) -->
   <g id="room" class="anim">
-    <g id="decor">
-      <rect class="wall" width="1200" height="470"/>
-      <rect class="floor" y="470" width="1200" height="130"/>
-      <path class="floor-line" d="M0 512H1200M0 562H1200"/>
-      <rect class="skirt" y="462" width="1200" height="12"/>
-      <!-- Place de l'étudiant, face à l'écran -->
-      <ellipse class="spot" cx="780" cy="580" rx="86" ry="14"/>
-    </g>
+    <!-- Tout sauf le portable : s'efface pendant le zoom (12,3-12,9 s) -->
+    <g id="around" class="anim">
+      <g id="decor">
+        <rect class="wall" width="1200" height="470"/>
+        <rect class="floor" y="470" width="1200" height="130"/>
+        <path class="floor-line" d="M0 512H1200M0 562H1200"/>
+        <rect class="skirt" y="462" width="1200" height="12"/>
+        <!-- Place de l'étudiant, face à l'écran -->
+        <ellipse class="spot" cx="780" cy="580" rx="86" ry="14"/>
+      </g>
 
-    <!-- Écran projeté (600,30 560x320), toujours sombre -->
-    <g id="projector">
-      <rect class="proj-glow" x="596" y="26" width="568" height="328" rx="14" filter="url(#win-shadow)"/>
-      <rect class="proj-bar" x="584" y="16" width="592" height="18" rx="9"/>
-      <rect class="proj-screen" x="600" y="30" width="560" height="320" rx="6"/>
-      <g id="projector-screen">
-        <g id="proj-tiles" class="tiles-vis anim">
-          <g class="sel-1 anim">
-            <g class="proj-tile-1 anim c1">
-              <rect class="proj-tile" x="630" y="120" width="110" height="140" rx="14"/>
-              <use href="#i-leaf" x="653" y="140" width="64" height="64"/>
-              <rect class="tile-bar" x="655" y="226" width="60" height="12" rx="6"/>
+      <!-- Écran projeté (600,30 560x320), toujours sombre -->
+      <g id="projector">
+        <rect class="proj-glow" x="596" y="26" width="568" height="328" rx="14" filter="url(#blur)"/>
+        <rect class="proj-bar" x="584" y="16" width="592" height="18" rx="9"/>
+        <rect class="proj-screen" x="600" y="30" width="560" height="320" rx="6"/>
+        <g id="projector-screen">
+          <g id="proj-tiles" class="tiles-vis anim">
+            <g class="sel-1 anim">
+              <g class="proj-tile-1 anim c1">
+                <rect class="proj-tile" x="630" y="120" width="110" height="140" rx="14"/>
+                <use href="#i-leaf" x="653" y="140" width="64" height="64"/>
+                <rect class="tile-bar" x="655" y="226" width="60" height="12" rx="6"/>
+              </g>
+            </g>
+            <g class="sel-2 anim">
+              <g class="proj-tile-2 anim c2">
+                <rect class="proj-tile" x="760" y="120" width="110" height="140" rx="14"/>
+                <use href="#i-brand-php" x="783" y="140" width="64" height="64"/>
+                <rect class="tile-bar" x="785" y="226" width="60" height="12" rx="6"/>
+              </g>
+            </g>
+            <g class="sel-3 anim">
+              <g class="proj-tile-3 anim c3">
+                <rect class="proj-tile" x="890" y="120" width="110" height="140" rx="14"/>
+                <use href="#i-flame" x="913" y="140" width="64" height="64"/>
+                <rect class="tile-bar" x="915" y="226" width="60" height="12" rx="6"/>
+              </g>
+            </g>
+            <g class="sel-4 anim">
+              <g class="proj-tile-4 anim c4">
+                <rect class="proj-tile" x="1020" y="120" width="110" height="140" rx="14"/>
+                <use href="#i-skull" x="1043" y="140" width="64" height="64"/>
+                <rect class="tile-bar" x="1045" y="226" width="60" height="12" rx="6"/>
+              </g>
             </g>
           </g>
-          <g class="sel-2 anim">
-            <g class="proj-tile-2 anim c2">
-              <rect class="proj-tile" x="760" y="120" width="110" height="140" rx="14"/>
-              <use href="#i-brand-php" x="783" y="140" width="64" height="64"/>
-              <rect class="tile-bar" x="785" y="226" width="60" height="12" rx="6"/>
+          <!-- Tirage : trois cartes mélangées (dos marqués Difficile), centrées sur 868,192 -->
+          <g class="c3">
+            <g class="deck-card deck-l anim">
+              <use href="#card-back"/>
+            </g>
+            <g class="deck-card deck-r anim">
+              <use href="#card-back"/>
+            </g>
+            <g class="deck-card deck-m anim">
+              <use href="#card-back"/>
             </g>
           </g>
-          <g class="sel-3 anim">
-            <g class="proj-tile-3 anim c3">
-              <rect class="proj-tile" x="890" y="120" width="110" height="140" rx="14"/>
-              <use href="#i-flame" x="913" y="140" width="64" height="64"/>
-              <rect class="tile-bar" x="915" y="226" width="60" height="12" rx="6"/>
-            </g>
+          <!-- Carte question projetée : catégorie et énoncé seuls, jamais la réponse -->
+          <g class="q-show anim">
+            <rect class="q-card" x="668" y="64" width="400" height="256" rx="20"/>
+            <rect class="q-chip" x="692" y="88" width="76" height="76" rx="16"/>
+            <use href="#i-flame" class="qi-a anim c3" x="698" y="94" width="64" height="64"/>
+            <use href="#i-leaf" class="qi-b anim c1" x="698" y="94" width="64" height="64"/>
+            <use href="#i-brand-php" class="qi-c anim c2" x="698" y="94" width="64" height="64"/>
+            <rect class="q-bar" x="790" y="100" width="250" height="20" rx="10"/>
+            <rect class="q-bar" x="790" y="134" width="190" height="20" rx="10"/>
+            <rect class="q-bar" x="692" y="196" width="348" height="20" rx="10"/>
+            <rect class="q-bar" x="692" y="232" width="290" height="20" rx="10"/>
+            <rect class="q-bar" x="692" y="268" width="200" height="20" rx="10"/>
           </g>
-          <g class="sel-4 anim">
-            <g class="proj-tile-4 anim c4">
-              <rect class="proj-tile" x="1020" y="120" width="110" height="140" rx="14"/>
-              <use href="#i-skull" x="1043" y="140" width="64" height="64"/>
-              <rect class="tile-bar" x="1045" y="226" width="60" height="12" rx="6"/>
-            </g>
+          <!-- Score de l'étudiant en place, à sa couleur, coin haut droit -->
+          <g class="score-a anim stu-col-a">
+            <circle class="score-disc" cx="1112" cy="76" r="36"/>
+            <text class="score-num" x="1112" y="93">2</text>
           </g>
-        </g>
-        <!-- Tirage : trois cartes mélangées (dos marqués Difficile), centrées sur 868,192 -->
-        <g class="c3">
-          <g class="deck-card deck-l anim">
-            <rect class="card-back" x="810" y="110" width="116" height="164" rx="14"/>
-            <use href="#i-flame" x="840" y="164" width="56" height="56"/>
+          <g class="score-b anim stu-col-b">
+            <circle class="score-disc" cx="1112" cy="76" r="36"/>
+            <text class="score-num" x="1112" y="93">1</text>
           </g>
-          <g class="deck-card deck-r anim">
-            <rect class="card-back" x="810" y="110" width="116" height="164" rx="14"/>
-            <use href="#i-flame" x="840" y="164" width="56" height="56"/>
-          </g>
-          <g class="deck-card deck-m anim">
-            <rect class="card-back" x="810" y="110" width="116" height="164" rx="14"/>
-            <use href="#i-flame" x="840" y="164" width="56" height="56"/>
+          <g class="score-c anim stu-col-c">
+            <circle class="score-disc" cx="1112" cy="76" r="36"/>
+            <text class="score-num" x="1112" y="93">3</text>
           </g>
         </g>
-        <!-- Carte question projetée : catégorie et énoncé seuls, jamais la réponse -->
-        <g class="q-show anim">
-          <rect class="q-card" x="668" y="64" width="400" height="256" rx="20"/>
-          <rect class="q-chip" x="692" y="88" width="76" height="76" rx="16"/>
-          <use href="#i-flame" class="qi-a anim c3" x="698" y="94" width="64" height="64"/>
-          <use href="#i-leaf" class="qi-b anim c1" x="698" y="94" width="64" height="64"/>
-          <use href="#i-brand-php" class="qi-c anim c2" x="698" y="94" width="64" height="64"/>
-          <rect class="q-bar" x="790" y="100" width="250" height="20" rx="10"/>
-          <rect class="q-bar" x="790" y="134" width="190" height="20" rx="10"/>
-          <rect class="q-bar" x="692" y="196" width="348" height="20" rx="10"/>
-          <rect class="q-bar" x="692" y="232" width="290" height="20" rx="10"/>
-          <rect class="q-bar" x="692" y="268" width="200" height="20" rx="10"/>
+      </g>
+
+      <!-- Examinateur assis derrière son bureau, tasse à portée de main -->
+      <g id="examiner">
+        <rect class="chair" x="28" y="292" width="116" height="110" rx="22"/>
+        <use href="#p-examiner" class="suit" x="86" y="392"/>
+      </g>
+
+      <!-- Bureau -->
+      <rect class="desk-front" x="26" y="404" width="508" height="62"/>
+      <rect class="desk" x="10" y="390" width="540" height="16" rx="5"/>
+
+      <!-- Tasse de l'examinateur, devant lui -->
+      <g id="mug">
+        <path class="steam" d="M130 352c-6 -8 6 -12 0 -20M142 350c-6 -8 6 -12 0 -20"/>
+        <path class="mug-handle" d="M122 366h-6a7 7 0 0 0 0 14h6"/>
+        <rect class="mug" x="120" y="358" width="30" height="34" rx="5"/>
+      </g>
+
+      <!-- Étudiants : entrent et sortent par la droite, place au sol 780,580, environ 180 unités -->
+      <g id="students">
+        <g class="stu stu-a anim"><use href="#p-student" class="stu-col-a" transform="translate(780 580) scale(1.12)"/></g>
+        <g class="stu stu-b anim"><use href="#p-student" class="stu-col-b" transform="translate(780 580) scale(1.12)"/></g>
+        <g class="stu stu-c anim"><use href="#p-student" class="stu-col-c" transform="translate(780 580) scale(1.12)"/></g>
+        <!-- Bulle du choix : la flamme de Difficile -->
+        <g class="bub bub-flame anim">
+          <use href="#bubble" class="bubble"/>
+          <use href="#i-flame" class="c3" x="860" y="374" width="56" height="56"/>
         </g>
-        <!-- Score de l'étudiant en place, à sa couleur, coin haut droit -->
-        <g class="score score-a anim stu-col-a">
-          <circle class="score-disc" cx="1112" cy="76" r="36"/>
-          <text class="score-num" x="1112" y="93">2</text>
-        </g>
-        <g class="score score-b anim stu-col-b">
-          <circle class="score-disc" cx="1112" cy="76" r="36"/>
-          <text class="score-num" x="1112" y="93">1</text>
-        </g>
-        <g class="score score-c anim stu-col-c">
-          <circle class="score-disc" cx="1112" cy="76" r="36"/>
-          <text class="score-num" x="1112" y="93">3</text>
+        <!-- Bulle de la réponse orale : trois points qui pulsent -->
+        <g class="bub bub-dots anim">
+          <use href="#bubble" class="bubble"/>
+          <circle class="talk-dot talk-dot-1 anim" cx="866" cy="402" r="7"/>
+          <circle class="talk-dot talk-dot-2 anim" cx="888" cy="402" r="7"/>
+          <circle class="talk-dot talk-dot-3 anim" cx="910" cy="402" r="7"/>
         </g>
       </g>
     </g>
 
-    <!-- Examinateur assis derrière son bureau, tasse à portée de main -->
-    <g id="examiner">
-      <rect class="chair" x="28" y="292" width="116" height="110" rx="22"/>
-      <use href="#p-examiner" class="suit" x="86" y="392"/>
-    </g>
-
-    <!-- Bureau -->
-    <rect class="desk-front" x="26" y="404" width="508" height="62"/>
-    <rect class="desk" x="10" y="390" width="540" height="16" rx="5"/>
-
     <!-- Portable de trois quarts : écran (200,200 280x170), base en perspective -->
-    <g id="laptop">
+    <g id="laptop" class="anim">
       <path class="lap-edge" d="M488 198L502 206V372L488 378Z"/>
       <rect class="lap" x="192" y="192" width="296" height="186" rx="12"/>
       <g id="laptop-screen">
@@ -909,32 +976,6 @@
       <path class="lap-edge" d="M206 381H476L490 388H194Z"/>
     </g>
 
-    <!-- Tasse de l'examinateur, devant lui -->
-    <g id="mug">
-      <path class="steam" d="M144 352c-6 -8 6 -12 0 -20M156 350c-6 -8 6 -12 0 -20"/>
-      <path class="mug-handle" d="M136 366h-6a7 7 0 0 0 0 14h6"/>
-      <rect class="mug" x="134" y="358" width="30" height="34" rx="5"/>
-    </g>
-
-    <!-- Étudiants : entrent et sortent par la droite, place au sol 780,580, environ 180 unités -->
-    <g id="students">
-      <g class="stu stu-a anim"><use href="#p-student" class="stu-col-a" transform="translate(780 580) scale(1.12)"/></g>
-      <g class="stu stu-b anim"><use href="#p-student" class="stu-col-b" transform="translate(780 580) scale(1.12)"/></g>
-      <g class="stu stu-c anim"><use href="#p-student" class="stu-col-c" transform="translate(780 580) scale(1.12)"/></g>
-      <!-- Bulle du choix : la flamme de Difficile -->
-      <g class="bub bub-flame anim">
-        <path class="bubble" d="M856 358H920A20 20 0 0 1 940 378V426A20 20 0 0 1 920 446H856A20 20 0 0 1 836 426L812 448L836 398V378A20 20 0 0 1 856 358Z"/>
-        <use href="#i-flame" class="c3" x="860" y="374" width="56" height="56"/>
-      </g>
-      <!-- Bulle de la réponse orale : trois points qui pulsent -->
-      <g class="bub bub-dots anim">
-        <path class="bubble" d="M856 358H920A20 20 0 0 1 940 378V426A20 20 0 0 1 920 446H856A20 20 0 0 1 836 426L812 448L836 398V378A20 20 0 0 1 856 358Z"/>
-        <circle class="talk-dot talk-dot-1 anim" cx="866" cy="402" r="7"/>
-        <circle class="talk-dot talk-dot-2 anim" cx="888" cy="402" r="7"/>
-        <circle class="talk-dot talk-dot-3 anim" cx="910" cy="402" r="7"/>
-      </g>
-    </g>
-
     <!-- Note : le +2 monte au-dessus du portable -->
     <text class="plus plus-2 anim" x="340" y="176">+2</text>
 
@@ -951,50 +992,54 @@
       <use href="#i-file-spreadsheet" class="ico-fg" x="174" y="134" width="36" height="36"/>
       <text class="label" x="236" y="166">etudiants.csv</text>
     </g>
-  </g>
 
-  <!-- Zoom dans l'écran du portable (stats et export), rempli par la tâche du zoom -->
-  <g id="zoom"/>
-
-  <!-- Stats et export de la première version, hors affichage, matière première du zoom -->
-  <g id="scene-5" opacity="0">
-    <rect class="card" x="120" y="140" width="960" height="380" rx="16"/>
-    <rect class="chip" x="144" y="160" width="52" height="52" rx="12"/>
-    <use href="#i-chart-bar" class="ico-fg" x="156" y="172" width="28" height="28"/>
-    <rect class="url-mark" x="212" y="180" width="150" height="12" rx="6"/>
-    <path class="win-sep" d="M600 236V496M150 452H570M630 452H1050"/>
-    <g class="c1"><rect class="bar s5-bar s5-bar-1 anim" x="160" y="300" width="70" height="150" rx="10"/><use href="#i-leaf" x="177" y="464" width="36" height="36"/></g>
-    <g class="c2"><rect class="bar s5-bar s5-bar-2 anim" x="270" y="240" width="70" height="210" rx="10"/><use href="#i-brand-php" x="287" y="464" width="36" height="36"/></g>
-    <g class="c3"><rect class="bar s5-bar s5-bar-3 anim" x="380" y="280" width="70" height="170" rx="10"/><use href="#i-flame" x="397" y="464" width="36" height="36"/></g>
-    <g class="c4"><rect class="bar s5-bar s5-bar-4 anim" x="490" y="350" width="70" height="100" rx="10"/><use href="#i-skull" x="507" y="464" width="36" height="36"/></g>
-    <g class="c2">
-      <g class="s5-area anim">
-        <path class="area" d="M640 448C720 446 770 236 850 236S980 444 1040 448L1040 450L640 450Z"/>
-        <path class="mean" d="M850 244V450"/>
+    <!--
+      Zoom dans l'écran du portable (13-18 s) : le même écran que celui de l'examinateur, agrandi 3,3 fois
+      (écran 280x170 en 200,200 devenu 924x561 en 138,19.5). Il couvre le portable agrandi, au-dessus de lui.
+    -->
+    <g id="zoom" class="anim">
+      <rect class="zoom-screen" x="138" y="19.5" width="924" height="561" rx="13"/>
+      <!-- Stats (13-15 s) : barres par catégorie à gauche, distribution des notes à droite -->
+      <g class="stats anim">
+        <rect class="chip" x="178" y="56" width="64" height="64" rx="14"/>
+        <use href="#i-chart-bar" class="ico-fg" x="192" y="70" width="36" height="36"/>
+        <rect class="ui-bar" x="262" y="80" width="200" height="16" rx="8"/>
+        <path class="sep" d="M640 170V520M178 472H610M670 472H1022"/>
+        <g class="c1"><rect class="bar stat-bar stat-bar-1 anim" x="196" y="290" width="80" height="180" rx="12"/><use href="#i-leaf" x="216" y="488" width="40" height="40"/></g>
+        <g class="c2"><rect class="bar stat-bar stat-bar-2 anim" x="302" y="220" width="80" height="250" rx="12"/><use href="#i-brand-php" x="322" y="488" width="40" height="40"/></g>
+        <g class="c3"><rect class="bar stat-bar stat-bar-3 anim" x="408" y="260" width="80" height="210" rx="12"/><use href="#i-flame" x="428" y="488" width="40" height="40"/></g>
+        <g class="c4"><rect class="bar stat-bar stat-bar-4 anim" x="514" y="350" width="80" height="120" rx="12"/><use href="#i-skull" x="534" y="488" width="40" height="40"/></g>
+        <g class="c2">
+          <g class="stat-area anim">
+            <path class="area" d="M680 468C770 466 790 230 846 230S930 466 1012 468L1012 470L680 470Z"/>
+            <path class="mean" d="M846 238V470"/>
+          </g>
+          <path class="curve stat-curve anim" pathLength="1" d="M680 468C770 466 790 230 846 230S930 466 1012 468"/>
+        </g>
       </g>
-      <path class="curve s5-curve anim" pathLength="1" d="M640 448C720 446 770 236 850 236S980 444 1040 448"/>
-    </g>
-  </g>
-  <g id="scene-6" opacity="0">
-    <rect class="card" x="140" y="150" width="580" height="360" rx="16"/>
-    <rect class="chip" x="164" y="170" width="52" height="52" rx="12"/>
-    <use href="#i-file-spreadsheet" class="ico-fg" x="176" y="182" width="28" height="28"/>
-    <path class="win-sep" d="M164 240H696M164 300H696M164 360H696M164 420H696"/>
-    <circle class="avatar" cx="188" cy="270" r="18"/><use href="#i-user" class="ico-muted" x="176" y="258" width="24" height="24"/><rect class="url-mark" x="220" y="264" width="120" height="12" rx="6"/>
-    <circle class="avatar" cx="188" cy="330" r="18"/><use href="#i-user" class="ico-muted" x="176" y="318" width="24" height="24"/><rect class="url-mark" x="220" y="324" width="120" height="12" rx="6"/>
-    <circle class="avatar" cx="188" cy="390" r="18"/><use href="#i-user" class="ico-muted" x="176" y="378" width="24" height="24"/><rect class="url-mark" x="220" y="384" width="120" height="12" rx="6"/>
-    <circle class="avatar" cx="188" cy="450" r="18"/><use href="#i-user" class="ico-muted" x="176" y="438" width="24" height="24"/><rect class="url-mark" x="220" y="444" width="120" height="12" rx="6"/>
-    <g class="c1"><use href="#i-leaf" x="410" y="178" width="36" height="36"/><rect class="tile-bar" x="400" y="263" width="56" height="14" rx="7"/><rect class="tile-bar" x="400" y="323" width="56" height="14" rx="7"/><rect class="tile-bar" x="400" y="383" width="40" height="14" rx="7"/><rect class="tile-bar" x="400" y="443" width="56" height="14" rx="7"/></g>
-    <g class="c2"><use href="#i-brand-php" x="490" y="178" width="36" height="36"/><rect class="tile-bar" x="480" y="263" width="40" height="14" rx="7"/><rect class="tile-bar" x="480" y="323" width="56" height="14" rx="7"/><rect class="tile-bar" x="480" y="383" width="28" height="14" rx="7"/><rect class="tile-bar" x="480" y="443" width="48" height="14" rx="7"/></g>
-    <g class="c3"><use href="#i-flame" x="570" y="178" width="36" height="36"/><rect class="tile-bar" x="560" y="263" width="56" height="14" rx="7"/><rect class="tile-bar" x="560" y="323" width="20" height="14" rx="7"/><rect class="tile-bar" x="560" y="383" width="48" height="14" rx="7"/><rect class="tile-bar" x="560" y="443" width="36" height="14" rx="7"/></g>
-    <g class="c4"><use href="#i-skull" x="650" y="178" width="36" height="36"/><rect class="tile-bar" x="640" y="263" width="28" height="14" rx="7"/><rect class="tile-bar" x="640" y="323" width="44" height="14" rx="7"/><rect class="tile-bar" x="640" y="383" width="12" height="14" rx="7"/><rect class="tile-bar" x="640" y="443" width="52" height="14" rx="7"/></g>
-    <!-- Hors du découpage de la fenêtre : le fichier en franchit le bord droit. -->
-    <g class="s6-file anim xlsx">
-      <g transform="rotate(5 1075 311)">
-        <rect class="win-shadow" x="995" y="210" width="170" height="226" rx="16" filter="url(#win-shadow)"/>
-        <rect class="xlsx-card" x="985" y="196" width="180" height="230" rx="16"/>
-        <use href="#i-file-spreadsheet" x="1020" y="222" width="110" height="110"/>
-        <text class="xlsx-label" x="1075" y="394">.xlsx</text>
+      <!-- Export (15-18 s) : tableau étudiants x catégories, puis le fichier Excel qui en sort -->
+      <g class="export anim">
+        <rect class="chip" x="178" y="56" width="64" height="64" rx="14"/>
+        <use href="#i-file-spreadsheet" class="ico-fg" x="192" y="70" width="36" height="36"/>
+        <rect class="ui-bar" x="262" y="80" width="200" height="16" rx="8"/>
+        <path class="sep" d="M178 190H780M178 270H780M178 350H780M178 430H780M178 510H780"/>
+        <circle class="avatar" cx="218" cy="230" r="24"/><use href="#i-user" class="ico-muted" x="204" y="216" width="28" height="28"/><rect class="ui-bar" x="258" y="223" width="120" height="14" rx="7"/>
+        <circle class="avatar" cx="218" cy="310" r="24"/><use href="#i-user" class="ico-muted" x="204" y="296" width="28" height="28"/><rect class="ui-bar" x="258" y="303" width="120" height="14" rx="7"/>
+        <circle class="avatar" cx="218" cy="390" r="24"/><use href="#i-user" class="ico-muted" x="204" y="376" width="28" height="28"/><rect class="ui-bar" x="258" y="383" width="120" height="14" rx="7"/>
+        <circle class="avatar" cx="218" cy="470" r="24"/><use href="#i-user" class="ico-muted" x="204" y="456" width="28" height="28"/><rect class="ui-bar" x="258" y="463" width="120" height="14" rx="7"/>
+        <g class="c1"><use href="#i-leaf" x="418" y="150" width="40" height="40"/><rect class="tile-bar" x="410" y="222" width="56" height="16" rx="8"/><rect class="tile-bar" x="410" y="302" width="56" height="16" rx="8"/><rect class="tile-bar" x="410" y="382" width="40" height="16" rx="8"/><rect class="tile-bar" x="410" y="462" width="56" height="16" rx="8"/></g>
+        <g class="c2"><use href="#i-brand-php" x="518" y="150" width="40" height="40"/><rect class="tile-bar" x="510" y="222" width="40" height="16" rx="8"/><rect class="tile-bar" x="510" y="302" width="56" height="16" rx="8"/><rect class="tile-bar" x="510" y="382" width="28" height="16" rx="8"/><rect class="tile-bar" x="510" y="462" width="48" height="16" rx="8"/></g>
+        <g class="c3"><use href="#i-flame" x="618" y="150" width="40" height="40"/><rect class="tile-bar" x="610" y="222" width="56" height="16" rx="8"/><rect class="tile-bar" x="610" y="302" width="20" height="16" rx="8"/><rect class="tile-bar" x="610" y="382" width="48" height="16" rx="8"/><rect class="tile-bar" x="610" y="462" width="36" height="16" rx="8"/></g>
+        <g class="c4"><use href="#i-skull" x="718" y="150" width="40" height="40"/><rect class="tile-bar" x="710" y="222" width="28" height="16" rx="8"/><rect class="tile-bar" x="710" y="302" width="44" height="16" rx="8"/><rect class="tile-bar" x="710" y="382" width="12" height="16" rx="8"/><rect class="tile-bar" x="710" y="462" width="52" height="16" rx="8"/></g>
+        <!-- Le fichier franchit le bord droit de l'écran agrandi, sans atteindre celui de l'image -->
+        <g class="xlsx-file anim xlsx">
+          <g transform="rotate(5 1085 300)">
+            <rect class="drop" x="1010" y="214" width="160" height="216" rx="16" filter="url(#blur)"/>
+            <rect class="xlsx-card" x="1000" y="190" width="170" height="220" rx="16"/>
+            <use href="#i-file-spreadsheet" x="1033" y="214" width="104" height="104"/>
+            <text class="xlsx-label" x="1085" y="378">.xlsx</text>
+          </g>
+        </g>
       </g>
     </g>
   </g>
