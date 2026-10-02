@@ -12,7 +12,6 @@
   <style>
     svg {
       --loop: 18s;
-      --bg: oklch(1 0 0);
       --fg: oklch(0.145 0 0);
       --card: oklch(1 0 0);
       --muted: oklch(0.97 0 0);
@@ -50,11 +49,11 @@
       --mug: oklch(0.6 0.17 28);
       --steam: oklch(0.556 0 0 / 60%);
       --proj-bar: oklch(0.5 0.01 260);
+      --answer: oklch(0.6 0.16 150);
       --ease: cubic-bezier(0.45, 0, 0.25, 1);
     }
     @media (prefers-color-scheme: dark) {
       svg {
-        --bg: oklch(0.145 0 0);
         --fg: oklch(0.985 0 0);
         --card: oklch(0.205 0 0);
         --muted: oklch(0.269 0 0);
@@ -83,6 +82,7 @@
         --mug: oklch(0.66 0.17 28);
         --steam: oklch(0.85 0 0 / 50%);
         --proj-bar: oklch(0.55 0.01 260);
+        --answer: oklch(0.74 0.18 150);
       }
     }
 
@@ -153,17 +153,43 @@
     .shirt { fill: var(--shirt); }
     .pack { fill: var(--pack); }
     .floor-shadow { fill: var(--spot); }
+    .suit { color: var(--suit); }
+    .stu-col-a { color: var(--cat1); }
+    .stu-col-b { color: var(--cat2); }
+    .stu-col-c { color: var(--cat4); }
+    .bubble { fill: var(--card); stroke: var(--muted-fg); stroke-width: 3; stroke-linejoin: round; }
+    .talk-dot { fill: var(--fg); }
 
     /* Portable de l'examinateur */
     .lap { fill: var(--lap); }
     .lap-edge { fill: var(--lap-edge); }
     .lap-off { fill: var(--screen-off); }
     .lap-on { fill: var(--card); }
+    .lap-chip { fill: var(--muted); }
+    .lap-bar { fill: var(--muted-fg); opacity: 0.6; }
+    /* Réponse attendue : visible du seul examinateur, dans une couleur à part */
+    .answer-box { fill: var(--answer); fill-opacity: 0.16; stroke: var(--answer); stroke-width: 3; }
+    .answer-ico { color: var(--answer); }
+    .answer-bar { fill: var(--answer); opacity: 0.8; }
+    .gbtn { fill: var(--muted); stroke: var(--border); stroke-width: 2; }
+    .gdot { fill: var(--muted-fg); }
+    .gbtn-on { fill: var(--cat2); }
+    .gdot-on { fill: #ffffff; }
+    .plus {
+      fill: var(--answer); font-size: 64px; font-weight: 800; text-anchor: middle;
+      stroke: var(--wall); stroke-width: 8px; paint-order: stroke; stroke-linejoin: round;
+    }
 
     /* Écran projeté : toujours sombre (il est éclairé), quel que soit le thème */
     .proj-bar { fill: var(--proj-bar); }
     .proj-glow { fill: #8a6cff; opacity: 0.45; }
     .proj-screen { fill: #120c26; stroke: #4b3d8f; stroke-width: 6; }
+    .card-back { fill: #2b2060; stroke: #8a6cff; stroke-width: 4; }
+    .q-card { fill: #231a4d; stroke: #8a6cff; stroke-width: 4; }
+    .q-chip { fill: #120c26; }
+    .q-bar { fill: #d9d2ff; opacity: 0.85; }
+    .score-disc { fill: currentColor; stroke: #120c26; stroke-width: 4; }
+    .score-num { fill: #120c26; font-size: 48px; font-weight: 800; text-anchor: middle; }
 
     /* Titre : nuit synthwave (fixe, quel que soit le thème) */
     .floor-grid { stroke: #b04cff; stroke-width: 2; opacity: 0.75; }
@@ -277,10 +303,284 @@
       93.333%, 100% { opacity: 1; transform: none; }
     }
 
-    /* Mouvement réduit : animations coupées, titre et fichiers volants masqués. */
+    /* Choix (4-6 s) : A entre par la droite et se place, bulle flamme, Difficile s'allume sur les deux écrans */
+    .stu { animation-timing-function: linear; }
+    .stu-a { animation-name: stu-a; }
+    @keyframes stu-a {
+      0%, 22.222% { transform: translate(520px, 0) scaleX(-1); }
+      23.333% { transform: translate(390px, -8px) scaleX(-1); }
+      24.444% { transform: translate(260px, 0px) scaleX(-1); }
+      25.556% { transform: translate(130px, -8px) scaleX(-1); }
+      26.667% { transform: translate(0px, 0px) scaleX(-1); }
+      27.222%, 55.556% { transform: none; }
+      55.972% { transform: translate(130px, -8px); }
+      56.389% { transform: translate(260px, 0px); }
+      56.806% { transform: translate(390px, -8px); }
+      57.222%, 100% { transform: translate(520px, 0); }
+    }
+    .bub-flame { animation-name: bub-flame; }
+    @keyframes bub-flame {
+      0%, 26.944% { opacity: 0; transform: scale(0.4); }
+      28.056%, 32.778% { opacity: 1; transform: none; }
+      33.611%, 100% { opacity: 0; transform: scale(0.8); }
+    }
+    /* Choix d'une catégorie : la tuile choisie grossit, les autres s'éteignent (A, puis B et C en accéléré) */
+    .sel-1 { animation-name: sel-1; }
+    @keyframes sel-1 {
+      0% { opacity: 1; transform: none; }
+      27.778% { opacity: 1; transform: none; }
+      28.889%, 38.056% { opacity: 0.25; transform: none; }
+      38.611% { opacity: 1; transform: none; }
+      58.889% { opacity: 1; transform: none; }
+      59.278%, 59.722% { opacity: 1; transform: scale(1.14); }
+      60.111% { opacity: 1; transform: none; }
+      64.444% { opacity: 1; transform: none; }
+      64.833%, 65.111% { opacity: 0.25; transform: none; }
+      65.444% { opacity: 1; transform: none; }
+      100% { opacity: 1; transform: none; }
+    }
+    .sel-2 { animation-name: sel-2; }
+    @keyframes sel-2 {
+      0% { opacity: 1; transform: none; }
+      27.778% { opacity: 1; transform: none; }
+      28.889%, 38.056% { opacity: 0.25; transform: none; }
+      38.611% { opacity: 1; transform: none; }
+      58.889% { opacity: 1; transform: none; }
+      59.278%, 59.722% { opacity: 0.25; transform: none; }
+      60.111% { opacity: 1; transform: none; }
+      64.444% { opacity: 1; transform: none; }
+      64.833%, 65.111% { opacity: 1; transform: scale(1.14); }
+      65.444% { opacity: 1; transform: none; }
+      100% { opacity: 1; transform: none; }
+    }
+    .sel-3 { animation-name: sel-3; }
+    @keyframes sel-3 {
+      0% { opacity: 1; transform: none; }
+      27.778% { opacity: 1; transform: none; }
+      28.889%, 38.056% { opacity: 1; transform: scale(1.14); }
+      38.611% { opacity: 1; transform: none; }
+      58.889% { opacity: 1; transform: none; }
+      59.278%, 59.722% { opacity: 0.25; transform: none; }
+      60.111% { opacity: 1; transform: none; }
+      64.444% { opacity: 1; transform: none; }
+      64.833%, 65.111% { opacity: 0.25; transform: none; }
+      65.444% { opacity: 1; transform: none; }
+      100% { opacity: 1; transform: none; }
+    }
+    .sel-4 { animation-name: sel-4; }
+    @keyframes sel-4 {
+      0% { opacity: 1; transform: none; }
+      27.778% { opacity: 1; transform: none; }
+      28.889%, 38.056% { opacity: 0.25; transform: none; }
+      38.611% { opacity: 1; transform: none; }
+      58.889% { opacity: 1; transform: none; }
+      59.278%, 59.722% { opacity: 0.25; transform: none; }
+      60.111% { opacity: 1; transform: none; }
+      64.444% { opacity: 1; transform: none; }
+      64.833%, 65.111% { opacity: 0.25; transform: none; }
+      65.444% { opacity: 1; transform: none; }
+      100% { opacity: 1; transform: none; }
+    }
+
+    /* Tirage et réponse (6-8,5 s) : les tuiles cèdent la place aux cartes, puis à la question */
+    /* Tuiles visibles hors des questions (reviennent pour B à 10,05 s et pour C à 11,1 s) */
+    .tiles-vis { animation-name: tiles-vis; }
+    @keyframes tiles-vis {
+      0%, 33.333% { opacity: 1; }
+      34.444%, 55.833% { opacity: 0; }
+      56.667%, 59.722% { opacity: 1; }
+      60%, 61.667% { opacity: 0; }
+      62.222%, 65.111% { opacity: 1; }
+      65.333%, 100% { opacity: 0; }
+    }
+    /* Sur le portable, les tuiles restent jusqu'à l'arrivée de la question (6,9 s) */
+    .tiles-lap { animation-name: tiles-lap; }
+    @keyframes tiles-lap {
+      0%, 38.056% { opacity: 1; }
+      38.611%, 55.833% { opacity: 0; }
+      56.667%, 59.722% { opacity: 1; }
+      60%, 61.667% { opacity: 0; }
+      62.222%, 65.111% { opacity: 1; }
+      65.333%, 100% { opacity: 0; }
+    }
+    /* Trois cartes en éventail, deux fois, puis regroupées : 6,1-7 s */
+    .deck-l { animation-name: deck-l; }
+    @keyframes deck-l {
+      0%, 33.889% { opacity: 0; transform: scale(0.7); }
+      34.722% { opacity: 1; transform: none; }
+      35.667%, 37.222% { opacity: 1; transform: translateX(-118px) rotate(-14deg); }
+      36.444%, 38%, 38.444% { opacity: 1; transform: none; }
+      38.889%, 100% { opacity: 0; transform: none; }
+    }
+    .deck-m { animation-name: deck-m; }
+    @keyframes deck-m {
+      0%, 33.889% { opacity: 0; transform: scale(0.7); }
+      34.722% { opacity: 1; transform: none; }
+      35.667%, 37.222% { opacity: 1; transform: translateY(-14px); }
+      36.444%, 38%, 38.444% { opacity: 1; transform: none; }
+      38.889%, 100% { opacity: 0; transform: none; }
+    }
+    .deck-r { animation-name: deck-r; }
+    @keyframes deck-r {
+      0%, 33.889% { opacity: 0; transform: scale(0.7); }
+      34.722% { opacity: 1; transform: none; }
+      35.667%, 37.222% { opacity: 1; transform: translateX(118px) rotate(14deg); }
+      36.444%, 38%, 38.444% { opacity: 1; transform: none; }
+      38.889%, 100% { opacity: 0; transform: none; }
+    }
+    /* Carte question, sur les deux écrans : 6,9-10 s pour A, éclairs pour B (10,8 s) et C (11,76 s) */
+    .q-show { animation-name: q-show; }
+    @keyframes q-show {
+      0%, 38.333% { opacity: 0; transform: scale(0.4); }
+      40%, 55.556% { opacity: 1; transform: none; }
+      56.389%, 60% { opacity: 0; transform: scale(0.4); }
+      60.278%, 61.389% { opacity: 1; transform: none; }
+      61.667%, 65.333% { opacity: 0; transform: scale(0.4); }
+      65.611%, 100% { opacity: 1; transform: none; }
+    }
+    /* Icône de catégorie de la question : flamme pour A, feuille pour B, PHP pour C */
+    .qi-a { animation-name: qi-a; }
+    @keyframes qi-a {
+      0%, 56.389% { opacity: 1; }
+      56.667%, 100% { opacity: 0; }
+    }
+    .qi-b { animation-name: qi-b; }
+    @keyframes qi-b {
+      0%, 56.389% { opacity: 0; }
+      56.667%, 61.667% { opacity: 1; }
+      61.944%, 100% { opacity: 0; }
+    }
+    .qi-c { animation-name: qi-c; }
+    @keyframes qi-c {
+      0%, 61.667% { opacity: 0; }
+      61.944%, 100% { opacity: 1; }
+    }
+    /* Réponse attendue : surgit sur le portable seul, 7,25-7,45 s */
+    .answer { animation-name: answer; }
+    @keyframes answer {
+      0%, 40.278% { opacity: 0; transform: scale(0.6); }
+      41.389%, 100% { opacity: 1; transform: none; }
+    }
+    /* A répond à l'oral : bulle et trois points qui pulsent, 7,3-8,5 s */
+    .bub-dots { animation-name: bub-dots; }
+    @keyframes bub-dots {
+      0%, 40.556% { opacity: 0; transform: scale(0.4); }
+      41.389%, 46.389% { opacity: 1; transform: none; }
+      47.222%, 100% { opacity: 0; transform: scale(0.8); }
+    }
+    .talk-dot-1 { animation-name: talk-dot-1; }
+    @keyframes talk-dot-1 {
+      0% { opacity: 0.3; transform: none; }
+      41.111% { opacity: 0.3; transform: none; }
+      41.944% { opacity: 1; transform: translateY(-8px); }
+      42.778% { opacity: 0.3; transform: none; }
+      43.611% { opacity: 0.3; transform: none; }
+      44.444% { opacity: 1; transform: translateY(-8px); }
+      45.278% { opacity: 0.3; transform: none; }
+      100% { opacity: 0.3; transform: none; }
+    }
+    .talk-dot-2 { animation-name: talk-dot-2; }
+    @keyframes talk-dot-2 {
+      0% { opacity: 0.3; transform: none; }
+      41.944% { opacity: 0.3; transform: none; }
+      42.778% { opacity: 1; transform: translateY(-8px); }
+      43.611% { opacity: 0.3; transform: none; }
+      44.444% { opacity: 0.3; transform: none; }
+      45.278% { opacity: 1; transform: translateY(-8px); }
+      46.111% { opacity: 0.3; transform: none; }
+      100% { opacity: 0.3; transform: none; }
+    }
+    .talk-dot-3 { animation-name: talk-dot-3; }
+    @keyframes talk-dot-3 {
+      0% { opacity: 0.3; transform: none; }
+      42.778% { opacity: 0.3; transform: none; }
+      43.611% { opacity: 1; transform: translateY(-8px); }
+      44.444% { opacity: 0.3; transform: none; }
+      45.278% { opacity: 0.3; transform: none; }
+      46.111% { opacity: 1; transform: translateY(-8px); }
+      46.944% { opacity: 0.3; transform: none; }
+      100% { opacity: 0.3; transform: none; }
+    }
+
+    /* Note (8,5-10 s) : bouton de note pressé sur le portable, +2 qui monte, score projeté */
+    .lit-a { animation-name: lit-a; }
+    @keyframes lit-a {
+      0%, 47.778% { opacity: 0; transform: none; }
+      48.222% { opacity: 1; transform: scale(0.85); }
+      48.889%, 55.556% { opacity: 1; transform: none; }
+      56.111%, 100% { opacity: 0; transform: none; }
+    }
+    .plus-2 { animation-name: plus-2; }
+    @keyframes plus-2 {
+      0%, 48.611% { opacity: 0; transform: translateY(24px); }
+      49.722% { opacity: 1; transform: none; }
+      53.333% { opacity: 1; transform: translateY(-36px); }
+      55%, 100% { opacity: 0; transform: translateY(-56px); }
+    }
+    .score-a { animation-name: score-a; }
+    @keyframes score-a {
+      0%, 50% { opacity: 0; transform: scale(0.4); }
+      51.111% { opacity: 1; transform: scale(1.25); }
+      51.944%, 55.556% { opacity: 1; transform: none; }
+      56.111%, 100% { opacity: 0; transform: none; }
+    }
+
+    /* Suivants (10-12 s) : A sort, B puis C passent en accéléré (tuile, question, note, score) */
+    .stu-b { animation-name: stu-b; }
+    @keyframes stu-b {
+      0%, 57.222% { transform: translate(520px, 0) scaleX(-1); }
+      57.639% { transform: translate(390px, -8px) scaleX(-1); }
+      58.056% { transform: translate(260px, 0px) scaleX(-1); }
+      58.472% { transform: translate(130px, -8px) scaleX(-1); }
+      58.889% { transform: translate(0px, 0px) scaleX(-1); }
+      59.167%, 61.111% { transform: none; }
+      61.528% { transform: translate(130px, -8px); }
+      61.944% { transform: translate(260px, 0px); }
+      62.361% { transform: translate(390px, -8px); }
+      62.778%, 100% { transform: translate(520px, 0); }
+    }
+    .stu-c { animation-name: stu-c; }
+    @keyframes stu-c {
+      0%, 62.778% { transform: translate(520px, 0) scaleX(-1); }
+      63.194% { transform: translate(390px, -8px) scaleX(-1); }
+      63.611% { transform: translate(260px, 0px) scaleX(-1); }
+      64.028% { transform: translate(130px, -8px) scaleX(-1); }
+      64.444% { transform: translate(0px, 0px) scaleX(-1); }
+      64.722%, 100% { transform: none; }
+    }
+    .lit-b { animation-name: lit-b; }
+    @keyframes lit-b {
+      0%, 60.444% { opacity: 0; }
+      60.667%, 61.667% { opacity: 1; }
+      61.944%, 100% { opacity: 0; }
+    }
+    .lit-c { animation-name: lit-c; }
+    @keyframes lit-c {
+      0%, 65.722% { opacity: 0; }
+      65.944%, 100% { opacity: 1; }
+    }
+    .score-b { animation-name: score-b; }
+    @keyframes score-b {
+      0%, 60.667% { opacity: 0; transform: scale(0.4); }
+      61.111% { opacity: 1; transform: scale(1.25); }
+      61.444%, 62.5% { opacity: 1; transform: none; }
+      62.778%, 100% { opacity: 0; transform: none; }
+    }
+    .score-c { animation-name: score-c; }
+    @keyframes score-c {
+      0%, 65.889% { opacity: 0; transform: scale(0.4); }
+      66.333% { opacity: 1; transform: scale(1.25); }
+      66.667%, 100% { opacity: 1; transform: none; }
+    }
+
+    /*
+      Mouvement réduit : animations coupées, salle figée au moment de la note. A est à sa place, la
+      question est projetée, le portable montre la réponse attendue et la note, le score est affiché.
+    */
     @media (prefers-reduced-motion: reduce) {
       svg, svg * { animation: none !important; }
-      #scene-title, .prep-file { opacity: 0; }
+      #scene-title, .prep-file, .tiles-vis, .deck-card, .bub, .qi-b, .qi-c,
+      .stu-b, .stu-c, .lit-b, .lit-c, .score-b, .score-c { opacity: 0; }
     }
   </style>
 
@@ -329,6 +629,9 @@
       <path d="M15 9a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -10"/>
       <path d="M9 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -14"/>
       <path d="M4 20h14"/>
+    </symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12l5 5l10 -10"/>
     </symbol>
     <!-- Ambiance : grille légère -->
     <pattern id="amb-grid" width="40" height="40" patternUnits="userSpaceOnUse">
@@ -455,27 +758,76 @@
       <rect class="proj-bar" x="584" y="16" width="592" height="18" rx="9"/>
       <rect class="proj-screen" x="600" y="30" width="560" height="320" rx="6"/>
       <g id="projector-screen">
-        <g id="proj-tiles">
-          <g class="proj-tile-1 anim c1">
-            <rect class="proj-tile" x="630" y="120" width="110" height="140" rx="14"/>
-            <use href="#i-leaf" x="653" y="140" width="64" height="64"/>
-            <rect class="tile-bar" x="655" y="226" width="60" height="12" rx="6"/>
+        <g id="proj-tiles" class="tiles-vis anim">
+          <g class="sel-1 anim">
+            <g class="proj-tile-1 anim c1">
+              <rect class="proj-tile" x="630" y="120" width="110" height="140" rx="14"/>
+              <use href="#i-leaf" x="653" y="140" width="64" height="64"/>
+              <rect class="tile-bar" x="655" y="226" width="60" height="12" rx="6"/>
+            </g>
           </g>
-          <g class="proj-tile-2 anim c2">
-            <rect class="proj-tile" x="760" y="120" width="110" height="140" rx="14"/>
-            <use href="#i-brand-php" x="783" y="140" width="64" height="64"/>
-            <rect class="tile-bar" x="785" y="226" width="60" height="12" rx="6"/>
+          <g class="sel-2 anim">
+            <g class="proj-tile-2 anim c2">
+              <rect class="proj-tile" x="760" y="120" width="110" height="140" rx="14"/>
+              <use href="#i-brand-php" x="783" y="140" width="64" height="64"/>
+              <rect class="tile-bar" x="785" y="226" width="60" height="12" rx="6"/>
+            </g>
           </g>
-          <g class="proj-tile-3 anim c3">
-            <rect class="proj-tile" x="890" y="120" width="110" height="140" rx="14"/>
-            <use href="#i-flame" x="913" y="140" width="64" height="64"/>
-            <rect class="tile-bar" x="915" y="226" width="60" height="12" rx="6"/>
+          <g class="sel-3 anim">
+            <g class="proj-tile-3 anim c3">
+              <rect class="proj-tile" x="890" y="120" width="110" height="140" rx="14"/>
+              <use href="#i-flame" x="913" y="140" width="64" height="64"/>
+              <rect class="tile-bar" x="915" y="226" width="60" height="12" rx="6"/>
+            </g>
           </g>
-          <g class="proj-tile-4 anim c4">
-            <rect class="proj-tile" x="1020" y="120" width="110" height="140" rx="14"/>
-            <use href="#i-skull" x="1043" y="140" width="64" height="64"/>
-            <rect class="tile-bar" x="1045" y="226" width="60" height="12" rx="6"/>
+          <g class="sel-4 anim">
+            <g class="proj-tile-4 anim c4">
+              <rect class="proj-tile" x="1020" y="120" width="110" height="140" rx="14"/>
+              <use href="#i-skull" x="1043" y="140" width="64" height="64"/>
+              <rect class="tile-bar" x="1045" y="226" width="60" height="12" rx="6"/>
+            </g>
           </g>
+        </g>
+        <!-- Tirage : trois cartes mélangées (dos marqués Difficile), centrées sur 868,192 -->
+        <g class="c3">
+          <g class="deck-card deck-l anim">
+            <rect class="card-back" x="810" y="110" width="116" height="164" rx="14"/>
+            <use href="#i-flame" x="840" y="164" width="56" height="56"/>
+          </g>
+          <g class="deck-card deck-r anim">
+            <rect class="card-back" x="810" y="110" width="116" height="164" rx="14"/>
+            <use href="#i-flame" x="840" y="164" width="56" height="56"/>
+          </g>
+          <g class="deck-card deck-m anim">
+            <rect class="card-back" x="810" y="110" width="116" height="164" rx="14"/>
+            <use href="#i-flame" x="840" y="164" width="56" height="56"/>
+          </g>
+        </g>
+        <!-- Carte question projetée : catégorie et énoncé seuls, jamais la réponse -->
+        <g class="q-show anim">
+          <rect class="q-card" x="668" y="64" width="400" height="256" rx="20"/>
+          <rect class="q-chip" x="692" y="88" width="76" height="76" rx="16"/>
+          <use href="#i-flame" class="qi-a anim c3" x="698" y="94" width="64" height="64"/>
+          <use href="#i-leaf" class="qi-b anim c1" x="698" y="94" width="64" height="64"/>
+          <use href="#i-brand-php" class="qi-c anim c2" x="698" y="94" width="64" height="64"/>
+          <rect class="q-bar" x="790" y="100" width="250" height="20" rx="10"/>
+          <rect class="q-bar" x="790" y="134" width="190" height="20" rx="10"/>
+          <rect class="q-bar" x="692" y="196" width="348" height="20" rx="10"/>
+          <rect class="q-bar" x="692" y="232" width="290" height="20" rx="10"/>
+          <rect class="q-bar" x="692" y="268" width="200" height="20" rx="10"/>
+        </g>
+        <!-- Score de l'étudiant en place, à sa couleur, coin haut droit -->
+        <g class="score score-a anim stu-col-a">
+          <circle class="score-disc" cx="1112" cy="76" r="36"/>
+          <text class="score-num" x="1112" y="93">2</text>
+        </g>
+        <g class="score score-b anim stu-col-b">
+          <circle class="score-disc" cx="1112" cy="76" r="36"/>
+          <text class="score-num" x="1112" y="93">1</text>
+        </g>
+        <g class="score score-c anim stu-col-c">
+          <circle class="score-disc" cx="1112" cy="76" r="36"/>
+          <text class="score-num" x="1112" y="93">3</text>
         </g>
       </g>
     </g>
@@ -483,7 +835,7 @@
     <!-- Examinateur assis derrière son bureau, tasse à portée de main -->
     <g id="examiner">
       <rect class="chair" x="28" y="292" width="116" height="110" rx="22"/>
-      <use href="#p-examiner" x="86" y="392" style="color: var(--suit)"/>
+      <use href="#p-examiner" class="suit" x="86" y="392"/>
     </g>
 
     <!-- Bureau -->
@@ -497,26 +849,58 @@
       <g id="laptop-screen">
         <rect class="lap-off" x="200" y="200" width="280" height="170" rx="4"/>
         <rect class="lap-on anim" x="200" y="200" width="280" height="170" rx="4"/>
-        <g id="lap-tiles">
-          <g class="lap-tile-1 anim c1">
-            <rect class="tile" x="209" y="236" width="58" height="84" rx="10"/>
-            <use href="#i-leaf" x="220" y="248" width="36" height="36"/>
-            <rect class="tile-bar" x="223" y="298" width="30" height="8" rx="4"/>
+        <g id="lap-tiles" class="tiles-vis tiles-lap anim">
+          <g class="sel-1 anim">
+            <g class="lap-tile-1 anim c1">
+              <rect class="tile" x="209" y="236" width="58" height="84" rx="10"/>
+              <use href="#i-leaf" x="220" y="248" width="36" height="36"/>
+              <rect class="tile-bar" x="223" y="298" width="30" height="8" rx="4"/>
+            </g>
           </g>
-          <g class="lap-tile-2 anim c2">
-            <rect class="tile" x="277" y="236" width="58" height="84" rx="10"/>
-            <use href="#i-brand-php" x="288" y="248" width="36" height="36"/>
-            <rect class="tile-bar" x="291" y="298" width="30" height="8" rx="4"/>
+          <g class="sel-2 anim">
+            <g class="lap-tile-2 anim c2">
+              <rect class="tile" x="277" y="236" width="58" height="84" rx="10"/>
+              <use href="#i-brand-php" x="288" y="248" width="36" height="36"/>
+              <rect class="tile-bar" x="291" y="298" width="30" height="8" rx="4"/>
+            </g>
           </g>
-          <g class="lap-tile-3 anim c3">
-            <rect class="tile" x="345" y="236" width="58" height="84" rx="10"/>
-            <use href="#i-flame" x="356" y="248" width="36" height="36"/>
-            <rect class="tile-bar" x="359" y="298" width="30" height="8" rx="4"/>
+          <g class="sel-3 anim">
+            <g class="lap-tile-3 anim c3">
+              <rect class="tile" x="345" y="236" width="58" height="84" rx="10"/>
+              <use href="#i-flame" x="356" y="248" width="36" height="36"/>
+              <rect class="tile-bar" x="359" y="298" width="30" height="8" rx="4"/>
+            </g>
           </g>
-          <g class="lap-tile-4 anim c4">
-            <rect class="tile" x="413" y="236" width="58" height="84" rx="10"/>
-            <use href="#i-skull" x="424" y="248" width="36" height="36"/>
-            <rect class="tile-bar" x="427" y="298" width="30" height="8" rx="4"/>
+          <g class="sel-4 anim">
+            <g class="lap-tile-4 anim c4">
+              <rect class="tile" x="413" y="236" width="58" height="84" rx="10"/>
+              <use href="#i-skull" x="424" y="248" width="36" height="36"/>
+              <rect class="tile-bar" x="427" y="298" width="30" height="8" rx="4"/>
+            </g>
+          </g>
+        </g>
+        <!-- Même question côté examinateur, plus la réponse attendue et les boutons de note -->
+        <g class="q-show anim">
+          <rect class="lap-chip" x="210" y="210" width="40" height="40" rx="9"/>
+          <use href="#i-flame" class="qi-a anim c3" x="214" y="214" width="32" height="32"/>
+          <use href="#i-leaf" class="qi-b anim c1" x="214" y="214" width="32" height="32"/>
+          <use href="#i-brand-php" class="qi-c anim c2" x="214" y="214" width="32" height="32"/>
+          <rect class="lap-bar" x="262" y="214" width="196" height="12" rx="6"/>
+          <rect class="lap-bar" x="262" y="234" width="140" height="12" rx="6"/>
+          <g class="answer anim">
+            <rect class="answer-box" x="210" y="260" width="260" height="52" rx="10"/>
+            <use href="#i-check" class="answer-ico" x="218" y="268" width="36" height="36"/>
+            <rect class="answer-bar" x="264" y="272" width="180" height="12" rx="6"/>
+            <rect class="answer-bar" x="264" y="290" width="120" height="10" rx="5"/>
+          </g>
+          <g>
+            <rect class="gbtn" x="210" y="322" width="60" height="38" rx="9"/>
+            <rect class="gbtn" x="276" y="322" width="60" height="38" rx="9"/><circle class="gdot" cx="306" cy="341" r="4.5"/>
+            <rect class="gbtn" x="342" y="322" width="60" height="38" rx="9"/><circle class="gdot" cx="365" cy="341" r="4.5"/><circle class="gdot" cx="379" cy="341" r="4.5"/>
+            <rect class="gbtn" x="408" y="322" width="60" height="38" rx="9"/><circle class="gdot" cx="424" cy="341" r="4.5"/><circle class="gdot" cx="438" cy="341" r="4.5"/><circle class="gdot" cx="452" cy="341" r="4.5"/>
+            <g class="lit-a anim"><rect class="gbtn-on" x="342" y="322" width="60" height="38" rx="9"/><circle class="gdot-on" cx="365" cy="341" r="4.5"/><circle class="gdot-on" cx="379" cy="341" r="4.5"/></g>
+            <g class="lit-b anim"><rect class="gbtn-on" x="276" y="322" width="60" height="38" rx="9"/><circle class="gdot-on" cx="306" cy="341" r="4.5"/></g>
+            <g class="lit-c anim"><rect class="gbtn-on" x="408" y="322" width="60" height="38" rx="9"/><circle class="gdot-on" cx="424" cy="341" r="4.5"/><circle class="gdot-on" cx="438" cy="341" r="4.5"/><circle class="gdot-on" cx="452" cy="341" r="4.5"/></g>
           </g>
         </g>
       </g>
@@ -531,8 +915,27 @@
       <rect class="mug" x="134" y="358" width="30" height="34" rx="5"/>
     </g>
 
-    <!-- Étudiants : entrent et sortent par la droite (instanciés par la tâche suivante) -->
-    <g id="students"/>
+    <!-- Étudiants : entrent et sortent par la droite, place au sol 780,580, environ 180 unités -->
+    <g id="students">
+      <g class="stu stu-a anim"><use href="#p-student" class="stu-col-a" transform="translate(780 580) scale(1.12)"/></g>
+      <g class="stu stu-b anim"><use href="#p-student" class="stu-col-b" transform="translate(780 580) scale(1.12)"/></g>
+      <g class="stu stu-c anim"><use href="#p-student" class="stu-col-c" transform="translate(780 580) scale(1.12)"/></g>
+      <!-- Bulle du choix : la flamme de Difficile -->
+      <g class="bub bub-flame anim">
+        <path class="bubble" d="M856 358H920A20 20 0 0 1 940 378V426A20 20 0 0 1 920 446H856A20 20 0 0 1 836 426L812 448L836 398V378A20 20 0 0 1 856 358Z"/>
+        <use href="#i-flame" class="c3" x="860" y="374" width="56" height="56"/>
+      </g>
+      <!-- Bulle de la réponse orale : trois points qui pulsent -->
+      <g class="bub bub-dots anim">
+        <path class="bubble" d="M856 358H920A20 20 0 0 1 940 378V426A20 20 0 0 1 920 446H856A20 20 0 0 1 836 426L812 448L836 398V378A20 20 0 0 1 856 358Z"/>
+        <circle class="talk-dot talk-dot-1 anim" cx="866" cy="402" r="7"/>
+        <circle class="talk-dot talk-dot-2 anim" cx="888" cy="402" r="7"/>
+        <circle class="talk-dot talk-dot-3 anim" cx="910" cy="402" r="7"/>
+      </g>
+    </g>
+
+    <!-- Note : le +2 monte au-dessus du portable -->
+    <text class="plus plus-2 anim" x="340" y="176">+2</text>
 
     <!-- Préparation : config.json et etudiants.csv volent dans le portable -->
     <g class="prep-file file-cfg anim">
