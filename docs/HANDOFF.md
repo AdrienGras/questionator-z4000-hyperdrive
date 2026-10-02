@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-02 — #109 : l'aperçu de l'éditeur coupe les mots très longs
+
+**Dernière chose faite** : PR #111 (#104) mergée sur go de l'utilisateur. #109 est passé en « In progress », branche `fix/109-apercu-mot-long`. Le correctif pose `wrap-anywhere` sur l'`article` de `QuestionPreview` : la propriété est héritée par l'en-tête (`id`, libellé) et par les Markdown, et les blocs de code continuent de défiler. Deux e2e dans `config-editor.spec.ts`, à 1280 et 375 px, avec une URL de 200 caractères, un `id` de 127 caractères et une ligne de code longue. Ils étaient rouges avant le correctif (2231 px de débordement).
+
+**Trucs en suspens** : PR en brouillon, Sonar, puis « Ready for review » ; merge sur go de l'utilisateur. Constaté et commenté dans #109 sans être corrigé : l'écran de passage (`QuestionPanel`) et la vue projetée (`StudentScreen`) débordent eux aussi sur un mot très long. C'est au BACKLOG (§ Écran de passage), décision à prendre (nouveau ticket ?). La carte de session de l'accueil avec un nom insécable est toujours à confirmer (BACKLOG). Toujours en attente : la décision sur le taux de réussite avec un barème entièrement négatif.
+
+**Prochaine chose à creuser** : #100 (F37, barème des catégories en points), puis #101, #102, #103, #88, #85.
+
+**Notes pour future Claude** : pour mesurer un débordement en e2e, comparer `scrollWidth` et `clientWidth` du conteneur ou de `document.documentElement`, et les boîtes au cadre parent. Le `scrollWidth` de l'élément texte ne suffit pas quand c'est la grille parente qui grandit (QUIRK #104). Un test ponctuel jetable (`e2e/zz-adhoc.spec.ts`, supprimé après) reste pratique pour regarder un écran sans l'ajouter à la suite.
+
 ## 2026-10-02 — #104 : la modale de suppression tient ses trois boutons
 
 **Dernière chose faite** : #104 passé en « In progress » sur le projet n°3, branche `fix/104-pied-modale-suppression`. Dans `DeleteDialog`, la largeur passe à `data-[size=default]:sm:max-w-md` (28 rem). Le préfixe est requis, sinon le `sm:max-w-sm` du vendor l'emporte. Le titre passe en `wrap-anywhere`. Un e2e `delete-dialog.spec.ts` couvre trois largeurs (1280, 700, 375) avec un nom sans espace ni tiret ; il était rouge avant le correctif (boutons à 23 px hors du cadre à partir de `sm`, toute la modale élargie par un nom insécable). `src/components/ui/alert-dialog.tsx` n'est pas modifié.
