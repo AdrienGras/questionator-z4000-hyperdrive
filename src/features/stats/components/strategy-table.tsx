@@ -5,6 +5,7 @@ import { categoryLabel } from '@/domain/config/lookup'
 import { formatDecimal } from '@/features/stats/format-stats'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { NUMERIC_CELL, ROW_HEADER, StatsSection, StatsTable } from './stats-section'
+import { StatsEmpty } from './stats-empty'
 
 type StrategyTableProps = Readonly<{
   ui: Ui
@@ -23,7 +24,7 @@ export function StrategyTable({ ui, config, strategies }: StrategyTableProps) {
     <StatsSection title={text('stats_strategies', {})}>
       {(headingId) =>
         strategies.length === 0 ? (
-          <p className="text-muted-foreground">{text('stats_strategies_empty', {})}</p>
+          <StatsEmpty>{text('stats_strategies_empty', {})}</StatsEmpty>
         ) : (
           <StatsTable
             labelledBy={headingId}

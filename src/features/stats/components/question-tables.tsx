@@ -5,6 +5,7 @@ import { questionTitle } from '@/domain/config/lookup'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { CategoryLabel } from './category-label'
 import { CELL, NUMERIC_CELL, ROW_HEADER, StatsSection, StatsTable } from './stats-section'
+import { StatsEmpty } from './stats-empty'
 
 type QuestionTablesProps = Readonly<{
   ui: Ui
@@ -27,7 +28,7 @@ export function QuestionTables({ ui, config, topDrawn, skipped }: QuestionTables
       <StatsSection title={text('stats_top_drawn', {})}>
         {(headingId) =>
           topDrawn.length === 0 ? (
-            <p className="text-muted-foreground">{text('stats_top_drawn_empty', {})}</p>
+            <StatsEmpty>{text('stats_top_drawn_empty', {})}</StatsEmpty>
           ) : (
             <StatsTable
               labelledBy={headingId}
@@ -55,7 +56,7 @@ export function QuestionTables({ ui, config, topDrawn, skipped }: QuestionTables
       <StatsSection title={text('stats_skipped', {})}>
         {(headingId) =>
           skipped.length === 0 ? (
-            <p className="text-muted-foreground">{text('stats_skipped_empty', {})}</p>
+            <StatsEmpty>{text('stats_skipped_empty', {})}</StatsEmpty>
           ) : (
             <StatsTable
               labelledBy={headingId}
