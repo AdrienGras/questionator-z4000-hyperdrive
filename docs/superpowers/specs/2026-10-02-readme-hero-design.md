@@ -53,7 +53,7 @@ Un visiteur du dépôt comprend en ~15 s ce que fait l'application, sans lire le
 | 12 – 15 s | Zoom : stats | Le portable s'agrandit jusqu'à remplir l'image (`scale` sur son groupe, centré sur son écran), le décor s'efface ; barres par catégorie et courbe de distribution dans l'écran. |
 | 15 – 18 s | Export | Un fichier Excel sort de l'écran zoomé ; fondu vers le titre à 17,7 – 18 s. |
 
-**Lisibilité** : personnages ~160 unités de haut ; bulles ≥ 80 unités avec une icône ou « … » ; seuls textes : le titre, « +2 » et le score (≥ 40 unités). Le contenu des écrans est schématique (barres de texte simulées, icônes).
+**Lisibilité** : personnages ~160 unités de haut ; bulles ≥ 80 unités avec une icône ou « … » ; seuls textes : le titre, « +2 », le score et les noms de fichiers « config.json », « etudiants.csv », « .xlsx » (≥ 40 unités). Le contenu des écrans est schématique (barres de texte simulées, icônes).
 
 **Structure** : chaque personnage défini une fois dans `<defs>` (`#p-student`, `#p-examiner`), instancié par `<use>`, couleur passée par `color`. Déplacements par `transform` (glissement + léger rebond). Groupes de premier niveau : `ambiance`, `scene-title`, `room` (décor, `examiner`, `laptop`, `projector`, `students`), `zoom` (stats et export dans l'écran agrandi). La fenêtre de navigateur, l'accueil et les scènes 2 à 4 de la première version disparaissent ; on réutilise le titre, les symboles Tabler, les tuiles, les stats et l'export.
 
