@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 import { ConfigEditorPage } from './config-editor-page.ts'
 import { CreateSessionPage } from './create-session-page.ts'
 
@@ -24,5 +24,12 @@ export class HomePage {
   async openEditor(): Promise<ConfigEditorPage> {
     await this.page.getByRole('link', { name: "Ouvrir l'éditeur" }).click()
     return new ConfigEditorPage(this.page)
+  }
+
+  /** Ouvre « Supprimer » dans le menu de la carte de la session et renvoie la modale de confirmation. */
+  async openDeleteDialog(sessionName: string): Promise<Locator> {
+    await this.page.getByRole('button', { name: `Actions pour « ${sessionName} »` }).click()
+    await this.page.getByRole('menuitem', { name: 'Supprimer' }).click()
+    return this.page.getByRole('alertdialog')
   }
 }

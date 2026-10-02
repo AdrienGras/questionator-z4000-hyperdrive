@@ -688,3 +688,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : en ARIA, un `header` descendant de `main` n'est pas un `banner`, mais les rôles implicites de Testing Library ne vérifient pas cette contrainte. L'aperçu de l'éditeur rend des `header` (`QuestionPreview` ; le `header` de `StudentScreen` est masqué par le canevas `aria-hidden`) après la validation différée (300 ms puis imports dynamiques) ; une assertion faite juste après l'apparition de CodeMirror passait avant l'aperçu, sauf quand la machine ralentissait le montage.
 **Workaround** : chercher la barre de titre par le `header` qui porte le `h1` (`pageBanner()` de `src/testing/page-shell-assertions.ts`), jamais par `getByRole('banner')`. Asserter dans l'état le plus chargé (après l'aperçu) pour qu'une régression échoue à coup sûr.
 **Référence** : `src/testing/page-shell-assertions.ts`, `src/features/config-editor/config-editor-page.test.tsx`.
+
+## Un mot insécable élargit une modale shadcn : la grille de l'en-tête prend la largeur min-content du titre (2026-10-02)
+
+**Découvert** : #104, modale de suppression avec un nom de session `Oral_de_rattrapage_…`.
+**Symptôme** : la modale et ses boutons sortent du cadre, même sous `sm` ; un nom avec tirets ou espaces ne reproduit pas.
+**Cause** : `AlertDialogHeader` est une grille (`grid place-items-…`) ; un élément de grille a `min-width: auto`, donc sa piste prend la largeur min-content du titre. `break-words` (`overflow-wrap: break-word`) ne réduit pas cette largeur min-content, seul `overflow-wrap: anywhere` le fait. Mesurer `scrollWidth` du titre ne détecte rien : c'est la grille qui grandit, pas le titre qui déborde.
+**Workaround** : `className="wrap-anywhere"` sur le titre (Tailwind v4). En e2e, comparer les boîtes des boutons au cadre de la modale, avec un nom sans espace ni tiret.
+**Référence** : `src/features/home/components/delete-dialog.tsx`, `e2e/delete-dialog.spec.ts`. Même famille de piège que les largeurs du `Sheet` (D76) : la largeur du vendor porte le préfixe `data-[size=default]:`, une classe `sm:max-w-md` nue perdrait.

@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-02 — #104 : la modale de suppression tient ses trois boutons
+
+**Dernière chose faite** : #104 passé en « In progress » sur le projet n°3, branche `fix/104-pied-modale-suppression`. Dans `DeleteDialog`, la largeur passe à `data-[size=default]:sm:max-w-md` (28 rem). Le préfixe est requis, sinon le `sm:max-w-sm` du vendor l'emporte. Le titre passe en `wrap-anywhere`. Un e2e `delete-dialog.spec.ts` couvre trois largeurs (1280, 700, 375) avec un nom sans espace ni tiret ; il était rouge avant le correctif (boutons à 23 px hors du cadre à partir de `sm`, toute la modale élargie par un nom insécable). `src/components/ui/alert-dialog.tsx` n'est pas modifié.
+
+**Trucs en suspens** : PR en brouillon, Sonar, puis « Ready for review » ; merge sur go de l'utilisateur. L'EN n'est pas testé en e2e (les pages e2e sont en libellés FR) : ses trois libellés sont plus courts que les FR, et le FR est vérifié. Toujours en attente de l'utilisateur : la décision sur le taux de réussite avec un barème entièrement négatif (BACKLOG).
+
+**Prochaine chose à creuser** : #109 (aperçu de l'éditeur qui déborde sur un énoncé long sans espace). C'est probablement le même remède `wrap-anywhere` (voir le nouveau QUIRK). Ensuite #100, #101, #102, #103, #88, #85.
+
+**Notes pour future Claude** : la carte de session de l'accueil semble déborder elle aussi avec un nom insécable sur mobile (BACKLOG, à confirmer). Elle pourrait se traiter avec #109 si l'utilisateur est d'accord.
+
 ## 2026-10-02 — #87 terminé (PR 4) et grooming : ordre de la suite fixé
 
 **Dernière chose faite** : PR #108 (#87 PR 3) mergée sur go de l'utilisateur. Grooming du projet à sa demande :
