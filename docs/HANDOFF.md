@@ -35,13 +35,14 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
   - `CreateSessionPage.submit()` attend le bouton « Panneau » : `color-mode` passe de 1 échec sur 30 à 0 sur 100 ;
   - `update.spec` attend le contrôleur avant « Prête pour le hors ligne ».
   La suite e2e rejouée 4 fois passe 148 fois sur 148.
-- **Reporté avec mesures (D94) :** oxfmt (0.71), avertissement dependency-cruiser (`typescript <7`), `vmThreads` (2,5× plus rapide mais `examiner-view` instable). `isolate: false` est écarté (15 tests cassés).
+- **Fait aussi, à la demande de l'utilisateur :** oxfmt 0.71 remplace Prettier (`.oxfmtrc.json` migré, écart de 2 fichiers, tri Tailwind identique). L'avertissement dependency-cruiser est supprimé : alias `@/` dans `depcruise.resolve.cjs` (`webpackConfig`) au lieu de `tsConfig` (D94).
+- **Reporté avec mesures :** `vmThreads` (2,5× plus rapide mais `examiner-view` instable). `isolate: false` est écarté (15 tests cassés).
 
-**Trucs en suspens** : PR en brouillon, Sonar, puis « Ready for review » ; merge sur go de l'utilisateur. #88 reste partiellement ouvert sur le fond : oxfmt et l'avertissement attendent des sorties externes. À voir avec l'utilisateur : fermer #88 par la PR et rouvrir un ticket « à la sortie d'oxfmt 1.0 / dependency-cruiser TS 7 », ou laisser #88 ouvert. Par défaut, la PR dit `Closes #88` et les reports sont au BACKLOG.
+**Trucs en suspens** : PR en brouillon, Sonar, puis « Ready for review » ; merge sur go de l'utilisateur. La PR ferme #88 en entier ; seul `vmThreads` reste au BACKLOG (évaluation faite, reportée).
 
 **Prochaine chose à creuser** : #85 (Node 26) pas avant le 2026-10-28. Sinon, le rapidfire du BACKLOG annoncé par l'utilisateur.
 
-**Notes pour future Claude** : pour réévaluer `vmThreads`, la config en projets (`app` en `vmThreads` sur `src/`, `tooling` en pool par défaut sur `vite/` et `scripts/`) et le `toEqual` de `create-session-page.test.tsx` sont décrits dans D94 ; ils ne sont pas dans le code.
+**Notes pour future Claude** : `pnpm format` lance oxfmt, plus Prettier (`rtk prettier` ne sert plus). Pour réévaluer `vmThreads`, la config en projets (`app` en `vmThreads` sur `src/`, `tooling` en pool par défaut sur `vite/` et `scripts/`) et le `toEqual` de `create-session-page.test.tsx` sont décrits dans D94 ; ils ne sont pas dans le code.
 
 ## 2026-10-02 — F40 (#103) : champ manquant nommé, valeurs possibles au survol
 

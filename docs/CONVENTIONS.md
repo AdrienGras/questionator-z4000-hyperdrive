@@ -133,7 +133,7 @@ corepack pnpm dlx shadcn@latest add <composant> -y
 ### Règles tacites
 
 - shadcn v4, primitives base-ui, icônes Tabler (`@tabler/icons-react`), preset Nova (D37).
-- Code vendu dans `src/components/ui/` : ignoré par oxlint, formaté par Prettier ; on peut le modifier, mais toute personnalisation doit rester compatible avec un `add --overwrite`.
+- Code vendu dans `src/components/ui/` : ignoré par oxlint, formaté par oxfmt ; on peut le modifier, mais toute personnalisation doit rester compatible avec un `add --overwrite`.
 - Un seul `cn`, dans `@/lib/utils`.
 - Après chaque `add` : vérifier que le CLI n'a pas réécrit l'import de `cn` ni ajouté la dépendance `cn` (QUIRKS 2026-09-25).
 - `DialogContent` du vendor affiche par défaut un bouton « Close » en anglais : toujours `showCloseButton={false}`, et fermer via un bouton traduit.

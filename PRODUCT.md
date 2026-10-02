@@ -313,7 +313,7 @@ Chaque feature est pensée pour donner un ou plusieurs tickets. L'ordre proposé
 **Contenu.**
 - Vite + React + TypeScript strict, TanStack Router en mode SPA avec historique par hash (GitHub Pages n'offre pas de fallback SPA).
 - Tailwind + shadcn/ui, thème par défaut de shadcn.
-- oxlint avec lint type-aware (oxlint-tsgolint), Prettier avec prettier-plugin-tailwindcss, Vitest.
+- oxlint avec lint type-aware (oxlint-tsgolint), oxfmt avec tri des classes Tailwind (`sortTailwindcss`, D94), Vitest.
 - Node 24 LTS épinglé par `.nvmrc` (nvm en local, `node-version-file` en CI), pnpm épinglé par `packageManager`.
 - GitHub Action : lint, tests, build, déploiement sur GitHub Pages à chaque push sur `main`. `base` Vite réglé sur le nom du repo.
 - Licence MIT, README (usage, format des fichiers, lien vers le schéma et l'exemple).
@@ -703,7 +703,7 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 |---|---|
 | Runtime | Node 24 LTS via nvm (`.nvmrc`), pnpm 12 |
 | Build | Vite 8, TypeScript 7 strict (compilateur natif) |
-| Lint / format | oxlint + oxlint-tsgolint (type-aware), Prettier + prettier-plugin-tailwindcss |
+| Lint / format | oxlint + oxlint-tsgolint (type-aware), oxfmt (tri des classes Tailwind intégré, D94) |
 | UI | React, Tailwind, shadcn/ui v4 (base-ui, preset Nova, police Geist), icônes Tabler |
 | Routing | TanStack Router, historique par hash |
 | Persistance | Dexie (IndexedDB), `useLiveQuery` |
