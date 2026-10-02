@@ -1,5 +1,6 @@
 import { CompletionContext } from '@codemirror/autocomplete'
 import { EditorState } from '@codemirror/state'
+import { EditorView } from '@codemirror/view'
 import { act, render, screen } from '@testing-library/react'
 import { createRef } from 'react'
 import { describe, expect, it, vi } from 'vitest'
@@ -61,6 +62,69 @@ describe('JsonEditor', () => {
     act(() => apiRef.current?.reveal(15, 18))
     expect(container.querySelector('.cm-activeLine')?.textContent).toBe('  "b": 2')
     expect(container.querySelector('.cm-lineNumbers .cm-activeLineGutter')?.textContent).toBe('3')
+  })
+
+  it('reveal sélectionne la plage, borne au document et donne le focus', () => {
+    const { apiRef, container } = mount({ initialText: '{\n  "a": 1\n}' })
+    const view = EditorView.findFromDOM(container.querySelector<HTMLElement>('.cm-editor')!)!
+
+    act(() => apiRef.current?.reveal(4, 7))
+    expect(view.state.selection.main).toMatchObject({ anchor: 4, head: 7 })
+    expect(view.hasFocus).toBe(true)
+
+    // Plage périmée (texte raccourci depuis la validation) : bornée, sans exception.
+    act(() => apiRef.current?.reveal(50, 60))
+    expect(view.state.selection.main).toMatchObject({ anchor: 12, head: 12 })
+    // Fin avant le début : sélection vide au début.
+    act(() => apiRef.current?.reveal(5, 2))
+    expect(view.state.selection.main).toMatchObject({ anchor: 5, head: 5 })
+  })
+
+  it('les diagnostics passés après le montage sont appliqués puis retirés', () => {
+    const { container, rerender, apiRef, onChange } = mount()
+    const props = { initialText: '{"a":1}', onChange, ariaLabel: 'Configuration JSON' }
+    expect(container.querySelector('.cm-lintRange-error')).toBeNull()
+
+    rerender(
+      <JsonEditor
+        {...props}
+        defaultLabel="Défaut :"
+        apiRef={apiRef}
+        diagnostics={[{ from: 1, to: 4, severity: 'warning', message: 'Attention' }]}
+      />,
+    )
+    expect(container.querySelector('.cm-lintRange-warning')).not.toBeNull()
+
+    rerender(<JsonEditor {...props} defaultLabel="Défaut :" apiRef={apiRef} diagnostics={[]} />)
+    expect(container.querySelector('.cm-lintRange-warning')).toBeNull()
+  })
+
+  it('les diagnostics initiaux ne partent qu’une fois au montage', () => {
+    const dispatch = vi.spyOn(EditorView.prototype, 'dispatch')
+    try {
+      mount({ diagnostics: [{ from: 1, to: 4, severity: 'error', message: 'Clé inconnue' }] })
+      expect(dispatch).toHaveBeenCalledTimes(1)
+    } finally {
+      dispatch.mockRestore()
+    }
+  })
+
+  it('le nom accessible suit le changement de ariaLabel', () => {
+    const { rerender, apiRef, onChange } = mount()
+
+    rerender(
+      <JsonEditor
+        initialText={'{"a":1}'}
+        onChange={onChange}
+        diagnostics={[]}
+        ariaLabel="JSON configuration"
+        defaultLabel="Default:"
+        apiRef={apiRef}
+      />,
+    )
+
+    expect(screen.getByRole('textbox', { name: 'JSON configuration' })).toBeTruthy()
+    expect(screen.queryByRole('textbox', { name: 'Configuration JSON' })).toBeNull()
   })
 
   it("l'élément de complétion sélectionné l'emporte en spécificité sur le thème par défaut", () => {

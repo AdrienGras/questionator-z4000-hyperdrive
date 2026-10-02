@@ -95,3 +95,57 @@ describe('locateIssue', () => {
     expect(range.from).toBe(0)
   })
 })
+
+function syntax(line: number, column: number): ConfigIssue {
+  return { severity: 'error', code: 'json_syntax', path: [], params: { line, column } }
+}
+
+describe('locateIssue (json_syntax : BOM, CRLF, position hors limites)', () => {
+  test('BOM en tête : la colonne de la ligne 1, comptée sans le BOM, vise le bon caractère', () => {
+    const text = '\uFEFF{"a": 1,}'
+    const issue = firstIssue(text, 'json_syntax')
+    expect(issue.params).toEqual({ line: 1, column: 9 })
+
+    const range = locateIssue(text, issue)
+    expect(text.slice(range.from, range.to)).toBe('}')
+  })
+
+  test('BOM en tête : les lignes suivantes ne sont pas décalées', () => {
+    const text = '\uFEFF{\n  "a": 1,\n}'
+    const issue = firstIssue(text, 'json_syntax')
+
+    const range = locateIssue(text, issue)
+    expect(text.slice(range.from, range.to)).toBe('}')
+  })
+
+  test('CRLF : la plage tombe sur le caractère fautif de la bonne ligne', () => {
+    const text = '{\r\n  "a": 1,\r\n  "b": ]\r\n}'
+    const issue = firstIssue(text, 'json_syntax')
+
+    const range = locateIssue(text, issue)
+    expect(text.slice(range.from, range.to)).toBe(']')
+  })
+
+  test('colonne au-delà de la ligne : bornée à la fin de cette ligne, pas du texte', () => {
+    const text = '{\n  "a": 1\n}'
+
+    const range = locateIssue(text, syntax(2, 99))
+    expect(range.from).toBe(text.indexOf('\n', 2))
+    expect(lineOf(text, range.from)).toBe(2)
+  })
+
+  test('colonne au-delà d’une ligne CRLF : bornée avant le retour chariot', () => {
+    const text = '{\r\n  "a": 1\r\n}'
+
+    const range = locateIssue(text, syntax(2, 99))
+    expect(range.from).toBe(text.indexOf('\r', 2))
+  })
+
+  test('ligne au-delà du texte ou colonne nulle : plage valide, sans exception', () => {
+    const text = '{\n  "a": 1\n}'
+
+    expect(locateIssue(text, syntax(42, 1))).toEqual({ from: text.length, to: text.length })
+    expect(locateIssue(text, syntax(2, 0)).from).toBe(2)
+    expect(locateIssue('', syntax(1, 5))).toEqual({ from: 0, to: 0 })
+  })
+})

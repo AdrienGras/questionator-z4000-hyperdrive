@@ -40,11 +40,16 @@ export function parseCssVariables(style: string | false | undefined): CssVariabl
   )
 }
 
-function toHighlightedCode(result: TokensResult): HighlightedCode {
+/**
+ * `offset` d'une ligne : son début dans `code`, comme l'`offset` absolu des tokens Shiki. Shiki
+ * coupe sur `\r?\n` sans garder le séparateur : une fin de ligne CRLF compte deux caractères.
+ */
+function toHighlightedCode(code: string, result: TokensResult): HighlightedCode {
   let lineOffset = 0
   const lines = result.tokens.map((line) => {
     const offset = lineOffset
-    lineOffset += line.reduce((length, token) => length + token.content.length, 0) + 1
+    const end = offset + line.reduce((length, token) => length + token.content.length, 0)
+    lineOffset = end + (code.startsWith('\r\n', end) ? 2 : 1)
     return {
       offset,
       tokens: line.map((token) => ({
@@ -119,6 +124,7 @@ export function createHighlightLoader(
       const highlighter = await getCore()
       await loadLanguage(highlighter, grammar)
       return toHighlightedCode(
+        code,
         highlighter.codeToTokens(code, {
           lang: language,
           themes: { light: 'github-light', dark: 'github-dark' },

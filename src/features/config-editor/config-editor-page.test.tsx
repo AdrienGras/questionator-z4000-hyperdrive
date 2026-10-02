@@ -64,6 +64,8 @@ afterEach(() => {
 describe('ConfigEditorPage', () => {
   it('ouvre l’exemple sur deux colonnes, puis en affiche l’aperçu', async () => {
     await renderEditor()
+    // Après l'aperçu, qui ajoute ses propres `header` : la barre de titre doit rester trouvable.
+    await previewReady()
     expectColorModeToggleLast()
     expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
     expect(screen.getByRole('heading', { level: 2, name: 'Configuration' })).toBeInTheDocument()

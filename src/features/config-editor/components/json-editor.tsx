@@ -10,7 +10,7 @@ import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import { json } from '@codemirror/lang-json'
 import { bracketMatching, indentOnInput } from '@codemirror/language'
 import { lintGutter, setDiagnostics } from '@codemirror/lint'
-import { EditorState, Prec } from '@codemirror/state'
+import { Compartment, EditorState, Prec, type Extension } from '@codemirror/state'
 import {
   EditorView,
   highlightActiveLine,
@@ -73,13 +73,13 @@ export function JsonEditor({
   const viewRef = useRef<EditorView | null>(null)
   const onChangeRef = useRef(onChange)
   const initialTextRef = useRef(initialText)
+  // Libellé appliqué à la vue : le compartiment n'est reconfiguré que s'il change.
   const ariaLabelRef = useRef(ariaLabel)
+  const ariaCompartment = useRef(new Compartment())
   const defaultLabelRef = useRef(defaultLabel)
-  const diagnosticsRef = useRef(diagnostics)
 
   useEffect(() => {
     onChangeRef.current = onChange
-    diagnosticsRef.current = diagnostics
     defaultLabelRef.current = defaultLabel
   })
 
@@ -126,7 +126,7 @@ export function JsonEditor({
             ...defaultKeymap,
             ...historyKeymap,
           ]),
-          EditorView.contentAttributes.of({ 'aria-label': ariaLabelRef.current }),
+          ariaCompartment.current.of(ariaLabelExtension(ariaLabelRef.current)),
           EditorView.updateListener.of((update) => {
             if (update.docChanged) onChangeRef.current(update.state.doc.toString())
           }),
@@ -134,9 +134,7 @@ export function JsonEditor({
       }),
     })
     viewRef.current = view
-    view.dispatch(
-      setDiagnostics(view.state, toCodeMirror(diagnosticsRef.current, view.state.doc.length)),
-    )
+    // Pas de diagnostics ici : l'effet suivant, exécuté juste après au montage, les envoie.
     return () => {
       view.destroy()
       viewRef.current = null
@@ -148,6 +146,13 @@ export function JsonEditor({
     if (view === null) return
     view.dispatch(setDiagnostics(view.state, toCodeMirror(diagnostics, view.state.doc.length)))
   }, [diagnostics])
+
+  useEffect(() => {
+    const view = viewRef.current
+    if (view === null || ariaLabelRef.current === ariaLabel) return
+    ariaLabelRef.current = ariaLabel
+    view.dispatch({ effects: ariaCompartment.current.reconfigure(ariaLabelExtension(ariaLabel)) })
+  }, [ariaLabel])
 
   useImperativeHandle(apiRef, () => ({
     setText(text) {
@@ -169,6 +174,10 @@ export function JsonEditor({
   }))
 
   return <div ref={hostRef} className={className} />
+}
+
+function ariaLabelExtension(label: string): Extension {
+  return EditorView.contentAttributes.of({ 'aria-label': label })
 }
 
 /**

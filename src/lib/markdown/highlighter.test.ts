@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from 'vitest'
-import type { TokensResult } from 'shiki/core'
+import type { LanguageInput, TokensResult } from 'shiki/core'
 import {
   createHighlightLoader,
   highlight,
@@ -120,6 +120,27 @@ describe('createHighlightLoader', () => {
 })
 
 describe('createHighlightLoader (catalogue)', () => {
+  test('un import de grammaire en échec renvoie null, puis un nouvel appel réessaie', async () => {
+    const core = fakeHighlighter()
+    let attempt = 0
+    const php = vi.fn<() => LanguageInput>(() => {
+      attempt += 1
+      // Le catalogue réel renvoie `import(...)` : un chunk de grammaire introuvable rejette.
+      return attempt === 1
+        ? Promise.reject(new Error('chunk introuvable'))
+        : Promise.resolve(phpModule)
+    })
+    const run = createHighlightLoader(
+      () => Promise.resolve(core),
+      () => Promise.resolve({ php }),
+    )
+
+    await expect(run('echo', 'php')).resolves.toBeNull()
+    await expect(run('echo', 'php')).resolves.not.toBeNull()
+    expect(php).toHaveBeenCalledTimes(2)
+    expect(core.loadLanguage).toHaveBeenCalledTimes(1)
+  })
+
   test('le catalogue est chargé une seule fois pour deux appels', async () => {
     const loadCatalog = vi.fn<() => Promise<LanguageCatalog>>(noLanguages)
     const run = createHighlightLoader(() => Promise.resolve(fakeHighlighter()), loadCatalog)
@@ -197,6 +218,32 @@ describe('highlight (instance réelle, Shiki + moteur JavaScript)', () => {
     expect(result?.rootStyle).toHaveProperty('--shiki-light-bg')
     expect(result?.rootStyle).toHaveProperty('--shiki-dark-bg')
   }, 15_000)
+
+  // Les offsets servent de clés React (`CodeBlock`) : ligne = début de la ligne dans le code,
+  // token = position absolue ; chacun retombe exactement sur son texte.
+  test.each([
+    ['LF, ligne vide comprise', 'def f(x):\n\n    return x + 1\n'],
+    ['CRLF', 'a = 1\r\nb = 2\r\n\r\nc = 3'],
+  ])(
+    'offsets multi-lignes (%s) : chaque ligne et chaque token retombent sur leur texte',
+    async (_, code) => {
+      const result = await highlight(code, 'python')
+
+      const lines = result?.lines ?? []
+      expect(lines.length).toBeGreaterThan(2)
+      const lineOffsets = lines.map((line) => line.offset)
+      expect(new Set(lineOffsets).size).toBe(lineOffsets.length)
+      for (const line of lines) {
+        const text = line.tokens.map((token) => token.content).join('')
+        expect(code.slice(line.offset, line.offset + text.length)).toBe(text)
+        expect(line.offset === 0 || code[line.offset - 1] === '\n').toBe(true)
+        for (const token of line.tokens) {
+          expect(code.slice(token.offset, token.offset + token.content.length)).toBe(token.content)
+        }
+      }
+    },
+    15_000,
+  )
 
   test.each([
     ['python', 'def f(x):\n    return x + 1\n'],

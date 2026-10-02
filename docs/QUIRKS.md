@@ -680,3 +680,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : jsdom n'implémente pas `DragEvent` ; Testing Library retombe sur un `Event` générique, dont l'init ignore `relatedTarget` (seul `dataTransfer` est recopié à la main).
 **Workaround** : côté code, tester la valeur par vérité (`if (event.relatedTarget) return`), pas contre `null`. Côté test, pour un `relatedTarget` réel : `createEvent.dragLeave(el, …)` puis `Object.defineProperty(event, 'relatedTarget', { value })` et `fireEvent(el, event)`. Et ne pas déduire une sortie de fenêtre d'un `dragleave` à `relatedTarget` nul, ni de l'ordre `dragenter` / `dragleave` : WebKit le laisse nul entre parent et enfant, Chromium et Firefox le posent, et un élément démonté ne reçoit plus son `dragleave`. `useFileDrop` lance un délai (`WINDOW_EXIT_DELAY_MS`) qu'annule tout `dragenter` ou `dragover` ; tests sous `vi.useFakeTimers()`.
 **Référence** : `src/hooks/use-file-drop.ts`, `src/hooks/use-file-drop.test.tsx`.
+
+## Testing Library donne le rôle `banner` à tout `header`, même dans `main` : `getByRole('banner')` casse dès qu'un aperçu en ajoute un (2026-10-02)
+
+**Découvert** : #87, échec isolé de `config-editor-page.test.tsx` vu pendant F31.
+**Symptôme** : « Found multiple elements with the role "banner" », seulement de temps en temps, sur une machine chargée.
+**Cause** : en ARIA, un `header` descendant de `main` n'est pas un `banner`, mais les rôles implicites de Testing Library ne vérifient pas cette contrainte. L'aperçu de l'éditeur rend des `header` (`QuestionPreview` ; le `header` de `StudentScreen` est masqué par le canevas `aria-hidden`) après la validation différée (300 ms puis imports dynamiques) ; une assertion faite juste après l'apparition de CodeMirror passait avant l'aperçu, sauf quand la machine ralentissait le montage.
+**Workaround** : chercher la barre de titre par le `header` qui porte le `h1` (`pageBanner()` de `src/testing/page-shell-assertions.ts`), jamais par `getByRole('banner')`. Asserter dans l'état le plus chargé (après l'aperçu) pour qu'une régression échoue à coup sûr.
+**Référence** : `src/testing/page-shell-assertions.ts`, `src/features/config-editor/config-editor-page.test.tsx`.

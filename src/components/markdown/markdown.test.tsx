@@ -69,6 +69,20 @@ describe('Markdown', () => {
     expect(screen.getByRole('link', { name: 'Revenir à la référence 1' })).toBeInTheDocument()
   })
 
+  test('une note citée deux fois : le second retour porte le suffixe -2', () => {
+    render(<Markdown ui={ui} source={'A[^x] B[^y] C[^y]\n\n[^x]: Une.\n[^y]: Deux.'} />)
+
+    // `rereferenceIndex` commence à 1 (mdast-util-to-hast) : la première citation reste sans suffixe.
+    const backs = screen
+      .getAllByRole('link', { name: /^Revenir à la référence/ })
+      .map((link) => link.getAttribute('aria-label'))
+    expect(backs).toEqual([
+      'Revenir à la référence 1',
+      'Revenir à la référence 2',
+      'Revenir à la référence 2-2',
+    ])
+  })
+
   test('une image est chargée paresseusement et garde son alt', () => {
     render(<Markdown ui={ui} source="![schéma MVC](https://example.org/mvc.png)" />)
 

@@ -71,6 +71,21 @@ describe('CodeBlock', () => {
     })
   })
 
+  test('rerender de Python en python : même langage normalisé, ni nouvel appel ni retour au brut', async () => {
+    const highlight = vi.fn<Highlight>((code) => Promise.resolve(highlighted(code)))
+    const { container, rerender } = render(
+      <CodeBlock code="print(1)" lang="Python" highlight={highlight} />,
+    )
+    await waitFor(() => {
+      expect(container.querySelector('pre')).toHaveAttribute('data-highlighted', 'true')
+    })
+
+    rerender(<CodeBlock code="print(1)" lang="python" highlight={highlight} />)
+
+    expect(container.querySelector('pre')).toHaveAttribute('data-highlighted', 'true')
+    expect(highlight).toHaveBeenCalledTimes(1)
+  })
+
   test('un échec de coloration (null) laisse le texte brut', async () => {
     const highlight = vi.fn<Highlight>(() => Promise.resolve(null))
     const { container } = render(<CodeBlock code="echo 1;" lang="php" highlight={highlight} />)

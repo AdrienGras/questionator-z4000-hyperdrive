@@ -13,8 +13,11 @@ function trimEdgeDash(value: string): string {
   return withoutLeading.endsWith('-') ? withoutLeading.slice(0, -1) : withoutLeading
 }
 
-/** Slug ASCII d'un nom de session pour un nom de fichier (60 caractères max, repli `session`). */
-export function slugify(name: string): string {
+/**
+ * Slug ASCII d'un nom pour un nom de fichier (60 caractères max), `fallback` (`session` par défaut)
+ * quand le nom ne garde aucun caractère.
+ */
+export function slugify(name: string, fallback: string = FALLBACK_SLUG): string {
   const collapsed = trimEdgeDash(
     name
       .normalize('NFD')
@@ -24,7 +27,7 @@ export function slugify(name: string): string {
   )
   // La troncature peut faire retomber un tiret interne en position de queue : on le retire aussi.
   const slug = trimEdgeDash(collapsed.slice(0, SLUG_MAX_LENGTH))
-  return slug === '' ? FALLBACK_SLUG : slug
+  return slug === '' ? fallback : slug
 }
 
 function pad(value: number): string {

@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import type { Student } from '@/domain/session/types'
+import type { WriteOutcome } from '@/features/session/hooks/use-passage-actions'
 import type { Ui } from '@/lib/i18n/use-ui'
 
 type AbsentToggleProps = Readonly<{
@@ -21,13 +22,14 @@ type AbsentToggleProps = Readonly<{
     studentId: string,
     absent: boolean,
     options?: { ownError?: boolean },
-  ) => Promise<boolean>
+  ) => Promise<WriteOutcome>
 }>
 
 /**
  * Case « Absent » (F12). Cocher un étudiant qui a des questions tirées demande confirmation, car
  * l'absence les supprime ; sinon, cocher comme décocher écrit tout de suite. Dialogue au motif
- * F11 (`ResetDialog`) : échec → `write_error` dans le dialogue, rien ne ferme pendant l'écriture.
+ * F11 (`ResetDialog`) : échec → `write_error` dans le dialogue, rien ne ferme pendant l'écriture,
+ * un appel écarté par le verrou (`ignored`) ne ferme ni n'alerte.
  * L'étudiant visé est figé à l'ouverture : si l'étudiant actif change pendant que le dialogue est
  * ouvert (autre onglet), c'est bien celui du dialogue qui est déclaré absent (D67).
  */
@@ -65,10 +67,10 @@ export function AbsentToggle({ ui, student, disabled, onChange }: AbsentTogglePr
     if (pending) return
     setPending(true)
     setFailed(false)
-    const succeeded = await onChange(target.id, true, { ownError: true })
+    const outcome = await onChange(target.id, true, { ownError: true })
     setPending(false)
-    if (succeeded) setOpen(false)
-    else setFailed(true)
+    if (outcome === 'written') setOpen(false)
+    else if (outcome === 'failed') setFailed(true)
   }
 
   return (

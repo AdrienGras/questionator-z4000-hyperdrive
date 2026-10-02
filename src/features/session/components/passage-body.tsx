@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import type { Attempt, Session, Student } from '@/domain/session/types'
 import type { SidePanelTab } from '@/features/session/side-panel-state'
 import type { StudentStanding } from '@/features/session/student-standing'
+import type { WriteOutcome } from '@/features/session/hooks/use-passage-actions'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { AbsentState } from './absent-state'
 import { CategoryGrid } from './category-grid'
@@ -26,9 +27,9 @@ type PassageBodyProps = Readonly<{
     value: number,
     reason: string | undefined,
     options: { reveal: boolean },
-  ) => Promise<boolean>
-  onRevealFinal: () => Promise<boolean>
-  onReset: () => Promise<boolean>
+  ) => Promise<WriteOutcome>
+  onRevealFinal: () => Promise<WriteOutcome>
+  onReset: () => Promise<WriteOutcome>
   onNext: () => void
   onShowPanel: (tab: SidePanelTab) => void
 }>

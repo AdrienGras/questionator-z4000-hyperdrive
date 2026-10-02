@@ -8,7 +8,7 @@ import { putSession, updateSession } from '@/lib/db/sessions'
 import { getHealthySession } from '@/testing/healthy-session'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
-import { usePassageActions } from './use-passage-actions'
+import { usePassageActions, type WriteOutcome } from './use-passage-actions'
 
 beforeEach(async () => {
   await db.sessions.clear()
@@ -200,12 +200,12 @@ describe('usePassageActions', () => {
     test('adjust avec reveal écrit ajustement et révélation dans la même écriture', async () => {
       const { initialSession, result } = await setup()
 
-      let ok: boolean | undefined
+      let ok: WriteOutcome | undefined
       await act(async () => {
         ok = await result.current.adjust(1, 'r', { reveal: true })
       })
 
-      expect(ok).toBe(true)
+      expect(ok).toBe('written')
       const session = await getHealthySession('session-1')
       const student = session?.students[0]
       expect(student?.adjustment).toEqual({ value: 1, reason: 'r' })
@@ -216,26 +216,26 @@ describe('usePassageActions', () => {
     test('adjust sans reveal ne pose pas finalRevealedAt', async () => {
       const { result } = await setup()
 
-      let ok: boolean | undefined
+      let ok: WriteOutcome | undefined
       await act(async () => {
         ok = await result.current.adjust(1, undefined, { reveal: false })
       })
 
-      expect(ok).toBe(true)
+      expect(ok).toBe('written')
       const student = (await getHealthySession('session-1'))?.students[0]
       expect(student?.adjustment).toEqual({ value: 1 })
       expect(student?.finalRevealedAt).toBeUndefined()
     })
 
-    test('adjust invalide renvoie false sans poser error (le dialogue affiche son propre échec)', async () => {
+    test('adjust invalide renvoie failed sans poser error (le dialogue affiche son propre échec)', async () => {
       const { result } = await setup()
 
-      let ok: boolean | undefined
+      let ok: WriteOutcome | undefined
       await act(async () => {
         ok = await result.current.adjust(0.3, 'r', { reveal: true })
       })
 
-      expect(ok).toBe(false)
+      expect(ok).toBe('failed')
       expect(result.current.error).toBeNull()
       const student = (await getHealthySession('session-1'))?.students[0]
       expect(student?.adjustment).toBeUndefined()
@@ -245,24 +245,24 @@ describe('usePassageActions', () => {
     test('revealFinal écrit la date de révélation', async () => {
       const { result } = await setup()
 
-      let ok: boolean | undefined
+      let ok: WriteOutcome | undefined
       await act(async () => {
         ok = await result.current.revealFinal()
       })
 
-      expect(ok).toBe(true)
+      expect(ok).toBe('written')
       expect((await getHealthySession('session-1'))?.students[0]?.finalRevealedAt).toBeDefined()
     })
 
     test('reset vide les attempts', async () => {
       const { result } = await setup()
 
-      let ok: boolean | undefined
+      let ok: WriteOutcome | undefined
       await act(async () => {
         ok = await result.current.reset()
       })
 
-      expect(ok).toBe(true)
+      expect(ok).toBe('written')
       expect((await getHealthySession('session-1'))?.students[0]?.attempts).toEqual([])
     })
 
@@ -278,10 +278,10 @@ describe('usePassageActions', () => {
       expect(session?.projection).toEqual({ mode: 'waiting' })
     })
 
-    test('double adjust simultané : une seule écriture, le second renvoie false sans erreur', async () => {
+    test('double adjust simultané : une seule écriture, le second est écarté (ignored) sans erreur', async () => {
       const { result } = await setup()
 
-      let results: boolean[] = []
+      let results: WriteOutcome[] = []
       await act(async () => {
         results = await Promise.all([
           result.current.adjust(1, 'r', { reveal: true }),
@@ -289,14 +289,14 @@ describe('usePassageActions', () => {
         ])
       })
 
-      expect(results).toEqual([true, false])
+      expect(results).toEqual(['written', 'ignored'])
       expect(result.current.error).toBeNull()
     })
 
     test('studentId indéfini : les quatre actions ne font rien', async () => {
       const { initialSession, result } = await setup(false)
 
-      const results: boolean[] = []
+      const results: WriteOutcome[] = []
       await act(async () => {
         results.push(await result.current.adjust(1, 'r', { reveal: true }))
         results.push(await result.current.revealFinal())
@@ -304,7 +304,7 @@ describe('usePassageActions', () => {
         await result.current.next()
       })
 
-      expect(results).toEqual([false, false])
+      expect(results).toEqual(['failed', 'failed'])
       expect(result.current.error).toBeNull()
       const session = await getHealthySession('session-1')
       expect(session?.updatedAt).toBe(initialSession.updatedAt)
@@ -456,15 +456,15 @@ describe('actions du panneau (F12)', () => {
     expect(result.current.error).toBeNull()
   })
 
-  test('setAbsent(true) vide les attempts et renvoie true', async () => {
+  test('setAbsent(true) vide les attempts et renvoie written', async () => {
     const { result } = await setupPanel()
 
-    let ok: boolean | undefined
+    let ok: WriteOutcome | undefined
     await act(async () => {
       ok = await result.current.setAbsent('student-1', true)
     })
 
-    expect(ok).toBe(true)
+    expect(ok).toBe('written')
     const student = (await getHealthySession('session-1'))?.students[0]
     expect(student?.absent).toBe(true)
     expect(student?.attempts).toEqual([])
@@ -473,12 +473,12 @@ describe('actions du panneau (F12)', () => {
   test('setAbsent vise l’étudiant explicite, pas l’étudiant actif du hook', async () => {
     const { result } = await setupPanel()
 
-    let ok: boolean | undefined
+    let ok: WriteOutcome | undefined
     await act(async () => {
       ok = await result.current.setAbsent('student-2', true)
     })
 
-    expect(ok).toBe(true)
+    expect(ok).toBe('written')
     const session = await getHealthySession('session-1')
     expect(session?.students[1]?.absent).toBe(true)
     expect(session?.students[0]?.absent).toBe(false)

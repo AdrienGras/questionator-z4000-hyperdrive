@@ -7,15 +7,28 @@ function rangeOf(node: Node): TextRange {
   return { from: node.offset, to: node.offset + node.length }
 }
 
-/** Décalage d'une position ligne / colonne (base 1), borné au texte. */
+const BYTE_ORDER_MARK = '\uFEFF'
+
+/** Fin d'une ligne qui commence à `start` : avant son `\n` (et son `\r` en CRLF), sinon fin du texte. */
+function endOfLine(text: string, start: number): number {
+  const newline = text.indexOf('\n', start)
+  if (newline === -1) return text.length
+  return newline > start && text[newline - 1] === '\r' ? newline - 1 : newline
+}
+
+/**
+ * Décalage d'une position ligne / colonne (base 1), une colonne au-delà de la ligne étant bornée à
+ * la fin de cette ligne. `parseJson` retire le BOM avant de localiser l'erreur : la ligne 1
+ * commence donc après lui, les suivantes ne sont pas concernées.
+ */
 function offsetOfLineColumn(text: string, line: number, column: number): number {
-  let offset = 0
+  let offset = text.startsWith(BYTE_ORDER_MARK) ? 1 : 0
   for (let current = 1; current < line; current++) {
     const next = text.indexOf('\n', offset)
     if (next === -1) return text.length
     offset = next + 1
   }
-  return Math.min(offset + Math.max(column - 1, 0), text.length)
+  return Math.min(offset + Math.max(column - 1, 0), endOfLine(text, offset))
 }
 
 function locateSyntaxIssue(text: string, params: { line?: number; column?: number }): TextRange {
