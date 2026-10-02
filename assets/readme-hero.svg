@@ -614,7 +614,7 @@
     */
     @media (prefers-reduced-motion: reduce) {
       svg, svg * { animation: none !important; }
-      #scene-title, .prep-file, .tiles-vis, .deck-card, .bub, .qi-b, .qi-c,
+      #scene-title, .prep-file, .tiles-vis, .tiles-lap, .deck-card, .bub, .qi-b, .qi-c,
       .stu-b, .stu-c, .lit-b, .lit-c, .score-b, .score-c, #zoom { opacity: 0; }
     }
   </style>
@@ -917,7 +917,7 @@
       <g id="laptop-screen">
         <rect class="lap-off" x="200" y="200" width="280" height="170" rx="4"/>
         <rect class="lap-on anim" x="200" y="200" width="280" height="170" rx="4"/>
-        <g id="lap-tiles" class="tiles-vis tiles-lap anim">
+        <g id="lap-tiles" class="tiles-lap anim">
           <g class="sel-1 anim">
             <g class="lap-tile-1 anim c1">
               <rect class="tile" x="209" y="236" width="58" height="84" rx="10"/>
