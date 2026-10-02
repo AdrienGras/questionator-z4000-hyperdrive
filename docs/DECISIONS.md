@@ -1382,3 +1382,14 @@ autre encodage 8 bits.
 - `absent_label` retiré ; `absent_mark`, `absent_unmark`, `absent_mark_named` et `absent_unmark_named` ajoutés (FR, EN). Le texte de l'état absent renvoie à « Marquer présent ».
 
 **Pourquoi** : pendant un oral, on ouvre le panneau pour l'étudiant en cours ; la liste est un détour ponctuel. L'absence est une action (elle supprime parfois des questions), pas un état à cocher, et elle concerne souvent un étudiant qui n'est pas encore actif.
+
+## D92 — F39 (#102) : ouverture de la vue projetée séparée du pilotage (2026-10-02)
+
+**Question** : « Ouvrir la vue projetée » était aligné avec « Projeter cet étudiant » et « Écran d'attente » sous l'aperçu, alors qu'il n'écrit rien et n'est jamais désactivé. Où le placer, et où mettre la logique de fenêtre ?
+
+**Décision** :
+- « Ouvrir la vue projetée » passe sur la ligne du titre de l'aperçu, à droite, par l'emplacement `action` de `ProjectionPreview`. Le message de popup bloquée suit, dans l'emplacement `notice`, sous l'en-tête.
+- La logique de fenêtre (ref liée à la session, URL sans paramètres de recherche, popup bloquée) sort de `ProjectionControls` dans le hook `usePresentWindow`, appelé une seule fois par `ExaminerView`. `ProjectionControls` ne garde que le pilotage ; son `onAction` efface le message, comme avant.
+- Icônes Tabler décoratives à côté du libellé : `IconExternalLink`, `IconPlayerPlay`, `IconPlayerPause`.
+
+**Pourquoi** : ouvrir une fenêtre et piloter ce qu'elle montre sont deux gestes distincts ; un hook unique évite de dupliquer la logique de fenêtre entre deux composants.

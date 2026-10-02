@@ -1,5 +1,5 @@
 import { useMemo, useRef } from 'react'
-import { IconChartBar, IconLayoutSidebarRight } from '@tabler/icons-react'
+import { IconChartBar, IconExternalLink, IconLayoutSidebarRight } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { PageShell } from '@/components/page-shell'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -11,6 +11,7 @@ import { currentPending } from '@/domain/passage/selectors'
 import type { Session } from '@/domain/session/types'
 import { usePassageActions } from '@/features/session/hooks/use-passage-actions'
 import type { Failure } from '@/features/session/hooks/use-fresh-error'
+import { usePresentWindow } from '@/features/session/hooks/use-present-window'
 import { useSidePanel } from '@/features/session/hooks/use-side-panel'
 import { studentStanding } from '@/features/session/student-standing'
 import { useUi, type Ui } from '@/lib/i18n/use-ui'
@@ -68,6 +69,7 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
   }, [actions.error])
   const errorMessage = failure?.message
   const projected = useMemo(() => toProjectedView(session), [session])
+  const presentWindow = usePresentWindow(session.id)
   const panel = useSidePanel()
   const panelButton = useRef<HTMLButtonElement>(null)
 
@@ -104,14 +106,34 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
       >
         <div className="flex flex-1 flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-start">
           <div className="flex w-full max-w-xl flex-col gap-3 lg:col-start-2 lg:row-start-1 lg:max-w-none">
-            <ProjectionPreview ui={ui} view={projected} />
+            <ProjectionPreview
+              ui={ui}
+              view={projected}
+              // Ouvrir n'écrit rien : jamais désactivé, à part du pilotage (F39).
+              action={
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={presentWindow.openWindow}
+                >
+                  <IconExternalLink aria-hidden />
+                  {ui.text('projection_open', {})}
+                </Button>
+              }
+              notice={
+                presentWindow.popupBlocked && (
+                  <p role="alert">{ui.text('projection_popup_blocked', {})}</p>
+                )
+              }
+            />
             <ProjectionControls
               ui={ui}
-              sessionId={session.id}
               projection={session.projection}
               activeStudentId={student?.id}
               disabled={actions.busy}
               onProject={actions.project}
+              onAction={presentWindow.clearPopupBlocked}
             />
             <ProjectionBanner ui={ui} session={session} activeStudentId={student?.id} />
           </div>

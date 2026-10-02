@@ -24,6 +24,21 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-02 — F39 (#102) : ouverture de la vue projetée à côté du titre, icônes
+
+**Dernière chose faite** : PR #114 (F38) mergée sur go de l'utilisateur. #102 est passé en « In progress », branche `feat/f39-controles-projection`.
+- La logique de fenêtre sort de `ProjectionControls` dans `usePresentWindow`, appelé par `ExaminerView`.
+- « Ouvrir la vue projetée » est rendu dans l'emplacement `action` de `ProjectionPreview`, sur la ligne du titre, et la popup bloquée dans `notice`.
+- `ProjectionControls` ne garde que le pilotage (projeter, attente), avec `onAction` qui efface le message.
+- Icônes `IconExternalLink`, `IconPlayerPlay`, `IconPlayerPause`.
+- Décision D92, PRODUCT.md F22 à jour. Tests : emplacement et ordre, icônes `aria-hidden` et libellés, popup bloquée dans la région de l'aperçu, ouverture jamais désactivée, hook réouvrant pour une autre session (`renderHook`).
+
+**Trucs en suspens** : PR en brouillon, Sonar, puis « Ready for review » ; merge sur go de l'utilisateur. Le BACKLOG attend un rapidfire de l'utilisateur.
+
+**Prochaine chose à creuser** : #103 (F40, éditeur : champ manquant nommé, valeurs possibles au survol), puis #88 et #85 (pas avant la LTS de Node 26, le 2026-10-28).
+
+**Notes pour future Claude** : la popup bloquée est maintenant dans la région « Vue projetée » : un test qui cherche `getByRole('alert')` hors de cette région ne la trouvera plus que via `screen`.
+
 ## 2026-10-02 — F38 (#101) : panneau ouvert sur l'étudiant, absence en bouton d'action
 
 **Dernière chose faite** : PR #113 (F37) mergée sur go de l'utilisateur. À sa demande, les points en suspens sont au BACKLOG, pour un rapidfire plus tard : accord « 1,5 pts » (§ Thème et langue), mots très longs dans l'écran de passage et la vue projetée (marqué non urgent), carte de l'accueil, barème négatif.
