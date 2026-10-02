@@ -51,7 +51,8 @@ export function StudentScreen({
           color={view.categories.find((category) => category.id === current.categoryId)?.color}
           animate={animate && view.drawAnimation && current.drawnAt !== initialDrawnAt}
         >
-          <section aria-label={ui.text('present_prompt_label', {})}>
+          {/* `wrap-anywhere` : un mot sans espace coupe au lieu d'élargir l'écran (#118). */}
+          <section aria-label={ui.text('present_prompt_label', {})} className="wrap-anywhere">
             <Markdown source={current.prompt} ui={ui} size="projection" />
           </section>
         </DrawReveal>

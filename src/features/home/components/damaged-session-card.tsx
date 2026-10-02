@@ -26,7 +26,7 @@ export function DamagedSessionCard({ ui, damaged }: DamagedSessionCardProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex flex-wrap items-center gap-2">
-          <h3 className="text-lg font-semibold">{name}</h3>
+          <h3 className="text-lg font-semibold wrap-anywhere">{name}</h3>
           <span className="rounded-full border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
             {text('damaged_badge', {})}
           </span>

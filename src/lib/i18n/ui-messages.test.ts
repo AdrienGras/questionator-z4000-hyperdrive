@@ -353,6 +353,12 @@ describe('UI_MESSAGES', () => {
     expect(t(UI_MESSAGES, 'fr', 'passage_category_max', { max: '2,5', points: 2.5 })).toBe(
       '2,5 pts',
     )
+    // Singulier sous 2 en français (#118) : « 0,5 pt », « 1,5 pt ».
+    expect(t(UI_MESSAGES, 'fr', 'passage_category_max', { max: '0,5', points: 0.5 })).toBe('0,5 pt')
+    expect(t(UI_MESSAGES, 'fr', 'passage_category_max', { max: '1,5', points: 1.5 })).toBe('1,5 pt')
+    expect(t(UI_MESSAGES, 'en', 'passage_category_max', { max: '1.5', points: 1.5 })).toBe(
+      '1.5 pts',
+    )
     expect(t(UI_MESSAGES, 'en', 'passage_category_max', { max: '2', points: 2 })).toBe('2 pts')
     expect(t(UI_MESSAGES, 'en', 'passage_category_max', { max: '1.0', points: 1 })).toBe('1.0 pt')
   })

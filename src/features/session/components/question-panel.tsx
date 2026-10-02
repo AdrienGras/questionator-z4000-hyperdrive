@@ -47,7 +47,12 @@ export function QuestionPanel({
 
   return (
     // Région nommée comme sur la vue projetée : la question en cours s'atteint par son rôle.
-    <section aria-label={text('present_prompt_label', {})} className="flex flex-col gap-4">
+    // `wrap-anywhere`, hérité : une URL ou un mot sans espace coupe au lieu d'élargir la page ;
+    // les blocs de code (`white-space: pre`) n'y sont pas sensibles et défilent (#118).
+    <section
+      aria-label={text('present_prompt_label', {})}
+      className="flex flex-col gap-4 wrap-anywhere"
+    >
       <div className="flex flex-col gap-1">
         <span className="text-sm text-muted-foreground">{category.label}</span>
         <h2 className="text-lg font-semibold">{question.title}</h2>

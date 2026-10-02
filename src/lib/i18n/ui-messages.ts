@@ -301,6 +301,9 @@ type RoundingParams = { mode: RoundingMode; step: number | null; decimals: numbe
 
 const plural = (count: number, one: string, many: string) => (count > 1 ? many : one)
 const pluralEn = (count: number, one: string, many: string) => (count === 1 ? one : many)
+/** Valeur décimale en français : singulier strictement sous 2 (« 1,5 pt », #118, D90). */
+const pluralDecimal = (value: number, one: string, many: string) =>
+  Math.abs(value) < 2 ? one : many
 
 const ROUNDING_MODE_FR: Record<RoundingMode, string> = {
   nearest: 'au plus proche',
@@ -458,7 +461,7 @@ const fr: Dictionary<UiMessageParams> = {
   passage_question_index: ({ current, total }) => `Question ${current} / ${total}`,
   passage_raw_score: ({ score }) => `Score brut : ${score}`,
   passage_categories: () => 'Choisir une catégorie',
-  passage_category_max: ({ max, points }) => `${max} ${plural(points, 'pt', 'pts')}`,
+  passage_category_max: ({ max, points }) => `${max} ${pluralDecimal(points, 'pt', 'pts')}`,
   passage_category_exhausted: () => 'Plus de question disponible dans cette catégorie',
   passage_answer: () => 'Éléments de réponse',
   passage_score_heading: () => 'Note',

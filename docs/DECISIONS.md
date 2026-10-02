@@ -1364,7 +1364,7 @@ autre encodage 8 bits.
 **Question** : « max 2 » sous chaque case de l'examinateur se lisait « 2 questions au maximum », et la vue projetée ne montrait pas ce maximum. Comment l'écrire, et qui décide de le montrer à l'étudiant ?
 
 **Décision** :
-- Libellé `passage_category_max` : « 2 pts », « 1 pt », commun à la grille examinateur et aux tuiles projetées. Le paramètre `points` (nombre) porte l'accord, à côté de `max` (chaîne formatée) : « 1,0 pt ». Accord avec les helpers existants : en français, singulier jusqu'à 1 (« 0,5 pt », « 1,5 pts ») ; en anglais, singulier pour 1 seulement.
+- Libellé `passage_category_max` : « 2 pts », « 1 pt », commun à la grille examinateur et aux tuiles projetées. Le paramètre `points` (nombre) porte l'accord, à côté de `max` (chaîne formatée) : « 1,0 pt ». Accord : en français, singulier strictement sous 2 (« 0,5 pt », « 1,5 pt », « 2 pts »), par un helper décimal propre à ce libellé (`pluralDecimal`) ; en anglais, singulier pour 1 seulement (« 1.5 pts »). *Modifié par #118 : à la livraison de F37, l'accord suivait `plural` (pluriel au-delà de 1, « 1,5 pts »).*
 - Examinateur : toujours affiché. Vue projetée : nouvelle clé `presentation.showCategoryPoints`, défaut `true`. À `false`, `toProjectedView` ne transmet pas `categories[].maxPoints` (champ optionnel), comme `showCumulativeScore` et `showStatsOnFinal` retirent leurs données (D69).
 - Format : `formatRawScore` (extrait de `formatScore` en `raw`), utilisable par la vue projetée, qui ne reçoit pas la config.
 - Sessions et backups antérieurs : rien à migrer, `checkStoredSession` repasse la config par `validateConfig`, qui applique le défaut.

@@ -53,6 +53,17 @@ describe('computeCategories', () => {
     ])
   })
 
+  it('renvoie null quand le maximum cumulé est négatif, plutôt qu’un taux trompeur (#118)', () => {
+    const config = minimalConfig()
+    config.categories = [
+      { id: 'a', label: 'A', scale: [-2, -1], questions: [{ id: 'a-1', prompt: 'A1' }] },
+    ]
+    const session = sessionWith([[attemptOf('a', 'a-1', -2)]], config)
+    expect(computeCategories(session)).toEqual([
+      { categoryId: 'a', choices: 1, scored: 1, successRate: null },
+    ])
+  })
+
   it('ignore un absent aux attempts résiduels', () => {
     const session = sessionWith([[attemptOf('a', 'a-1', 2)]], minimalConfig(), () => ({
       absent: true,
