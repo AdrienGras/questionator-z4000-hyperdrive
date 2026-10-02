@@ -26,7 +26,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 ## 2026-10-02 — #74 : animation du parcours en tête du README
 
-**Dernière chose faite** : `assets/readme-hero.svg` remplace `banner.webp` en tête du README (`banner.webp` supprimé). Scène 1 synthwave hybride, scènes 2-6 d'interface épurée dans une fenêtre de navigateur, boucle de 15 s sur une seule timeline CSS, symboles Tabler 3.48.0, mouvement réduit = scène d'export figée. Sonde de thème sur la page de la branche : le SVG en `<img>` suit le thème GitHub (pas l'OS), donc mode `img`, pas de `<picture>` (QUIRKS, D95). `pnpm check:hero` ajouté à `pnpm check`. Mémoire à jour (D95, INDEX, BACKLOG, QUIRKS).
+**Dernière chose faite** : `assets/readme-hero.svg` remplace `banner.webp` en tête du README (`banner.webp` supprimé). Scène 1 synthwave hybride, scènes 2-6 d'interface épurée dans une fenêtre de navigateur, boucle de 15 s sur une seule timeline CSS, symboles Tabler 3.48.0, mouvement réduit = scène d'export figée. Sonde de thème sur la page de la branche : le SVG en `<img>` suit le thème GitHub (pas l'OS), donc mode `img`, pas de `<picture>` (QUIRKS, D95). `pnpm check:hero` ajouté à `pnpm check` et à la CI. Mémoire à jour (D95, INDEX, BACKLOG, QUIRKS).
 
 **Trucs en suspens** : PR en brouillon (`Closes #74`), Sonar, puis « Ready for review » ; merge sur go de l'utilisateur. Rendu dans l'application GitHub mobile (thème) non vérifié, noté au BACKLOG.
 

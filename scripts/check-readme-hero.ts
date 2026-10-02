@@ -17,8 +17,11 @@ const MAX_BYTES = 102_400
 const MIN_FONT_SIZE = 40
 
 const REDUCED_MOTION = /@media\s*\(\s*prefers-reduced-motion\s*:\s*reduce\s*\)/
-const EXTERNAL_HREF = /href\s*=\s*["']\s*https?:/i
-const EXTERNAL_URL = /url\(\s*["']?\s*https?:/i
+/** Tout `href` (y compris `xlink:href`) dont la valeur ne commence pas par `#`. */
+const EXTERNAL_HREF = /href\s*=\s*(?:"(?!\s*#)[^"]*"|'(?!\s*#)[^']*')/i
+/** Tout `url(` dont l'argument ne commence pas par `#` (guillemets et espaces tolérés). */
+const EXTERNAL_URL = /url\((?!\s*["']?\s*#)/i
+const CSS_IMPORT = /@import/i
 const FONT_SIZE = /font-size\s*(?:=\s*["']|:)\s*(\d+(?:\.\d+)?)/g
 
 /** Problèmes (messages en français) d'un SVG d'animation ; vide s'il est conforme. */
@@ -32,8 +35,9 @@ export function findHeroIssues(svg: string): string[] {
     issues.push('Attribut de gestionnaire d’événement (onload…) interdit.')
   if (/<foreignObject[\s>/]/i.test(svg)) issues.push('Élément <foreignObject> interdit.')
   if (EXTERNAL_HREF.test(svg))
-    issues.push('Attribut href vers une ressource externe (http/https) interdit.')
-  if (EXTERNAL_URL.test(svg)) issues.push('url() vers une ressource externe (http/https) interdit.')
+    issues.push('Attribut href autre qu’une référence interne (#id) interdit.')
+  if (EXTERNAL_URL.test(svg)) issues.push('url() autre qu’une référence interne (#id) interdit.')
+  if (CSS_IMPORT.test(svg)) issues.push('Règle @import interdite.')
   if (!REDUCED_MOTION.test(svg)) {
     issues.push('Bloc @media (prefers-reduced-motion: reduce) manquant.')
   }

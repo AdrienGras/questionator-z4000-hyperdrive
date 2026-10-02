@@ -29,6 +29,8 @@ jobs:
         run: pnpm typecheck
       - name: Tests
         run: pnpm test
+      - name: Vérifier l'animation du README
+        run: pnpm check:hero
       - name: Build
         run: pnpm build
       - name: Vérifier que Recharts et write-excel-file restent hors du bundle initial

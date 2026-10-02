@@ -10,6 +10,9 @@ const REDUCED_MOTION = '@media (prefers-reduced-motion: reduce){*{animation:none
 const svgWith = (extra = '', body = ''): string =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><style>${REDUCED_MOTION}${extra}</style>${body}</svg>`
 
+const href = (value: string, attr = 'href') =>
+  findHeroIssues(svgWith('', `<use ${attr}="${value}"/>`))
+
 describe('findHeroIssues', () => {
   it('accepte un SVG conforme', () => {
     expect(findHeroIssues(svgWith())).toEqual([])
@@ -22,13 +25,38 @@ describe('findHeroIssues', () => {
   })
 
   it('refuse les href et url() externes', () => {
-    expect(findHeroIssues(svgWith('', '<use href="https://x.test/a.svg"/>'))).not.toEqual([])
-    expect(findHeroIssues(svgWith('', '<use xlink:href="http://x.test/a.svg"/>'))).not.toEqual([])
-    expect(findHeroIssues(svgWith('.a{fill:url(https://x.test/g)}'))).not.toEqual([])
+    for (const value of [
+      'https://x.test/a.svg',
+      '//x.test/a.svg',
+      'data:image/png;base64,AAAA',
+      'javascript:alert(1)',
+    ]) {
+      expect(href(value)).toHaveLength(1)
+      expect(href(value).join()).toContain('href')
+    }
+    expect(href('http://x.test/a.svg', 'xlink:href')).toHaveLength(1)
+    expect(href('http://x.test/a.svg', 'xlink:href').join()).toContain('href')
+    for (const arg of [
+      'https://x.test/g',
+      '//x.test/g',
+      'data:image/png;base64,AAAA',
+      "'https://x.test/g'",
+    ]) {
+      const issues = findHeroIssues(svgWith(`.a{fill:url(${arg})}`))
+      expect(issues).toHaveLength(1)
+      expect(issues.join()).toContain('url(')
+    }
+  })
+
+  it('refuse @import', () => {
+    for (const rule of ['@import "https://x.test/a.css";', '@import url(#a);']) {
+      expect(findHeroIssues(svgWith(rule)).join()).toContain('@import')
+    }
   })
 
   it('accepte les références internes', () => {
     expect(findHeroIssues(svgWith('.a{fill:url(#grad)}', '<use href="#leaf"/>'))).toEqual([])
+    expect(findHeroIssues(svgWith(".a{fill:url( '#grad' )}"))).toEqual([])
   })
 
   it('refuse plus de 102 400 octets (UTF-8)', () => {

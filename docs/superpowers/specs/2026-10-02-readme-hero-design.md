@@ -95,7 +95,7 @@ Un visiteur du dépôt comprend en ~15 s ce que fait l'application, sans lire le
 - poids < 100 Ko ;
 - présence de `@media (prefers-reduced-motion: reduce)`.
 
-`scripts/check-readme-hero.test.ts` couvre chaque cas d'échec (écrit d'abord). Script `check:hero` dans `package.json`, ajouté à `pnpm check`, donc à la CI.
+`scripts/check-readme-hero.test.ts` couvre chaque cas d'échec (écrit d'abord). Script `check:hero` dans `package.json`, ajouté à `pnpm check`, et étape dédiée de la CI (`ci.yml`).
 
 ### 7. Vérification visuelle (revue, pas CI)
 

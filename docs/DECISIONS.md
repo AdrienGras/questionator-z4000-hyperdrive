@@ -1437,6 +1437,6 @@ autre encodage 8 bits.
 | Mouvement réduit | Scène 6 (export) figée | Ticket ; image fixe qui résume la fin du parcours. |
 | `banner.webp` | Supprimé | Plus aucun usage hors plans et archives historiques, non réécrits. |
 
-`pnpm check:hero` (`scripts/check-readme-hero.ts`, dans `pnpm check`) refuse en plus tout `animation-delay` (les captures figées injectent un délai négatif pour arrêter l'animation à un instant donné) et tout `font-size` inférieur à 40 (lisibilité sur mobile, où l'image est réduite). Il contrôle aussi le poids (≤ 100 Ko), l'absence de script et de ressource externe, et le bloc `prefers-reduced-motion`.
+`pnpm check:hero` (`scripts/check-readme-hero.ts`, dans `pnpm check` et en CI) refuse en plus tout `animation-delay` (les captures figées injectent un délai négatif pour arrêter l'animation à un instant donné) et tout `font-size` inférieur à 40 (lisibilité sur mobile, où l'image est réduite). Il contrôle aussi le poids (≤ 100 Ko), l'absence de script et de ressource externe, et le bloc `prefers-reduced-motion`.
 
 **Pourquoi** : une image unique, légère et autonome, que GitHub affiche sans neutraliser ; les garde-fous automatiques évitent qu'une retouche à la main dégrade le rendu sans que personne ne s'en aperçoive.

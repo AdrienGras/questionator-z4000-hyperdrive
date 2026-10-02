@@ -43,7 +43,7 @@
       }
     }
 
-    text { font-family: system-ui, sans-serif; }
+    text { font-family: system-ui, sans-serif; font-size: 40px; }
     .anim {
       animation-duration: var(--loop);
       animation-iteration-count: infinite;
@@ -504,7 +504,7 @@
     <rect class="url-mark" x="374" y="75" width="190" height="10" rx="5"/>
 
     <!-- Contenu de la fenêtre, découpé à son cadre -->
-    <g clip-path="url(#win-clip)">
+    <g clip-path="url(#win-clip)"><!-- début du découpage de la fenêtre (win-clip) -->
     <!-- Accueil : les trois cartes d'action (nouvelle session, restauration, éditeur) -->
     <g id="home" class="anim">
       <g>
@@ -655,7 +655,7 @@
         </g>
         <path class="curve s5-curve anim" pathLength="1" d="M640 448C720 446 770 236 850 236S980 444 1040 448"/>
       </g>
-    </g>
+    </g><!-- fin du découpage de la fenêtre : la scène 6 en sort volontairement -->
     </g>
 
     <!-- Scène 6 : export (13-15 s). Le tableau des notes donne un fichier Excel qui sort de la fenêtre. -->
