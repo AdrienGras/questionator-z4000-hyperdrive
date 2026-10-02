@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" role="img" aria-label="Témoin de thème">
+  <style>
+    .bg { fill: #ffffff; }
+    .label { fill: #000000; font: bold 120px system-ui, sans-serif; }
+    .dark-only { display: none; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #111111; }
+      .label { fill: #ffffff; }
+      .light-only { display: none; }
+      .dark-only { display: inline; }
+    }
+  </style>
+  <rect class="bg" width="1200" height="600" />
+  <text class="label light-only" x="600" y="340" text-anchor="middle">CLAIR</text>
+  <text class="label dark-only" x="600" y="340" text-anchor="middle">SOMBRE</text>
+</svg>

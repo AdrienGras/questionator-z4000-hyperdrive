@@ -1,6 +1,6 @@
 # Questionator Z-4000 Hyperdrive
 
-![Questionator Z-4000 Hyperdrive](banner.webp)
+![Témoin de thème](assets/readme-hero.svg)
 
 Application web pour faire passer des oraux notés par tirage de questions. L'étudiant choisit une catégorie de difficulté, l'application tire une question au hasard, l'examinateur note, et le score cumulé est affiché après chaque question.
 
