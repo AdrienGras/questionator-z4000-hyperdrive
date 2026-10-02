@@ -126,9 +126,9 @@ describe('createHighlightLoader (catalogue)', () => {
     const php = vi.fn<() => LanguageInput>(() => {
       attempt += 1
       // Le catalogue réel renvoie `import(...)` : un chunk de grammaire introuvable rejette.
-      const loaded: unknown =
-        attempt === 1 ? Promise.reject(new Error('chunk introuvable')) : Promise.resolve(phpModule)
-      return loaded as LanguageInput
+      return attempt === 1
+        ? Promise.reject(new Error('chunk introuvable'))
+        : Promise.resolve(phpModule)
     })
     const run = createHighlightLoader(
       () => Promise.resolve(core),

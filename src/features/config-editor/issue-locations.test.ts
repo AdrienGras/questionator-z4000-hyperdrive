@@ -96,14 +96,11 @@ describe('locateIssue', () => {
   })
 })
 
-describe('locateIssue (json_syntax : BOM, CRLF, position hors limites)', () => {
-  const syntax = (line: number, column: number): ConfigIssue => ({
-    severity: 'error',
-    code: 'json_syntax',
-    path: [],
-    params: { line, column },
-  })
+function syntax(line: number, column: number): ConfigIssue {
+  return { severity: 'error', code: 'json_syntax', path: [], params: { line, column } }
+}
 
+describe('locateIssue (json_syntax : BOM, CRLF, position hors limites)', () => {
   test('BOM en tête : la colonne de la ligne 1, comptée sans le BOM, vise le bon caractère', () => {
     const text = '\uFEFF{"a": 1,}'
     const issue = firstIssue(text, 'json_syntax')

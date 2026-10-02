@@ -4,7 +4,9 @@ import { configFileName } from '@/domain/config/config-file-name'
 describe('configFileName', () => {
   test('slug du titre de l’examen', () => {
     expect(configFileName('{"exam": {"title": "Oral PHP"}}')).toBe('oral-php.json')
-    expect(configFileName('{"exam": {"title": "  Écrit d’algèbre  "}}')).toBe('ecrit-d-algebre.json')
+    expect(configFileName('{"exam": {"title": "  Écrit d’algèbre  "}}')).toBe(
+      'ecrit-d-algebre.json',
+    )
   })
 
   test('texte qui ne se parse pas : config.json', () => {

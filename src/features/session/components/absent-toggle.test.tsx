@@ -8,7 +8,12 @@ import { AbsentToggle } from './absent-toggle'
 function confirmAbsence(outcome: WriteOutcome) {
   const onChange = vi.fn<() => Promise<WriteOutcome>>().mockResolvedValue(outcome)
   render(
-    <AbsentToggle ui={makeUi()} student={makeStudent([13.5])} disabled={false} onChange={onChange} />,
+    <AbsentToggle
+      ui={makeUi()}
+      student={makeStudent([13.5])}
+      disabled={false}
+      onChange={onChange}
+    />,
   )
   fireEvent.click(screen.getByLabelText('Absent'))
   fireEvent.click(screen.getByRole('button', { name: 'Déclarer absent' }))

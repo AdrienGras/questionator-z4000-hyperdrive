@@ -42,7 +42,7 @@ describe('fenceLanguages', () => {
     expect(fenceLanguages('````py\n```js\n```\n````')).toEqual(['py'])
   })
 
-  it("lit le langage après une tabulation suivant le marqueur", () => {
+  it('lit le langage après une tabulation suivant le marqueur', () => {
     expect(fenceLanguages('```\tpython\nx = 1\n```')).toEqual(['python'])
   })
 
