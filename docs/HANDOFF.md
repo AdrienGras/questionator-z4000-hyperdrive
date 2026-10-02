@@ -24,6 +24,21 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-02 — #118 : rapidfire du BACKLOG (débordements, « pt », taux)
+
+**Dernière chose faite** : PR #117 (#88) mergée sur go de l'utilisateur. Revue du BACKLOG à sa demande : rien de critique. Le seul bug de calcul (taux sur barème négatif) est inatteignable, car `negative_scale_value` et `zero_max_scale` le refusent. Ticket #118 créé au format des autres (P2, S) pour regrouper les petits correctifs, puis traité sur `fix/118-rapidfire-debordements` :
+- **Mots très longs :** `wrap-anywhere` sur la région « Question en cours » de l'écran de passage et sur l'énoncé de la vue projetée.
+- **Titre des cartes de l'accueil :** même correctif. Débordement confirmé : titre à 660 px dans une carte de 359 px, sans élargir la page.
+- **Accord :** `pluralDecimal` pour `passage_category_max` (« 1,5 pt »), D90 mis à jour.
+- **Taux :** `successRate` vaut `null` si le maximum est ≤ 0.
+- **Test :** e2e `long-words.spec.ts`, vérifié rouge avant le correctif (543 px et 1424 px de débordement, puis 660 px pour la carte seule).
+
+**Trucs en suspens** : PR en brouillon, Sonar, puis « Ready for review » ; merge sur go de l'utilisateur. Reste ouvert au BACKLOG : vérifications manuelles (#77), idées de fonctionnalités (raccourcis clavier, autofiltre, synchro du mode), points à surveiller (pré-cache, installation interrompue), Node 26 (#85), `vmThreads`.
+
+**Prochaine chose à creuser** : #85 (Node 26) après le 2026-10-28. Sinon, une décision de l'utilisateur sur les idées du BACKLOG.
+
+**Notes pour future Claude** : un débordement peut rester dans un conteneur sans élargir la page (carte de l'accueil). En e2e, mesurer aussi la boîte de l'élément, pas seulement `scrollWidth` du document.
+
 ## 2026-10-02 — #88 : outillage, reports tracés et e2e stabilisés
 
 **Dernière chose faite** : PR #116 (F40) mergée sur go de l'utilisateur. #88 est passé en « In progress », branche `chore/88-outillage`.

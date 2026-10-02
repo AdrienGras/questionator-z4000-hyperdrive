@@ -38,7 +38,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Écran de passage
 
-- [ ] Énoncé avec un mot très long sans espace (URL de 200 caractères) : l'écran de passage (`QuestionPanel`) et la vue projetée (`StudentScreen`) s'élargissent et défilent horizontalement (1823 px et 2809 px pour 1280 px de large). Constaté en #109 et noté dans le ticket ; remède probable : `wrap-anywhere` sur le conteneur de l'énoncé. Décision à prendre. Marginal, pas urgent (avis de l'utilisateur) : à traiter dans le rapidfire du BACKLOG.
+- [x] Énoncé avec un mot très long sans espace (URL de 200 caractères) : l'écran de passage (`QuestionPanel`) et la vue projetée (`StudentScreen`) s'élargissent et défilent horizontalement (1823 px et 2809 px pour 1280 px de large). Constaté en #109 et noté dans le ticket ; remède probable : `wrap-anywhere` sur le conteneur de l'énoncé. Décision à prendre. Marginal, pas urgent (avis de l'utilisateur) : à traiter dans le rapidfire du BACKLOG. → #118 *Fait en #118 : `wrap-anywhere` sur la région « Question en cours » de l'écran de passage et sur l'énoncé de la vue projetée.*
 - [x] `ResetDialog`, `AdjustmentDialog` et confirmation d'absence : un appel écarté par le verrou (`run` renvoie `false`) est traité comme un échec ou un succès ; faire remonter l'issue `'written' | 'failed' | 'ignored'` comme l'ajout d'étudiant (#87 PR 1), via `FinalScreen` et `PassageBody`. Rare : boutons désactivés pendant une écriture. → #87 *Fait en #87 (PR 3).*
 - [ ] Raccourcis clavier : chiffres pour les valeurs du barème, touches pour les catégories, raccourci de skip.
 - [x] Helper `requireStudent(session, studentId)` dans `domain/passage/` : la recherche + `student_not_found` est copiée dans `drawQuestion`, `scoreAttempt`, `setActiveStudent` ; F10 et F11 en ajouteront deux copies. *Fait en F10.*
@@ -63,7 +63,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Accueil et backup
 
-- [ ] Carte de session de l'accueil : un nom sans espace ni tiret (ex. `Oral_de_rattrapage_…`) semble déborder de la carte sur mobile (vu en arrière-plan des captures de #104). À confirmer, puis `wrap-anywhere` sur le titre de `SessionCard` et `DamagedSessionCard`.
+- [x] Carte de session de l'accueil : un nom sans espace ni tiret (ex. `Oral_de_rattrapage_…`) semble déborder de la carte sur mobile (vu en arrière-plan des captures de #104). À confirmer, puis `wrap-anywhere` sur le titre de `SessionCard` et `DamagedSessionCard`. → #118 *Fait en #118 : débordement confirmé (titre à 660 px dans une carte de 359 px, à 375 px de large), `wrap-anywhere` sur le titre des deux cartes.*
 - [x] Glisser-déposer : filet `window` (`dragleave` avec `relatedTarget === null`, `drop`) qui remet le compteur de `useFileDrop` à zéro si l'élément survolé est démonté pendant le glisser (son `dragleave` n'atteint pas React : la surimpression de l'accueil reste affichée jusqu'au dépôt suivant). Rare (ligne de session re-rendue par un autre onglet). → #87 *Fait en #87 (PR 2).*
 - [x] La clé `back_home` utilise une apostrophe droite alors que le reste de l'interface a `’` : harmoniser (e2e et tests à suivre). → #87 *Fait en #87 (PR 2).*
 - [x] Tests manquants : erreurs d'écriture (renommer, examinateur, suppression), réinitialisation du champ à la réouverture d'un dialogue, « toutes les issues » avec un décompte exact, `score` sur un attempt `skipped`, date locale vs UTC du nom de fichier (cas à 00:30). → #87 *Fait en #87 (PR 2).*
@@ -76,7 +76,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Thème et langue
 
-- [ ] Accord de « pt » (F37, D90) : le helper `plural` (pluriel au-delà de 1) donne « 1,5 pts » ; la règle française stricte voudrait « 1,5 point » (singulier sous 2). Décider, et, si on change, revoir aussi les autres usages de `plural` à valeur décimale. À traiter dans le rapidfire du BACKLOG.
+- [x] Accord de « pt » (F37, D90) : le helper `plural` (pluriel au-delà de 1) donne « 1,5 pts » ; la règle française stricte voudrait « 1,5 point » (singulier sous 2). Décider, et, si on change, revoir aussi les autres usages de `plural` à valeur décimale. À traiter dans le rapidfire du BACKLOG. → #118 *Fait en #118 : singulier sous 2 en français (`pluralDecimal`), D90 mis à jour.*
 - [x] Garde-fou de build : un script de fin de build qui échoue si un chunk autre que `icons-*` contient `IconBrandPhp`, ou si `index-*` dépasse un budget. *Livré en #86 (`pnpm check:budget`, D88).* `chunkSizeWarningLimit: 2400` ne surveille plus les autres chunks (D37). → #86
 - [ ] Synchroniser le mode entre deux fenêtres d'une même vue (événement `storage`, via `useSyncExternalStore`). Aujourd'hui, la valeur est lue une fois par clé.
 - [x] Tests manquants de `LocaleProvider` : changement de la locale du propriétaire avec une déclaration active, deux imbriqués frères de même locale. → #87 *Fait en #87 (PR 2).*
@@ -106,7 +106,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [x] Liste blanche du groupe `vendor` (`vite.config.ts`) à étendre si `check:bundle` rougit après l'ajout d'une dépendance partagée avec Recharts (voir QUIRKS 2026-09-30). → #86 *Relue en #86 (D88) : rien à ajouter, `check:bundle` vert.*
 - [x] e2e : `StatsPage.headcount()` s'appuie sur `.last()` parmi des `div` imbriqués ; passer par `term` → `dd` suivant. → #88 *Fait en #88 : `term` filtré puis `following-sibling::dd[1]`.*
 - [x] Tests manquants : taux négatif (barème à valeurs négatives), frontière 0,999 / 1 sur /20, id inconnu dans `computeSkipped`, départage alphabétique seul des motifs, table des tags non vide à l'écran. → #87 *Fait en #87 (PR 4).*
-- [ ] Taux de réussite sur un barème entièrement négatif : le maximum est négatif, `points ÷ max` donne un taux positif trompeur (ex. barème `[-2, -1]`, note −2 → 200 %). Décider : `null` dès que `max ≤ 0`, ou refuser un tel barème (règle de config).
+- [x] Taux de réussite sur un barème entièrement négatif : le maximum est négatif, `points ÷ max` donne un taux positif trompeur (ex. barème `[-2, -1]`, note −2 → 200 %). Décider : `null` dès que `max ≤ 0`, ou refuser un tel barème (règle de config). → #118 *Fait en #118 : `null` dès que le maximum est ≤ 0 (garde défensive, les règles de config refusent déjà ce barème).*
 - [x] Petits nettoyages de `domain/stats/` : `mean` en une seule division, `?? 0` inatteignable dans `strategies.ts`, `countBy` renommé, `Tally` au lieu de `ReturnType<typeof emptyTally>`, commentaire de limite 2^53 de `populationStdDev`. → #87 *Fait en #87 (PR 4) : `mean` surchargée (liste non vide → `number`), `countBy` → `groupByKey` ; `Tally` existait déjà.*
 - [x] Paragraphe d'état vide répété quatre fois dans `features/stats/components/` : extraire un `StatsEmpty`. → #87 *Fait en #87 (PR 4) : extraite (cinq occurrences, quatre fichiers).*
 
