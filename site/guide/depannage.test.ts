@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, test } from 'vitest'
 import { CONFIG_ISSUE_MESSAGES } from '@/domain/config/messages'
@@ -32,5 +32,19 @@ describe('dépannage du guide', () => {
   test('aucune ancre de code n’est dupliquée', () => {
     const duplicated = anchors.filter((anchor, index) => anchors.indexOf(anchor) !== index)
     expect(duplicated).toEqual([])
+  })
+
+  test('chaque lien vers le dépannage pointe une ancre existante', () => {
+    const dir = import.meta.dirname
+    const broken: string[] = []
+    for (const file of readdirSync(dir).filter((name) => name.endsWith('.md'))) {
+      const text = readFileSync(join(dir, file), 'utf8')
+      const targets = [...text.matchAll(/depannage(?:\.html|\.md)?#([\w-]+)/g)].map((m) => m[1])
+      if (file === 'depannage.md') {
+        targets.push(...[...text.matchAll(/\]\(#([\w-]+)\)/g)].map((m) => m[1]))
+      }
+      for (const id of targets) if (!anchors.includes(id)) broken.push(`${file}#${id}`)
+    }
+    expect(broken).toEqual([])
   })
 })

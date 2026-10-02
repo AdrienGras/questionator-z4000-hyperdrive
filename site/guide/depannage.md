@@ -17,7 +17,9 @@ Erreur.
 
 > Le fichier n'est pas un JSON valide (ligne *n*, colonne *n*).
 
-**Cause.** Le fichier a une faute de syntaxe JSON : virgule oubliée ou en trop, guillemet manquant, accolade non fermée. La ligne et la colonne indiquent où la lecture s'est arrêtée. La faute se trouve souvent juste avant.
+Quand la position n'est pas connue, le message se réduit à « Le fichier n'est pas un JSON valide. ».
+
+**Cause.** Le fichier a une faute de syntaxe JSON : virgule oubliée ou en trop, guillemet manquant, accolade non fermée. Quand elles sont affichées, la ligne et la colonne indiquent où la lecture s'est arrêtée. La faute se trouve souvent juste avant.
 
 **Que faire.** Corrigez le fichier à l'endroit indiqué. L'[éditeur de config](./editeur-config) signale ces fautes en direct.
 
@@ -312,11 +314,15 @@ Avertissement.
 
 ### La création est impossible {#creation-impossible}
 
-Deux messages peuvent apparaître au moment de cliquer sur « Créer la session ».
+Deux messages peuvent l'expliquer. Ils n'apparaissent pas au même moment.
+
+**Au dépôt du fichier de config**, sous la zone de dépôt :
 
 > La validation n'a pas pu démarrer. Rechargez la page.
 
-La vérification de la config n'a pas pu se charger, par exemple à cause d'une connexion coupée pendant le chargement. Rechargez la page.
+La vérification de la config n'a pas pu se charger, par exemple à cause d'une connexion coupée pendant le chargement. Rechargez la page, puis redéposez le fichier.
+
+**En cliquant sur « Créer la session »**, près du bouton :
 
 > La création a échoué. Réessayez.
 
@@ -325,7 +331,7 @@ L'enregistrement de la session dans le navigateur a échoué. Réessayez. Si le 
 ### Le CSV est mal reconnu {#csv-mal-reconnu}
 
 - **Accents abîmés dans l'aperçu.** Réexportez le fichier en UTF-8.
-- **Une seule colonne lue, ou noms et prénoms mélangés.** Le séparateur (virgule ou point-virgule) est détecté automatiquement. Si une cellule contient elle-même ce caractère, entourez-la de guillemets.
+- **Une seule colonne lue, ou noms et prénoms mélangés.** Le séparateur (virgule, point-virgule ou tabulation) est détecté automatiquement. Si une cellule contient elle-même ce caractère, entourez-la de guillemets.
 - **Nom et prénom inversés.** Si le fichier a un en-tête, l'application repère les colonnes par leur intitulé. Sans en-tête, la première colonne est le nom et la seconde le prénom.
 
 ### La vue projetée ne s'ouvre pas {#projection}
