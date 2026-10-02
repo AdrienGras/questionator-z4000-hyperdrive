@@ -17,12 +17,14 @@ Exportez régulièrement un backup. Voir [Créer, reprendre et importer une sess
 
 ## Votre premier oral, pas à pas
 
-Ce parcours utilise les deux fichiers d'exemple. Téléchargez-les d'abord :
+Ce parcours utilise les deux fichiers d'exemple : une liste de dix étudiants et un oral de PHP avec quatre catégories. Téléchargez-les depuis l'accueil de l'application, avec les liens « Télécharger la liste d'étudiants d'exemple » et « Télécharger la config d'exemple ».
 
-- [students.example.csv](https://adriengras.github.io/questionator-z4000-hyperdrive/students.example.csv) : dix étudiants ;
-- [config.example.json](https://adriengras.github.io/questionator-z4000-hyperdrive/config.example.json) : un oral de PHP avec quatre catégories.
+Les liens directs ci-dessous marchent aussi, mais le navigateur peut ouvrir le fichier dans un onglet au lieu de l'enregistrer. Dans ce cas, faites un clic droit puis « Enregistrer le lien sous ».
 
-Ces deux fichiers sont aussi proposés dans l'application, par les liens « Télécharger la liste d'étudiants d'exemple » et « Télécharger la config d'exemple ».
+- [students.example.csv](https://adriengras.github.io/questionator-z4000-hyperdrive/students.example.csv)
+- [config.example.json](https://adriengras.github.io/questionator-z4000-hyperdrive/config.example.json)
+
+L'interface de l'accueil et de la création de session suit la langue de votre navigateur. Les écrans de la session et l'export suivent le champ `locale` de la config (voir [Référence de la config](./reference-config)).
 
 1. **Ouvrez l'accueil.** La carte « Nouvelle session » est à gauche. Tant que vous n'avez rien créé, la zone de droite indique « Aucune session ».
 
@@ -34,21 +36,25 @@ Ces deux fichiers sont aussi proposés dans l'application, par les liens « Tél
 
 4. **Vérifiez l'aperçu.** Il s'affiche à droite : nombre d'étudiants, titre de l'examen, catégories avec leur nombre de questions et leur barème, nombre de questions par étudiant. Les avertissements éventuels y figurent aussi.
 
-5. **Donnez un nom à la session.** Le champ « Nom de la session » est prérempli avec le titre de l'examen et la date du jour. Le champ « Nom de l'examinateur » est facultatif : il est repris dans les exports.
+5. **Donnez un nom à la session.** Le champ « Nom de la session » est prérempli avec le titre de l'examen et la date du jour, par exemple « Oral PHP — 2 octobre 2026 ». Vous pouvez le modifier : sur la capture, il a été remplacé par « Oral de démonstration ». Le champ « Nom de l'examinateur » est facultatif : il est repris dans les exports.
 
    ![Écran Nouvelle session : les deux fichiers déposés sont validés, l'aperçu à droite montre 10 étudiants et les quatre catégories.](/screenshots/creation-session.png)
 
 6. **Cliquez sur « Créer la session ».** Le bouton reste inactif tant qu'un fichier manque ou contient une erreur, ou que le nom est vide. L'application ouvre alors l'écran de passage, avec le premier étudiant de la liste déjà sélectionné.
 
-7. **Tirez une question.** Sous le titre, la grille « Choisir une catégorie » montre une tuile par catégorie, avec son maximum de points. Cliquez sur une tuile : l'application tire au sort une question de cette catégorie et l'affiche, avec les « Éléments de réponse » que vous seul voyez.
+   Avec la config d'exemple, cet écran est sombre : son bloc `presentation` demande `defaultColorMode` à `dark`. Vous pouvez changer de mode avec le bouton en haut à droite.
 
-8. **Notez la réponse.** Sous l'énoncé, la rubrique « Note » propose un bouton par valeur du barème de la catégorie. Cliquez sur celui qui correspond à la réponse de l'étudiant. La question suivante se tire de la même façon.
+7. **Tirez une question.** Sous le titre, la grille des catégories montre une tuile par catégorie, avec son maximum de points. Cliquez sur une tuile : l'application tire au sort une question de cette catégorie et l'affiche. Pour lire la réponse attendue, dépliez « Éléments de réponse » : la section est repliée par défaut, et vous seul la voyez.
 
-   ![Écran de passage : la question tirée et ses éléments de réponse à gauche, les boutons de note sous l'énoncé, l'aperçu de la vue projetée à droite.](/screenshots/passage-question.png)
+8. **Notez la réponse.** Sous l'énoncé, la rubrique « Note » propose un bouton par valeur du barème de la catégorie. Cliquez sur celui qui correspond à la réponse de l'étudiant.
 
-   Avec la config d'exemple, l'écran est sombre : son bloc `presentation` demande `defaultColorMode` à `dark`. Vous pouvez changer de mode avec le bouton en haut à droite.
+   Répétez les étapes 7 et 8 jusqu'à la dernière question : le compteur « Question 1 / 3 » sous le titre indique où vous en êtes.
 
-9. **Terminez le passage.** Après la dernière question notée, l'écran « Passage terminé » affiche la note brute, la note convertie et la note finale. Une fenêtre « Ajuster la note » s'ouvre. Cliquez sur « Enregistrer » pour valider la note avec l'ajustement saisi, ou sur « Annuler » pour la valider sans ajustement.
+   ![Écran de passage : la question tirée et ses éléments de réponse à gauche, les boutons de note sous l'énoncé, l'aperçu de la vue projetée à droite. L'étudiant y est projeté.](/screenshots/passage-question.png)
+
+   Sur la capture, l'étudiant est projeté (bouton « Projeter cet étudiant »). Vous n'avez pas à le faire pour ce parcours ; voir [Projeter](./projeter).
+
+9. **Terminez le passage.** « Passage terminé » n'apparaît qu'après la dernière question notée. L'écran « Passage terminé » affiche la note brute, la note convertie et la note finale. Une fenêtre « Ajuster la note » s'ouvre. Cliquez sur « Enregistrer » pour valider la note avec l'ajustement saisi, ou sur « Annuler » pour la valider sans ajustement.
 
 10. **Passez à l'étudiant suivant.** Cliquez sur « Étudiant suivant ». Le bouton est inactif quand tous les étudiants sont passés.
 
@@ -56,7 +62,7 @@ Ces deux fichiers sont aussi proposés dans l'application, par les liens « Tél
 
     ![Écran des statistiques : effectifs, notes finales, histogramme et tableau par catégorie.](/screenshots/statistiques.png)
 
-12. **Exportez les résultats.** Dans le même onglet « Étudiants » du panneau, cliquez sur « Exporter en Excel ». Le même bouton existe dans le menu de la carte de la session, sur l'accueil.
+12. **Exportez les résultats.** Dans le même onglet « Étudiants » du panneau, cliquez sur « Exporter en Excel ». Le même bouton existe dans le menu de la carte de la session, sur l'accueil. Le fichier arrive dans le dossier de téléchargements de votre navigateur, nommé `<nom-de-session>-<AAAA-MM-JJ>.xlsx`.
 
 ## Pour aller plus loin
 

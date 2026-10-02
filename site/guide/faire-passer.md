@@ -25,7 +25,7 @@ Pour ajouter un étudiant en séance, cliquez sur « Ajouter un étudiant » en 
 
 ## Tirer une question
 
-La grille « Choisir une catégorie » a une tuile par catégorie, dans l'ordre de la config, avec son maximum de points (« 2 pts »). Cliquez sur une tuile : l'application tire au hasard une question de cette catégorie, parmi celles que cet étudiant n'a pas encore eues.
+La grille des catégories a une tuile par catégorie, dans l'ordre de la config, avec son maximum de points (« 2 pts »). Cliquez sur une tuile : l'application tire au hasard une question de cette catégorie, parmi celles que cet étudiant n'a pas encore eues.
 
 Trois règles à connaître :
 
@@ -64,7 +64,7 @@ Ce que fait un skip :
 - **un skip ne s'annule pas** ;
 - quand toutes les passes sont utilisées, le bouton reste visible mais inactif, et l'infobulle dit « Plus de passe disponible pour cet étudiant ».
 
-La question passée reste dans le détail du passage, avec la mention « Passée » et son motif (« Passée — hors programme »), et dans l'export. Voir [Statistiques et export Excel](./stats-export).
+La question passée reste dans le détail du passage, avec la mention « Passée » et son motif (« Passée — Hors programme »), et dans l'export. Voir [Statistiques et export Excel](./stats-export).
 
 ## Le commentaire
 
@@ -111,7 +111,7 @@ Changer d'étudiant remet la vue projetée sur l'écran d'attente si elle montra
 
 Pour déclarer un étudiant absent, deux endroits :
 
-- dans l'onglet « Étudiants », l'icône à droite de sa ligne (« Marquer absent ») ;
+- dans l'onglet « Étudiants », l'icône à droite de sa ligne (« Marquer *nom* absent ») ;
 - dans l'onglet « Étudiant », le bouton « Marquer absent ».
 
 Si l'étudiant a déjà des questions tirées, une fenêtre « Déclarer … absent ? » prévient que **ces questions seront supprimées**. Le commentaire est conservé. Confirmez avec « Déclarer absent ».

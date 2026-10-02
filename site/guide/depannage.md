@@ -244,9 +244,9 @@ Avertissement.
 
 Erreur.
 
-> Guillemet non fermé : la suite du fichier ne peut pas être lue.
+> Ligne 4 : Guillemet non fermé : la suite du fichier ne peut pas être lue.
 
-**Cause.** Un guillemet ouvert dans une cellule n'est jamais refermé. Le numéro de ligne indique où.
+**Cause.** Un guillemet ouvert dans une cellule n'est jamais refermé. Le préfixe « Ligne *N* : » ajouté par l'interface indique où.
 
 **Que faire.** Ouvrez le CSV dans un éditeur de texte, repérez la ligne et fermez le guillemet, ou supprimez-le.
 
@@ -348,7 +348,9 @@ Les sessions sont enregistrées dans le stockage local du navigateur, sur cet ap
 
 > Stockage non garanti : le navigateur n'a pas garanti la conservation des données : il peut effacer vos sessions s'il manque d'espace. Exportez régulièrement un backup.
 
-Cet avertissement s'affiche quand le navigateur ne promet pas de conserver les données. Exportez régulièrement une sauvegarde de vos sessions.
+Cet avertissement s'affiche quand le navigateur ne promet pas de conserver les données. Exportez régulièrement un backup de vos sessions.
+
+Si des sessions ont déjà disparu, il n'y a pas de moyen de les récupérer, sauf à les restaurer depuis un backup exporté plus tôt : voir [Restaurer : importer un backup](./sessions#restaurer-importer-un-backup).
 
 > Le stockage local est indisponible (navigation privée ou cookies bloqués ?). Les sessions ne peuvent pas être enregistrées.
 

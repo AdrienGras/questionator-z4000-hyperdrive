@@ -22,7 +22,7 @@ Les blocs se suivent dans cet ordre.
 | Catégories | Pour chaque catégorie : « Choix », « Questions notées » et « Taux de réussite ». |
 | Tags | Pour chaque tag des questions : « Questions notées » et « Taux de réussite ». |
 | Questions les plus tirées | Les dix questions tirées le plus souvent, avec leur catégorie et le nombre de « Tirages ». |
-| Questions passées | Les questions passées au moins une fois : nombre de « Passes » et « Motifs », par exemple « hors programme ×2, sans motif ×1 ». |
+| Questions passées | Les questions passées au moins une fois : nombre de « Passes » et « Motifs », par exemple « Hors programme ×2, sans motif ×1 ». |
 | Stratégies | La composition des passages terminés, par exemple « Facile ×2 · Difficile ×1 », avec le nombre d'étudiants et leur « Note finale moyenne ». |
 | Ajustements | « Nombre », « Somme » et « Moyenne » des ajustements non nuls. |
 
@@ -86,7 +86,7 @@ Une ligne par question tirée, regroupées par étudiant, dans l'ordre du tirage
 
 ### Statistiques
 
-Les neuf blocs de l'écran des statistiques, l'un sous l'autre, séparés par une ligne vide. Les en-têtes sont ceux de l'écran, à une différence près : l'histogramme a les colonnes « Intervalle » et « Effectif ».
+Les neuf blocs de l'écran des statistiques, l'un sous l'autre, séparés par une ligne vide. Les en-têtes sont ceux de l'écran, avec deux différences. L'histogramme a les colonnes « Intervalle » et « Effectif ». Et un bloc sans donnée (par exemple « Questions passées » quand aucune question n'a été passée) n'affiche pas de phrase comme « Aucune question passée. » : la feuille garde sa ligne de titre et sa ligne d'en-tête, suivies d'une ligne vide.
 
 ### Configuration
 

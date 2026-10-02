@@ -1,6 +1,6 @@
 # Préparer les fichiers
 
-Une session se crée à partir de deux fichiers : la liste des étudiants (un CSV) et la config (un JSON). Cette page explique comment les écrire. Les deux fichiers d'exemple, [students.example.csv](https://adriengras.github.io/questionator-z4000-hyperdrive/students.example.csv) et [config.example.json](https://adriengras.github.io/questionator-z4000-hyperdrive/config.example.json), sont un bon point de départ.
+Une session se crée à partir de deux fichiers : la liste des étudiants (un CSV) et la config (un JSON). Cette page explique comment les écrire. Les deux fichiers d'exemple sont un bon point de départ. Téléchargez-les par les liens « Télécharger la liste d'étudiants d'exemple » et « Télécharger la config d'exemple » de l'accueil (ou « Télécharger la liste d'exemple » et « Télécharger la config d'exemple » sur l'écran de création). Les liens directs, [students.example.csv](https://adriengras.github.io/questionator-z4000-hyperdrive/students.example.csv) et [config.example.json](https://adriengras.github.io/questionator-z4000-hyperdrive/config.example.json), peuvent s'ouvrir dans un onglet : faites alors un clic droit puis « Enregistrer le lien sous ».
 
 ## La liste des étudiants (CSV)
 
@@ -25,6 +25,8 @@ L'en-tête est facultatif, mais recommandé : il permet d'écrire les colonnes d
 - Les intitulés reconnus pour le prénom sont `prénom`, `firstname` et `givenname`.
 - La casse, les accents, les espaces, les tirets et les tirets bas ne comptent pas : `Prénom`, `PRENOM` et `first_name` sont tous reconnus.
 - L'en-tête doit se trouver dans les cinq premières lignes non vides du fichier. Les lignes qui le précèdent (titre, date, commentaire) sont ignorées, avec un avertissement.
+
+L'en-tête n'est reconnu que si une cellule de la ligne correspond à un intitulé de nom **et** une autre à un intitulé de prénom. Sinon, la ligne est lue comme un étudiant. Attention aux variantes absentes de la liste : avec `Nom;Prénoms` (au pluriel), aucune cellule ne correspond au prénom, et la ligne d'en-tête devient un étudiant.
 
 Sans en-tête reconnu, la première colonne est le nom, la deuxième le prénom, et toutes les lignes non vides sont lues comme des étudiants.
 

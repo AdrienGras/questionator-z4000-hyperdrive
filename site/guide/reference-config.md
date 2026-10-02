@@ -47,7 +47,7 @@ Le JSON Schema contrôle la forme du fichier. Les règles qui croisent plusieurs
 
 | Champ | Type | Obligatoire | Défaut | Description |
 | --- | --- | --- | --- | --- |
-| `locale` | `fr` ou `en` | non | langue du navigateur si elle est prise en charge, sinon `fr` | Langue de l'interface. |
+| `locale` | `fr` ou `en` | non | langue du navigateur si elle est prise en charge, sinon `fr` | Langue des écrans de la session et de l'export. L'accueil et la création de session suivent toujours la langue du navigateur. |
 
 ```json
 "locale": "fr"
@@ -138,7 +138,7 @@ Affichage de la vue projetée. Tous les champs sont facultatifs.
 | Champ | Type | Obligatoire | Défaut | Description |
 | --- | --- | --- | --- | --- |
 | `presentation` | objet | non | voir ci-dessous | Bloc de présentation. |
-| `presentation.showCumulativeScore` | booléen | non | `true` | Affiche le score cumulé sur la vue projetée après chaque question. |
+| `presentation.showCumulativeScore` | booléen | non | `true` | Affiche le score cumulé sur la vue projetée après chaque question notée, pendant le passage. Il disparaît quand le passage est terminé. |
 | `presentation.finalScoreDisplay` | `raw`, `converted` ou `both` | non | `both` | Note affichée sur l'écran final : brute, convertie ou les deux. |
 | `presentation.showStatsOnFinal` | booléen | non | `false` | Affiche le détail du passage sur l'écran final projeté. |
 | `presentation.drawAnimation` | booléen | non | `true` | Active l'animation lors du tirage. |
@@ -243,11 +243,11 @@ Chaque élément de `categories[].questions` est une question.
 | Champ | Type | Obligatoire | Défaut | Description |
 | --- | --- | --- | --- | --- |
 | `categories[].questions[].id` | texte non vide | oui | aucun | Identifiant stable de la question, unique dans toute la config. |
-| `categories[].questions[].title` | texte non vide | non | début du `prompt` sans markdown | Libellé court, utilisé dans le side panel et les exports. |
+| `categories[].questions[].title` | texte non vide | non | début du `prompt` sans markdown | Libellé court, utilisé dans le panneau latéral et les exports. |
 | `categories[].questions[].tags` | liste de textes non vides | non | aucun | Notions pédagogiques, utilisées dans les stats. |
 | `categories[].questions[].tags[]` | texte non vide | oui, dans la liste | aucun | Une notion pédagogique. |
 | `categories[].questions[].prompt` | texte non vide | oui | aucun | Énoncé en markdown, affiché aux deux vues. |
-| `categories[].questions[].answer` | texte | non | aucun | Éléments de réponse en markdown, visibles uniquement dans la vue examinateur. |
+| `categories[].questions[].answer` | texte | non | aucun | Éléments de réponse en markdown, visibles uniquement sur l'écran de passage. |
 
 ```json
 {
