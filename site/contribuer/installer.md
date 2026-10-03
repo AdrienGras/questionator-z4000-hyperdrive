@@ -2,6 +2,8 @@
 
 Cette page vous mène du clonage à un `pnpm check` vert. Il vous faut Git, [nvm](https://github.com/nvm-sh/nvm) et un accès à GitHub.
 
+Pour signaler un bug ou proposer une idée sans toucher au code, rien à installer : [`CONTRIBUTING.md`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/CONTRIBUTING.md) vous oriente.
+
 ## Cloner et installer
 
 ```bash

@@ -71,6 +71,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [x] La clé `back_home` utilise une apostrophe droite alors que le reste de l'interface a `’` : harmoniser (e2e et tests à suivre). → #87 *Fait en #87 (PR 2).*
 - [x] Tests manquants : erreurs d'écriture (renommer, examinateur, suppression), réinitialisation du champ à la réouverture d'un dialogue, « toutes les issues » avec un décompte exact, `score` sur un attempt `skipped`, date locale vs UTC du nom de fichier (cas à 00:30). → #87 *Fait en #87 (PR 2).*
 - [x] Ajouter un favicon (404 sur `/favicon.ico` en preview et en prod). → #53 — réglé par F17 (D72), constaté en F19
+- [ ] Afficher la version de l'application (`APP_VERSION`, déjà dans les backups) quelque part dans l'interface, par exemple au pied de l'accueil : le formulaire de bug (#125) demande à défaut la date d'utilisation et le mode (onglet ou installée).
 
 ## Création de session
 
