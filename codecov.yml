@@ -1,0 +1,23 @@
+# Codecov (F42) : informe, ne bloque jamais. Le seuil de couverture est tenu par le quality gate
+# SonarQube Cloud (couverture du nouveau code).
+coverage:
+  status:
+    project:
+      default:
+        informational: true
+    patch:
+      default:
+        informational: true
+
+comment:
+  layout: 'condensed_header, diff, files'
+  require_changes: false
+
+# Mêmes exclusions que `test.coverage` (vite.config.ts) et `sonar.coverage.exclusions`.
+ignore:
+  - '**/*.test.ts'
+  - '**/*.test.tsx'
+  - '**/*.d.ts'
+  - 'src/routeTree.gen.ts'
+  - 'src/components/ui/**'
+  - 'src/testing/**'
