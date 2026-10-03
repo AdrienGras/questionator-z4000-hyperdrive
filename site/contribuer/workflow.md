@@ -4,7 +4,7 @@ Le déroulé complet du travail, de l'issue à la fusion. La source de ces règl
 
 ## Une branche et une PR par ticket
 
-Chaque ticket a sa branche (`feat/73-guide-contributeur`, `fix/…`) et sa pull request vers `main`. La description de la PR contient `Closes #n`. Une fois F01 livré, personne ne pousse directement sur `main`.
+Chaque ticket a sa branche (`feat/73-guide-contributeur`, `fix/…`) et sa pull request vers `main`. La description de la PR contient `Closes #n`. Personne ne pousse directement sur `main`.
 
 ## Les tickets se suivent
 
@@ -25,10 +25,10 @@ La PR d'un ticket est fusionnée avant d'ouvrir la branche du suivant, qui part 
 
 Les commandes exactes sont dans [Pull request](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/CONVENTIONS.md#pull-request--checklist-avant--ready-for-review-). Le script lui-même : [`sonar-check.sh`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/.claude/scripts/sonar-check.sh). Pourquoi une branche seule n'est pas analysée : voir [QUIRKS.md](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/QUIRKS.md#sonarqube-cloud-nanalyse-pas-une-branche-sans-pr-2026-09-24).
 
-## La fusion
-
-La PR s'arrête à « Ready for review », CI et SonarQube au vert. **Le mainteneur fusionne**, sur son accord explicite. Ne fusionnez jamais de vous-même.
-
 ## Avant de passer en « Ready for review »
 
 Mettez à jour la mémoire projet (`docs/INDEX.md`, `docs/HANDOFF.md`, et les autres fichiers concernés). La règle est décrite dans [Travailler avec Claude Code](./claude-code#regle-de-fin) et sa source est [`CLAUDE.md`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/CLAUDE.md#règle-de-fin-dimplémentation-non-négociable).
+
+## La fusion
+
+La PR s'arrête à « Ready for review », CI et SonarQube au vert. **Le mainteneur fusionne**, sur son accord explicite. Ne fusionnez jamais de vous-même.

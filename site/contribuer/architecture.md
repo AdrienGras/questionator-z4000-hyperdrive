@@ -8,7 +8,7 @@ L'application tourne entièrement dans le navigateur, sans serveur. Cette page s
 |---|---|
 | `app/` | Création du routeur (`router.tsx`) et fournisseurs globaux (apparence). |
 | `routes/` | Routes TanStack Router, minces : chacune importe la page d'une feature. |
-| `features/<x>/` | Un écran : `config-editor`, `create-session`, `home`, `present`, `session`, `stats`. Chaque dossier a sa page, ses `components/` et ses `hooks/`. |
+| `features/<x>/` | Un écran : `config-editor`, `create-session`, `home`, `present`, `session`, `stats`. Chaque dossier a sa page, ses `components/` et, le cas échéant, ses `hooks/`. |
 | `components/` | Composants partagés (`export/`, `markdown/`, `projection/`, `ui/`). `ui/` contient les composants shadcn, vendus et non modifiés. |
 | `hooks/` | Hooks transverses. |
 | `lib/` | Technique, sans règle métier : `db/`, `i18n/`, `pwa/`, `xlsx/`, `markdown/`, `appearance/`, et des utilitaires. |

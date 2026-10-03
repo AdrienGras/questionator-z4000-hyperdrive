@@ -13,15 +13,15 @@ Un commit s'écrit `<emoji> <message au présent, en français>`, avec un emoji 
 - **Pas de barrel** : pas de `index.ts` qui réexporte. On importe le fichier qui déclare le symbole. `pnpm deps` le vérifie.
 - **Tests à côté du code** : `x.test.ts` près de `x.ts`.
 
-Détail : [Règles tacites de l'arborescence](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/CONVENTIONS.md#arborescence-et-imports--squelette) et [oxlint, règles configurées](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/CONVENTIONS.md#oxlint--règles-configurées).
+Détail : [Règles tacites](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/CONVENTIONS.md#règles-tacites) et [oxlint, règles configurées](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/CONVENTIONS.md#oxlint--règles-configurées).
 
 ## Formatage et lint
 
-oxfmt formate le code (`pnpm format`) et oxlint le contrôle, avec les règles qui s'appuient sur les types ; `pnpm lint` échoue sur un simple avertissement. Les fichiers Markdown ne sont pas formatés. La configuration est dans [`.oxfmtrc.json`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/.oxfmtrc.json) et [`.oxlintrc.json`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/.oxlintrc.json). Une exception s'écrit dans le fichier de configuration, avec sa raison, plutôt que par un commentaire de désactivation.
+oxfmt formate le code (`pnpm format`) et oxlint le contrôle, avec les règles qui s'appuient sur les types ; `pnpm lint` échoue sur un simple avertissement. Les fichiers Markdown ne sont pas formatés. La configuration est dans [`.oxfmtrc.json`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/.oxfmtrc.json) et [`.oxlintrc.json`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/.oxlintrc.json). Les exceptions suivent trois voies. Un import à effet de bord légitime s'ajoute à la liste `allow` de `import/no-unassigned-import` dans `.oxlintrc.json` (voir [oxlint, règles configurées](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/CONVENTIONS.md#oxlint--règles-configurées)). Une exception à une règle de dependency-cruiser s'écrit dans la règle elle-même, avec sa raison. Une désactivation ponctuelle s'écrit `// oxlint-disable-next-line <règle> -- <raison>` : la raison suit toujours le `--`.
 
 ## Commentaires
 
-Dans le code existant, les commentaires sont en français et disent pourquoi, pas quoi. Ils citent l'arbitrage concerné quand il existe (`D72`, `#87`). Faites de même.
+Dans le code existant, les commentaires sont en français et disent pourquoi, pas quoi. Ils citent l'arbitrage concerné quand il existe (`D72`, `#87`).
 
 ## Interface et langues
 

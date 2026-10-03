@@ -5,12 +5,14 @@ Cette page vous mène du clonage à un `pnpm check` vert. Il vous faut Git, [nvm
 ## Cloner et installer
 
 ```bash
-git clone git@github.com:AdrienGras/questionator-z4000-hyperdrive.git
+git clone https://github.com/AdrienGras/questionator-z4000-hyperdrive.git
 cd questionator-z4000-hyperdrive
 nvm use
 corepack enable
 pnpm install
 ```
+
+L'adresse SSH `git@github.com:AdrienGras/questionator-z4000-hyperdrive.git` convient aussi.
 
 - `nvm use` lit `.nvmrc` : le projet demande Node 24. Si nvm répond que cette version manque, lancez `nvm install`.
 - `corepack enable` active le pnpm épinglé par le champ `packageManager` de `package.json` (pnpm 12.6.0). Un pnpm global plus ancien ne s'en mêle plus. À défaut, préfixez vos commandes par `corepack pnpm`.
@@ -57,7 +59,7 @@ Elle reproduit les étapes de la CI qui précèdent le build. Elle ne lance ni `
 | `pnpm deps` | dependency-cruiser sur `src/`. |
 | `pnpm docs:dev` | Ce site, en développement. Adresse : `http://localhost:5173/questionator-z4000-hyperdrive/docs/`. |
 | `pnpm docs:build` | Construit ce site dans `dist/docs/`. Un lien interne mort fait échouer la commande. |
-| `pnpm docs:preview` | Prévisualise le site construit. |
+| `pnpm docs:preview` | Prévisualise le site construit, sur le port 4173. |
 | `pnpm docs:screenshots` | Régénère les captures du guide utilisateur (voir [Tests](./tests)). |
 
 D'autres scripts servent surtout à la CI après `pnpm build` : `check:bundle`, `check:precache` et `check:budget` surveillent le bundle initial, le pré-cache du service worker et les budgets de taille. `pnpm icons` régénère les icônes de l'application à la main, hors CI.
@@ -65,7 +67,7 @@ D'autres scripts servent surtout à la CI après `pnpm build` : `check:bundle`, 
 ## Ports et serveurs
 
 - **5173** : `pnpm dev` et `pnpm docs:dev`. Lancez-en un seul à la fois.
-- **4173** : `vite preview`, utilisé par les tests de bout en bout et par les captures.
+- **4173** : `vite preview` (utilisé par les tests de bout en bout et par les captures) et `pnpm docs:preview` (port par défaut de VitePress). Lancez-en un seul à la fois.
 
 Playwright réutilise un serveur déjà présent sur 4173 quand la variable `CI` est absente (`reuseExistingServer`). Un `vite preview` périmé resté ouvert serait alors testé à la place d'un build frais. Vérifiez avec `ss -ltnp | grep 4173` avant de lancer `pnpm e2e`.
 

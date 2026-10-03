@@ -812,7 +812,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 ## Slugs d'ancre GitHub et VitePress différents : un lien `blob/main/…#ancre` se vérifie à part (2026-10-03)
 
 **Découvert** : F29 (#73), liens du guide contributeur vers `docs/*.md` et `CLAUDE.md`.
-**Symptôme** : `docs:build` ne contrôle pas les ancres ; une ancre fausse vers GitHub ne se voit qu'au clic. Un titre `## Sujet — détail` donne `sujet--détail` (deux tirets) et un titre qui finit par `»` garde un tiret final.
-**Cause** : GitHub met en minuscules, retire tout sauf lettres Unicode, chiffres, espaces, tirets et `_`, remplace chaque espace par un tiret sans fusion, et suffixe les doublons `-1`, `-2`. VitePress retire les accents et fusionne les tirets.
+**Symptôme** : une ancre fausse vers GitHub ne se voit qu'au clic (`docs:build` ne contrôle pas les ancres, voir l'entrée du 2026-10-02). Un titre `## Sujet — détail` donne `sujet--détail` (deux tirets) et un titre qui finit par `»` garde un tiret final.
+**Cause** : GitHub met en minuscules, retire tout sauf lettres Unicode, chiffres, espaces, tirets et `_`, remplace chaque espace par un tiret sans fusion, et suffixe les doublons `-1`, `-2`. VitePress applique d'autres règles.
 **Workaround** : `site/contribuer/links.test.ts` recalcule les slugs GitHub des titres du fichier visé ; garder les liens `blob/main/…#ancre` et ne jamais réutiliser la règle de VitePress. Après un renommage de titre dans `docs/`, relancer `pnpm test`.
-**Référence** : `site/contribuer/links.test.ts`.
+**Référence** : `site/contribuer/links.test.ts` ; voir aussi « VitePress ne vérifie pas les liens `#ancre` et retire les accents des slugs » (2026-10-02).

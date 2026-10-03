@@ -12,9 +12,9 @@ Ajoutez une entrée quand vous tranchez entre plusieurs options viables et qu'un
 
 ## Proposer un arbitrage
 
-1. Ouvrez une issue (ou commentez celle du ticket) qui expose la question et les options.
-2. Une fois la réponse du mainteneur obtenue, ajoutez l'entrée `D<NN>` dans la PR du ticket.
-3. Si la décision change le comportement du produit, mettez aussi `PRODUCT.md` à jour dans la même PR.
+Le projet pose deux règles : [`PRODUCT.md`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/PRODUCT.md) est la source de vérité produit, et [tout arbitrage est tracé dans `docs/DECISIONS.md`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/CLAUDE.md#conventions-du-projet). Le reste est une suggestion, pas une procédure écrite.
+
+Le plus simple : exposez la question et les options dans l'issue du ticket, attendez l'avis du mainteneur, puis ajoutez l'entrée `D<NN>` dans la PR du ticket. Si la décision change le comportement du produit, mettez `PRODUCT.md` à jour dans la même PR.
 
 Le numéro suivant est celui qui suit la dernière entrée du fichier. Les références croisées s'écrivent `D59`, `D96`, comme dans les commentaires du code.
 

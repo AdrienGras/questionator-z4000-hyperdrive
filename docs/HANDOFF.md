@@ -30,7 +30,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 **Trucs en suspens** : PR à ouvrir en brouillon sur `feat/73-guide-contributeur`, puis `sonar-check.sh --pr <n> --wait`, « Ready for review ». Ne pas merger sans le go explicite de l'utilisateur.
 
-**Prochaine chose à creuser** : retour de revue de la PR ; ensuite, prochain ticket de `main`.
+**Prochaine chose à creuser** : retour de revue de la PR ; ensuite #77 (vérifications manuelles V1), puis #85 (passage à Node 26 LTS, pas avant le 2026-10-28).
 
 **Notes pour future Claude** : renommer un titre de `docs/*.md` ou de `CLAUDE.md` vers lequel pointe le guide fait échouer `links.test.ts` (ancre introuvable) : mettre à jour le lien. La règle sur les commentaires du guide (pages Conventions) décrit la pratique observée, `CONVENTIONS.md` n'a pas de section dédiée.
 

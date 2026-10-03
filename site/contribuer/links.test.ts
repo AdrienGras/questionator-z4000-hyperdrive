@@ -83,6 +83,17 @@ describe('liens du guide contributeur vers le dépôt', () => {
     expect(broken).toEqual([])
   })
 
+  test('chaque lien vers le dépôt vise la branche main', () => {
+    const refs = readdirSync(import.meta.dirname)
+      .filter((name) => name.endsWith('.md'))
+      .flatMap((file) => {
+        const text = readFileSync(join(import.meta.dirname, file), 'utf8')
+        return [...text.matchAll(new RegExp(`${REPO_URL}/(?:blob|tree)/([^/\\s)]+)/`, 'g'))]
+      })
+    expect(refs.length).toBeGreaterThan(0)
+    expect(refs.filter((match) => match[1] !== 'main').map((match) => match[0])).toEqual([])
+  })
+
   test('le calcul des slugs suit GitHub', () => {
     expect(githubSlug('Arborescence et imports — squelette')).toBe(
       'arborescence-et-imports--squelette',
