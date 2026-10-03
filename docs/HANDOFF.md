@@ -28,7 +28,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 **Dernière chose faite** : README réécrit en vitrine (badges CI, quality gate, application, licence, hors ligne, 100 % local ; trois liens d'appel ; sept fonctionnalités vérifiées dans le guide et le code). Ajout de `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (traduction officielle 2.1, contact remplacé seul), `SECURITY.md`, trois formulaires d'issue + `config.yml`, modèle de PR. `scripts/community-links.test.ts` vérifie liens relatifs, liens vers `main` et liens vers la doc (page + ancre VitePress). Renvois dans *Workflow*, *Installer le poste* et `CLAUDE.md`. D98, une ligne de BACKLOG.
 
-**Trucs en suspens** : PR en brouillon, CI et SonarQube à faire passer. Réglages du dépôt (description, site, signalement privé de vulnérabilité) à appliquer puis vérifier dans *Insights › Community Standards*. Ne pas merger sans le go explicite de l'utilisateur.
+**Trucs en suspens** : PR #127, revue faite et corrigée, CI verte, SonarQube OK (0 issue, 0 hotspot), passée en « Ready for review ». Réglages du dépôt appliqués (description, site, signalement privé de vulnérabilité) ; *Insights › Community Standards* ne lit que `main` : à vérifier après le merge. Le contact du code de conduite renvoie au profil GitHub, qui n'affiche pas de canal privé : à trancher par l'utilisateur. Ne pas merger sans le go explicite de l'utilisateur.
 
 **Prochaine chose à creuser** : #126 (F42, couverture Codecov et SonarQube) ou #77 (vérifications manuelles V1), puis #85 (Node 26 LTS, pas avant le 2026-10-28).
 
