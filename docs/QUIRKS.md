@@ -808,3 +808,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : `animations: 'disabled'` ne couvre pas l'animation JS de recharts ; `storage.persisted()` est faux en Chromium headless ; un service worker actif peut afficher la pastille de mise à jour ; un champ resté actif dessine son anneau de focus.
 **Workaround** : attendre une barre dessinée à hauteur non nulle et stable (400 ms d'écart) ; `context.clock.setFixedTime` (pas `clock.install`, qui figerait ou ferait dériver les minuteries) ; stubs `storage.persisted/persist` à vrai ; `serviceWorkers: 'block'` ; attendre `document.fonts.ready` ; `blur()` des champs avant capture ; PRNG mulberry32 de graine 72 injecté par `context.addInitScript` (couvre la popup projetée). Les écrans de session sont sombres parce que la config d'exemple fixe `presentation.defaultColorMode` à sombre.
 **Référence** : `e2e/screenshots/determinism.ts`, `e2e/screenshots/guide.spec.ts`.
+
+## Slugs d'ancre GitHub et VitePress différents : un lien `blob/main/…#ancre` se vérifie à part (2026-10-03)
+
+**Découvert** : F29 (#73), liens du guide contributeur vers `docs/*.md` et `CLAUDE.md`.
+**Symptôme** : une ancre fausse vers GitHub ne se voit qu'au clic (`docs:build` ne contrôle pas les ancres, voir l'entrée du 2026-10-02). Un titre `## Sujet — détail` donne `sujet--détail` (deux tirets) et un titre qui finit par `»` garde un tiret final.
+**Cause** : GitHub met en minuscules, retire tout sauf lettres Unicode, chiffres, espaces, tirets et `_`, remplace chaque espace par un tiret sans fusion, et suffixe les doublons `-1`, `-2`. VitePress applique d'autres règles.
+**Workaround** : `site/contribuer/links.test.ts` recalcule les slugs GitHub des titres du fichier visé ; garder les liens `blob/main/…#ancre` et ne jamais réutiliser la règle de VitePress. Après un renommage de titre dans `docs/`, relancer `pnpm test`.
+**Référence** : `site/contribuer/links.test.ts` ; voir aussi « VitePress ne vérifie pas les liens `#ancre` et retire les accents des slugs » (2026-10-02).

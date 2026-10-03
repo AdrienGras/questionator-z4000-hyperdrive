@@ -21,6 +21,7 @@
     "vite",
     "scripts",
     "site/.vitepress/**/*.ts",
-    "site/guide/*.test.ts"
+    "site/guide/*.test.ts",
+    "site/contribuer/*.test.ts"
   ]
 }

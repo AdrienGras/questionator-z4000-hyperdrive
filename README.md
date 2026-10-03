@@ -52,6 +52,7 @@ pnpm docs:build # construit la documentation dans dist/docs/ (après pnpm build)
 
 - Commits en [gitmoji](https://gitmoji.dev), message en français (voir [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md)).
 - Une branche et une pull request par ticket, `Closes #n` dans la PR ; la CI doit être verte.
+- Le [guide contributeur](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/contribuer/installer.html) décrit l'installation du poste, l'architecture, les tests et le workflow.
 
 ## Licence
 
