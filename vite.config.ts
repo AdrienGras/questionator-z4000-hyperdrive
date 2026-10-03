@@ -153,5 +153,20 @@ export default defineConfig({
     exclude: [...configDefaults.exclude, 'e2e/**'],
     // Sans cela, `import css from '../index.css?raw'` renvoie '' sous Vitest (test des THEME_TOKENS).
     css: { include: [/index\.css/] },
+    // Couverture (F42) : `pnpm test:coverage` seulement. Mêmes exclusions que
+    // `sonar.coverage.exclusions` (sonar-project.properties) et `ignore` (codecov.yml).
+    coverage: {
+      provider: 'v8',
+      reporter: ['lcov', 'text-summary'],
+      reportsDirectory: 'coverage',
+      include: ['src/**', 'scripts/**', 'vite/**'],
+      exclude: [
+        '**/*.test.{ts,tsx}',
+        '**/*.d.ts',
+        'src/routeTree.gen.ts',
+        'src/components/ui/**',
+        'src/testing/**',
+      ],
+    },
   },
 })

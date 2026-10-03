@@ -43,7 +43,8 @@ Carte des paths, services, accès, commandes. À jour au fil des découvertes.
 | Service worker (F17) | Pré-cache complet, hors ligne, mise à jour proposée | Build de prod seulement (désactivé sous `pnpm dev`) : tester avec `pnpm build && pnpm preview` (port 4173 ; ajouter `pnpm docs:build` entre les deux pour que `preview` serve aussi la doc) ; `dist/sw.js`, `dist/manifest.webmanifest`. En local, `reuseExistingServer` de Playwright peut réutiliser un `preview` sur un vieux `dist/` |
 | Documentation (F27) | Site VitePress, hors pré-cache du SW | https://adriengras.github.io/questionator-z4000-hyperdrive/docs/ — construit par l'étape « Build de la doc » de la CI et déployé avec l'app ; en local, `pnpm preview` la sert à `…/docs/` (avec la barre finale) après les deux builds |
 | GitHub Actions | CI : job `check` (requis par la protection de `main`), job `deploy` | `.github/workflows/ci.yml`, actions épinglées par SHA |
-| SonarQube Cloud | Analyse automatique de `main` et des PR (quality gate) | https://sonarcloud.io/project/overview?id=AdrienGras_questionator-z4000-hyperdrive — `.claude/scripts/sonar-check.sh` |
+| SonarQube Cloud | Analyse de `main` et des PR lancée par la CI (étape « Analyse SonarQube Cloud » du job `check`, F42), couverture comprise (quality gate : nouveau code ≥ 80 %). Analyse automatique **désactivée** (*Administration › Analysis Method*) : les deux modes ne peuvent pas coexister | https://sonarcloud.io/project/overview?id=AdrienGras_questionator-z4000-hyperdrive — config `sonar-project.properties`, contrôle `.claude/scripts/sonar-check.sh` |
+| Codecov | Couverture informative : commentaire de PR, statuts `project` et `patch` non bloquants (F42) | https://app.codecov.io/gh/AdrienGras/questionator-z4000-hyperdrive — config `codecov.yml`, envoi par OIDC depuis le job `check` (aucun jeton) |
 | GitHub Project n°3 | Kanban des tickets (une issue par feature Fxx, label `feature`/`spike`). Champs : Status (Backlog → Ready = spec rédigée dans l’issue → In progress → In review → Done), Priority P0–P2, Size XS–XL | https://github.com/users/AdrienGras/projects/3 — `gh project … --owner AdrienGras` |
 
 ## Variables d'environnement
@@ -54,3 +55,5 @@ Carte des paths, services, accès, commandes. À jour au fil des découvertes.
 ## Accès / secrets
 
 - Aucun secret applicatif (app front-only, données en IndexedDB local).
+- `SONAR_TOKEN` (secret du dépôt GitHub, F42) : jeton d'analyse SonarQube Cloud lu par l'étape « Analyse SonarQube Cloud ». Absent pour une PR venue d'un fork : l'étape est sautée.
+- Codecov : pas de `CODECOV_TOKEN`, l'envoi passe par OIDC (`id-token: write` sur le job `check`) ; une PR de fork envoie sans jeton (dépôt public).
