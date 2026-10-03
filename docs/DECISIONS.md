@@ -1500,3 +1500,21 @@ autre encodage 8 bits.
 
 **Pourquoi** : des fichiers courts qui renvoient vers le site, vérifiés par un test, plutôt qu'une seconde documentation à tenir à jour.
 
+## D99 — F42 (#126) : couverture des tests, Codecov et analyse Sonar par la CI (2026-10-03)
+
+**Question** : comment mesurer la couverture des tests Vitest et la faire juger sur chaque PR ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Mesure | `@vitest/coverage-v8`, script `pnpm test:coverage`, reporters `lcov` et `text-summary` ; `src/`, `scripts/`, `vite/` mesurés, sans tests, `.d.ts`, `src/testing/`, `routeTree.gen.ts`, `src/components/ui/` ; Vitest monté de 5.0.1 à 5.0.3 | Le plugin exige la même version que Vitest. `pnpm test` et `pnpm check` restent sans mesure. |
+| Sonar | Analyse lancée par la CI (`SonarSource/sonarqube-scan-action`, `sonar-project.properties`, secret `SONAR_TOKEN`) ; analyse automatique désactivée ; `.sonarcloud.properties` supprimé | L'analyse automatique n'importe pas de rapport de couverture. |
+| Seuil | Condition « Sonar way » gardée : couverture du nouveau code ≥ 80 % | Mesure sur `main` avant F42 : 96,1 % des lignes, 92,1 % des branches. 80 % laisse de la marge sans tolérer une PR non testée ; Sonar ignore la condition sous 20 lignes nouvelles, donc une PR de doc passe. |
+| Codecov | Commentaire de PR et statuts `project` / `patch` en `informational: true` ; envoi par OIDC, sans `CODECOV_TOKEN` ; `fail_ci_if_error: false` | Sonar reste la seule barrière. OIDC évite un secret à faire tourner ; une panne de Codecov ne bloque pas la CI. |
+| Forks | Une PR de fork n'a pas `SONAR_TOKEN` ni de jeton OIDC : l'analyse Sonar est sautée, Codecov envoie sans jeton | Le mainteneur relance l'analyse en reprenant la branche dans le dépôt. |
+| Ordre du job `check` | Tests couverts → Codecov → Sonar → build | Le scanner a besoin de `coverage/lcov.info` et ne doit pas voir `dist/`. Checkout complet (`fetch-depth: 0`) pour le blame du nouveau code. |
+| Exclusions | Écrites trois fois, avec un commentaire qui renvoie aux deux autres : `vite.config.ts`, `sonar-project.properties`, `codecov.yml` | Chaque outil a sa syntaxe ; aucun ne lit la config des autres. |
+
+**Pourquoi** : la couverture du nouveau code devient une condition du quality gate déjà exigé avant toute revue, et Codecov rend l'évolution visible sur la PR sans ajouter de seconde barrière.
+

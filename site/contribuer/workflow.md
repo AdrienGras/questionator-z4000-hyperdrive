@@ -24,8 +24,10 @@ La PR d'un ticket est fusionnée avant d'ouvrir la branche du suivant, qui part 
    .claude/scripts/sonar-check.sh --pr <n> --wait
    ```
 
-   `--wait` attend que l'analyse porte sur le dernier commit. Corrigez jusqu'à « Quality gate OK », 0 issue et 0 hotspot. Le script sort avec un code non nul sinon.
+   `--wait` attend que l'analyse porte sur le dernier commit. Corrigez jusqu'à « Quality gate OK », 0 issue et 0 hotspot. Le script sort avec un code non nul sinon. Le quality gate compte aussi la couverture du nouveau code (voir [Tests](./tests#couverture)).
 4. Passez la PR en « Ready for review » (`gh pr ready <n>`).
+
+Codecov commente aussi la PR avec l'évolution de la couverture. Ce commentaire informe et ne bloque pas.
 
 La description de la PR part du [modèle de PR](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/.github/pull_request_template.md) : contexte, changements, tests, et la checklist de ces étapes. GitHub le préremplit dans l'interface ; avec `gh pr create -F corps.md`, partez de ce fichier.
 

@@ -62,9 +62,9 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 
 **Découvert** : F01, PR #18 (quality gate en échec découvert après ouverture).
 **Symptôme** : `api/qualitygates/project_status?branch=<branche>` renvoie 404 ; seule `main` apparaît dans `api/project_branches/list`.
-**Cause** : le projet est en analyse automatique, qui ne couvre que la branche principale et les pull requests.
+**Cause** : jusqu'à F42, l'analyse automatique ne couvrait que la branche principale et les pull requests. Depuis F42 (D99), l'analyse est lancée par la CI, qui ne tourne que sur un push sur `main` et sur une pull request : même effet.
 **Workaround** : ouvrir la PR en brouillon, puis `.claude/scripts/sonar-check.sh --pr <n> --wait` avant de la passer en « Ready for review ».
-**Référence** : `.claude/scripts/sonar-check.sh`, `.sonarcloud.properties`.
+**Référence** : `.claude/scripts/sonar-check.sh`, `sonar-project.properties`, `.github/workflows/ci.yml`.
 
 ## Zod 4 : un champ absent n'est signalé que par `invalid_type` (ou `invalid_value` pour un littéral) (2026-09-25)
 
@@ -473,8 +473,8 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 
 **Découvert** : PR #48 (F16), gate en échec sur `new_duplicated_lines_density` (9,5 %, seuil 3).
 **Symptôme** : un dictionnaire `Dictionary<P>` fr + en (ex. `src/domain/export/messages.ts`) a deux blocs de même structure ; le CPD de Sonar ignore les littéraux et signale tout le fichier.
-**Workaround** : ajouter le fichier à `sonar.cpd.exclusions` dans `.sonarcloud.properties` (D61), comme `src/lib/i18n/ui-messages.ts`. Un petit dictionnaire de domaine (quelques clés) passe sous le seuil sans exclusion.
-**Référence** : `.sonarcloud.properties`.
+**Workaround** : ajouter le fichier à `sonar.cpd.exclusions` dans `sonar-project.properties` (`.sonarcloud.properties` avant F42, D61), comme `src/lib/i18n/ui-messages.ts`. Un petit dictionnaire de domaine (quelques clés) passe sous le seuil sans exclusion.
+**Référence** : `sonar-project.properties`.
 
 ## `registerSW` en mode `prompt` recharge chaque onglet sans `onNeedReload`, et réémet `waiting` à chaque chargement (2026-09-30)
 
