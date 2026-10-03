@@ -24,11 +24,21 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-03 — #73 : F29, guide contributeur
+
+**Dernière chose faite** : les 7 pages de `site/contribuer/` sont rédigées d'après le dépôt (`package.json`, CI, configs, `src/`, `.claude/`, `CLAUDE.md`), sans règle recopiée : chaque convention est un lien `blob/main/…#ancre`. `site/contribuer/links.test.ts` vérifie que chaque fichier et chaque ancre (slug GitHub) existent ; `CLAUDE.md` et le README renvoient au guide ; un QUIRKS sur les slugs GitHub.
+
+**Trucs en suspens** : PR à ouvrir en brouillon sur `feat/73-guide-contributeur`, puis `sonar-check.sh --pr <n> --wait`, « Ready for review ». Ne pas merger sans le go explicite de l'utilisateur.
+
+**Prochaine chose à creuser** : retour de revue de la PR ; ensuite, prochain ticket de `main`.
+
+**Notes pour future Claude** : renommer un titre de `docs/*.md` ou de `CLAUDE.md` vers lequel pointe le guide fait échouer `links.test.ts` (ancre introuvable) : mettre à jour le lien. La règle sur les commentaires du guide (pages Conventions) décrit la pratique observée, `CONVENTIONS.md` n'a pas de section dédiée.
+
 ## 2026-10-02 — #72 : F28, guide utilisateur
 
 **Dernière chose faite** : guide complet sur `feat/72-guide-utilisateur`, en local, non poussé. Les 10 pages de `site/guide/` sont rédigées d'après le code (libellés du dictionnaire `fr`), avec 10 captures déterministes générées par `pnpm docs:screenshots` ; `reference-config.test.ts` et `depannage.test.ts` verrouillent la couverture du schéma et des codes d'erreur ; README réduit à un renvoi vers la référence ; D97, trois QUIRKS, deux lignes de BACKLOG.
 
-**Trucs en suspens** : PR #123, revue finale faite et corrigée (parcours *Prise en main* suivi jusqu'au `.xlsx`), une issue SonarQube corrigée (condition aux branches identiques dans `determinism.ts`), passée en « Ready for review » une fois Sonar et la CI verts. Ne pas merger sans le go explicite de l'utilisateur.
+**Trucs en suspens** : rien. PR #123 mergée sur le go de l'utilisateur, #72 fermé, guide en ligne.
 
 **Prochaine chose à creuser** : #73 (F29, section Contribuer de `site/contribuer/`), qui part de `main` à jour après le merge de #72.
 
