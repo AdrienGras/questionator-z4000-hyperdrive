@@ -784,3 +784,27 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : repli SPA de `vite preview`. GitHub Pages, lui, redirige `docs` vers `docs/`.
 **Workaround** : ne tester en local que `docs/` (avec la barre finale) ; le lien « Aide » pointe déjà vers `${BASE_URL}docs/`.
 **Référence** : `e2e/docs.spec.ts`.
+
+## VitePress ne vérifie pas les liens `#ancre` et retire les accents des slugs (2026-10-02)
+
+**Découvert** : F28 (#72), liens du guide vers `reference-config` et `faire-passer`.
+**Symptôme** : un lien `page.md#ancre` faux passe `docs:build` ; `#règles-vérifiées-à-la-création` ne mène nulle part.
+**Cause** : le contrôle de liens morts ne porte que sur les pages. Les slugs automatiques suppriment les accents (`#regles-verifiees-a-la-creation`) mais gardent les guillemets « » d'un titre.
+**Workaround** : vérifier les ancres dans `dist/docs/**/*.html`, et poser un identifiant explicite `{#id}` sur les titres à guillemets. Pour `depannage`, `depannage.test.ts` résout tous les liens `depannage#id`.
+**Référence** : `site/guide/depannage.test.ts`, `site/guide/faire-passer.md` (`{#ajuster-la-note}`).
+
+## Vitest tourne sous jsdom : `new URL(…, import.meta.url)` n'est pas une URL `file:` (2026-10-02)
+
+**Découvert** : F28 (#72), `site/guide/reference-config.test.ts`.
+**Symptôme** : `readFileSync(new URL('./page.md', import.meta.url))` échoue.
+**Cause** : l'environnement jsdom réécrit les URL. Par ailleurs, une clé `paths` dupliquée dans `tsconfig.node.json` casse la transformation Vite/oxc de TOUS les tests.
+**Workaround** : `join(import.meta.dirname, 'page.md')`. Les tests de `site/guide/` atteignent `src/` via `paths` `@/*` (`tsconfig.node.json`) : les modules importés doivent rester sans DOM.
+**Référence** : `site/guide/*.test.ts`, `tsconfig.node.json`.
+
+## Captures Playwright non déterministes : animation recharts, horloge, stockage, service worker (2026-10-02)
+
+**Découvert** : F28 (#72), `pnpm docs:screenshots`.
+**Symptôme** : deux exécutions donnent des PNG différents : barre d'histogramme à mi-hauteur, dates changeantes, icône « Stockage non garanti », pastille de mise à jour, anneau de focus sur un champ.
+**Cause** : `animations: 'disabled'` ne couvre pas l'animation JS de recharts ; `storage.persisted()` est faux en Chromium headless ; un service worker actif peut afficher la pastille de mise à jour ; un champ resté actif dessine son anneau de focus.
+**Workaround** : attendre une barre dessinée à hauteur non nulle et stable (400 ms d'écart) ; `context.clock.setFixedTime` (pas `clock.install`, qui figerait ou ferait dériver les minuteries) ; stubs `storage.persisted/persist` à vrai ; `serviceWorkers: 'block'` ; attendre `document.fonts.ready` ; `blur()` des champs avant capture ; PRNG mulberry32 de graine 72 injecté par `context.addInitScript` (couvre la popup projetée). Les écrans de session sont sombres parce que la config d'exemple fixe `presentation.defaultColorMode` à sombre.
+**Référence** : `e2e/screenshots/determinism.ts`, `e2e/screenshots/guide.spec.ts`.

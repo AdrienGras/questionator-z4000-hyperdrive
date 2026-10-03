@@ -25,13 +25,11 @@ Après un premier chargement en ligne, l'application fonctionne sans réseau : c
 
 ## Écrire une config
 
-Partir du [fichier d'exemple](https://adriengras.github.io/questionator-z4000-hyperdrive/config.example.json) (aussi dans [`examples/config.example.json`](examples/config.example.json)). Sa première ligne pointe vers le JSON Schema publié :
+Le format complet est décrit dans la [référence de la config](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/reference-config.html) du guide. Point de départ : le [fichier d'exemple](examples/config.example.json), dont la première ligne pointe vers le JSON Schema publié :
 
 ```json
 "$schema": "https://adriengras.github.io/questionator-z4000-hyperdrive/config.schema.json"
 ```
-
-VSCode et les éditeurs compatibles en tirent l'autocomplétion des champs et des noms d'icônes [Tabler](https://tabler.io/icons), et affichent au survol la description, les valeurs possibles et le défaut de chaque champ. L'éditeur de l'application (Ctrl+Espace, survol) propose les mêmes aides. L'éditeur ne vérifie que la structure ; les règles croisées (identifiants uniques, barèmes, nombre de questions, couleurs…) sont vérifiées par l'application à la création de session. Les blocs de code des énoncés et des réponses sont colorés pour tous les langages de Shiki ; un langage inconnu est signalé à la création de session et s'affiche en texte brut. Le format complet est décrit dans [`PRODUCT.md`](PRODUCT.md) §6.2.
 
 ## Développement
 

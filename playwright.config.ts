@@ -1,25 +1,33 @@
 import { defineConfig, devices } from '@playwright/test'
 
+/** URL de base de l'app servie par `vite preview` ; partagée avec les captures du guide (F28). */
+export const baseURL = 'http://localhost:4173/questionator-z4000-hyperdrive/'
+
+/** Serveur de test : build de l'app puis de la doc, servis par `vite preview` ; partagé avec les captures. */
+export const webServer = {
+  // `exec` sur le binaire de vite : Playwright arrête alors bien le serveur (via `pnpm preview`, il restait orphelin).
+  // La doc est construite après l'app : `pnpm build` vide `dist/`, `docs:build` écrit dans `dist/docs/`.
+  command:
+    'pnpm build && pnpm docs:build && exec node_modules/.bin/vite preview --port 4173 --strictPort',
+  url: baseURL,
+  reuseExistingServer: !process.env.CI,
+  timeout: 180_000,
+}
+
 /** Tests de bout en bout (F14, D33) : Chromium seul, contre le build de production servi par `vite preview`. */
 export default defineConfig({
   testDir: 'e2e',
+  // Les captures du guide (F28) ont leur propre config : `pnpm docs:screenshots`.
+  testIgnore: ['screenshots/**'],
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
-    baseURL: 'http://localhost:4173/questionator-z4000-hyperdrive/',
+    baseURL,
     // Locale figée : l'accueil s'affiche en français quel que soit le poste, les libellés sont déterministes.
     locale: 'fr-FR',
     trace: 'retain-on-failure',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  webServer: {
-    // `exec` sur le binaire de vite : Playwright arrête alors bien le serveur (via `pnpm preview`, il restait orphelin).
-    // La doc est construite après l'app : `pnpm build` vide `dist/`, `docs:build` écrit dans `dist/docs/`.
-    command:
-      'pnpm build && pnpm docs:build && exec node_modules/.bin/vite preview --port 4173 --strictPort',
-    url: 'http://localhost:4173/questionator-z4000-hyperdrive/',
-    reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
-  },
+  webServer,
 })
