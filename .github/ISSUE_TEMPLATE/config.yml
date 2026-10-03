@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://adriengras.github.io/questionator-z4000-hyperdrive/docs/
+    about: Prise en main, préparation des fichiers, passage, projection, export.
+  - name: Référence de la config
+    url: https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/reference-config.html
+    about: Chaque champ du fichier de configuration.
+  - name: FAQ et dépannage
+    url: https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/depannage.html
+    about: Un message d'erreur, un fichier mal reconnu, des sessions disparues.

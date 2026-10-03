@@ -1,0 +1,21 @@
+name: Question
+description: Une question sur l'usage de l'application ou sur la config.
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        La [documentation](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/) répond à la plupart des questions, en particulier la [référence de la config](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/reference-config.html) et la [FAQ](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/depannage.html).
+  - type: textarea
+    id: question
+    attributes:
+      label: Votre question
+    validations:
+      required: true
+  - type: textarea
+    id: lu
+    attributes:
+      label: Ce que vous avez déjà lu ou essayé
+      description: Les pages de la documentation consultées, l'extrait de config concerné (anonymisé).
+    validations:
+      required: true

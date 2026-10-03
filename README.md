@@ -1,58 +1,50 @@
 # Questionator Z-4000 Hyperdrive
 
+[![CI](https://github.com/AdrienGras/questionator-z4000-hyperdrive/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/AdrienGras/questionator-z4000-hyperdrive/actions/workflows/ci.yml?query=branch%3Amain)
+[![Quality gate](https://sonarcloud.io/api/project_badges/measure?project=AdrienGras_questionator-z4000-hyperdrive&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=AdrienGras_questionator-z4000-hyperdrive)
+[![Application](https://img.shields.io/website?url=https%3A%2F%2Fadriengras.github.io%2Fquestionator-z4000-hyperdrive%2F&label=application&up_message=en%20ligne&down_message=hors%20service&up_color=ff2d95&down_color=lightgrey)](https://adriengras.github.io/questionator-z4000-hyperdrive/)
+[![Licence : MIT](https://img.shields.io/badge/licence-MIT-1a1033)](LICENSE)
+[![Hors ligne](https://img.shields.io/badge/hors%20ligne-oui-ff2d95)](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/hors-ligne.html)
+[![100 % local](https://img.shields.io/badge/donn%C3%A9es-100%20%25%20local-1a1033)](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/prise-en-main.html#vos-donnees-restent-sur-votre-appareil)
+
 ![Animation du principe : un étudiant choisit une difficulté, une question est tirée et projetée sur grand écran, il répond à l'oral pendant que l'examinateur voit la réponse attendue et note sur son ordinateur ; puis on consulte les statistiques et on exporte un fichier Excel.](assets/readme-hero.svg)
 
-Application web pour faire passer des oraux notés par tirage de questions. L'étudiant choisit une catégorie de difficulté, l'application tire une question au hasard, l'examinateur note, et le score cumulé est affiché après chaque question.
+**Faites passer des oraux notés par tirage au sort, sur deux écrans, sans rien installer.**
+L'étudiant choisit une difficulté, l'application tire une question, vous notez. Le score s'affiche après chaque question.
 
-Tout tourne dans le navigateur : aucune donnée ne quitte la machine de l'examinateur.
+**[▶ Ouvrir l'application](https://adriengras.github.io/questionator-z4000-hyperdrive/)** · **[📖 Lire la documentation](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/)** · **[🚀 Prise en main en 5 minutes](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/prise-en-main.html)**
 
-**Application :** https://adriengras.github.io/questionator-z4000-hyperdrive/
+## Ce qu'elle fait
 
-**Documentation :** https://adriengras.github.io/questionator-z4000-hyperdrive/docs/
+- 🎲 **Tirage par difficulté** : catégories, barèmes et questions sont décrits dans un fichier JSON. Un étudiant ne tombe jamais deux fois sur la même question.
+- 🖥️ **Deux écrans** : la vue projetée montre l'énoncé à l'étudiant. Votre écran garde la réponse attendue et les boutons de note.
+- 🧮 **Notation au fil de l'oral** : score cumulé, questions passées, absents, ajustement de la note finale et arrondi.
+- 📊 **Statistiques et export Excel** : histogramme des notes, questions les plus tirées, classeur complet en un clic.
+- ✏️ **Éditeur de config intégré** : autocomplétion, aide au survol, erreurs en direct et aperçu.
+- 🔒 **Tout reste sur votre machine** : aucune donnée n'est envoyée. Vous sauvegardez une session dans un fichier et la réimportez quand vous voulez.
+- ✈️ **Fonctionne hors ligne** : installable comme une application, utilisable sans réseau le jour de l'oral.
 
-> Projet en cours de construction. La spécification complète est dans [`PRODUCT.md`](PRODUCT.md).
+## Essayer en 5 minutes
 
-## Usage prévu
+1. Ouvrez l'[application](https://adriengras.github.io/questionator-z4000-hyperdrive/) et téléchargez les deux fichiers d'exemple proposés sur l'accueil.
+2. Cliquez sur « Créer une session » et déposez les deux fichiers.
+3. Tirez une question, notez, recommencez.
 
-1. Préparer une liste d'étudiants (CSV nom / prénom, partir du [fichier d'exemple](https://adriengras.github.io/questionator-z4000-hyperdrive/students.example.csv), aussi dans [`examples/students.example.csv`](examples/students.example.csv)) et un fichier de configuration (JSON : catégories, questions, barèmes).
-2. Créer une session dans l'application à partir de ces deux fichiers.
-3. Faire passer chaque étudiant, avec une vue projetée pour l'étudiant et une vue de pilotage pour l'examinateur.
-4. Exporter les résultats en Excel.
+La suite est dans la [prise en main](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/prise-en-main.html).
 
-## Hors ligne et installation
+## Écrire votre propre config
 
-Après un premier chargement en ligne, l'application fonctionne sans réseau : créer une session, faire passer, projeter, exporter. Elle s'installe comme une application (Chrome, Edge : icône d'installation dans la barre d'adresse). Quand une nouvelle version est publiée, un bouton « Recharger » la propose ; elle n'est jamais appliquée d'office. Seule exception hors ligne : une image distante dans une question (URL externe) ne s'affiche pas.
-
-## Écrire une config
-
-Le format complet est décrit dans la [référence de la config](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/reference-config.html) du guide. Point de départ : le [fichier d'exemple](examples/config.example.json), dont la première ligne pointe vers le JSON Schema publié :
+Partez du [fichier d'exemple](examples/config.example.json). Sa première ligne pointe vers le JSON Schema publié, ce qui donne l'autocomplétion et la vérification dans VSCode :
 
 ```json
 "$schema": "https://adriengras.github.io/questionator-z4000-hyperdrive/config.schema.json"
 ```
 
-## Développement
+Chaque champ est décrit dans la [référence de la config](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/reference-config.html).
 
-Prérequis : [nvm](https://github.com/nvm-sh/nvm) et pnpm (version fixée par `packageManager`). Activer corepack avant l'installation (Node 24 le fournit ; avec un pnpm global plus ancien, préfixer chaque commande par `corepack pnpm …`).
+## Contribuer
 
-```bash
-nvm use
-corepack enable
-pnpm install
-pnpm dev        # serveur de développement
-pnpm check      # format, lint, dépendances, types, tests (comme la CI, hors build)
-pnpm deps       # sens des imports entre dossiers (dependency-cruiser)
-pnpm build      # build de production dans dist/ (avec le service worker)
-pnpm preview    # sert dist/ pour tester le hors ligne
-pnpm docs:dev   # site de documentation (VitePress), sur http://localhost:5173/questionator-z4000-hyperdrive/docs/
-pnpm docs:build # construit la documentation dans dist/docs/ (après pnpm build)
-```
-
-## Conventions
-
-- Commits en [gitmoji](https://gitmoji.dev), message en français (voir [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md)).
-- Une branche et une pull request par ticket, `Closes #n` dans la PR ; la CI doit être verte.
-- Le [guide contributeur](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/contribuer/installer.html) décrit l'installation du poste, l'architecture, les tests et le workflow.
+Bug, idée ou question : lisez [`CONTRIBUTING.md`](CONTRIBUTING.md). Pour le code, le [guide contributeur](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/contribuer/installer.html) vous mène du clonage à un `pnpm check` vert.
 
 ## Licence
 

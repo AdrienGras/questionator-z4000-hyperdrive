@@ -1,0 +1,27 @@
+name: Fonctionnalité
+description: Proposer une nouvelle fonctionnalité ou un changement de comportement.
+labels: [feature]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        [PRODUCT.md](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/PRODUCT.md) décrit le produit et fait foi. Une proposition qui le modifie passe par un arbitrage, tracé dans les [décisions](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/contribuer/decisions.html).
+  - type: textarea
+    id: besoin
+    attributes:
+      label: Besoin et contexte d'oral
+      description: Ce qui vous manque, et dans quelle situation d'oral (nombre d'étudiants, matière, déroulé).
+    validations:
+      required: true
+  - type: textarea
+    id: proposition
+    attributes:
+      label: Proposition
+      description: Ce que l'application devrait faire.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives envisagées
+      description: Ce que vous faites aujourd'hui à la place, ou d'autres façons de répondre au besoin.
