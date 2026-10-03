@@ -23,7 +23,7 @@ Lisez d'abord la [documentation](https://adriengras.github.io/questionator-z4000
 1. Partez d'une issue : un ticket, une branche, une pull request.
 2. Installez le poste : [Installer le poste](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/contribuer/installer.html).
 3. Ouvrez la pull request en brouillon, avec `Closes #n` : [Workflow](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/contribuer/workflow.html).
-4. Faites passer `pnpm check`, la CI et SonarQube Cloud : [Tests](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/contribuer/tests.html).
+4. Faites passer `pnpm check` ([Tests](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/contribuer/tests.html)), puis la CI et SonarQube Cloud ([Workflow](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/contribuer/workflow.html)).
 5. Passez en « Ready for review ». Le mainteneur relit et fusionne.
 
 Le modèle de pull request reprend la checklist. Les conventions (commits, arborescence, imports) sont dans [Conventions](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/contribuer/conventions.html).

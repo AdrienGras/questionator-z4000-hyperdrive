@@ -2,7 +2,7 @@
 
 ## Versions prises en charge
 
-Seule la version déployée sur [GitHub Pages](https://adriengras.github.io/questionator-z4000-hyperdrive/) est prise en charge. Il n'y a pas de branche maintenue en parallèle : un correctif est publié sur `main`, puis déployé. Une application installée propose la nouvelle version avec son bouton « Recharger ».
+Seule la version déployée sur [GitHub Pages](https://adriengras.github.io/questionator-z4000-hyperdrive/) est prise en charge. Il n'y a pas de branche maintenue en parallèle : un correctif est publié sur `main`, puis déployé. L'application ouverte, dans un onglet ou installée, propose la nouvelle version avec son bouton « Recharger ».
 
 ## Signaler une faille
 
@@ -22,5 +22,5 @@ Ce qui compte pour juger de la gravité d'un rapport :
 
 - **Application statique.** Il n'y a pas de serveur applicatif : GitHub Pages sert des fichiers, tout s'exécute dans le navigateur.
 - **Aucune donnée envoyée.** Les listes d'étudiants, les configs et les notes ne quittent pas l'appareil. Une requête réseau qui emporterait ces données est une faille.
-- **Stockage local du navigateur.** Les sessions vivent dans IndexedDB, sur l'appareil de l'examinateur. Quiconque a accès à ce navigateur y a accès : c'est hors du périmètre.
+- **Stockage local du navigateur.** Les sessions vivent dans IndexedDB, et quelques préférences et brouillons dans `localStorage`, sur l'appareil de l'examinateur. Quiconque a accès à ce navigateur y a accès : c'est hors du périmètre.
 - **Fichiers fournis par l'utilisateur.** Configs, listes d'étudiants et backups sont lus et affichés, et le Markdown des questions est rendu dans la page. Un fichier qui fait exécuter du code ou bloque l'application est une faille. Une image distante dans une question est chargée depuis son URL : c'est voulu, l'auteur de la config la choisit.

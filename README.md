@@ -5,7 +5,7 @@
 [![Application](https://img.shields.io/website?url=https%3A%2F%2Fadriengras.github.io%2Fquestionator-z4000-hyperdrive%2F&label=application&up_message=en%20ligne&down_message=hors%20service&up_color=ff2d95&down_color=lightgrey)](https://adriengras.github.io/questionator-z4000-hyperdrive/)
 [![Licence : MIT](https://img.shields.io/badge/licence-MIT-1a1033)](LICENSE)
 [![Hors ligne](https://img.shields.io/badge/hors%20ligne-oui-ff2d95)](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/hors-ligne.html)
-[![100 % local](https://img.shields.io/badge/donn%C3%A9es-100%20%25%20local-1a1033)](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/prise-en-main.html#vos-donnees-restent-sur-votre-appareil)
+[![100 % local](https://img.shields.io/badge/local-100%20%25-1a1033)](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/prise-en-main.html#vos-donnees-restent-sur-votre-appareil)
 
 ![Animation du principe : un étudiant choisit une difficulté, une question est tirée et projetée sur grand écran, il répond à l'oral pendant que l'examinateur voit la réponse attendue et note sur son ordinateur ; puis on consulte les statistiques et on exporte un fichier Excel.](assets/readme-hero.svg)
 
@@ -34,7 +34,7 @@ La suite est dans la [prise en main](https://adriengras.github.io/questionator-z
 
 ## Écrire votre propre config
 
-Partez du [fichier d'exemple](examples/config.example.json). Sa première ligne pointe vers le JSON Schema publié, ce qui donne l'autocomplétion et la vérification dans VSCode :
+Partez du [fichier d'exemple](examples/config.example.json). Son premier champ, `$schema`, pointe vers le JSON Schema publié, ce qui donne l'autocomplétion et la vérification dans VSCode :
 
 ```json
 "$schema": "https://adriengras.github.io/questionator-z4000-hyperdrive/config.schema.json"

@@ -18,8 +18,8 @@ const FILES = [
   ),
 ]
 
-/** Cible d'un lien Markdown `](cible)`, sans titre. */
-const MARKDOWN_TARGET = /\]\(([^)\s]+)\)/g
+/** Cible d'un lien Markdown `](cible)` ou `](cible "titre")`. */
+const MARKDOWN_TARGET = /\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g
 const REPO_LINK = new RegExp(`${REPO_URL}/(?:blob|tree)/main/([^\\s)#>"'|]+)`, 'g')
 const DOCS_LINK = new RegExp(`${DOCS_URL}([^\\s)#>"'|]*)(?:#([^\\s)>"'|]+))?`, 'g')
 
@@ -27,7 +27,7 @@ const DOCS_LINK = new RegExp(`${DOCS_URL}([^\\s)#>"'|]*)(?:#([^\\s)>"'|]+))?`, '
 function vitepressSlug(heading: string): string {
   return heading
     .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036F]/g, '')
     .replace(/[\s~`!@#$%^&*()\-_+=[\]{}|\\;:"'“”‘’<>,.?/]+/g, '-')
     .replace(/-{2,}/g, '-')
     .replace(/^-+|-+$/g, '')
@@ -35,13 +35,21 @@ function vitepressSlug(heading: string): string {
     .toLowerCase()
 }
 
-/** Ancres d'une page du site : `{#id}` explicites, sinon slug du titre. */
+/** Ancres d'une page du site : `{#id}` explicites, sinon slug du titre, doublons suffixés `-1`, `-2`… */
 function listAnchors(markdown: string): Set<string> {
   const anchors = new Set<string>()
+  const seen = new Map<string, number>()
   const prose = markdown.replace(/^```[\s\S]*?^```/gm, '')
   for (const [, title] of prose.matchAll(/^#{1,6}\s+(.+?)\s*$/gm)) {
     const explicit = /\{#([^}]+)\}$/.exec(title)
-    anchors.add(explicit ? explicit[1] : vitepressSlug(title.replaceAll('`', '')))
+    if (explicit) {
+      anchors.add(explicit[1])
+      continue
+    }
+    const base = vitepressSlug(title.replaceAll('`', ''))
+    const count = seen.get(base) ?? 0
+    seen.set(base, count + 1)
+    anchors.add(count === 0 ? base : `${base}-${count}`)
   }
   return anchors
 }
@@ -69,7 +77,10 @@ function brokenRepoLinks(file: string): string[] {
 
 function brokenDocsLinks(file: string): string[] {
   return [...read(file).matchAll(DOCS_LINK)].flatMap(([, page, anchor]) => {
-    const source = join('site', page === '' ? 'index.md' : page.replace(/\.html$/, '.md'))
+    const source = join(
+      'site',
+      page === '' || page.endsWith('/') ? `${page}index.md` : page.replace(/\.html$/, '.md'),
+    )
     const label = `${file} → ${page}${anchor === undefined ? '' : `#${anchor}`}`
     if (!existsSync(join(ROOT, source))) return [`${label} : page introuvable`]
     if (anchor === undefined || listAnchors(read(source)).has(anchor)) return []
@@ -102,6 +113,10 @@ describe('liens des fichiers communautaires', () => {
       'vos-donnees-restent-sur-votre-appareil',
     )
     expect(vitepressSlug("Construire l'app avant la doc")).toBe('construire-l-app-avant-la-doc')
-    expect([...listAnchors('## Titre {#id}\n### `skips`')]).toEqual(['id', 'skips'])
+    expect([...listAnchors('## Titre {#id}\n### `skips`\n## Skips')]).toEqual([
+      'id',
+      'skips',
+      'skips-1',
+    ])
   })
 })
