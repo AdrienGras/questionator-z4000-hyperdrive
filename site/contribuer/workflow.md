@@ -2,6 +2,10 @@
 
 Le déroulé complet du travail, de l'issue à la fusion. La source de ces règles est [`CLAUDE.md`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/CLAUDE.md#conventions-du-projet), section « Conventions du projet ».
 
+## Partir d'une issue
+
+Tout travail part d'une issue. Pour en ouvrir une, « New issue » propose trois formulaires : **Bug**, **Fonctionnalité** et **Question** ([`.github/ISSUE_TEMPLATE/`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/tree/main/.github/ISSUE_TEMPLATE)). Une issue vide n'est pas acceptée. [`CONTRIBUTING.md`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/CONTRIBUTING.md) dit lequel choisir ; une faille de sécurité passe par [`SECURITY.md`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/SECURITY.md), jamais par une issue.
+
 ## Une branche et une PR par ticket
 
 Chaque ticket a sa branche (`feat/73-guide-contributeur`, `fix/…`) et sa pull request vers `main`. La description de la PR contient `Closes #n`. Personne ne pousse directement sur `main`.
@@ -22,6 +26,8 @@ La PR d'un ticket est fusionnée avant d'ouvrir la branche du suivant, qui part 
 
    `--wait` attend que l'analyse porte sur le dernier commit. Corrigez jusqu'à « Quality gate OK », 0 issue et 0 hotspot. Le script sort avec un code non nul sinon.
 4. Passez la PR en « Ready for review » (`gh pr ready <n>`).
+
+La description de la PR part du [modèle de PR](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/.github/pull_request_template.md) : contexte, changements, tests, et la checklist de ces étapes. GitHub le préremplit dans l'interface ; avec `gh pr create -F corps.md`, partez de ce fichier.
 
 Les commandes exactes sont dans [Pull request](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/CONVENTIONS.md#pull-request--checklist-avant--ready-for-review-). Le script lui-même : [`sonar-check.sh`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/.claude/scripts/sonar-check.sh). Pourquoi une branche seule n'est pas analysée : voir [QUIRKS.md](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/QUIRKS.md#sonarqube-cloud-nanalyse-pas-une-branche-sans-pr-2026-09-24).
 

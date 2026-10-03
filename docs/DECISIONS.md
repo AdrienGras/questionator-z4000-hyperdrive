@@ -1482,3 +1482,21 @@ autre encodage 8 bits.
 | Voix | Vouvoiement, phrases courtes, libellés exacts de l'interface ; relecture `humanize-fr` de chaque page | Cohérence avec les messages de l'app. |
 
 **Pourquoi** : un guide qui décrit ce que fait le code, avec des captures régénérables à l'identique et des tests qui échouent quand la référence ou le dépannage prennent du retard sur le schéma.
+
+## D98 — F41 (#125) : README vitrine et fichiers communautaires (2026-10-03)
+
+**Question** : quels fichiers communautaires, avec quel contenu, pour que le dépôt GitHub serve un enseignant et un contributeur sans dupliquer la documentation ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| README | Vitrine : badges, animation, accroche, trois liens d'appel, fonctionnalités, essai en trois étapes, config, contribuer ; plus de section « Développement » | Le guide contributeur couvre l'installation (F29). |
+| Version dans le formulaire de bug | L'interface n'affiche pas de version : le champ demande la date d'utilisation et le mode (onglet ou installée), et rappelle qu'un backup porte `appVersion` | Le ticket supposait une version affichée ; l'afficher est au BACKLOG plutôt que d'élargir le ticket. |
+| Code de conduite | Contributor Covenant 2.1, traduction française officielle (dépôt `EthicalSource/contributor_covenant`, branche `release`), seul le contact remplacé : `@AdrienGras` via son profil GitHub | Aucune adresse e-mail publiée. |
+| `SECURITY.md` | Version déployée seule prise en charge ; signalement privé GitHub ; modèle de menace en quatre points (statique, aucune donnée envoyée, IndexedDB, fichiers utilisateur dont le Markdown rendu) ; image distante d'une question déclarée voulue | Donne au rapporteur de quoi juger la gravité. |
+| Formulaires d'issue | `bug` / `feature` / `question` (labels existants), `blank_issues_enabled: false`, liens vers doc, référence, dépannage | Discussions désactivées : une question passe par un formulaire. |
+| Garde-fou | `scripts/community-links.test.ts` : liens relatifs, liens `blob/main` ou `tree/main` et liens vers `…/docs/*.html#ancre` (page de `site/` et slug VitePress) de tous les fichiers communautaires | Couvre plus que les seuls liens relatifs du README demandés par le ticket, pour le même coût. |
+
+**Pourquoi** : des fichiers courts qui renvoient vers le site, vérifiés par un test, plutôt qu'une seconde documentation à tenir à jour.
+

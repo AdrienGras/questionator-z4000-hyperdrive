@@ -1,0 +1,57 @@
+name: Bug
+description: L'application ne fait pas ce qu'elle devrait.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Avant d'ouvrir l'issue, cherchez le message d'erreur dans la [FAQ et dépannage](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/depannage.html).
+        Une faille de sécurité ne se signale pas ici : voir [SECURITY.md](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/SECURITY.md).
+  - type: textarea
+    id: observe
+    attributes:
+      label: Ce qui s'est passé
+      description: Le comportement observé, avec le message d'erreur exact s'il y en a un.
+    validations:
+      required: true
+  - type: textarea
+    id: attendu
+    attributes:
+      label: Ce qui était attendu
+    validations:
+      required: true
+  - type: textarea
+    id: etapes
+    attributes:
+      label: Étapes pour reproduire
+      placeholder: |
+        1. Créer une session avec les fichiers d'exemple
+        2. Tirer une question dans la catégorie « Facile »
+        3. …
+    validations:
+      required: true
+  - type: input
+    id: environnement
+    attributes:
+      label: Navigateur et système
+      placeholder: Firefox 143, Windows 11
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Date d'utilisation et mode
+      description: L'application n'affiche pas de numéro de version. Indiquez le jour où le bug s'est produit, et si l'application était ouverte dans un onglet ou installée. Un backup de session contient le numéro de version.
+      placeholder: 2026-10-03, application installée
+    validations:
+      required: true
+  - type: textarea
+    id: fichiers
+    attributes:
+      label: Config ou liste d'étudiants (anonymisées)
+      description: Si le bug dépend de vos fichiers, joignez-les ou collez l'extrait utile. **Remplacez les noms des étudiants** avant de les joindre.
+  - type: textarea
+    id: captures
+    attributes:
+      label: Captures d'écran
+      description: Glissez les images ici. Masquez les noms des étudiants.

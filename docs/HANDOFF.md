@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-03 — #125 : F41, README et fichiers communautaires
+
+**Dernière chose faite** : README réécrit en vitrine (badges CI, quality gate, application, licence, hors ligne, 100 % local ; trois liens d'appel ; sept fonctionnalités vérifiées dans le guide et le code). Ajout de `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (traduction officielle 2.1, contact remplacé seul), `SECURITY.md`, trois formulaires d'issue + `config.yml`, modèle de PR. `scripts/community-links.test.ts` vérifie liens relatifs, liens vers `main` et liens vers la doc (page + ancre VitePress). Renvois dans *Workflow*, *Installer le poste* et `CLAUDE.md`. D98, une ligne de BACKLOG.
+
+**Trucs en suspens** : PR #127, revue faite et corrigée, CI verte, SonarQube OK (0 issue, 0 hotspot), passée en « Ready for review ». Réglages du dépôt appliqués (description, site, signalement privé de vulnérabilité) ; *Insights › Community Standards* ne lit que `main` : à vérifier après le merge. Le contact du code de conduite renvoie au profil GitHub, qui n'affiche pas de canal privé : à trancher par l'utilisateur. Ne pas merger sans le go explicite de l'utilisateur.
+
+**Prochaine chose à creuser** : #126 (F42, couverture Codecov et SonarQube) ou #77 (vérifications manuelles V1), puis #85 (Node 26 LTS, pas avant le 2026-10-28).
+
+**Notes pour future Claude** : l'interface n'affiche pas `APP_VERSION` ; le formulaire de bug demande donc la date et le mode (D98, BACKLOG « Accueil et backup »). Renommer un titre d'une page de `site/` vers lequel pointe un fichier communautaire fait échouer `community-links.test.ts`. `rtk vitest` ne sait pas toujours analyser la sortie : lire `.vitest/json/output.json`.
+
 ## 2026-10-03 — #73 : F29, guide contributeur
 
 **Dernière chose faite** : les 7 pages de `site/contribuer/` sont rédigées d'après le dépôt (`package.json`, CI, configs, `src/`, `.claude/`, `CLAUDE.md`), sans règle recopiée : chaque convention est un lien `blob/main/…#ancre`. `site/contribuer/links.test.ts` vérifie que chaque fichier et chaque ancre (slug GitHub) existent ; `CLAUDE.md` et le README renvoient au guide ; un QUIRKS sur les slugs GitHub.
