@@ -28,7 +28,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 **Dernière chose faite** : les 7 pages de `site/contribuer/` sont rédigées d'après le dépôt (`package.json`, CI, configs, `src/`, `.claude/`, `CLAUDE.md`), sans règle recopiée : chaque convention est un lien `blob/main/…#ancre`. `site/contribuer/links.test.ts` vérifie que chaque fichier et chaque ancre (slug GitHub) existent ; `CLAUDE.md` et le README renvoient au guide ; un QUIRKS sur les slugs GitHub.
 
-**Trucs en suspens** : PR à ouvrir en brouillon sur `feat/73-guide-contributeur`, puis `sonar-check.sh --pr <n> --wait`, « Ready for review ». Ne pas merger sans le go explicite de l'utilisateur.
+**Trucs en suspens** : PR #124, revue faite et corrigée, page *Installer le poste* suivie dans un clone neuf jusqu'à `pnpm check` vert, SonarQube OK (0 issue, 0 hotspot), passée en « Ready for review » une fois la CI verte. Ne pas merger sans le go explicite de l'utilisateur.
 
 **Prochaine chose à creuser** : retour de revue de la PR ; ensuite #77 (vérifications manuelles V1), puis #85 (passage à Node 26 LTS, pas avant le 2026-10-28).
 
