@@ -21,8 +21,8 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Passer `.nvmrc` (et la CI) à Node 26 une fois LTS (prévu le 2026-10-28) ; Node 24 passe en maintenance le 2026-10-20. → #85
 - [x] Évaluer oxfmt en remplacement de Prettier + prettier-plugin-tailwindcss quand il sort en 1.0 (tri Tailwind natif via `sortTailwindcss`). → #88 *Fait en #88 (D94) : adopté en 0.71, Prettier et son plugin retirés.*
 - [x] `check:hero` : vérifier que le SVG est du XML bien formé (`&` nu, balises) et que la racine porte `width`/`height` (#74, QUIRKS). *Sans objet depuis #130 (D100) : SVG et `check:hero` retirés.*
-- [ ] Réutiliser la bannière du README (`assets/readme-banner.webp`, ou son image fixe) en en-tête du site de doc (F27, #71). *Le SVG d'origine a été retiré en #130 (D100).*
-- [ ] Vérifier la bannière du README dans l'application GitHub mobile (lecture du WebP animé, `<picture>` et mouvement réduit) : seul l'affichage sur ordinateur a été contrôlé (#130, D100).
+- [ ] Réutiliser la bannière du README (`assets/readme-banner.avif`, ou son image fixe) en en-tête du site de doc (F27, #71). *Le SVG d'origine a été retiré en #130 (D100).*
+- [ ] Vérifier la bannière du README dans l'application GitHub mobile (lecture de l’AVIF animé, `<picture>` et mouvement réduit) : seul l'affichage sur ordinateur a été contrôlé (#130, D100).
 
 ## Config
 
