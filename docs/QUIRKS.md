@@ -816,3 +816,28 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : GitHub met en minuscules, retire tout sauf lettres Unicode, chiffres, espaces, tirets et `_`, remplace chaque espace par un tiret sans fusion, et suffixe les doublons `-1`, `-2`. VitePress applique d'autres règles.
 **Workaround** : `site/contribuer/links.test.ts` recalcule les slugs GitHub des titres du fichier visé ; garder les liens `blob/main/…#ancre` et ne jamais réutiliser la règle de VitePress. Après un renommage de titre dans `docs/`, relancer `pnpm test`.
 **Référence** : `site/contribuer/links.test.ts` ; voir aussi « VitePress ne vérifie pas les liens `#ancre` et retire les accents des slugs » (2026-10-02).
+
+## Vitest, Sonar et Codecov n'affichent pas la même couverture (2026-10-04)
+
+**Découvert** : F42 (#126), premier passage de `main` après le merge de la PR #128.
+**Symptôme** : sur le même commit, `pnpm test:coverage` donne 96,1 % des lignes, SonarQube Cloud 94,8 % et Codecov 93,2 % (badge « 93% »).
+**Cause** : chaque outil calcule à sa façon à partir du même `lcov.info`. Vitest sépare lignes, branches et instructions ; Sonar combine lignes et conditions dans `coverage` ; Codecov compte une ligne à branche partiellement couverte comme manquée.
+**Workaround** : aucun, c'est normal. Comparer un outil avec lui-même dans le temps, jamais deux outils entre eux. Le seuil qui bloque est celui de Sonar (couverture du nouveau code, D99).
+**Référence** : `vite.config.ts` (`test.coverage`), `sonar-project.properties`, `codecov.yml`.
+
+## Analyse SonarQube par la CI : échec tant que `SONAR_TOKEN` manque ou que l'analyse automatique est active (2026-10-04)
+
+**Découvert** : F42 (#126), premier passage de la PR #128.
+**Symptôme** : l'étape « Analyse SonarQube Cloud » échoue avec « Not authorized or project not found. Please check the 'SONAR_TOKEN'… » ; le job `check` est rouge et la PR bloquée par la protection de `main`.
+**Cause** : le scanner exige le secret `SONAR_TOKEN`, et SonarCloud refuse une analyse lancée par la CI tant que l'analyse automatique est activée. Une PR venue d'un fork n'a jamais le secret (l'étape est alors sautée par sa condition `if`).
+**Workaround** : créer le jeton (*My Account › Security*), `gh secret set SONAR_TOKEN`, désactiver l'analyse automatique (*Administration › Analysis Method*), puis `gh run rerun <id> --failed`. Ne jamais merger avec cette étape en échec : `deploy` dépend de `check`, `main` ne serait plus déployée.
+**Référence** : `.github/workflows/ci.yml`, `docs/ENVIRONMENT.md` (Accès / secrets), D99.
+
+## Codecov commente la PR mais ne pose pas ses statuts sans l'application GitHub (2026-10-04)
+
+**Découvert** : F42 (#126), PR #129.
+**Symptôme** : le commentaire Codecov (compte `codecov-commenter`) apparaît avec le diff de couverture, mais aucun statut `codecov/project` ni `codecov/patch` n'est posé sur le commit ; le commentaire avertit « Your organization needs to install the Codecov GitHub app ».
+**Cause** : l'envoi par OIDC suffit pour le rapport et le commentaire ; les statuts de commit passent par l'application GitHub Codecov.
+**Workaround** : installer l'application sur le compte (https://github.com/apps/codecov/installations/select_target), limitée à ce dépôt. Les statuts restent informatifs (`codecov.yml`).
+**Référence** : `codecov.yml`, `docs/ENVIRONMENT.md` (Services), D99.
+
