@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type FormEvent, type RefObject } from 'react'
+import { useEffect, useId, useRef, useState, type SubmitEvent, type RefObject } from 'react'
 import { IconMinus, IconPlus } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -181,7 +181,7 @@ function AdjustmentForm({
     setInput(formatInput(fromMilli(asMilli(next)), locale))
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     if (value === null || pending) return
     const trimmed = reason.trim()

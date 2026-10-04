@@ -30,10 +30,16 @@ export class QuestionatorDb extends Dexie {
       this.#setStatus('outdated')
       return false
     })
-    // Ouverture anticipée (D47) : un échec (IndexedDB bloqué ou absent) ne doit jamais rester un
-    // rejet non géré. `versionchange` ne peut se produire qu'après une ouverture réussie, donc si
-    // ce catch s'exécute le statut est forcément encore 'open' ; le garde reste là pour ne jamais
-    // écraser un 'outdated' déjà posé, sans complexifier plus que nécessaire.
+  }
+
+  /**
+   * Ouverture anticipée (D47), appelée par `createDb` et non par le constructeur (Sonar S7059) :
+   * un échec (IndexedDB bloqué ou absent) ne doit jamais rester un rejet non géré.
+   * `versionchange` ne peut se produire qu'après une ouverture réussie, donc si ce catch
+   * s'exécute le statut est forcément encore 'open' ; le garde reste là pour ne jamais écraser
+   * un 'outdated' déjà posé, sans complexifier plus que nécessaire.
+   */
+  openEagerly(): void {
     this.open().catch(() => {
       if (this.#status === 'open') this.#setStatus('unavailable')
     })
@@ -57,7 +63,9 @@ export class QuestionatorDb extends Dexie {
 }
 
 export function createDb(name: string, options?: DexieOptions): QuestionatorDb {
-  return new QuestionatorDb(name, options)
+  const database = new QuestionatorDb(name, options)
+  database.openEagerly()
+  return database
 }
 
 export const db = createDb('questionator')

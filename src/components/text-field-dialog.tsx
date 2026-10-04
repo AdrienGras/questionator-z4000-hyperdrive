@@ -1,4 +1,4 @@
-import { useId, useState, type FormEvent } from 'react'
+import { useId, useState, type SubmitEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -72,7 +72,7 @@ function TextFieldForm({
   const [failed, setFailed] = useState(false)
   const invalid = required && value.trim() === ''
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     if (invalid || saving) return
     onSavingChange(true)

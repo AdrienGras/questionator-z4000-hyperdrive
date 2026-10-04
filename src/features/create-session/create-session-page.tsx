@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouter } from '@tanstack/react-router'
-import { useEffect, useId, useRef, type DragEvent, type FormEvent } from 'react'
+import { useEffect, useId, useRef, type DragEvent, type SubmitEvent } from 'react'
 import { DbStatusBanner } from '@/components/db-status-banner'
 import { PageShell } from '@/components/page-shell'
 import { Button } from '@/components/ui/button'
@@ -76,7 +76,7 @@ export function CreateSessionPage() {
     }
   }, [])
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     const from = router.state.location.pathname
     const id = await form.submit()

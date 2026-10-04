@@ -1,4 +1,4 @@
-import { useId, useRef, useState, type FormEvent } from 'react'
+import { useId, useRef, useState, type SubmitEvent } from 'react'
 import { IconUserPlus } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -76,7 +76,7 @@ export function AddStudentDialog({ ui, session, disabled, onAdd }: AddStudentDia
     else if (outcome === 'failed') setFailed(true)
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     void submit(false)
   }
