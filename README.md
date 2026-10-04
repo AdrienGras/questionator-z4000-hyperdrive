@@ -10,6 +10,7 @@
 
 <picture>
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/readme-banner-still.webp">
+  <source type="image/avif" srcset="assets/readme-banner.avif">
   <img src="assets/readme-banner.webp" width="800" alt="Présentation animée : vous préparez vos questions et vos barèmes ; l'étudiant choisit une difficulté, une question est tirée au sort et projetée ; vous voyez la réponse attendue et notez, le score s'affiche ; puis statistiques et export Excel. Aucune donnée ne quitte votre machine.">
 </picture>
 
