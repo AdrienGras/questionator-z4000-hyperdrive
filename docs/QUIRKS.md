@@ -841,3 +841,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Workaround** : installer l'application sur le compte (https://github.com/apps/codecov/installations/select_target), limitée à ce dépôt. Les statuts restent informatifs (`codecov.yml`).
 **Référence** : `codecov.yml`, `docs/ENVIRONMENT.md` (Services), D99.
 
+## L'analyse Sonar par la CI voit des issues que l'analyse automatique ne voyait pas (2026-10-04)
+
+**Découvert** : premier passage de `main` après F42 (#126) et #130 ; corrigé en #132.
+**Symptôme** : quality gate OK, mais 9 issues apparaissent d'un coup sur `main` dans du code inchangé depuis des semaines : 8 × `typescript:S1874` (`FormEvent` déprécié) et 1 × `typescript:S7059` (`this.open()` dans le constructeur de `QuestionatorDb`).
+**Cause** : le scanner de la CI tourne après `pnpm install` et résout les types des dépendances (`@types/react` 19.3 marque `FormEvent` `@deprecated`) ; l'analyse automatique n'avait pas ces types. Le gate ne juge que le nouveau code, d'où un gate vert malgré les issues.
+**Workaround** : après un changement de mode d'analyse ou une montée de version de types, lancer `sonar-check.sh --branch main` et corriger les issues révélées dans un ticket dédié.
+**Référence** : `.github/workflows/ci.yml` (« Analyse SonarQube Cloud »), D99, #132.
+

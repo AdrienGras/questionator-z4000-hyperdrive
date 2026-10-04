@@ -24,11 +24,21 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-04 — #132 : correctif des issues Sonar révélées par l'analyse en CI
+
+**Dernière chose faite** : #129 et #131 mergées ; bannière AVIF en ligne. Puis #132 : `FormEvent` → `SubmitEvent` dans les 4 formulaires (S1874), et l'ouverture anticipée de `QuestionatorDb` sort du constructeur vers `openEagerly()`, appelée par `createDb` (S7059, comportement D47 inchangé). QUIRKS et règle tacite dans CONVENTIONS (« Dialogue de saisie »).
+
+**Trucs en suspens** : PR de #132 ; après le merge, vérifier `sonar-check.sh --branch main` à 0 issue. Application GitHub Codecov installée par l'utilisateur : statuts `project` / `patch` à constater sur cette PR. Vidéo source retirée de la racine. Contact privé du code de conduite toujours à trancher. Branches locales mergées à nettoyer si l'utilisateur le demande.
+
+**Prochaine chose à creuser** : #77 (vérifications manuelles V1), puis #85 (passage à Node 26 LTS, pas avant le 2026-10-28).
+
+**Notes pour future Claude** : ne jamais construire `QuestionatorDb` directement hors de `createDb`, sinon la base n'est pas ouverte d'avance et un IndexedDB bloqué ne passe plus en `unavailable` avant la première requête.
+
 ## 2026-10-04 — #130 : bannière animée du README
 
 **Dernière chose faite** : la vidéo de présentation fournie par l'utilisateur (motion design, 30 s) est convertie en AVIF animé 1600 px, 30 i/s (`assets/readme-banner.avif`, 2,5 Mo), affichée en tête du README dans un `<picture>`, avec un WebP animé 800 px en secours et une image fixe pour le mouvement réduit (`assets/readme-banner-still.webp`). La première version, en WebP 800 px / 12 i/s, était pixélisée et saccadée. `assets/readme-hero.svg`, `check:hero` et son script sont retirés ; `scripts/readme-banner.test.ts` les remplace. D100 révise D95.
 
-**Trucs en suspens** : PR empilée sur #129 (mémoire F42), à merger après elle. Vérifier le rendu de la bannière sur la page de la branche, puis dans l'application GitHub mobile (BACKLOG). La vidéo source `questionator-promo-muette.mp4` reste non suivie à la racine : à ranger hors du dépôt par l'utilisateur.
+**Trucs en suspens** : PR #131 mergée après #129, #130 fermé ; rendu validé par l'utilisateur sur ordinateur. Application GitHub mobile non vérifiée (BACKLOG).
 
 **Prochaine chose à creuser** : #77 (vérifications manuelles V1), puis #85 (passage à Node 26 LTS, pas avant le 2026-10-28).
 
