@@ -8,7 +8,11 @@
 [![Hors ligne](https://img.shields.io/badge/hors%20ligne-oui-ff2d95)](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/hors-ligne.html)
 [![100 % local](https://img.shields.io/badge/local-100%20%25-1a1033)](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/prise-en-main.html#vos-donnees-restent-sur-votre-appareil)
 
-![Animation du principe : un étudiant choisit une difficulté, une question est tirée et projetée sur grand écran, il répond à l'oral pendant que l'examinateur voit la réponse attendue et note sur son ordinateur ; puis on consulte les statistiques et on exporte un fichier Excel.](assets/readme-hero.svg)
+<picture>
+  <source media="(prefers-reduced-motion: reduce)" srcset="assets/readme-banner-still.webp">
+  <source type="image/avif" srcset="assets/readme-banner.avif">
+  <img src="assets/readme-banner.webp" width="800" alt="Présentation animée : vous préparez vos questions et vos barèmes ; l'étudiant choisit une difficulté, une question est tirée au sort et projetée ; vous voyez la réponse attendue et notez, le score s'affiche ; puis statistiques et export Excel. Aucune donnée ne quitte votre machine.">
+</picture>
 
 **Faites passer des oraux notés par tirage au sort, sur deux écrans, sans rien installer.**
 L'étudiant choisit une difficulté, l'application tire une question, vous notez. Le score s'affiche après chaque question.

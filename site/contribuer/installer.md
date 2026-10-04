@@ -40,8 +40,7 @@ La commande enchaîne, dans cet ordre, et s'arrête au premier échec :
 2. `pnpm lint` : oxlint, avec les règles qui demandent les types ;
 3. `pnpm deps` : sens des imports entre dossiers (voir [Architecture](./architecture)) ;
 4. `pnpm typecheck` : `tsc -b` ;
-5. `pnpm check:hero` : contrôle de l'animation du README ;
-6. `pnpm test` : tous les tests Vitest.
+5. `pnpm test` : tous les tests Vitest.
 
 Elle reproduit les étapes de la CI qui précèdent le build. Elle ne lance ni `pnpm build`, ni `pnpm docs:build`, ni les tests de bout en bout : faites-les tourner avant d'ouvrir une PR si votre changement les concerne.
 
@@ -50,7 +49,7 @@ Elle reproduit les étapes de la CI qui précèdent le build. Elle ne lance ni `
 | Script | Rôle |
 |---|---|
 | `pnpm dev` | Serveur de développement Vite, port 5173. Régénère `src/routeTree.gen.ts`. |
-| `pnpm check` | Format, lint, dépendances, types, animation du README et tests. |
+| `pnpm check` | Format, lint, dépendances, types et tests. |
 | `pnpm format` / `pnpm format:check` | Formate avec oxfmt / vérifie le formatage sans rien écrire. |
 | `pnpm lint` | oxlint (`--type-aware --deny-warnings`). |
 | `pnpm typecheck` | `tsc -b`. |

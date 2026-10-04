@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-04 — #130 : bannière animée du README
+
+**Dernière chose faite** : la vidéo de présentation fournie par l'utilisateur (motion design, 30 s) est convertie en AVIF animé 1600 px, 30 i/s (`assets/readme-banner.avif`, 2,5 Mo), affichée en tête du README dans un `<picture>`, avec un WebP animé 800 px en secours et une image fixe pour le mouvement réduit (`assets/readme-banner-still.webp`). La première version, en WebP 800 px / 12 i/s, était pixélisée et saccadée. `assets/readme-hero.svg`, `check:hero` et son script sont retirés ; `scripts/readme-banner.test.ts` les remplace. D100 révise D95.
+
+**Trucs en suspens** : PR empilée sur #129 (mémoire F42), à merger après elle. Vérifier le rendu de la bannière sur la page de la branche, puis dans l'application GitHub mobile (BACKLOG). La vidéo source `questionator-promo-muette.mp4` reste non suivie à la racine : à ranger hors du dépôt par l'utilisateur.
+
+**Prochaine chose à creuser** : #77 (vérifications manuelles V1), puis #85 (passage à Node 26 LTS, pas avant le 2026-10-28).
+
+**Notes pour future Claude** : régénérer depuis la vidéo : AVIF `ffmpeg -i <video> -vf "fps=30,scale=1600:-2:flags=lanczos" -c:v libsvtav1 -crf 38 -preset 6 -pix_fmt yuv420p -f avif assets/readme-banner.avif` ; secours `-vf "fps=12,scale=800:-1:flags=lanczos" -c:v libwebp_anim -quality 60 -compression_level 6 -loop 0 assets/readme-banner.webp` ; image fixe `-ss 29.5 -frames:v 1 -vf scale=1600:-2:flags=lanczos -c:v libwebp -quality 85`. Ne pas baisser la largeur sous 1600 px ni la cadence sous 30 i/s (retour utilisateur). Pillow lit les WebP animés (`n_frames`) quand ffmpeg n'a pas de décodeur `libwebp`.
+
 ## 2026-10-04 — #126 : F42, couverture des tests (Codecov et SonarQube)
 
 **Dernière chose faite** : PR #128 mergée. `pnpm test:coverage` (`@vitest/coverage-v8`, Vitest monté en 5.0.3) ; le job `check` lance les tests couverts, envoie `coverage/lcov.info` à Codecov par OIDC, puis lance le scanner Sonar avant le build. `sonar-project.properties` remplace `.sonarcloud.properties` ; l'analyse automatique est désactivée et `SONAR_TOKEN` est en secret. Badge Codecov au README, section *Couverture* de la page *Tests*, D99. Sur `main` : Sonar 94,8 %, Codecov 93,2 %, déploiement vert. Job `check` : +47 s.

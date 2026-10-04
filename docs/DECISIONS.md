@@ -1518,3 +1518,20 @@ autre encodage 8 bits.
 
 **Pourquoi** : la couverture du nouveau code devient une condition du quality gate déjà exigé avant toute revue, et Codecov rend l'évolution visible sur la PR sans ajouter de seconde barrière.
 
+## D100 — #130 : bannière animée du README tirée d'une vidéo (2026-10-04)
+
+**Question** : comment afficher en tête du README la vidéo de présentation refaite en motion design (30 s, 1920×1080, muette) à la place du SVG animé de D95 ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Remplacement | La vidéo remplace `assets/readme-hero.svg` ; SVG, `scripts/check-readme-hero.ts` et `pnpm check:hero` retirés | Choix de l'utilisateur. Révise D95 : on passe d'un SVG écrit à la main à un rendu vidéo. |
+| Format | **AVIF animé**, 1600 px (affiché en 800 px : net sur écran haute densité), 30 i/s comme la vidéo, boucle infinie : 2,5 Mo (`libsvtav1`, CRF 38). WebP animé 800 px, 12 i/s (3,9 Mo) en secours dans le `<img>` pour un navigateur sans AVIF animé | Première version en WebP 800 px / 12 i/s jugée pixélisée et saccadée par l'utilisateur. Le même rendu net et fluide en WebP (1600 px, 24 i/s) pèse 21,8 Mo ; en GIF 960 px, 40,6 Mo avec des dégradés en bandes. Un SVG ne peut pas reprendre une vidéo. Une vidéo MP4 du dépôt n'est pas lue dans un README (seules les pièces jointes téléversées le sont, avec contrôles et sans boucle automatique). GitHub sert le fichier en `image/avif` ; rendu vérifié sur la page de la branche. |
+| Mouvement réduit | `<picture>` : d'abord `<source media="(prefers-reduced-motion: reduce)">` vers une image fixe (dernière image : titre et adresse, WebP 1600 px, 112 Ko), puis `<source type="image/avif">` | Remplace le bloc `prefers-reduced-motion` interne au SVG. |
+| Texte alternatif | Le principe au vouvoiement (préparer, tirer, projeter, noter, statistiques, export, données locales), sans genrer l'examinateur | Même rôle que dans D95. |
+| Source | La vidéo n'est pas versionnée (14 Mo) | Le dépôt ne garde que le rendu ; la source reste chez l'utilisateur. |
+| Garde-fou | `scripts/readme-banner.test.ts` : AVIF animé (marque `avis`) ≤ 5 Mo, WebP animé de secours ≤ 5 Mo, image fixe non animée ≤ 200 Ko, balisage `<picture>` du README, images HTML existantes | Remplace `check:hero` : rien à contrôler dans un fichier binaire au-delà du poids et du format. |
+
+**Pourquoi** : la vidéo explique mieux le principe que le SVG ; l'AVIF animé est le seul format que GitHub lit en boucle dans un README avec une image nette et fluide pour un poids acceptable.
+

@@ -24,7 +24,7 @@ Carte des paths, services, accès, commandes. À jour au fil des découvertes.
 - **Commandes principales** :
   - `nvm use && corepack pnpm install`
   - `pnpm dev` — serveur de dev (régénère `src/routeTree.gen.ts`)
-  - `pnpm check` — format, lint type-aware, dépendances entre dossiers, types, tests, `check:hero` (comme la CI, hors build)
+  - `pnpm check` — format, lint type-aware, dépendances entre dossiers, types, tests (comme la CI, hors build et sans couverture)
   - `pnpm deps` — dependency-cruiser sur `src/` (`.dependency-cruiser.cjs`, parseur swc) ; vérifier que « N modules » n'est pas 0
   - `pnpm build` / `pnpm preview` — build de prod dans `dist/` et prévisualisation sous `/questionator-z4000-hyperdrive/`
   - Après `pnpm build` (comme la CI) : `pnpm check:bundle` (Recharts, xlsx, Shiki, CodeMirror hors du bundle initial), `pnpm check:precache` (tout `dist/` pré-caché), `pnpm check:budget` (budgets gzip, D88 : premier affichage de l'accueil ≤ 275 Ko, chaque chunk ≤ 135 Ko hors `icons-*` et grammaires/thèmes Shiki ; valeurs et mesures en tête de `scripts/check-bundle-budget.ts`)

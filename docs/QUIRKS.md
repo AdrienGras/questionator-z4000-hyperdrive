@@ -720,7 +720,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : on craignait que `@media (prefers-color-scheme: dark)` dans un SVG en `<img>` suive l'OS, ce qui aurait imposé `<picture>` et une variante sombre.
 **Cause** : GitHub évalue ce média selon le thème réglé dans GitHub. Vérifié sur ordinateur dans les deux croisements (GitHub sombre avec OS clair, et l'inverse).
 **Workaround** : aucun besoin. Un seul SVG avec son propre `@media (prefers-color-scheme: dark)` suffit, sans `<picture>`. Application GitHub mobile non vérifiée.
-**Référence** : `assets/readme-hero.svg`, D95.
+**Référence** : `assets/readme-hero.svg` (retiré en #130, D100), D95.
 
 ## Un SVG peut s'afficher inline et échouer en `<img>` : `--` dans un commentaire, taille intrinsèque absente (2026-10-02)
 
@@ -728,7 +728,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Symptôme** : les captures de revue étaient correctes, mais le fichier ouvert seul affichait une erreur d'analyse ; en `<img>`, le README GitHub n'aurait rien montré. Sans `width` / `height` à la racine, un `<img>` sans taille l'affiche en 300 × 150 px.
 **Cause** : les captures inséraient le SVG dans une page HTML, dont l'analyseur tolère `--` dans un commentaire ; un SVG ouvert seul ou en `<img>` passe par l'analyseur XML strict (XML 1.0 §2.5 interdit `--` dans un commentaire, même pour citer une variable CSS). Le `viewBox` seul ne donne qu'un ratio, pas de taille.
 **Workaround** : ne jamais écrire `--` dans un commentaire XML (`check:hero` le refuse désormais) ; poser `width="1200" height="600"` à la racine (GitHub réduit par `max-width: 100%`). Vérifier un SVG par `page.goto('file://…')` ou un `<img>`, pas seulement inline.
-**Référence** : `assets/readme-hero.svg`, `scripts/check-readme-hero.ts`, D95.
+**Référence** : `assets/readme-hero.svg`, `scripts/check-readme-hero.ts` (retirés en #130, D100), D95.
 
 ## Le lien « Aide » mène à une page introuvable sous `pnpm dev` (2026-10-02)
 
