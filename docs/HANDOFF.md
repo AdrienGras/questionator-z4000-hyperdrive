@@ -28,7 +28,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 **Dernière chose faite** : PR #128 mergée. `pnpm test:coverage` (`@vitest/coverage-v8`, Vitest monté en 5.0.3) ; le job `check` lance les tests couverts, envoie `coverage/lcov.info` à Codecov par OIDC, puis lance le scanner Sonar avant le build. `sonar-project.properties` remplace `.sonarcloud.properties` ; l'analyse automatique est désactivée et `SONAR_TOKEN` est en secret. Badge Codecov au README, section *Couverture* de la page *Tests*, D99. Sur `main` : Sonar 94,8 %, Codecov 93,2 %, déploiement vert. Job `check` : +47 s.
 
-**Trucs en suspens** : statuts Codecov `project` et `patch` pas encore vus sur une PR (la base `main` n'existait pas lors de la PR #128) : à vérifier sur la prochaine PR. Le contact du code de conduite (profil GitHub sans canal privé) reste à trancher par l'utilisateur.
+**Trucs en suspens** : sur la PR #129, Codecov commente bien (diff contre `main`), mais ne pose pas les statuts `project` et `patch` : il faut installer l'application GitHub Codecov sur le compte (https://github.com/apps/codecov/installations/select_target), action de l'utilisateur. À revérifier sur la PR suivante. Le contact du code de conduite (profil GitHub sans canal privé) reste à trancher par l'utilisateur.
 
 **Prochaine chose à creuser** : #77 (vérifications manuelles V1), puis #85 (passage à Node 26 LTS, pas avant le 2026-10-28).
 

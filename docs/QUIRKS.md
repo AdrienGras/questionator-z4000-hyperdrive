@@ -833,3 +833,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Workaround** : créer le jeton (*My Account › Security*), `gh secret set SONAR_TOKEN`, désactiver l'analyse automatique (*Administration › Analysis Method*), puis `gh run rerun <id> --failed`. Ne jamais merger avec cette étape en échec : `deploy` dépend de `check`, `main` ne serait plus déployée.
 **Référence** : `.github/workflows/ci.yml`, `docs/ENVIRONMENT.md` (Accès / secrets), D99.
 
+## Codecov commente la PR mais ne pose pas ses statuts sans l'application GitHub (2026-10-04)
+
+**Découvert** : F42 (#126), PR #129.
+**Symptôme** : le commentaire Codecov (compte `codecov-commenter`) apparaît avec le diff de couverture, mais aucun statut `codecov/project` ni `codecov/patch` n'est posé sur le commit ; le commentaire avertit « Your organization needs to install the Codecov GitHub app ».
+**Cause** : l'envoi par OIDC suffit pour le rapport et le commentaire ; les statuts de commit passent par l'application GitHub Codecov.
+**Workaround** : installer l'application sur le compte (https://github.com/apps/codecov/installations/select_target), limitée à ce dépôt. Les statuts restent informatifs (`codecov.yml`).
+**Référence** : `codecov.yml`, `docs/ENVIRONMENT.md` (Services), D99.
+
