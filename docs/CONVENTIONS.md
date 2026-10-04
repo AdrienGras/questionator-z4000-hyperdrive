@@ -159,8 +159,8 @@ gh pr ready <n>
 
 ### Règles tacites
 
-- Toujours ouvrir la PR en brouillon : SonarQube Cloud (analyse automatique) n'analyse que `main` et les PR, pas une branche poussée seule.
-- Chaque issue Sonar est corrigée, pas marquée « won't fix », sauf accord explicite. Un fichier généré (ex. `src/routeTree.gen.ts`) ou vendu (`src/components/ui/`, D53) s'exclut dans `.sonarcloud.properties`, comme dans `ignorePatterns` d'oxlint.
+- Toujours ouvrir la PR en brouillon : SonarQube Cloud est lancé par la CI (D99), qui ne tourne que sur `main` et les PR, pas sur une branche poussée seule.
+- Chaque issue Sonar est corrigée, pas marquée « won't fix », sauf accord explicite. Un fichier généré (ex. `src/routeTree.gen.ts`) ou vendu (`src/components/ui/`, D53) s'exclut dans `sonar-project.properties`, comme dans `ignorePatterns` d'oxlint. Une exclusion de couverture s'écrit à trois endroits : `test.coverage.exclude` (`vite.config.ts`), `sonar.coverage.exclusions` et `ignore` (`codecov.yml`).
 - Actions GitHub épinglées par **SHA de commit**, version en commentaire (`uses: owner/action@<sha> # vX.Y.Z`) — règle Sonar `githubactions:S7637`.
 
 ## Code d'issue de config — ajout

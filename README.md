@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/AdrienGras/questionator-z4000-hyperdrive/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/AdrienGras/questionator-z4000-hyperdrive/actions/workflows/ci.yml?query=branch%3Amain)
 [![Quality gate](https://sonarcloud.io/api/project_badges/measure?project=AdrienGras_questionator-z4000-hyperdrive&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=AdrienGras_questionator-z4000-hyperdrive)
+[![Couverture](https://codecov.io/gh/AdrienGras/questionator-z4000-hyperdrive/branch/main/graph/badge.svg)](https://app.codecov.io/gh/AdrienGras/questionator-z4000-hyperdrive)
 [![Application](https://img.shields.io/website?url=https%3A%2F%2Fadriengras.github.io%2Fquestionator-z4000-hyperdrive%2F&label=application&up_message=en%20ligne&down_message=hors%20service&up_color=ff2d95&down_color=lightgrey)](https://adriengras.github.io/questionator-z4000-hyperdrive/)
 [![Licence : MIT](https://img.shields.io/badge/licence-MIT-1a1033)](LICENSE)
 [![Hors ligne](https://img.shields.io/badge/hors%20ligne-oui-ff2d95)](https://adriengras.github.io/questionator-z4000-hyperdrive/docs/guide/hors-ligne.html)
