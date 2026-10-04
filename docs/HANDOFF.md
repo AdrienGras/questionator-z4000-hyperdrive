@@ -24,11 +24,21 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-04 — #126 : F42, couverture des tests (Codecov et SonarQube)
+
+**Dernière chose faite** : PR #128 mergée. `pnpm test:coverage` (`@vitest/coverage-v8`, Vitest monté en 5.0.3) ; le job `check` lance les tests couverts, envoie `coverage/lcov.info` à Codecov par OIDC, puis lance le scanner Sonar avant le build. `sonar-project.properties` remplace `.sonarcloud.properties` ; l'analyse automatique est désactivée et `SONAR_TOKEN` est en secret. Badge Codecov au README, section *Couverture* de la page *Tests*, D99. Sur `main` : Sonar 94,8 %, Codecov 93,2 %, déploiement vert. Job `check` : +47 s.
+
+**Trucs en suspens** : statuts Codecov `project` et `patch` pas encore vus sur une PR (la base `main` n'existait pas lors de la PR #128) : à vérifier sur la prochaine PR. Le contact du code de conduite (profil GitHub sans canal privé) reste à trancher par l'utilisateur.
+
+**Prochaine chose à creuser** : #77 (vérifications manuelles V1), puis #85 (passage à Node 26 LTS, pas avant le 2026-10-28).
+
+**Notes pour future Claude** : Sonar se lance désormais depuis la CI, plus rien à déclencher à la main ; `sonar-check.sh` marche comme avant. Une exclusion de couverture s'écrit à trois endroits (`vite.config.ts`, `sonar-project.properties`, `codecov.yml`). Les trois outils donnent des pourcentages différents (QUIRKS). Sonar ignore la condition de couverture sous 20 lignes nouvelles : une PR de doc passe.
+
 ## 2026-10-03 — #125 : F41, README et fichiers communautaires
 
 **Dernière chose faite** : README réécrit en vitrine (badges CI, quality gate, application, licence, hors ligne, 100 % local ; trois liens d'appel ; sept fonctionnalités vérifiées dans le guide et le code). Ajout de `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` (traduction officielle 2.1, contact remplacé seul), `SECURITY.md`, trois formulaires d'issue + `config.yml`, modèle de PR. `scripts/community-links.test.ts` vérifie liens relatifs, liens vers `main` et liens vers la doc (page + ancre VitePress). Renvois dans *Workflow*, *Installer le poste* et `CLAUDE.md`. D98, une ligne de BACKLOG.
 
-**Trucs en suspens** : PR #127, revue faite et corrigée, CI verte, SonarQube OK (0 issue, 0 hotspot), passée en « Ready for review ». Réglages du dépôt appliqués (description, site, signalement privé de vulnérabilité) ; *Insights › Community Standards* ne lit que `main` : à vérifier après le merge. Le contact du code de conduite renvoie au profil GitHub, qui n'affiche pas de canal privé : à trancher par l'utilisateur. Ne pas merger sans le go explicite de l'utilisateur.
+**Trucs en suspens** : PR #127 mergée, #125 fermé ; Community Standards à 100 %. Le contact du code de conduite renvoie au profil GitHub, qui n'affiche pas de canal privé : à trancher par l'utilisateur.
 
 **Prochaine chose à creuser** : #126 (F42, couverture Codecov et SonarQube) ou #77 (vérifications manuelles V1), puis #85 (Node 26 LTS, pas avant le 2026-10-28).
 
