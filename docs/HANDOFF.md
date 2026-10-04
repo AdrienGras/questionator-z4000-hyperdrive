@@ -28,7 +28,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 **Dernière chose faite** : #129 et #131 mergées ; bannière AVIF en ligne. Puis #132 : `FormEvent` → `SubmitEvent` dans les 4 formulaires (S1874), et l'ouverture anticipée de `QuestionatorDb` sort du constructeur vers `openEagerly()`, appelée par `createDb` (S7059, comportement D47 inchangé). QUIRKS et règle tacite dans CONVENTIONS (« Dialogue de saisie »).
 
-**Trucs en suspens** : PR de #132 ; après le merge, vérifier `sonar-check.sh --branch main` à 0 issue. Application GitHub Codecov installée par l'utilisateur : statuts `project` / `patch` à constater sur cette PR. Vidéo source retirée de la racine. Contact privé du code de conduite toujours à trancher. Branches locales mergées à nettoyer si l'utilisateur le demande.
+**Trucs en suspens** : PR de #132 ; après le merge, vérifier `sonar-check.sh --branch main` à 0 issue. Application GitHub Codecov installée par l'utilisateur : statuts `codecov/project` et `codecov/patch` constatés sur la PR #133. Vidéo source retirée de la racine. Contact privé du code de conduite toujours à trancher. Branches locales mergées à nettoyer si l'utilisateur le demande.
 
 **Prochaine chose à creuser** : #77 (vérifications manuelles V1), puis #85 (passage à Node 26 LTS, pas avant le 2026-10-28).
 
