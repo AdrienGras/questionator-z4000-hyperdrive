@@ -1518,3 +1518,20 @@ autre encodage 8 bits.
 
 **Pourquoi** : la couverture du nouveau code devient une condition du quality gate déjà exigé avant toute revue, et Codecov rend l'évolution visible sur la PR sans ajouter de seconde barrière.
 
+## D100 — #130 : bannière animée du README tirée d'une vidéo (2026-10-04)
+
+**Question** : comment afficher en tête du README la vidéo de présentation refaite en motion design (30 s, 1920×1080, muette) à la place du SVG animé de D95 ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Remplacement | La vidéo remplace `assets/readme-hero.svg` ; SVG, `scripts/check-readme-hero.ts` et `pnpm check:hero` retirés | Choix de l'utilisateur. Révise D95 : on passe d'un SVG écrit à la main à un rendu vidéo. |
+| Format | WebP animé, 800 px de large, 12 i/s, qualité 60, boucle infinie : 3,9 Mo (`ffmpeg -c:v libwebp_anim`) | GIF en 960 px : 40,6 Mo et dégradés en bandes. Un SVG ne peut pas reprendre une vidéo. Une vidéo MP4 du dépôt n'est pas lue dans un README (seules les pièces jointes téléversées le sont, avec contrôles et sans boucle automatique). 960 px à 15 i/s (6 Mo) écarté par l'utilisateur. |
+| Mouvement réduit | `<picture>` avec `<source media="(prefers-reduced-motion: reduce)">` vers une image fixe (dernière image : titre et adresse, 48 Ko) | Remplace le bloc `prefers-reduced-motion` interne au SVG. |
+| Texte alternatif | Le principe au vouvoiement (préparer, tirer, projeter, noter, statistiques, export, données locales), sans genrer l'examinateur | Même rôle que dans D95. |
+| Source | La vidéo n'est pas versionnée (14 Mo) | Le dépôt ne garde que le rendu ; la source reste chez l'utilisateur. |
+| Garde-fou | `scripts/readme-banner.test.ts` : WebP animé ≤ 5 Mo, image fixe non animée ≤ 200 Ko, balisage `<picture>` du README, images HTML existantes | Remplace `check:hero` : rien à contrôler dans un fichier binaire au-delà du poids et du format. |
+
+**Pourquoi** : la vidéo explique mieux le principe que le SVG ; le WebP animé est le seul format que GitHub lit en boucle dans un README pour un poids acceptable.
+
