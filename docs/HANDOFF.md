@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-05 — #136 : F43.3, écrans d'entraînement
+
+**Dernière chose faite** : F43.3 implémenté sur `feat/136-ecrans-entrainement`. `/training/new` (`features/training-setup/`) : quatre étapes, dépôt de fichier ou JSON collé, récapitulatif, erreurs avec « Corriger dans l'éditeur » (passage du texte via `stashConfigForEditor`/`takeConfigForEditor`). `/training/$trainingId` (`features/training/`) : tuiles, tirage, « Voir la réponse », boutons du barème, « Passer », reprise avec réponse masquée. Accueil : carte « S'entraîner » et section « Mes entraînements ». Refactors partagés dans `components/` et `hooks/`, `lib/clipboard.ts`, e2e `training.spec.ts`, guide `site/guide/s-entrainer.md`. Décisions utilisateur tracées dans D101.
+
+**Trucs en suspens** : PR du ticket #136 à ouvrir en brouillon, puis `sonar-check.sh --pr <n> --wait` jusqu'au gate vert avant « Ready for review ». Essai manuel avec un vrai LLM à faire par l'utilisateur, résultat à consigner dans la PR. Pas de merge sans le go de l'utilisateur.
+
+**Prochaine chose à creuser** : #137 (écran de stats d'entraînement, « Mettre à jour la config » avec `?replace=`, lien « Stats »), avec les captures du guide.
+
+**Notes pour future Claude** : la révélation de la réponse n'est pas persistée (D101) : une question `pending` revient masquée. Le validateur reste derrière un `import()` pour le bundle initial de l'accueil. Les erreurs d'écriture s'affichent en ligne (`role="alert"`), jamais en toast. Aucune capture dans le guide pour cette page : elles arrivent avec #137. L'accueil fait une requête live par carte pour la couverture (voir BACKLOG).
+
 ## 2026-10-05 — #135 : F43.2, stockage et domaine de l'entraînement
 
 **Dernière chose faite** : F43.2 implémenté sur `feat/135-stockage-entrainement`. Dexie version 2 (`trainings`, `trainingDraws`), `lib/db/trainings.ts` (création, tirage, note, passe, remplacement de config, suppression, lectures validées), hooks de lecture, et `domain/training/` (cycle de tirage, stats, remplacement de config, schémas Zod, lecture tolérante du journal). Spec corrigée (valeurs du barème, noms réels), D101, CONVENTIONS, QUIRKS et INDEX à jour.
