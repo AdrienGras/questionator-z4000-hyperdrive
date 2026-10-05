@@ -13,6 +13,28 @@ export function categoryAccent(category: NormalizedCategory): CategoryAccent | u
   return color === undefined ? undefined : { '--category-color': color }
 }
 
+// `dark:` répété : sinon `dark:border-input` du variant outline l'emporte en sombre.
+// Pas de `pointer-events-none` sur `aria-disabled` : le survol doit ouvrir l'infobulle d'une
+// catégorie épuisée, le clic est neutralisé par l'appelant (QUIRKS).
+const CATEGORY_TILE_BUTTON_CLASS =
+  'flex h-full w-full flex-col items-center gap-2 p-4 text-center whitespace-normal ' +
+  'data-[colored=true]:border-[var(--category-color)] ' +
+  'dark:data-[colored=true]:border-[var(--category-color)] ' +
+  'aria-disabled:cursor-not-allowed aria-disabled:opacity-50'
+
+/**
+ * Props du bouton `outline` qui entoure une tuile : accent (`--category-color`), bordure teintée
+ * si la catégorie a une couleur, mise en page pleine hauteur. Communes au tirage d'un passage et
+ * d'un entraînement.
+ */
+export function categoryTileButtonProps(category: NormalizedCategory) {
+  return {
+    style: categoryAccent(category),
+    'data-colored': category.color !== undefined,
+    className: CATEGORY_TILE_BUTTON_CLASS,
+  }
+}
+
 type CategoryTileProps = Readonly<{
   ui: Ui
   config: NormalizedConfig

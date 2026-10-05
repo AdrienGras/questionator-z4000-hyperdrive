@@ -1,5 +1,5 @@
 import { CategoryLayout } from '@/components/category-layout'
-import { CategoryTile, categoryAccent } from '@/components/category-tile'
+import { CategoryTile, categoryTileButtonProps } from '@/components/category-tile'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { NormalizedConfig } from '@/domain/config/normalize'
@@ -38,8 +38,7 @@ export function CategoryGrid({ ui, config, student, disabled, onDraw }: Category
       itemKey={(category) => category.id}
       renderItem={(category) => {
         const exhausted = isCategoryExhausted(student, category)
-        const { color } = category
-        const accent = categoryAccent(category)
+        const tileProps = categoryTileButtonProps(category)
         const reasonId = `passage-category-exhausted-${category.id}`
 
         const content = <CategoryTile ui={ui} config={config} category={category} />
@@ -48,15 +47,6 @@ export function CategoryGrid({ ui, config, student, disabled, onDraw }: Category
           if (exhausted) return
           onDraw(category.id)
         }
-
-        // `dark:` répété : sinon `dark:border-input` du variant outline l'emporte en sombre.
-        // Pas de `pointer-events-none` sur `aria-disabled` : le survol doit ouvrir l'infobulle,
-        // le clic est déjà neutralisé par `handleClick` (QUIRKS).
-        const buttonClassName =
-          'flex h-full w-full flex-col items-center gap-2 p-4 text-center whitespace-normal ' +
-          'data-[colored=true]:border-[var(--category-color)] ' +
-          'dark:data-[colored=true]:border-[var(--category-color)] ' +
-          'aria-disabled:cursor-not-allowed aria-disabled:opacity-50'
 
         return (
           <>
@@ -71,9 +61,7 @@ export function CategoryGrid({ ui, config, student, disabled, onDraw }: Category
                       aria-disabled="true"
                       aria-describedby={reasonId}
                       onClick={handleClick}
-                      style={accent}
-                      data-colored={color !== undefined}
-                      className={buttonClassName}
+                      {...tileProps}
                     />
                   }
                 >
@@ -87,9 +75,7 @@ export function CategoryGrid({ ui, config, student, disabled, onDraw }: Category
                 variant="outline"
                 disabled={disabled}
                 onClick={handleClick}
-                style={accent}
-                data-colored={color !== undefined}
-                className={buttonClassName}
+                {...tileProps}
               >
                 {content}
               </Button>
