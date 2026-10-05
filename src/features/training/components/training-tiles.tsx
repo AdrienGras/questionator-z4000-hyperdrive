@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { CategoryLayout } from '@/components/category-layout'
 import { CategoryTile, categoryTileButtonProps } from '@/components/category-tile'
 import { Button } from '@/components/ui/button'
@@ -20,15 +21,15 @@ type TrainingTilesProps = Readonly<{
  */
 export function TrainingTiles({ ui, config, disabled, focusOnMount, onDraw }: TrainingTilesProps) {
   const { text } = ui
-  const title = text('training_tiles_title', {})
+  const titleId = useId()
   const titleRef = useFocusOnMount<HTMLHeadingElement>(focusOnMount)
   return (
     <section className="flex flex-col gap-3">
-      <h2 ref={titleRef} tabIndex={-1} className="text-lg font-semibold outline-none">
-        {title}
+      <h2 id={titleId} ref={titleRef} tabIndex={-1} className="text-lg font-semibold outline-none">
+        {text('training_tiles_title', {})}
       </h2>
       <CategoryLayout
-        aria-label={title}
+        aria-labelledby={titleId}
         className="gap-3"
         items={config.categories}
         itemKey={(category) => category.id}
