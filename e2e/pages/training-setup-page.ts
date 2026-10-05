@@ -4,18 +4,18 @@ import { TrainingPage } from './training-page.ts'
 
 /** Écran de mise en place d'un entraînement (`#/training/new`, F43.3). */
 export class TrainingSetupPage {
-  /** Bouton « Corriger dans l'éditeur », présent quand la config chargée est invalide. */
+  /** Bouton « Corriger dans l’éditeur », présent quand la config chargée est invalide. */
   readonly fixButton: Locator
 
-  /** Bouton « C'est parti », désactivé tant que la config n'est pas valide. */
+  /** Bouton « C’est parti », désactivé tant que la config n'est pas valide. */
   readonly submitButton: Locator
 
   private readonly page: Page
 
   constructor(page: Page) {
     this.page = page
-    this.submitButton = page.getByRole('button', { name: "C'est parti" })
-    this.fixButton = page.getByRole('button', { name: "Corriger dans l'éditeur" })
+    this.submitButton = page.getByRole('button', { name: 'C’est parti' })
+    this.fixButton = page.getByRole('button', { name: 'Corriger dans l’éditeur' })
   }
 
   /** Message d'une issue de validation affichée sous la config. */
@@ -29,7 +29,7 @@ export class TrainingSetupPage {
     await this.page.getByRole('button', { name: 'Vérifier le JSON collé' }).click()
   }
 
-  /** « C'est parti » : crée l'entraînement et renvoie son écran, une fois les tuiles montées. */
+  /** « C’est parti » : crée l'entraînement et renvoie son écran, une fois les tuiles montées. */
   async start(): Promise<TrainingPage> {
     await this.submitButton.click()
     await this.page.waitForURL(/#\/training\/(?!new)[^/]+$/)
@@ -38,7 +38,7 @@ export class TrainingSetupPage {
     return training
   }
 
-  /** « Corriger dans l'éditeur » : ouvre l'éditeur de config, une fois sa zone de texte montée. */
+  /** « Corriger dans l’éditeur » : ouvre l'éditeur de config, une fois sa zone de texte montée. */
   async fixInEditor(): Promise<ConfigEditorPage> {
     await this.fixButton.click()
     await this.page.waitForURL(/#\/editor$/)

@@ -25,7 +25,7 @@ describe('carte d’entraînement endommagé', () => {
     ).toBeInTheDocument()
     expect(within(trainings).getByText('Endommagée')).toBeInTheDocument()
     expect(within(trainings).queryByRole('link', { name: 'Reprendre' })).not.toBeInTheDocument()
-    expect(within(trainings).queryByText(/des questions vues/)).not.toBeInTheDocument()
+    expect(within(trainings).queryByText(/des questions notées/)).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Actions pour « Révisions cassées »' }))
     const items = await screen.findAllByRole('menuitem')
     expect(items.map((item) => item.textContent)).toEqual(['Supprimer'])

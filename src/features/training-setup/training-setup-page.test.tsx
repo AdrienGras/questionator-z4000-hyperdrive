@@ -38,7 +38,7 @@ function twoCategoryConfig(): string {
 
 async function renderPage() {
   const rendered = renderAt('/training/new')
-  await screen.findByRole('heading', { level: 1, name: "S'entraîner" })
+  await screen.findByRole('heading', { level: 1, name: 'S’entraîner' })
   const input = rendered.container.querySelector('input[type=file]')
   if (!(input instanceof HTMLInputElement)) throw new Error('input fichier absent')
   return { ...rendered, input }
@@ -48,7 +48,7 @@ function choose(input: HTMLInputElement, name: string, content: string) {
   fireEvent.change(input, { target: { files: [new File([content], name)] } })
 }
 
-const submitButton = () => screen.getByRole('button', { name: "C'est parti" })
+const submitButton = () => screen.getByRole('button', { name: 'C’est parti' })
 const pasteArea = () => screen.getByRole('textbox', { name: '… ou collez le JSON ici' })
 
 beforeEach(async () => {
@@ -116,7 +116,7 @@ describe('écran de mise en place d’un entraînement', () => {
     expect(screen.getByText('A : 1 question')).toBeInTheDocument()
     expect(screen.getByText('B : 2 questions')).toBeInTheDocument()
     expect(submitButton()).toBeEnabled()
-    expect(screen.queryByRole('button', { name: "Corriger dans l'éditeur" })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Corriger dans l’éditeur' })).toBeNull()
   })
 
   test('fichier illisible : alerte de lecture', async () => {
@@ -131,7 +131,7 @@ describe('écran de mise en place d’un entraînement', () => {
     const { router } = await renderPage()
     fireEvent.change(pasteArea(), { target: { value: '{}' } })
     fireEvent.click(screen.getByRole('button', { name: 'Vérifier le JSON collé' }))
-    const fix = await screen.findByRole('button', { name: "Corriger dans l'éditeur" })
+    const fix = await screen.findByRole('button', { name: 'Corriger dans l’éditeur' })
     expect(screen.getByText('config-collee.json')).toBeInTheDocument()
     expect(screen.getAllByRole('listitem').length).toBeGreaterThan(4)
     expect(submitButton()).toBeDisabled()
@@ -169,9 +169,9 @@ describe('écran de mise en place d’un entraînement', () => {
     await renderPage()
     fireEvent.change(pasteArea(), { target: { value: '{}' } })
     fireEvent.click(screen.getByRole('button', { name: 'Vérifier le JSON collé' }))
-    await screen.findByRole('button', { name: "Corriger dans l'éditeur" })
+    await screen.findByRole('button', { name: 'Corriger dans l’éditeur' })
     fireEvent.change(pasteArea(), { target: { value: '{"exam":{}}' } })
-    expect(screen.queryByRole('button', { name: "Corriger dans l'éditeur" })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Corriger dans l’éditeur' })).toBeNull()
     expect(submitButton()).toBeDisabled()
   })
 
@@ -179,7 +179,7 @@ describe('écran de mise en place d’un entraînement', () => {
     await renderPage()
     fireEvent.change(pasteArea(), { target: { value: 'pas du json' } })
     fireEvent.click(screen.getByRole('button', { name: 'Vérifier le JSON collé' }))
-    await screen.findByRole('button', { name: "Corriger dans l'éditeur" })
+    await screen.findByRole('button', { name: 'Corriger dans l’éditeur' })
     expect(screen.getAllByRole('listitem').length).toBeGreaterThan(0)
     expect(submitButton()).toBeDisabled()
   })
@@ -188,7 +188,7 @@ describe('écran de mise en place d’un entraînement', () => {
     const { input, router } = await renderPage()
     const file = new File(['{}'], 'mauvais.json')
     fireEvent.change(input, { target: { files: [file] } })
-    const fix = await screen.findByRole('button', { name: "Corriger dans l'éditeur" })
+    const fix = await screen.findByRole('button', { name: 'Corriger dans l’éditeur' })
     vi.spyOn(file, 'text').mockRejectedValue(new Error('lecture'))
     fireEvent.click(fix)
     expect(await screen.findByRole('alert')).toHaveTextContent("Le fichier n'a pas pu être lu.")

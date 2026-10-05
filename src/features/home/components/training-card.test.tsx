@@ -30,7 +30,7 @@ describe('carte d’entraînement', () => {
     ])
     renderAt('/')
     const card = await findCard('Révisions JS')
-    expect(await within(card).findByText('25 % des questions vues')).toBeInTheDocument()
+    expect(await within(card).findByText('25 % des questions notées')).toBeInTheDocument()
     expect(within(card).getByText(/^Dernière activité : /)).toBeInTheDocument()
     expect(within(card).getByRole('link', { name: 'Reprendre' })).toHaveAttribute(
       'href',
@@ -38,11 +38,11 @@ describe('carte d’entraînement', () => {
     )
   })
 
-  test('sans tirage : 0 % des questions vues', async () => {
+  test('sans tirage : 0 % des questions notées', async () => {
     await createTraining(makeTraining())
     renderAt('/')
     const card = await findCard('Entraînement de test')
-    expect(await within(card).findByText('0 % des questions vues')).toBeInTheDocument()
+    expect(await within(card).findByText('0 % des questions notées')).toBeInTheDocument()
   })
 
   test('suppression confirmée : entraînement et journal supprimés', async () => {
@@ -62,7 +62,7 @@ describe('carte d’entraînement', () => {
       within(dialog).getByRole('heading', { name: 'Supprimer « Entraînement de test » ?' }),
     ).toBeInTheDocument()
     expect(
-      within(dialog).getByText("L'historique et les stats de cet entraînement seront perdus."),
+      within(dialog).getByText('L’historique et les stats de cet entraînement seront perdus.'),
     ).toBeInTheDocument()
     fireEvent.click(within(dialog).getByRole('button', { name: 'Supprimer' }))
     await waitFor(async () => expect(await db.trainings.get('training-1')).toBeUndefined())

@@ -46,7 +46,7 @@ Si vous fermez l'onglet ou actualisez la page entre le tirage et la note, la que
 
 ## Reprendre un entraînement
 
-L'accueil liste vos entraînements dans « Mes entraînements », au-dessus des sessions. La section n'apparaît que si vous en avez au moins un. Chaque carte indique la dernière activité et la part des questions déjà vues (« 40 % des questions vues »). Cliquez sur « Reprendre » pour retrouver les tuiles.
+L'accueil liste vos entraînements dans « Mes entraînements », au-dessus des sessions. La section n'apparaît que si vous en avez au moins un. Chaque carte indique la dernière activité et la part des questions déjà notées au moins une fois (« 40 % des questions notées »). Cliquez sur « Reprendre » pour retrouver les tuiles.
 
 Le menu de la carte propose « Supprimer ». La suppression efface l'entraînement avec son historique, sans retour possible.
 

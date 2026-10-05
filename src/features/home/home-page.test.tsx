@@ -100,6 +100,8 @@ describe('accueil', () => {
     renderAt('/')
     await screen.findByRole('heading', { name: 'Aucune session' })
     expect(screen.queryByRole('region', { name: 'Mes entraînements' })).not.toBeInTheDocument()
+    // Seule section à droite : son titre reste réservé aux lecteurs d'écran.
+    expect(screen.getByRole('heading', { level: 2, name: 'Sessions' })).toHaveClass('sr-only')
   })
 
   test('avec un entraînement : section « Mes entraînements » au-dessus des sessions', async () => {
@@ -113,6 +115,10 @@ describe('accueil', () => {
       within(trainings).getByRole('heading', { level: 3, name: 'Révisions JS' }),
     ).toBeInTheDocument()
     const sessions = screen.getByRole('region', { name: 'Sessions' })
+    // Deux sections à droite : le titre des sessions devient visible, comme celui des entraînements.
+    const sessionsTitle = within(sessions).getByRole('heading', { level: 2, name: 'Sessions' })
+    expect(sessionsTitle).not.toHaveClass('sr-only')
+    expect(sessionsTitle).toHaveClass('text-xl', 'font-semibold')
     expect(
       trainings.compareDocumentPosition(sessions) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy()

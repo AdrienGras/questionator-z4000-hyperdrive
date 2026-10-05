@@ -23,10 +23,10 @@ export class HomePage {
       .filter({ has: this.page.getByRole('heading', { name, exact: true }) })
   }
 
-  /** Suit le lien « Commencer » de la carte « S'entraîner » et renvoie l'écran de mise en place. */
+  /** Suit le lien « Commencer » de la carte « S’entraîner » et renvoie l'écran de mise en place. */
   async startTraining(): Promise<TrainingSetupPage> {
     await this.page.getByRole('link', { name: 'Commencer' }).click()
-    await this.page.getByRole('button', { name: "C'est parti" }).waitFor()
+    await this.page.getByRole('button', { name: 'C’est parti' }).waitFor()
     return new TrainingSetupPage(this.page)
   }
 

@@ -2,15 +2,21 @@ import { PageShell } from '@/components/page-shell'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useDbStatus, useSessions, useTrainings } from '@/lib/db/hooks'
 import { useUi } from '@/lib/i18n/use-ui'
+import { cn } from '@/lib/utils'
 import { ActionCards } from '@/features/home/components/action-cards'
 import { HomeActions } from '@/features/home/components/home-actions'
 import { ImportController } from '@/features/home/components/import-controller'
 import { SessionList } from '@/features/home/components/session-list'
 import { TrainingList } from '@/features/home/components/training-list'
 
+/** Titre d'une section de la colonne de droite. */
+const SECTION_TITLE_CLASS = 'text-xl font-semibold'
+
 /**
  * Accueil (D52, D78) : actions à gauche (24rem dès `lg`) ; à droite, les entraînements (s'il y en a)
- * puis les sessions, en cartes. La langue est détectée une fois ici et passée en prop `ui`.
+ * puis les sessions, en cartes. Le titre des sessions n'est visible qu'à côté de celui des
+ * entraînements ; seul, il reste réservé aux lecteurs d'écran. La langue est détectée une fois ici
+ * et passée en prop `ui`.
  */
 export function HomePage() {
   const ui = useUi()
@@ -34,14 +40,20 @@ export function HomePage() {
               <div className="flex min-w-0 flex-col gap-6">
                 {showTrainings && (
                   <section aria-labelledby="home-trainings-title" className="flex flex-col gap-4">
-                    <h2 id="home-trainings-title" className="text-xl font-semibold">
+                    <h2 id="home-trainings-title" className={SECTION_TITLE_CLASS}>
                       {ui.text('home_trainings_title', {})}
                     </h2>
                     <TrainingList ui={ui} trainings={trainings} />
                   </section>
                 )}
-                <section aria-labelledby="home-sessions-title">
-                  <h2 id="home-sessions-title" className="sr-only">
+                <section
+                  aria-labelledby="home-sessions-title"
+                  className={cn(showTrainings && 'flex flex-col gap-4')}
+                >
+                  <h2
+                    id="home-sessions-title"
+                    className={showTrainings ? SECTION_TITLE_CLASS : 'sr-only'}
+                  >
                     {ui.text('home_sessions_title', {})}
                   </h2>
                   <SessionList ui={ui} status={status} sessions={sessions} />

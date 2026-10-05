@@ -82,16 +82,16 @@ describe('ActionCards', () => {
     renderCards({ storageAvailable: false })
     await screen.findByRole('heading', { level: 3, name: 'Restaurer une session' })
     expect(screen.queryByRole('heading', { name: 'Nouvelle session' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: "S'entraîner" })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'S’entraîner' })).not.toBeInTheDocument()
   })
 
   it('entraînement : texte et lien « Commencer » vers /training/new', async () => {
     renderCards()
     expect(
-      await screen.findByRole('heading', { level: 3, name: "S'entraîner" }),
+      await screen.findByRole('heading', { level: 3, name: 'S’entraîner' }),
     ).toBeInTheDocument()
     expect(
-      screen.getByText("Révisez seul à partir d'une config générée par un LLM."),
+      screen.getByText('Révisez seul à partir d’une config générée par un LLM.'),
     ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Commencer' }).getAttribute('href')).toMatch(
       /\/training\/new$/,

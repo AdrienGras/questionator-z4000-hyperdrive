@@ -42,7 +42,7 @@ test('entraînement : tirer, noter, reprendre après rechargement, passer, retro
   const back = await training.backHome()
   const card = back.trainingCard(NAME)
   await expect(card).toBeVisible()
-  await expect(card).toContainText(/11\s%\sdes questions vues/)
+  await expect(card).toContainText(/11\s%\sdes questions notées/)
 
   const reopened = await back.openTraining(NAME)
   await expect(reopened.tiles).toBeVisible()
