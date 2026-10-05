@@ -42,7 +42,7 @@ type Source = { fileName: string; pasted: boolean; read: () => Promise<string> }
  */
 export function useTrainingSetup(dbStatus: DbStatus): TrainingSetup {
   const { slot: config, ...configSlot } = useConfigSlot()
-  const [pasted, setPastedText] = useState('')
+  const [pastedText, setPastedText] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState(false)
   const [fixError, setFixError] = useState(false)
@@ -71,7 +71,7 @@ export function useTrainingSetup(dbStatus: DbStatus): TrainingSetup {
   }
 
   async function checkPasted(): Promise<void> {
-    const text = pasted
+    const text = pastedText
     if (text.trim() === '') return
     source.current = { fileName: PASTED_FILE_NAME, pasted: true, read: () => Promise.resolve(text) }
     setFixError(false)
@@ -116,7 +116,7 @@ export function useTrainingSetup(dbStatus: DbStatus): TrainingSetup {
 
   return {
     config,
-    pasted,
+    pasted: pastedText,
     submitting,
     submitError,
     fixError,
