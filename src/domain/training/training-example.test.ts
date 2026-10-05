@@ -55,4 +55,11 @@ describe('config d’exemple d’entraînement', () => {
       expect(questionsDe('normal').some((q) => q.tags?.includes(tag))).toBe(true)
     }
   })
+
+  test('facile : exactement 1 tag par question', () => {
+    const facile = categories.find((c) => c.id === 'facile')
+    for (const question of facile?.questions ?? []) {
+      expect(question.tags?.length).toBe(1)
+    }
+  })
 })
