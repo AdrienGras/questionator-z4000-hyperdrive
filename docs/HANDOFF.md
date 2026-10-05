@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-05 — #134 : F43.1, schéma allégé et prompt d'entraînement
+
+**Dernière chose faite** : F43.1 implémenté sur `feat/134-schema-allege-prompt`. `config.schema.lite.json` (31 054 octets, test < 40 000), `domain/training/` (catégories imposées, prompt fr/en, `buildTrainingPrompt(locale)` avec URL en constantes), `examples/training.example.json` (3 facile à un tag, 3 normal, 2 difficile, 1 cauchemar) et son test de conventions. Spec, PRODUCT (F43, glossaire), D101, QUIRKS et INDEX à jour.
+
+**Trucs en suspens** : PR de #134 à ouvrir en brouillon, puis `sonar-check.sh --pr <n> --wait` jusqu'au gate vert avant « Ready for review ». Corriger le critère « < 30 Ko » du ticket #134 en « < 40 000 octets ». Pas de merge sans le go de l'utilisateur.
+
+**Prochaine chose à creuser** : #135 (stockage et domaine de l'entraînement : Dexie v2, cycle, stats, mise à jour de config).
+
+**Notes pour future Claude** : le prompt pointe toujours vers le site publié, même en dev (URL constantes). Les facile portent exactement un tag, parce que le prompt définit facile comme une seule notion. Le tableau de catégories du prompt est généré depuis `TRAINING_CATEGORIES` : modifier la constante, pas le texte.
+
 ## 2026-10-04 — #132 : correctif des issues Sonar révélées par l'analyse en CI
 
 **Dernière chose faite** : #129 et #131 mergées ; bannière AVIF en ligne. Puis #132 : `FormEvent` → `SubmitEvent` dans les 4 formulaires (S1874), et l'ouverture anticipée de `QuestionatorDb` sort du constructeur vers `openEagerly()`, appelée par `createDb` (S7059, comportement D47 inchangé). QUIRKS et règle tacite dans CONVENTIONS (« Dialogue de saisie »).

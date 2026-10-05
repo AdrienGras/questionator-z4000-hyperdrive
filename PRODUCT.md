@@ -39,6 +39,8 @@ L'application tourne entièrement dans le navigateur, sans backend : aucune donn
 | Ajustement | Un bonus ou malus libre appliqué par l'examinateur sur la note convertie, avec une justification facultative. |
 | Note finale | La note convertie arrondie plus l'ajustement, bornée entre 0 et l'échelle finale. |
 | Étudiant projeté | L'étudiant que l'examinateur a explicitement poussé vers la vue projetée. |
+| Entraînement | Une révision en autonomie : une config figée, un journal de tirages, aucune limite de questions. L'étudiant se note lui-même. |
+| Tirage en cycle | Le tirage d'un entraînement : par catégorie, chaque question sort avant qu'une autre ne revienne ; la catégorie épuisée, le cycle repart. |
 
 ## 5. Règles de notation
 
@@ -696,6 +698,26 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 - L'aperçu montre toutes les questions et l'écran final ; une config invalide laisse le dernier aperçu valide, marqué périmé.
 - Fichier téléchargé identique au texte ; création ouverte avec la config validée ; brouillon retrouvé au rechargement.
 - Fonctionne hors ligne ; l'accueil ne charge pas CodeMirror.
+
+### F43 — Entraînement autonome
+
+**Objectif.** Un étudiant passe de « j'ai un PDF de cours » à « je m'entraîne » en quelques minutes, sans aide. Il reprend quand il veut, ses stats s'accumulent, et régénérer la config avec un LLM ne lui fait pas perdre son historique. Quatre tickets (#134 à #137), spec : `docs/superpowers/specs/2026-10-05-f43-entrainement-autonome-design.md`, D101.
+
+**Contenu.**
+- Schéma allégé `config.schema.lite.json`, publié à côté de `config.schema.json` : identique, sauf `icon` réduit à une chaîne. Il tient sous 40 000 octets, là où le schéma complet (252 Ko) noie la structure des questions sous l'énumération des icônes (#134).
+- Prompt de génération fourni par l'application, en français et en anglais : il renvoie au README et au schéma allégé par URL, impose 4 catégories (Facile, Normal, Difficile, Cauchemar), une grille de difficulté, une couverture par tag, 30 à 60 questions et un gabarit pour `answer` (#134). `examples/training.example.json` est une config conforme.
+- Entité `Training` à part, dans ses propres tables ; `Session` ne change pas. Un entraînement par config, reprenable. Journal des tirages dans une table séparée (#135).
+- Tirage en cycle sans répétition par catégorie, déduit du journal. Une question ajoutée par une mise à jour de config sort en priorité (#135).
+- Mise en place en 4 étapes (rassembler le cours, copier le prompt, récupérer la config, la déposer ou la coller), puis l'écran d'entraînement : tuiles de catégorie, énoncé, « Voir la réponse », notation au barème de la catégorie, « Passer ». Un tirage en attente survit au rechargement. Bouton « S'entraîner » et section « Mes entraînements » à l'accueil (#136).
+- Stats : questions faites, réussite par catégorie, maîtrise par tag, détail par question avec liste « À revoir », couverture. « Mettre à jour la config » reprend l'historique des `id` conservés (#137).
+
+**Critères d'acceptation.**
+- Le schéma allégé ne diffère du complet que sur `icon`, et pèse moins de 40 000 octets.
+- Le prompt contient les URL du README et du schéma allégé, les 4 catégories avec leur barème et le gabarit de `answer`, en fr comme en en.
+- La config d'exemple passe la validation sans erreur ni avertissement et reste valable pour un oral.
+- D'un PDF de cours à une première question tirée, sans autre source que l'écran de mise en place.
+- Le cycle ne répète aucune question avant d'avoir épuisé la catégorie ; recharger ne retire pas une question tirée.
+- Mettre à jour la config conserve l'historique des `id` communs ; les sessions existantes survivent à la migration de la base.
 
 ## 9. Stack technique
 

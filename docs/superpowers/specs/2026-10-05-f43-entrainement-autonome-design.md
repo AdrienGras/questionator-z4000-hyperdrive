@@ -126,11 +126,11 @@ La nouvelle config remplace l'ancienne et `name` suit le nouveau `exam.title`. L
 
 ## Schéma allégé
 
-`buildConfigJsonSchema` (`domain/config/json-schema.ts`) prend une option `{ lite: boolean }` : en `lite`, `icon` est déclaré `{ "type": "string" }` avec une description qui renvoie aux icônes Tabler, sans énumération. `vite/config-schema-plugin.ts` émet `config.schema.json` et `config.schema.lite.json`. Vérifier que les scripts `check:precache` et `check:budget` l'acceptent (fichier statique, hors bundle initial).
+`buildConfigJsonSchema` (`domain/config/json-schema.ts`) prend une option `{ lite: boolean }` : en `lite`, `icon` est déclaré `{ "type": "string" }` avec une description qui renvoie aux icônes Tabler, sans énumération. `vite/config-schema-plugin.ts` émet `config.schema.json` et `config.schema.lite.json`. Le fichier émis pèse environ 31 000 octets ; un test borne sa taille à 40 000 octets. Vérifier que les scripts `check:precache` et `check:budget` l'acceptent (fichier statique, hors bundle initial).
 
 ## Prompt (`domain/training/prompt.ts`)
 
-`buildTrainingPrompt({ locale, appBaseUrl, readmeUrl })` rend le texte ; les phrases vivent dans `domain/training/messages.ts` (fr et en, mêmes clés). Version française de référence :
+`buildTrainingPrompt(locale)` rend le texte ; les URL (schéma allégé, README) sont des constantes, comme `CONFIG_SCHEMA_URL` : le prompt pointe toujours vers le site publié, même en dev. Les 4 catégories imposées vivent dans `training-categories.ts`, dont le tableau du prompt est généré ; les phrases vivent dans `domain/training/messages.ts` (fr et en, mêmes clés). Version française de référence :
 
 ````text
 Tu vas générer un fichier de configuration pour Questionator Z-4000 Hyperdrive, une application
@@ -216,7 +216,7 @@ La version anglaise impose `"locale": "en"`, les libellés `Easy`, `Normal`, `Ha
 
 | Emplacement | Contenu |
 |---|---|
-| `domain/training/` | `types.ts`, `cycle-draw.ts`, `training-stats.ts`, `replace-config.ts`, `stored-training.ts`, `prompt.ts`, `messages.ts` |
+| `domain/training/` | `types.ts`, `cycle-draw.ts`, `training-stats.ts`, `replace-config.ts`, `stored-training.ts`, `prompt.ts`, `messages.ts`, `training-categories.ts` |
 | `domain/config/json-schema.ts` | option `lite` |
 | `vite/config-schema-plugin.ts` | émission de `config.schema.lite.json` |
 | `lib/db/` | Dexie v2, `trainings.ts` (écritures), hooks de lecture |

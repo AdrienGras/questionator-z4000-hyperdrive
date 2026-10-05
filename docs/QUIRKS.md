@@ -849,3 +849,10 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Workaround** : après un changement de mode d'analyse ou une montée de version de types, lancer `sonar-check.sh --branch main` et corriger les issues révélées dans un ticket dédié.
 **Référence** : `.github/workflows/ci.yml` (« Analyse SonarQube Cloud »), D99, #132.
 
+## `config.schema.json` : les icônes précèdent `questions` et font tronquer la lecture (2026-10-05)
+
+**Découvert** : conception de F43 (#134).
+**Symptôme** : un LLM qui lit `config.schema.json` par un outil web ne voit jamais la structure des questions et produit des configs invalides.
+**Cause** : le fichier pèse 252 Ko ; l'énumération des 6 220 icônes Tabler (`icon`) précède `questions` (caractère ~250 000), et les outils de lecture tronquent bien avant.
+**Workaround** : le prompt d'entraînement pointe vers `config.schema.lite.json` (`icon` réduit à une chaîne, environ 31 000 octets). Ne pas réintroduire l'énumération dans le schéma allégé : un test borne sa taille à 40 000 octets.
+**Référence** : `src/domain/config/json-schema.ts` (option `lite`), `vite/config-schema-plugin.ts`, D101.
