@@ -21,9 +21,9 @@ Sur l'accueil, cliquez sur « Commencer » dans la carte « S'entraîner ». L'�
 L'application vérifie la config avec les mêmes règles que pour un oral. Vous obtenez l'un des deux résultats suivants.
 
 - **La config est valide.** Un récapitulatif affiche le titre et le nombre de questions par catégorie. Cliquez sur « C'est parti » pour créer l'entraînement.
-- **La config contient des erreurs.** Une liste indique chaque problème. Cliquez sur « Corriger dans l'éditeur » pour ouvrir [l'éditeur de config](./editeur-config) avec ce texte. Chaque message est expliqué dans [FAQ et dépannage](./depannage). Les LLM se trompent surtout sur les `id` en double et les barèmes : relancez-le en lui collant le message d'erreur.
+- **La config contient des erreurs.** Une liste indique chaque problème. Cliquez sur « Corriger dans l'éditeur » pour ouvrir [l'éditeur de config](./editeur-config) avec ce texte. Chaque message est expliqué dans [FAQ et dépannage](./depannage). Les `id` en double (voir [catégorie](./depannage#duplicate_category_id), [question](./depannage#duplicate_question_id)) et les [valeurs en double dans un barème](./depannage#duplicate_scale_value) sont des erreurs que vous pouvez corriger dans l'éditeur. Sinon, relancez le LLM en lui collant le message d'erreur.
 
-Le prompt impose quatre catégories de difficulté croissante, avec les mêmes `id` d'une génération à l'autre. Chaque question porte une réponse de référence dans son champ `answer`.
+Le prompt impose quatre catégories de difficulté croissante (Facile, Normal, Difficile, Cauchemar), avec les mêmes `id` d'une génération à l'autre. Chaque question porte une réponse de référence dans son champ `answer`.
 
 ## Réviser
 
@@ -52,7 +52,7 @@ Le menu de la carte propose « Supprimer ». La suppression efface l'entraîneme
 
 Comme les sessions, les entraînements sont enregistrés dans le stockage local de ce navigateur. Voir [Prise en main](./prise-en-main#vos-donnees-restent-sur-votre-appareil).
 
-Si les données d'un entraînement ne passent plus la validation, la carte porte une pastille « endommagé » et l'écran explique ce qui ne va pas. Vous pouvez alors le supprimer.
+Si les données d'un entraînement ne passent plus la validation, la carte porte la pastille « Endommagée » et ne peut pas être ouverte : il ne reste que « Supprimer » dans son menu.
 
 ## Ce qui n'existe pas encore
 
