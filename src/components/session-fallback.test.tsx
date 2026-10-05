@@ -24,3 +24,20 @@ test('l’état chargement est enveloppé dans le même <main> que « introuvabl
   expect(main).not.toBeNull()
   expect(main).toHaveClass(...MAIN_CLASSES)
 })
+
+// « Introuvable » contient un `Link` (routeur requis) : couvert par le test de l'écran d'entraînement.
+test('le texte de chargement passé en `messages` remplace celui de la session', () => {
+  render(<CustomLoading />)
+  expect(screen.getByText('Chargement maison…')).toBeInTheDocument()
+  expect(screen.queryByText('Chargement de la session…')).not.toBeInTheDocument()
+})
+
+function CustomLoading() {
+  return (
+    <SessionFallback
+      ui={useUi()}
+      kind="loading"
+      messages={{ loading: 'Chargement maison…', notFound: 'Introuvable maison' }}
+    />
+  )
+}

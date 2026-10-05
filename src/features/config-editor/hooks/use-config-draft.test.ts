@@ -1,12 +1,15 @@
+import { StrictMode } from 'react'
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import exampleText from '../../../../examples/config.example.json?raw'
+import { stashConfigForEditor } from '@/lib/config-handoff'
 import { DRAFT_KEY, useConfigDraft } from './use-config-draft'
 
 describe('useConfigDraft', () => {
   beforeEach(() => {
     localStorage.clear()
+    sessionStorage.clear()
     vi.useFakeTimers()
   })
   afterEach(() => {
@@ -77,5 +80,28 @@ describe('useConfigDraft', () => {
     act(() => result.current.save('après'))
     act(() => void globalThis.dispatchEvent(new Event('pagehide')))
     expect(localStorage.getItem(DRAFT_KEY)).toBeNull()
+  })
+
+  it('une config déposée pour l’éditeur prime sur le brouillon et devient le brouillon', () => {
+    localStorage.setItem(DRAFT_KEY, '{"ancien":1}')
+    stashConfigForEditor({ text: '{"depose":1}', fileName: 'config.json' })
+    const { result } = renderHook(() => useConfigDraft())
+    expect(result.current.initialText).toBe('{"depose":1}')
+    expect(localStorage.getItem(DRAFT_KEY)).toBe('{"depose":1}')
+  })
+
+  it('le dépôt est consommé : un second montage reprend le brouillon', () => {
+    stashConfigForEditor({ text: '{"depose":1}', fileName: 'config.json' })
+    renderHook(() => useConfigDraft())
+    expect(sessionStorage.getItem('questionator:editor-handoff')).toBeNull()
+    const { result } = renderHook(() => useConfigDraft())
+    expect(result.current.initialText).toBe('{"depose":1}')
+  })
+
+  it('le double appel de StrictMode ne perd pas le dépôt', () => {
+    localStorage.setItem(DRAFT_KEY, '{"ancien":1}')
+    stashConfigForEditor({ text: '{"depose":1}', fileName: 'config.json' })
+    const { result } = renderHook(() => useConfigDraft(), { wrapper: StrictMode })
+    expect(result.current.initialText).toBe('{"depose":1}')
   })
 })

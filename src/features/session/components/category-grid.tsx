@@ -1,12 +1,9 @@
-import type { CSSProperties } from 'react'
-import { CategoryIcon } from '@/components/category-icon'
 import { CategoryLayout } from '@/components/category-layout'
+import { CategoryTile, categoryTileButtonProps } from '@/components/category-tile'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import { isCategoryExhausted } from '@/domain/passage/selectors'
-import { formatScore } from '@/domain/scoring/format'
-import { toMilli } from '@/domain/scoring/milli'
 import type { Student } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
 
@@ -32,7 +29,7 @@ type CategoryGridProps = Readonly<{
  * base) reste un vrai `disabled` : dans cet état, aucune catégorie n'est actionnable.
  */
 export function CategoryGrid({ ui, config, student, disabled, onDraw }: CategoryGridProps) {
-  const { text, locale } = ui
+  const { text } = ui
   return (
     <CategoryLayout
       aria-label={text('passage_categories', {})}
@@ -41,41 +38,15 @@ export function CategoryGrid({ ui, config, student, disabled, onDraw }: Category
       itemKey={(category) => category.id}
       renderItem={(category) => {
         const exhausted = isCategoryExhausted(student, category)
-        const { color } = category
-        const accent: (CSSProperties & Record<'--category-color', string>) | undefined =
-          color === undefined ? undefined : { '--category-color': color }
-        const points = Math.max(...category.scale)
-        const max = formatScore(toMilli(points), 'raw', config, locale)
+        const tileProps = categoryTileButtonProps(category)
         const reasonId = `passage-category-exhausted-${category.id}`
 
-        const content = (
-          <>
-            {category.icon !== undefined && (
-              <CategoryIcon
-                name={category.icon}
-                className="size-6 shrink-0 text-[var(--category-color,currentColor)]"
-              />
-            )}
-            <span>{category.label}</span>
-            <span className="text-xs text-muted-foreground">
-              {text('passage_category_max', { max, points })}
-            </span>
-          </>
-        )
+        const content = <CategoryTile ui={ui} config={config} category={category} />
 
         const handleClick = () => {
           if (exhausted) return
           onDraw(category.id)
         }
-
-        // `dark:` répété : sinon `dark:border-input` du variant outline l'emporte en sombre.
-        // Pas de `pointer-events-none` sur `aria-disabled` : le survol doit ouvrir l'infobulle,
-        // le clic est déjà neutralisé par `handleClick` (QUIRKS).
-        const buttonClassName =
-          'flex h-full w-full flex-col items-center gap-2 p-4 text-center whitespace-normal ' +
-          'data-[colored=true]:border-[var(--category-color)] ' +
-          'dark:data-[colored=true]:border-[var(--category-color)] ' +
-          'aria-disabled:cursor-not-allowed aria-disabled:opacity-50'
 
         return (
           <>
@@ -90,9 +61,7 @@ export function CategoryGrid({ ui, config, student, disabled, onDraw }: Category
                       aria-disabled="true"
                       aria-describedby={reasonId}
                       onClick={handleClick}
-                      style={accent}
-                      data-colored={color !== undefined}
-                      className={buttonClassName}
+                      {...tileProps}
                     />
                   }
                 >
@@ -106,9 +75,7 @@ export function CategoryGrid({ ui, config, student, disabled, onDraw }: Category
                 variant="outline"
                 disabled={disabled}
                 onClick={handleClick}
-                style={accent}
-                data-colored={color !== undefined}
-                className={buttonClassName}
+                {...tileProps}
               >
                 {content}
               </Button>

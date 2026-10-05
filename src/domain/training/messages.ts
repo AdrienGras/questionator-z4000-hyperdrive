@@ -52,17 +52,33 @@ ${categoryTable}`,
 a. Dresse la liste fermée des notions du cours (5 à 15 tags courts, en minuscules, par exemple
    à partir des chapitres). Tu n'utiliseras que ces tags, écrits exactement pareil.
 b. Rédige les questions, chacune avec 1 à 3 tags de cette liste.
-c. Vérifie la couverture et le format (sections 2, 5 et 6) avant de répondre.`,
-  calibration: () => `## 4. Calibrer la difficulté
+c. Vérifie les règles d'oral, la couverture et le format (sections 2, 4, 5 et 6) avant de
+   répondre.`,
+  calibration: () => `## 4. Questions d'oral et difficulté
+Ce sont des questions d'ORAL : chaque question se répond à voix haute, en 2 à 5 minutes, sans
+écrire de code.
+- Ne demande jamais d'écrire, de réécrire ou d'implémenter du code.
+- Le cours et les ateliers illustrent des notions ; ils ne sont pas à mémoriser. Ne demande
+  jamais un nom de classe, de méthode, de fichier ou une valeur de configuration propre aux
+  ateliers, ni « la solution retenue dans l'atelier ». La réponse attendue est une notion, un
+  mécanisme ou un raisonnement, jamais un détail du projet.
+- Si une question s'appuie sur du code, l'énoncé fournit un extrait court et autonome
+  (15 lignes au plus) : l'étudiant raisonne dessus (prédire, expliquer, repérer un problème
+  et dire pourquoi), sans avoir vu l'atelier.
+- Une seule question par énoncé : pas de liste de cas à traiter un par un.
+Plus le niveau monte, plus le raisonnement s'approfondit (pourquoi, compromis, conséquences,
+cas limites) ; la quantité de détails à connaître, elle, n'augmente pas.
 - facile : RESTITUER. La réponse est littéralement dans le cours, en 1 ou 2 phrases. Une
   seule notion. « Qu'est-ce que… », « À quoi sert… ».
-- normal : COMPRENDRE ET APPLIQUER. Expliquer un comportement, prédire la sortie d'un extrait
-  de 5 à 10 lignes, appliquer une notion à un cas proche des ateliers. Une notion, dans un
-  contexte légèrement nouveau.
-- difficile : ANALYSER. Combiner au moins 2 notions (au moins 2 tags), diagnostiquer un bug,
-  comparer deux approches et justifier un choix. Un raisonnement, pas une récitation.
-- cauchemar : ÉVALUER ET CONCEVOIR. Cas limites, pièges, mécanismes internes, conception
-  d'une solution à un problème ouvert. Demande une compréhension fine, sans sortir du cours.
+- normal : COMPRENDRE ET APPLIQUER. Expliquer un comportement ou un mécanisme, prédire le
+  résultat d'un extrait fourni, appliquer une notion à une situation concrète. Une notion,
+  dans un contexte légèrement nouveau.
+- difficile : ANALYSER. Relier au moins 2 notions (au moins 2 tags), expliquer la cause d'un
+  problème décrit ou montré dans un extrait, comparer deux approches et justifier un choix.
+  Un raisonnement, pas une récitation.
+- cauchemar : ÉVALUER ET ARGUMENTER. Cas limites, compromis, mécanismes internes, « que se
+  passe-t-il si… » sur une notion centrale. Demande une compréhension fine, sans sortir du
+  cours.
 Toute question doit pouvoir se résoudre avec le contenu fourni, sans connaissance hors programme.`,
   volume: () => `## 5. Volume et couverture
 - Pour chaque tag : au moins 1 question facile et 1 question normal.
@@ -79,7 +95,7 @@ Toute question doit pouvoir se résoudre avec le contenu fourni, sans connaissan
 - "answer" : exactement ce gabarit markdown :
 
   **Réponse de référence**
-  <la bonne réponse, concise>
+  <ce qu'un bon candidat dit à l'oral, en quelques phrases, sans code à produire>
 
   **Barème**
   - **<valeur>** : <ce que dit une réponse qui vaut cette note>
@@ -120,17 +136,31 @@ ${categoryTable}`,
 a. Draw up the closed list of the course's concepts (5 to 15 short lowercase tags, for example
    from the chapters). You will only use these tags, spelled exactly the same.
 b. Write the questions, each with 1 to 3 tags from this list.
-c. Check coverage and format (sections 2, 5 and 6) before answering.`,
-  calibration: () => `## 4. Calibrate the difficulty
+c. Check the oral rules, coverage and format (sections 2, 4, 5 and 6) before answering.`,
+  calibration: () => `## 4. Oral questions and difficulty
+These are ORAL questions: each question is answered out loud, in 2 to 5 minutes, without
+writing any code.
+- Never ask to write, rewrite or implement code.
+- The course and the workshops illustrate concepts; they are not material to memorise. Never
+  ask for a class, method or file name or a configuration value specific to the workshops, nor
+  for "the solution chosen in the workshop". The expected answer is a concept, a mechanism or a
+  line of reasoning, never a project detail.
+- If a question relies on code, the statement provides a short, self-contained snippet
+  (15 lines at most): the student reasons about it (predict, explain, spot a problem and say
+  why), without having seen the workshop.
+- One question per statement: no list of cases to handle one by one.
+The higher the level, the deeper the reasoning (why, trade-offs, consequences, edge cases);
+the amount of detail to know does not grow.
 - facile: RECALL. The answer is literally in the course, in 1 or 2 sentences. A single
   concept. "What is…", "What is … used for…".
-- normal: UNDERSTAND AND APPLY. Explain a behaviour, predict the output of a 5 to 10 line
-  snippet, apply a concept to a case close to the workshops. One concept, in a slightly new
+- normal: UNDERSTAND AND APPLY. Explain a behaviour or a mechanism, predict the result of a
+  provided snippet, apply a concept to a concrete situation. One concept, in a slightly new
   context.
-- difficile: ANALYSE. Combine at least 2 concepts (at least 2 tags), diagnose a bug, compare
-  two approaches and justify a choice. Reasoning, not recitation.
-- cauchemar: EVALUATE AND DESIGN. Edge cases, traps, internal mechanisms, designing a solution
-  to an open problem. Requires a fine understanding, without going beyond the course.
+- difficile: ANALYSE. Connect at least 2 concepts (at least 2 tags), explain the cause of a
+  problem described or shown in a snippet, compare two approaches and justify a choice.
+  Reasoning, not recitation.
+- cauchemar: EVALUATE AND ARGUE. Edge cases, trade-offs, internal mechanisms, "what happens
+  if…" on a central concept. Requires a fine understanding, without going beyond the course.
 Every question must be solvable with the content provided, with no knowledge from outside the syllabus.`,
   volume: () => `## 5. Volume and coverage
 - For each tag: at least 1 facile question and 1 normal question.
@@ -147,7 +177,7 @@ Every question must be solvable with the content provided, with no knowledge fro
 - "answer": exactly this markdown template:
 
   **Reference answer**
-  <the correct answer, concise>
+  <what a good candidate says out loud, in a few sentences, with no code to produce>
 
   **Scoring**
   - **<value>**: <what an answer worth this score says>

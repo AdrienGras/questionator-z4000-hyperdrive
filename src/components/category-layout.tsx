@@ -8,6 +8,7 @@ type CategoryLayoutProps<T> = Readonly<{
   renderItem: (item: T) => ReactNode
   className?: string
   'aria-label'?: string
+  'aria-labelledby'?: string
 }>
 
 /**
@@ -36,6 +37,7 @@ export function CategoryLayout<T>({
   renderItem,
   className,
   'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
 }: CategoryLayoutProps<T>) {
   const rows = categoryRows(items.length)
   const starts = shortRowStarts(rows)
@@ -45,6 +47,7 @@ export function CategoryLayout<T>({
     <div className="@container">
       <ul
         aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledBy}
         style={style}
         className={cn(
           'grid grid-cols-1 @min-[40rem]:grid-cols-[repeat(var(--cols),minmax(0,1fr))]',

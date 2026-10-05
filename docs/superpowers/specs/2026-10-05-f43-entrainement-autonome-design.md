@@ -165,18 +165,34 @@ Valeurs imposées :
 a. Dresse la liste fermée des notions du cours (5 à 15 tags courts, en minuscules, par exemple
    à partir des chapitres). Tu n'utiliseras que ces tags, écrits exactement pareil.
 b. Rédige les questions, chacune avec 1 à 3 tags de cette liste.
-c. Vérifie la couverture et le format (sections 2, 5 et 6) avant de répondre.
+c. Vérifie les règles d'oral, la couverture et le format (sections 2, 4, 5 et 6) avant de
+   répondre.
 
-## 4. Calibrer la difficulté
+## 4. Questions d'oral et difficulté
+Ce sont des questions d'ORAL : chaque question se répond à voix haute, en 2 à 5 minutes, sans
+écrire de code.
+- Ne demande jamais d'écrire, de réécrire ou d'implémenter du code.
+- Le cours et les ateliers illustrent des notions ; ils ne sont pas à mémoriser. Ne demande
+  jamais un nom de classe, de méthode, de fichier ou une valeur de configuration propre aux
+  ateliers, ni « la solution retenue dans l'atelier ». La réponse attendue est une notion, un
+  mécanisme ou un raisonnement, jamais un détail du projet.
+- Si une question s'appuie sur du code, l'énoncé fournit un extrait court et autonome
+  (15 lignes au plus) : l'étudiant raisonne dessus (prédire, expliquer, repérer un problème
+  et dire pourquoi), sans avoir vu l'atelier.
+- Une seule question par énoncé : pas de liste de cas à traiter un par un.
+Plus le niveau monte, plus le raisonnement s'approfondit (pourquoi, compromis, conséquences,
+cas limites) ; la quantité de détails à connaître, elle, n'augmente pas.
 - facile : RESTITUER. La réponse est littéralement dans le cours, en 1 ou 2 phrases. Une
   seule notion. « Qu'est-ce que… », « À quoi sert… ».
-- normal : COMPRENDRE ET APPLIQUER. Expliquer un comportement, prédire la sortie d'un extrait
-  de 5 à 10 lignes, appliquer une notion à un cas proche des ateliers. Une notion, dans un
-  contexte légèrement nouveau.
-- difficile : ANALYSER. Combiner au moins 2 notions (au moins 2 tags), diagnostiquer un bug,
-  comparer deux approches et justifier un choix. Un raisonnement, pas une récitation.
-- cauchemar : ÉVALUER ET CONCEVOIR. Cas limites, pièges, mécanismes internes, conception
-  d'une solution à un problème ouvert. Demande une compréhension fine, sans sortir du cours.
+- normal : COMPRENDRE ET APPLIQUER. Expliquer un comportement ou un mécanisme, prédire le
+  résultat d'un extrait fourni, appliquer une notion à une situation concrète. Une notion,
+  dans un contexte légèrement nouveau.
+- difficile : ANALYSER. Relier au moins 2 notions (au moins 2 tags), expliquer la cause d'un
+  problème décrit ou montré dans un extrait, comparer deux approches et justifier un choix.
+  Un raisonnement, pas une récitation.
+- cauchemar : ÉVALUER ET ARGUMENTER. Cas limites, compromis, mécanismes internes, « que se
+  passe-t-il si… » sur une notion centrale. Demande une compréhension fine, sans sortir du
+  cours.
 Toute question doit pouvoir se résoudre avec le contenu fourni, sans connaissance hors programme.
 
 ## 5. Volume et couverture
@@ -195,7 +211,7 @@ Toute question doit pouvoir se résoudre avec le contenu fourni, sans connaissan
 - "answer" : exactement ce gabarit markdown :
 
   **Réponse de référence**
-  <la bonne réponse, concise>
+  <ce qu'un bon candidat dit à l'oral, en quelques phrases, sans code à produire>
 
   **Barème**
   - **<valeur>** : <ce que dit une réponse qui vaut cette note>
@@ -213,6 +229,8 @@ de fichier, rends un seul bloc de code ```json``` et rien d'autre.
 ````
 
 La version anglaise impose `"locale": "en"`, les libellés `Easy`, `Normal`, `Hard`, `Nightmare` (mêmes `id`), et le point décimal dans les barèmes de `answer`. Le prompt sera affiné à l'usage ; ses contraintes structurelles (URL, 4 catégories, gabarit de `answer`) sont verrouillées par des tests.
+
+La section 4 a été réécrite après une première génération réelle (cours d'API REST, Claude Opus 5.5) : le LLM demandait de réécrire du code et de réciter l'implémentation des ateliers. Elle impose désormais des questions d'oral (sans code à écrire, ateliers comme illustrations et non comme matière à mémoriser, extrait de code court et autonome fourni dans l'énoncé, une question par énoncé) et un calibrage qui approfondit le raisonnement plutôt que la quantité de détails.
 
 ## Arborescence (D59)
 

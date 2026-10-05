@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouter } from '@tanstack/react-router'
-import { useEffect, useId, useRef, type DragEvent, type SubmitEvent } from 'react'
+import { useEffect, useId, useRef, type SubmitEvent } from 'react'
 import { DbStatusBanner } from '@/components/db-status-banner'
 import { PageShell } from '@/components/page-shell'
 import { Button } from '@/components/ui/button'
@@ -8,40 +8,16 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { takeConfigForCreation } from '@/lib/config-handoff'
 import { useDbStatus } from '@/lib/db/hooks'
-import type { UiMessageParams } from '@/lib/i18n/ui-messages'
 import { useUi } from '@/lib/i18n/use-ui'
 import { ConfigPreview } from '@/features/create-session/components/config-preview'
-import { FileDropField } from '@/features/create-session/components/file-drop-field'
-import { hasFiles } from '@/hooks/use-file-drop'
+import { FileDropField } from '@/components/file-drop-field'
+import { PAGE_DROP_GUARD } from '@/hooks/use-file-drop'
 import { StudentsPreview } from '@/features/create-session/components/students-preview'
-import { configSlotStatus, studentsSlotStatus } from './slot-status'
-import { useCreateForm, type FileSlot } from '@/features/create-session/hooks/use-create-form'
+import { configSlotStatus, slotErrorKey, slotFileName } from '@/components/file-slot'
+import { studentsSlotStatus } from './slot-status'
+import { useCreateForm } from '@/features/create-session/hooks/use-create-form'
 import { SMALL_TEXT_LINK_CLASS } from '@/components/text-link'
 import { cn } from '@/lib/utils'
-
-function fileNameOf(slot: FileSlot<unknown>): string | undefined {
-  return slot.kind === 'empty' ? undefined : slot.fileName
-}
-
-/** Message affiché sous une zone de dépôt quand le fichier n'a pas pu être traité. */
-function slotErrorKey(slot: FileSlot<unknown>): keyof UiMessageParams | undefined {
-  if (slot.kind === 'read-error') return 'import_read_error'
-  if (slot.kind === 'load-error') return 'create_validator_load_error'
-  return undefined
-}
-
-// Garde de dépôt au niveau de la page : un fichier déposé hors des deux zones ne doit jamais être
-// ouvert par le navigateur (le formulaire serait perdu). Les zones gèrent leur propre dépôt et
-// s'exécutent avant, par propagation.
-function handlePageDragOver(event: DragEvent<HTMLElement>) {
-  if (!hasFiles(event)) return
-  event.preventDefault()
-  event.dataTransfer.dropEffect = 'none'
-}
-
-function handlePageDrop(event: DragEvent<HTMLElement>) {
-  event.preventDefault()
-}
 
 /** Écran de création d'une session (F06) : deux fichiers, nom, examinateur, aperçu. */
 export function CreateSessionPage() {
@@ -98,8 +74,7 @@ export function CreateSessionPage() {
           {text('back_home', {})}
         </Link>
       }
-      onDragOver={handlePageDragOver}
-      onDrop={handlePageDrop}
+      {...PAGE_DROP_GUARD}
     >
       <DbStatusBanner ui={ui} status={status} />
       <div className="grid gap-6 md:grid-cols-2">
@@ -109,7 +84,7 @@ export function CreateSessionPage() {
               ui={ui}
               label={text('create_students_label', {})}
               accept=".csv,text/csv"
-              fileName={fileNameOf(form.students)}
+              fileName={slotFileName(form.students)}
               status={studentsSlotStatus(form.students)}
               onFile={(file) => void form.setStudentsFile(file)}
               disabled={form.submitting}
@@ -125,7 +100,7 @@ export function CreateSessionPage() {
               ui={ui}
               label={text('create_config_label', {})}
               accept=".json,application/json"
-              fileName={fileNameOf(form.config)}
+              fileName={slotFileName(form.config)}
               status={configSlotStatus(form.config)}
               onFile={(file) => void form.setConfigFile(file)}
               disabled={form.submitting}

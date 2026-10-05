@@ -1,7 +1,6 @@
-import { IconDots } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import {
   Card,
   CardAction,
@@ -11,13 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { CardActionsMenu } from '@/components/card-actions-menu'
+import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { useWorkbookExport } from '@/components/export/use-workbook-export'
 import { Progress } from '@/components/ui/progress'
 import { updateSession } from '@/lib/db/sessions'
@@ -55,37 +49,24 @@ export function SessionCard({ ui, session }: SessionCardProps) {
         </CardTitle>
         <CardDescription>{session.config.exam.title}</CardDescription>
         <CardAction>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={text('card_actions', { name: session.name })}
-                />
-              }
-            >
-              <IconDots />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-auto">
-              <DropdownMenuItem onClick={() => setDialog('rename')}>
-                {text('action_rename', {})}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setDialog('examiner')}>
-                {text('action_edit_examiner', {})}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => exportBackup(session)}>
-                {text('action_export', {})}
-              </DropdownMenuItem>
-              <DropdownMenuItem disabled={excelBusy} onClick={() => void excel.run(session)}>
-                {text(excelBusy ? 'export_busy' : 'export_button', {})}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" onClick={() => setDialog('delete')}>
-                {text('action_delete', {})}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <CardActionsMenu label={text('card_actions', { name: session.name })}>
+            <DropdownMenuItem onClick={() => setDialog('rename')}>
+              {text('action_rename', {})}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setDialog('examiner')}>
+              {text('action_edit_examiner', {})}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportBackup(session)}>
+              {text('action_export', {})}
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={excelBusy} onClick={() => void excel.run(session)}>
+              {text(excelBusy ? 'export_busy' : 'export_button', {})}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" onClick={() => setDialog('delete')}>
+              {text('action_delete', {})}
+            </DropdownMenuItem>
+          </CardActionsMenu>
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-2 text-sm">

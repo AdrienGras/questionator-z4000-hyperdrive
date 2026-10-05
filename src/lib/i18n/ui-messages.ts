@@ -20,6 +20,14 @@ export type UiMessageParams = {
   home_editor_title: NoParams
   home_editor_body: NoParams
   home_editor_open: NoParams
+  home_training_title: NoParams
+  home_training_body: NoParams
+  home_training_start: NoParams
+  home_trainings_title: NoParams
+  home_training_updated: { date: string }
+  home_training_coverage: { percent: number }
+  home_training_delete_body: NoParams
+  home_training_damaged_body: NoParams
   persistence_warning_label: NoParams
   persistence_warning: NoParams
   db_outdated: NoParams
@@ -102,6 +110,38 @@ export type UiMessageParams = {
   create_write_error: NoParams
   create_preview_title: NoParams
   create_preview_empty: NoParams
+  training_setup_title: NoParams
+  training_setup_gather_title: NoParams
+  training_setup_gather_body: NoParams
+  training_setup_prompt_title: NoParams
+  training_setup_prompt_label: NoParams
+  training_setup_prompt_hint: NoParams
+  training_setup_effort_title: NoParams
+  training_setup_effort_body: NoParams
+  training_setup_copy: NoParams
+  training_setup_copied: NoParams
+  training_setup_copy_failed: NoParams
+  training_setup_config_title: NoParams
+  training_setup_config_body: NoParams
+  training_setup_drop_title: NoParams
+  training_setup_file_label: NoParams
+  training_setup_paste_label: NoParams
+  training_setup_check_paste: NoParams
+  /** Résumé d'une config valide : une ligne par catégorie. */
+  training_setup_category_count: { label: string; count: number }
+  training_setup_fix_in_editor: NoParams
+  training_setup_submit: NoParams
+  training_loading: NoParams
+  training_not_found: NoParams
+  training_damaged_title: NoParams
+  training_damaged_body: NoParams
+  training_tiles_title: NoParams
+  training_reveal: NoParams
+  training_answer_title: NoParams
+  training_no_answer: NoParams
+  training_score_heading: NoParams
+  training_pass: NoParams
+  training_question_missing: NoParams
   preview_students_count: { count: number }
   preview_students_list: NoParams
   preview_line: { line: number; message: string }
@@ -356,6 +396,15 @@ const fr: Dictionary<UiMessageParams> = {
   home_editor_body: () =>
     "Écrivez ou corrigez un fichier de configuration : les erreurs sont signalées en direct et les questions affichées telles qu'elles seront projetées.",
   home_editor_open: () => "Ouvrir l'éditeur",
+  home_training_title: () => 'S’entraîner',
+  home_training_body: () => 'Révisez seul à partir d’une config générée par un LLM.',
+  home_training_start: () => 'Commencer',
+  home_trainings_title: () => 'Mes entraînements',
+  home_training_updated: ({ date }) => `Dernière activité : ${date}`,
+  home_training_coverage: ({ percent }) => `${percent} % des questions notées`,
+  home_training_delete_body: () => 'L’historique et les stats de cet entraînement seront perdus.',
+  home_training_damaged_body: () =>
+    'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Vous pouvez le supprimer.',
   persistence_warning_label: () => 'Stockage non garanti',
   persistence_warning: () =>
     "Le navigateur n'a pas garanti la conservation des données : il peut effacer vos sessions s'il manque d'espace. Exportez régulièrement un backup.",
@@ -447,6 +496,42 @@ const fr: Dictionary<UiMessageParams> = {
   create_preview_title: () => 'Aperçu',
   create_preview_empty: () =>
     "Déposez une liste d'étudiants et une configuration pour voir l'aperçu.",
+  training_setup_title: () => 'S’entraîner',
+  training_setup_gather_title: () => 'Rassemblez votre cours',
+  training_setup_gather_body: () =>
+    'Réunissez le cours et les ateliers dans un seul PDF ou une seule archive zip. Ce fichier reste chez vous : vous le donnerez au LLM, pas à l’application.',
+  training_setup_prompt_title: () => 'Copiez le prompt',
+  training_setup_prompt_label: () => 'Prompt à copier',
+  training_setup_prompt_hint: () =>
+    'Collez-le dans un LLM qui a accès au web, avec votre fichier de cours.',
+  training_setup_effort_title: () => 'Réglez le LLM sur son effort de réflexion maximal.',
+  training_setup_effort_body: () =>
+    'Plus le cours est long, plus ça compte : un effort réduit donne des questions superficielles ou un JSON incomplet.',
+  training_setup_copy: () => 'Copier le prompt',
+  training_setup_copied: () => 'Prompt copié.',
+  training_setup_copy_failed: () =>
+    'La copie a échoué : sélectionnez le texte et copiez-le à la main.',
+  training_setup_config_title: () => 'Récupérez la config',
+  training_setup_config_body: () => 'Le LLM vous rend un fichier .json, ou un bloc de code JSON.',
+  training_setup_drop_title: () => 'Déposez-la',
+  training_setup_file_label: () => 'Config (JSON)',
+  training_setup_paste_label: () => '… ou collez le JSON ici',
+  training_setup_check_paste: () => 'Vérifier le JSON collé',
+  training_setup_category_count: ({ label, count }) =>
+    `${label} : ${count} ${plural(count, 'question', 'questions')}`,
+  training_setup_fix_in_editor: () => 'Corriger dans l’éditeur',
+  training_setup_submit: () => 'C’est parti',
+  training_loading: () => 'Chargement de l’entraînement…',
+  training_not_found: () => 'Entraînement introuvable',
+  training_damaged_title: () => 'Cet entraînement est endommagé',
+  training_damaged_body: () => 'Ses données ne passent plus la validation. Voici ce qui ne va pas.',
+  training_tiles_title: () => 'Choisissez une catégorie',
+  training_reveal: () => 'Voir la réponse',
+  training_answer_title: () => 'Réponse',
+  training_no_answer: () => 'Pas de réponse de référence pour cette question.',
+  training_score_heading: () => 'Notez-vous',
+  training_pass: () => 'Passer',
+  training_question_missing: () => 'Cette question n’existe plus dans la config.',
   preview_students_count: ({ count }) => `${count} ${plural(count, 'étudiant', 'étudiants')}`,
   preview_students_list: () => 'Voir la liste',
   preview_line: ({ line, message }) => `Ligne ${line} : ${message}`,
@@ -655,6 +740,15 @@ const en: Dictionary<UiMessageParams> = {
   home_editor_body: () =>
     'Write or fix a configuration file: errors are flagged as you type and questions are shown as they will be projected.',
   home_editor_open: () => 'Open the editor',
+  home_training_title: () => 'Practice',
+  home_training_body: () => 'Review on your own from a config generated by an LLM.',
+  home_training_start: () => 'Start',
+  home_trainings_title: () => 'My practice',
+  home_training_updated: ({ date }) => `Last activity: ${date}`,
+  home_training_coverage: ({ percent }) => `${percent}% of questions rated`,
+  home_training_delete_body: () => 'The history and stats of this practice will be lost.',
+  home_training_damaged_body: () =>
+    'The saved content is inconsistent; the app cannot open it. You can delete it.',
   persistence_warning_label: () => 'Storage not guaranteed',
   persistence_warning: () =>
     'The browser did not guarantee data retention: it may erase your sessions when space runs low. Export a backup regularly.',
@@ -743,6 +837,41 @@ const en: Dictionary<UiMessageParams> = {
   create_write_error: () => 'Creation failed. Please try again.',
   create_preview_title: () => 'Preview',
   create_preview_empty: () => 'Drop a student list and a configuration to see the preview.',
+  training_setup_title: () => 'Practice',
+  training_setup_gather_title: () => 'Gather your course',
+  training_setup_gather_body: () =>
+    'Put the course and the workshops in a single PDF or a single zip archive. This file stays with you: you give it to the LLM, not to the app.',
+  training_setup_prompt_title: () => 'Copy the prompt',
+  training_setup_prompt_label: () => 'Prompt to copy',
+  training_setup_prompt_hint: () =>
+    'Paste it into an LLM with web access, along with your course file.',
+  training_setup_effort_title: () => 'Set the LLM to its maximum reasoning effort.',
+  training_setup_effort_body: () =>
+    'The longer the course, the more it matters: low effort gives shallow questions or an incomplete JSON.',
+  training_setup_copy: () => 'Copy the prompt',
+  training_setup_copied: () => 'Prompt copied.',
+  training_setup_copy_failed: () => 'Copy failed: select the text and copy it by hand.',
+  training_setup_config_title: () => 'Get the config',
+  training_setup_config_body: () => 'The LLM gives you a .json file, or a JSON code block.',
+  training_setup_drop_title: () => 'Drop it here',
+  training_setup_file_label: () => 'Config (JSON)',
+  training_setup_paste_label: () => '… or paste the JSON here',
+  training_setup_check_paste: () => 'Check the pasted JSON',
+  training_setup_category_count: ({ label, count }) =>
+    `${label}: ${count} ${pluralEn(count, 'question', 'questions')}`,
+  training_setup_fix_in_editor: () => 'Fix in the editor',
+  training_setup_submit: () => "Let's go",
+  training_loading: () => 'Loading practice…',
+  training_not_found: () => 'Practice not found',
+  training_damaged_title: () => 'This practice is damaged',
+  training_damaged_body: () => 'Its data no longer passes validation. Here is what is wrong.',
+  training_tiles_title: () => 'Choose a category',
+  training_reveal: () => 'Show the answer',
+  training_answer_title: () => 'Answer',
+  training_no_answer: () => 'No reference answer for this question.',
+  training_score_heading: () => 'Rate yourself',
+  training_pass: () => 'Skip',
+  training_question_missing: () => 'This question is no longer in the config.',
   preview_students_count: ({ count }) => `${count} ${pluralEn(count, 'student', 'students')}`,
   preview_students_list: () => 'Show the list',
   preview_line: ({ line, message }) => `Line ${line}: ${message}`,

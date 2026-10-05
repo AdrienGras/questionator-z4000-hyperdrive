@@ -117,6 +117,7 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 ## Entraînement
 
 - [ ] Ligne de journal d'entraînement corrompue : écartée à la lecture, donc invisible pour la règle d'un seul tirage en attente ; envisager de la signaler ou de la réparer.
+- [ ] Couverture de l'accueil : une requête live par carte, à regrouper si les journaux grossissent
 
 ## Export Excel
 

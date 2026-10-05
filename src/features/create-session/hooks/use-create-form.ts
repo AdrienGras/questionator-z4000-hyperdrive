@@ -9,13 +9,8 @@ import { csvWarning } from '@/domain/students/issues'
 import { decodeCsvBytes } from '@/domain/students/decode'
 import { parseStudentsCsv, type CsvParseResult } from '@/domain/students/parse-csv'
 import { defaultSessionName } from '@/features/create-session/default-session-name'
-
-export type FileSlot<T> =
-  | { kind: 'empty' }
-  | { kind: 'reading'; fileName: string }
-  | { kind: 'read-error'; fileName: string }
-  | { kind: 'load-error'; fileName: string } // config : échec du chargement du validateur
-  | { kind: 'loaded'; fileName: string; result: T }
+import type { FileSlot } from '@/components/file-slot'
+import { useConfigSlot } from '@/hooks/use-config-slot'
 
 export type CreateForm = {
   students: FileSlot<CsvParseResult>
@@ -34,30 +29,6 @@ export type CreateForm = {
   setExaminer: (value: string) => void
   /** Id de la session créée ; `undefined` si refus (formulaire incomplet, déjà en cours) ou échec. */
   submit: () => Promise<string | undefined>
-}
-
-/** Appel paresseux : `CSS` n'est lu qu'au moment de la validation (absent de jsdom). */
-const cssSupports = (property: string, value: string) => CSS.supports(property, value)
-
-/**
- * Validateur chargé à la demande (~200 kB avec les noms d'icônes) : il ne doit pas alourdir le
- * chunk de l'écran de création tant qu'aucune config n'est déposée. Le catalogue des langages
- * (`shiki/langs`) aussi : il active l'avertissement `unknown_code_language` (F18).
- */
-async function loadValidator(): Promise<(text: string) => ValidationResult> {
-  const [{ validateConfig }, { isKnownLanguage }] = await Promise.all([
-    import('@/domain/config/validate'),
-    import('@/domain/config/code-languages'),
-  ])
-  return (text) => validateConfig(text, { cssSupports, isKnownLanguage })
-}
-
-async function readText(file: File): Promise<string | undefined> {
-  try {
-    return await file.text()
-  } catch {
-    return undefined
-  }
 }
 
 /**
@@ -84,7 +55,7 @@ async function readStudentsCsv(file: File): Promise<CsvParseResult | undefined> 
  */
 export function useCreateForm(locale: Locale, dbStatus: DbStatus): CreateForm {
   const [students, setStudents] = useState<FileSlot<CsvParseResult>>({ kind: 'empty' })
-  const [config, setConfig] = useState<FileSlot<ValidationResult>>({ kind: 'empty' })
+  const { slot: config, ...configSlot } = useConfigSlot()
   const [name, setName] = useState('')
   const [examiner, setExaminer] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -92,7 +63,6 @@ export function useCreateForm(locale: Locale, dbStatus: DbStatus): CreateForm {
   // Lus après un `await` : des refs, pour ne pas dépendre de la fermeture d'un rendu passé.
   const nameEdited = useRef(false)
   const studentsSeq = useRef(0)
-  const configSeq = useRef(0)
   // Garde synchrone : deux clics dans le même tick voient la même valeur de `submitting`.
   const submitLock = useRef(false)
 
@@ -116,39 +86,19 @@ export function useCreateForm(locale: Locale, dbStatus: DbStatus): CreateForm {
     setStudents({ kind: 'loaded', fileName, result })
   }
 
-  async function setConfigFile(file: File): Promise<void> {
-    const seq = ++configSeq.current
-    const fileName = file.name
-    setConfig({ kind: 'reading', fileName })
-    const text = await readText(file)
-    if (seq !== configSeq.current) return
-    if (text === undefined) {
-      setConfig({ kind: 'read-error', fileName })
-      return
+  // Config valide : préremplit le nom tant que l'utilisateur ne l'a pas saisi.
+  function prefillName(result: ValidationResult | undefined) {
+    if (result?.ok === true && !nameEdited.current) {
+      setName(defaultSessionName(result.config.exam.title, new Date(), locale))
     }
-    await validateText(text, fileName, seq)
+  }
+
+  async function setConfigFile(file: File): Promise<void> {
+    prefillName(await configSlot.setConfigFile(file))
   }
 
   async function setConfigText(text: string, fileName: string): Promise<void> {
-    const seq = ++configSeq.current
-    setConfig({ kind: 'reading', fileName })
-    await validateText(text, fileName, seq)
-  }
-
-  async function validateText(text: string, fileName: string, seq: number): Promise<void> {
-    let validateConfig: Awaited<ReturnType<typeof loadValidator>>
-    try {
-      validateConfig = await loadValidator()
-    } catch {
-      if (seq === configSeq.current) setConfig({ kind: 'load-error', fileName })
-      return
-    }
-    if (seq !== configSeq.current) return
-    const result = validateConfig(text)
-    setConfig({ kind: 'loaded', fileName, result })
-    if (result.ok && !nameEdited.current) {
-      setName(defaultSessionName(result.config.exam.title, new Date(), locale))
-    }
+    prefillName(await configSlot.setConfigText(text, fileName))
   }
 
   function editName(value: string) {

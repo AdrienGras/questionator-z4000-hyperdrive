@@ -66,6 +66,7 @@ export default defineConfig({
             { text: 'Éditeur de config', link: '/guide/editeur-config' },
             { text: 'Créer, reprendre et importer une session', link: '/guide/sessions' },
             { text: 'Faire passer un oral', link: '/guide/faire-passer' },
+            { text: "S'entraîner seul", link: '/guide/s-entrainer' },
             { text: 'Projeter', link: '/guide/projeter' },
             { text: 'Statistiques et export Excel', link: '/guide/stats-export' },
             { text: 'Hors ligne et installation', link: '/guide/hors-ligne' },

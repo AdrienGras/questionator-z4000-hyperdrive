@@ -1,4 +1,4 @@
-import { IconFileCode, IconFileImport, IconPlus } from '@tabler/icons-react'
+import { IconFileCode, IconFileImport, IconPlus, IconSchool } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -80,6 +80,17 @@ export function ActionCards({ ui, storageAvailable, importDisabled, onImport }: 
           {text('home_editor_open', {})}
         </Link>
       </ActionCard>
+      {storageAvailable && (
+        <ActionCard
+          icon={<IconSchool className="size-8" />}
+          title={text('home_training_title', {})}
+        >
+          <p className="text-muted-foreground">{text('home_training_body', {})}</p>
+          <Link to="/training/new" className={buttonVariants()}>
+            {text('home_training_start', {})}
+          </Link>
+        </ActionCard>
+      )}
     </section>
   )
 }

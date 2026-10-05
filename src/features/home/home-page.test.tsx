@@ -8,6 +8,8 @@ import type { PersistenceStatus } from '@/lib/db/persistence'
 import { db, type DbStatus } from '@/lib/db/db'
 import { renderAt } from '@/testing/render-at'
 import { makeSession } from '@/testing/session-fixtures'
+import { createTraining } from '@/lib/db/trainings'
+import { makeTraining } from '@/testing/training-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
 import { bannerInteractiveNames, expectColorModeToggleLast } from '@/testing/page-shell-assertions'
 import { storedSession } from '@/testing/stored-session'
@@ -39,6 +41,8 @@ async function chooseAction(action: string) {
 
 beforeEach(async () => {
   await db.sessions.clear()
+  await db.trainings.clear()
+  await db.trainingDraws.clear()
   dbState.status = 'open'
   persistence.status = 'persisted'
   download.mockClear()
@@ -87,8 +91,48 @@ describe('accueil', () => {
     expect(
       actions.compareDocumentPosition(sessions) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy()
-    expect(actions.parentElement).toBe(sessions.parentElement)
+    // Colonne de droite : entraînements puis sessions, dans un même conteneur.
+    expect(actions.parentElement).toBe(sessions.parentElement?.parentElement)
     expect(actions.parentElement).toHaveClass('lg:grid-cols-[24rem_minmax(0,1fr)]')
+  })
+
+  test('sans entraînement : pas de section « Mes entraînements »', async () => {
+    renderAt('/')
+    await screen.findByRole('heading', { name: 'Aucune session' })
+    expect(screen.queryByRole('region', { name: 'Mes entraînements' })).not.toBeInTheDocument()
+    // Seule section à droite : son titre reste réservé aux lecteurs d'écran.
+    expect(screen.getByRole('heading', { level: 2, name: 'Sessions' })).toHaveClass('sr-only')
+  })
+
+  test('avec un entraînement : section « Mes entraînements » au-dessus des sessions', async () => {
+    await createTraining(makeTraining({ name: 'Révisions JS' }))
+    renderAt('/')
+    const trainings = await screen.findByRole('region', { name: 'Mes entraînements' })
+    expect(
+      within(trainings).getByRole('heading', { level: 2, name: 'Mes entraînements' }),
+    ).toBeVisible()
+    expect(
+      within(trainings).getByRole('heading', { level: 3, name: 'Révisions JS' }),
+    ).toBeInTheDocument()
+    const sessions = screen.getByRole('region', { name: 'Sessions' })
+    // Deux sections à droite : le titre des sessions devient visible, comme celui des entraînements.
+    const sessionsTitle = within(sessions).getByRole('heading', { level: 2, name: 'Sessions' })
+    expect(sessionsTitle).not.toHaveClass('sr-only')
+    expect(sessionsTitle).toHaveClass('text-xl', 'font-semibold')
+    expect(
+      trainings.compareDocumentPosition(sessions) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    const actions = screen.getByRole('region', { name: 'Actions' })
+    expect(trainings.parentElement).toBe(sessions.parentElement)
+    expect(actions.parentElement).toBe(trainings.parentElement?.parentElement)
+  })
+
+  test('unavailable : pas de section « Mes entraînements »', async () => {
+    await createTraining(makeTraining())
+    dbState.status = 'unavailable'
+    renderAt('/')
+    await screen.findByText(/stockage local est indisponible/)
+    expect(screen.queryByRole('region', { name: 'Mes entraînements' })).not.toBeInTheDocument()
   })
 
   test('liste triée de la plus récente à la plus ancienne, avec jury et avancement', async () => {

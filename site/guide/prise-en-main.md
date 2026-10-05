@@ -68,6 +68,7 @@ L'interface de l'accueil et de la création de session suit la langue de votre n
 
 - [Préparer les fichiers](./preparer-les-fichiers) : écrire votre propre liste d'étudiants et votre propre config.
 - [Référence de la config](./reference-config) : chaque champ du fichier de config.
+- [S'entraîner seul](./s-entrainer) : réviser un cours avec une config générée par un LLM, sans examinateur.
 - [Éditeur de config](./editeur-config) : écrire la config dans l'application, avec contrôle en direct.
 - [Créer, reprendre et importer une session](./sessions) : reprendre un oral, sauvegarder, restaurer.
 - [Faire passer un oral](./faire-passer) : le détail du passage, des skips, des absents et des ajustements.

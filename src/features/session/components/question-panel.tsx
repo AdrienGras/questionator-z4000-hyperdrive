@@ -1,8 +1,6 @@
 import { Markdown } from '@/components/markdown/markdown'
-import { Button } from '@/components/ui/button'
+import { ScaleButtons } from '@/components/scale-buttons'
 import type { NormalizedConfig } from '@/domain/config/normalize'
-import { formatScore } from '@/domain/scoring/format'
-import { toMilli } from '@/domain/scoring/milli'
 import type { Attempt } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { SkipButton } from './skip-button'
@@ -33,7 +31,7 @@ export function QuestionPanel({
   onScore,
   onSkip,
 }: QuestionPanelProps) {
-  const { text, locale } = ui
+  const { text } = ui
   const category = config.categories.find((c) => c.id === attempt.categoryId)
   if (category === undefined) {
     throw new Error(
@@ -68,23 +66,13 @@ export function QuestionPanel({
       )}
       <div className="flex flex-col gap-2">
         <h3 className="text-sm font-semibold">{text('passage_score_heading', {})}</h3>
-        <div className="flex flex-wrap gap-2">
-          {category.scale.map((value) => {
-            const formatted = formatScore(toMilli(value), 'raw', config, locale)
-            return (
-              <Button
-                key={value}
-                type="button"
-                variant="outline"
-                disabled={disabled}
-                aria-label={text('passage_score_button', { value: formatted })}
-                onClick={() => onScore(attempt.id, value)}
-              >
-                {formatted}
-              </Button>
-            )
-          })}
-        </div>
+        <ScaleButtons
+          ui={ui}
+          config={config}
+          scale={category.scale}
+          disabled={disabled}
+          onScore={(value) => onScore(attempt.id, value)}
+        />
       </div>
       <SkipButton
         ui={ui}
