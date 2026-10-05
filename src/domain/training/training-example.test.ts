@@ -62,4 +62,17 @@ describe('config d’exemple d’entraînement', () => {
       expect(question.tags?.length).toBe(1)
     }
   })
+
+  test('barème : chaque ligne décrit la réponse complète, sans formule incrémentale', () => {
+    for (const category of categories) {
+      for (const question of category.questions) {
+        const lignes = (question.answer ?? '')
+          .split('\n')
+          .filter((l) => /^- \*\*[0-9,]+\*\* :/.test(l))
+        for (const ligne of lignes) {
+          expect(ligne).not.toMatch(/en plus|précédente|plus haut/i)
+        }
+      }
+    }
+  })
 })
