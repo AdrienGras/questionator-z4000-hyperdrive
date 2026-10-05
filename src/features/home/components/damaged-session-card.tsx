@@ -1,15 +1,9 @@
-import { IconDots } from '@tabler/icons-react'
 import { useState } from 'react'
 import { exportBackup } from '@/components/export/export-backup'
-import { Button } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { CardActionsMenu } from '@/components/card-actions-menu'
+import { DamagedBadge } from '@/components/damaged-badge'
+import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { damagedName, type DamagedSession } from '@/lib/db/damaged-session'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { DeleteDialog } from './delete-dialog'
@@ -27,29 +21,18 @@ export function DamagedSessionCard({ ui, damaged }: DamagedSessionCardProps) {
       <CardHeader>
         <CardTitle className="flex flex-wrap items-center gap-2">
           <h3 className="text-lg font-semibold wrap-anywhere">{name}</h3>
-          <span className="rounded-full border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
-            {text('damaged_badge', {})}
-          </span>
+          <DamagedBadge ui={ui} />
         </CardTitle>
         <CardAction>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button variant="ghost" size="icon" aria-label={text('card_actions', { name })} />
-              }
-            >
-              <IconDots />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-auto">
-              <DropdownMenuItem onClick={() => exportBackup(damaged.raw)}>
-                {text('action_export', {})}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" onClick={() => setDeleting(true)}>
-                {text('action_delete', {})}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <CardActionsMenu label={text('card_actions', { name })}>
+            <DropdownMenuItem onClick={() => exportBackup(damaged.raw)}>
+              {text('action_export', {})}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" onClick={() => setDeleting(true)}>
+              {text('action_delete', {})}
+            </DropdownMenuItem>
+          </CardActionsMenu>
         </CardAction>
       </CardHeader>
       <CardContent className="text-sm">
