@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import { runnerImport, type Plugin, type ResolvedConfig } from 'vite'
 
 export const SCHEMA_FILE_NAME = 'config.schema.json'
+export const LITE_SCHEMA_FILE_NAME = 'config.schema.lite.json'
 export const EXAMPLE_FILE_NAME = 'config.example.json'
 export const STUDENTS_EXAMPLE_FILE_NAME = 'students.example.csv'
 
@@ -13,14 +14,27 @@ const STUDENTS_EXAMPLE_FILE = fileURLToPath(
   new URL('../examples/students.example.csv', import.meta.url),
 )
 
-type JsonSchemaModule = { buildConfigJsonSchema: () => Record<string, unknown> }
+type JsonSchemaModule = {
+  buildConfigJsonSchema: (options?: { lite?: boolean }) => Record<string, unknown>
+}
+
+/** Contenu rendu de chaque asset, avant association à son nom de fichier et à son type MIME. */
+type RenderedAssets = {
+  schema: string
+  liteSchema: string
+  example: string
+  studentsExample: string
+}
 
 /** Nom du fichier servi si `url` le désigne sous `base`, sinon `undefined`. */
 export function matchConfigAsset(url: string | undefined, base: string): string | undefined {
   const pathname = url?.split('?')[0]
-  return [SCHEMA_FILE_NAME, EXAMPLE_FILE_NAME, STUDENTS_EXAMPLE_FILE_NAME].find(
-    (name) => pathname === `${base}${name}`,
-  )
+  return [
+    SCHEMA_FILE_NAME,
+    LITE_SCHEMA_FILE_NAME,
+    EXAMPLE_FILE_NAME,
+    STUDENTS_EXAMPLE_FILE_NAME,
+  ].find((name) => pathname === `${base}${name}`)
 }
 
 /**
@@ -29,34 +43,32 @@ export function matchConfigAsset(url: string | undefined, base: string): string 
  * les dépendances transitives de `json-schema.ts` (tout `src/domain/config/`, cf. D17) plus les exemples
  * eux-mêmes.
  */
-export async function renderConfigAssets(): Promise<{
-  schema: string
-  example: string
-  studentsExample: string
-  watchFiles: string[]
-}> {
+export async function renderConfigAssets(): Promise<RenderedAssets & { watchFiles: string[] }> {
   const { module, dependencies } = await runnerImport<JsonSchemaModule>(SCHEMA_MODULE, {
     configFile: false,
     // Même alias que vite.config.ts : le code de src/ importe par `@/` (#31).
     resolve: { alias: { '@': SRC_DIR } },
   })
   const schema = `${JSON.stringify(module.buildConfigJsonSchema(), null, 2)}\n`
+  const liteSchema = `${JSON.stringify(module.buildConfigJsonSchema({ lite: true }), null, 2)}\n`
   const example = await readFile(EXAMPLE_FILE, 'utf8')
   const studentsExample = await readFile(STUDENTS_EXAMPLE_FILE, 'utf8')
   const watchFiles = [
     ...new Set([SCHEMA_MODULE, ...dependencies, EXAMPLE_FILE, STUDENTS_EXAMPLE_FILE]),
   ]
-  return { schema, example, studentsExample, watchFiles }
+  return { schema, liteSchema, example, studentsExample, watchFiles }
 }
 
 /** Contenu et type MIME de chaque asset rendu, par nom de fichier publié. */
-function assetsByFileName(rendered: {
-  schema: string
-  example: string
-  studentsExample: string
-}): Record<string, { content: string; type: string }> {
+function assetsByFileName(
+  rendered: RenderedAssets,
+): Record<string, { content: string; type: string }> {
   return {
     [SCHEMA_FILE_NAME]: { content: rendered.schema, type: 'application/json; charset=utf-8' },
+    [LITE_SCHEMA_FILE_NAME]: {
+      content: rendered.liteSchema,
+      type: 'application/json; charset=utf-8',
+    },
     [EXAMPLE_FILE_NAME]: { content: rendered.example, type: 'application/json; charset=utf-8' },
     [STUDENTS_EXAMPLE_FILE_NAME]: {
       content: rendered.studentsExample,
@@ -65,9 +77,9 @@ function assetsByFileName(rendered: {
   }
 }
 
-/** Publie config.schema.json, config.example.json et students.example.csv à la racine du site (D17, D56). */
+/** Publie config.schema.json, config.schema.lite.json (variante allégée pour les prompts), config.example.json et students.example.csv à la racine du site (D17, D56). */
 export function configSchemaPlugin(): Plugin {
-  let rendered: { schema: string; example: string; studentsExample: string } | undefined
+  let rendered: RenderedAssets | undefined
   let command: ResolvedConfig['command'] | undefined
 
   return {
@@ -101,8 +113,8 @@ export function configSchemaPlugin(): Plugin {
     /** En dev, seul le middleware rend les fichiers : une erreur n'y bloque pas le démarrage. */
     async buildStart() {
       if (command !== 'build') return
-      const { schema, example, studentsExample, watchFiles } = await renderConfigAssets()
-      rendered = { schema, example, studentsExample }
+      const { watchFiles, ...assets } = await renderConfigAssets()
+      rendered = assets
       for (const file of watchFiles) this.addWatchFile(file)
     },
     generateBundle() {
@@ -110,6 +122,11 @@ export function configSchemaPlugin(): Plugin {
         throw new Error('questionator:config-schema : buildStart ne s’est pas exécuté')
       }
       this.emitFile({ type: 'asset', fileName: SCHEMA_FILE_NAME, source: rendered.schema })
+      this.emitFile({
+        type: 'asset',
+        fileName: LITE_SCHEMA_FILE_NAME,
+        source: rendered.liteSchema,
+      })
       this.emitFile({ type: 'asset', fileName: EXAMPLE_FILE_NAME, source: rendered.example })
       this.emitFile({
         type: 'asset',

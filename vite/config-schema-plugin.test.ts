@@ -5,6 +5,7 @@ import { describe, expect, test } from 'vitest'
 import {
   configSchemaPlugin,
   EXAMPLE_FILE_NAME,
+  LITE_SCHEMA_FILE_NAME,
   matchConfigAsset,
   renderConfigAssets,
   SCHEMA_FILE_NAME,
@@ -14,8 +15,9 @@ import {
 const BASE = '/questionator-z4000-hyperdrive/'
 
 describe('matchConfigAsset', () => {
-  test('reconnaît les trois fichiers sous la base, avec ou sans query', () => {
+  test('reconnaît les quatre fichiers sous la base, avec ou sans query', () => {
     expect(matchConfigAsset(`${BASE}config.schema.json`, BASE)).toBe(SCHEMA_FILE_NAME)
+    expect(matchConfigAsset(`${BASE}config.schema.lite.json`, BASE)).toBe(LITE_SCHEMA_FILE_NAME)
     expect(matchConfigAsset(`${BASE}config.example.json?t=1`, BASE)).toBe(EXAMPLE_FILE_NAME)
     expect(matchConfigAsset(`${BASE}students.example.csv`, BASE)).toBe(STUDENTS_EXAMPLE_FILE_NAME)
   })
@@ -28,6 +30,16 @@ describe('matchConfigAsset', () => {
 })
 
 describe('renderConfigAssets', () => {
+  test('génère le schéma allégé, avec son propre $id et un saut de ligne final', async () => {
+    const { liteSchema } = await renderConfigAssets()
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- schema généré par buildConfigJsonSchema({ lite: true }) puis reparsé : on affirme juste la forme qu'on vient d'écrire.
+    const parsed = JSON.parse(liteSchema) as { $id: string }
+    expect(parsed.$id).toBe(
+      'https://adriengras.github.io/questionator-z4000-hyperdrive/config.schema.lite.json',
+    )
+    expect(liteSchema.endsWith('\n')).toBe(true)
+  }, 30_000)
+
   test('génère le schéma via runnerImport et recopie l’exemple', async () => {
     const { schema, example, studentsExample, watchFiles } = await renderConfigAssets()
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- schema généré par buildConfigJsonSchema() puis reparsé : on affirme juste la forme qu'on vient d'écrire.
