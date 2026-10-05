@@ -27,7 +27,7 @@ function renderCards(props: Partial<Parameters<typeof ActionCards>[0]> = {}) {
 }
 
 describe('ActionCards', () => {
-  it('rend une section « Actions » avec trois cartes titrées', async () => {
+  it('rend une section « Actions » avec ses cartes titrées', async () => {
     renderCards()
     const region = await screen.findByRole('region', { name: 'Actions' })
     expect(region).toBeInTheDocument()
@@ -82,5 +82,19 @@ describe('ActionCards', () => {
     renderCards({ storageAvailable: false })
     await screen.findByRole('heading', { level: 3, name: 'Restaurer une session' })
     expect(screen.queryByRole('heading', { name: 'Nouvelle session' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: "S'entraîner" })).not.toBeInTheDocument()
+  })
+
+  it('entraînement : texte et lien « Commencer » vers /training/new', async () => {
+    renderCards()
+    expect(
+      await screen.findByRole('heading', { level: 3, name: "S'entraîner" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText("Révisez seul à partir d'une config générée par un LLM."),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Commencer' }).getAttribute('href')).toMatch(
+      /\/training\/new$/,
+    )
   })
 })
