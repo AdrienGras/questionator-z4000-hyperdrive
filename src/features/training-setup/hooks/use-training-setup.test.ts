@@ -106,13 +106,60 @@ describe('useTrainingSetup', () => {
     expect(takeConfigForEditor()).toEqual({ text: '{"a":1}', fileName: 'mauvais.json' })
   })
 
-  test('fichier illisible au moment de la correction : rien n’est passé', async () => {
+  test('fichier illisible au moment de la correction : rien n’est passé, erreur signalée', async () => {
+    const { result } = renderSetup()
+    const file = configFile('{}', 'mauvais.json')
+    await act(() => result.current.setConfigFile(file))
+    vi.spyOn(file, 'text').mockRejectedValue(new Error('lecture'))
+    let passed: boolean | undefined
+    await act(async () => {
+      passed = await result.current.fixInEditor()
+    })
+    expect(passed).toBe(false)
+    expect(takeConfigForEditor()).toBeUndefined()
+    expect(result.current.fixError).toBe(true)
+  })
+
+  test('nouvelle config après un échec de correction : l’erreur disparaît', async () => {
     const { result } = renderSetup()
     const file = configFile('{}', 'mauvais.json')
     await act(() => result.current.setConfigFile(file))
     vi.spyOn(file, 'text').mockRejectedValue(new Error('lecture'))
     await act(() => result.current.fixInEditor())
-    expect(takeConfigForEditor()).toBeUndefined()
+    await act(() => result.current.setConfigFile(configFile()))
+    expect(result.current.fixError).toBe(false)
+  })
+
+  test('texte collé modifié après vérification : résultat périmé, rien à soumettre', async () => {
+    const { result } = renderSetup()
+    act(() => result.current.setPasted(VALID))
+    await act(() => result.current.checkPasted())
+    expect(result.current.canSubmit).toBe(true)
+    act(() => result.current.setPasted(`${VALID} `))
+    expect(result.current.config.kind).toBe('empty')
+    expect(result.current.canSubmit).toBe(false)
+    expect(result.current.canFix).toBe(false)
+    await act(() => result.current.checkPasted())
+    expect(result.current.canSubmit).toBe(true)
+  })
+
+  test('texte collé modifié alors que la config vient d’un fichier : le fichier reste', async () => {
+    const { result } = renderSetup()
+    await act(() => result.current.setConfigFile(configFile()))
+    act(() => result.current.setPasted('brouillon'))
+    expect(result.current.config).toMatchObject({ kind: 'loaded', fileName: 'config.json' })
+    expect(result.current.canSubmit).toBe(true)
+  })
+
+  test('texte collé non parsable : issue listée, rien à soumettre', async () => {
+    const { result } = renderSetup()
+    act(() => result.current.setPasted('pas du json'))
+    await act(() => result.current.checkPasted())
+    const { config } = result.current
+    expect(config.kind === 'loaded' && config.result.ok).toBe(false)
+    expect(config.kind === 'loaded' && config.result.issues.length).toBeGreaterThan(0)
+    expect(result.current.canSubmit).toBe(false)
+    expect(result.current.canFix).toBe(true)
   })
 
   test('soumission : entraînement créé en base, nommé d’après l’examen', async () => {

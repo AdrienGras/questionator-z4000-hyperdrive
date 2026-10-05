@@ -86,6 +86,11 @@ export function ConfigStep({ ui, setup, onFix }: ConfigStepProps) {
               {text('training_setup_fix_in_editor', {})}
             </Button>
           )}
+          {setup.fixError && (
+            <p role="alert" className="text-sm text-destructive">
+              {text('import_read_error', {})}
+            </p>
+          )}
         </div>
       )}
     </>

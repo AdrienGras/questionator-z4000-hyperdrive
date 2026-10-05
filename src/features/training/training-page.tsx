@@ -1,5 +1,5 @@
 import { getRouteApi, Link } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { DbStatusBanner } from '@/components/db-status-banner'
 import { PageShell } from '@/components/page-shell'
 import { SessionAppearance } from '@/components/session-appearance'
@@ -40,7 +40,16 @@ function TrainingView({
   const actions = useTrainingActions(training.id, journalStepOf(draws))
   const [acted, setActed] = useState(false)
   const pending = currentPending(draws)
+  // Constante : son rétrécissement tient dans les rappels de la question.
+  const drawId = pending?.id
   const errorMessage = errorText(actions.error, ui)
+  const alertRef = useRef<HTMLParagraphElement>(null)
+
+  // Les tuiles ou les boutons de la question sont désactivés pendant l'écriture : sans ça, le
+  // focus retomberait sur `body` après un échec.
+  useEffect(() => {
+    if (actions.error !== null) alertRef.current?.focus()
+  }, [actions.error])
 
   const act = (write: () => Promise<void>) => {
     setActed(true)
@@ -58,11 +67,16 @@ function TrainingView({
       }
     >
       {errorMessage !== undefined && (
-        <p role="alert" className="text-sm text-destructive">
+        <p
+          ref={alertRef}
+          tabIndex={-1}
+          role="alert"
+          className="text-sm text-destructive outline-none"
+        >
           {errorMessage}
         </p>
       )}
-      {pending?.id === undefined ? (
+      {pending === undefined || drawId === undefined ? (
         <TrainingTiles
           ui={ui}
           config={config}
@@ -72,15 +86,15 @@ function TrainingView({
         />
       ) : (
         <TrainingQuestion
-          key={pending.id}
+          key={drawId}
           ui={ui}
           config={config}
           questionId={pending.questionId}
           disabled={actions.busy}
           animate={config.presentation.drawAnimation}
           focusOnMount={acted}
-          onScore={(points) => act(() => actions.score(pending.id ?? -1, points))}
-          onPass={() => act(() => actions.pass(pending.id ?? -1))}
+          onScore={(points) => act(() => actions.score(drawId, points))}
+          onPass={() => act(() => actions.pass(drawId))}
         />
       )}
     </PageShell>

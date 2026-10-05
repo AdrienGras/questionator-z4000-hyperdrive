@@ -185,9 +185,9 @@ describe('écran d’entraînement', () => {
 
     fireEvent.click(await tile('A'))
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Une question est déjà en cours : notez-la d’abord.',
-    )
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('Une question est déjà en cours : notez-la d’abord.')
+    await waitFor(() => expect(alert).toHaveFocus())
   })
 
   test('un échec inattendu affiche le message générique', async () => {

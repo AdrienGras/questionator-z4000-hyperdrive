@@ -12,6 +12,8 @@ export type ConfigSlot = {
   setConfigFile: (file: File) => Promise<ValidationResult | undefined>
   /** Même chemin que `setConfigFile` pour un texte déjà en main (passage depuis l'éditeur). */
   setConfigText: (text: string, fileName: string) => Promise<ValidationResult | undefined>
+  /** Vide l'emplacement ; une lecture ou une validation en vol devient obsolète. */
+  clear: () => void
 }
 
 /** Appel paresseux : `CSS` n'est lu qu'au moment de la validation (absent de jsdom). */
@@ -88,5 +90,10 @@ export function useConfigSlot(): ConfigSlot {
     return result
   }
 
-  return { slot, setConfigFile, setConfigText }
+  function clear(): void {
+    seqRef.current++
+    setSlot({ kind: 'empty' })
+  }
+
+  return { slot, setConfigFile, setConfigText, clear }
 }

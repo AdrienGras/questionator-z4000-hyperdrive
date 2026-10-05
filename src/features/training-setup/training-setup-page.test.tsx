@@ -153,6 +153,49 @@ describe('écran de mise en place d’un entraînement', () => {
     expect(submitButton()).toBeEnabled()
   })
 
+  test('JSON collé modifié après vérification : résumé masqué, bouton désactivé', async () => {
+    await renderPage()
+    const valid = JSON.stringify(minimalConfig())
+    fireEvent.change(pasteArea(), { target: { value: valid } })
+    fireEvent.click(screen.getByRole('button', { name: 'Vérifier le JSON collé' }))
+    await screen.findByRole('heading', { name: 'Oral de test' })
+    expect(submitButton()).toBeEnabled()
+    fireEvent.change(pasteArea(), { target: { value: `${valid}\n` } })
+    expect(screen.queryByRole('heading', { name: 'Oral de test' })).toBeNull()
+    expect(submitButton()).toBeDisabled()
+  })
+
+  test('JSON collé invalide puis modifié : plus de correction proposée', async () => {
+    await renderPage()
+    fireEvent.change(pasteArea(), { target: { value: '{}' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Vérifier le JSON collé' }))
+    await screen.findByRole('button', { name: "Corriger dans l'éditeur" })
+    fireEvent.change(pasteArea(), { target: { value: '{"exam":{}}' } })
+    expect(screen.queryByRole('button', { name: "Corriger dans l'éditeur" })).toBeNull()
+    expect(submitButton()).toBeDisabled()
+  })
+
+  test('JSON collé non parsable : erreur listée, bouton désactivé', async () => {
+    await renderPage()
+    fireEvent.change(pasteArea(), { target: { value: 'pas du json' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Vérifier le JSON collé' }))
+    await screen.findByRole('button', { name: "Corriger dans l'éditeur" })
+    expect(screen.getAllByRole('listitem').length).toBeGreaterThan(0)
+    expect(submitButton()).toBeDisabled()
+  })
+
+  test('fichier illisible au moment de la correction : alerte, on reste sur l’écran', async () => {
+    const { input, router } = await renderPage()
+    const file = new File(['{}'], 'mauvais.json')
+    fireEvent.change(input, { target: { files: [file] } })
+    const fix = await screen.findByRole('button', { name: "Corriger dans l'éditeur" })
+    vi.spyOn(file, 'text').mockRejectedValue(new Error('lecture'))
+    fireEvent.click(fix)
+    expect(await screen.findByRole('alert')).toHaveTextContent("Le fichier n'a pas pu être lu.")
+    expect(router.state.location.pathname).toBe('/training/new')
+    expect(stashConfigForEditor).not.toHaveBeenCalled()
+  })
+
   test('« C’est parti » : entraînement créé en base, navigation vers son écran', async () => {
     const { input, router } = await renderPage()
     choose(input, 'config.json', JSON.stringify(minimalConfig()))
