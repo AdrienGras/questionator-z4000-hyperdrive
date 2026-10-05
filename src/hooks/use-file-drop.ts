@@ -5,6 +5,22 @@ export function hasFiles(event: DragEvent<HTMLElement>): boolean {
   return Array.from(event.dataTransfer.types).includes('Files')
 }
 
+/**
+ * Garde de dépôt au niveau d'une page : un fichier déposé hors des zones ne doit jamais être ouvert
+ * par le navigateur (le formulaire serait perdu). Les zones gèrent leur propre dépôt et s'exécutent
+ * avant, par propagation. À étaler sur l'élément racine de la page.
+ */
+export const PAGE_DROP_GUARD = {
+  onDragOver(event: DragEvent<HTMLElement>) {
+    if (!hasFiles(event)) return
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'none'
+  },
+  onDrop(event: DragEvent<HTMLElement>) {
+    event.preventDefault()
+  },
+}
+
 type FileDropOptions = Readonly<{
   /** Survol et dépôt refusés : le navigateur n'ouvre pas le fichier, mais rien n'est lu. */
   disabled?: boolean

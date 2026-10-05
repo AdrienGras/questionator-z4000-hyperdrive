@@ -102,6 +102,25 @@ export type UiMessageParams = {
   create_write_error: NoParams
   create_preview_title: NoParams
   create_preview_empty: NoParams
+  training_setup_title: NoParams
+  training_setup_gather_title: NoParams
+  training_setup_gather_body: NoParams
+  training_setup_prompt_title: NoParams
+  training_setup_prompt_label: NoParams
+  training_setup_prompt_hint: NoParams
+  training_setup_copy: NoParams
+  training_setup_copied: NoParams
+  training_setup_copy_failed: NoParams
+  training_setup_config_title: NoParams
+  training_setup_config_body: NoParams
+  training_setup_drop_title: NoParams
+  training_setup_file_label: NoParams
+  training_setup_paste_label: NoParams
+  training_setup_check_paste: NoParams
+  /** Résumé d'une config valide : une ligne par catégorie. */
+  training_setup_category_count: { label: string; count: number }
+  training_setup_fix_in_editor: NoParams
+  training_setup_submit: NoParams
   preview_students_count: { count: number }
   preview_students_list: NoParams
   preview_line: { line: number; message: string }
@@ -447,6 +466,28 @@ const fr: Dictionary<UiMessageParams> = {
   create_preview_title: () => 'Aperçu',
   create_preview_empty: () =>
     "Déposez une liste d'étudiants et une configuration pour voir l'aperçu.",
+  training_setup_title: () => "S'entraîner",
+  training_setup_gather_title: () => 'Rassemblez votre cours',
+  training_setup_gather_body: () =>
+    "Réunissez le cours et les ateliers dans un seul PDF ou une seule archive zip. Ce fichier reste chez vous : vous le donnerez au LLM, pas à l'application.",
+  training_setup_prompt_title: () => 'Copiez le prompt',
+  training_setup_prompt_label: () => 'Prompt à copier',
+  training_setup_prompt_hint: () =>
+    'Collez-le dans un LLM qui a accès au web, avec votre fichier de cours.',
+  training_setup_copy: () => 'Copier le prompt',
+  training_setup_copied: () => 'Prompt copié.',
+  training_setup_copy_failed: () =>
+    'La copie a échoué : sélectionnez le texte et copiez-le à la main.',
+  training_setup_config_title: () => 'Récupérez la config',
+  training_setup_config_body: () => 'Le LLM vous rend un fichier .json, ou un bloc de code JSON.',
+  training_setup_drop_title: () => 'Déposez-la',
+  training_setup_file_label: () => 'Config (JSON)',
+  training_setup_paste_label: () => '… ou collez le JSON ici',
+  training_setup_check_paste: () => 'Vérifier le JSON collé',
+  training_setup_category_count: ({ label, count }) =>
+    `${label} : ${count} ${plural(count, 'question', 'questions')}`,
+  training_setup_fix_in_editor: () => "Corriger dans l'éditeur",
+  training_setup_submit: () => "C'est parti",
   preview_students_count: ({ count }) => `${count} ${plural(count, 'étudiant', 'étudiants')}`,
   preview_students_list: () => 'Voir la liste',
   preview_line: ({ line, message }) => `Ligne ${line} : ${message}`,
@@ -743,6 +784,27 @@ const en: Dictionary<UiMessageParams> = {
   create_write_error: () => 'Creation failed. Please try again.',
   create_preview_title: () => 'Preview',
   create_preview_empty: () => 'Drop a student list and a configuration to see the preview.',
+  training_setup_title: () => 'Practice',
+  training_setup_gather_title: () => 'Gather your course',
+  training_setup_gather_body: () =>
+    'Put the course and the workshops in a single PDF or a single zip archive. This file stays with you: you give it to the LLM, not to the app.',
+  training_setup_prompt_title: () => 'Copy the prompt',
+  training_setup_prompt_label: () => 'Prompt to copy',
+  training_setup_prompt_hint: () =>
+    'Paste it into an LLM with web access, along with your course file.',
+  training_setup_copy: () => 'Copy the prompt',
+  training_setup_copied: () => 'Prompt copied.',
+  training_setup_copy_failed: () => 'Copy failed: select the text and copy it by hand.',
+  training_setup_config_title: () => 'Get the config',
+  training_setup_config_body: () => 'The LLM gives you a .json file, or a JSON code block.',
+  training_setup_drop_title: () => 'Drop it here',
+  training_setup_file_label: () => 'Config (JSON)',
+  training_setup_paste_label: () => '… or paste the JSON here',
+  training_setup_check_paste: () => 'Check the pasted JSON',
+  training_setup_category_count: ({ label, count }) =>
+    `${label}: ${count} ${pluralEn(count, 'question', 'questions')}`,
+  training_setup_fix_in_editor: () => 'Fix in the editor',
+  training_setup_submit: () => "Let's go",
   preview_students_count: ({ count }) => `${count} ${pluralEn(count, 'student', 'students')}`,
   preview_students_list: () => 'Show the list',
   preview_line: ({ line, message }) => `Line ${line}: ${message}`,
