@@ -229,6 +229,38 @@ await updateSession(sessionId, (session) => {
 - Lecture : `useSession(id)` / `useSessions()` ; `undefined` = chargement, `null` = absente, et depuis F31 (D81) le type est `StoredSession` (`Session | DamagedSession`) : **appeler `isDamaged(value)` avant tout usage** et afficher `DamagedSessionScreen` (pages) ou `DamagedSessionCard` (accueil) ; `updateSession` lève `SessionDamagedError` sur une session endommagée. Tests : semer des données qui passent `checkStoredSession` et réduire le type avec `healthy()` (`src/testing/healthy-session.ts`). Afficher un message si `useDbStatus()` vaut `'outdated'` (recharger) ou `'unavailable'` (stockage bloqué).
 - Tests de `src/lib/db/` : `import 'fake-indexeddb/auto'` en première ligne ; `createDb(nomUnique)` pour les tests de cycle de vie, `beforeEach(() => db.sessions.clear())` pour ceux du singleton ; `makeSession()` de `src/testing/session-fixtures.ts`.
 
+## Mutation d'entraînement — squelette
+
+Les écritures d'entraînement passent par `src/lib/db/trainings.ts` (`drawTrainingQuestion`, `scoreTrainingDraw`, `passTrainingDraw`, `replaceTrainingConfigInDb`, `deleteTraining`), jamais par `db.trainings.*` ni `db.trainingDraws.*` hors de `src/lib/db/`. Contrairement aux sessions, il n'y a pas de mutator : chaque fonction appelle `writeTraining`, qui ouvre une transaction `rw` sur `trainings` et `trainingDraws`, relit l'entraînement et son journal, puis exécute le corps `async`.
+
+```ts
+export function drawTrainingQuestion(
+  trainingId: string,
+  categoryId: string,
+  deps: Clock & { random: (n: number) => number },
+): Promise<TrainingDraw> {
+  return writeTraining(trainingId, async (training, draws) => {
+    const questionId = pickTrainingQuestion(training.config, draws, categoryId, deps.random)
+    const drawnAt = deps.now().toISOString()
+    const draw: TrainingDraw = { trainingId, questionId, drawnAt, outcome: { kind: 'pending' } }
+    const id = await db.trainingDraws.add(draw)
+    await touch(trainingId, drawnAt)
+    return { ...draw, id }
+  })
+}
+```
+
+### Règles tacites
+
+- Le domaine pur (`src/domain/training/`) est appelé **dans** la transaction, sur les données fraîches : le contrôle « un seul tirage `pending` » est refait là, ce qui couvre deux onglets. Il lève `TrainingError` (code stable, message traduit) ; une erreur annule toute la transaction.
+- `loadReadStoredTraining()` est attendu **avant** la transaction : un `import()` attendu dedans la ferait valider trop tôt (`PrematureCommitError`). Les validateurs qu'il renvoie sont synchrones.
+- Création : `createTraining` attrape `Dexie.ConstraintError` et lève `TrainingExistsError` (comme `SessionExistsError`).
+- Absent → `TrainingNotFoundError`, endommagé → `TrainingDamagedError`, levés avant tout appel au domaine. Le journal est lu validé : les lignes invalides sont écartées.
+- Les dates (`now`) et le hasard (`random`) sont injectés par les `deps`, comme les ids (`newId`) à la création. Points et `max` sont des valeurs du barème (D43), jamais des millièmes.
+- Chaque écriture met `updatedAt` à jour (`touch`) : il sert au tri (`compareRecords`, partagé avec les sessions).
+- Lecture : `useTrainings()`, `useTraining(id)`, `useTrainingDraws(id)` ; `undefined` = chargement, `null` = absent, `isDamagedTraining(value)` avant usage.
+- Tests : comme pour les sessions (`import 'fake-indexeddb/auto'` en première ligne, `createDb(nomUnique)` pour le cycle de vie, `beforeEach` qui vide `trainings` et `trainingDraws`).
+
 ## Composant d'écran traduit — squelette
 
 ```tsx

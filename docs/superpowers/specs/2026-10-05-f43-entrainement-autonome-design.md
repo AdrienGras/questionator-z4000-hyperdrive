@@ -82,7 +82,7 @@ type Training = {
 
 type DrawOutcome =
   | { kind: 'pending' }
-  | { kind: 'scored'; points: number; max: number } // millièmes entiers ; max figé à la note
+  | { kind: 'scored'; points: number; max: number } // valeurs du barème (D43), ex. 1.5 ; max figé à la note
   | { kind: 'passed' }
 
 type TrainingDraw = {
@@ -95,9 +95,10 @@ type TrainingDraw = {
 ```
 
 - Au plus un tirage `pending` par entraînement. Le contrôle est refait dans la transaction d'écriture, sur les données fraîches (deux onglets).
-- Toutes les écritures passent par `lib/db/trainings.ts`, dans une transaction `rw` sur `trainings` et `trainingDraws` : `createTraining`, `drawQuestion`, `scoreDraw`, `passDraw`, `replaceTrainingConfig`, `deleteTraining` (supprime aussi le journal). Aucun import du singleton hors de `lib/db/` (règle `db-singleton`).
+- Toutes les écritures passent par `lib/db/trainings.ts`, dans une transaction `rw` sur `trainings` et `trainingDraws` : `createTraining`, `drawTrainingQuestion`, `scoreTrainingDraw`, `passTrainingDraw`, `replaceTrainingConfigInDb`, `deleteTraining` (supprime aussi le journal). Les points et `max` restent en valeurs du barème dans la base ; `toMilli` ne sert qu'aux calculs de `training-stats.ts`. Aucun import du singleton hors de `lib/db/` (règle `db-singleton`).
 - `updatedAt` change à chaque écriture ; il sert au tri de l'accueil et à « dernière activité ».
-- Lecture : `useTrainings()`, `useTraining(id)`, `useTrainingDraws(id)` ; `undefined` = chargement, `null` = absent. Un entraînement dont la config stockée ne passe plus la validation est endommagé (`checkStoredTraining`, sur le modèle de `checkStoredSession`).
+- Lecture : `useTrainings()`, `useTraining(id)`, `useTrainingDraws(id)` ; `undefined` = chargement, `null` = absent. Un entraînement dont la config stockée ne passe plus la validation est endommagé (`checkStoredTraining`, sur le modèle de `checkStoredSession`) ; les lignes du journal invalides sont écartées à la lecture (`parseStoredDraws`).
+- Fichiers du domaine : `types.ts`, `schema.ts` (`TrainingSchema`, `TrainingDrawSchema`), `stored-training.ts`, `new-training.ts`, `cycle-draw.ts`, `resolve-draw.ts` (`scoredOutcome`, `passedOutcome`), `replace-config.ts`, `training-stats.ts`, `errors.ts` (`TrainingError` : `category_not_found`, `pending_exists`, `not_pending`, `score_not_in_scale`). Côté `lib/db/` : `damaged-training.ts`, `errors.ts` (`TrainingExistsError`, `TrainingNotFoundError`, `TrainingDamagedError`), `record-order.ts` (tri partagé avec les sessions).
 
 ## Règles métier (`domain/training/`)
 
@@ -109,7 +110,7 @@ Pour une catégorie : compter, pour chacune de ses questions, les tirages `score
 
 ### Stats (`training-stats.ts`)
 
-Calculées sur les tirages `scored` des questions de la config courante, regroupés par leur catégorie et leurs tags **actuels**. Taux = somme des `points` / somme des `max`, en entiers jusqu'à l'affichage, affiché en pourcentage entier.
+Calculées sur les tirages `scored` des questions de la config courante, regroupés par leur catégorie et leurs tags **actuels**. Taux = somme des `points` / somme des `max`, en millièmes (`toMilli`) jusqu'à l'affichage, affiché en pourcentage entier.
 
 - **Socle** : nombre de questions notées, nombre de questions passées, taux par catégorie.
 - **Maîtrise par tag** : taux par tag ; une question à plusieurs tags compte dans chacun. Pas de bloc si la config n'a aucun tag.

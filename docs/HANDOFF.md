@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-05 — #135 : F43.2, stockage et domaine de l'entraînement
+
+**Dernière chose faite** : F43.2 implémenté sur `feat/135-stockage-entrainement`. Dexie version 2 (`trainings`, `trainingDraws`), `lib/db/trainings.ts` (création, tirage, note, passe, remplacement de config, suppression, lectures validées), hooks de lecture, et `domain/training/` (cycle de tirage, stats, remplacement de config, schémas Zod, lecture tolérante du journal). Spec corrigée (valeurs du barème, noms réels), D101, CONVENTIONS, QUIRKS et INDEX à jour.
+
+**Trucs en suspens** : PR du ticket #135 à ouvrir en brouillon, puis `sonar-check.sh --pr <n> --wait` jusqu'au gate vert avant « Ready for review ». Pas de merge sans le go de l'utilisateur.
+
+**Prochaine chose à creuser** : #136 (écrans d'entraînement : dépôt de la config, tirage, notation, accueil).
+
+**Notes pour future Claude** : `points` et `max` sont stockés en valeurs du barème (D43) ; la spec disait « millièmes entiers », elle est corrigée. `loadReadStoredTraining()` doit être attendu avant la transaction (sinon `PrematureCommitError`). Une ligne de journal invalide est écartée à la lecture, elle ne rend pas l'entraînement endommagé. Les checks Codecov peuvent rester `in_progress` : relancer le job `check` (voir QUIRKS).
+
 ## 2026-10-05 — #134 : F43.1, schéma allégé et prompt d'entraînement
 
 **Dernière chose faite** : F43.1 implémenté sur `feat/134-schema-allege-prompt`. `config.schema.lite.json` (31 054 octets, test < 40 000), `domain/training/` (catégories imposées, prompt fr/en, `buildTrainingPrompt(locale)` avec URL en constantes), `examples/training.example.json` (3 facile à un tag, 3 normal, 2 difficile, 1 cauchemar) et son test de conventions. Spec, PRODUCT (F43, glossaire), D101, QUIRKS et INDEX à jour.

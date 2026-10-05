@@ -1,5 +1,6 @@
 import { Dexie, type DexieOptions, type EntityTable } from 'dexie'
 import type { Session } from '@/domain/session/types'
+import type { Training, TrainingDraw } from '@/domain/training/types'
 
 /**
  * `outdated` : un autre onglet a monté le schéma, cette connexion est fermée (D45).
@@ -8,9 +9,15 @@ import type { Session } from '@/domain/session/types'
  */
 export type DbStatus = 'open' | 'outdated' | 'unavailable'
 
-/** Un document par session, étudiants et attempts imbriqués (D22). */
+/**
+ * Un document par session, étudiants et attempts imbriqués (D22). Un document par entraînement,
+ * son journal de tirages à part (une ligne par tirage, id auto-incrémenté, indexée par
+ * `trainingId`).
+ */
 export class QuestionatorDb extends Dexie {
   declare readonly sessions: EntityTable<Session, 'id'>
+  declare readonly trainings: EntityTable<Training, 'id'>
+  declare readonly trainingDraws: EntityTable<TrainingDraw, 'id'>
 
   #status: DbStatus = 'open'
   readonly #listeners = new Set<() => void>()
@@ -19,6 +26,12 @@ export class QuestionatorDb extends Dexie {
     super(name, options)
     // Toute évolution passe par version(n).stores(...).upgrade(...).
     this.version(1).stores({ sessions: 'id, updatedAt' })
+    // v2 : tables d'entraînement, ajoutées vides ; les sessions sont conservées telles quelles.
+    this.version(2).stores({
+      sessions: 'id, updatedAt',
+      trainings: 'id, updatedAt',
+      trainingDraws: '++id, trainingId',
+    })
     // Remplace le traitement par défaut de Dexie (fermeture + log console) : l'onglet qui
     // monte de version n'est jamais bloqué, et celui-ci expose un état observable.
     this.on('versionchange', () => {

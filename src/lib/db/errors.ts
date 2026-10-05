@@ -30,3 +30,36 @@ export class SessionDamagedError extends Error {
     this.id = id
   }
 }
+
+/** Un entraînement existe déjà avec cet identifiant (`createTraining`). */
+export class TrainingExistsError extends Error {
+  readonly id: string
+
+  constructor(id: string) {
+    super(`Un entraînement « ${id} » existe déjà.`)
+    this.name = 'TrainingExistsError'
+    this.id = id
+  }
+}
+
+/** Aucun entraînement n'a cet identifiant. */
+export class TrainingNotFoundError extends Error {
+  readonly id: string
+
+  constructor(id: string) {
+    super(`Entraînement « ${id} » introuvable.`)
+    this.name = 'TrainingNotFoundError'
+    this.id = id
+  }
+}
+
+/** L'entraînement lu ne passe pas la validation : aucune écriture n'est faite. */
+export class TrainingDamagedError extends Error {
+  readonly id: string
+
+  constructor(id: string) {
+    super(`Entraînement « ${id} » endommagé : écriture refusée.`)
+    this.name = 'TrainingDamagedError'
+    this.id = id
+  }
+}
