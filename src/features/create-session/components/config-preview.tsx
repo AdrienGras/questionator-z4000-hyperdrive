@@ -1,11 +1,7 @@
-import { IconAlertTriangle } from '@tabler/icons-react'
-import { formatPath, type ConfigIssue } from '@/domain/config/issues'
-import { formatConfigIssue } from '@/domain/config/messages'
+import { ConfigIssueList } from '@/components/config-issue-list'
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import type { ValidationResult } from '@/domain/config/validate'
 import type { Ui } from '@/lib/i18n/use-ui'
-import { cn } from '@/lib/utils'
-import { errorsFirst, keyed } from '@/lib/issue-list'
 
 type ConfigPreviewProps = Readonly<{
   ui: Ui
@@ -52,32 +48,11 @@ function ConfigSummary({ ui, config }: Readonly<{ ui: Ui; config: NormalizedConf
   )
 }
 
-function IssueItem({ ui, issue }: Readonly<{ ui: Ui; issue: ConfigIssue }>) {
-  const path = formatPath(issue.path)
-  const isError = issue.severity === 'error'
-  return (
-    <li
-      className={cn(
-        'flex items-start gap-2',
-        isError ? 'text-destructive' : 'text-muted-foreground',
-      )}
-    >
-      {!isError && <IconAlertTriangle aria-hidden className="mt-0.5 size-4 shrink-0" />}
-      {path !== '' && <code className="rounded bg-muted px-1 font-mono text-xs">{path}</code>}
-      {formatConfigIssue(issue, ui.locale)}
-    </li>
-  )
-}
-
 /**
  * Aperçu de la config déposée : résumé si elle est valide, puis toutes les issues de F02
  * (erreurs d'abord), chacune avec son chemin.
  */
 export function ConfigPreview({ ui, result }: ConfigPreviewProps) {
-  const issues = keyed(
-    errorsFirst(result.issues),
-    (issue) => `${formatPath(issue.path)}|${issue.code}`,
-  )
   return (
     <div className="flex flex-col gap-2">
       {result.ok ? (
@@ -85,13 +60,7 @@ export function ConfigPreview({ ui, result }: ConfigPreviewProps) {
       ) : (
         <h3 className="font-semibold">{ui.text('preview_config_title', {})}</h3>
       )}
-      {issues.length > 0 && (
-        <ul className="flex flex-col gap-1 text-sm">
-          {issues.map(({ item, key }) => (
-            <IssueItem key={key} ui={ui} issue={item} />
-          ))}
-        </ul>
-      )}
+      <ConfigIssueList ui={ui} issues={result.issues} />
     </div>
   )
 }

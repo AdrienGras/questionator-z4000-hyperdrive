@@ -1,12 +1,9 @@
-import type { CSSProperties } from 'react'
-import { CategoryIcon } from '@/components/category-icon'
 import { CategoryLayout } from '@/components/category-layout'
+import { CategoryTile, categoryAccent } from '@/components/category-tile'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import { isCategoryExhausted } from '@/domain/passage/selectors'
-import { formatScore } from '@/domain/scoring/format'
-import { toMilli } from '@/domain/scoring/milli'
 import type { Student } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
 
@@ -32,7 +29,7 @@ type CategoryGridProps = Readonly<{
  * base) reste un vrai `disabled` : dans cet état, aucune catégorie n'est actionnable.
  */
 export function CategoryGrid({ ui, config, student, disabled, onDraw }: CategoryGridProps) {
-  const { text, locale } = ui
+  const { text } = ui
   return (
     <CategoryLayout
       aria-label={text('passage_categories', {})}
@@ -42,26 +39,10 @@ export function CategoryGrid({ ui, config, student, disabled, onDraw }: Category
       renderItem={(category) => {
         const exhausted = isCategoryExhausted(student, category)
         const { color } = category
-        const accent: (CSSProperties & Record<'--category-color', string>) | undefined =
-          color === undefined ? undefined : { '--category-color': color }
-        const points = Math.max(...category.scale)
-        const max = formatScore(toMilli(points), 'raw', config, locale)
+        const accent = categoryAccent(category)
         const reasonId = `passage-category-exhausted-${category.id}`
 
-        const content = (
-          <>
-            {category.icon !== undefined && (
-              <CategoryIcon
-                name={category.icon}
-                className="size-6 shrink-0 text-[var(--category-color,currentColor)]"
-              />
-            )}
-            <span>{category.label}</span>
-            <span className="text-xs text-muted-foreground">
-              {text('passage_category_max', { max, points })}
-            </span>
-          </>
-        )
+        const content = <CategoryTile ui={ui} config={config} category={category} />
 
         const handleClick = () => {
           if (exhausted) return
