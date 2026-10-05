@@ -3,7 +3,7 @@ import type { Training, TrainingDraw } from '@/domain/training/types'
 import { minimalConfig } from './config-fixtures'
 
 /** Config normalisée à 2 catégories : `a` (3 questions, barème 0-2) et `b` (1 question, barème 0-1). */
-function makeTrainingConfig(): NormalizedConfig {
+export function makeTrainingConfig(): NormalizedConfig {
   const config = minimalConfig()
   config.categories = [
     {
