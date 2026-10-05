@@ -55,13 +55,20 @@ export function TrainingCard({ ui, training }: TrainingCardProps) {
           <p>{text('home_training_coverage', { percent: coveragePercent(training, draws) })}</p>
         )}
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-wrap gap-2">
         <Link
           to="/training/$trainingId"
           params={{ trainingId: training.id }}
           className={buttonVariants({ variant: 'outline' })}
         >
           {text('card_resume', {})}
+        </Link>
+        <Link
+          to="/training/$trainingId/stats"
+          params={{ trainingId: training.id }}
+          className={buttonVariants({ variant: 'ghost' })}
+        >
+          {text('training_stats_card_link', {})}
         </Link>
       </CardFooter>
       <DeleteTrainingDialog

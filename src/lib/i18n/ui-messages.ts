@@ -142,6 +142,35 @@ export type UiMessageParams = {
   training_score_heading: NoParams
   training_pass: NoParams
   training_question_missing: NoParams
+  training_stats_link: NoParams
+  training_stats_card_link: NoParams
+  training_stats_back: NoParams
+  training_stats_not_found: NoParams
+  training_stats_error: NoParams
+  training_stats_empty: NoParams
+  training_stats_start: NoParams
+  training_stats_key_figures: NoParams
+  training_stats_scored: { count: number }
+  training_stats_passed: { count: number }
+  training_stats_coverage: { covered: number; total: number }
+  training_stats_review_title: NoParams
+  training_stats_review_empty: NoParams
+  /** `score` : « points / max » déjà mis en forme par l'appelant (`formatRawScore`). */
+  training_stats_last_score: { score: string }
+  training_stats_attempts: { count: number }
+  training_stats_by_category: NoParams
+  training_stats_by_tag: NoParams
+  training_stats_col_level: NoParams
+  training_stats_col_tag: NoParams
+  training_stats_col_rate: NoParams
+  training_stats_col_coverage: NoParams
+  training_stats_col_question: NoParams
+  training_stats_col_scored: NoParams
+  training_stats_col_last: NoParams
+  training_stats_col_status: NoParams
+  training_stats_details: { count: number }
+  /** Nom accessible d'une barre de taux ; `rate` déjà mis en forme (« 82 % »). */
+  training_stats_rate_label: { label: string; rate: string }
   preview_students_count: { count: number }
   preview_students_list: NoParams
   preview_line: { line: number; message: string }
@@ -532,6 +561,37 @@ const fr: Dictionary<UiMessageParams> = {
   training_score_heading: () => 'Notez-vous',
   training_pass: () => 'Passer',
   training_question_missing: () => 'Cette question n’existe plus dans la config.',
+  training_stats_link: () => 'Voir les stats',
+  training_stats_card_link: () => 'Stats',
+  training_stats_back: () => 'Retour à l’entraînement',
+  training_stats_not_found: () => 'Cet entraînement n’existe pas.',
+  training_stats_error: () => 'Les stats n’ont pas pu être chargées.',
+  training_stats_empty: () =>
+    'Pas encore de réponse notée. Tirez une première question pour voir vos stats.',
+  training_stats_start: () => 'Aller à l’entraînement',
+  training_stats_key_figures: () => 'Chiffres clés',
+  training_stats_scored: ({ count }) =>
+    `${count} ${plural(count, 'réponse notée', 'réponses notées')}`,
+  training_stats_passed: ({ count }) => `${count} ${plural(count, 'passée', 'passées')}`,
+  training_stats_coverage: ({ covered, total }) =>
+    `${covered} / ${total} ${plural(total, 'question notée', 'questions notées')}`,
+  training_stats_review_title: () => 'À revoir',
+  training_stats_review_empty: () => 'Aucune question à revoir pour l’instant.',
+  training_stats_last_score: ({ score }) => `Dernière note : ${score}`,
+  training_stats_attempts: ({ count }) => `${count} ${plural(count, 'passage', 'passages')}`,
+  training_stats_by_category: () => 'Par niveau',
+  training_stats_by_tag: () => 'Par notion',
+  training_stats_col_level: () => 'Niveau',
+  training_stats_col_tag: () => 'Notion',
+  training_stats_col_rate: () => 'Taux de réussite',
+  training_stats_col_coverage: () => 'Questions notées',
+  training_stats_col_question: () => 'Question',
+  training_stats_col_scored: () => 'Passages notés',
+  training_stats_col_last: () => 'Dernière note',
+  training_stats_col_status: () => 'Statut',
+  training_stats_details: ({ count }) =>
+    count > 1 ? `Détail des ${count} questions` : `Détail de ${count} question`,
+  training_stats_rate_label: ({ label, rate }) => `${label} : ${rate}`,
   preview_students_count: ({ count }) => `${count} ${plural(count, 'étudiant', 'étudiants')}`,
   preview_students_list: () => 'Voir la liste',
   preview_line: ({ line, message }) => `Ligne ${line} : ${message}`,
@@ -872,6 +932,36 @@ const en: Dictionary<UiMessageParams> = {
   training_score_heading: () => 'Rate yourself',
   training_pass: () => 'Skip',
   training_question_missing: () => 'This question is no longer in the config.',
+  training_stats_link: () => 'View stats',
+  training_stats_card_link: () => 'Stats',
+  training_stats_back: () => 'Back to practice',
+  training_stats_not_found: () => 'This practice does not exist.',
+  training_stats_error: () => 'The stats could not be loaded.',
+  training_stats_empty: () => 'No rated answer yet. Draw a first question to see your stats.',
+  training_stats_start: () => 'Go to practice',
+  training_stats_key_figures: () => 'Key figures',
+  training_stats_scored: ({ count }) =>
+    `${count} ${pluralEn(count, 'rated answer', 'rated answers')}`,
+  training_stats_passed: ({ count }) => `${count} skipped`,
+  training_stats_coverage: ({ covered, total }) =>
+    `${covered} / ${total} ${pluralEn(total, 'question rated', 'questions rated')}`,
+  training_stats_review_title: () => 'To review',
+  training_stats_review_empty: () => 'No question to review for now.',
+  training_stats_last_score: ({ score }) => `Last score: ${score}`,
+  training_stats_attempts: ({ count }) => `${count} ${pluralEn(count, 'attempt', 'attempts')}`,
+  training_stats_by_category: () => 'By level',
+  training_stats_by_tag: () => 'By topic',
+  training_stats_col_level: () => 'Level',
+  training_stats_col_tag: () => 'Topic',
+  training_stats_col_rate: () => 'Success rate',
+  training_stats_col_coverage: () => 'Questions rated',
+  training_stats_col_question: () => 'Question',
+  training_stats_col_scored: () => 'Rated attempts',
+  training_stats_col_last: () => 'Last score',
+  training_stats_col_status: () => 'Status',
+  training_stats_details: ({ count }) =>
+    `Details of ${count} ${pluralEn(count, 'question', 'questions')}`,
+  training_stats_rate_label: ({ label, rate }) => `${label}: ${rate}`,
   preview_students_count: ({ count }) => `${count} ${pluralEn(count, 'student', 'students')}`,
   preview_students_list: () => 'Show the list',
   preview_line: ({ line, message }) => `Line ${line}: ${message}`,

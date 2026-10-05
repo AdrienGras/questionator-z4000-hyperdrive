@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { PageShell } from '@/components/page-shell'
 import { SMALL_TEXT_LINK_CLASS } from '@/components/text-link'
 import { TrainingGate } from '@/components/training-gate'
+import { buttonVariants } from '@/components/ui/button'
 import { currentPending } from '@/domain/training/cycle-draw'
 import { TrainingError } from '@/domain/training/errors'
 import { trainingErrorMessage } from '@/domain/training/errors-messages'
@@ -55,6 +56,15 @@ function TrainingView({
     <PageShell
       ui={ui}
       title={training.name}
+      actions={
+        <Link
+          to="/training/$trainingId/stats"
+          params={{ trainingId: training.id }}
+          className={buttonVariants({ variant: 'outline' })}
+        >
+          {ui.text('training_stats_link', {})}
+        </Link>
+      }
       back={
         <Link to="/" className={cn('self-start', SMALL_TEXT_LINK_CLASS)}>
           {ui.text('back_home', {})}
