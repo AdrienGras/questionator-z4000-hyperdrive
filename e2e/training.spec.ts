@@ -1,10 +1,22 @@
 import { readFileSync } from 'node:fs'
+import { z } from 'zod'
 import { examplePath, expect, test } from './fixtures.ts'
 import { HomePage } from './pages/home-page.ts'
 
-/** Config d'entraînement d'exemple : « Git, les bases », 9 questions en 4 catégories. */
+/** Config d'entraînement d'exemple : « Git, les bases ». */
 const CONFIG = readFileSync(examplePath('training.example.json'), 'utf8')
 const NAME = 'Git, les bases'
+
+/** Nombre de questions de l'exemple, lu dans la config plutôt qu'écrit en dur. */
+function questionCount(text: string): number {
+  const parsed = z
+    .looseObject({ categories: z.array(z.looseObject({ questions: z.array(z.unknown()) })) })
+    .parse(JSON.parse(text))
+  return parsed.categories.reduce((sum, category) => sum + category.questions.length, 0)
+}
+
+/** Couverture affichée sur la carte après une seule question notée, arrondie comme l'écran. */
+const ONE_RATED_PERCENT = Math.round(100 / questionCount(CONFIG))
 
 test('entraînement : tirer, noter, reprendre après rechargement, passer, retrouver la couverture', async ({
   page,
@@ -38,11 +50,13 @@ test('entraînement : tirer, noter, reprendre après rechargement, passer, retro
   await training.pass()
   await expect(training.question).toBeHidden()
 
-  // Accueil : l'entraînement est listé avec sa couverture (1 question notée sur 9 → 11 %).
+  // Accueil : l'entraînement est listé avec sa couverture (une seule question notée).
   const back = await training.backHome()
   const card = back.trainingCard(NAME)
   await expect(card).toBeVisible()
-  await expect(card).toContainText(/11\s%\sdes questions notées/)
+  await expect(card).toContainText(
+    new RegExp(String.raw`${ONE_RATED_PERCENT}\s%\sdes questions notées`, 'u'),
+  )
 
   const reopened = await back.openTraining(NAME)
   await expect(reopened.tiles).toBeVisible()
