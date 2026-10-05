@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { CONFIG_DEFAULTS } from './defaults'
-import { buildConfigJsonSchema } from './json-schema'
+import { buildConfigJsonSchema, CONFIG_SCHEMA_LITE_URL } from './json-schema'
 
 interface Node {
   description?: string
@@ -116,5 +116,55 @@ describe('JSON Schema de config : aide à la saisie', () => {
     expect(property(property(theme, 'dark'), 'chart-1').description).toBe(
       'Variable CSS `--chart-1` du thème sombre.',
     )
+  })
+})
+
+const PATH_TO_PROPERTIES = ['properties', 'categories', 'items', 'properties'] as const
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+function categoryProperties(schema: Record<string, unknown>): Record<string, unknown> {
+  let node: unknown = schema
+  for (const key of PATH_TO_PROPERTIES) node = isRecord(node) ? node[key] : undefined
+  if (!isRecord(node)) throw new Error('propriétés de catégorie introuvables')
+  return node
+}
+function iconNode(schema: Record<string, unknown>): Record<string, unknown> {
+  const icon = categoryProperties(schema).icon
+  if (!isRecord(icon)) throw new Error('icon introuvable')
+  return icon
+}
+function withoutIcon(schema: Record<string, unknown>): Record<string, unknown> {
+  const copy = structuredClone(schema)
+  delete copy.$id
+  delete categoryProperties(copy).icon
+  return copy
+}
+
+describe('schéma allégé (F43)', () => {
+  test('icon est une simple chaîne, sans anyOf ni liste de noms', () => {
+    const icon = iconNode(buildConfigJsonSchema({ lite: true }))
+    expect(icon.type).toBe('string')
+    expect(icon).not.toHaveProperty('anyOf')
+    expect(icon.description).toBe(iconNode(buildConfigJsonSchema()).description)
+  })
+
+  test('ne diffère du schéma complet que sur icon et $id', () => {
+    expect(withoutIcon(buildConfigJsonSchema({ lite: true }))).toEqual(
+      withoutIcon(buildConfigJsonSchema()),
+    )
+  })
+
+  test('$id pointe vers le schéma allégé', () => {
+    expect(buildConfigJsonSchema({ lite: true }).$id).toBe(CONFIG_SCHEMA_LITE_URL)
+  })
+
+  test('pèse moins de 40 000 octets', () => {
+    const text = JSON.stringify(buildConfigJsonSchema({ lite: true }), null, 2) + '\n'
+    expect(new TextEncoder().encode(text).length).toBeLessThan(40_000)
+  })
+
+  test('sans option, la sortie est inchangée', () => {
+    expect(buildConfigJsonSchema()).toEqual(buildConfigJsonSchema({ lite: false }))
   })
 })

@@ -6,11 +6,19 @@ import { hoverValues, TABLER_ICONS_URL, type SchemaValueNode } from './schema-va
 export const CONFIG_SCHEMA_URL =
   'https://adriengras.github.io/questionator-z4000-hyperdrive/config.schema.json'
 
+export const CONFIG_SCHEMA_LITE_URL =
+  'https://adriengras.github.io/questionator-z4000-hyperdrive/config.schema.lite.json'
+
 /**
  * JSON Schema publié à la racine du site (D17). Structure seule : les règles croisées ne sont
  * vérifiées que par l'application. `icon` propose les noms Tabler sans refuser les autres.
+ *
+ * Avec `lite` (F43), `icon` n'est plus qu'une chaîne, sans la liste de ~6 200 noms : le schéma
+ * allégé existe pour les LLM, dont les outils de lecture tronquent le fichier complet avant
+ * `questions`. Hors de `icon` et de `$id`, les deux sorties sont identiques.
  */
-export function buildConfigJsonSchema(): Record<string, unknown> {
+export function buildConfigJsonSchema(options: { lite?: boolean } = {}): Record<string, unknown> {
+  const lite = options.lite === true
   const schema = z.toJSONSchema(ConfigSchema, {
     target: 'draft-2020-12',
     io: 'input',
@@ -22,7 +30,8 @@ export function buildConfigJsonSchema(): Record<string, unknown> {
       const node = ctx.jsonSchema as Record<string, unknown>
       const { description, default: defaultValue } = node
       for (const key of Object.keys(node)) delete node[key]
-      node.anyOf = [{ enum: [...ICON_NAMES] }, { type: 'string' }]
+      if (lite) node.type = 'string'
+      else node.anyOf = [{ enum: [...ICON_NAMES] }, { type: 'string' }]
       if (description !== undefined) node.description = description
       if (defaultValue !== undefined) node.default = defaultValue
     },
@@ -30,7 +39,7 @@ export function buildConfigJsonSchema(): Record<string, unknown> {
   addMarkdownDescriptions(schema)
   return {
     ...schema,
-    $id: CONFIG_SCHEMA_URL,
+    $id: lite ? CONFIG_SCHEMA_LITE_URL : CONFIG_SCHEMA_URL,
     title: 'Questionator Z-4000 Hyperdrive — configuration',
   }
 }
