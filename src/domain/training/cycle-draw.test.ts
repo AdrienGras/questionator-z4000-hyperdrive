@@ -16,6 +16,10 @@ function ids(draws: ReturnType<typeof seen>[], categoryId = 'a'): string[] {
 }
 
 describe('cycleCandidates', () => {
+  test('catégorie inconnue : aucune candidate', () => {
+    expect(ids([], 'inconnue')).toEqual([])
+  })
+
   test('journal vide : toutes les questions de la catégorie sont candidates', () => {
     expect(ids([])).toEqual(['a-1', 'a-2', 'a-3'])
   })

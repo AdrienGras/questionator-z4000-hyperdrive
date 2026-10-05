@@ -114,6 +114,10 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [x] Petits nettoyages de `domain/stats/` : `mean` en une seule division, `?? 0` inatteignable dans `strategies.ts`, `countBy` renommé, `Tally` au lieu de `ReturnType<typeof emptyTally>`, commentaire de limite 2^53 de `populationStdDev`. → #87 *Fait en #87 (PR 4) : `mean` surchargée (liste non vide → `number`), `countBy` → `groupByKey` ; `Tally` existait déjà.*
 - [x] Paragraphe d'état vide répété quatre fois dans `features/stats/components/` : extraire un `StatsEmpty`. → #87 *Fait en #87 (PR 4) : extraite (cinq occurrences, quatre fichiers).*
 
+## Entraînement
+
+- [ ] Ligne de journal d'entraînement corrompue : écartée à la lecture, donc invisible pour la règle d'un seul tirage en attente ; envisager de la signaler ou de la réparer.
+
 ## Export Excel
 
 - [ ] Vérifier l'ouverture dans Excel (critère d'acceptation de F16, fait seulement sous LibreOffice) : pas d'invite de réparation, volet figé (`activePane="bottomRight"` avec `xSplit="0"` écrit par write-excel-file). → #77

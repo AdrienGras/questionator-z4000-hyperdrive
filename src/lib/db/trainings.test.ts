@@ -6,7 +6,7 @@ import type { Training } from '@/domain/training/types'
 import { makeDraw, makeTraining, makeTrainingConfig } from '@/testing/training-fixtures'
 import { db } from './db'
 import { isDamagedTraining, type StoredTraining } from './damaged-training'
-import { TrainingDamagedError, TrainingNotFoundError } from './errors'
+import { TrainingDamagedError, TrainingExistsError, TrainingNotFoundError } from './errors'
 import {
   createTraining,
   deleteTraining,
@@ -49,6 +49,14 @@ describe('lecture', () => {
   test('createTraining puis getTraining', async () => {
     await createTraining(makeTraining())
     expect(await getTraining('training-1')).toEqual(makeTraining())
+  })
+
+  test('createTraining refuse un id existant sans rien écraser', async () => {
+    await createTraining(makeTraining())
+    const error = await createTraining(makeTraining({ name: 'Autre' })).catch((e: unknown) => e)
+    expect(error).toBeInstanceOf(TrainingExistsError)
+    expect(error).toMatchObject({ id: 'training-1' })
+    expect(healthyTraining(await getTraining('training-1')).name).toBe(makeTraining().name)
   })
 
   test('getTraining renvoie null pour un entraînement absent', async () => {

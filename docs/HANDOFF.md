@@ -28,7 +28,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 **Dernière chose faite** : F43.2 implémenté sur `feat/135-stockage-entrainement`. Dexie version 2 (`trainings`, `trainingDraws`), `lib/db/trainings.ts` (création, tirage, note, passe, remplacement de config, suppression, lectures validées), hooks de lecture, et `domain/training/` (cycle de tirage, stats, remplacement de config, schémas Zod, lecture tolérante du journal). Spec corrigée (valeurs du barème, noms réels), D101, CONVENTIONS, QUIRKS et INDEX à jour.
 
-**Trucs en suspens** : PR #135 à ouvrir en brouillon, puis `sonar-check.sh --pr <n> --wait` jusqu'au gate vert avant « Ready for review ». Pas de merge sans le go de l'utilisateur.
+**Trucs en suspens** : PR du ticket #135 à ouvrir en brouillon, puis `sonar-check.sh --pr <n> --wait` jusqu'au gate vert avant « Ready for review ». Pas de merge sans le go de l'utilisateur.
 
 **Prochaine chose à creuser** : #136 (écrans d'entraînement : dépôt de la config, tirage, notation, accueil).
 

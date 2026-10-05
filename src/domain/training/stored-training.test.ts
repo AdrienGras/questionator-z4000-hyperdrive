@@ -41,4 +41,16 @@ describe('parseStoredDraws', () => {
     const { questionId: _q, ...noQuestion } = makeDraw({ id: 4 })
     expect(parseStoredDraws([good1, bogus, noQuestion, good2, null])).toEqual([good1, good2])
   })
+
+  test('écarte une ligne dont les points ne sont pas finis', () => {
+    const infinite = makeDraw({ id: 1, outcome: { kind: 'scored', points: Infinity, max: 2 } })
+    const good = makeDraw({ id: 2 })
+    expect(parseStoredDraws([infinite, good])).toEqual([good])
+  })
+
+  test('écarte une ligne dont drawnAt n’est pas une date ISO', () => {
+    const bad = makeDraw({ id: 1, drawnAt: 'hier' })
+    const good = makeDraw({ id: 2 })
+    expect(parseStoredDraws([bad, good])).toEqual([good])
+  })
 })

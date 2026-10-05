@@ -8,6 +8,7 @@ import {
   SessionExistsError,
   SessionNotFoundError,
   TrainingDamagedError,
+  TrainingExistsError,
   TrainingNotFoundError,
 } from './errors'
 
@@ -132,6 +133,9 @@ describe('erreurs', () => {
     const notFound = new TrainingNotFoundError('t-9')
     expect(notFound).toBeInstanceOf(Error)
     expect(notFound).toMatchObject({ id: 't-9', name: 'TrainingNotFoundError' })
+    const exists = new TrainingExistsError('t-9')
+    expect(exists).toBeInstanceOf(TrainingExistsError)
+    expect(exists).toMatchObject({ id: 't-9', name: 'TrainingExistsError' })
     const damaged = new TrainingDamagedError('t-9')
     expect(damaged).toBeInstanceOf(TrainingDamagedError)
     expect(damaged).toMatchObject({ id: 't-9', name: 'TrainingDamagedError' })

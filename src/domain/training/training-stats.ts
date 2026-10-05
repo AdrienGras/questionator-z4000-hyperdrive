@@ -80,7 +80,7 @@ function questionStats(
     scoredCount: notes.length,
     last: last && { points: last.points, max: last.max },
     meanRate: rates.length > 0 ? rates.reduce((s, r) => s + r, 0) / rates.length : null,
-    toReview: last !== null && last.points * 2 < last.max,
+    toReview: last !== null && last.points < last.max * REVIEW_THRESHOLD,
   }
 }
 

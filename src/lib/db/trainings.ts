@@ -1,3 +1,4 @@
+import { Dexie } from 'dexie'
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import { pickTrainingQuestion } from '@/domain/training/cycle-draw'
 import { TrainingError } from '@/domain/training/errors'
@@ -6,14 +7,19 @@ import { passedOutcome, scoredOutcome } from '@/domain/training/resolve-draw'
 import type { DrawOutcome, Training, TrainingDraw } from '@/domain/training/types'
 import { db } from './db'
 import { isDamagedTraining, loadReadStoredTraining, type StoredTraining } from './damaged-training'
-import { TrainingDamagedError, TrainingNotFoundError } from './errors'
+import { TrainingDamagedError, TrainingExistsError, TrainingNotFoundError } from './errors'
 import { compareRecords } from './record-order'
 
 type Clock = { now: () => Date }
 
-/** Crée un entraînement construit par `newTraining`. */
+/** Crée un entraînement construit par `newTraining` ; `TrainingExistsError` si l'`id` existe déjà. */
 export async function createTraining(training: Training): Promise<void> {
-  await db.trainings.add(training)
+  try {
+    await db.trainings.add(training)
+  } catch (error) {
+    if (error instanceof Dexie.ConstraintError) throw new TrainingExistsError(training.id)
+    throw error
+  }
 }
 
 /** Entraînement validé, forme endommagée si l'enregistrement est incohérent, `null` si absent. */

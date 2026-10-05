@@ -19,8 +19,8 @@ const OutcomeSchema = z.discriminatedUnion('kind', [
   z.strictObject({ kind: z.literal('pending') }),
   z.strictObject({
     kind: z.literal('scored'),
-    points: z.number().finite(),
-    max: z.number().finite(),
+    points: z.number(),
+    max: z.number(),
   }),
   z.strictObject({ kind: z.literal('passed') }),
 ])
@@ -29,6 +29,6 @@ export const TrainingDrawSchema = z.strictObject({
   id: z.int().optional(),
   trainingId: nonEmptyString(),
   questionId: nonEmptyString(),
-  drawnAt: z.string(),
+  drawnAt: isoDate(),
   outcome: OutcomeSchema,
 })

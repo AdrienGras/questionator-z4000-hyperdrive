@@ -29,6 +29,13 @@ describe('computeTrainingStats', () => {
     expect(stats.questions.every((q) => !q.toReview && q.last === null)).toBe(true)
   })
 
+  it('un tirage passed sur une question absente de la config ne compte pas', () => {
+    const stats = computeTrainingStats(config, [
+      makeDraw({ questionId: 'fantome', outcome: { kind: 'passed' } }),
+    ])
+    expect(stats.passedCount).toBe(0)
+  })
+
   it('taux par catégorie en millièmes', () => {
     const stats = computeTrainingStats(config, [scored('a-1', 2, 2), scored('a-2', 1, 2)])
     expect(stats.byCategory[0]?.rate).toEqual({ points: 3000, max: 4000, rate: 0.75 })

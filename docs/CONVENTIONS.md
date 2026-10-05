@@ -254,6 +254,7 @@ export function drawTrainingQuestion(
 
 - Le domaine pur (`src/domain/training/`) est appelé **dans** la transaction, sur les données fraîches : le contrôle « un seul tirage `pending` » est refait là, ce qui couvre deux onglets. Il lève `TrainingError` (code stable, message traduit) ; une erreur annule toute la transaction.
 - `loadReadStoredTraining()` est attendu **avant** la transaction : un `import()` attendu dedans la ferait valider trop tôt (`PrematureCommitError`). Les validateurs qu'il renvoie sont synchrones.
+- Création : `createTraining` attrape `Dexie.ConstraintError` et lève `TrainingExistsError` (comme `SessionExistsError`).
 - Absent → `TrainingNotFoundError`, endommagé → `TrainingDamagedError`, levés avant tout appel au domaine. Le journal est lu validé : les lignes invalides sont écartées.
 - Les dates (`now`) et le hasard (`random`) sont injectés par les `deps`, comme les ids (`newId`) à la création. Points et `max` sont des valeurs du barème (D43), jamais des millièmes.
 - Chaque écriture met `updatedAt` à jour (`touch`) : il sert au tri (`compareRecords`, partagé avec les sessions).
