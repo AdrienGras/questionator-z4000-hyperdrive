@@ -116,6 +116,8 @@ export type UiMessageParams = {
   training_setup_prompt_title: NoParams
   training_setup_prompt_label: NoParams
   training_setup_prompt_hint: NoParams
+  training_setup_effort_title: NoParams
+  training_setup_effort_body: NoParams
   training_setup_copy: NoParams
   training_setup_copied: NoParams
   training_setup_copy_failed: NoParams
@@ -502,6 +504,9 @@ const fr: Dictionary<UiMessageParams> = {
   training_setup_prompt_label: () => 'Prompt à copier',
   training_setup_prompt_hint: () =>
     'Collez-le dans un LLM qui a accès au web, avec votre fichier de cours.',
+  training_setup_effort_title: () => 'Réglez le LLM sur son effort de réflexion maximal.',
+  training_setup_effort_body: () =>
+    'Plus le cours est long, plus ça compte : un effort réduit donne des questions superficielles ou un JSON incomplet.',
   training_setup_copy: () => 'Copier le prompt',
   training_setup_copied: () => 'Prompt copié.',
   training_setup_copy_failed: () =>
@@ -840,6 +845,9 @@ const en: Dictionary<UiMessageParams> = {
   training_setup_prompt_label: () => 'Prompt to copy',
   training_setup_prompt_hint: () =>
     'Paste it into an LLM with web access, along with your course file.',
+  training_setup_effort_title: () => 'Set the LLM to its maximum reasoning effort.',
+  training_setup_effort_body: () =>
+    'The longer the course, the more it matters: low effort gives shallow questions or an incomplete JSON.',
   training_setup_copy: () => 'Copy the prompt',
   training_setup_copied: () => 'Prompt copied.',
   training_setup_copy_failed: () => 'Copy failed: select the text and copy it by hand.',

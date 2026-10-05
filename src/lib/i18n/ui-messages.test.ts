@@ -116,6 +116,8 @@ const SAMPLE: UiMessageParams = {
   training_setup_prompt_title: {},
   training_setup_prompt_label: {},
   training_setup_prompt_hint: {},
+  training_setup_effort_title: {},
+  training_setup_effort_body: {},
   training_setup_copy: {},
   training_setup_copied: {},
   training_setup_copy_failed: {},

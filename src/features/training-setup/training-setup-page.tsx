@@ -67,19 +67,16 @@ export function TrainingSetupPage() {
       {...PAGE_DROP_GUARD}
     >
       <DbStatusBanner ui={ui} status={status} />
-      <form
-        onSubmit={(event) => void handleSubmit(event)}
-        className="flex max-w-3xl flex-col gap-6"
-      >
+      <form onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-6">
         <ol className="flex flex-col gap-8">
           <SetupStep number={1} title={text('training_setup_gather_title', {})}>
-            <p>{text('training_setup_gather_body', {})}</p>
+            <p className="max-w-prose">{text('training_setup_gather_body', {})}</p>
           </SetupStep>
           <SetupStep number={2} title={text('training_setup_prompt_title', {})}>
             <PromptStep ui={ui} prompt={prompt} />
           </SetupStep>
           <SetupStep number={3} title={text('training_setup_config_title', {})}>
-            <p>{text('training_setup_config_body', {})}</p>
+            <p className="max-w-prose">{text('training_setup_config_body', {})}</p>
           </SetupStep>
           <SetupStep number={4} title={text('training_setup_drop_title', {})}>
             <ConfigStep ui={ui} setup={setup} onFix={() => void handleFix()} />

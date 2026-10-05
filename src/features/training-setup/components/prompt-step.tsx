@@ -1,3 +1,4 @@
+import { IconBulb } from '@tabler/icons-react'
 import { useId, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -19,6 +20,17 @@ export function PromptStep({ ui, prompt }: Readonly<{ ui: Ui; prompt: string }>)
 
   return (
     <>
+      {/* Mis en évidence : un effort de réflexion réduit est la première cause de configs bâclées. */}
+      <div
+        role="note"
+        className="flex max-w-prose gap-3 rounded-lg border border-primary/40 bg-primary/10 px-4 py-3 text-sm"
+      >
+        <IconBulb aria-hidden="true" className="size-5 shrink-0 text-primary" />
+        <p>
+          <strong>{text('training_setup_effort_title', {})}</strong>{' '}
+          {text('training_setup_effort_body', {})}
+        </p>
+      </div>
       <label htmlFor={promptId} className="sr-only">
         {text('training_setup_prompt_label', {})}
       </label>
@@ -29,7 +41,7 @@ export function PromptStep({ ui, prompt }: Readonly<{ ui: Ui; prompt: string }>)
         aria-describedby={hintId}
         className="field-sizing-fixed h-48 resize-y font-mono text-xs"
       />
-      <p id={hintId} className="text-sm text-muted-foreground">
+      <p id={hintId} className="max-w-prose text-sm text-muted-foreground">
         {text('training_setup_prompt_hint', {})}
       </p>
       <div className="flex flex-wrap items-center gap-3">

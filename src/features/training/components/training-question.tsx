@@ -87,7 +87,7 @@ export function TrainingQuestion({
     <section
       aria-label={text('present_prompt_label', {})}
       className={cn(
-        'flex max-w-3xl flex-col gap-4 wrap-anywhere',
+        'flex flex-col gap-4 wrap-anywhere',
         animate && 'motion-safe:animate-in motion-safe:duration-300 motion-safe:fade-in',
       )}
     >

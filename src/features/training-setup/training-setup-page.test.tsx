@@ -88,6 +88,15 @@ describe('écran de mise en place d’un entraînement', () => {
     expect(prompt).toHaveAttribute('readonly')
   })
 
+  test('l’étape du prompt met en avant l’effort de réflexion maximal', async () => {
+    await renderPage()
+    const note = screen.getByRole('note')
+    expect(note).toHaveTextContent('Réglez le LLM sur son effort de réflexion maximal.')
+    expect(note.querySelector('strong')).toHaveTextContent(
+      'Réglez le LLM sur son effort de réflexion maximal.',
+    )
+  })
+
   test('copie réussie : prompt passé à copyText, succès annoncé', async () => {
     await renderPage()
     fireEvent.click(screen.getByRole('button', { name: 'Copier le prompt' }))
