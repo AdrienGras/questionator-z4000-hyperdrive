@@ -108,7 +108,12 @@ describe('computeTrainingStats', () => {
   })
 
   it('barème modifié : max figé', () => {
-    const stats = computeTrainingStats(config, [scored('a-1', 2, 2)])
-    expect(stats.byCategory[0]?.rate.rate).toBe(1)
+    // Le barème courant de `b` plafonne à 1 : le max figé du tirage (2) doit primer.
+    const stats = computeTrainingStats(config, [scored('b-1', 2, 2)])
+    expect(stats.byCategory[1]?.rate).toEqual({ points: 2000, max: 2000, rate: 1 })
+    expect(stats.questions.find((q) => q.questionId === 'b-1')?.last).toEqual({
+      points: 2000,
+      max: 2000,
+    })
   })
 })
