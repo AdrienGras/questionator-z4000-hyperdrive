@@ -31,6 +31,8 @@ Copiez la ligne `$schema` ci-dessus telle quelle en tête de votre fichier. Un �
 - le survol d'un champ : sa description et sa valeur par défaut ;
 - les noms d'icônes : pour `icon`, l'éditeur propose les noms d'icônes Tabler. L'éditeur n'en refuse aucun autre ; l'application signale un nom inconnu à la création de la session.
 
+Un second schéma est publié pour les LLM : `config.schema.lite.json`, à côté du premier. Il est identique, sauf `icon`, qui n'y est qu'un texte libre, sans la liste des noms Tabler. Le schéma complet est trop long pour certains LLM, qui le tronquent avant d'arriver aux questions. Le prompt de [l'entraînement](./s-entrainer) renvoie vers ce schéma allégé. Dans votre fichier, gardez la ligne `$schema` ci-dessus.
+
 Le JSON Schema contrôle la forme du fichier. Les règles qui croisent plusieurs champs sont vérifiées par l'application, à la création de la session (voir la dernière section de cette page).
 
 ## `schemaVersion`

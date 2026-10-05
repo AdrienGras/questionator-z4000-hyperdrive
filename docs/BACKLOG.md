@@ -118,6 +118,13 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 - [ ] Ligne de journal d'entraînement corrompue : écartée à la lecture, donc invisible pour la règle d'un seul tirage en attente ; envisager de la signaler ou de la réparer.
 - [ ] Couverture de l'accueil : une requête live par carte, à regrouper si les journaux grossissent
+- [ ] Courbe de progression des stats d'entraînement (taux de réussite au fil des séances) ; n'a de sens qu'après plusieurs séances (D101).
+- [ ] Tirage qui favorise les points faibles (questions « à revoir », notions au taux bas), en plus du cycle sans répétition (D101).
+- [ ] Export et import d'un entraînement (backup), comme pour les sessions.
+- [ ] Seuil « à revoir » réglable : il est fixé à la moitié du barème (`REVIEW_THRESHOLD`).
+- [ ] Variante du prompt qui embarque le schéma allégé, pour un LLM sans accès au web.
+- [ ] Mode « compléter une config existante » : donner au LLM la config actuelle pour qu'il ajoute des questions en gardant les `id`.
+- [ ] Sauvegarder le brouillon de l'éditeur avant un passage de config (« Corriger dans l’éditeur ») : le texte en cours y est remplacé (retour de #140).
 
 ## Export Excel
 
