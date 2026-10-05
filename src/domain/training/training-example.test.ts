@@ -4,7 +4,8 @@ import { validateConfig } from '@/domain/config/validate'
 import { TRAINING_CATEGORIES } from '@/domain/training/training-categories'
 
 const result = validateConfig(exampleText, { cssSupports: () => true })
-if (!result.ok) throw new Error('exemple d’entraînement invalide')
+if (!result.ok)
+  throw new Error(`exemple d’entraînement invalide : ${JSON.stringify(result.issues)}`)
 const categories = result.config.categories
 
 describe('config d’exemple d’entraînement', () => {

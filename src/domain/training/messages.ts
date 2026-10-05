@@ -52,7 +52,7 @@ ${categoryTable}`,
 a. Dresse la liste fermée des notions du cours (5 à 15 tags courts, en minuscules, par exemple
    à partir des chapitres). Tu n'utiliseras que ces tags, écrits exactement pareil.
 b. Rédige les questions, chacune avec 1 à 3 tags de cette liste.
-c. Vérifie la couverture et le format (section 6) avant de répondre.`,
+c. Vérifie la couverture et le format (sections 2, 5 et 6) avant de répondre.`,
   calibration: () => `## 4. Calibrer la difficulté
 - facile : RESTITUER. La réponse est littéralement dans le cours, en 1 ou 2 phrases. Une
   seule notion. « Qu'est-ce que… », « À quoi sert… ».
@@ -120,10 +120,10 @@ ${categoryTable}`,
 a. Draw up the closed list of the course's concepts (5 to 15 short lowercase tags, for example
    from the chapters). You will only use these tags, spelled exactly the same.
 b. Write the questions, each with 1 to 3 tags from this list.
-c. Check coverage and format (section 6) before answering.`,
+c. Check coverage and format (sections 2, 5 and 6) before answering.`,
   calibration: () => `## 4. Calibrate the difficulty
 - facile: RECALL. The answer is literally in the course, in 1 or 2 sentences. A single
-  concept. "What is…", "What is … for…".
+  concept. "What is…", "What is … used for…".
 - normal: UNDERSTAND AND APPLY. Explain a behaviour, predict the output of a 5 to 10 line
   snippet, apply a concept to a case close to the workshops. One concept, in a slightly new
   context.

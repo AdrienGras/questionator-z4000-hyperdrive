@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { CONFIG_SCHEMA_LITE_URL, CONFIG_SCHEMA_URL } from '@/domain/config/json-schema'
-import type { Locale } from '@/lib/i18n/i18n'
-import { TRAINING_PROMPT_SECTIONS } from './messages'
+import { t, type Locale } from '@/lib/i18n/i18n'
+import { TRAINING_MESSAGES } from './messages'
 import { buildTrainingPrompt } from './prompt'
 import { README_RAW_URL, TRAINING_CATEGORIES } from './training-categories'
 
@@ -54,37 +54,30 @@ describe('buildTrainingPrompt', () => {
     for (const s of ['**Reference answer**', '**Scoring**', '**Pitfalls**', '0.5']) {
       expect(prompt).toContain(s)
     }
-    for (const s of ['Facile', 'Réponse de référence', 'Barème']) {
+    for (const s of [
+      'Facile',
+      'Difficile',
+      'Cauchemar',
+      'Réponse de référence',
+      'Barème',
+      'Pièges',
+    ]) {
       expect(prompt).not.toContain(s)
     }
   })
 
-  test.each(LOCALES)('%s : sections dans l’ordre', (locale) => {
+  test.each(LOCALES)('%s : sections numérotées 1 à 7 dans l’ordre, après l’intro', (locale) => {
     const prompt = buildTrainingPrompt(locale)
-    expect(TRAINING_PROMPT_SECTIONS).toEqual([
-      'intro',
-      'tool',
-      'format',
-      'steps',
-      'calibration',
-      'volume',
-      'writing',
-      'delivery',
+    expect(prompt.match(/^## (\d)\./gm)).toEqual([
+      '## 1.',
+      '## 2.',
+      '## 3.',
+      '## 4.',
+      '## 5.',
+      '## 6.',
+      '## 7.',
     ])
-    const starts = prompt.split('\n\n').filter((p) => p.length > 0)
-    expect(starts.length).toBeGreaterThanOrEqual(TRAINING_PROMPT_SECTIONS.length)
-    let from = 0
-    for (const p of [
-      prompt.slice(0, 20),
-      ...prompt
-        .split('\n\n')
-        .filter((s) => /^## \d\./.test(s))
-        .map((s) => s.slice(0, 20)),
-    ]) {
-      const i = prompt.indexOf(p, from)
-      expect(i).toBeGreaterThanOrEqual(from)
-      from = i
-    }
+    expect(prompt.startsWith(t(TRAINING_MESSAGES, locale, 'intro', {}))).toBe(true)
   })
 
   test('les barèmes imposés sont des barèmes valides', () => {

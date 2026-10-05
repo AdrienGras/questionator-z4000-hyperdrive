@@ -21,7 +21,7 @@ function buildCategoryTable(locale: Locale): string {
   const rows = TRAINING_CATEGORIES.map(
     (c) => `  | ${c.id} | ${c.label[locale]} | ${formatScale(c.scale)} | ${c.icon} |`,
   )
-  return ['  | id | label | scale | icon |', ...rows].join('\n')
+  return ['  | id | label | scale | icon |', '  |---|---|---|---|', ...rows].join('\n')
 }
 
 /** Prompt à coller dans un LLM pour générer une config d'entraînement (D101). */

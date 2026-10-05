@@ -154,6 +154,7 @@ Valeurs imposées :
 - "scoring": { "questionsPerStudent": 3, "maxRawScore": 10, "finalScale": 20 }
 - exactement ces 4 catégories, dans cet ordre (`icon` = nom d'icône Tabler Icons) :
   | id        | label     | scale                 | icon    |
+  |---|---|---|---|
   | facile    | Facile    | [0, 0.5, 1]           | leaf    |
   | normal    | Normal    | [0, 0.5, 1, 1.5, 2]   | flame   |
   | difficile | Difficile | [0, 1, 2, 3]          | bolt    |
@@ -163,7 +164,7 @@ Valeurs imposées :
 a. Dresse la liste fermée des notions du cours (5 à 15 tags courts, en minuscules, par exemple
    à partir des chapitres). Tu n'utiliseras que ces tags, écrits exactement pareil.
 b. Rédige les questions, chacune avec 1 à 3 tags de cette liste.
-c. Vérifie la couverture et le format (section 6) avant de répondre.
+c. Vérifie la couverture et le format (sections 2, 5 et 6) avant de répondre.
 
 ## 4. Calibrer la difficulté
 - facile : RESTITUER. La réponse est littéralement dans le cours, en 1 ou 2 phrases. Une
