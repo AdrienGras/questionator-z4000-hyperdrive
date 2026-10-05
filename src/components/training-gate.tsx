@@ -10,8 +10,6 @@ import { useUi } from '@/lib/i18n/use-ui'
 
 type TrainingGateProps = Readonly<{
   trainingId: string
-  /** Titre de l'écran « introuvable » ; par défaut, celui de l'écran d'entraînement. */
-  notFound?: string
   /** Titre de l'écran « endommagé » ; par défaut, le titre générique. */
   damaged?: string
   /** Rendu sous l'apparence de la config, une fois l'entraînement et son journal lus. */
@@ -23,14 +21,14 @@ type TrainingGateProps = Readonly<{
  * chargement, endommagé, puis le contenu sous l'apparence de la config (mode couleur propre à
  * l'entraînement, distinct des sessions). `useUi()` ici ne sert qu'aux états sans config.
  */
-export function TrainingGate({ trainingId, notFound, damaged, children }: TrainingGateProps) {
+export function TrainingGate({ trainingId, damaged, children }: TrainingGateProps) {
   const training = useTraining(trainingId)
   const draws = useTrainingDraws(trainingId)
   const status = useDbStatus()
   const ui = useUi()
   const messages = {
     loading: ui.text('training_loading', {}),
-    notFound: notFound ?? ui.text('training_not_found', {}),
+    notFound: ui.text('training_not_found', {}),
   }
   if (status !== 'open')
     return (

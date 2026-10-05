@@ -75,9 +75,8 @@ function TrainingStatsView({
 /** Stats d'un entraînement (F43.4) : états communs de `TrainingGate`, puis la vue. */
 export function TrainingStatsPage() {
   const { trainingId } = route.useParams()
-  const ui = useUi()
   return (
-    <TrainingGate trainingId={trainingId} notFound={ui.text('training_stats_not_found', {})}>
+    <TrainingGate trainingId={trainingId}>
       {(training, draws) => <TrainingStatsView training={training} draws={draws} />}
     </TrainingGate>
   )

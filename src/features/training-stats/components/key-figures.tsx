@@ -30,7 +30,10 @@ export function KeyFigures({ ui, stats }: Readonly<{ ui: Ui; stats: TrainingStat
         </Card>
         <Card>
           <CardContent className="flex flex-col gap-2">
-            <p className={FIGURE}>{coverage}</p>
+            {/* La barre porte la couverture dans son nom : le texte visible n'est pas relu. */}
+            <p className={FIGURE} aria-hidden>
+              {coverage}
+            </p>
             <Progress value={total === 0 ? 0 : (covered / total) * 100} aria-label={coverage} />
           </CardContent>
         </Card>

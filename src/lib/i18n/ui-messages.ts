@@ -145,7 +145,6 @@ export type UiMessageParams = {
   training_stats_link: NoParams
   training_stats_card_link: NoParams
   training_stats_back: NoParams
-  training_stats_not_found: NoParams
   training_stats_error: NoParams
   training_stats_empty: NoParams
   training_stats_start: NoParams
@@ -176,7 +175,6 @@ export type UiMessageParams = {
   training_update_back: NoParams
   training_update_submit: NoParams
   training_update_write_error: NoParams
-  training_update_not_found: NoParams
   training_update_damaged: NoParams
   training_update_summary: NoParams
   training_update_kept: { count: number }
@@ -575,7 +573,6 @@ const fr: Dictionary<UiMessageParams> = {
   training_stats_link: () => 'Voir les stats',
   training_stats_card_link: () => 'Stats',
   training_stats_back: () => 'Retour à l’entraînement',
-  training_stats_not_found: () => 'Cet entraînement n’existe pas.',
   training_stats_error: () => 'Les stats n’ont pas pu être chargées.',
   training_stats_empty: () =>
     'Pas encore de réponse notée. Tirez une première question pour voir vos stats.',
@@ -608,7 +605,6 @@ const fr: Dictionary<UiMessageParams> = {
   training_update_back: () => 'Retour à l’entraînement',
   training_update_submit: () => 'Mettre à jour',
   training_update_write_error: () => 'La mise à jour a échoué. Réessayez.',
-  training_update_not_found: () => 'Cet entraînement n’existe pas.',
   training_update_damaged: () => 'Cet entraînement est endommagé : il ne peut pas être mis à jour.',
   training_update_summary: () => 'Bilan de la mise à jour',
   training_update_kept: ({ count }) =>
@@ -961,7 +957,6 @@ const en: Dictionary<UiMessageParams> = {
   training_stats_link: () => 'View stats',
   training_stats_card_link: () => 'Stats',
   training_stats_back: () => 'Back to practice',
-  training_stats_not_found: () => 'This practice does not exist.',
   training_stats_error: () => 'The stats could not be loaded.',
   training_stats_empty: () => 'No rated answer yet. Draw a first question to see your stats.',
   training_stats_start: () => 'Go to practice',
@@ -993,7 +988,6 @@ const en: Dictionary<UiMessageParams> = {
   training_update_back: () => 'Back to practice',
   training_update_submit: () => 'Update',
   training_update_write_error: () => 'The update failed. Try again.',
-  training_update_not_found: () => 'This practice does not exist.',
   training_update_damaged: () => 'This practice is damaged: it cannot be updated.',
   training_update_summary: () => 'Update summary',
   training_update_kept: ({ count }) =>

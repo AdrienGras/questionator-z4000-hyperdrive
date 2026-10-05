@@ -106,11 +106,11 @@ describe('écran de stats d’un entraînement', () => {
     expect(rowCells(details, 'Question B1')).toEqual(['B', '1', '2 / 2', percent(1), ''])
   })
 
-  test('id absent : écran « n’existe pas » avec retour', async () => {
+  test('id absent : écran « introuvable » avec retour', async () => {
     renderAt('/training/absent/stats')
 
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Cet entraînement n’existe pas.' }),
+      await screen.findByRole('heading', { level: 1, name: 'Entraînement introuvable' }),
     ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
   })

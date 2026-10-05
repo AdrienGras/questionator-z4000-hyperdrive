@@ -147,11 +147,7 @@ export function TrainingSetupPage({ trainingId }: TrainingSetupPageProps) {
   const ui = useUi()
   if (trainingId === undefined) return <TrainingSetupForm />
   return (
-    <TrainingGate
-      trainingId={trainingId}
-      notFound={ui.text('training_update_not_found', {})}
-      damaged={ui.text('training_update_damaged', {})}
-    >
+    <TrainingGate trainingId={trainingId} damaged={ui.text('training_update_damaged', {})}>
       {(training) => <TrainingSetupForm training={training} />}
     </TrainingGate>
   )
