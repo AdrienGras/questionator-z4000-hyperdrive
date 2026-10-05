@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { db } from '@/lib/db/db'
 import { createTraining } from '@/lib/db/trainings'
 import { renderAt } from '@/testing/render-at'
@@ -9,6 +9,11 @@ import { makeDraw, makeTraining } from '@/testing/training-fixtures'
 beforeEach(async () => {
   await db.trainings.clear()
   await db.trainingDraws.clear()
+})
+
+// Un `stubGlobal` d'un test ne doit jamais fuir dans le suivant, même si ce test échoue.
+afterEach(() => {
+  vi.unstubAllGlobals()
 })
 
 /** Carte de l'entraînement `name` dans la section « Mes entraînements ». */
@@ -84,6 +89,5 @@ describe('carte d’entraînement', () => {
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Mettre à jour la config' }),
     ).toBeInTheDocument()
-    vi.unstubAllGlobals()
   })
 })

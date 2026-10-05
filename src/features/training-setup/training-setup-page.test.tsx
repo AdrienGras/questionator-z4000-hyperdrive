@@ -318,6 +318,39 @@ describe('mise à jour de la config d’un entraînement', () => {
     expect(updateButton()).toBeEnabled()
   })
 
+  test('tous les id changés : 0 conservée, toutes nouvelles et retirées, rien d’écrit avant le clic', async () => {
+    const training = makeTraining()
+    await createTraining(training)
+    const before = await db.trainings.get('training-1')
+    const { input } = await renderUpdate()
+    const config = minimalConfig()
+    config.exam.title = 'Oral renommé'
+    config.categories = [
+      {
+        id: 'x',
+        label: 'X',
+        scale: [0, 1],
+        questions: [
+          { id: 'x-1', prompt: 'Question X1' },
+          { id: 'x-2', prompt: 'Question X2' },
+        ],
+      },
+    ]
+    choose(input, 'config.json', JSON.stringify(config))
+    await screen.findByRole('heading', { name: 'Oral renommé' })
+    const summary = screen.getByRole('list', { name: 'Bilan de la mise à jour' })
+    expect(
+      within(summary)
+        .getAllByRole('listitem')
+        .map((item) => item.textContent),
+    ).toEqual([
+      '0 question conservée — historique gardé',
+      '2 nouvelles',
+      '4 retirées — elles n’apparaissent plus dans les stats',
+    ])
+    expect(await db.trainings.get('training-1')).toEqual(before)
+  })
+
   test('création : aucun bilan sous la config valide', async () => {
     const { input } = await renderPage()
     choose(input, 'config.json', JSON.stringify(minimalConfig()))
@@ -367,14 +400,15 @@ describe('mise à jour de la config d’un entraînement', () => {
   test('entraînement absent : message, aucun bouton d’écriture', async () => {
     renderAt('/training/inconnu/update')
     expect(
-      await screen.findByRole('heading', { name: 'Cet entraînement n’existe pas.' }),
+      await screen.findByRole('heading', { name: 'Entraînement introuvable' }),
     ).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Mettre à jour' })).toBeNull()
     expect(await db.trainings.count()).toBe(0)
   })
 
-  test('entraînement endommagé : message, aucun bouton d’écriture', async () => {
-    await db.table('trainings').put({ id: 'training-1', name: 'Cassé' })
+  test('entraînement endommagé : message, aucun bouton d’écriture, enregistrement intact', async () => {
+    const damaged = { id: 'training-1', name: 'Cassé' }
+    await db.table('trainings').put(damaged)
     renderAt('/training/training-1/update')
     expect(
       await screen.findByRole('heading', {
@@ -382,5 +416,6 @@ describe('mise à jour de la config d’un entraînement', () => {
       }),
     ).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Mettre à jour' })).toBeNull()
+    expect(await db.table('trainings').get('training-1')).toEqual(damaged)
   })
 })

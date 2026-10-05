@@ -33,3 +33,14 @@ test('détail replié par défaut, puis une ligne par question une fois ouvert',
   expect(rowCells(table, 'Question A2')).toEqual(['A', '1', '2 / 2', percent(1), ''])
   expect(rowCells(table, 'Question B1')).toEqual(['B', '0', '—', '—', ''])
 })
+
+test('niveau absent de la table des libellés : l’id de catégorie sert de repli', () => {
+  const stats = computeTrainingStats(makeTrainingConfig(), makeStatsDraws())
+  render(<QuestionDetails ui={makeUi()} questions={stats.questions} levels={new Map()} />)
+
+  fireEvent.click(screen.getByText('Détail des 4 questions'))
+
+  const table = screen.getByRole('table', { name: 'Détail des 4 questions' })
+  expect(rowCells(table, 'Question A1')[0]).toBe('a')
+  expect(rowCells(table, 'Question B1')[0]).toBe('b')
+})

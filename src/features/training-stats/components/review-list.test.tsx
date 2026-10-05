@@ -32,3 +32,11 @@ test('aucune question à revoir : phrase dédiée, pas de liste', () => {
   expect(screen.getByText('Aucune question à revoir pour l’instant.')).toBeInTheDocument()
   expect(screen.queryByRole('list')).not.toBeInTheDocument()
 })
+
+test('niveau absent de la table des libellés : l’id de catégorie sert de repli', () => {
+  const stats = computeTrainingStats(makeTrainingConfig(), makeStatsDraws())
+  render(<ReviewList ui={makeUi()} questions={stats.questions} levels={new Map()} />)
+
+  const item = screen.getByRole('listitem')
+  expect(item).toHaveTextContent('a · Dernière note : 0,5 / 2 · 2 passages')
+})
