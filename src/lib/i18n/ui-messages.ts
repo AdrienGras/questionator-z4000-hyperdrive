@@ -121,6 +121,17 @@ export type UiMessageParams = {
   training_setup_category_count: { label: string; count: number }
   training_setup_fix_in_editor: NoParams
   training_setup_submit: NoParams
+  training_loading: NoParams
+  training_not_found: NoParams
+  training_damaged_title: NoParams
+  training_damaged_body: NoParams
+  training_tiles_title: NoParams
+  training_reveal: NoParams
+  training_answer_title: NoParams
+  training_no_answer: NoParams
+  training_score_heading: NoParams
+  training_pass: NoParams
+  training_question_missing: NoParams
   preview_students_count: { count: number }
   preview_students_list: NoParams
   preview_line: { line: number; message: string }
@@ -488,6 +499,17 @@ const fr: Dictionary<UiMessageParams> = {
     `${label} : ${count} ${plural(count, 'question', 'questions')}`,
   training_setup_fix_in_editor: () => "Corriger dans l'éditeur",
   training_setup_submit: () => "C'est parti",
+  training_loading: () => 'Chargement de l’entraînement…',
+  training_not_found: () => 'Entraînement introuvable',
+  training_damaged_title: () => 'Cet entraînement est endommagé',
+  training_damaged_body: () => 'Ses données ne passent plus la validation. Voici ce qui ne va pas.',
+  training_tiles_title: () => 'Choisissez une catégorie',
+  training_reveal: () => 'Voir la réponse',
+  training_answer_title: () => 'Réponse',
+  training_no_answer: () => 'Pas de réponse de référence pour cette question.',
+  training_score_heading: () => 'Notez-vous',
+  training_pass: () => 'Passer',
+  training_question_missing: () => 'Cette question n’existe plus dans la config.',
   preview_students_count: ({ count }) => `${count} ${plural(count, 'étudiant', 'étudiants')}`,
   preview_students_list: () => 'Voir la liste',
   preview_line: ({ line, message }) => `Ligne ${line} : ${message}`,
@@ -805,6 +827,17 @@ const en: Dictionary<UiMessageParams> = {
     `${label}: ${count} ${pluralEn(count, 'question', 'questions')}`,
   training_setup_fix_in_editor: () => 'Fix in the editor',
   training_setup_submit: () => "Let's go",
+  training_loading: () => 'Loading training…',
+  training_not_found: () => 'Training not found',
+  training_damaged_title: () => 'This training is damaged',
+  training_damaged_body: () => 'Its data no longer passes validation. Here is what is wrong.',
+  training_tiles_title: () => 'Choose a category',
+  training_reveal: () => 'Show the answer',
+  training_answer_title: () => 'Answer',
+  training_no_answer: () => 'No reference answer for this question.',
+  training_score_heading: () => 'Rate yourself',
+  training_pass: () => 'Skip',
+  training_question_missing: () => 'This question is no longer in the config.',
   preview_students_count: ({ count }) => `${count} ${pluralEn(count, 'student', 'students')}`,
   preview_students_list: () => 'Show the list',
   preview_line: ({ line, message }) => `Line ${line}: ${message}`,
