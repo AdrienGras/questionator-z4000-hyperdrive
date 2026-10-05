@@ -57,13 +57,22 @@ function TrainingView({
       ui={ui}
       title={training.name}
       actions={
-        <Link
-          to="/training/$trainingId/stats"
-          params={{ trainingId: training.id }}
-          className={buttonVariants({ variant: 'outline' })}
-        >
-          {ui.text('training_stats_link', {})}
-        </Link>
+        <>
+          <Link
+            to="/training/$trainingId/update"
+            params={{ trainingId: training.id }}
+            className={buttonVariants({ variant: 'ghost' })}
+          >
+            {ui.text('training_update_link', {})}
+          </Link>
+          <Link
+            to="/training/$trainingId/stats"
+            params={{ trainingId: training.id }}
+            className={buttonVariants({ variant: 'outline' })}
+          >
+            {ui.text('training_stats_link', {})}
+          </Link>
+        </>
       }
       back={
         <Link to="/" className={cn('self-start', SMALL_TEXT_LINK_CLASS)}>

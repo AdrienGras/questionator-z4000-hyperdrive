@@ -171,6 +171,17 @@ export type UiMessageParams = {
   training_stats_details: { count: number }
   /** Nom accessible d'une barre de taux ; `rate` déjà mis en forme (« 82 % »). */
   training_stats_rate_label: { label: string; rate: string }
+  training_update_title: NoParams
+  training_update_link: NoParams
+  training_update_back: NoParams
+  training_update_submit: NoParams
+  training_update_write_error: NoParams
+  training_update_not_found: NoParams
+  training_update_damaged: NoParams
+  training_update_summary: NoParams
+  training_update_kept: { count: number }
+  training_update_added: { count: number }
+  training_update_removed: { count: number }
   preview_students_count: { count: number }
   preview_students_list: NoParams
   preview_line: { line: number; message: string }
@@ -592,6 +603,21 @@ const fr: Dictionary<UiMessageParams> = {
   training_stats_details: ({ count }) =>
     count > 1 ? `Détail des ${count} questions` : `Détail de ${count} question`,
   training_stats_rate_label: ({ label, rate }) => `${label} : ${rate}`,
+  training_update_title: () => 'Mettre à jour la config',
+  training_update_link: () => 'Mettre à jour la config',
+  training_update_back: () => 'Retour à l’entraînement',
+  training_update_submit: () => 'Mettre à jour',
+  training_update_write_error: () => 'La mise à jour a échoué. Réessayez.',
+  training_update_not_found: () => 'Cet entraînement n’existe pas.',
+  training_update_damaged: () => 'Cet entraînement est endommagé : il ne peut pas être mis à jour.',
+  training_update_summary: () => 'Bilan de la mise à jour',
+  training_update_kept: ({ count }) =>
+    `${count} ${plural(count, 'question conservée', 'questions conservées')} — historique gardé`,
+  training_update_added: ({ count }) => `${count} ${plural(count, 'nouvelle', 'nouvelles')}`,
+  training_update_removed: ({ count }) =>
+    count > 1
+      ? `${count} retirées — elles n’apparaissent plus dans les stats`
+      : `${count} retirée — elle n’apparaît plus dans les stats`,
   preview_students_count: ({ count }) => `${count} ${plural(count, 'étudiant', 'étudiants')}`,
   preview_students_list: () => 'Voir la liste',
   preview_line: ({ line, message }) => `Ligne ${line} : ${message}`,
@@ -962,6 +988,21 @@ const en: Dictionary<UiMessageParams> = {
   training_stats_details: ({ count }) =>
     `Details of ${count} ${pluralEn(count, 'question', 'questions')}`,
   training_stats_rate_label: ({ label, rate }) => `${label}: ${rate}`,
+  training_update_title: () => 'Update the config',
+  training_update_link: () => 'Update the config',
+  training_update_back: () => 'Back to practice',
+  training_update_submit: () => 'Update',
+  training_update_write_error: () => 'The update failed. Try again.',
+  training_update_not_found: () => 'This practice does not exist.',
+  training_update_damaged: () => 'This practice is damaged: it cannot be updated.',
+  training_update_summary: () => 'Update summary',
+  training_update_kept: ({ count }) =>
+    `${count} ${pluralEn(count, 'question kept', 'questions kept')} — history preserved`,
+  training_update_added: ({ count }) => `${count} new`,
+  training_update_removed: ({ count }) =>
+    count === 1
+      ? `${count} removed — it no longer appears in the stats`
+      : `${count} removed — they no longer appear in the stats`,
   preview_students_count: ({ count }) => `${count} ${pluralEn(count, 'student', 'students')}`,
   preview_students_list: () => 'Show the list',
   preview_line: ({ line, message }) => `Line ${line}: ${message}`,

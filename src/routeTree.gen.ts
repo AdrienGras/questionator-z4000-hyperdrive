@@ -18,6 +18,7 @@ import { Route as TrainingTrainingIdRouteImport } from './routes/training.$train
 import { Route as TrainingNewRouteImport } from './routes/training.new'
 import { Route as SessionSessionIdStatsRouteImport } from './routes/session.$sessionId_.stats'
 import { Route as TrainingTrainingIdStatsRouteImport } from './routes/training.$trainingId_.stats'
+import { Route as TrainingTrainingIdUpdateRouteImport } from './routes/training.$trainingId_.update'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -64,6 +65,12 @@ const TrainingTrainingIdStatsRoute = TrainingTrainingIdStatsRouteImport.update({
   path: '/training/$trainingId/stats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrainingTrainingIdUpdateRoute =
+  TrainingTrainingIdUpdateRouteImport.update({
+    id: '/training/$trainingId_/update',
+    path: '/training/$trainingId/update',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/training/new': typeof TrainingNewRoute
   '/session/$sessionId/stats': typeof SessionSessionIdStatsRoute
   '/training/$trainingId/stats': typeof TrainingTrainingIdStatsRoute
+  '/training/$trainingId/update': typeof TrainingTrainingIdUpdateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,6 +94,7 @@ export interface FileRoutesByTo {
   '/training/new': typeof TrainingNewRoute
   '/session/$sessionId/stats': typeof SessionSessionIdStatsRoute
   '/training/$trainingId/stats': typeof TrainingTrainingIdStatsRoute
+  '/training/$trainingId/update': typeof TrainingTrainingIdUpdateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -98,6 +107,7 @@ export interface FileRoutesById {
   '/training/new': typeof TrainingNewRoute
   '/session/$sessionId_/stats': typeof SessionSessionIdStatsRoute
   '/training/$trainingId_/stats': typeof TrainingTrainingIdStatsRoute
+  '/training/$trainingId_/update': typeof TrainingTrainingIdUpdateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/training/new'
     | '/session/$sessionId/stats'
     | '/training/$trainingId/stats'
+    | '/training/$trainingId/update'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,6 +133,7 @@ export interface FileRouteTypes {
     | '/training/new'
     | '/session/$sessionId/stats'
     | '/training/$trainingId/stats'
+    | '/training/$trainingId/update'
   id:
     | '__root__'
     | '/'
@@ -133,6 +145,7 @@ export interface FileRouteTypes {
     | '/training/new'
     | '/session/$sessionId_/stats'
     | '/training/$trainingId_/stats'
+    | '/training/$trainingId_/update'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -145,6 +158,7 @@ export interface RootRouteChildren {
   TrainingNewRoute: typeof TrainingNewRoute
   SessionSessionIdStatsRoute: typeof SessionSessionIdStatsRoute
   TrainingTrainingIdStatsRoute: typeof TrainingTrainingIdStatsRoute
+  TrainingTrainingIdUpdateRoute: typeof TrainingTrainingIdUpdateRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -212,6 +226,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrainingTrainingIdStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/training/$trainingId_/update': {
+      id: '/training/$trainingId_/update'
+      path: '/training/$trainingId/update'
+      fullPath: '/training/$trainingId/update'
+      preLoaderRoute: typeof TrainingTrainingIdUpdateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -225,6 +246,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrainingNewRoute: TrainingNewRoute,
   SessionSessionIdStatsRoute: SessionSessionIdStatsRoute,
   TrainingTrainingIdStatsRoute: TrainingTrainingIdStatsRoute,
+  TrainingTrainingIdUpdateRoute: TrainingTrainingIdUpdateRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

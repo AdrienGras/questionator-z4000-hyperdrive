@@ -12,6 +12,8 @@ type TrainingGateProps = Readonly<{
   trainingId: string
   /** Titre de l'écran « introuvable » ; par défaut, celui de l'écran d'entraînement. */
   notFound?: string
+  /** Titre de l'écran « endommagé » ; par défaut, le titre générique. */
+  damaged?: string
   /** Rendu sous l'apparence de la config, une fois l'entraînement et son journal lus. */
   children: (training: Training, draws: TrainingDraw[]) => ReactNode
 }>
@@ -21,7 +23,7 @@ type TrainingGateProps = Readonly<{
  * chargement, endommagé, puis le contenu sous l'apparence de la config (mode couleur propre à
  * l'entraînement, distinct des sessions). `useUi()` ici ne sert qu'aux états sans config.
  */
-export function TrainingGate({ trainingId, notFound, children }: TrainingGateProps) {
+export function TrainingGate({ trainingId, notFound, damaged, children }: TrainingGateProps) {
   const training = useTraining(trainingId)
   const draws = useTrainingDraws(trainingId)
   const status = useDbStatus()
@@ -39,7 +41,8 @@ export function TrainingGate({ trainingId, notFound, children }: TrainingGatePro
   if (training === null) return <SessionFallback ui={ui} kind="not-found" messages={messages} />
   if (training === undefined || draws === undefined)
     return <SessionFallback ui={ui} kind="loading" messages={messages} />
-  if (isDamagedTraining(training)) return <DamagedTrainingScreen ui={ui} damaged={training} />
+  if (isDamagedTraining(training))
+    return <DamagedTrainingScreen ui={ui} damaged={training} title={damaged} />
   return (
     <SessionAppearance
       sessionId={`training-${training.id}`}

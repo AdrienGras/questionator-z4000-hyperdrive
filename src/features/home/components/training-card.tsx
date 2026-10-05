@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { CardActionsMenu } from '@/components/card-actions-menu'
 import { buttonVariants } from '@/components/ui/button'
@@ -31,6 +31,8 @@ export function TrainingCard({ ui, training }: TrainingCardProps) {
   const { locale, text } = ui
   const [deleting, setDeleting] = useState(false)
   const draws = useTrainingDraws(training.id)
+  const navigate = useNavigate()
+  const params = { trainingId: training.id }
 
   return (
     <Card>
@@ -41,6 +43,11 @@ export function TrainingCard({ ui, training }: TrainingCardProps) {
         </CardTitle>
         <CardAction>
           <CardActionsMenu label={text('card_actions', { name: training.name })}>
+            <DropdownMenuItem
+              onClick={() => void navigate({ to: '/training/$trainingId/update', params })}
+            >
+              {text('training_update_link', {})}
+            </DropdownMenuItem>
             <DropdownMenuItem variant="destructive" onClick={() => setDeleting(true)}>
               {text('action_delete', {})}
             </DropdownMenuItem>
@@ -58,14 +65,14 @@ export function TrainingCard({ ui, training }: TrainingCardProps) {
       <CardFooter className="flex flex-wrap gap-2">
         <Link
           to="/training/$trainingId"
-          params={{ trainingId: training.id }}
+          params={params}
           className={buttonVariants({ variant: 'outline' })}
         >
           {text('card_resume', {})}
         </Link>
         <Link
           to="/training/$trainingId/stats"
-          params={{ trainingId: training.id }}
+          params={params}
           className={buttonVariants({ variant: 'ghost' })}
         >
           {text('training_stats_card_link', {})}
