@@ -15,7 +15,7 @@ Sur l'accueil, cliquez sur « Commencer » dans la carte « S'entraîner ». L'�
 
 1. **Rassemblez votre cours.** Réunissez le cours et les ateliers dans un seul PDF ou une seule archive zip.
 2. **Copiez le prompt.** Cliquez sur « Copier le prompt ». L'application confirme par « Prompt copié. ». Si la copie échoue, sélectionnez le texte du champ « Prompt à copier » et copiez-le à la main.
-3. **Récupérez la config.** Collez le prompt dans le LLM, joignez votre fichier de cours et attendez le résultat. Le LLM rend un fichier `.json`, ou un bloc de code JSON.
+3. **Récupérez la config.** Collez le prompt dans le LLM, joignez votre fichier de cours et attendez le résultat. **Réglez le LLM sur son effort de réflexion maximal** : plus le cours est long, plus ça compte, et un effort réduit donne des questions superficielles ou un JSON incomplet. Le LLM rend un fichier `.json`, ou un bloc de code JSON.
 4. **Déposez-la.** Déposez le fichier dans « Config (JSON) ». Si le LLM n'a rendu qu'un bloc de code, collez-le dans « … ou collez le JSON ici », puis cliquez sur « Vérifier le JSON collé ».
 
 L'application vérifie la config avec les mêmes règles que pour un oral. Vous obtenez l'un des deux résultats suivants.
@@ -23,7 +23,7 @@ L'application vérifie la config avec les mêmes règles que pour un oral. Vous 
 - **La config est valide.** Un récapitulatif affiche le titre et le nombre de questions par catégorie. Cliquez sur « C'est parti » pour créer l'entraînement.
 - **La config contient des erreurs.** Une liste indique chaque problème. Cliquez sur « Corriger dans l'éditeur » pour ouvrir [l'éditeur de config](./editeur-config) avec ce texte. Chaque message est expliqué dans [FAQ et dépannage](./depannage). Les `id` en double (voir [catégorie](./depannage#duplicate_category_id), [question](./depannage#duplicate_question_id)) et les [valeurs en double dans un barème](./depannage#duplicate_scale_value) sont des erreurs que vous pouvez corriger dans l'éditeur. Sinon, relancez le LLM en lui collant le message d'erreur.
 
-Le prompt impose quatre catégories de difficulté croissante (Facile, Normal, Difficile, Cauchemar), avec les mêmes `id` d'une génération à l'autre. Chaque question porte une réponse de référence dans son champ `answer`.
+Le prompt impose quatre catégories de difficulté croissante (Facile, Normal, Difficile, Cauchemar), avec les mêmes `id` d'une génération à l'autre. Chaque question porte une réponse de référence dans son champ `answer`. Ce sont des questions d'oral : le prompt interdit de faire écrire du code et de demander des détails propres aux ateliers (noms de classes, de fichiers…). Quand une question s'appuie sur du code, l'énoncé fournit un court extrait sur lequel raisonner.
 
 ## Réviser
 
