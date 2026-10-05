@@ -97,10 +97,13 @@ function categoriesOf(text: string) {
 }
 
 /**
- * Variante de l'exemple : la première question d'une autre catégorie que `keptCategoryId` est
- * retirée, une question est ajoutée dans `keptCategoryId`. Renvoie le JSON et le titre ajouté.
+ * Variante de l'exemple : la question `removedId` est retirée, une question est ajoutée dans
+ * `keptCategoryId`. Renvoie le JSON et le titre ajouté.
  */
-function updatedConfig(keptCategoryId: string): { text: string; addedTitle: string } {
+function updatedConfig(
+  keptCategoryId: string,
+  removedId: string,
+): { text: string; addedTitle: string } {
   const config = z
     .looseObject({
       categories: z.array(
@@ -109,9 +112,10 @@ function updatedConfig(keptCategoryId: string): { text: string; addedTitle: stri
     })
     .parse(JSON.parse(CONFIG))
   const target = config.categories.find((c) => c.id === keptCategoryId)
-  const other = config.categories.find((c) => c.id !== keptCategoryId && c.questions.length > 1)
-  if (target === undefined || other === undefined) throw new Error('Exemple inattendu')
-  other.questions.shift()
+  if (target === undefined) throw new Error('Exemple inattendu')
+  for (const category of config.categories) {
+    category.questions = category.questions.filter((q) => q.id !== removedId)
+  }
   const addedTitle = 'Question ajoutée par la mise à jour'
   target.questions.push({
     ...target.questions[0],
@@ -121,14 +125,16 @@ function updatedConfig(keptCategoryId: string): { text: string; addedTitle: stri
   return { text: JSON.stringify(config, null, 2), addedTitle }
 }
 
-test('stats et mise à jour de config : la note reste, la question ajoutée sort en priorité', async ({
+test('stats et mise à jour de config : la note reste, la retirée disparaît, l’ajoutée sort en priorité', async ({
   page,
 }) => {
   const total = questionCount(CONFIG)
-  const [first] = categoriesOf(CONFIG)
-  if (first === undefined) throw new Error('Exemple sans catégorie')
+  const categories = categoriesOf(CONFIG)
+  const [first] = categories
+  // Catégorie de la question qui sera retirée : une autre, qui garde au moins une question.
+  const other = categories.find((c) => c !== first && c.questions.length > 1)
+  if (first === undefined || other === undefined) throw new Error('Exemple inattendu')
   const level = first.label
-  const { text: updated, addedTitle } = updatedConfig(first.id)
 
   const home = new HomePage(page)
   await home.goto()
@@ -147,11 +153,21 @@ test('stats et mise à jour de config : la note reste, la question ajoutée sort
   expect(passedTitle).not.toBe(scoredTitle)
   await training.pass()
 
+  // La question tirée dans l'autre catégorie, notée 0, sera celle retirée par la mise à jour.
+  await training.draw(other.label)
+  const removedTitle = (await training.questionTitle.textContent()) ?? ''
+  const removed = other.questions.find((q) => q.title === removedTitle)
+  if (removed === undefined) throw new Error(`Question inconnue : ${removedTitle}`)
+  await training.reveal()
+  await training.score('0')
+  const { text: updated, addedTitle } = updatedConfig(first.id, removed.id)
+
   const stats = await training.openStats()
-  await expect(stats.keyFigures).toContainText('1 réponse notée')
+  await expect(stats.keyFigures).toContainText('2 réponses notées')
   await expect(stats.keyFigures).toContainText('1 passée')
-  await expect(stats.keyFigures).toContainText(`1 / ${total} questions notées`)
+  await expect(stats.keyFigures).toContainText(`2 / ${total} questions notées`)
   await expect(stats.reviewItem(scoredTitle)).toBeVisible()
+  await expect(stats.reviewItem(removedTitle)).toBeVisible()
 
   // Les autres questions du niveau sont vues à leur tour : seule l'ajoutée restera jamais vue.
   const back = await stats.backToTraining()
@@ -166,11 +182,11 @@ test('stats et mise à jour de config : la note reste, la question ajoutée sort
 
   const update = await back.openUpdate()
   await update.pasteConfig(updated)
-  await expect(update.updateSummary).toContainText(
+  await expect(update.updateSummary.getByRole('listitem')).toHaveText([
     `${total - 1} questions conservées — historique gardé`,
-  )
-  await expect(update.updateSummary).toContainText('1 nouvelle')
-  await expect(update.updateSummary).toContainText('1 retirée')
+    '1 nouvelle',
+    '1 retirée — elle n’apparaît plus dans les stats',
+  ])
   const afterUpdate = await update.update()
 
   // La question ajoutée est la seule jamais vue du niveau : elle sort en premier.
@@ -178,7 +194,8 @@ test('stats et mise à jour de config : la note reste, la question ajoutée sort
   await expect(afterUpdate.questionTitle).toHaveText(addedTitle)
   await afterUpdate.pass()
 
-  // Les stats gardent la note d'avant la mise à jour ; le total ne bouge pas (une retirée, une ajoutée).
+  // Les stats gardent la note d'avant la mise à jour et oublient la question retirée ; le total
+  // ne bouge pas (une retirée, une ajoutée).
   const homeAgain = await afterUpdate.backHome()
   const finalStats = await homeAgain.openTrainingStats(NAME)
   await expect(finalStats.keyFigures).toContainText('1 réponse notée')
@@ -189,4 +206,10 @@ test('stats et mise à jour de config : la note reste, la question ajoutée sort
   )
   await expect(finalStats.keyFigures).toContainText(`1 / ${total} questions notées`)
   await expect(finalStats.reviewItem(scoredTitle)).toBeVisible()
+  await expect(finalStats.reviewItem(removedTitle)).toHaveCount(0)
+
+  const details = await finalStats.openDetails(total)
+  await expect(details.getByRole('rowheader', { name: scoredTitle, exact: true })).toBeVisible()
+  await expect(details.getByRole('rowheader', { name: addedTitle, exact: true })).toBeVisible()
+  await expect(details.getByRole('rowheader', { name: removedTitle, exact: true })).toHaveCount(0)
 })

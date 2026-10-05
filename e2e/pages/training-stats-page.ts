@@ -24,6 +24,18 @@ export class TrainingStatsPage {
     return this.reviewList.getByRole('listitem').filter({ hasText: title })
   }
 
+  /**
+   * Déplie « Détail des <count> questions » (`<details>` natif) et renvoie son tableau, nommé par
+   * le même libellé. Le `<summary>` n'a pas de rôle ARIA exposé : il est visé par son texte.
+   */
+  async openDetails(count: number): Promise<Locator> {
+    const name = count > 1 ? `Détail des ${count} questions` : `Détail de ${count} question`
+    await this.page.getByText(name, { exact: true }).click()
+    const table = this.page.getByRole('table', { name })
+    await table.waitFor()
+    return table
+  }
+
   /** « Retour à l’entraînement » : renvoie l'écran d'entraînement, une fois les tuiles montées. */
   async backToTraining(): Promise<TrainingPage> {
     await this.page.getByRole('link', { name: 'Retour à l’entraînement' }).click()
