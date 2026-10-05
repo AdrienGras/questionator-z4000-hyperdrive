@@ -17,7 +17,7 @@ export function isDamaged(value: StoredSession): value is DamagedSession {
 export type ReadStored = (raw: unknown, id: string) => StoredSession
 
 /** Appel paresseux : `CSS.supports` absent (jsdom) → tout est accepté. */
-function cssSupports(property: string, value: string): boolean {
+export function cssSupports(property: string, value: string): boolean {
   return typeof CSS === 'undefined' || typeof CSS.supports !== 'function'
     ? true
     : CSS.supports(property, value)
@@ -45,12 +45,16 @@ export function loadReadStored(): Promise<ReadStored> {
   return loading
 }
 
-/** Nom lisible d'une session endommagée : le `name` du brut s'il est une chaîne non vide, sinon l'`id`. */
-export function damagedName(damaged: DamagedSession): string {
-  const { raw } = damaged
+/** `name` d'un enregistrement brut s'il est une chaîne non vide, sinon `fallback`. */
+export function rawName(raw: unknown, fallback: string): string {
   if (typeof raw === 'object' && raw !== null && 'name' in raw) {
     const { name } = raw
     if (typeof name === 'string' && name.trim() !== '') return name
   }
-  return damaged.id
+  return fallback
+}
+
+/** Nom lisible d'une session endommagée : le `name` du brut s'il est une chaîne non vide, sinon l'`id`. */
+export function damagedName(damaged: DamagedSession): string {
+  return rawName(damaged.raw, damaged.id)
 }

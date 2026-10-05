@@ -79,7 +79,7 @@ describe('useDbStatus', () => {
     expect(result.current).toBe('open')
 
     const newer = new Dexie('hooks-status')
-    newer.version(2).stores({ sessions: 'id' })
+    newer.version(3).stores({ sessions: 'id' })
     await act(() => newer.open())
 
     await waitFor(() => expect(result.current).toBe('outdated'))
