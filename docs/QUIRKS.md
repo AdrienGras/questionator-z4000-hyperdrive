@@ -202,6 +202,14 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Workaround** : `configure({ asyncUtilTimeout: 5000 })` dans `src/testing/setup.ts`. Les menus et dialogues base-ui s'ouvrent bien avec `fireEvent.click` : `@testing-library/user-event` n'est pas nécessaire.
 **Référence** : `src/testing/setup.ts`, `vite.config.ts` (`autoCodeSplitting`).
 
+## Les checks `codecov/patch` et `codecov/project` restent « in_progress » alors que le rapport est posté (2026-10-05)
+
+**Découvert** : PR #138 (F43.1).
+**Symptôme** : les deux checks Codecov restent `in_progress` sur la PR, alors que le rapport et le commentaire de couverture sont déjà postés.
+**Cause** : inconnue côté Codecov ; son API montrait pourtant le commit `complete` et l'envoi `merged`. Le statut GitHub n'a simplement pas été clos.
+**Workaround** : relancer le job `check` de la CI ; les deux checks passent alors à `success`.
+**Référence** : PR #138, workflow CI (job `check`).
+
 ## `Equal<A, B>` (astuce des fonctions génériques) déclare différents une intersection et l'objet aplati équivalent (2026-09-25)
 
 **Découvert** : test d'alignement `SessionSchema` / `Session` en F05.
