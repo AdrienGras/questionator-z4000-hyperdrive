@@ -66,6 +66,35 @@ describe('buildTrainingPrompt', () => {
     }
   })
 
+  // Une première génération (cours d'API REST) avait demandé de réécrire du code et de réciter
+  // l'implémentation des ateliers : ces règles cadrent des questions qui se répondent à l'oral.
+  test.each([
+    {
+      locale: 'fr' as const,
+      rules: [
+        "Ne demande jamais d'écrire, de réécrire ou d'implémenter du code.",
+        'ils ne sont pas à mémoriser',
+        'extrait court et autonome',
+        'Une seule question par énoncé',
+      ],
+    },
+    {
+      locale: 'en' as const,
+      rules: [
+        'Never ask to write, rewrite or implement code.',
+        'they are not material to memorise',
+        'short, self-contained snippet',
+        'One question per statement',
+      ],
+    },
+  ])(
+    '$locale : impose des questions d’oral, sans code à écrire ni détail d’atelier',
+    ({ locale, rules }) => {
+      const prompt = buildTrainingPrompt(locale)
+      for (const rule of rules) expect(prompt).toContain(rule)
+    },
+  )
+
   test.each(LOCALES)('%s : sections numérotées 1 à 7 dans l’ordre, après l’intro', (locale) => {
     const prompt = buildTrainingPrompt(locale)
     expect(prompt.match(/^## (\d)\./gm)).toEqual([
