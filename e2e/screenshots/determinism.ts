@@ -56,8 +56,15 @@ export const test = base.extend({
 
 export { expect } from '@playwright/test'
 
-/** Capture `site/public/screenshots/<name>.png` (page entière visible ou élément). */
-export async function capture(target: Page | Locator, name: string): Promise<void> {
+/**
+ * Capture `site/public/screenshots/<name>.png` (partie visible de la page, ou élément).
+ * `fullPage` : toute la hauteur de la page, pour un écran plus haut que la fenêtre.
+ */
+export async function capture(
+  target: Page | Locator,
+  name: string,
+  options: Readonly<{ fullPage?: boolean }> = {},
+): Promise<void> {
   // Polices chargées avant la prise de vue (garde contre une variation de rendu du texte).
   const page = 'goto' in target ? target : target.page()
   await page.evaluate(() => document.fonts.ready)
@@ -65,5 +72,6 @@ export async function capture(target: Page | Locator, name: string): Promise<voi
     path: `${OUT_DIR}/${name}.png`,
     animations: 'disabled',
     caret: 'hide',
+    ...('goto' in target && options.fullPage === true ? { fullPage: true } : {}),
   })
 }

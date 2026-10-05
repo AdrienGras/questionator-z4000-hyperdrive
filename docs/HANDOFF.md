@@ -28,7 +28,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 
 **Dernière chose faite** : F43.4 implémenté sur `feat/137-stats-mise-a-jour`, dernier ticket de F43. `/training/$trainingId/stats` (`features/training-stats/`) : chiffres clés, « À revoir », « Par niveau » et « Par notion » avec barres `Progress`, détail replié. `/training/$trainingId/update` : les 4 étapes de la mise en place, puis le bilan (`diffTrainingConfig`) avant « Mettre à jour ». Liens « Voir les stats » et « Mettre à jour la config » sur l'écran d'entraînement, « Stats » et menu « Mettre à jour la config » sur la carte. `TrainingGate` et écran endommagé partagés dans `components/`, briques de tableau dans `components/stats/`. e2e stats et mise à jour ; captures `entrainement-*` et guide `s-entrainer.md` complétés. Décisions ajoutées à D101.
 
-**Trucs en suspens** : #140 (F43.3) a été mergée dans la nuit après une panne de GitHub Actions : le run avait été annulé, puis relancé à 22:03 UTC. PR du ticket #137 à ouvrir en brouillon, puis `sonar-check.sh --pr <n> --wait` jusqu'au gate vert avant « Ready for review ». Pas de merge sans le go de l'utilisateur.
+**Trucs en suspens** : PR du ticket #137 à ouvrir en brouillon, puis `sonar-check.sh --pr <n> --wait` jusqu'au gate vert avant « Ready for review ». Pas de merge sans le go de l'utilisateur.
 
 **Prochaine chose à creuser** : une fois #137 mergée, F43 est complète. Les idées restantes de l'entraînement sont au BACKLOG (courbe de progression, tirage sur les points faibles, backup, seuil réglable, prompt sans web, compléter une config, brouillon de l'éditeur).
 

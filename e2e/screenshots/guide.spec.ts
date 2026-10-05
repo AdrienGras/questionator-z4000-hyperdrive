@@ -125,7 +125,8 @@ test('entraînement : mise en place, question révélée, stats', async ({ page 
   await training.draw('Normal')
   await training.reveal()
   await expect(training.answerTitle).toBeVisible()
-  await capture(page, 'entrainement-question')
+  // Page entière : à 800 px de haut, le bouton « Passer » sous la réponse serait coupé.
+  await capture(page, 'entrainement-question', { fullPage: true })
 
   // Quelques notes, dont deux sous la moitié du barème (« À revoir »), et un passage.
   await training.score('1,5')

@@ -16,7 +16,8 @@ Sur l'accueil, cliquez sur « Commencer » dans la carte « S’entraîner ». L
 1. **Rassemblez votre cours.** Réunissez le cours et les ateliers dans un seul PDF ou une seule archive zip.
 2. **Copiez le prompt.** Cliquez sur « Copier le prompt ». L'application confirme par « Prompt copié. ». Si la copie échoue, sélectionnez le texte du champ « Prompt à copier » et copiez-le à la main.
 3. **Récupérez la config.** Collez le prompt dans le LLM, joignez votre fichier de cours et attendez le résultat. **Réglez le LLM sur son effort de réflexion maximal** : plus le cours est long, plus ça compte, et un effort réduit donne des questions superficielles ou un JSON incomplet. Le LLM rend un fichier `.json`, ou un bloc de code JSON.
-![Étape 2 de l’écran S’entraîner : l’encadré « Réglez le LLM sur son effort de réflexion maximal », le prompt à copier et le bouton Copier le prompt.](/screenshots/entrainement-mise-en-place.png)
+
+   ![Étape 2 de l’écran S’entraîner : l’encadré « Réglez le LLM sur son effort de réflexion maximal », le prompt à copier et le bouton Copier le prompt.](/screenshots/entrainement-mise-en-place.png)
 
 4. **Déposez-la.** Déposez le fichier dans « Config (JSON) ». Si le LLM n'a rendu qu'un bloc de code, collez-le dans « … ou collez le JSON ici », puis cliquez sur « Vérifier le JSON collé ».
 
