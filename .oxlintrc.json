@@ -36,6 +36,7 @@
     {
       "files": [
         "src/domain/config/example.test.ts",
+        "src/domain/training/training-example.test.ts",
         "src/features/session/passage-example.test.tsx",
         "src/features/config-editor/hooks/use-config-draft.ts",
         "src/features/config-editor/hooks/use-config-draft.test.ts",

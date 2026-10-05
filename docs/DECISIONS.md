@@ -1535,3 +1535,28 @@ autre encodage 8 bits.
 
 **Pourquoi** : la vidéo explique mieux le principe que le SVG ; l'AVIF animé est le seul format que GitHub lit en boucle dans un README avec une image nette et fluide pour un poids acceptable.
 
+## D101 — F43 : entraînement autonome (2026-10-05)
+
+**Question** : comment permettre à un étudiant de réviser seul à partir de son cours, avec une config produite par un LLM, sans alourdir le modèle des sessions ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Évaluation | Auto-évaluation : l'étudiant révèle `answer` puis se note avec les boutons du barème de la catégorie | Réutilise le barème existant ; les stats restent chiffrées. |
+| Tirage | Cycle sans répétition par catégorie : jamais vues d'abord, remélange une fois la catégorie épuisée | Simple, prévisible, chaque question finit par sortir. La priorité aux points faibles va au backlog. |
+| Stats | Socle (questions faites, réussite par catégorie) + maîtrise par tag + détail par question + couverture | Ce qui aide à réviser. Courbe de progression au backlog (n'a de sens qu'après plusieurs séances). |
+| Config | Même schéma strict que l'oral, aucune variante assouplie | Une config d'entraînement reste utilisable pour un oral ; une seule validation à maintenir. |
+| Entité | `Training` à part, tables Dexie dédiées ; `Session` inchangée | Une session porte étudiants, passages, plafond, ajustements, export : un drapeau `mode` mettrait des `if` partout (D59). |
+| Persistance | Un entraînement par config, reprenable ; mise à jour de config qui reprend l'historique des `id` conservés | Régénérer la config avec le LLM est le cas normal ; les `id` stables sont exigés par le prompt. |
+| Journal | Table `trainingDraws` séparée, une ligne par tirage | Le journal grossit sans fin : une note ajoute une ligne au lieu de réécrire un document. |
+| Prompt | Fourni par l'application, à copier ; renvoie au README et à un schéma allégé par URL | Le LLM a forcément accès au web (prérequis assumé) ; le prompt reste court et ne dérive pas du schéma. |
+| Schéma allégé | `config.schema.lite.json`, identique au schéma complet sauf `icon` réduit à une chaîne | Dans `config.schema.json` (252 Ko), l'énumération des 6 220 icônes précède `questions` (caractère ~250 000) : un outil de lecture web qui tronque ne verrait jamais la structure des questions. |
+| Niveaux | 4 catégories imposées par le prompt (`id`, libellé, barème, icône) | Configs homogènes, stats comparables, `id` de catégorie stables pour la reprise d'historique. |
+| Calibrage | Grille cognitive (restituer / appliquer / analyser / concevoir), couverture par tag, 30 à 60 questions | Critère qu'un LLM applique de façon régulière ; volume qui suit le cours sans dépasser la longueur de sortie. |
+| `answer` | Gabarit imposé : réponse de référence, barème palier par palier, pièges facultatifs | L'étudiant se note seul : sans grille alignée sur le barème, l'auto-évaluation devient approximative. |
+| Dépôt | Fichier `.json` déposé **ou** JSON collé | Un LLM qui ne sait pas produire de fichier rend un bloc de code ; coller évite d'en faire un fichier à la main. |
+| Prompt : URL en constantes | `buildTrainingPrompt(locale)` ; les URL du README et du schéma allégé sont des constantes, comme `CONFIG_SCHEMA_URL` | Le prompt pointe toujours vers le site publié, même en dev ; une signature de moins à câbler. |
+| Taille du schéma allégé | Moins de 40 000 octets, bornés par un test (mesuré : 31 054) | Le critère initial de 30 Ko était arbitraire ; l'enjeu est que la structure des questions reste lisible par un outil qui tronque. |
+
+**Pourquoi** : l'étudiant fournit son cours à un LLM, dépose la config et s'entraîne sans limite de questions ; une entité à part et un schéma strict gardent l'oral intact, et des `id` stables rendent la régénération de config sans perte. Spec : `docs/superpowers/specs/2026-10-05-f43-entrainement-autonome-design.md`. Découpage en quatre tickets (#134 à #137) ; #134 livre le schéma allégé, le prompt et la config d'exemple.
