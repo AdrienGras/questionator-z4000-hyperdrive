@@ -5,13 +5,24 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import { healthy } from '@/testing/healthy-session'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
+import { makeDraw, makeTraining } from '@/testing/training-fixtures'
 import { isDamaged } from './damaged-session'
 import { createDb, db } from './db'
-import { useDbStatus, useSession, useSessions } from './hooks'
+import {
+  useDbStatus,
+  useSession,
+  useSessions,
+  useTraining,
+  useTrainingDraws,
+  useTrainings,
+} from './hooks'
 import { createSession, deleteSession, updateSession } from './sessions'
+import { createTraining, deleteTraining, drawTrainingQuestion, getTrainingDraws } from './trainings'
 
 beforeEach(async () => {
   await db.sessions.clear()
+  await db.trainings.clear()
+  await db.trainingDraws.clear()
 })
 
 describe('useSessions', () => {
@@ -68,6 +79,84 @@ describe('useSession', () => {
     rerender({ id: 'b' })
     expect(healthy(result.current)?.name).not.toBe('Session A')
     await waitFor(() => expect(healthy(result.current)?.name).toBe('Session B'))
+  })
+})
+
+describe('useTrainings', () => {
+  test('undefined pendant le chargement, puis la liste triée, mise à jour après écriture', async () => {
+    await createTraining(makeTraining({ id: 'a', updatedAt: '2026-10-05T08:00:00.000Z' }))
+    const { result } = renderHook(() => useTrainings())
+    expect(result.current).toBeUndefined()
+    await waitFor(() => expect(result.current?.map((t) => t.id)).toEqual(['a']))
+
+    await act(() =>
+      createTraining(makeTraining({ id: 'b', updatedAt: '2026-10-05T09:00:00.000Z' })),
+    )
+    await waitFor(() => expect(result.current?.map((t) => t.id)).toEqual(['b', 'a']))
+  })
+})
+
+describe('useTraining', () => {
+  test('undefined → entraînement → null après suppression', async () => {
+    await createTraining(makeTraining())
+    const { result } = renderHook(() => useTraining('training-1'))
+    expect(result.current).toBeUndefined()
+    await waitFor(() => expect(result.current?.id).toBe('training-1'))
+
+    await act(() => deleteTraining('training-1'))
+    await waitFor(() => expect(result.current).toBeNull())
+  })
+
+  test('null pour un entraînement absent', async () => {
+    const { result } = renderHook(() => useTraining('absent'))
+    await waitFor(() => expect(result.current).toBeNull())
+  })
+
+  test('suit un changement d’id sans démontage', async () => {
+    await createTraining(makeTraining({ id: 'a' }))
+    await createTraining(makeTraining({ id: 'b' }))
+    const { result, rerender } = renderHook(({ id }) => useTraining(id), {
+      initialProps: { id: 'a' },
+    })
+    await waitFor(() => expect(result.current?.id).toBe('a'))
+    rerender({ id: 'b' })
+    expect(result.current?.id).not.toBe('a')
+    await waitFor(() => expect(result.current?.id).toBe('b'))
+  })
+})
+
+describe('useTrainingDraws', () => {
+  test('undefined → journal vide → mis à jour après un tirage', async () => {
+    await createTraining(makeTraining())
+    const { result } = renderHook(() => useTrainingDraws('training-1'))
+    expect(result.current).toBeUndefined()
+    await waitFor(() => expect(result.current).toEqual([]))
+
+    await act(() =>
+      drawTrainingQuestion('training-1', 'a', {
+        random: () => 0,
+        now: () => new Date('2026-10-05T10:00:00.000Z'),
+      }),
+    )
+    await waitFor(() => expect(result.current).toHaveLength(1))
+    expect(result.current?.[0]).toMatchObject({
+      trainingId: 'training-1',
+      outcome: { kind: 'pending' },
+    })
+  })
+
+  test('suit un changement d’id sans montrer le journal de l’ancien', async () => {
+    await createTraining(makeTraining({ id: 'a' }))
+    await createTraining(makeTraining({ id: 'b' }))
+    await db.trainingDraws.add(makeDraw({ trainingId: 'a' }))
+    const { result, rerender } = renderHook(({ id }) => useTrainingDraws(id), {
+      initialProps: { id: 'a' },
+    })
+    await waitFor(() => expect(result.current).toHaveLength(1))
+    rerender({ id: 'b' })
+    expect(result.current).toBeUndefined()
+    await waitFor(() => expect(result.current).toEqual([]))
+    expect(await getTrainingDraws('a')).toHaveLength(1)
   })
 })
 
