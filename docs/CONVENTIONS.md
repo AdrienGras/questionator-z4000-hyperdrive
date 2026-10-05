@@ -45,7 +45,7 @@ Sens des imports : `lib` ← `domain` ← `components` ← `features` ← `route
 
 ### Règles tacites
 
-- Imports par `@/…` partout ; `./…` seulement pour le même dossier ; `../` interdit (oxlint `no-restricted-imports`). Seule exception : `domain/config/example.test.ts`, qui lit `examples/` hors de `src/`.
+- Imports par `@/…` partout ; `./…` seulement pour le même dossier ; `../` interdit (oxlint `no-restricted-imports`). Seules exceptions : `domain/config/example.test.ts` et `domain/training/training-example.test.ts`, qui lisent `examples/` hors de `src/`.
 - Pas de barrel (`index.ts` de réexportation, règle `no-barrel`) : on importe le fichier qui déclare le symbole. `vi.mock` cible ce même fichier (`vi.mock('@/lib/db/hooks', …)` pour `useDbStatus`), pas un dossier.
 - Fichiers et dossiers en kebab-case, composants compris (`session-card.tsx` exporte `SessionCard`) ; seules les routes TanStack gardent leur syntaxe (`__root.tsx`, `session.$sessionId.tsx`).
 - `domain/` n'importe ni `lib/db/` ni `lib/i18n/use-ui.ts` : un dictionnaire de messages (`domain/*/messages.ts`) utilise `t` de `@/lib/i18n/i18n`. Seul `lib/db/` a le droit de lire les types de `domain/`.

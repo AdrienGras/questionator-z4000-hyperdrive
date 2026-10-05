@@ -1,0 +1,97 @@
+{
+  "$schema": "https://adriengras.github.io/questionator-z4000-hyperdrive/config.schema.json",
+  "schemaVersion": 1,
+  "locale": "fr",
+  "exam": {
+    "title": "Git, les bases",
+    "subject": "Git"
+  },
+  "scoring": {
+    "questionsPerStudent": 3,
+    "maxRawScore": 10,
+    "finalScale": 20
+  },
+  "categories": [
+    {
+      "id": "facile",
+      "label": "Facile",
+      "scale": [0, 0.5, 1],
+      "icon": "leaf",
+      "questions": [
+        {
+          "id": "facile-role-du-commit",
+          "title": "À quoi sert un commit ?",
+          "tags": ["commit", "branche"],
+          "prompt": "À quoi sert un commit dans Git ?",
+          "answer": "**Réponse de référence**\nUn commit enregistre un instantané du projet (l'état des fichiers indexés) avec un message et un auteur, et s'ajoute à l'historique de la branche courante.\n\n**Barème**\n- **0,5** : parle d'une sauvegarde de modifications, sans préciser qu'il s'agit d'un instantané lié à l'historique.\n- **1** : un instantané du projet, avec message et auteur, ajouté à l'historique de la branche courante."
+        },
+        {
+          "id": "facile-afficher-historique",
+          "title": "Lister les commits",
+          "tags": ["historique"],
+          "prompt": "Quelle commande affiche la liste des commits d'un dépôt ?",
+          "answer": "**Réponse de référence**\n`git log` affiche les commits du plus récent au plus ancien ; `git log --oneline` en donne une version condensée sur une ligne par commit.\n\n**Barème**\n- **0,5** : cite `git log` sans savoir ce qu'il affiche ni l'ordre.\n- **1** : `git log`, du plus récent au plus ancien, avec `--oneline` pour la version condensée."
+        }
+      ]
+    },
+    {
+      "id": "normal",
+      "label": "Normal",
+      "scale": [0, 0.5, 1, 1.5, 2],
+      "icon": "flame",
+      "questions": [
+        {
+          "id": "normal-add-puis-commit",
+          "title": "Pourquoi git add avant git commit ?",
+          "tags": ["commit"],
+          "prompt": "Voici une suite de commandes :\n\n```bash\necho \"a\" > a.txt\necho \"b\" > b.txt\ngit add a.txt\ngit commit -m \"Ajoute a\"\n```\n\nQuels fichiers contient le commit, et pourquoi ?",
+          "answer": "**Réponse de référence**\nLe commit ne contient que `a.txt` : `git commit` enregistre le contenu de la zone d'index (staging), et seul `a.txt` y a été ajouté. `b.txt` reste non suivi.\n\n**Barème**\n- **0,5** : indique que seul `a.txt` est commité, sans expliquer pourquoi.\n- **1** : seul `a.txt` est commité, car `git add` l'a placé dans l'index.\n- **1,5** : explique que le commit enregistre l'index et non le dossier de travail, et que `b.txt` n'est pas suivi.\n- **2** : explique l'index, précise que `b.txt` reste non suivi et sait comment l'inclure (`git add b.txt` puis un nouveau commit)."
+        },
+        {
+          "id": "normal-creer-branche",
+          "title": "Créer et rejoindre une branche",
+          "tags": ["branche", "historique"],
+          "prompt": "Quelle commande crée la branche `fonctionnalite` et s'y place immédiatement ? Que devient l'historique des commits existants ?",
+          "answer": "**Réponse de référence**\n`git switch -c fonctionnalite` (ou `git checkout -b fonctionnalite`). La branche part du commit courant : l'historique existant est partagé, aucun commit n'est copié.\n\n**Barème**\n- **0,5** : cite une commande qui crée la branche, sans se placer dessus.\n- **1** : `git switch -c` ou `git checkout -b`, sans parler de l'historique.\n- **1,5** : la bonne commande, et la branche part du commit courant.\n- **2** : la bonne commande, la branche part du commit courant et partage l'historique existant (c'est un simple pointeur, aucun commit copié)."
+        }
+      ]
+    },
+    {
+      "id": "difficile",
+      "label": "Difficile",
+      "scale": [0, 1, 2, 3],
+      "icon": "bolt",
+      "questions": [
+        {
+          "id": "difficile-annuler-commit-publie",
+          "title": "Annuler un commit déjà poussé",
+          "tags": ["commit", "historique"],
+          "prompt": "Un commit défectueux a été poussé sur la branche `main` partagée par toute l'équipe. Comment l'annuler, et pourquoi ne pas utiliser `git reset --hard` puis `git push --force` ?",
+          "answer": "**Réponse de référence**\nUtiliser `git revert <commit>` : il crée un nouveau commit qui inverse les changements et préserve l'historique. `reset --hard` suivi d'un `push --force` réécrit l'historique publié et désynchronise les copies locales des collègues.\n\n**Barème**\n- **1** : propose `git revert`, sans justifier.\n- **2** : `git revert` crée un commit inverse et conserve l'historique.\n- **3** : `git revert`, historique conservé, et explique que `reset --hard` + `push --force` réécrit un historique partagé, ce qui casse les copies locales des collègues.\n\n**Pièges**\n- Croire que `git revert` supprime le commit de l'historique."
+        },
+        {
+          "id": "difficile-fusion-ou-rebase",
+          "title": "Merge ou rebase ?",
+          "tags": ["branche", "historique"],
+          "prompt": "La branche `fonctionnalite` a pris du retard sur `main`. Comparez `git merge main` et `git rebase main` depuis `fonctionnalite` : effet sur l'historique et précaution à prendre.",
+          "answer": "**Réponse de référence**\n`git merge main` crée un commit de fusion et conserve l'historique tel quel. `git rebase main` rejoue les commits de `fonctionnalite` au-dessus de `main`, donne un historique linéaire mais réécrit ces commits (nouveaux identifiants) : on ne rebase pas une branche déjà partagée.\n\n**Barème**\n- **1** : décrit correctement l'un des deux (merge ou rebase).\n- **2** : décrit les deux : commit de fusion d'un côté, historique linéaire de l'autre.\n- **3** : décrit les deux, indique que le rebase réécrit les commits (nouveaux identifiants) et qu'il faut l'éviter sur une branche déjà partagée."
+        }
+      ]
+    },
+    {
+      "id": "cauchemar",
+      "label": "Cauchemar",
+      "scale": [0, 1, 2, 3, 4],
+      "icon": "skull",
+      "questions": [
+        {
+          "id": "cauchemar-tete-detachee",
+          "title": "Commits perdus en HEAD détaché",
+          "tags": ["commit", "historique", "branche"],
+          "prompt": "Après `git checkout a1b2c3d` (un ancien commit), vous créez deux commits puis revenez sur `main` avec `git switch main`. Que sont devenus vos deux commits, et comment les récupérer ?",
+          "answer": "**Réponse de référence**\nEn HEAD détaché, les commits ne sont rattachés à aucune branche. Après le retour sur `main`, ils ne sont plus accessibles depuis une branche et seront à terme supprimés par le ramasse-miettes de Git. On les retrouve avec `git reflog` (qui garde la trace des positions de HEAD), puis on les rattache avec `git branch <nom> <commit>`.\n\n**Barème**\n- **1** : sait que les commits sont perdus de vue ou orphelins.\n- **2** : explique qu'en HEAD détaché aucune branche ne les porte.\n- **3** : l'explication précédente, plus `git reflog` pour retrouver le commit.\n- **4** : l'explication, `git reflog`, rattachement par `git branch <nom> <commit>` et le risque de suppression par le ramasse-miettes.\n\n**Pièges**\n- Croire que les commits sont supprimés immédiatement."
+        }
+      ]
+    }
+  ]
+}
