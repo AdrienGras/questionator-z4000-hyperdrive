@@ -3,8 +3,10 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { buildTrainingPrompt } from '@/domain/training/prompt'
 import { db, type DbStatus } from '@/lib/db/db'
+import { createTraining } from '@/lib/db/trainings'
 import { minimalConfig } from '@/testing/config-fixtures'
 import { renderAt } from '@/testing/render-at'
+import { makeDraw, makeScoredDraw, makeTraining } from '@/testing/training-fixtures'
 
 const state = vi.hoisted((): { status: DbStatus } => ({ status: 'open' }))
 const copyText = vi.hoisted(() => vi.fn<(text: string) => Promise<boolean>>())
@@ -53,6 +55,7 @@ const pasteArea = () => screen.getByRole('textbox', { name: '… ou collez le JS
 
 beforeEach(async () => {
   await db.trainings.clear()
+  await db.trainingDraws.clear()
   state.status = 'open'
   copyText.mockReset()
   stashConfigForEditor.mockReset()
@@ -243,5 +246,176 @@ describe('écran de mise en place d’un entraînement', () => {
     expect(over).toBe(false)
     expect(fireEvent.drop(main, { dataTransfer })).toBe(false)
     expect(within(main).getByRole('heading', { level: 1 })).toBeInTheDocument()
+  })
+})
+
+/**
+ * Nouvelle config de `makeTraining()` : `a-1` à `a-3` conservées, `b-1` retirée, `b-2` ajoutée,
+ * examen renommé.
+ */
+function updatedConfig(): string {
+  const config = minimalConfig()
+  config.exam.title = 'Oral mis à jour'
+  config.categories = [
+    {
+      id: 'a',
+      label: 'A',
+      scale: [0, 1, 2],
+      questions: [
+        { id: 'a-1', prompt: 'Question A1' },
+        { id: 'a-2', prompt: 'Question A2' },
+        { id: 'a-3', prompt: 'Question A3' },
+      ],
+    },
+    { id: 'b', label: 'B', scale: [0, 1, 2], questions: [{ id: 'b-2', prompt: 'Question B2' }] },
+  ]
+  return JSON.stringify(config)
+}
+
+async function renderUpdate() {
+  const rendered = renderAt('/training/training-1/update')
+  await screen.findByRole('heading', { level: 1, name: 'Mettre à jour la config' })
+  const input = rendered.container.querySelector('input[type=file]')
+  if (!(input instanceof HTMLInputElement)) throw new Error('input fichier absent')
+  return { ...rendered, input }
+}
+
+/** Charge la nouvelle config et attend son résumé. */
+async function loadUpdatedConfig(input: HTMLInputElement) {
+  choose(input, 'config.json', updatedConfig())
+  await screen.findByRole('heading', { name: 'Oral mis à jour' })
+}
+
+const updateButton = () => screen.getByRole('button', { name: 'Mettre à jour' })
+
+describe('mise à jour de la config d’un entraînement', () => {
+  test('titre, retour à l’entraînement, quatre étapes, bouton désactivé', async () => {
+    await createTraining(makeTraining())
+    await renderUpdate()
+    expect(screen.getByRole('link', { name: 'Retour à l’entraînement' })).toHaveAttribute(
+      'href',
+      '/training/training-1',
+    )
+    expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(4)
+    expect(updateButton()).toBeDisabled()
+    expect(screen.queryByRole('button', { name: 'C’est parti' })).toBeNull()
+  })
+
+  test('config valide : bilan des questions conservées, nouvelles et retirées', async () => {
+    await createTraining(makeTraining())
+    const { input } = await renderUpdate()
+    await loadUpdatedConfig(input)
+    const summary = screen.getByRole('list', { name: 'Bilan de la mise à jour' })
+    expect(
+      within(summary)
+        .getAllByRole('listitem')
+        .map((item) => item.textContent),
+    ).toEqual([
+      '3 questions conservées — historique gardé',
+      '1 nouvelle',
+      '1 retirée — elle n’apparaît plus dans les stats',
+    ])
+    expect(updateButton()).toBeEnabled()
+  })
+
+  test('tous les id changés : 0 conservée, toutes nouvelles et retirées, rien d’écrit avant le clic', async () => {
+    const training = makeTraining()
+    await createTraining(training)
+    const before = await db.trainings.get('training-1')
+    const { input } = await renderUpdate()
+    const config = minimalConfig()
+    config.exam.title = 'Oral renommé'
+    config.categories = [
+      {
+        id: 'x',
+        label: 'X',
+        scale: [0, 1],
+        questions: [
+          { id: 'x-1', prompt: 'Question X1' },
+          { id: 'x-2', prompt: 'Question X2' },
+        ],
+      },
+    ]
+    choose(input, 'config.json', JSON.stringify(config))
+    await screen.findByRole('heading', { name: 'Oral renommé' })
+    const summary = screen.getByRole('list', { name: 'Bilan de la mise à jour' })
+    expect(
+      within(summary)
+        .getAllByRole('listitem')
+        .map((item) => item.textContent),
+    ).toEqual([
+      '0 question conservée — historique gardé',
+      '2 nouvelles',
+      '4 retirées — elles n’apparaissent plus dans les stats',
+    ])
+    expect(await db.trainings.get('training-1')).toEqual(before)
+  })
+
+  test('création : aucun bilan sous la config valide', async () => {
+    const { input } = await renderPage()
+    choose(input, 'config.json', JSON.stringify(minimalConfig()))
+    await screen.findByRole('heading', { name: 'Oral de test' })
+    expect(screen.queryByRole('list', { name: 'Bilan de la mise à jour' })).toBeNull()
+  })
+
+  test('« Mettre à jour » : config remplacée, nom suivi, journal gardé, retour à l’entraînement', async () => {
+    await createTraining(makeTraining())
+    await db.trainingDraws.add(makeScoredDraw('a-1', 2, 2))
+    const { input, router } = await renderUpdate()
+    await loadUpdatedConfig(input)
+    fireEvent.click(updateButton())
+    await waitFor(() => expect(router.state.location.pathname).toBe('/training/training-1'))
+    const stored = await db.trainings.get('training-1')
+    expect(stored?.name).toBe('Oral mis à jour')
+    expect(await db.trainingDraws.count()).toBe(1)
+    expect(await db.trainings.count()).toBe(1)
+  })
+
+  test('tirage en attente sur une question retirée : passé, l’écran revient aux tuiles', async () => {
+    await createTraining(makeTraining())
+    await db.trainingDraws.add(makeDraw({ questionId: 'b-1' }))
+    const { input } = await renderUpdate()
+    await loadUpdatedConfig(input)
+    fireEvent.click(updateButton())
+    expect(
+      await screen.findByRole('list', { name: 'Choisissez une catégorie' }),
+    ).toBeInTheDocument()
+    const [draw] = await db.trainingDraws.toArray()
+    expect(draw?.outcome).toEqual({ kind: 'passed' })
+  })
+
+  test('échec de l’écriture : alerte en ligne, on reste sur l’écran', async () => {
+    await createTraining(makeTraining())
+    const { input, router } = await renderUpdate()
+    await loadUpdatedConfig(input)
+    vi.spyOn(db.trainings, 'put').mockRejectedValue(new Error('écriture'))
+    fireEvent.click(updateButton())
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'La mise à jour a échoué. Réessayez.',
+    )
+    expect(router.state.location.pathname).toBe('/training/training-1/update')
+    expect((await db.trainings.get('training-1'))?.name).toBe('Entraînement de test')
+  })
+
+  test('entraînement absent : message, aucun bouton d’écriture', async () => {
+    renderAt('/training/inconnu/update')
+    expect(
+      await screen.findByRole('heading', { name: 'Entraînement introuvable' }),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Mettre à jour' })).toBeNull()
+    expect(await db.trainings.count()).toBe(0)
+  })
+
+  test('entraînement endommagé : message, aucun bouton d’écriture, enregistrement intact', async () => {
+    const damaged = { id: 'training-1', name: 'Cassé' }
+    await db.table('trainings').put(damaged)
+    renderAt('/training/training-1/update')
+    expect(
+      await screen.findByRole('heading', {
+        name: 'Cet entraînement est endommagé : il ne peut pas être mis à jour.',
+      }),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Mettre à jour' })).toBeNull()
+    expect(await db.table('trainings').get('training-1')).toEqual(damaged)
   })
 })

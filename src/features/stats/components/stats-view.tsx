@@ -12,10 +12,10 @@ import { HeadcountCard } from './headcount-card'
 import { HistogramChart } from './histogram-chart'
 import { HistogramTable } from './histogram-table'
 import { QuestionTables } from './question-tables'
-import { StatsSection } from './stats-section'
+import { StatsSection } from '@/components/stats/stats-section'
 import { StrategyTable } from './strategy-table'
 import { TagTable } from './tag-table'
-import { StatsEmpty } from './stats-empty'
+import { StatsEmpty } from '@/components/stats/stats-empty'
 
 /**
  * Écran des statistiques (F15) : barre de titre de la coque (`PageShell`), puis les blocs sur une colonne en mobile, en grille

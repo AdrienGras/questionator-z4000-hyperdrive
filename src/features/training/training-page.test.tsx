@@ -81,6 +81,19 @@ describe('écran d’entraînement', () => {
     expect(within(await tiles()).getAllByRole('button')).toHaveLength(2)
   })
 
+  test('l’en-tête propose les stats et la mise à jour de la config', async () => {
+    await seed()
+    renderAt('/training/training-1')
+    expect(await screen.findByRole('link', { name: 'Voir les stats' })).toHaveAttribute(
+      'href',
+      '/training/training-1/stats',
+    )
+    expect(screen.getByRole('link', { name: 'Mettre à jour la config' })).toHaveAttribute(
+      'href',
+      '/training/training-1/update',
+    )
+  })
+
   test('tirer affiche la question, réponse masquée, focus sur son titre', async () => {
     await seed()
     await seedOnlyA1Left()

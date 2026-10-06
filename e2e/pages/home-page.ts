@@ -3,6 +3,7 @@ import { ConfigEditorPage } from './config-editor-page.ts'
 import { CreateSessionPage } from './create-session-page.ts'
 import { TrainingPage } from './training-page.ts'
 import { TrainingSetupPage } from './training-setup-page.ts'
+import { TrainingStatsPage } from './training-stats-page.ts'
 
 /** Page d'accueil (`#/`). */
 export class HomePage {
@@ -36,6 +37,14 @@ export class HomePage {
     const training = new TrainingPage(this.page)
     await training.tiles.or(training.question).waitFor()
     return training
+  }
+
+  /** Suit « Stats » sur la carte de l'entraînement `name` et renvoie l'écran de stats. */
+  async openTrainingStats(name: string): Promise<TrainingStatsPage> {
+    await this.trainingCard(name).getByRole('link', { name: 'Stats', exact: true }).click()
+    const stats = new TrainingStatsPage(this.page)
+    await stats.keyFigures.waitFor()
+    return stats
   }
 
   async goto(): Promise<void> {

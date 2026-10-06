@@ -3,7 +3,9 @@ import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { db, type DbStatus } from '@/lib/db/db'
 import { takeConfigForEditor } from '@/lib/config-handoff'
+import { createTraining } from '@/lib/db/trainings'
 import { minimalConfig } from '@/testing/config-fixtures'
+import { makeTraining } from '@/testing/training-fixtures'
 import { useTrainingSetup } from './use-training-setup'
 
 const dbMock = vi.hoisted(() => ({ failCreate: false, failPersist: false }))
@@ -31,14 +33,15 @@ function configFile(text = VALID, name = 'config.json'): File {
   return new File([text], name, { type: 'application/json' })
 }
 
-function renderSetup(dbStatus: DbStatus = 'open') {
-  return renderHook(({ status }) => useTrainingSetup(status), {
+function renderSetup(dbStatus: DbStatus = 'open', trainingId?: string) {
+  return renderHook(({ status }) => useTrainingSetup(status, trainingId), {
     initialProps: { status: dbStatus },
   })
 }
 
 beforeEach(async () => {
   await db.trainings.clear()
+  await db.trainingDraws.clear()
   dbMock.failCreate = false
   dbMock.failPersist = false
   sessionStorage.clear()
@@ -209,5 +212,30 @@ describe('useTrainingSetup', () => {
     })
     expect(ids.filter((id) => id !== undefined)).toHaveLength(1)
     expect(await db.trainings.count()).toBe(1)
+  })
+
+  test('mise à jour : la config de l’entraînement est remplacée, son id est renvoyé', async () => {
+    await createTraining(makeTraining())
+    const { result } = renderSetup('open', 'training-1')
+    await act(() => result.current.setConfigFile(configFile()))
+    let id: string | undefined
+    await act(async () => {
+      id = await result.current.submit()
+    })
+    expect(id).toBe('training-1')
+    expect(await db.trainings.count()).toBe(1)
+    expect((await db.trainings.get('training-1'))?.name).toBe('Oral de test')
+  })
+
+  test('mise à jour d’un entraînement disparu : erreur affichée, rien n’est créé', async () => {
+    const { result } = renderSetup('open', 'inconnu')
+    await act(() => result.current.setConfigFile(configFile()))
+    let id: string | undefined
+    await act(async () => {
+      id = await result.current.submit()
+    })
+    expect(id).toBeUndefined()
+    expect(result.current.submitError).toBe(true)
+    expect(await db.trainings.count()).toBe(0)
   })
 })

@@ -17,6 +17,8 @@ import { Route as SessionSessionIdRouteImport } from './routes/session.$sessionI
 import { Route as TrainingTrainingIdRouteImport } from './routes/training.$trainingId'
 import { Route as TrainingNewRouteImport } from './routes/training.new'
 import { Route as SessionSessionIdStatsRouteImport } from './routes/session.$sessionId_.stats'
+import { Route as TrainingTrainingIdStatsRouteImport } from './routes/training.$trainingId_.stats'
+import { Route as TrainingTrainingIdUpdateRouteImport } from './routes/training.$trainingId_.update'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +60,17 @@ const SessionSessionIdStatsRoute = SessionSessionIdStatsRouteImport.update({
   path: '/session/$sessionId/stats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrainingTrainingIdStatsRoute = TrainingTrainingIdStatsRouteImport.update({
+  id: '/training/$trainingId_/stats',
+  path: '/training/$trainingId/stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrainingTrainingIdUpdateRoute =
+  TrainingTrainingIdUpdateRouteImport.update({
+    id: '/training/$trainingId_/update',
+    path: '/training/$trainingId/update',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +81,8 @@ export interface FileRoutesByFullPath {
   '/training/$trainingId': typeof TrainingTrainingIdRoute
   '/training/new': typeof TrainingNewRoute
   '/session/$sessionId/stats': typeof SessionSessionIdStatsRoute
+  '/training/$trainingId/stats': typeof TrainingTrainingIdStatsRoute
+  '/training/$trainingId/update': typeof TrainingTrainingIdUpdateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +93,8 @@ export interface FileRoutesByTo {
   '/training/$trainingId': typeof TrainingTrainingIdRoute
   '/training/new': typeof TrainingNewRoute
   '/session/$sessionId/stats': typeof SessionSessionIdStatsRoute
+  '/training/$trainingId/stats': typeof TrainingTrainingIdStatsRoute
+  '/training/$trainingId/update': typeof TrainingTrainingIdUpdateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +106,8 @@ export interface FileRoutesById {
   '/training/$trainingId': typeof TrainingTrainingIdRoute
   '/training/new': typeof TrainingNewRoute
   '/session/$sessionId_/stats': typeof SessionSessionIdStatsRoute
+  '/training/$trainingId_/stats': typeof TrainingTrainingIdStatsRoute
+  '/training/$trainingId_/update': typeof TrainingTrainingIdUpdateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +120,8 @@ export interface FileRouteTypes {
     | '/training/$trainingId'
     | '/training/new'
     | '/session/$sessionId/stats'
+    | '/training/$trainingId/stats'
+    | '/training/$trainingId/update'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +132,8 @@ export interface FileRouteTypes {
     | '/training/$trainingId'
     | '/training/new'
     | '/session/$sessionId/stats'
+    | '/training/$trainingId/stats'
+    | '/training/$trainingId/update'
   id:
     | '__root__'
     | '/'
@@ -121,6 +144,8 @@ export interface FileRouteTypes {
     | '/training/$trainingId'
     | '/training/new'
     | '/session/$sessionId_/stats'
+    | '/training/$trainingId_/stats'
+    | '/training/$trainingId_/update'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +157,8 @@ export interface RootRouteChildren {
   TrainingTrainingIdRoute: typeof TrainingTrainingIdRoute
   TrainingNewRoute: typeof TrainingNewRoute
   SessionSessionIdStatsRoute: typeof SessionSessionIdStatsRoute
+  TrainingTrainingIdStatsRoute: typeof TrainingTrainingIdStatsRoute
+  TrainingTrainingIdUpdateRoute: typeof TrainingTrainingIdUpdateRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +219,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SessionSessionIdStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/training/$trainingId_/stats': {
+      id: '/training/$trainingId_/stats'
+      path: '/training/$trainingId/stats'
+      fullPath: '/training/$trainingId/stats'
+      preLoaderRoute: typeof TrainingTrainingIdStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/training/$trainingId_/update': {
+      id: '/training/$trainingId_/update'
+      path: '/training/$trainingId/update'
+      fullPath: '/training/$trainingId/update'
+      preLoaderRoute: typeof TrainingTrainingIdUpdateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -204,6 +245,8 @@ const rootRouteChildren: RootRouteChildren = {
   TrainingTrainingIdRoute: TrainingTrainingIdRoute,
   TrainingNewRoute: TrainingNewRoute,
   SessionSessionIdStatsRoute: SessionSessionIdStatsRoute,
+  TrainingTrainingIdStatsRoute: TrainingTrainingIdStatsRoute,
+  TrainingTrainingIdUpdateRoute: TrainingTrainingIdUpdateRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

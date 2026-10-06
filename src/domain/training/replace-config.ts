@@ -18,3 +18,23 @@ export function replaceTrainingConfig(
   }
   return { training: { ...training, name: config.exam.title, config }, orphanPendingIds }
 }
+
+/** Ensemble des ids de questions d'une config, toutes catégories confondues. */
+function questionIds(config: NormalizedConfig): Set<string> {
+  return new Set(config.categories.flatMap((c) => c.questions.map((q) => q.id)))
+}
+
+/**
+ * Bilan d'une mise à jour de config, compté par `id` de question toutes catégories confondues :
+ * une question qui change de catégorie est conservée.
+ */
+export function diffTrainingConfig(
+  current: NormalizedConfig,
+  next: NormalizedConfig,
+): { kept: number; added: number; removed: number } {
+  const before = questionIds(current)
+  const after = questionIds(next)
+  let kept = 0
+  for (const id of after) if (before.has(id)) kept++
+  return { kept, added: after.size - kept, removed: before.size - kept }
+}

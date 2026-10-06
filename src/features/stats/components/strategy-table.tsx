@@ -4,8 +4,13 @@ import type { Strategy } from '@/domain/stats/types'
 import { categoryLabel } from '@/domain/config/lookup'
 import { formatDecimal } from '@/features/stats/format-stats'
 import type { Ui } from '@/lib/i18n/use-ui'
-import { NUMERIC_CELL, ROW_HEADER, StatsSection, StatsTable } from './stats-section'
-import { StatsEmpty } from './stats-empty'
+import {
+  NUMERIC_CELL,
+  ROW_HEADER,
+  StatsSection,
+  StatsTable,
+} from '@/components/stats/stats-section'
+import { StatsEmpty } from '@/components/stats/stats-empty'
 
 type StrategyTableProps = Readonly<{
   ui: Ui

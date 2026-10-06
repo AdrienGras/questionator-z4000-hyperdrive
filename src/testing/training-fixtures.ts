@@ -48,3 +48,34 @@ export function makeDraw(overrides: Partial<TrainingDraw> = {}): TrainingDraw {
     ...overrides,
   }
 }
+
+/** Tirage noté `points / max` (valeurs du barème) de `questionId`, à la minute `minute` après 9 h. */
+export function makeScoredDraw(
+  questionId: string,
+  points: number,
+  max: number,
+  minute = 0,
+): TrainingDraw {
+  return makeDraw({
+    questionId,
+    drawnAt: `2026-10-05T09:${String(minute).padStart(2, '0')}:00.000Z`,
+    outcome: { kind: 'scored', points, max },
+  })
+}
+
+/**
+ * Journal type des stats : `a-1` noté 2/2 puis 0,5/2 (à revoir), `a-2` noté 2/2, `a-3` passée.
+ * Sur `makeTrainingConfig()` : 3 réponses notées, 1 passée, 2 / 4 questions notées, A à 75 %.
+ */
+export function makeStatsDraws(): TrainingDraw[] {
+  return [
+    makeScoredDraw('a-1', 2, 2, 0),
+    makeScoredDraw('a-1', 0.5, 2, 1),
+    makeScoredDraw('a-2', 2, 2, 2),
+    makeDraw({
+      questionId: 'a-3',
+      drawnAt: '2026-10-05T09:03:00.000Z',
+      outcome: { kind: 'passed' },
+    }),
+  ]
+}

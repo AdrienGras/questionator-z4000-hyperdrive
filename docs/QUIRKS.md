@@ -864,3 +864,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : le fichier pèse 252 Ko ; l'énumération des 6 220 icônes Tabler (`icon`) précède `questions` (caractère ~250 000), et les outils de lecture tronquent bien avant.
 **Workaround** : le prompt d'entraînement pointe vers `config.schema.lite.json` (`icon` réduit à une chaîne, environ 31 000 octets). Ne pas réintroduire l'énumération dans le schéma allégé : un test borne sa taille à 40 000 octets.
 **Référence** : `src/domain/config/json-schema.ts` (option `lite`), `vite/config-schema-plugin.ts`, D101.
+
+## base-ui `Progress` glisse un « x » masqué dans `role="progressbar"` : le `textContent` d'une cellule le contient (2026-10-06)
+
+**Découvert** : tests de l'écran de stats d'entraînement (F43.4, #137).
+**Symptôme** : une cellule qui affiche « 50 % » avec sa barre a pour `textContent` « x50 % » ; une assertion sur le texte de la cellule échoue alors que l'écran est juste.
+**Cause** : le `Progress` de base-ui (`src/components/ui/progress.tsx`) rend, dans l'élément `role="progressbar"`, un nœud `role="presentation"` visuellement masqué qui contient « x ». `textContent` lit tout le sous-arbre, nœuds masqués compris.
+**Workaround** : lire le texte d'une cellule sans ses nœuds `role="presentation"` (`rowCells` de `src/testing/table-assertions.ts`), ou viser la barre par son nom accessible (`getByRole('progressbar', { name: 'Facile : 50 %' })`).
+**Référence** : `src/testing/table-assertions.ts`, `src/features/training-stats/components/rate-cell.tsx`.

@@ -3,7 +3,7 @@ import { formatScore } from '@/domain/scoring/format'
 import type { AdjustmentStats } from '@/domain/stats/types'
 import { formatDecimal } from '@/features/stats/format-stats'
 import type { Ui } from '@/lib/i18n/use-ui'
-import { StatFigures, StatsSection } from './stats-section'
+import { StatFigures, StatsSection } from '@/components/stats/stats-section'
 
 type AdjustmentCardProps = Readonly<{
   ui: Ui

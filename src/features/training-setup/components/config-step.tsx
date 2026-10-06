@@ -7,12 +7,15 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import type { Ui } from '@/lib/i18n/use-ui'
+import { UpdateSummary } from '@/features/training-setup/components/update-summary'
 import type { TrainingSetup } from '@/features/training-setup/hooks/use-training-setup'
 
 type ConfigStepProps = Readonly<{
   ui: Ui
   setup: TrainingSetup
   onFix: () => void
+  /** Config actuelle de l'entraînement mis à jour : affiche le bilan sous une config valide. */
+  current?: NormalizedConfig
 }>
 
 /** Résumé d'une config valide : titre de l'examen, nombre de questions par catégorie. */
@@ -35,7 +38,7 @@ function TrainingSummary({ ui, config }: Readonly<{ ui: Ui; config: NormalizedCo
 }
 
 /** Config déposée ou collée : zone de dépôt, zone de collage, état de la validation. */
-export function ConfigStep({ ui, setup, onFix }: ConfigStepProps) {
+export function ConfigStep({ ui, setup, onFix, current }: ConfigStepProps) {
   const { text } = ui
   const pasteId = useId()
   const { config } = setup
@@ -80,6 +83,9 @@ export function ConfigStep({ ui, setup, onFix }: ConfigStepProps) {
       {result !== undefined && (
         <div className="flex flex-col gap-2">
           {result.ok && <TrainingSummary ui={ui} config={result.config} />}
+          {result.ok && current !== undefined && (
+            <UpdateSummary ui={ui} current={current} next={result.config} />
+          )}
           <ConfigIssueList ui={ui} issues={result.issues} />
           {setup.canFix && (
             <Button type="button" variant="outline" className="self-start" onClick={onFix}>

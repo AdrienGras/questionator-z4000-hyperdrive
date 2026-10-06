@@ -1,5 +1,7 @@
 import type { Locator, Page } from '@playwright/test'
 import { HomePage } from './home-page.ts'
+import { TrainingSetupPage } from './training-setup-page.ts'
+import { TrainingStatsPage } from './training-stats-page.ts'
 
 /** Écran d'entraînement (`#/training/$trainingId`, F43.3) : tuiles, ou la question tirée. */
 export class TrainingPage {
@@ -64,5 +66,21 @@ export class TrainingPage {
     await this.page.getByRole('link', { name: 'Retour à l’accueil' }).click()
     await this.page.waitForURL(/#\/$/)
     return new HomePage(this.page)
+  }
+
+  /** « Voir les stats » : renvoie l'écran de stats, une fois ses chiffres clés montés. */
+  async openStats(): Promise<TrainingStatsPage> {
+    await this.page.getByRole('link', { name: 'Voir les stats' }).click()
+    const stats = new TrainingStatsPage(this.page)
+    await stats.keyFigures.waitFor()
+    return stats
+  }
+
+  /** « Mettre à jour la config » : renvoie l'écran de mise à jour, une fois son bouton monté. */
+  async openUpdate(): Promise<TrainingSetupPage> {
+    await this.page.getByRole('link', { name: 'Mettre à jour la config' }).click()
+    const setup = new TrainingSetupPage(this.page)
+    await setup.updateButton.waitFor()
+    return setup
   }
 }

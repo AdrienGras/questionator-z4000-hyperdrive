@@ -1,9 +1,14 @@
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import type { CategoryStats } from '@/domain/stats/types'
-import { formatRate } from '@/features/stats/format-stats'
+import { formatRate } from '@/components/stats/format-rate'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { CategoryLabel } from './category-label'
-import { NUMERIC_CELL, ROW_HEADER, StatsSection, StatsTable } from './stats-section'
+import {
+  NUMERIC_CELL,
+  ROW_HEADER,
+  StatsSection,
+  StatsTable,
+} from '@/components/stats/stats-section'
 
 type CategoryTableProps = Readonly<{
   ui: Ui

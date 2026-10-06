@@ -4,8 +4,14 @@ import { reasonsLabel } from '@/domain/stats/labels'
 import { questionTitle } from '@/domain/config/lookup'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { CategoryLabel } from './category-label'
-import { CELL, NUMERIC_CELL, ROW_HEADER, StatsSection, StatsTable } from './stats-section'
-import { StatsEmpty } from './stats-empty'
+import {
+  CELL,
+  NUMERIC_CELL,
+  ROW_HEADER,
+  StatsSection,
+  StatsTable,
+} from '@/components/stats/stats-section'
+import { StatsEmpty } from '@/components/stats/stats-empty'
 
 type QuestionTablesProps = Readonly<{
   ui: Ui

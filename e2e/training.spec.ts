@@ -80,3 +80,136 @@ test('une config collée invalide affiche ses erreurs et se corrige dans l’éd
   await expect(editor.editor).toContainText('"title": "Git, les bases"')
   await expect(editor.issue('Champ obligatoire manquant : « finalScale ».')).toBeVisible()
 })
+
+/** Catégories de l'exemple, avec l'id, le titre et le libellé utiles au parcours. */
+function categoriesOf(text: string) {
+  return z
+    .looseObject({
+      categories: z.array(
+        z.looseObject({
+          id: z.string(),
+          label: z.string(),
+          questions: z.array(z.looseObject({ id: z.string(), title: z.string() })),
+        }),
+      ),
+    })
+    .parse(JSON.parse(text)).categories
+}
+
+/**
+ * Variante de l'exemple : la question `removedId` est retirée, une question est ajoutée dans
+ * `keptCategoryId`. Renvoie le JSON et le titre ajouté.
+ */
+function updatedConfig(
+  keptCategoryId: string,
+  removedId: string,
+): { text: string; addedTitle: string } {
+  const config = z
+    .looseObject({
+      categories: z.array(
+        z.looseObject({ id: z.string(), questions: z.array(z.record(z.string(), z.unknown())) }),
+      ),
+    })
+    .parse(JSON.parse(CONFIG))
+  const target = config.categories.find((c) => c.id === keptCategoryId)
+  if (target === undefined) throw new Error('Exemple inattendu')
+  for (const category of config.categories) {
+    category.questions = category.questions.filter((q) => q.id !== removedId)
+  }
+  const addedTitle = 'Question ajoutée par la mise à jour'
+  target.questions.push({
+    ...target.questions[0],
+    id: `${keptCategoryId}-ajoutee-e2e`,
+    title: addedTitle,
+  })
+  return { text: JSON.stringify(config, null, 2), addedTitle }
+}
+
+test('stats et mise à jour de config : la note reste, la retirée disparaît, l’ajoutée sort en priorité', async ({
+  page,
+}) => {
+  const total = questionCount(CONFIG)
+  const categories = categoriesOf(CONFIG)
+  const [first] = categories
+  // Catégorie de la question qui sera retirée : une autre, qui garde au moins une question.
+  const other = categories.find((c) => c !== first && c.questions.length > 1)
+  if (first === undefined || other === undefined) throw new Error('Exemple inattendu')
+  const level = first.label
+
+  const home = new HomePage(page)
+  await home.goto()
+  const setup = await home.startTraining()
+  await setup.pasteConfig(CONFIG)
+  const training = await setup.start()
+
+  // Une question notée 0 (elle devient « à revoir »), une autre passée.
+  await training.draw(level)
+  const scoredTitle = (await training.questionTitle.textContent()) ?? ''
+  expect(scoredTitle).not.toBe('')
+  await training.reveal()
+  await training.score('0')
+  await training.draw(level)
+  const passedTitle = (await training.questionTitle.textContent()) ?? ''
+  expect(passedTitle).not.toBe(scoredTitle)
+  await training.pass()
+
+  // La question tirée dans l'autre catégorie, notée 0, sera celle retirée par la mise à jour.
+  await training.draw(other.label)
+  const removedTitle = (await training.questionTitle.textContent()) ?? ''
+  const removed = other.questions.find((q) => q.title === removedTitle)
+  if (removed === undefined) throw new Error(`Question inconnue : ${removedTitle}`)
+  await training.reveal()
+  await training.score('0')
+  const { text: updated, addedTitle } = updatedConfig(first.id, removed.id)
+
+  const stats = await training.openStats()
+  await expect(stats.keyFigures).toContainText('2 réponses notées')
+  await expect(stats.keyFigures).toContainText('1 passée')
+  await expect(stats.keyFigures).toContainText(`2 / ${total} questions notées`)
+  await expect(stats.reviewItem(scoredTitle)).toBeVisible()
+  await expect(stats.reviewItem(removedTitle)).toBeVisible()
+
+  // Les autres questions du niveau sont vues à leur tour : seule l'ajoutée restera jamais vue.
+  const back = await stats.backToTraining()
+  const seen = new Set([scoredTitle, passedTitle])
+  while (seen.size < first.questions.length) {
+    const before = seen.size
+    await back.draw(level)
+    seen.add((await back.questionTitle.textContent()) ?? '')
+    expect(seen.size).toBe(before + 1)
+    await back.pass()
+  }
+
+  const update = await back.openUpdate()
+  await update.pasteConfig(updated)
+  await expect(update.updateSummary.getByRole('listitem')).toHaveText([
+    `${total - 1} questions conservées — historique gardé`,
+    '1 nouvelle',
+    '1 retirée — elle n’apparaît plus dans les stats',
+  ])
+  const afterUpdate = await update.update()
+
+  // La question ajoutée est la seule jamais vue du niveau : elle sort en premier.
+  await afterUpdate.draw(level)
+  await expect(afterUpdate.questionTitle).toHaveText(addedTitle)
+  await afterUpdate.pass()
+
+  // Les stats gardent la note d'avant la mise à jour et oublient la question retirée ; le total
+  // ne bouge pas (une retirée, une ajoutée).
+  const homeAgain = await afterUpdate.backHome()
+  const finalStats = await homeAgain.openTrainingStats(NAME)
+  await expect(finalStats.keyFigures).toContainText('1 réponse notée')
+  // Passées : toutes les questions du niveau d'origine sauf la notée, plus l'ajoutée.
+  const passed = first.questions.length
+  await expect(finalStats.keyFigures).toContainText(
+    `${passed} ${passed > 1 ? 'passées' : 'passée'}`,
+  )
+  await expect(finalStats.keyFigures).toContainText(`1 / ${total} questions notées`)
+  await expect(finalStats.reviewItem(scoredTitle)).toBeVisible()
+  await expect(finalStats.reviewItem(removedTitle)).toHaveCount(0)
+
+  const details = await finalStats.openDetails(total)
+  await expect(details.getByRole('rowheader', { name: scoredTitle, exact: true })).toBeVisible()
+  await expect(details.getByRole('rowheader', { name: addedTitle, exact: true })).toBeVisible()
+  await expect(details.getByRole('rowheader', { name: removedTitle, exact: true })).toHaveCount(0)
+})

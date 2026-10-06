@@ -1,7 +1,7 @@
 import type { HistogramBin } from '@/domain/stats/types'
 import { binLabel } from '@/domain/stats/labels'
 import type { Ui } from '@/lib/i18n/use-ui'
-import { NUMERIC_CELL, ROW_HEADER, StatsTable } from './stats-section'
+import { NUMERIC_CELL, ROW_HEADER, StatsTable } from '@/components/stats/stats-section'
 
 type HistogramTableProps = Readonly<{ ui: Ui; bins: HistogramBin[]; labelledBy: string }>
 

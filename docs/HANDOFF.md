@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-06 — #137 : F43.4, stats et mise à jour de config
+
+**Dernière chose faite** : F43.4 implémenté sur `feat/137-stats-mise-a-jour`, dernier ticket de F43. `/training/$trainingId/stats` (`features/training-stats/`) : chiffres clés, « À revoir », « Par niveau » et « Par notion » avec barres `Progress`, détail replié. `/training/$trainingId/update` : les 4 étapes de la mise en place, puis le bilan (`diffTrainingConfig`) avant « Mettre à jour ». Liens « Voir les stats » et « Mettre à jour la config » sur l'écran d'entraînement, « Stats » et menu « Mettre à jour la config » sur la carte. `TrainingGate` et écran endommagé partagés dans `components/`, briques de tableau dans `components/stats/`. e2e stats et mise à jour ; captures `entrainement-*` et guide `s-entrainer.md` complétés. Décisions ajoutées à D101.
+
+**Trucs en suspens** : PR du ticket #137 à ouvrir en brouillon, puis `sonar-check.sh --pr <n> --wait` jusqu'au gate vert avant « Ready for review ». Pas de merge sans le go de l'utilisateur.
+
+**Prochaine chose à creuser** : une fois #137 mergée, F43 est complète. Les idées restantes de l'entraînement sont au BACKLOG (courbe de progression, tirage sur les points faibles, backup, seuil réglable, prompt sans web, compléter une config, brouillon de l'éditeur).
+
+**Notes pour future Claude** : le `Progress` de base-ui glisse un « x » masqué dans la barre : lire les cellules avec `src/testing/table-assertions.ts` (voir QUIRKS). Les captures du guide sont stables d'un run à l'autre (`crypto.getRandomValues` graine, horloge figée) ; `accueil.png` et `accueil-sessions.png` ont été régénérées car la carte « S’entraîner » y apparaît désormais. La route de mise à jour est un paramètre de chemin, pas `?replace=` (D101).
+
 ## 2026-10-05 — #136 : F43.3, écrans d'entraînement
 
 **Dernière chose faite** : F43.3 implémenté sur `feat/136-ecrans-entrainement`. `/training/new` (`features/training-setup/`) : quatre étapes, dépôt de fichier ou JSON collé, récapitulatif, erreurs avec « Corriger dans l'éditeur » (passage du texte via `stashConfigForEditor`/`takeConfigForEditor`). `/training/$trainingId` (`features/training/`) : tuiles, tirage, « Voir la réponse », boutons du barème, « Passer », reprise avec réponse masquée. Accueil : carte « S'entraîner » et section « Mes entraînements ». Refactors partagés dans `components/` et `hooks/`, `lib/clipboard.ts`, e2e `training.spec.ts`, guide `site/guide/s-entrainer.md`. Décisions utilisateur tracées dans D101.

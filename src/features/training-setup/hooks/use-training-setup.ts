@@ -7,7 +7,7 @@ import { useConfigSlot } from '@/hooks/use-config-slot'
 import { stashConfigForEditor } from '@/lib/config-handoff'
 import type { DbStatus } from '@/lib/db/db'
 import { requestPersistentStorage } from '@/lib/db/persistence'
-import { createTraining } from '@/lib/db/trainings'
+import { createTraining, replaceTrainingConfigInDb } from '@/lib/db/trainings'
 
 /** Nom donné au JSON collé : affiché comme un nom de fichier, repris par l'éditeur. */
 const PASTED_FILE_NAME = 'config-collee.json'
@@ -29,18 +29,43 @@ export type TrainingSetup = {
   checkPasted: () => Promise<void>
   /** Dépose la config chargée pour l'éditeur ; `false` si son texte n'a pas pu être relu. */
   fixInEditor: () => Promise<boolean>
-  /** Id de l'entraînement créé ; `undefined` si refus (config invalide, déjà en cours) ou échec. */
+  /**
+   * Id de l'entraînement créé ou mis à jour ; `undefined` si refus (config invalide, déjà en
+   * cours) ou échec.
+   */
   submit: () => Promise<string | undefined>
 }
 
 /** Source de la config chargée : de quoi la relire pour la passer à l'éditeur. */
 type Source = { fileName: string; pasted: boolean; read: () => Promise<string> }
 
+const now = () => new Date()
+
+/**
+ * Écrit la config validée : remplace celle de `trainingId` (F43.4), sinon crée un entraînement.
+ * Renvoie l'id de l'entraînement écrit.
+ */
+async function saveTrainingConfig(
+  config: NormalizedConfig,
+  trainingId: string | undefined,
+): Promise<string> {
+  if (trainingId !== undefined) {
+    await replaceTrainingConfigInDb(trainingId, config, { now })
+    return trainingId
+  }
+  // Un refus ou une erreur du navigateur ne bloque pas la création (F05 avertira).
+  await requestPersistentStorage().catch(() => false)
+  const training = newTraining(config, { newId: () => crypto.randomUUID(), now })
+  await createTraining(training)
+  return training.id
+}
+
 /**
  * État de l'écran de mise en place (F43.3) : config déposée ou collée, validée par le validateur
- * chargé à la demande, reprise dans l'éditeur si invalide, création de l'entraînement.
+ * chargé à la demande, reprise dans l'éditeur si invalide, création de l'entraînement. Avec
+ * `trainingId`, la config de cet entraînement est remplacée (F43.4).
  */
-export function useTrainingSetup(dbStatus: DbStatus): TrainingSetup {
+export function useTrainingSetup(dbStatus: DbStatus, trainingId?: string): TrainingSetup {
   const { slot: config, ...configSlot } = useConfigSlot()
   const [pastedText, setPastedText] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -97,15 +122,9 @@ export function useTrainingSetup(dbStatus: DbStatus): TrainingSetup {
     setSubmitting(true)
     setSubmitError(false)
     try {
-      // Un refus ou une erreur du navigateur ne bloque pas la création (F05 avertira).
-      await requestPersistentStorage().catch(() => false)
-      const training = newTraining(validConfig, {
-        newId: () => crypto.randomUUID(),
-        now: () => new Date(),
-      })
-      await createTraining(training)
+      const id = await saveTrainingConfig(validConfig, trainingId)
       // `submitting` reste vrai : la page navigue vers l'entraînement.
-      return training.id
+      return id
     } catch {
       submitLock.current = false
       setSubmitError(true)

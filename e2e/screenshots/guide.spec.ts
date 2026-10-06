@@ -107,3 +107,44 @@ test('création : un CSV avec un doublon affiche un avertissement', async ({ pag
   await page.getByRole('textbox', { name: 'Nom de la session' }).blur()
   await capture(page, 'creation-avertissements')
 })
+
+test('entraînement : mise en place, question révélée, stats', async ({ page }) => {
+  const home = new HomePage(page)
+  await home.goto()
+  const setup = await home.startTraining()
+  // Étape 2 seule : le prompt et l'encadré sur l'effort de réflexion.
+  const promptStep = page.getByRole('listitem', { name: 'Copiez le prompt' })
+  await expect(
+    promptStep.getByText('Réglez le LLM sur son effort de réflexion maximal.'),
+  ).toBeVisible()
+  await capture(promptStep, 'entrainement-mise-en-place')
+
+  await setup.pasteConfig(readFileSync(examplePath('training.example.json'), 'utf8'))
+  const training = await setup.start()
+
+  await training.draw('Normal')
+  await training.reveal()
+  await expect(training.answerTitle).toBeVisible()
+  // Page entière : à 800 px de haut, le bouton « Passer » sous la réponse serait coupé.
+  await capture(page, 'entrainement-question', { fullPage: true })
+
+  // Quelques notes, dont deux sous la moitié du barème (« À revoir »), et un passage.
+  await training.score('1,5')
+  for (const [category, value] of [
+    ['Facile', '0'],
+    ['Difficile', '3'],
+    ['Normal', '0,5'],
+    ['Facile', '1'],
+  ] as const) {
+    await training.draw(category)
+    await training.reveal()
+    await training.score(value)
+  }
+  await training.draw('Cauchemar')
+  await training.pass()
+
+  const stats = await training.openStats()
+  await expect(stats.keyFigures).toContainText('5 réponses notées')
+  await expect(stats.reviewList).toBeVisible()
+  await capture(page, 'entrainement-stats')
+})

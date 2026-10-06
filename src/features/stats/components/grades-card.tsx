@@ -2,9 +2,10 @@ import type { NormalizedConfig } from '@/domain/config/normalize'
 import { formatScore } from '@/domain/scoring/format'
 import type { Milli } from '@/domain/scoring/milli'
 import type { GradeStats } from '@/domain/stats/types'
-import { formatDecimal, NO_VALUE } from '@/features/stats/format-stats'
+import { NO_VALUE } from '@/components/stats/format-rate'
+import { formatDecimal } from '@/features/stats/format-stats'
 import type { Ui } from '@/lib/i18n/use-ui'
-import { StatFigures, StatsSection } from './stats-section'
+import { StatFigures, StatsSection } from '@/components/stats/stats-section'
 
 type GradesCardProps = Readonly<{ ui: Ui; config: NormalizedConfig; grades: GradeStats }>
 

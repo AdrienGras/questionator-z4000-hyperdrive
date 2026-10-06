@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
-import { beforeEach, describe, expect, test } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { db } from '@/lib/db/db'
 import { createTraining } from '@/lib/db/trainings'
 import { renderAt } from '@/testing/render-at'
@@ -9,6 +9,11 @@ import { makeDraw, makeTraining } from '@/testing/training-fixtures'
 beforeEach(async () => {
   await db.trainings.clear()
   await db.trainingDraws.clear()
+})
+
+// Un `stubGlobal` d'un test ne doit jamais fuir dans le suivant, même si ce test échoue.
+afterEach(() => {
+  vi.unstubAllGlobals()
 })
 
 /** Carte de l'entraînement `name` dans la section « Mes entraînements ». */
@@ -55,7 +60,7 @@ describe('carte d’entraînement', () => {
       await screen.findByRole('button', { name: 'Actions pour « Entraînement de test »' }),
     )
     const items = await screen.findAllByRole('menuitem')
-    expect(items.map((item) => item.textContent)).toEqual(['Supprimer'])
+    expect(items.map((item) => item.textContent)).toEqual(['Mettre à jour la config', 'Supprimer'])
     fireEvent.click(screen.getByRole('menuitem', { name: 'Supprimer' }))
     const dialog = await screen.findByRole('alertdialog')
     expect(
@@ -70,5 +75,19 @@ describe('carte d’entraînement', () => {
     expect(await db.trainingDraws.where('trainingId').equals('autre').count()).toBe(1)
     await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
     expect(screen.getByRole('heading', { level: 3, name: 'Autre' })).toBeInTheDocument()
+  })
+
+  test('« Mettre à jour la config » mène à l’écran de mise à jour', async () => {
+    vi.stubGlobal('CSS', { supports: () => true })
+    await createTraining(makeTraining())
+    const { router } = renderAt('/')
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Actions pour « Entraînement de test »' }),
+    )
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Mettre à jour la config' }))
+    await waitFor(() => expect(router.state.location.pathname).toBe('/training/training-1/update'))
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Mettre à jour la config' }),
+    ).toBeInTheDocument()
   })
 })
