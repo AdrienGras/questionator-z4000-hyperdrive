@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-06 — F43 livrée : clôture
+
+**Dernière chose faite** : F43 (entraînement autonome) est livrée en entier : #134 (PR #138), #135 (PR #139), #136 (PR #140) et #137 (PR #141), toutes mergées après CI et Sonar verts et validation manuelle par l'utilisateur. Le prompt de génération a été testé avec un vrai LLM (Claude Opus 5.5) et validé après la réécriture de sa section 4 (questions d'oral, D101). INDEX mis à jour.
+
+**Trucs en suspens** : aucune PR ouverte sur F43. Branches locales mergées à nettoyer si l'utilisateur le demande.
+
+**Prochaine chose à creuser** : #77 (vérifications manuelles V1), puis #85 (Node 26 LTS, pas avant le 2026-10-28). Les pistes de l'entraînement sont au BACKLOG, section « Entraînement ».
+
+**Notes pour future Claude** : en cas de panne de GitHub Actions, les jobs peuvent être annulés sans relance : relancer le run (`gh run rerun`) une fois le service rétabli, puis refaire `sonar-check.sh`, car l'analyse Sonar tourne dans le job `check`.
+
 ## 2026-10-06 — #137 : F43.4, stats et mise à jour de config
 
 **Dernière chose faite** : F43.4 implémenté sur `feat/137-stats-mise-a-jour`, dernier ticket de F43. `/training/$trainingId/stats` (`features/training-stats/`) : chiffres clés, « À revoir », « Par niveau » et « Par notion » avec barres `Progress`, détail replié. `/training/$trainingId/update` : les 4 étapes de la mise en place, puis le bilan (`diffTrainingConfig`) avant « Mettre à jour ». Liens « Voir les stats » et « Mettre à jour la config » sur l'écran d'entraînement, « Stats » et menu « Mettre à jour la config » sur la carte. `TrainingGate` et écran endommagé partagés dans `components/`, briques de tableau dans `components/stats/`. e2e stats et mise à jour ; captures `entrainement-*` et guide `s-entrainer.md` complétés. Décisions ajoutées à D101.
