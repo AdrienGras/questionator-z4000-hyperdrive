@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-14 — F44 : spec, plan et tickets de la refonte UI
+
+**Dernière chose faite** : cadrage de F44 (refonte UI) en conversation, puis spec `docs/superpowers/specs/2026-10-14-f44-refonte-ui-design.md`, plan des phases 1-2 `docs/superpowers/plans/2026-10-14-f44-phases-1-2-inventaire-design-system.md`, tickets #143 à #152, D102, section F44 de `PRODUCT.md`, règle « canevas avant l'interface » dans `CLAUDE.md`. Recherche de références sur Dribbble (planches dans `.playwright-mcp/recon/`, non versionnées) : l'utilisateur a retenu les #2, 4, 6, 7, 8, 9 et 10 (Fluently en tête).
+
+**Trucs en suspens** : PR de documentation `docs/f44-spec-refonte-ui` à merger (go de l'utilisateur). Ensuite, plan tâche 3 : captures « avant » en sombre, puis canevas d'inventaire (#143).
+
+**Prochaine chose à creuser** : la forme du menu et la collision entre couleurs d'espace et couleurs de catégorie (choisies par l'auteur de la config, donc arbitraires) : à tester sur le canevas en #144.
+
+**Notes pour future Claude** : registre d'exécution du plan dans `.superpowers/sdd/2026-10-14-f44-phases-1-2-inventaire-design-system/progress.md` (ignoré par git) : reprendre à la première tâche sans ligne `complete`. Exécution native, une entrée HANDOFF à chaque validation pour permettre un `/clear`. Phase 3 dans une nouvelle session, avec son propre plan. L'extension Chrome n'était pas connectée : la recherche visuelle est passée par le Playwright MCP (captures limitées à la racine du dépôt, d'où `.playwright-mcp/`).
+
 ## 2026-10-06 — F43 livrée : clôture
 
 **Dernière chose faite** : F43 (entraînement autonome) est livrée en entier : #134 (PR #138), #135 (PR #139), #136 (PR #140) et #137 (PR #141), toutes mergées après CI et Sonar verts et validation manuelle par l'utilisateur. Le prompt de génération a été testé avec un vrai LLM (Claude Opus 5.5) et validé après la réécriture de sa section 4 (questions d'oral, D101). INDEX mis à jour.

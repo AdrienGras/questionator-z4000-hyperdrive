@@ -719,6 +719,26 @@ Définitions (fonction pure `computeStats(session)`, reprise par l'export F16) :
 - Le cycle ne répète aucune question avant d'avoir épuisé la catégorie ; recharger ne retire pas une question tirée.
 - Mettre à jour la config conserve l'historique des `id` communs ; les sessions existantes survivent à la migration de la base.
 
+### F44 — Refonte UI : thème sombre, navigation, passe UX
+
+**Objectif.** L'application a une identité visuelle propre, sombre et discrète, où la couleur porte du sens, et l'on circule entre ses espaces sans repasser par l'accueil. Le fond ne bouge pas : chaque écran fait ce qu'il fait aujourd'hui ; la forme bouge franchement. Dix tickets (#143 à #152), spec : `docs/superpowers/specs/2026-10-14-f44-refonte-ui-design.md`, D102. F44 remplace la mise en page de F19 et F20, et retire la bascule clair/sombre de F07 jusqu'à #152.
+
+**Contenu.**
+- Inventaire de tous les écrans sur un canevas Design, avec leurs captures réelles (#143) ; design system et maquettes refaites sur ce canevas, validés avant tout code (#144). Le canevas devient ensuite la référence de toute création d'interface.
+- Thème sombre unique : fond presque noir teinté de violet, une couleur d'action en dégradé sur les boutons principaux, une palette multicolore codée pour ce qui désigne (espaces, catégories, scores). Tout ce que le thème d'une session pilote dérive des tokens shadcn ; les couleurs d'espace ne sont pas surchargeables (#145).
+- Menu latéral permanent (Accueil, Sessions, Éditeur de config, Entraînement, Aide), absent de la vue projetée (#146).
+- Pages `/sessions` et `/trainings` ; accueil en tableau de bord : reprise des dernières sessions et du dernier entraînement, tuiles d'espace, premier lancement guidé (#147).
+- Écrans refaits d'après les maquettes : création de session et éditeur (#148), session examinateur et vue projetée (#149), statistiques (#150), entraînement (#151).
+- Mode clair dérivé du thème sombre, bascule et `defaultColorMode` réactivés, captures du guide régénérées (#152).
+- Livraison : une branche d'intégration et une PR unique vers `main`, pour ne jamais mettre en ligne une app à moitié refaite.
+
+**Critères d'acceptation.**
+- Chaque écran correspond à son artboard validé.
+- Aucune fonctionnalité ne change : un parcours complet (création de session, oral avec projection, stats, export, entraînement) se déroule comme avant.
+- Le menu est présent partout sauf sur la vue projetée ; tout ce que l'accueil actuel permet reste possible depuis `/sessions` et `/trainings`.
+- Une config avec `theme.dark` personnalisé change toujours l'apparence des écrans de session.
+- Contrastes conformes sur fond sombre ; aucune requête réseau ajoutée.
+
 ## 9. Stack technique
 
 | Besoin | Choix |
