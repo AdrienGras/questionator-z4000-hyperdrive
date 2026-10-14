@@ -872,3 +872,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : le `Progress` de base-ui (`src/components/ui/progress.tsx`) rend, dans l'élément `role="progressbar"`, un nœud `role="presentation"` visuellement masqué qui contient « x ». `textContent` lit tout le sous-arbre, nœuds masqués compris.
 **Workaround** : lire le texte d'une cellule sans ses nœuds `role="presentation"` (`rowCells` de `src/testing/table-assertions.ts`), ou viser la barre par son nom accessible (`getByRole('progressbar', { name: 'Facile : 50 %' })`).
 **Référence** : `src/testing/table-assertions.ts`, `src/features/training-stats/components/rate-cell.tsx`.
+
+## `sonar-check.sh --wait` attend sans fin quand l'étape Sonar de la CI a échoué avant l'analyse (2026-10-14)
+
+**Découvert** : PR #153 (documentation F44).
+**Symptôme** : `.claude/scripts/sonar-check.sh --pr <n> --wait` ne rend pas la main ; sans `--wait`, il répond « analyse introuvable pour pullRequest=<n> » (404). Le job `check` de la CI est rouge sur l'étape « Analyse SonarQube Cloud » : `Failed to import SonarSource public key from all keyservers`.
+**Cause** : l'action Sonar vérifie la signature du scanner avec une clé GPG téléchargée depuis des serveurs de clés publics ; quand ils sont indisponibles, l'étape échoue avant toute analyse, et SonarQube Cloud n'a donc rien à rendre pour la PR.
+**Workaround** : avant d'attendre Sonar, regarder `gh pr checks <n>`. Si `check` est rouge sur l'import de clé, relancer le job (`gh run rerun <run-id> --failed`) : c'est un incident réseau, pas un défaut de la PR.
+**Référence** : `.github/workflows/ci.yml` (étape « Analyse SonarQube Cloud »), `.claude/scripts/sonar-check.sh`.
