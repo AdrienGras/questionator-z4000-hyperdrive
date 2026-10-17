@@ -4,13 +4,16 @@ import { makeUi } from '@/testing/make-ui'
 import { FinalCard } from './final-card'
 
 test('aucune note à afficher : « Passage terminé », pas de section vide', () => {
-  const { container } = render(<FinalCard ui={makeUi()} final={{ scale: 20 }} detail={undefined} />)
+  const { container } = render(
+    <FinalCard ui={makeUi()} final={{ scale: 20, decimals: 2 }} detail={undefined} />,
+  )
   expect(screen.getByText('Passage terminé')).toBeInTheDocument()
   expect(container.querySelector('section')).toBeNull()
 })
 
 const row = (questionId: string, extra: { points?: number; skipped?: boolean } = {}) => ({
   questionId,
+  categoryId: 'algo',
   categoryLabel: 'Algorithmique',
   title: 'Tri rapide',
   maxPoints: 4,
@@ -22,7 +25,7 @@ test('détail : catégorie et titre séparés, aucune note inventée', () => {
   render(
     <FinalCard
       ui={makeUi()}
-      final={{ final: 12, scale: 20 }}
+      final={{ final: 12, scale: 20, decimals: 2 }}
       detail={[row('q-1', { points: 3 }), row('q-2')]}
     />,
   )
@@ -40,7 +43,7 @@ test('détail : deux lignes de même catégorie et même titre restent deux lign
     render(
       <FinalCard
         ui={makeUi()}
-        final={{ final: 12, scale: 20 }}
+        final={{ final: 12, scale: 20, decimals: 2 }}
         detail={[row('q-1', { points: 1 }), row('q-2', { points: 2 })]}
       />,
     )

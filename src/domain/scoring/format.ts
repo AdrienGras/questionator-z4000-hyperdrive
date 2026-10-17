@@ -22,6 +22,14 @@ export function formatRawScore(value: Milli, locale: Locale): string {
   return new Intl.NumberFormat(locale, { maximumFractionDigits: 3 }).format(fromMilli(value))
 }
 
+/** Note à décimales imposées (« 11,50 » avec 2) : convertie, finale, ajustement, note projetée. */
+export function formatFixed(value: Milli, decimals: number, locale: Locale): string {
+  return new Intl.NumberFormat(locale, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(fromMilli(value))
+}
+
 export function formatScore(
   value: Milli,
   kind: ScoreKind,
@@ -29,9 +37,5 @@ export function formatScore(
   locale: Locale,
 ): string {
   if (kind === 'raw') return formatRawScore(value, locale)
-  const decimals = stepDecimals(stepMilli(config))
-  return new Intl.NumberFormat(locale, {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  }).format(fromMilli(value))
+  return formatFixed(value, stepDecimals(stepMilli(config)), locale)
 }
