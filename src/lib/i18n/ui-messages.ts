@@ -303,6 +303,8 @@ export type UiMessageParams = {
   final_skipped: NoParams
   final_skipped_reason: { reason: string }
   final_adjust: NoParams
+  final_gauge_label: { value: string; scale: string }
+  final_gauge_scale: { scale: string }
   final_reset: NoParams
   final_next: NoParams
   final_no_next: NoParams
@@ -818,7 +820,9 @@ const fr: Dictionary<UiMessageParams> = {
   final_points: ({ score, max }) => `${score} / ${max}`,
   final_skipped: () => 'Passée',
   final_skipped_reason: ({ reason }) => `Passée — ${reason}`,
-  final_adjust: () => 'Ajuster',
+  final_adjust: () => 'Ajuster la note',
+  final_gauge_label: ({ value, scale }) => `Note finale : ${value} sur ${scale}`,
+  final_gauge_scale: ({ scale }) => `sur ${scale}`,
   final_reset: () => 'Réinitialiser l’étudiant',
   final_next: () => 'Étudiant suivant',
   final_no_next: () => 'Tous les étudiants sont passés',
@@ -1287,7 +1291,9 @@ const en: Dictionary<UiMessageParams> = {
   final_points: ({ score, max }) => `${score} / ${max}`,
   final_skipped: () => 'Skipped',
   final_skipped_reason: ({ reason }) => `Skipped — ${reason}`,
-  final_adjust: () => 'Adjust',
+  final_adjust: () => 'Adjust the grade',
+  final_gauge_label: ({ value, scale }) => `Final grade: ${value} out of ${scale}`,
+  final_gauge_scale: ({ scale }) => `out of ${scale}`,
   final_reset: () => 'Reset student',
   final_next: () => 'Next student',
   final_no_next: () => 'All students have been examined',

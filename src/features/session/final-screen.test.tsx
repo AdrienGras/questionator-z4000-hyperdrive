@@ -46,22 +46,29 @@ function row(label: string): HTMLElement {
   return parent
 }
 
-test('affiche les cinq notes formatées et la justification de l’ajustement', async () => {
+test('jauge : note finale formatée selon l’arrondi, phrase pour les lecteurs d’écran', async () => {
   await openFinal(done({ adjustment: { value: 1, reason: 'Bonne tenue' } }))
 
-  expect(row('Note brute')).toHaveTextContent('13,5')
+  expect(screen.getByText('Note finale : 14,5 sur 20')).toHaveClass('sr-only')
+  expect(screen.getByText('14,5')).toBeInTheDocument()
+  expect(screen.getByText('sur 20')).toBeInTheDocument()
+})
+
+test('liste : brute sur le maximum, plafonnée, convertie, ajustement et justification', async () => {
+  await openFinal(done({ adjustment: { value: 1, reason: 'Bonne tenue' } }))
+
+  expect(row('Note brute')).toHaveTextContent('13,5 / 20')
   expect(row('Note plafonnée')).toHaveTextContent('13,5')
   expect(row('Note convertie')).toHaveTextContent('13,5')
   expect(row('Ajustement')).toHaveTextContent('+1,0')
   expect(row('Ajustement')).toHaveTextContent('Bonne tenue')
-  expect(row('Note finale')).toHaveTextContent('14,5 / 20')
 })
 
 test('ajustement négatif avec le signe moins typographique', async () => {
   await openFinal(done({ adjustment: { value: -0.5 } }))
 
   expect(row('Ajustement')).toHaveTextContent('−0,5')
-  expect(row('Note finale')).toHaveTextContent('13,0 / 20')
+  expect(screen.getByText('Note finale : 13,0 sur 20')).toBeInTheDocument()
 })
 
 test('« aucun » sans ajustement', async () => {
@@ -73,10 +80,10 @@ test('« aucun » sans ajustement', async () => {
 test('finale bornée à l’échelle : 20 + 1 donne 20,0 / 20', async () => {
   await openFinal(makeStudent([20], { finalRevealedAt: REVEALED, adjustment: { value: 1 } }))
 
-  expect(row('Note finale')).toHaveTextContent('20,0 / 20')
+  expect(screen.getByText('Note finale : 20,0 sur 20')).toBeInTheDocument()
 })
 
-test('détail du passage : rangs des questions notées, passée sans rang', async () => {
+test('détail : points sur le maximum et barre ; question passée avec son motif, hors rang', async () => {
   await openFinal(
     makeStudent([2, { skipped: 'Hors programme' }, 3], { finalRevealedAt: REVEALED }),
     2,
@@ -93,8 +100,11 @@ test('détail du passage : rangs des questions notées, passée sans rang', asyn
   const items = within(detail).getAllByRole('listitem')
   expect(items).toHaveLength(3)
   expect(items[0]).toHaveTextContent(/^1Titre a-1A2 \/ 20$/)
-  expect(items[1]).toHaveTextContent(/^–Titre a-2APassée — Hors programme$/)
+  expect(items[1]).toHaveTextContent(/^–Titre a-2A · Hors programmePassée$/)
   expect(items[2]).toHaveTextContent(/^2Titre a-3A3 \/ 20$/)
+  // Barre au prorata du maximum : 2 / 20 → 10 %, dans la couleur de la catégorie.
+  expect(items[0]!.querySelector('[data-bar]')).toHaveStyle({ width: '10%' })
+  expect(items[1]!.querySelector('[data-bar]')).toBeNull()
 })
 
 test('réinitialiser : confirmation, attempts vidés, commentaire conservé, grille de retour', async () => {
@@ -158,8 +168,8 @@ test('dernier étudiant restant : bouton désactivé et mention visible', async 
   expect(screen.getByText('Tous les étudiants sont passés')).toBeVisible()
 })
 
-test('le bouton « Ajuster » est rendu', async () => {
+test('le bouton « Ajuster la note » est rendu', async () => {
   await openFinal(done())
 
-  expect(screen.getByRole('button', { name: 'Ajuster' })).toBeEnabled()
+  expect(screen.getByRole('button', { name: 'Ajuster la note' })).toBeEnabled()
 })

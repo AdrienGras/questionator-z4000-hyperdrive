@@ -14,16 +14,17 @@ function signedAdjustment(value: Milli, config: NormalizedConfig, ui: Ui): strin
 
 function ScoreRow({ label, children }: Readonly<{ label: string; children: React.ReactNode }>) {
   return (
-    <div className="flex flex-wrap items-baseline gap-x-3">
+    <div className="flex items-baseline justify-between gap-3 border-b py-2">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-medium">{children}</dd>
+      <dd className="text-right font-medium tabular-nums">{children}</dd>
     </div>
   )
 }
 
 /**
- * Les cinq notes d'un étudiant ; « — » tant que la note convertie n'est pas calculable. `scores` :
- * `computeScores(student, config)`, calculé une fois par l'appelant.
+ * Notes d'un étudiant terminé, à côté de la jauge de l'écran final (artboard `passage-note-finale`) :
+ * brute sur le maximum, plafonnée, convertie, ajustement signé et sa justification. La note finale
+ * est dans la jauge. `scores` : `computeScores(student, config)`, calculé une fois par l'appelant.
  */
 export function ScoreList({
   ui,
@@ -35,15 +36,15 @@ export function ScoreList({
   const fmtRaw = (value: Milli) => formatScore(value, 'raw', config, locale)
   const fmtFinal = (value: Milli | null) =>
     value === null ? text('score_not_computed', {}) : formatScore(value, 'final', config, locale)
-  const scale = fmtRaw(toMilli(config.scoring.finalScale))
-  const finalText =
-    scores.final === null
-      ? text('score_not_computed', {})
-      : text('final_score', { value: fmtFinal(scores.final), scale })
 
   return (
-    <dl className="flex flex-col gap-1">
-      <ScoreRow label={text('final_raw', {})}>{fmtRaw(scores.raw)}</ScoreRow>
+    <dl className="flex min-w-0 flex-[1_1_15rem] flex-col">
+      <ScoreRow label={text('final_raw', {})}>
+        {fmtRaw(scores.raw)}{' '}
+        <span className="font-normal text-muted-foreground">
+          {text('attempt_out_of', { max: fmtRaw(toMilli(config.scoring.maxRawScore)) })}
+        </span>
+      </ScoreRow>
       <ScoreRow label={text('final_capped', {})}>{fmtRaw(scores.capped)}</ScoreRow>
       <ScoreRow label={text('final_converted', {})}>{fmtFinal(scores.converted)}</ScoreRow>
       <ScoreRow label={text('final_adjustment', {})}>
@@ -51,13 +52,10 @@ export function ScoreList({
           ? text('final_no_adjustment', {})
           : signedAdjustment(scores.adjustment, config, ui)}
         {student.adjustment?.reason !== undefined && (
-          <span className="ml-2 text-sm font-normal text-muted-foreground">
+          <span className="block text-small font-normal text-muted-foreground">
             {student.adjustment.reason}
           </span>
         )}
-      </ScoreRow>
-      <ScoreRow label={text('final_final', {})}>
-        <span className="text-2xl font-bold">{finalText}</span>
       </ScoreRow>
     </dl>
   )

@@ -293,6 +293,8 @@ const SAMPLE: UiMessageParams = {
   final_skipped: {},
   final_skipped_reason: { reason: 'Hors programme' },
   final_adjust: {},
+  final_gauge_label: { value: '11,50', scale: '20' },
+  final_gauge_scale: { scale: '20' },
   final_reset: {},
   final_next: {},
   final_no_next: {},

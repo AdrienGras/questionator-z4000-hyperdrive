@@ -86,7 +86,7 @@ test('étudiant déjà révélé : pas de popup, « Ajuster » l’ouvre, prére
   await screen.findByRole('heading', { name: 'Passage terminé' })
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
-  fireEvent.click(screen.getByRole('button', { name: 'Ajuster' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Ajuster la note' }))
 
   const dialog = await findDialog()
   expect(field(dialog)).toHaveValue('-0,5')
@@ -124,7 +124,7 @@ test('mode « ajuster », « Annuler » : aucune écriture', async () => {
   await screen.findByRole('heading', { name: 'Passage terminé' })
   const before = (await stored()).session
 
-  fireEvent.click(screen.getByRole('button', { name: 'Ajuster' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Ajuster la note' }))
   const dialog = await findDialog()
   type(dialog, '1')
   fireEvent.click(button(dialog, 'Annuler'))
@@ -153,7 +153,7 @@ test('mode « ajuster », « Enregistrer » : ajustement sans toucher à la rév
   await mount(makeStudent([13.5], { finalRevealedAt: REVEALED }))
   await screen.findByRole('heading', { name: 'Passage terminé' })
 
-  fireEvent.click(screen.getByRole('button', { name: 'Ajuster' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Ajuster la note' }))
   const dialog = await findDialog()
   type(dialog, '−1,5')
   fireEvent.click(button(dialog, 'Enregistrer'))
@@ -372,5 +372,5 @@ test('pas de 1 sans décimale (`decimals: 0`) : calcul en entiers, pas et saisie
   fireEvent.click(button(dialog, 'Enregistrer'))
   await dialogClosed()
   expect((await stored()).student.adjustment).toEqual({ value: -2 })
-  expect(await screen.findByText('12 / 20')).toBeInTheDocument()
+  expect(await screen.findByText('Note finale : 12 sur 20')).toBeInTheDocument()
 })

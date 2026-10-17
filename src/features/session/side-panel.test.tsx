@@ -201,9 +201,7 @@ test('corriger une note depuis le panneau met à jour l’écran final', async (
   // `hidden` : le tiroir modal masque le reste de la page aux requêtes par rôle.
   const main = screen.getByRole('main', { hidden: true })
   await waitFor(() => {
-    const finalRow = within(main).getAllByText('Note finale')
-    const outside = finalRow.find((el) => !panel().contains(el))
-    expect(outside?.nextElementSibling).toHaveTextContent('4,0 / 20')
+    expect(within(main).getByText('Note finale : 4,0 sur 20')).toBeInTheDocument()
   })
 })
 
