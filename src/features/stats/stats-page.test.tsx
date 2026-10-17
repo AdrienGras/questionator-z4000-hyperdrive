@@ -53,18 +53,18 @@ test('barre de titre : « Retour au passage », nom de la session, thème dernie
 })
 
 test('session sans terminé : les cinq indicateurs de notes affichent —', async () => {
-  await putSession(makeSession({ students: [makeStudent()] }))
+  await putSession(makeSession({ students: [makeStudent(['pending'])] }))
   renderAt('/session/session-1/stats')
 
   const grades = await screen.findByRole('region', { name: 'Notes finales' })
-  for (const label of ['Minimum', 'Maximum', 'Moyenne', 'Médiane', 'Écart-type']) {
+  for (const label of ['Minimum', 'Maximum', 'Écart-type']) {
     expect(indicator(grades, label)).toBe('—')
   }
   expect(indicator(grades, 'Étudiants notés')).toBe('0')
-  const headcount = screen.getByRole('region', { name: 'Effectifs' })
-  expect(indicator(headcount, 'À passer')).toBe('1')
+  const synthesis = screen.getByRole('region', { name: 'Chiffres clés' })
+  for (const label of ['Moyenne', 'Médiane']) expect(indicator(synthesis, label)).toBe('—')
+  expect(within(synthesis).getByText('1 en cours')).toBeInTheDocument()
   expect(screen.getByRole('region', { name: 'Histogramme' })).toBeInTheDocument()
-  expect(screen.getByText('Aucune question tirée.')).toBeInTheDocument()
   expect(screen.getByText('Aucune question passée.')).toBeInTheDocument()
   // Histogramme et stratégies : la même phrase, chacune dans son bloc.
   for (const name of ['Histogramme', 'Stratégies']) {
@@ -78,8 +78,9 @@ test('un étudiant terminé : moyenne à 2 décimales, taux de catégorie en pou
   renderAt('/session/session-1/stats')
 
   const grades = await screen.findByRole('region', { name: 'Notes finales' })
-  expect(indicator(grades, 'Moyenne')).toBe('10,00')
-  expect(indicator(grades, 'Médiane')).toBe('10,00')
+  const synthesis = screen.getByRole('region', { name: 'Chiffres clés' })
+  expect(indicator(synthesis, 'Moyenne')).toBe('10,00 / 20')
+  expect(indicator(synthesis, 'Médiane')).toBe('10,00 / 20')
   expect(indicator(grades, 'Écart-type')).toBe('0,00')
   expect(indicator(grades, 'Minimum')).toBe('10,00')
 
@@ -156,10 +157,10 @@ test("question tirée d'id inconnu : session endommagée, statistiques non affic
 })
 
 test('session corrompue après le montage : les statistiques basculent sur l’écran « endommagée » (F31)', async () => {
-  const session = makeSession()
+  const session = makeSession({ students: [makeStudent([1])] })
   await putSession(session)
   renderAt('/session/session-1/stats')
-  await screen.findByRole('region', { name: 'Effectifs' })
+  await screen.findByRole('region', { name: 'Chiffres clés' })
 
   await db.sessions.put({ ...session, activeStudentId: 'inconnu' })
 
@@ -169,10 +170,13 @@ test('session corrompue après le montage : les statistiques basculent sur l’�
 })
 
 test('locale « en » : titres des blocs en anglais', async () => {
-  await putSession(makeSession({ config: { ...makeConfig(), locale: 'en' } }))
+  await putSession(
+    makeSession({ config: { ...makeConfig(), locale: 'en' }, students: [makeStudent([1])] }),
+  )
   renderAt('/session/session-1/stats')
 
-  expect(await screen.findByRole('region', { name: 'Headcount' })).toBeInTheDocument()
+  expect(await screen.findByRole('region', { name: 'Key figures' })).toBeInTheDocument()
+  expect(screen.getByRole('region', { name: 'Overview' })).toBeInTheDocument()
   for (const name of [
     'Final scores',
     'Histogram',
@@ -197,7 +201,7 @@ test('ajustements : nombre, somme signée et moyenne', async () => {
   await putSession(
     makeSession({
       students: [
-        makeStudent([], { id: 'student-1', adjustment: { value: 1 } }),
+        makeStudent([1], { id: 'student-1', adjustment: { value: 1 } }),
         makeStudent([], { id: 'student-2', order: 2, adjustment: { value: -0.5 } }),
         makeStudent([], { id: 'student-3', order: 3 }),
       ],
@@ -209,4 +213,45 @@ test('ajustements : nombre, somme signée et moyenne', async () => {
   expect(indicator(region, 'Nombre')).toBe('2')
   expect(indicator(region, 'Somme')).toBe('+0,50')
   expect(indicator(region, 'Moyenne')).toBe('0,25')
+})
+
+test('aucune tentative : état vide global, retour au passage, aucun bloc', async () => {
+  await putSession(makeSession())
+  renderAt('/session/session-1/stats')
+
+  expect(
+    await screen.findByRole('heading', { level: 2, name: 'Pas encore de statistiques' }),
+  ).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Aller au passage' })).toHaveAttribute(
+    'href',
+    '/session/session-1',
+  )
+  expect(screen.queryByRole('region', { name: 'Synthèse' })).not.toBeInTheDocument()
+})
+
+test('une question notée, aucun terminé : page normale, histogramme vide', async () => {
+  await putSession(
+    makeSession({ config: makeConfig({ questionsPerStudent: 2 }), students: [makeStudent([1])] }),
+  )
+  renderAt('/session/session-1/stats')
+
+  expect(await screen.findByRole('region', { name: 'Synthèse' })).toBeInTheDocument()
+  expect(screen.queryByText('Pas encore de statistiques')).not.toBeInTheDocument()
+  const histogram = screen.getByRole('region', { name: 'Histogramme' })
+  expect(within(histogram).getByText("Aucun étudiant n'a terminé.")).toBeInTheDocument()
+})
+
+test('sous-titre : « Statistiques · titre · matière · promotion », parties absentes omises', async () => {
+  const config = minimalConfig()
+  config.exam = { title: 'Oral PHP', subject: 'Back-end', cohort: 'B2 2026' }
+  await putSession(sessionWith([[attemptOf('a', 'a-1', 1)]], config))
+  const { unmount } = renderAt('/session/session-1/stats')
+  expect(
+    await screen.findByText('Statistiques · Oral PHP · Back-end · B2 2026'),
+  ).toBeInTheDocument()
+  unmount()
+
+  await putSession(sessionWith([[attemptOf('a', 'a-1', 1)]]))
+  renderAt('/session/session-1/stats')
+  expect(await screen.findByText('Statistiques · Oral de test')).toBeInTheDocument()
 })

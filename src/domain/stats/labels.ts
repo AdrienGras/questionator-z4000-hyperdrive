@@ -5,7 +5,7 @@ import type { Locale } from '@/lib/i18n/i18n'
 export type TimesFormatter = (label: string, count: number) => string
 
 /** Nombre d'une borne de barre : jusqu'à 3 décimales (les bornes sont des fractions de l'échelle). */
-const formatBound = (value: number, locale: Locale) =>
+export const formatBound = (value: number, locale: Locale) =>
   new Intl.NumberFormat(locale, { maximumFractionDigits: 3 }).format(value)
 
 /** Libellé complet d'une barre, « [0 ; 1[ » ; la dernière est fermée : « [2 ; 2,5] ». */

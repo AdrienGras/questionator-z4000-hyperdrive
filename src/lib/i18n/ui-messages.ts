@@ -414,14 +414,22 @@ export type UiMessageParams = {
   editor_hover_icon_search: NoParams
   editor_hover_icon_hint: NoParams
   stats_back: NoParams
+  stats_kicker: NoParams
+  stats_out_of: { max: string }
+  stats_empty_title: NoParams
+  stats_empty_body: NoParams
+  stats_empty_action: NoParams
+  stats_synthesis: NoParams
   stats_error: NoParams
   stats_headcount: NoParams
   stats_headcount_total: NoParams
   stats_headcount_done: NoParams
-  stats_headcount_in_progress: NoParams
-  stats_headcount_todo: NoParams
   stats_headcount_absent: NoParams
-  stats_headcount_added: NoParams
+  stats_legend_done: { count: number }
+  stats_legend_in_progress: { count: number }
+  stats_legend_todo: { count: number }
+  stats_legend_absent: { count: number }
+  stats_legend_added: { count: number }
   stats_grades: NoParams
   stats_grades_count: NoParams
   stats_grades_min: NoParams
@@ -941,14 +949,23 @@ const fr: Dictionary<UiMessageParams> = {
   editor_hover_icon_search: () => 'Rechercher une icône sur tabler.io',
   editor_hover_icon_hint: () => 'Ctrl+Espace propose les noms connus.',
   stats_back: () => 'Retour au passage',
+  stats_kicker: () => 'Statistiques',
+  stats_out_of: ({ max }) => `/ ${max}`,
+  stats_empty_title: () => 'Pas encore de statistiques',
+  stats_empty_body: () =>
+    'Aucune question tirée pour l’instant. Les chiffres apparaissent dès le premier tirage.',
+  stats_empty_action: () => 'Aller au passage',
+  stats_synthesis: () => 'Synthèse',
   stats_error: () => "Les statistiques n'ont pas pu être chargées.",
-  stats_headcount: () => 'Effectifs',
+  stats_headcount: () => 'Chiffres clés',
   stats_headcount_total: () => 'Étudiants',
-  stats_headcount_done: () => 'Terminés',
-  stats_headcount_in_progress: () => 'En cours',
-  stats_headcount_todo: () => 'À passer',
+  stats_headcount_done: () => 'Passés',
   stats_headcount_absent: () => 'Absents',
-  stats_headcount_added: () => 'Ajoutés en séance',
+  stats_legend_done: ({ count }) => `${count} ${plural(count, 'passé', 'passés')}`,
+  stats_legend_in_progress: ({ count }) => `${count} en cours`,
+  stats_legend_todo: ({ count }) => `${count} à passer`,
+  stats_legend_absent: ({ count }) => `${count} ${plural(count, 'absent', 'absents')}`,
+  stats_legend_added: ({ count }) => `${count} ${plural(count, 'ajouté', 'ajoutés')} en séance`,
   stats_grades: () => 'Notes finales',
   stats_grades_count: () => 'Étudiants notés',
   stats_grades_min: () => 'Minimum',
@@ -1418,14 +1435,22 @@ const en: Dictionary<UiMessageParams> = {
   editor_hover_icon_search: () => 'Search icons on tabler.io',
   editor_hover_icon_hint: () => 'Ctrl+Space suggests known names.',
   stats_back: () => 'Back to the exam',
+  stats_kicker: () => 'Statistics',
+  stats_out_of: ({ max }) => `/ ${max}`,
+  stats_empty_title: () => 'No statistics yet',
+  stats_empty_body: () => 'No question drawn yet. The figures appear with the first draw.',
+  stats_empty_action: () => 'Go to the exam',
+  stats_synthesis: () => 'Overview',
   stats_error: () => 'The statistics could not be loaded.',
-  stats_headcount: () => 'Headcount',
+  stats_headcount: () => 'Key figures',
   stats_headcount_total: () => 'Students',
-  stats_headcount_done: () => 'Finished',
-  stats_headcount_in_progress: () => 'In progress',
-  stats_headcount_todo: () => 'Not started',
+  stats_headcount_done: () => 'Done',
   stats_headcount_absent: () => 'Absent',
-  stats_headcount_added: () => 'Added during the session',
+  stats_legend_done: ({ count }) => `${count} done`,
+  stats_legend_in_progress: ({ count }) => `${count} in progress`,
+  stats_legend_todo: ({ count }) => `${count} not started`,
+  stats_legend_absent: ({ count }) => `${count} absent`,
+  stats_legend_added: ({ count }) => `${count} added during the session`,
   stats_grades: () => 'Final scores',
   stats_grades_count: () => 'Scored students',
   stats_grades_min: () => 'Minimum',

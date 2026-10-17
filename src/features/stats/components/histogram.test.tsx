@@ -42,7 +42,7 @@ test('HistogramChart : se monte sous jsdom, masqué aux lecteurs d’écran', ()
 })
 
 test('StatsView sans terminé : la phrase remplace le graphique, le tableau reste', async () => {
-  await putSession(makeSession({ students: [makeStudent()] }))
+  await putSession(makeSession({ students: [makeStudent(['pending'])] }))
   renderAt('/session/session-1/stats')
 
   const region = await screen.findByRole('region', { name: 'Histogramme' })
