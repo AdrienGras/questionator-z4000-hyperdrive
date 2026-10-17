@@ -52,8 +52,9 @@ export function DamagedSessionScreen(props: DamagedSessionScreenProps) {
           <IconDownload aria-hidden />
           {text('action_export', {})}
         </Button>
-        <Link to="/" className={buttonVariants({ variant: 'ghost' })}>
-          {text('back_home', {})}
+        {/* Sa carte, avec export et suppression, est sur la page Sessions (l'accueil exclut les endommagées). */}
+        <Link to="/sessions" className={buttonVariants({ variant: 'ghost' })}>
+          {text('back_sessions', {})}
         </Link>
       </div>
       <details className="mt-2 w-full max-w-120 rounded-lg bg-card px-4.5 py-3.5 text-left text-sm shadow-card">

@@ -232,7 +232,10 @@ describe('écran d’entraînement', () => {
       await screen.findByRole('heading', { level: 1, name: 'Cet entraînement est endommagé' }),
     ).toBeInTheDocument()
     expect(screen.getAllByRole('listitem').length).toBeGreaterThan(0)
-    expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Retour aux entraînements' })).toHaveAttribute(
+      'href',
+      '/trainings',
+    )
   })
 
   test('animation du tirage : présente si activée, absente sinon', async () => {

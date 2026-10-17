@@ -66,7 +66,11 @@ test('examinateur : titre, explication, export, retour, détails', async () => {
       'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Exportez une sauvegarde pour le conserver ou le corriger.',
     ),
   ).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
+  // La session endommagée se supprime ou s'exporte depuis sa page d'espace, pas depuis l'accueil.
+  expect(screen.getByRole('link', { name: 'Retour aux sessions' })).toHaveAttribute(
+    'href',
+    '/sessions',
+  )
 
   const details = screen.getByText('Détails · 2 problèmes').closest('details')
   expect(details).not.toBeNull()
@@ -86,7 +90,7 @@ test('examinateur : export en bouton principal, retour en bouton discret', async
   const exportButton = await screen.findByRole('button', { name: 'Exporter une sauvegarde' })
   // `Button` passe ses classes par `cn` (tailwind-merge), qui fusionne les doublons de `buttonVariants`.
   expect(exportButton).toHaveClass(...cn(buttonVariants({ variant: 'default' })).split(' '))
-  const back = screen.getByRole('link', { name: 'Retour à l’accueil' })
+  const back = screen.getByRole('link', { name: 'Retour aux sessions' })
   expect(back).toHaveClass(...buttonVariants({ variant: 'ghost' }).split(' '))
 })
 

@@ -6,6 +6,8 @@ export type UiMessageParams = {
   app_title: NoParams
   not_found_title: NoParams
   back_home: NoParams
+  back_sessions: NoParams
+  back_trainings: NoParams
   home_subtitle: NoParams
   home_train: NoParams
   home_resume_title: NoParams
@@ -466,6 +468,8 @@ const fr: Dictionary<UiMessageParams> = {
   app_title: () => 'Questionator Z-4000 Hyperdrive',
   not_found_title: () => 'Page introuvable',
   back_home: () => 'Retour à l’accueil',
+  back_sessions: () => 'Retour aux sessions',
+  back_trainings: () => 'Retour aux entraînements',
   home_subtitle: () => 'Reprenez un oral ou préparez le suivant.',
   home_train: () => 'S’entraîner',
   home_resume_title: () => 'Reprendre',
@@ -905,6 +909,8 @@ const en: Dictionary<UiMessageParams> = {
   app_title: () => 'Questionator Z-4000 Hyperdrive',
   not_found_title: () => 'Page not found',
   back_home: () => 'Back to home',
+  back_sessions: () => 'Back to sessions',
+  back_trainings: () => 'Back to practice',
   home_subtitle: () => 'Resume a session in progress or prepare the next oral exam.',
   home_train: () => 'Practice',
   home_resume_title: () => 'Resume',

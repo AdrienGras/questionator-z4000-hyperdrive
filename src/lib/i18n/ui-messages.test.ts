@@ -6,6 +6,8 @@ const SAMPLE: UiMessageParams = {
   app_title: {},
   not_found_title: {},
   back_home: {},
+  back_sessions: {},
+  back_trainings: {},
   home_subtitle: {},
   home_train: {},
   home_resume_title: {},

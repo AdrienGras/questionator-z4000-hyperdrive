@@ -26,8 +26,9 @@ export function DamagedTrainingScreen({
       <div className="w-full max-w-xl text-left">
         <ConfigIssueList ui={ui} issues={damaged.issues} />
       </div>
-      <Link to="/" className={buttonVariants({ variant: 'default' })}>
-        {text('back_home', {})}
+      {/* Sa carte, avec la suppression, est sur la page Entraînement (l'accueil exclut les endommagés). */}
+      <Link to="/trainings" className={buttonVariants({ variant: 'default' })}>
+        {text('back_trainings', {})}
       </Link>
     </StatusScreen>
   )
