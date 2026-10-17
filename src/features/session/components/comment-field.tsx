@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from 'react'
+import { IconCheck } from '@tabler/icons-react'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import type { Student } from '@/domain/session/types'
@@ -6,6 +7,7 @@ import { clearCommentDraft, readCommentDraft, writeCommentDraft } from '@/lib/co
 import { useAutosave, type AutosaveStatus } from '@/features/session/hooks/use-autosave'
 import type { Ui } from '@/lib/i18n/use-ui'
 import type { UiMessageParams } from '@/lib/i18n/ui-messages'
+import { cn } from '@/lib/utils'
 
 type CommentStatusKey = Extract<keyof UiMessageParams, `comment_${string}`>
 
@@ -59,13 +61,25 @@ export function CommentField({ ui, sessionId, student, onSave }: CommentFieldPro
   const announcedKey = ANNOUNCED_KEY[status]
 
   return (
-    <section className="flex flex-col gap-2">
-      <Label htmlFor={id} className="font-semibold">
-        {text('comment_label', {})}
-      </Label>
+    <div className="flex flex-col gap-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <Label htmlFor={id} className="text-small font-semibold">
+          {text('comment_label', {})}
+        </Label>
+        <span
+          className={cn(
+            'inline-flex min-h-4 items-center gap-1 text-label font-normal text-muted-foreground',
+            status === 'error' && 'text-destructive',
+          )}
+        >
+          {status === 'saved' && <IconCheck aria-hidden className="size-3.5" />}
+          {statusKey === undefined ? null : text(statusKey, {})}
+        </span>
+      </div>
       <Textarea
         id={id}
         value={value}
+        className="min-h-21"
         onChange={(event) => {
           setValue(event.target.value)
           writeCommentDraft(sessionId, studentId, event.target.value)
@@ -73,13 +87,10 @@ export function CommentField({ ui, sessionId, student, onSave }: CommentFieldPro
         }}
         onBlur={flush}
       />
-      <p className="min-h-5 text-sm text-muted-foreground">
-        {statusKey === undefined ? null : text(statusKey, {})}
-      </p>
       {/* Seul le résultat (enregistré / échec) est annoncé : « Enregistrement… » resterait du bruit. */}
       <p className="sr-only" aria-live="polite">
         {announcedKey === undefined ? null : text(announcedKey, {})}
       </p>
-    </section>
+    </div>
   )
 }

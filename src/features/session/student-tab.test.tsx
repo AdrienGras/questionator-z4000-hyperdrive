@@ -13,7 +13,7 @@ import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent, makeSecondStudent } from '@/testing/student-fixtures'
 import { storedSession as stored, storedStudent } from '@/testing/stored-session'
 
-const ABSENT_BODY = 'Cliquez « Marquer présent » dans le panneau pour le faire passer.'
+const ABSENT_BODY = 'Marquez-le présent pour le faire passer, ou choisissez un autre étudiant.'
 /** Au-delà du délai de sauvegarde différée (500 ms). */
 const AFTER_DELAY = { timeout: 2000 }
 
@@ -21,7 +21,7 @@ async function mount(students: Student[], questionsPerStudent = 3) {
   const config = screenConfig({ questionsPerStudent })
   await putSession(makeSession({ config, students, activeStudentId: students[0]?.id }))
   const rendered = renderAt('/session/session-1')
-  await openSidePanel('Étudiant')
+  await screen.findByRole('textbox', { name: 'Commentaire' })
   return rendered
 }
 
@@ -33,18 +33,24 @@ function grid(): Promise<HTMLElement> {
   return screen.findByRole('list', { name: 'Choisir une catégorie', hidden: true })
 }
 
-async function closePanel() {
-  fireEvent.keyDown(panel(), { key: 'Escape' })
-  await expectPanelClosed()
-}
-
+/** Champ « Commentaire » de la colonne de droite de la page (F44.7 : sorti du tiroir). */
 function commentBox(): HTMLElement {
-  return within(panel()).getByRole('textbox', { name: 'Commentaire' })
+  return screen.getByRole('textbox', { name: 'Commentaire', hidden: true })
 }
 
-/** Bouton d'absence de l'onglet « Étudiant » (« Marquer absent » ou « Marquer présent »). */
+/** Carte du commentaire : champ, statut et bouton d'absence. */
+function commentCard(): HTMLElement {
+  const card = commentBox().closest('section')
+  if (card === null) throw new Error('carte du commentaire absente')
+  return card
+}
+
+/** Bouton d'absence de la carte du commentaire (« Marquer absent » ou « Marquer présent »). */
 function absentButton(): HTMLElement {
-  return within(panel()).getByRole('button', { name: /^Marquer (absent|présent)$/ })
+  return within(commentCard()).getByRole('button', {
+    name: /^Marquer (absent|présent)$/,
+    hidden: true,
+  })
 }
 
 beforeEach(async () => {
@@ -63,7 +69,7 @@ test('commentaire : rien en base avant le délai, enregistré après, indicateur
 
   expect((await storedStudent()).comment).toBeUndefined()
   await waitFor(async () => expect((await storedStudent()).comment).toBe('À revoir'), AFTER_DELAY)
-  expect(await within(panel()).findAllByText('Enregistré')).not.toHaveLength(0)
+  expect(await within(commentCard()).findAllByText('Enregistré')).not.toHaveLength(0)
 })
 
 test('commentaire : la sortie du champ écrit tout de suite', async () => {
@@ -95,7 +101,7 @@ test('commentaire : taper puis revenir au texte d’origine et sortir n’écrit
   fireEvent.blur(commentBox())
 
   // La sauvegarde est bien partie (indicateur), mais sans changement : rien n'est écrit.
-  expect(await within(panel()).findAllByText('Enregistré')).not.toHaveLength(0)
+  expect(await within(commentCard()).findAllByText('Enregistré')).not.toHaveLength(0)
   expect(put).not.toHaveBeenCalled()
   expect((await stored()).updatedAt).toBe(before)
 })
@@ -109,7 +115,7 @@ test('commentaire : entrer et sortir sans frappe n’écrit rien', async () => {
   await new Promise((resolve) => setTimeout(resolve, 700))
 
   expect((await stored()).updatedAt).toBe(before)
-  expect(within(panel()).queryAllByText('Enregistré')).toHaveLength(0)
+  expect(within(commentCard()).queryAllByText('Enregistré')).toHaveLength(0)
 })
 
 test('commentaire : survit au rechargement et à la réinitialisation', async () => {
@@ -121,9 +127,7 @@ test('commentaire : survit au rechargement et à la réinitialisation', async ()
 
   renderAt('/session/session-1')
   await screen.findByRole('heading', { name: 'Passage terminé' })
-  await openSidePanel()
   expect(commentBox()).toHaveValue('Bonne tenue')
-  await closePanel()
 
   fireEvent.click(screen.getByRole('button', { name: 'Réinitialiser l’étudiant' }))
   const dialog = await screen.findByRole('alertdialog', { name: 'Réinitialiser Durand Alice ?' })
@@ -131,7 +135,6 @@ test('commentaire : survit au rechargement et à la réinitialisation', async ()
 
   expect(await categoryButton('A')).toBeInTheDocument()
   expect((await storedStudent()).comment).toBe('Bonne tenue')
-  await openSidePanel()
   expect(commentBox()).toHaveValue('Bonne tenue')
 })
 
@@ -139,8 +142,8 @@ test('commentaire tapé puis changement d’étudiant avant le délai : enregist
   await mount([makeStudent([]), makeSecondStudent()])
 
   fireEvent.change(commentBox(), { target: { value: 'Pour Alice' } })
-  // L'onglet « Étudiant » reste monté : seul le changement d'étudiant démonte `CommentField`
-  // (clé par étudiant), comme lors d'une écriture venue d'un autre onglet du navigateur.
+  // Seul le changement d'étudiant démonte `CommentField` (clé par étudiant), comme lors d'une
+  // écriture venue d'un autre onglet du navigateur.
   await updateSession('session-1', (s) => setActiveStudent(s, 'student-2'))
 
   await waitFor(async () => expect((await storedStudent('student-1')).comment).toBe('Pour Alice'))
@@ -148,19 +151,18 @@ test('commentaire tapé puis changement d’étudiant avant le délai : enregist
   await waitFor(() => expect(commentBox()).toHaveValue(''))
 })
 
-test('commentaire tapé puis passage à l’onglet « Étudiants » : enregistré, étudiant suivant vide', async () => {
+test('commentaire tapé puis autre étudiant choisi dans le panneau : enregistré sur le premier, champ vide', async () => {
   await mount([makeStudent([]), makeSecondStudent()])
 
   fireEvent.change(commentBox(), { target: { value: 'Pour Alice' } })
-  fireEvent.click(within(panel()).getByRole('tab', { name: 'Étudiants' }))
+  await openSidePanel('Étudiants')
   fireEvent.click(within(panel()).getByRole('button', { name: /^Martin Bob/ }))
 
   await waitFor(async () => expect((await stored()).activeStudentId).toBe('student-2'))
   await waitFor(async () => expect((await storedStudent('student-1')).comment).toBe('Pour Alice'))
   expect((await storedStudent('student-2')).comment).toBeUndefined()
-  // Le changement d'étudiant a fermé le tiroir : rouvert sur l'onglet « Étudiant ».
+  // Le changement d'étudiant a fermé le tiroir ; le champ suit le nouvel étudiant.
   await expectPanelClosed()
-  await openSidePanel('Étudiant')
   await waitFor(() => expect(commentBox()).toHaveValue(''))
 })
 
@@ -298,7 +300,7 @@ test('dialogue d’absence ouvert pour Alice, Bob devient actif ailleurs : c’e
 
 /** Zone annoncée aux lecteurs d'écran (`aria-live`) du champ commentaire. */
 function announcer(): HTMLElement {
-  const region = panel().querySelector<HTMLElement>('[aria-live="polite"]')
+  const region = commentCard().querySelector<HTMLElement>('[aria-live="polite"]')
   if (region === null) throw new Error('zone annoncée absente')
   return region
 }
@@ -309,13 +311,13 @@ test('commentaire : zone annoncée vide pendant l’enregistrement, « Enregistr
   const announced: string[] = []
   const observer = new MutationObserver(() => {
     visible.push(
-      ...within(panel())
+      ...within(commentCard())
         .queryAllByText('Enregistrement…')
         .map(() => 'saving'),
     )
     announced.push(announcer().textContent)
   })
-  observer.observe(panel(), { subtree: true, childList: true, characterData: true })
+  observer.observe(commentCard(), { subtree: true, childList: true, characterData: true })
 
   fireEvent.change(commentBox(), { target: { value: 'À revoir' } })
   fireEvent.blur(commentBox())
@@ -325,7 +327,7 @@ test('commentaire : zone annoncée vide pendant l’enregistrement, « Enregistr
   // Le statut visible est passé par « Enregistrement… », la zone annoncée jamais.
   expect(visible).not.toHaveLength(0)
   expect(announced).not.toContain('Enregistrement…')
-  expect(within(panel()).getAllByText('Enregistré')).toHaveLength(2)
+  expect(within(commentCard()).getAllByText('Enregistré')).toHaveLength(2)
 })
 
 test('commentaire : échec, la zone annoncée contient « Échec de l’enregistrement »', async () => {
@@ -336,16 +338,4 @@ test('commentaire : échec, la zone annoncée contient « Échec de l’enregist
   fireEvent.blur(commentBox())
 
   await waitFor(() => expect(announcer()).toHaveTextContent('Échec de l’enregistrement'))
-})
-
-test('commentaire tapé puis tiroir fermé par Échap avant le délai : enregistré en base', async () => {
-  await mount([makeStudent([])])
-
-  fireEvent.change(commentBox(), { target: { value: 'Avant fermeture' } })
-  await closePanel()
-
-  // Délai borné sous les 500 ms d'autosave : seule l'écriture au démontage peut arriver à temps.
-  await waitFor(async () => expect((await storedStudent()).comment).toBe('Avant fermeture'), {
-    timeout: 250,
-  })
 })

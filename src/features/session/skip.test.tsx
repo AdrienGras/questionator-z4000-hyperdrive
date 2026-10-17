@@ -51,10 +51,11 @@ test('bouton absent sans question en cours', async () => {
   expect(screen.queryByRole('button', { name: /^Passer la question/ })).not.toBeInTheDocument()
 })
 
-test('libellé avec le nombre de passes restantes', async () => {
+test('« Passer la question » et le nombre de passes restantes à côté', async () => {
   await openPassage(['pending'], { enabled: true, maxPerStudent: 2 })
 
-  expect(skipButton()).toHaveAccessibleName('Passer la question (2 passes restantes)')
+  expect(skipButton()).toHaveAccessibleName('Passer la question')
+  expect(screen.getByText('2 passes restantes')).toBeInTheDocument()
   expect(skipButton()).not.toHaveAttribute('aria-disabled')
 })
 
@@ -62,7 +63,8 @@ test('quota atteint : aria-disabled avec motif, le clic n’ouvre rien', async (
   await openPassage([{ skipped: '' }, 'pending'])
 
   const button = skipButton()
-  expect(button).toHaveAccessibleName('Passer la question (0 passe restante)')
+  expect(button).toHaveAccessibleName('Passer la question')
+  expect(screen.getByText('Aucune passe restante')).toBeInTheDocument()
   expect(button).toHaveAttribute('aria-disabled', 'true')
   expect(button).toHaveAccessibleDescription('Plus de passe disponible pour cet étudiant.')
 

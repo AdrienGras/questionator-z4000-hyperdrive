@@ -9,6 +9,7 @@ import { toProjectedView } from '@/domain/presentation/projected-view'
 import { PassageError } from '@/domain/passage/errors'
 import { passageErrorMessage } from '@/domain/passage/messages'
 import { currentPending } from '@/domain/passage/selectors'
+import { skipsRemaining } from '@/domain/passage/skip'
 import type { Session } from '@/domain/session/types'
 import { usePassageActions } from '@/features/session/hooks/use-passage-actions'
 import type { Failure } from '@/features/session/hooks/use-fresh-error'
@@ -16,14 +17,14 @@ import { usePresentWindow } from '@/features/session/hooks/use-present-window'
 import { useSidePanel } from '@/features/session/hooks/use-side-panel'
 import { studentStanding } from '@/features/session/student-standing'
 import { useUi, type Ui } from '@/lib/i18n/use-ui'
-import { AbsentButton } from './absent-button'
-import { CommentField } from './comment-field'
+import { CommentCard } from './comment-card'
 import { ExportButton } from './export-button'
 import { PassageBody } from './passage-body'
 import { PassageHeaderStats } from './passage-header-stats'
 import { ProjectionBanner } from './projection-banner'
 import { ProjectionControls } from './projection-controls'
 import { ProjectionPreview } from './projection-preview'
+import { ScoreCard } from './score-card'
 import { SidePanel } from './side-panel'
 import { StudentTab } from './student-tab'
 import { StudentsTab } from './students-tab'
@@ -115,62 +116,85 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
           </>
         }
       >
-        <div className="flex flex-1 flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-start">
-          <div className="flex w-full max-w-xl flex-col gap-3 lg:col-start-2 lg:row-start-1 lg:max-w-none">
-            <ProjectionPreview
-              ui={ui}
-              view={projected}
-              // Ouvrir n'écrit rien : jamais désactivé, à part du pilotage (F39).
-              action={
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={presentWindow.openWindow}
-                >
-                  <IconExternalLink aria-hidden />
-                  {ui.text('projection_open', {})}
-                </Button>
-              }
-              notice={
-                presentWindow.popupBlocked && (
-                  <p role="alert">{ui.text('projection_popup_blocked', {})}</p>
-                )
-              }
-            />
-            <ProjectionControls
-              ui={ui}
-              projection={session.projection}
-              activeStudentId={student?.id}
-              disabled={actions.busy}
-              onProject={actions.project}
-              onAction={presentWindow.clearPopupBlocked}
-            />
-            <ProjectionBanner ui={ui} session={session} activeStudentId={student?.id} />
-          </div>
-          <div className="flex min-w-0 flex-col gap-4 lg:col-start-1 lg:row-start-1">
-            {/* Rendu une seule fois, au-dessus de l'aiguillage par statut : une erreur touchant
-                un état sans passage (aucun étudiant, absent, terminé) doit rester visible. */}
-            {errorMessage !== undefined && <p role="alert">{errorMessage}</p>}
-            <PassageBody
-              ui={ui}
-              config={config}
-              session={session}
-              student={student}
-              standing={standing}
-              onShowPanel={panel.show}
-              pending={pending}
-              disabled={actions.busy}
-              onDraw={(categoryId) => void actions.draw(categoryId)}
-              onScore={(attemptId, value) => void actions.score(attemptId, value)}
-              onSkip={(attemptId, reason) => void actions.skip(attemptId, reason)}
-              onAdjust={(value, reason, options) => actions.adjust(value, reason, options)}
-              onRevealFinal={() => actions.revealFinal()}
-              onReset={() => actions.reset()}
-              onNext={() => void actions.next()}
-            />
-          </div>
-        </div>
+        <PassageBody
+          ui={ui}
+          config={config}
+          session={session}
+          student={student}
+          standing={standing}
+          onShowPanel={panel.show}
+          pending={pending}
+          disabled={actions.busy}
+          onDraw={(categoryId) => void actions.draw(categoryId)}
+          onAdjust={(value, reason, options) => actions.adjust(value, reason, options)}
+          onRevealFinal={() => actions.revealFinal()}
+          onReset={() => actions.reset()}
+          onNext={() => void actions.next()}
+          // Rendue une seule fois, au-dessus de l'aiguillage par statut : une erreur touchant un état
+          // sans passage (aucun étudiant, absent, terminé) doit rester visible.
+          alert={errorMessage !== undefined && <p role="alert">{errorMessage}</p>}
+          aside={
+            <>
+              <ProjectionPreview
+                ui={ui}
+                view={projected}
+                // Ouvrir n'écrit rien : jamais désactivé, à part du pilotage (F39).
+                action={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="-mr-2 text-muted-foreground"
+                    aria-label={ui.text('projection_open', {})}
+                    onClick={presentWindow.openWindow}
+                  >
+                    <IconExternalLink aria-hidden />
+                    {ui.text('projection_open_short', {})}
+                  </Button>
+                }
+                notice={
+                  presentWindow.popupBlocked && (
+                    <p role="alert">{ui.text('projection_popup_blocked', {})}</p>
+                  )
+                }
+              >
+                <ProjectionControls
+                  ui={ui}
+                  projection={session.projection}
+                  activeStudentId={student?.id}
+                  disabled={actions.busy}
+                  onProject={actions.project}
+                  onAction={presentWindow.clearPopupBlocked}
+                />
+                <ProjectionBanner ui={ui} session={session} activeStudentId={student?.id} />
+              </ProjectionPreview>
+              {student !== undefined && pending !== undefined && (
+                // En tête sur écran étroit : la note juste sous la question.
+                <div className="order-first lg:order-none">
+                  <ScoreCard
+                    ui={ui}
+                    config={config}
+                    attempt={pending}
+                    disabled={actions.busy}
+                    skipsRemaining={skipsRemaining(student, config)}
+                    onScore={(attemptId, value) => void actions.score(attemptId, value)}
+                    onSkip={(attemptId, reason) => void actions.skip(attemptId, reason)}
+                  />
+                </div>
+              )}
+              {student !== undefined && (
+                <CommentCard
+                  ui={ui}
+                  sessionId={session.id}
+                  student={student}
+                  disabled={actions.busy}
+                  onSave={actions.setComment}
+                  onSetAbsent={actions.setAbsent}
+                />
+              )}
+            </>
+          }
+        />
         <SidePanel
           ui={ui}
           open={panel.open}
@@ -216,29 +240,6 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
               scores={standing?.scores}
               disabled={actions.busy}
               onEditScore={(attemptId, score) => void actions.editScore(attemptId, score)}
-              commentSlot={
-                student && (
-                  // `key` : un montage par étudiant, dont le démontage flushe le commentaire
-                  // tapé sur CET étudiant (Review Focus 1).
-                  <CommentField
-                    key={student.id}
-                    ui={ui}
-                    sessionId={session.id}
-                    student={student}
-                    onSave={actions.setComment}
-                  />
-                )
-              }
-              absentSlot={
-                student && (
-                  <AbsentButton
-                    ui={ui}
-                    student={student}
-                    disabled={actions.busy}
-                    onChange={actions.setAbsent}
-                  />
-                )
-              }
             />
           }
         />

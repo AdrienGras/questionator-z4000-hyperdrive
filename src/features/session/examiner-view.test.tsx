@@ -189,20 +189,40 @@ async function absentAliceSession() {
   await putSession(sessionWith(config, [{ ...alice, absent: true }, bob], 'student-1'))
 }
 
-test('étudiant absent : « Afficher le panneau » ouvre l’onglet « Étudiant »', async () => {
+test('étudiant absent : « Marquer présent » sur la page, « Afficher le panneau » ouvre la liste', async () => {
   localStorage.clear()
   await absentAliceSession()
   renderAt('/session/session-1')
 
   await screen.findByRole('heading', { name: 'Étudiant absent' })
+  expect(screen.getByRole('button', { name: 'Marquer présent' })).toBeVisible()
   fireEvent.click(screen.getByRole('button', { name: 'Afficher le panneau' }))
 
   const dialog = await screen.findByRole('dialog', { name: 'Panneau latéral' })
-  expect(within(dialog).getByRole('tab', { name: 'Étudiant' })).toHaveAttribute(
+  expect(within(dialog).getByRole('tab', { name: 'Étudiants' })).toHaveAttribute(
     'aria-selected',
     'true',
   )
-  expect(within(dialog).getByRole('button', { name: 'Marquer présent' })).toBeVisible()
+})
+
+test('commentaire visible sur la page, sans ouvrir le panneau', async () => {
+  const config = makeConfig({ questionsPerStudent: 3 })
+  await putSession(sessionWith(config, twoStudents(), 'student-1'))
+  renderAt('/session/session-1')
+
+  expect(await screen.findByRole('textbox', { name: 'Commentaire' })).toBeVisible()
+  expect(screen.getByRole('button', { name: 'Marquer absent' })).toBeVisible()
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+})
+
+test('étudiant terminé : commentaire présent, pas de carte « Note »', async () => {
+  const config = makeConfig({ questionsPerStudent: 1 })
+  const done = makeStudent([1], { finalRevealedAt: '2026-09-25T10:00:00.000Z' })
+  await putSession(sessionWith(config, [done, makeSecondStudent()], 'student-1'))
+  renderAt('/session/session-1')
+
+  expect(await screen.findByRole('textbox', { name: 'Commentaire' })).toBeVisible()
+  expect(screen.queryByRole('region', { name: 'Noter la question' })).not.toBeInTheDocument()
 })
 
 test('aucun étudiant : « Afficher le panneau » ouvre l’onglet « Étudiants »', async () => {

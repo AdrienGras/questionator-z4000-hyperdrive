@@ -276,6 +276,8 @@ export type UiMessageParams = {
   passage_answer: NoParams
   passage_score_heading: NoParams
   /** `value` : valeur du barème déjà mise en forme par l'appelant. */
+  passage_score_card: NoParams
+  passage_score_context: { category: string; max: string }
   passage_score_button: { value: string }
   passage_status_todo: NoParams
   passage_status_in_progress: NoParams
@@ -317,7 +319,10 @@ export type UiMessageParams = {
   students_list_label: NoParams
   students_projected: NoParams
   projection_open: NoParams
+  projection_open_short: NoParams
   projection_project: NoParams
+  projection_project_short: NoParams
+  projection_group: NoParams
   projection_waiting: NoParams
   projection_banner: { name: string }
   projection_popup_blocked: NoParams
@@ -367,7 +372,8 @@ export type UiMessageParams = {
   adjust_reason: NoParams
   passage_error_generic: NoParams
   /** `remaining` : passes restantes pour l'étudiant (`skipsRemaining`). */
-  passage_skip_button: { remaining: number }
+  passage_skip_label: NoParams
+  passage_skips_remaining: { remaining: number }
   passage_skip_quota_reached: NoParams
   passage_skip_title: NoParams
   passage_skip_body: NoParams
@@ -784,6 +790,8 @@ const fr: Dictionary<UiMessageParams> = {
   passage_category_exhausted: () => 'Plus de question disponible dans cette catégorie',
   passage_answer: () => 'Éléments de réponse',
   passage_score_heading: () => 'Note',
+  passage_score_card: () => 'Noter la question',
+  passage_score_context: ({ category, max }) => `${category}, sur ${max}`,
   passage_score_button: ({ value }) => `Noter ${value}`,
   passage_status_todo: () => 'à passer',
   passage_status_in_progress: () => 'en cours',
@@ -793,7 +801,8 @@ const fr: Dictionary<UiMessageParams> = {
   passage_no_student_body: () =>
     'Choisissez un étudiant dans l’onglet « Étudiants » du panneau pour commencer le passage.',
   passage_absent_title: () => 'Étudiant absent',
-  passage_absent_body: () => 'Cliquez « Marquer présent » dans le panneau pour le faire passer.',
+  passage_absent_body: () =>
+    'Marquez-le présent pour le faire passer, ou choisissez un autre étudiant.',
   passage_done_title: () => 'Passage terminé',
   final_scores_heading: () => 'Notes',
   final_detail_heading: () => 'Détail du passage',
@@ -824,7 +833,10 @@ const fr: Dictionary<UiMessageParams> = {
   students_list_label: () => 'Étudiants de la session',
   students_projected: () => 'Projeté',
   projection_open: () => 'Ouvrir la vue projetée',
+  projection_open_short: () => 'Ouvrir',
   projection_project: () => 'Projeter cet étudiant',
+  projection_project_short: () => 'Cet étudiant',
+  projection_group: () => 'Projection',
   projection_waiting: () => 'Écran d’attente',
   projection_preview_label: () => 'Vue projetée',
   projection_banner: ({ name }) => `La vue projetée montre ${name}.`,
@@ -868,8 +880,11 @@ const fr: Dictionary<UiMessageParams> = {
   adjust_clamped: ({ bound }) => `(bornée à ${bound})`,
   adjust_reason: () => 'Justification (facultative)',
   passage_error_generic: () => 'L’action n’a pas pu être enregistrée. Rechargez la page.',
-  passage_skip_button: ({ remaining }) =>
-    `Passer la question (${remaining} ${plural(remaining, 'passe restante', 'passes restantes')})`,
+  passage_skip_label: () => 'Passer la question',
+  passage_skips_remaining: ({ remaining }) =>
+    remaining === 0
+      ? 'Aucune passe restante'
+      : `${remaining} ${plural(remaining, 'passe restante', 'passes restantes')}`,
   passage_skip_quota_reached: () => 'Plus de passe disponible pour cet étudiant.',
   passage_skip_title: () => 'Passer la question ?',
   passage_skip_body: () =>
@@ -1243,6 +1258,8 @@ const en: Dictionary<UiMessageParams> = {
   passage_category_exhausted: () => 'No questions left in this category',
   passage_answer: () => 'Answer notes',
   passage_score_heading: () => 'Score',
+  passage_score_card: () => 'Score the question',
+  passage_score_context: ({ category, max }) => `${category}, out of ${max}`,
   passage_score_button: ({ value }) => `Score ${value}`,
   passage_status_todo: () => 'to do',
   passage_status_in_progress: () => 'in progress',
@@ -1251,7 +1268,7 @@ const en: Dictionary<UiMessageParams> = {
   passage_no_student_title: () => 'No student selected',
   passage_no_student_body: () => 'Pick a student in the panel’s “Students” tab to start.',
   passage_absent_title: () => 'Student absent',
-  passage_absent_body: () => 'Click “Mark present” in the panel to examine them.',
+  passage_absent_body: () => 'Mark them present to examine them, or choose another student.',
   passage_done_title: () => 'Exam complete',
   final_scores_heading: () => 'Scores',
   final_detail_heading: () => 'Exam breakdown',
@@ -1282,7 +1299,10 @@ const en: Dictionary<UiMessageParams> = {
   students_list_label: () => 'Session students',
   students_projected: () => 'Projected',
   projection_open: () => 'Open the projected view',
+  projection_open_short: () => 'Open',
   projection_project: () => 'Project this student',
+  projection_project_short: () => 'This student',
+  projection_group: () => 'Projection',
   projection_waiting: () => 'Waiting screen',
   projection_preview_label: () => 'Projected view',
   projection_banner: ({ name }) => `The projected view shows ${name}.`,
@@ -1325,8 +1345,11 @@ const en: Dictionary<UiMessageParams> = {
   adjust_clamped: ({ bound }) => `(capped at ${bound})`,
   adjust_reason: () => 'Justification (optional)',
   passage_error_generic: () => 'The action could not be saved. Reload the page.',
-  passage_skip_button: ({ remaining }) =>
-    `Skip question (${remaining} ${pluralEn(remaining, 'skip', 'skips')} left)`,
+  passage_skip_label: () => 'Skip the question',
+  passage_skips_remaining: ({ remaining }) =>
+    remaining === 0
+      ? 'No skips left'
+      : `${remaining} ${pluralEn(remaining, 'skip left', 'skips left')}`,
   passage_skip_quota_reached: () => 'No skips left for this student.',
   passage_skip_title: () => 'Skip this question?',
   passage_skip_body: () =>

@@ -65,10 +65,10 @@ test('aperçu étanche : rien de réservé à l’examinateur', async () => {
     .querySelector('[data-projection-canvas]')!
   await waitFor(() => expect(canvas.textContent).toContain('Énoncé a-3'))
 
-  // Commentaire et motif de passe : bien présents dans le DOM examinateur (onglet « Étudiant » du
-  // tiroir), pour que leur absence de l'aperçu prouve quelque chose.
+  // Commentaire (colonne de droite) et motif de passe (onglet « Étudiant » du tiroir) : bien
+  // présents dans le DOM examinateur, pour que leur absence de l'aperçu prouve quelque chose.
+  expect(screen.getByRole('textbox', { name: 'Commentaire' })).toHaveValue('COMMENT-7Q')
   const panel = await openSidePanel('Étudiant')
-  expect(within(panel).getByRole('textbox', { name: 'Commentaire' })).toHaveValue('COMMENT-7Q')
   expect(within(panel).getByText(/SKIP-7Q/)).toBeInTheDocument()
 
   const text = canvas.textContent

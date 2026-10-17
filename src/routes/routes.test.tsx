@@ -111,8 +111,8 @@ test("la route /new affiche l'écran de création", async () => {
 test('la route /session/$sessionId affiche la session thémée', async () => {
   await putSession(themedSession())
   renderAt('/session/session-1')
-  expect(await screen.findByRole('heading', { name: 'Oral de PHP' })).toBeInTheDocument()
-  expect(screen.getByText('Question 1 / 1')).toBeInTheDocument()
+  expect(await screen.findByRole('heading', { level: 1, name: 'Durand Alice' })).toBeInTheDocument()
+  expect(screen.getByText(/^Question 1 sur 1/)).toBeInTheDocument()
   expect(screen.getByText('Bases')).toBeInTheDocument()
   expect(document.documentElement.style.getPropertyValue('--primary')).toBe('rgb(1, 2, 3)')
 })
@@ -126,7 +126,7 @@ test('une session inconnue affiche « Session introuvable » avec un lien de ret
 test('une config en anglais donne une vue examinateur en anglais, menu dans la langue de l’app', async () => {
   await putSession(themedSession('en'))
   renderAt('/session/session-1')
-  expect(await screen.findByText('Question 1 / 1')).toBeInTheDocument()
+  expect(await screen.findByText(/^Question 1 of 1/)).toBeInTheDocument()
   expect(screen.getByRole('navigation', { name: 'Breadcrumb' })).toBeInTheDocument()
   // Le menu garde la langue de l'application (D105) : l'aide y est en français.
   const aside = screen.getByRole('complementary')
@@ -146,7 +146,7 @@ test('la route /present/$sessionId affiche l’écran d’attente thémé', asyn
 test('revenir à l’accueil depuis une session thémée ne laisse aucun token sur <html>', async () => {
   await putSession(themedSession())
   const { router } = renderAt('/session/session-1')
-  await screen.findByRole('heading', { name: 'Oral de PHP' })
+  await screen.findByRole('heading', { level: 1, name: 'Durand Alice' })
   await router.navigate({ to: '/' })
   expect(await screen.findByRole('heading', { level: 1, name: 'Accueil' })).toBeInTheDocument()
   expect(document.documentElement.style.getPropertyValue('--primary')).toBe('')
@@ -229,7 +229,7 @@ function activeMenuLinks() {
 test('menu : Sessions actif sur une session', async () => {
   await putSession(themedSession())
   renderAt('/session/session-1')
-  await screen.findByRole('heading', { name: 'Oral de PHP' })
+  await screen.findByRole('heading', { level: 1, name: 'Durand Alice' })
   expect(activeMenuLinks()).toEqual(['Sessions'])
 })
 

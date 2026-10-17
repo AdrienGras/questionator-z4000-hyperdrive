@@ -18,7 +18,7 @@ export function ProjectionBanner({ ui, session, activeStudentId }: ProjectionBan
   const projected = session.students.find((s) => s.id === projection.studentId)
   if (projected === undefined) return null
   return (
-    <output className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
+    <output className="rounded-md bg-muted px-3 py-2 text-small text-muted-foreground">
       {ui.text('projection_banner', { name: `${projected.lastName} ${projected.firstName}` })}
     </output>
   )
