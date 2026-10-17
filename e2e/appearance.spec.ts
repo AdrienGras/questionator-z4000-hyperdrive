@@ -55,3 +55,37 @@ test('le bouton principal porte le dégradé d’action, qui suit theme.dark.pri
   expect(themed).toContain('linear-gradient')
   expect(themed).not.toBe(byDefault)
 })
+
+test('surfaces et champs du design system', async ({ page }) => {
+  const home = new HomePage(page)
+  await home.goto()
+  const card = await page
+    .locator('[data-slot="card"]')
+    .first()
+    .evaluate((el) => {
+      const style = getComputedStyle(el)
+      return { radius: style.borderTopLeftRadius, shadow: style.boxShadow }
+    })
+  expect(card.radius).toBe('18px')
+  expect(card.shadow).toContain('inset')
+  await home.createSession()
+  const input = await page
+    .locator('input:visible')
+    .first()
+    .evaluate((el) => {
+      const style = getComputedStyle(el)
+      return { height: style.height, radius: style.borderTopLeftRadius }
+    })
+  expect(input).toEqual({ height: '44px', radius: '12px' })
+
+  // La modale de suppression ouverte depuis l'accueil.
+  await home.goto()
+  const create = await home.createSession()
+  await create.uploadStudents(examplePath('students.example.csv'))
+  await create.uploadConfig(examplePath('config.example.json'))
+  await create.fillName('Session surfaces')
+  await create.submit()
+  await home.goto()
+  const dialog = await home.openDeleteDialog('Session surfaces')
+  await expect(dialog).toHaveCSS('border-top-left-radius', '18px')
+})
