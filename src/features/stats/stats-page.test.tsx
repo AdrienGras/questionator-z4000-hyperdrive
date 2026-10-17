@@ -161,7 +161,7 @@ test("question tirée d'id inconnu : session endommagée, statistiques non affic
   expect(
     await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
   ).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: 'Exporter un backup' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Exporter une sauvegarde' })).toBeInTheDocument()
   expect(screen.queryByRole('table', { name: 'Questions les plus tirées' })).not.toBeInTheDocument()
 })
 

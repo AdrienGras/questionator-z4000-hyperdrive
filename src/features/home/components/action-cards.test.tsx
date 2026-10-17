@@ -69,13 +69,13 @@ describe('ActionCards', () => {
   it('import : texte et bouton qui appelle onImport', async () => {
     const { onImport } = renderCards()
     expect(await screen.findByText(ui.text('home_import_body', {}))).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Importer un backup' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Importer une sauvegarde' }))
     expect(onImport).toHaveBeenCalledOnce()
   })
 
   it('désactive le bouton d’import si importDisabled', async () => {
     renderCards({ importDisabled: true })
-    expect(await screen.findByRole('button', { name: 'Importer un backup' })).toBeDisabled()
+    expect(await screen.findByRole('button', { name: 'Importer une sauvegarde' })).toBeDisabled()
   })
 
   it('masque la création sans stockage', async () => {

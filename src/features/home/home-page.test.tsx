@@ -63,7 +63,9 @@ describe('accueil', () => {
     const sessions = screen.getByRole('region', { name: 'Sessions' })
     expect(within(sessions).getByRole('heading', { name: 'Aucune session' })).toBeInTheDocument()
     expect(
-      within(sessions).getByText('Créez une session ou importez un backup depuis les actions.'),
+      within(sessions).getByText(
+        'Créez une session ou importez une sauvegarde depuis les actions.',
+      ),
     ).toBeInTheDocument()
     expect(within(sessions).queryByRole('link')).not.toBeInTheDocument()
     expect(within(sessions).queryByRole('button')).not.toBeInTheDocument()
@@ -72,7 +74,7 @@ describe('accueil', () => {
       'href',
       '/new',
     )
-    expect(within(actions).getByRole('button', { name: 'Importer un backup' })).toBeEnabled()
+    expect(within(actions).getByRole('button', { name: 'Importer une sauvegarde' })).toBeEnabled()
   })
 
   test('barre de titre : plus de création ni d’import, thème en dernier', async () => {
@@ -80,7 +82,7 @@ describe('accueil', () => {
     await screen.findByRole('heading', { name: 'Aucune session' })
     const names = bannerInteractiveNames()
     expect(names).not.toContain('Créer une session')
-    expect(names).not.toContain('Importer un backup')
+    expect(names).not.toContain('Importer une sauvegarde')
     expectHelpLinkLast()
   })
 
@@ -183,7 +185,7 @@ describe('accueil', () => {
     expect(screen.getByRole('button', { name: 'Recharger' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Oral de test' })).not.toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Aucune session' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Importer un backup' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Importer une sauvegarde' })).toBeDisabled()
   })
 
   test('unavailable : message et pas de création', async () => {
@@ -191,7 +193,7 @@ describe('accueil', () => {
     renderAt('/')
     expect(await screen.findByText(/stockage local est indisponible/)).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Créer une session' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Importer un backup' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Importer une sauvegarde' })).toBeDisabled()
     expectHelpLinkLast()
   })
 
@@ -323,12 +325,12 @@ describe('accueil', () => {
     expect(await screen.findByRole('heading', { name: 'Aucune session' })).toBeInTheDocument()
   })
 
-  test('« Exporter un backup d’abord » télécharge et laisse le dialogue ouvert', async () => {
+  test('« Exporter une sauvegarde d’abord » télécharge et laisse le dialogue ouvert', async () => {
     await putSession(makeSession())
     renderAt('/')
     await chooseAction('Supprimer')
     const dialog = await screen.findByRole('alertdialog')
-    fireEvent.click(within(dialog).getByRole('button', { name: "Exporter un backup d'abord" }))
+    fireEvent.click(within(dialog).getByRole('button', { name: "Exporter une sauvegarde d'abord" }))
     expect(download).toHaveBeenCalledTimes(1)
     expect(download).toHaveBeenCalledWith(
       expect.stringMatching(/^oral-de-test-backup-\d{4}-\d{2}-\d{2}\.json$/),
@@ -343,7 +345,7 @@ describe('accueil', () => {
   test('exporter depuis le menu télécharge le backup', async () => {
     await putSession(makeSession())
     renderAt('/')
-    await chooseAction('Exporter un backup')
+    await chooseAction('Exporter une sauvegarde')
     expect(download).toHaveBeenCalledTimes(1)
   })
 
@@ -353,7 +355,7 @@ describe('accueil', () => {
     renderAt('/')
     fireEvent.click(await screen.findByRole('button', { name: ACTIONS }))
     const names = (await screen.findAllByRole('menuitem')).map((item) => item.textContent)
-    expect(names.indexOf('Exporter en Excel')).toBe(names.indexOf('Exporter un backup') + 1)
+    expect(names.indexOf('Exporter en Excel')).toBe(names.indexOf('Exporter une sauvegarde') + 1)
     fireEvent.click(screen.getByRole('menuitem', { name: 'Exporter en Excel' }))
     await waitFor(() => expect(exportWorkbook).toHaveBeenCalledTimes(1))
     expect(exportWorkbook).toHaveBeenCalledWith(expect.objectContaining({ id: 'session-1' }), 'fr')

@@ -39,7 +39,9 @@ export function DamagedSessionScreen(props: DamagedSessionScreenProps) {
         {text('back_home', {})}
       </Link>
       <details className="w-full max-w-xl text-left text-sm">
-        <summary className="cursor-pointer text-center">{text('damaged_details', {})}</summary>
+        <summary className="cursor-pointer justify-center text-center">
+          {text('damaged_details', {})}
+        </summary>
         <ul className="mt-3 flex flex-col gap-2">
           {damaged.issues.map((issue, index) => {
             const path = formatIssuePath(issue)

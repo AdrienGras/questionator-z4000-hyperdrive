@@ -5,7 +5,7 @@ import { HomePage } from './pages/home-page.ts'
 // Sans espace ni tiret : aucun point de coupure, le cas le plus dur pour le titre.
 const LONG_NAME = 'Oral_de_rattrapage_du_module_architecture_logicielle_groupe_B_2026'
 
-const BUTTONS = ["Exporter un backup d'abord", 'Annuler', 'Supprimer']
+const BUTTONS = ["Exporter une sauvegarde d'abord", 'Annuler', 'Supprimer']
 
 /** Boîtes de la modale et de ses trois boutons, dans l'ordre d'affichage. */
 async function boxes(dialog: Locator) {

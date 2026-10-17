@@ -114,7 +114,7 @@ test('activeStudentId inconnu : session endommagée, vue examinateur non ouverte
   expect(
     await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
   ).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: 'Exporter un backup' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Exporter une sauvegarde' })).toBeInTheDocument()
   expect(screen.queryByText(/^Question /)).not.toBeInTheDocument()
 })
 

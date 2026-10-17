@@ -152,6 +152,35 @@
   html {
     @apply font-sans;
   }
+  /* Blocs repliables (composant Disclosure du design system, F44.3) : chevron Tabler `chevron-right`
+     dessiné à la place du triangle natif, en gris secondaire, qui pivote à l'ouverture. */
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary::before {
+    content: '';
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    background-color: var(--muted-foreground);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l6 6l-6 6'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+    transition: transform 150ms ease-out;
+  }
+  details[open] > summary::before {
+    transform: rotate(90deg);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    summary::before {
+      transition: none;
+    }
+  }
 }
 
 /* Coloration de l'éditeur JSON (F26), portée par l'éditeur lui-même (`.cm-editor`) : hors du bloc

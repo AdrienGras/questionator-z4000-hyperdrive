@@ -115,7 +115,9 @@ describe('import de backup', () => {
     const input = await renderImport()
     pick(input, backupFile(JSON.stringify({ format: 'autre', session: { id: 'session-1' } })))
     const dialog = await screen.findByRole('dialog')
-    expect(within(dialog).getByText("Ce fichier n'est pas un backup Questionator.")).toBeVisible()
+    expect(
+      within(dialog).getByText("Ce fichier n'est pas une sauvegarde Questionator."),
+    ).toBeVisible()
     expect(await storedSession()).toEqual(before)
     expect(await db.sessions.count()).toBe(1)
   })
@@ -281,9 +283,9 @@ describe('import de backup', () => {
   test('glisser-déposer : surimpression pendant le survol, puis session écrite', async () => {
     await renderImport()
     fireEvent.dragOver(screen.getByRole('main'), { dataTransfer: { types: ['Files'] } })
-    expect(screen.getByText('Déposez le backup ici')).toBeInTheDocument()
+    expect(screen.getByText('Déposez la sauvegarde ici')).toBeInTheDocument()
     drop(sessionFile(makeSession({ id: 'deposee', name: 'Déposée' })))
-    expect(screen.queryByText('Déposez le backup ici')).not.toBeInTheDocument()
+    expect(screen.queryByText('Déposez la sauvegarde ici')).not.toBeInTheDocument()
     expect(await screen.findByRole('heading', { name: 'Déposée' })).toBeInTheDocument()
     expect((await storedSession('deposee')).name).toBe('Déposée')
   })
@@ -291,22 +293,22 @@ describe('import de backup', () => {
   test('désactivé en outdated : import indisponible, dépôt ignoré', async () => {
     dbState.status = 'outdated'
     await renderImport()
-    expect(screen.getByRole('button', { name: 'Importer un backup' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Importer une sauvegarde' })).toBeDisabled()
     expect(
       fireEvent.dragOver(screen.getByRole('main'), { dataTransfer: { types: ['Files'] } }),
     ).toBe(false)
-    expect(screen.queryByText('Déposez le backup ici')).not.toBeInTheDocument()
+    expect(screen.queryByText('Déposez la sauvegarde ici')).not.toBeInTheDocument()
     drop(sessionFile(makeSession({ id: 'deposee' })))
     await new Promise((resolve) => setTimeout(resolve, 50))
     expect(await db.sessions.count()).toBe(0)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  test('le bouton « Importer un backup » ouvre le sélecteur de fichier', async () => {
+  test('le bouton « Importer une sauvegarde » ouvre le sélecteur de fichier', async () => {
     const input = await renderImport()
     await screen.findByRole('heading', { name: 'Aucune session' })
     const click = vi.spyOn(input, 'click').mockImplementation(() => {})
-    fireEvent.click(screen.getByRole('button', { name: 'Importer un backup' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Importer une sauvegarde' }))
     expect(click).toHaveBeenCalledTimes(1)
   })
 

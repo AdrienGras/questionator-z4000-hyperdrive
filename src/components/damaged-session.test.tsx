@@ -61,7 +61,7 @@ test('examinateur : titre, explication, export, retour, détails', async () => {
   ).toBeInTheDocument()
   expect(
     screen.getByText(
-      'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Exportez un backup pour le conserver ou le corriger.',
+      'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Exportez une sauvegarde pour le conserver ou le corriger.',
     ),
   ).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
@@ -79,10 +79,10 @@ test('examinateur : titre, explication, export, retour, détails', async () => {
   }
 })
 
-test('examinateur : « Exporter un backup » télécharge le brut à l’identique', async () => {
+test('examinateur : « Exporter une sauvegarde » télécharge le brut à l’identique', async () => {
   renderScreen('examiner')
 
-  fireEvent.click(await screen.findByRole('button', { name: 'Exporter un backup' }))
+  fireEvent.click(await screen.findByRole('button', { name: 'Exporter une sauvegarde' }))
 
   expect(downloadText).toHaveBeenCalledTimes(1)
   const [fileName, text] = vi.mocked(downloadText).mock.calls[0] ?? []

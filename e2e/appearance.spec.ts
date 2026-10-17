@@ -89,3 +89,30 @@ test('surfaces et champs du design system', async ({ page }) => {
   const dialog = await home.openDeleteDialog('Session surfaces')
   await expect(dialog).toHaveCSS('border-top-left-radius', '18px')
 })
+
+test('chevron dessiné sur les details, sans animation si mouvement réduit', async ({
+  examiner,
+  page,
+}) => {
+  await examiner.draw('Facile')
+  const summary = page.locator('summary', { hasText: 'Éléments de réponse' }).first()
+  const marker = () =>
+    summary.evaluate((el) => {
+      const before = getComputedStyle(el, '::before')
+      return {
+        list: getComputedStyle(el).listStyleType,
+        mask: before.maskImage,
+        transform: before.transform,
+        duration: before.transitionDuration,
+      }
+    })
+  const closed = await marker()
+  expect(closed.list).toBe('none')
+  expect(closed.mask).not.toBe('none')
+  expect(closed.duration).toBe('0.15s')
+  await summary.click()
+  expect((await marker()).transform).not.toBe('none')
+
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  expect((await marker()).duration).toBe('0s')
+})

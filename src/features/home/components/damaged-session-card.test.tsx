@@ -23,7 +23,7 @@ describe('carte de session endommagée', () => {
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Actions pour « Oral cassé »' }))
     const items = await screen.findAllByRole('menuitem')
-    expect(items.map((item) => item.textContent)).toEqual(['Exporter un backup', 'Supprimer'])
+    expect(items.map((item) => item.textContent)).toEqual(['Exporter une sauvegarde', 'Supprimer'])
   })
 
   test('sans nom lisible, le titre est l’identifiant', async () => {

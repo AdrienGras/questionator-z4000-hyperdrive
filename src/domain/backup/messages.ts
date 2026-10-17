@@ -4,9 +4,9 @@ import { t, type Dictionary, type Locale } from '@/lib/i18n/i18n'
 import { isBackupRuleIssue, type BackupIssue, type BackupIssueParams } from './issues'
 
 const fr: Dictionary<BackupIssueParams> = {
-  unknown_format: () => "Ce fichier n'est pas un backup Questionator.",
+  unknown_format: () => "Ce fichier n'est pas une sauvegarde Questionator.",
   unsupported_format_version: ({ found, supported }) =>
-    `Ce backup utilise le format ${found}, cette version de l'application ne lit que jusqu'au format ${supported} : il faut mettre à jour l'application.`,
+    `Cette sauvegarde utilise le format ${found}, cette version de l'application ne lit que jusqu'au format ${supported} : il faut mettre à jour l'application.`,
   unknown_category: ({ categoryId }) =>
     `La catégorie « ${categoryId} » n'existe pas dans la config de la session.`,
   unknown_question: ({ categoryId, questionId }) =>

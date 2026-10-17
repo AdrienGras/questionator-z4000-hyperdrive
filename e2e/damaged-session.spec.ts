@@ -52,7 +52,7 @@ test('une session endommagée s’exporte telle quelle et s’affiche badgée à
   // 4. L'export écrit l'enregistrement lu, sans le réparer.
   const [download] = await Promise.all([
     page.waitForEvent('download'),
-    page.getByRole('button', { name: 'Exporter un backup' }).click(),
+    page.getByRole('button', { name: 'Exporter une sauvegarde' }).click(),
   ])
   const backup = backupSchema.parse(JSON.parse(await readFile(await download.path(), 'utf8')))
   expect(backup.session).toEqual(corrupted)

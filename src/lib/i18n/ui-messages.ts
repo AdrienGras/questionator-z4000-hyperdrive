@@ -418,7 +418,7 @@ const fr: Dictionary<UiMessageParams> = {
   not_found_title: () => 'Page introuvable',
   back_home: () => 'Retour à l’accueil',
   home_create: () => 'Créer une session',
-  home_import: () => 'Importer un backup',
+  home_import: () => 'Importer une sauvegarde',
   home_actions_title: () => 'Actions',
   home_sessions_title: () => 'Sessions',
   home_create_title: () => 'Nouvelle session',
@@ -429,7 +429,7 @@ const fr: Dictionary<UiMessageParams> = {
   home_config_schema_link: () => 'JSON Schema de la config',
   home_import_title: () => 'Restaurer une session',
   home_import_body: () =>
-    "Restaurez une session à partir d'un fichier .json créé par « Exporter un backup ». Vous pouvez aussi déposer le fichier n'importe où sur la page.",
+    "Restaurez une session à partir d'un fichier .json créé par « Exporter une sauvegarde ». Vous pouvez aussi déposer le fichier n'importe où sur la page.",
   home_editor_title: () => 'Éditer une config',
   home_editor_body: () =>
     "Écrivez ou corrigez un fichier de configuration : les erreurs sont signalées en direct et les questions affichées telles qu'elles seront projetées.",
@@ -445,7 +445,7 @@ const fr: Dictionary<UiMessageParams> = {
     'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Vous pouvez le supprimer.',
   persistence_warning_label: () => 'Stockage non garanti',
   persistence_warning: () =>
-    "Le navigateur n'a pas garanti la conservation des données : il peut effacer vos sessions s'il manque d'espace. Exportez régulièrement un backup.",
+    "Le navigateur n'a pas garanti la conservation des données : il peut effacer vos sessions s'il manque d'espace. Exportez régulièrement une sauvegarde.",
   db_outdated: () =>
     "L'application a été mise à jour dans un autre onglet. Rechargez la page pour continuer.",
   db_reload: () => 'Recharger',
@@ -466,7 +466,7 @@ const fr: Dictionary<UiMessageParams> = {
   damaged_title: () => 'Cette session est endommagée',
   damaged_badge: () => 'Endommagée',
   damaged_body: () =>
-    'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Exportez un backup pour le conserver ou le corriger.',
+    'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Exportez une sauvegarde pour le conserver ou le corriger.',
   damaged_details: () => 'Détails',
   present_waiting: () => "L'épreuve va bientôt commencer.",
   present_prompt_label: () => 'Question en cours',
@@ -481,7 +481,7 @@ const fr: Dictionary<UiMessageParams> = {
   present_fullscreen: () => 'Plein écran',
   present_exit_fullscreen: () => 'Quitter le plein écran',
   empty_title: () => 'Aucune session',
-  empty_body: () => 'Créez une session ou importez un backup depuis les actions.',
+  empty_body: () => 'Créez une session ou importez une sauvegarde depuis les actions.',
   card_examiner: ({ name }) => `Jury : ${name}`,
   card_updated: ({ date }) => `Modifiée le ${date}`,
   card_progress: ({ done, absent, remaining }) =>
@@ -490,7 +490,7 @@ const fr: Dictionary<UiMessageParams> = {
   card_actions: ({ name }) => `Actions pour « ${name} »`,
   action_rename: () => 'Renommer',
   action_edit_examiner: () => "Modifier l'examinateur",
-  action_export: () => 'Exporter un backup',
+  action_export: () => 'Exporter une sauvegarde',
   action_delete: () => 'Supprimer',
   rename_title: () => 'Renommer la session',
   rename_label: () => 'Nom de la session',
@@ -504,9 +504,9 @@ const fr: Dictionary<UiMessageParams> = {
     "L'enregistrement a échoué. La session a peut-être été supprimée dans un autre onglet.",
   delete_title: ({ name }) => `Supprimer « ${name} » ?`,
   delete_body: () => 'Cette action est définitive : tous les passages de la session seront perdus.',
-  delete_export_first: () => "Exporter un backup d'abord",
+  delete_export_first: () => "Exporter une sauvegarde d'abord",
   delete_confirm: () => 'Supprimer',
-  import_drop_hint: () => 'Déposez le backup ici',
+  import_drop_hint: () => 'Déposez la sauvegarde ici',
   import_error_title: ({ fileName }) => `Import impossible : ${fileName}`,
   import_read_error: () => "Le fichier n'a pas pu être lu.",
   import_load_error: () => "L'import n'a pas pu démarrer. Rechargez la page et réessayez.",
