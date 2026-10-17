@@ -98,3 +98,26 @@ test('sans maxPoints (showCategoryPoints à false) : aucun point affiché', () =
   render(<CategoryTiles ui={makeUi()} categories={[hidden]} />)
   expect(tile('Catégorie a')).not.toHaveTextContent(/\bpts?\b/)
 })
+
+test('grille : consigne « Choisissez une catégorie »', () => {
+  render(<CategoryTiles ui={makeUi()} variant="grid" categories={[category('a')]} />)
+  expect(
+    screen.getByRole('heading', { level: 2, name: 'Choisissez une catégorie' }),
+  ).toBeInTheDocument()
+})
+
+test('rangée : catégorie courante marquée, autres atténuées', () => {
+  render(
+    <CategoryTiles
+      ui={makeUi()}
+      variant="row"
+      currentCategoryId="b"
+      categories={[category('a', { disabled: true }), category('b', { disabled: true })]}
+    />,
+  )
+  expect(screen.getByRole('list', { name: 'Catégories' })).toBeInTheDocument()
+  expect(tile('Catégorie b')).toHaveAttribute('aria-current', 'true')
+  expect(tile('Catégorie a')).not.toHaveAttribute('aria-current')
+  expect(tile('Catégorie a')).toHaveClass('opacity-45')
+  expect(screen.queryByRole('heading')).not.toBeInTheDocument()
+})

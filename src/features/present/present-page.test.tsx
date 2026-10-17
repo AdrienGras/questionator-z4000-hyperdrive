@@ -91,7 +91,9 @@ test('étudiant sans tirage : nom, une tuile par catégorie, « Question 1 / 3 �
   expect(await screen.findByText(/Alice/)).toHaveTextContent('Durand')
   expect(screen.getByText('Algorithmique')).toBeInTheDocument()
   expect(screen.getByText('Bases de données')).toBeInTheDocument()
-  expect(screen.getByText('Question 1 / 3')).toBeInTheDocument()
+  expect(screen.getByText('Question', { selector: 'dt' }).nextElementSibling).toHaveTextContent(
+    '1 / 3',
+  )
   expect(screen.queryAllByRole('button').map((b) => b.textContent)).not.toContain('Algorithmique')
   expect(screen.getByText('Algorithmique').closest('[tabindex]')).toBeNull()
 })
@@ -102,6 +104,14 @@ test('question en cours : énoncé affiché, réponse absente', async () => {
 
   expect(await screen.findByText('Énoncé a-1')).toBeInTheDocument()
   expect(screen.queryByText(/Secret a-1/)).not.toBeInTheDocument()
+})
+
+test('question en cours : aucun titre de question projeté (D103)', async () => {
+  await seed(makeStudent(['pending']))
+  renderAt('/present/session-1')
+
+  await screen.findByText('Énoncé a-1')
+  expect(screen.getByRole('main')).not.toHaveTextContent('Titre a-1')
 })
 
 test('terminé : pas de note tant que non révélé, puis note, puis correction visible', async () => {
@@ -132,7 +142,9 @@ test('score cumulé affiché avec le format de la locale', async () => {
   await seed(makeStudent([3, 'pending']), { showCumulativeScore: true })
   renderAt('/present/session-1')
 
-  expect(await screen.findByText('Score : 3')).toBeInTheDocument()
+  expect(
+    (await screen.findByText('Score', { selector: 'dt' })).nextElementSibling,
+  ).toHaveTextContent('3')
 })
 
 test('détail final : titres et « Passée » pour une passe', async () => {

@@ -67,7 +67,7 @@ test('la vue projetée suit l’examinateur sans action et ne montre jamais les 
   // 2. Projection de l'étudiant actif : son nom apparaît dans la popup.
   await examiner.projectActiveStudent()
   await expect(present.studentName('Alice Durand')).toBeVisible()
-  await expect(present.questionIndex).toHaveText('Question 1 / 3')
+  await expect(present.questionIndex).toHaveText('1 / 3')
 
   // 3. Tirage : l'énoncé apparaît dans la popup sans aucune action côté projection, et les
   // réponses n'y sont pas (c'est là qu'une fuite est la plus probable).
@@ -79,7 +79,7 @@ test('la vue projetée suit l’examinateur sans action et ne montre jamais les 
 
   // 4. Notation : la question suivante est annoncée.
   await examiner.score('1')
-  await expect(present.questionIndex).toHaveText('Question 2 / 3')
+  await expect(present.questionIndex).toHaveText('2 / 3')
 
   // 5. Commentaire de l'examinateur.
   await examiner.setComment(comment)
@@ -91,6 +91,6 @@ test('la vue projetée suit l’examinateur sans action et ne montre jamais les 
   await present.close()
   const reopened = await examiner.openPresentView()
   await expect(reopened.studentName('Alice Durand')).toBeVisible()
-  await expect(reopened.questionIndex).toHaveText('Question 2 / 3')
+  await expect(reopened.questionIndex).toHaveText('2 / 3')
   await expectNoLeak(reopened, answers, comment)
 })

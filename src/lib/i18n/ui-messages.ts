@@ -86,9 +86,11 @@ export type UiMessageParams = {
   damaged_body: NoParams
   damaged_details: { count: number }
   present_waiting: NoParams
+  present_question_label: NoParams
+  present_score_label: NoParams
+  present_choose_category: NoParams
+  present_categories: NoParams
   present_prompt_label: NoParams
-  present_question_index: { current: number; total: number }
-  present_cumulative: { score: string }
   present_finished: NoParams
   present_final: { value: string; scale: string }
   present_raw: { value: string }
@@ -583,9 +585,11 @@ const fr: Dictionary<UiMessageParams> = {
     'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Exportez une sauvegarde pour le conserver ou le corriger.',
   damaged_details: ({ count }) => `Détails · ${count} ${plural(count, 'problème', 'problèmes')}`,
   present_waiting: () => "L'épreuve va bientôt commencer.",
+  present_question_label: () => 'Question',
+  present_score_label: () => 'Score',
+  present_choose_category: () => 'Choisissez une catégorie',
+  present_categories: () => 'Catégories',
   present_prompt_label: () => 'Question en cours',
-  present_question_index: ({ current, total }) => `Question ${current} / ${total}`,
-  present_cumulative: ({ score }) => `Score : ${score}`,
   present_finished: () => 'Passage terminé',
   present_final: ({ value, scale }) => `Note : ${value} / ${scale}`,
   present_raw: ({ value }) => `Score brut : ${value}`,
@@ -1062,9 +1066,11 @@ const en: Dictionary<UiMessageParams> = {
     'The saved content is inconsistent; the app cannot open it. Export a backup to keep it or fix it.',
   damaged_details: ({ count }) => `Details · ${count} ${pluralEn(count, 'issue', 'issues')}`,
   present_waiting: () => 'The exam will start soon.',
+  present_question_label: () => 'Question',
+  present_score_label: () => 'Score',
+  present_choose_category: () => 'Choose a category',
+  present_categories: () => 'Categories',
   present_prompt_label: () => 'Current question',
-  present_question_index: ({ current, total }) => `Question ${current} / ${total}`,
-  present_cumulative: ({ score }) => `Score: ${score}`,
   present_finished: () => 'Exam complete',
   present_final: ({ value, scale }) => `Grade: ${value} / ${scale}`,
   present_raw: ({ value }) => `Raw score: ${value}`,
