@@ -2,6 +2,7 @@ import { IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand } from '@tab
 import { useLocation } from '@tanstack/react-router'
 import { useState } from 'react'
 import { activeMenuItem } from '@/components/menu/active-menu-item'
+import { MenuDrawer } from '@/components/menu/menu-drawer'
 import { MenuLinks } from '@/components/menu/menu-links'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useUi } from '@/lib/i18n/use-ui'
@@ -9,10 +10,10 @@ import { readMenuCollapsed, writeMenuCollapsed } from '@/lib/menu-collapsed'
 import { cn } from '@/lib/utils'
 
 /**
- * Menu latéral permanent (D102, D103), monté une fois dans `RootLayout`, hors vue projetée. Langue
- * de l'application, pas celle d'une session (D105) : `lang` le dit aux lecteurs d'écran quand une
- * session passe `<html>` dans une autre langue. Ses tokens `sidebar-*` sont lus sur `<html>`, où le
- * thème de la session s'applique.
+ * Menu latéral permanent (D102, D103), monté une fois dans `RootLayout`, hors vue projetée ; en
+ * tiroir sous 768 px (`MenuDrawer`). Langue de l'application, pas celle d'une session (D105) :
+ * `lang` le dit aux lecteurs d'écran quand une session passe `<html>` dans une autre langue. Ses
+ * tokens `sidebar-*` sont lus sur `<html>`, où le thème de la session s'applique.
  */
 export function AppMenu() {
   const ui = useUi()
@@ -31,6 +32,7 @@ export function AppMenu() {
   const ToggleIcon = collapsed ? IconLayoutSidebarLeftExpand : IconLayoutSidebarLeftCollapse
   return (
     <TooltipProvider>
+      <MenuDrawer ui={ui} active={active} />
       <aside
         lang={ui.locale}
         className={cn(
