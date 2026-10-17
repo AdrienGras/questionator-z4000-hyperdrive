@@ -116,6 +116,9 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Éditeur de config
 
+- [ ] Alignement vertical de l'action d'en-tête : `PageShell` aligne en bas (`items-end`), l'artboard `editeur-config` centre « Créer une session avec cette config » sur le bloc titre. À trancher pour toutes les pages avec une action d'en-tête. *(F44.6)*
+- [ ] Barre d'outils de la frame : en anglais (« Start from the example »), elle passe à la ligne sous le nom de fichier à 1280 px. *(F44.6)*
+
 - [x] `locateIssue` : BOM en tête (colonne de `json_syntax` décalée d'un caractère en ligne 1), colonne au-delà de la ligne bornée à la fin du texte plutôt qu'à la fin de ligne ; pas de tests CRLF / BOM / index hors limites. → #87 *Fait en #87 (PR 3).*
 - [x] `JsonEditor` : `aria-label` figé au montage, diagnostics envoyés deux fois au montage ; tests de `reveal` et des diagnostics après montage à ajouter. → #87 *Fait en #87 (PR 3).*
 - [x] Aperçu : énoncé très long sans `break-words`. → #109 *Fait en #109 (`wrap-anywhere` sur la carte).*

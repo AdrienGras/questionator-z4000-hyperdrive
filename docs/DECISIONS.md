@@ -1688,3 +1688,26 @@ autre encodage 8 bits.
 **Pourquoi** : chaque espace a sa page, l'accueil oriente au lieu de tout lister, et rien de ce que l'ancien accueil permettait (lister, ouvrir, supprimer, restaurer par bouton ou dépôt, signaler un endommagé) ne disparaît.
 
 **Reporté dans** : `src/features/{home,sessions,trainings}/`, `src/components/import/`, `src/components/{space-icon,session-progress,success-ring,training-figures,page-shell,damaged-badge,damaged-session,damaged-training-screen}.tsx`, `src/hooks/use-training-summary.ts`, `src/domain/training/training-stats.ts`, `src/lib/format-date.ts` ; `docs/CONVENTIONS.md` § « Page examinateur » ; plan `docs/superpowers/plans/2026-10-17-f44-5-accueil-espaces.md`.
+
+## D107 — F44.6 : création de session et éditeur de config (2026-10-17)
+
+**Question** : comment ramener `/new` et `/editor` à leurs artboards (`creation-session`, `creation-avertissements`, `editeur-config`) sans toucher au comportement, et que trancher là où les maquettes se taisent (plusieurs causes de blocage, couleur des états, mots-clés JSON, navigation de l'aperçu sous routage par hash) ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Phrase sous « Créer la session » | `submitBlocker` (feature), une cause à la fois, dans l'ordre : base (`outdated` ou `unavailable`), CSV en erreur ou illisible, config invalide, illisible ou validateur absent, fichier manquant, nom vide. Aucune phrase pendant une lecture ni pendant l'écriture. Le bouton porte `aria-describedby` vers la phrase quand elle est là. La cause « fichier manquant » s'ajoute aux quatre de la carte des écrans. | Un état transitoire ne s'explique pas ; sans la cinquième cause, un bouton désactivé avec un seul fichier déposé restait sans explication. |
+| Couleurs d'état | Fichier valide : `space-training` (vert) ; avertissement : `muted-foreground` (texte) et `space-editor` (pastille de marge de l'éditeur) ; erreur : `destructive`. `border-amber-500` disparaît. | Couleurs des artboards ; précédent de `offline-ready-prompt`. Le design system n'a pas de token « succès ». |
+| Syntaxe de l'éditeur | Palette des blocs de code des artboards en mode sombre : propriété `#7dd3fc`, chaîne `#f9a8d4`, nombre `#fcd34d`, ponctuation `muted-foreground`, mot-clé `#c4b5fd` (non maquetté). Le bloc clair `.cm-editor` attend #152. | « Thème de l'éditeur accordé au design system » (#148). |
+| Panneau « Problèmes » | Au-dessus du code, dans la frame, **rendu dès le montage** (en-tête seul avant la première validation), numéro de ligne calculé sur le texte validé (`lineAt`). | Apparu à la première validation, il poussait le code sous la souris : l'infobulle de survol visait la ligne du dessus (4 e2e rouges). |
+| Navigation de l'aperçu | Boutons qui font défiler la frame (`scrollIntoView`, `auto` si mouvement réduit) et donnent le focus au titre de la catégorie ; jamais d'ancre. Ids dérivés de `useId()` et du rang. | Routage par hash : `href="#…"` changerait de page. |
+| Briques partagées | `ActionHalo` (halo derrière l'action principale, `start` ou `end`), `formatScale` (barème selon la langue), `FileDropField` et `ConfigIssueList` restylés dans `src/components/`. La mise en place d'un entraînement prend leur forme dès maintenant ; sa zone compacte relève de #151. | D59 : partagé par deux features. |
+| Débord sur téléphone | Colonne de contenu de `RootLayout` en `overflow-x-clip`. | Le halo d'une action dépasse du bord ; `clip` ne crée pas de conteneur de défilement (colonnes collantes intactes). |
+| `cn` | `extendTailwindMerge` avec les tailles `text-*` du design system. | tailwind-merge les prenait pour des couleurs et les retirait devant `text-destructive` (QUIRKS 2026-10-17). |
+| Libellés | Courts à l'écran, longs en `aria-label` (« Charger » / « Charger un fichier », « Liste d'exemple » / « Télécharger la liste d'exemple ») ; « (facultatif) » dans le libellé de l'examinateur, `examiner_hint` gardé pour le dialogue. | Carte des écrans ; le nom accessible contient le texte visible (WCAG 2.5.3). |
+| Tuile d'en-tête | `SpaceIcon size="lg"` (52 px) comme les pages d'espace ; artboards passés de 48 à 52 px (canevas v23). | Une seule taille de tuile d'en-tête. |
+
+**Pourquoi** : les deux écrans prennent la forme validée, et chaque état que le code connaissait (lecture, erreurs de lecture et de validateur, aperçu périmé ou vide, avertissements d'une config valide, « Skips désactivés ») reste visible.
+
+**Reporté dans** : `src/features/create-session/` (`submit-blocker.ts`, `components/preview-card.tsx`), `src/features/config-editor/` (`issue-locations.ts` `lineAt`, `components/issue-list.tsx`, `components/config-preview.tsx`, `editor-theme.ts`), `src/components/{action-halo,format-scale,file-drop-field,config-issue-list}.tsx`, `src/lib/utils.ts`, `src/routes/__root.tsx`, `src/index.css` ; `docs/CONVENTIONS.md` § « Page examinateur » ; plan `docs/superpowers/plans/2026-10-17-f44-6-creation-editeur.md`.

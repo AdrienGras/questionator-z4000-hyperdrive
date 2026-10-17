@@ -953,3 +953,27 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : une page en `http://` servie depuis un autre nom que `localhost` n'est pas un contexte sécurisé (`window.isSecureContext === false`) ; le navigateur n'y expose pas `crypto.randomUUID`, appelé à la création d'une session, d'un entraînement et à l'ajout d'un étudiant. Vérifié avec Chromium : `localhost` → `{ secure: true, randomUUID: 'function' }`, IP Tailscale → `{ secure: false, randomUUID: 'undefined' }`. La production (HTTPS) n'est pas concernée.
 **Workaround** : tester en `localhost`, ou servir le dev en HTTPS sur le tailnet (`tailscale serve`, certificats HTTPS activés sur le tailnet). Sur le tailnet en `http://`, ne valider que l'affichage.
 **Référence** : `src/features/create-session/hooks/use-create-form.ts`, `src/features/training-setup/hooks/use-training-setup.ts`, `src/features/session/hooks/use-passage-actions.ts` ; `docs/ENVIRONMENT.md` § Stack d'exécution.
+
+## `cn` (tailwind-merge) retirait les tailles de texte du design system devant une couleur (2026-10-17)
+
+**Découvert** : F44.6, captures de `/new` (chiffre « 1 erreur à corriger » en petit).
+**Symptôme** : `cn('text-score-md', 'text-destructive')` rend `text-destructive` seul ; même chose pour `text-small`, `text-h2`… à côté de `text-muted-foreground`.
+**Cause** : tailwind-merge ne connaît pas les tailles `--text-*` déclarées dans `@theme` : `text-score-md` ressemble pour lui à une couleur, en conflit avec la suivante.
+**Workaround** : corrigé dans `src/lib/utils.ts` (`extendTailwindMerge`, `theme.text`). Une nouvelle taille `--text-*` dans `index.css` s'ajoute aussi à cette liste.
+**Référence** : `src/lib/utils.ts`, `src/lib/utils.test.ts`.
+
+## Un bloc qui apparaît au-dessus de CodeMirror fausse le survol en e2e (2026-10-17)
+
+**Découvert** : F44.6, `e2e/config-editor.spec.ts` (survols de `finalScoreDisplay`, `mode`, `icon`).
+**Symptôme** : l'infobulle de survol décrit la clé de la ligne du dessus.
+**Cause** : le panneau « Problèmes », placé au-dessus du code, n'apparaissait qu'à la première validation (300 ms) ; le code descendait sous une souris déjà posée.
+**Workaround** : tout bloc au-dessus de l'éditeur est rendu dès le montage, à sa hauteur (en-tête seul avant la validation).
+**Référence** : `src/features/config-editor/components/issue-list.tsx`, `config-editor-page.tsx`.
+
+## jsdom n'implémente pas `scrollIntoView` (2026-10-17)
+
+**Découvert** : F44.6, navigation par catégorie de l'aperçu de l'éditeur.
+**Symptôme** : `TypeError: section.scrollIntoView is not a function` dans un test unitaire.
+**Cause** : jsdom ne fait aucune mise en page et n'expose pas `Element.prototype.scrollIntoView`.
+**Workaround** : dans le test, `Element.prototype.scrollIntoView = vi.fn()` avant le rendu, puis vérifier `mock.contexts[0]` (l'élément défilé).
+**Référence** : `src/features/config-editor/components/config-preview.test.tsx`.

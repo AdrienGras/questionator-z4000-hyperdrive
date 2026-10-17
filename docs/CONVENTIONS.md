@@ -549,6 +549,9 @@ test('barre de titre : fil d’Ariane puis actions', async () => {
 - Page d'espace (D106) : `icon={<SpaceIcon space="…" size="lg" />}`, `meta` = sous-titre de l'espace, `halo="space"` ; l'accueil prend `halo="home"`. Un décor qui sort du cadre passe par `halo`, jamais par un `div` en position absolue dans la page : le calque du halo s'ancre à la colonne de contenu de `RootLayout` (`relative isolate`), pas au `main` borné en largeur, et il est coupé à cette colonne (ni barre du haut du téléphone, ni menu).
 - Grille de cartes en `auto-fit`/`auto-fill` : minimum écrit `min(100%, Npx)` (`grid-cols-[repeat(auto-fill,minmax(min(100%,380px),1fr))]`), sinon une carte de 380 px déborde d'un téléphone de 390 px.
 - Une action utile d'une carte endommagée sort du menu « … » en bouton visible (export pour une session, suppression pour un entraînement), le menu la garde aussi.
+- Action principale d'un écran (D107) : entourée d'`ActionHalo` (`@/components/action-halo`, `side="start"` sous un formulaire, `"end"` en en-tête), un seul par écran. Le débord du halo est coupé par la colonne de contenu de `RootLayout` (`overflow-x-clip`).
+- Libellé court à l'écran, long en `aria-label` (« Charger » / « Charger un fichier ») : le nom accessible contient toujours le texte visible.
+- Bouton désactivé : une phrase dit pourquoi, reliée par `aria-describedby` (une cause à la fois, jamais pendant un état transitoire ; modèle `submitBlocker` de la création).
 
 ## Menu et coquille de page — règles
 
