@@ -1663,3 +1663,28 @@ autre encodage 8 bits.
 **Pourquoi** : un menu unique, monté à la racine, est la seule façon de garantir sa présence sur tous les écrans (pages et écrans d'état) sans le dupliquer page par page, tout en suivant le thème de session.
 
 **Reporté dans** : `src/components/menu/`, `src/components/{breadcrumb,back-link,status-screen,prompt-classes}.tsx`, `src/lib/menu-collapsed.ts`, `src/components/page-shell.tsx` ; canevas (`apres/menu-etroit`), design system (Sidebar) ; `docs/CONVENTIONS.md` § « Page examinateur » et « Menu et coquille de page » ; plan `docs/superpowers/plans/2026-10-17-f44-4-menu-coquille.md`.
+
+## D106 — F44.5 : accueil en tableau de bord et pages d'espace (2026-10-17)
+
+**Question** : comment redistribuer les composants de l'accueil entre `/`, `/sessions` et `/trainings` sans import entre features, que montre l'accueil (et quand montre-t-il le premier lancement), et que deviennent les cas que les maquettes ne disent pas (import d'une sauvegarde ancienne, enregistrements endommagés, pastille de stockage) ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Répartition | Cartes de session et leurs dialogues dans `features/sessions`, cartes d'entraînement dans `features/trainings`, tableau de bord et premier lancement dans `features/home`. L'import d'une sauvegarde (`ImportController`, `useBackupImport`, `useRetained`) remonte dans `src/components/import/`, comme `components/export/`. Briques communes dans `src/components/` : `SpaceIcon`, `SessionProgress`, `SuccessRing`, `TrainingFigures`, et `useTrainingSummary` dans `src/hooks/`. | D59 : un composant de deux features remonte ; l'import sert l'accueil et `/sessions`. |
+| `PageShell` | Props `icon` (tuile à gauche du titre, `SpaceIcon size="lg"` sur une page d'espace) et `halo` (`home`, `space`) : premier usage des tokens `halo-*` de #145. | Artboards `accueil`, `sessions`, `trainings`. |
+| « Reprendre » | Les 3 éléments les plus récents, sessions et entraînements confondus (`compareRecords`), endommagés exclus ; section absente s'il n'y en a aucun. | Carte des écrans (D103) ; un endommagé ne se reprend pas. |
+| Compteurs des tuiles | `sessions.length` et `trainings.length`, endommagés compris. | Ils comptent ce que la page d'espace liste. |
+| Premier lancement | Base `open`, les deux listes lues et vides, endommagés compris ; jamais en `outdated` ou `unavailable` (bandeau). `h1` « Bienvenue ». | Un enregistrement endommagé est une donnée : il se traite sur sa page d'espace. |
+| Import depuis l'accueil | Un import réussi mène à `/sessions` (`onImported`). | La date d'une sauvegarde ancienne la laisse hors de « Reprendre » : l'import réussirait sans rien montrer. |
+| Retour des écrans endommagés | Session endommagée : « Retour aux sessions » (`/sessions`) ; entraînement endommagé : « Retour aux entraînements » (`/trainings`). | L'accueil exclut les endommagés : leur carte (export, suppression) n'est plus que sur la page d'espace. Écart aux artboards `bandeaux` et `accueil-dialogues`, mis à jour. |
+| Taux de réussite global | `TrainingStats.rate` : somme des points sur somme des max de toutes les notes, même définition que `byCategory[].rate` ; `null` sans note (« — », anneau vide). | Carte des écrans (D103). |
+| Pastille « Stockage non garanti » | Bouton en pastille sous le sous-titre, explication en infobulle (survol et focus). | L'artboard pose un `title`, que le clavier et le tactile n'atteignent pas ; l'ancien bouton avait une infobulle. |
+| Titre de l'accueil | `h1` « Accueil » (`menu_home`) ; `app_title` reste le nom complet ailleurs. | Artboard `accueil`. |
+| `/trainings` vide | « Aucun entraînement » + « Lancez un entraînement à partir d'une config. », restylé comme l'état vide des sessions. | Non maquetté : le code fait foi (l'ancien accueil masquait la section). |
+| Anneau de réussite | SVG caché, libellé `sr-only` (« Taux de réussite : 72 % »). | oxlint `prefer-tag-over-role` refuse `role="img"`, même sur `<svg>`. |
+
+**Pourquoi** : chaque espace a sa page, l'accueil oriente au lieu de tout lister, et rien de ce que l'ancien accueil permettait (lister, ouvrir, supprimer, restaurer par bouton ou dépôt, signaler un endommagé) ne disparaît.
+
+**Reporté dans** : `src/features/{home,sessions,trainings}/`, `src/components/import/`, `src/components/{space-icon,session-progress,success-ring,training-figures,page-shell,damaged-badge,damaged-session,damaged-training-screen}.tsx`, `src/hooks/use-training-summary.ts`, `src/domain/training/training-stats.ts`, `src/lib/format-date.ts` ; `docs/CONVENTIONS.md` § « Page examinateur » ; plan `docs/superpowers/plans/2026-10-17-f44-5-accueil-espaces.md`.

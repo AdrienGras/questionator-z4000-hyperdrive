@@ -84,6 +84,10 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [x] Ajouter un favicon (404 sur `/favicon.ico` en preview et en prod). → #53 — réglé par F17 (D72), constaté en F19
 - [ ] Afficher la version de l'application (`APP_VERSION`, déjà dans les backups) quelque part dans l'interface, par exemple au pied de l'accueil : le formulaire de bug (#125) demande à défaut la date d'utilisation et le mode (onglet ou installée).
 
+- [ ] Accueil sur téléphone (#147) : les trois actions de l'en-tête passent à la ligne, « Importer une sauvegarde » seule à droite au-dessus des deux autres. Non maquetté à 390 px ; à revoir en fin de phase 3 (artboard étroit de l'accueil, ou import replié dans un menu).
+- [ ] Écrans d'entraînement (#151) : leur lien « Retour à l'accueil » pourrait mener à `/trainings` ou passer en fil d'Ariane, comme les écrans de session ; à trancher avec les artboards `entrainement-*`.
+- [ ] Guide (`site/guide/`) : accueil en tableau de bord, premier lancement, pages Sessions et Entraînement, captures (`pnpm docs:screenshots`) ; passe prévue en fin de phase 3.
+
 ## Création de session
 
 - [x] Garde de montage de la création : comparer aussi `router.state.location.pathname` avant de naviguer (fenêtre résiduelle pendant le chargement du chunk de l'accueil). → #87 *Fait en #87 (PR 4) : chemin relevé avant `submit` et comparé après ; test RED reproduit (retour cliqué, écriture terminée avant le montage de l'accueil).*

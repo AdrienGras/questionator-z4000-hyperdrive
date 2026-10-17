@@ -929,3 +929,19 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Workaround** : comparer à `cn(buttonVariants(...)).split(' ')` pour un `Button`, à la chaîne brute pour un lien.
 **Référence** : `src/components/damaged-session.test.tsx`.
 
+
+## Le garde-fou `heavy-doubles` prend un simple `href` vers `config.example.json` pour un rendu de la config d'exemple (2026-10-17)
+
+**Découvert** : F44.5, `first-run.test.tsx`.
+**Symptôme** : `src/testing/heavy-doubles.test.ts` échoue et réclame les doublures des icônes et du surligneur dans un test qui ne rend aucune config, seulement le lien de téléchargement de l'exemple.
+**Cause** : le garde-fou lit les sources des `.test.tsx` et cherche le texte `config.example.json` (ou `<ConfigEditorPage`) ; une assertion `toHaveAttribute('href', `${base}config.example.json`)` contient ce texte.
+**Workaround** : vérifier le lien par une regex (`toMatch(/config\.example\.json$/)`), avec un commentaire qui dit pourquoi ; ne pas ajouter de doublures inutiles. Un test qui rend vraiment la config d'exemple garde la règle.
+**Référence** : `src/testing/heavy-doubles.test.ts`, `src/features/home/components/first-run.test.tsx`.
+
+## Après `useLiveQuery`, l'accueil rend son en-tête avant ses sections : `getBy` d'un titre de section échoue (2026-10-17)
+
+**Découvert** : F44.5, `home-page.test.tsx` (test en anglais).
+**Symptôme** : `getByRole('heading', { name: 'Spaces' })` échoue juste après un `findBy` du `h1`, alors que la section s'affiche bien.
+**Cause** : le `h1` vient de `PageShell`, rendu tout de suite ; « Reprendre » et « Espaces » attendent la lecture des deux listes (`useSessions`, `useTrainings`), qui arrive au rendu suivant.
+**Workaround** : attendre une section par `findBy`, jamais `getBy` après le seul `h1`.
+**Référence** : `src/features/home/home-page.tsx`.
