@@ -1619,3 +1619,23 @@ autre encodage 8 bits.
 **Pourquoi** : la carte des écrans (`docs/superpowers/specs/2026-10-17-f44-carte-des-ecrans.md`) a confronté les 29 artboards de la page « Après » au code. La plupart des éléments qui semblaient nouveaux existaient déjà ; les vrais écarts ont été tranchés un par un avec l'utilisateur, et le canevas corrigé en conséquence (planches ajoutées : onglet « Cet étudiant », animation de tirage, dialogues de l'accueil).
 
 **Reporté dans** : canevas (page « Après ») ; `docs/superpowers/specs/2026-10-17-f44-carte-des-ecrans.md` ; `docs/ENVIRONMENT.md` (URL du canevas et du design system).
+
+## D104 — F44.3 : tokens dans le code, mode sombre forcé (2026-10-17)
+
+**Question** : comment poser le design system dans `src/index.css` et les composants de base sans changer le schéma de config, et comment retirer la bascule de mode jusqu'au mode clair dérivé (#152) ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Où vivent les tokens | `:root` garde exactement les `THEME_TOKENS` (valeurs du design system) ; couleurs d'espace, ombres, typo et police mono en `@theme` (hors config) ; fin du dégradé, lueur et halos en `@theme inline`, dérivés de `--primary`. | Schéma de config inchangé (test de parité) ; les couleurs d'espace ne sont pas surchargeables ; `inline` recalcule les dérivés là où le thème d'une session s'applique, `ThemeScope` compris. |
+| Dérivation du dégradé | `color-mix(in oklch, var(--primary) 55%, oklch(0.45 0.2 280))`, soit environ `action-to` avec la `primary` par défaut. Le bouton garde `bg-primary` en aplat de secours. | `color-mix` a le même seuil de navigateurs que Tailwind v4 ; la syntaxe de couleur relative, non. |
+| Danger plein | Variante `destructive-solid` : fond `destructive`, texte `background` (6,2:1). Réservée aux confirmations de suppression et d'écrasement ; les déclencheurs restent en `destructive` (contour). | Le blanc sur `destructive` ne donne que 3,1:1. Garder `destructive` intact préserve son contraste en texte sur `card` (5,8:1). |
+| Mode forcé | `AppearanceProvider forcedMode="dark"` dans `__root.tsx` : choix mémorisé, système et `defaultColorMode` ignorés ; la classe `.dark` reste posée. `ColorModeToggle`, `color-mode.ts` et les clés i18n restent en place, démontés. | #152 n'a qu'à retirer la prop et remonter la bascule en pied de menu ; une préférence « clair » mémorisée avant la refonte ne peut plus bloquer l'app en clair sans bouton pour en sortir. |
+| Config d'exemple | `theme.dark` reprend les valeurs du thème entier (décision de l'utilisateur) ; `theme.light` attend #152. | Illustrer le nouveau style, tous les tokens visibles. |
+| Rattachement des retouches transverses | Chevrons des `<details>` et « backup » → « sauvegarde » en #145 ; forme des bandeaux en #146 avec la coquille. | Retouches globales sans changement de disposition, contre découpage en titre et corps lié à la coquille. |
+| Chevron | Couleur `muted-foreground`, comme sur le canevas (et non la couleur du texte du `summary`). | Le canevas fait foi (D102). |
+
+**Pourquoi** : poser l'apparence d'un coup sans toucher au contrat de la config (THEME_TOKENS, `defaultColorMode`) et sans perdre la mécanique de mode, qui revient au dernier ticket.
+
+**Reporté dans** : `src/index.css`, `src/components/ui/button.tsx`, `src/app/appearance-provider.tsx` ; design system (Sidebar, Button, Dialog, nouveau Disclosure) et canevas (`accueil-dialogues`, `session-dialogues`) ; `docs/CONVENTIONS.md` § « Tokens et palette — règles ».

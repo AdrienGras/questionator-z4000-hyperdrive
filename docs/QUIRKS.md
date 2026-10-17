@@ -888,3 +888,19 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : (1) les artboards n'ont pas le preflight de Tailwind : la feuille du navigateur donne `font-family: monospace` à `<code>`, qui ne hérite donc pas du `<pre>` ; (2) un `<span>` plus petit (« / 60 » en 18 px) hérite du `line-height` en px de son parent (36 px) et agrandit la boîte de ligne.
 **Workaround** : `style="font: inherit"` sur le `<code>` d'un `<pre>` ; `line-height: 1` sur le suffixe plus petit. Dans l'app, le preflight règle le premier cas ; le second peut s'y reproduire avec un `leading-*` en px.
 **Référence** : canevas F44 (`apres/projection-question`, `apres/entrainement-question`, `apres/trainings`).
+
+## Les e2e lisent des valeurs de token minifiées par le build (2026-10-17)
+
+**Découvert** : F44.3, `e2e/appearance.spec.ts`.
+**Symptôme** : `getComputedStyle(document.documentElement).getPropertyValue('--background')` rend `oklch(14.5% 0 0)` au lieu de `oklch(0.145 0 0)`, et `--radius` rend `.625rem`.
+**Cause** : le serveur web de Playwright sert le build de production, dont la CSS est minifiée ; une propriété personnalisée garde le texte minifié tel quel.
+**Workaround** : comparer une propriété calculée, normalisée par le navigateur (`getComputedStyle(document.body).backgroundColor` → `oklch(0.16 0.02 292)`), ou une longueur résolue (`border-top-left-radius` → `18px`), jamais le texte brut d'un token.
+**Référence** : `e2e/appearance.spec.ts`.
+
+## Publier sur le canevas ou le design system exige une lecture complète d'abord (2026-10-17)
+
+**Découvert** : F44.3, tâche 1 (alignement du design system sur D103).
+**Symptôme** : la publication est refusée (« You haven't viewed the latest version of this artifact ») alors que les fichiers modifiés venaient d'être lus avec `read` + `path`.
+**Cause** : lire un fichier par `path` ne compte pas comme avoir vu la version ; seule la lecture de l'artifact entier (`read` avec `url` seul) le fait.
+**Workaround** : `Artifact` `read` sur l'URL (sans `path`) dans la session, puis publier avec `root` et `files` ; les fichiers déjà lus restent valables si la version n'a pas changé.
+**Référence** : URL des deux Artifacts dans `docs/ENVIRONMENT.md`.

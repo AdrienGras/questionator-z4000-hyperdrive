@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-17 — F44.3 : tokens et composants de base (#145)
+
+**Dernière chose faite** : clôture de F44.2 (spec complétée, docs commitées, #144 fermé, #145 à #152 confirmés), plan `docs/superpowers/plans/2026-10-17-f44-3-tokens-composants-base.md` puis exécution native des 7 tâches sur `feat/f44-refonte-ui`, PR #154 en brouillon. Design system aligné sur D103 (menu repliable, danger plein en texte sombre, composant Disclosure) et canevas corrigé (`accueil-dialogues`, `session-dialogues`). Dans le code : mode sombre forcé (`AppearanceProvider forcedMode="dark"`), bascule démontée ; tokens du design system dans `src/index.css` (`:root` = THEME_TOKENS, `@theme` fixes, `@theme inline` dérivés de `--primary`) ; Geist Mono ; boutons (dégradé, 44 px, `destructive-solid`) ; cartes, dialogues, menus, champs, jauges, onglets ; chevrons des `<details>` ; « backup » → « sauvegarde » en FR. D104. `pnpm check` (1939 tests) et 50 e2e verts, Sonar OK.
+
+**Trucs en suspens** : **validation de #145 par l'utilisateur en local (`pnpm dev`)** avant d'ouvrir #146. Plusieurs écrans montrent encore plusieurs boutons en dégradé : chaque ticket d'écran (#147 à #151) choisit son action principale d'après l'artboard. Les halos (tokens posés) n'ont pas d'utilisateur : le critère « halos compris » se vérifie au premier état vide (#147). Le guide (`site/guide/`) parle encore de « backup » et de la bascule : passe prévue en fin de phase 3.
+
+**Prochaine chose à creuser** : plan de #146 (menu latéral repliable, coquille, aide et marque en pied, fil d'Ariane, bandeaux en titre et corps), d'après `menu-replie`, `bandeaux` et la section « Transverse » de la carte des écrans.
+
+**Notes pour future Claude** : registre d'exécution dans `.superpowers/sdd/2026-10-17-f44-3-tokens-composants-base/progress.md` (lignes `Ruling:`). Pour publier sur le canevas ou le design system : `read` de l'URL entière d'abord (QUIRKS 2026-10-17), puis `root` + `files`. Les e2e de style comparent des valeurs calculées, jamais le texte d'un token (le build minifie). La modale de suppression à trois boutons est à `max-w-xl` : boutons plus larges qu'avant. `ExaminerPage.chooseColorMode` reste dans les page objects, inutilisé jusqu'à #152.
+
 ## 2026-10-17 — F44 : maquettes validées, carte des écrans, D103
 
 **Dernière chose faite** : retouches de l'utilisateur sur le canevas (commentaires envoyés à Claude), revue de rendu des 26 artboards « Après » (rendu local par Playwright), puis carte des écrans : quatre explorations ont confronté chaque artboard au code de `src/`. Les écarts ont été tranchés avec l'utilisateur (tout suivant les recommandations) et le canevas corrigé : 29 artboards sur « Après », dont 3 nouveaux (`passage-panneau-etudiant`, `projection-tirage`, `accueil-dialogues`). Rédigés sur la branche d'intégration `feat/f44-refonte-ui` : `docs/superpowers/specs/2026-10-17-f44-carte-des-ecrans.md`, D103, URL du canevas et du design system dans `ENVIRONMENT.md`.

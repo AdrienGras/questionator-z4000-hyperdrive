@@ -141,6 +141,16 @@ corepack pnpm dlx shadcn@latest add <composant> -y
 - `shadcn add` peut demander d'écraser `button.tsx` : répondre « n » à toute demande d'écrasement d'un fichier existant (`printf 'n\n' | corepack pnpm dlx shadcn@latest add <composant>`), puis rétablir l'import de `cn` (`@/lib/utils`).
 - Couleurs uniquement via les tokens CSS (`bg-primary`, `text-foreground`…), jamais de couleur en dur : le thème de session (F07) surcharge ces tokens.
 
+## Tokens et palette — règles
+
+- **Tout dérive des tokens** : aucune couleur en dur dans un composant. Le design system (URL dans `docs/ENVIRONMENT.md`) est la référence ; `src/index.css` lui correspond (D102, D104).
+- **Trois étages dans `src/index.css`** : `:root` = exactement les `THEME_TOKENS` (surchargeables par `theme` d'une config, test de parité dans `schema.test.ts`) ; `@theme` = valeurs fixes hors config (`--color-space-*`, `--shadow-card`, `--shadow-popover`, `--font-mono`, échelle `--text-display|h1|h2|h3|score-xl|score-md|body|small|label`) ; `@theme inline` = dérivés de `--primary` (`--color-action-to`, `--color-halo-action`, `--color-halo-cool`, `--shadow-action`), écrits chacun en entier.
+- **Deux registres de couleur** : une couleur d'action (bouton `default` en dégradé `from-primary to-action-to`, une action principale par écran) ; une palette codée qui désigne (espaces : `text-space-*` sur tuile `bg-muted` dans le menu, `bg-space-*/14` sur l'accueil ; catégories : `--category-color` de la config ; données : `chart-1` à `chart-5`).
+- **Couleurs d'espace** : jamais en grand aplat, jamais surchargeables (hors `THEME_TOKENS`).
+- **Boutons** : `default` pour l'action attendue, `outline`/`secondary` (même rendu) pour le reste, `ghost` pour Annuler et les barres d'outils, `destructive` (contour) pour déclencher une suppression, `destructive-solid` (texte `background`) seulement pour la confirmer dans un dialogue.
+- **Rayons** : `rounded-sm|md|lg|xl` = 8 / 12 / 18 / 24 px, dérivés de `--radius` (18 px) ; barres et jauges en `rounded-full`.
+- **`<details>`** : aucun style à ajouter, le chevron vient des règles de base sur `summary` (flex, `gap`) ; un `summary` centré ajoute `justify-center`.
+
 ## oxlint — règles configurées
 
 - `import/no-unassigned-import` reste en erreur, avec une liste blanche pour les imports à effet de bord légitimes (`**/*.css`, `@testing-library/jest-dom/vitest`). Ajouter une entrée à `allow` dans `.oxlintrc.json` plutôt que désactiver la règle.
@@ -429,10 +439,10 @@ export function XPage() {
 ### Règles tacites
 
 - Un seul écrivain sur `<html>` : `AppearanceProvider` (`src/app/`), monté dans `__root.tsx`. Un écran ne touche jamais `document.documentElement`. Il déclare une portée avec `<SessionAppearance>` ou `useAppearanceScope(scope)` ; une portée garde sa place dans la pile même re-mémoïsée (un nouvel objet à chaque rendu ne la fait pas passer en fin de pile), mais mémoïser `scope` (`useMemo`) reste recommandé pour éviter de réécrire les tokens à chaque rendu (D60).
-- `color-scheme` suit le mode forcé : `:root { color-scheme: light; }` et `.dark { color-scheme: dark; }` dans `src/index.css`, pour que les contrôles natifs (barres de défilement…) suivent le mode de l'app plutôt que la préférence système (D26).
+- `color-scheme: dark` dans `:root` de `src/index.css` (thème sombre seul jusqu'à #152) : les contrôles natifs (barres de défilement…) suivent l'app plutôt que la préférence système (D26, D104).
 - Sous `SessionAppearance`, `useUi()` s'appelle **dans** l'enfant : appelé au-dessus, il ignore `config.locale`.
 - Couleur de config sur un élément : `style={{ '--category-color': color }}`, autorisé car React passe par `setProperty` (D15). Elle s'utilise en accent (`border-[var(--category-color)]`), jamais en fond sous du texte (D26).
-- Bascule de mode : `<ColorModeToggle ui={ui} />` dans l'en-tête de chaque écran.
+- Mode forcé pendant la refonte : `<AppearanceProvider forcedMode="dark">` dans `__root.tsx`, plus de `ColorModeToggle` dans les en-têtes ni sur la vue projetée (D104) ; seul `theme.dark` d'une config s'applique. #152 retire la prop et remonte la bascule en pied de menu.
 - Tests : `src/testing/setup.ts` simule `matchMedia` (`setSystemDark(true)` de `@/testing/match-media` pour simuler un système sombre) et vide `localStorage` après chaque test.
 - Vue projetée : ses composants ne reçoivent jamais la `Session` (`usePresentedConfig`, puis `toProjectedView` en F14).
 - Thème d'une config hors vue de session (aperçu de l'éditeur, F26) : `<ThemeScope theme={config.theme}>` pose les variables du mode effectif sur un `div` (`themeVariables`, même correspondance que `AppearanceProvider`), sans toucher `<html>`. Possible parce que `@theme inline` fait lire `var(--…)` aux utilitaires.
