@@ -1706,6 +1706,8 @@ autre encodage 8 bits.
 | Débord sur téléphone | Colonne de contenu de `RootLayout` en `overflow-x-clip`. | Le halo d'une action dépasse du bord ; `clip` ne crée pas de conteneur de défilement (colonnes collantes intactes). |
 | `cn` | `extendTailwindMerge` avec les tailles `text-*` du design system. | tailwind-merge les prenait pour des couleurs et les retirait devant `text-destructive` (QUIRKS 2026-10-17). |
 | Libellés | Courts à l'écran, longs en `aria-label` (« Charger » / « Charger un fichier », « Liste d'exemple » / « Télécharger la liste d'exemple ») ; « (facultatif) » dans le libellé de l'examinateur, `examiner_hint` gardé pour le dialogue. | Carte des écrans ; le nom accessible contient le texte visible (WCAG 2.5.3). |
+| Zones de dépôt | Toujours au grand format : même hauteur vides ou remplies (`min-h-46`), et égales entre elles (`flex-1`). | Retour de validation : la zone vide était plus basse que sa voisine remplie. |
+| Colonnes de l'éditeur | Code et aperçu à parts égales (bases 460 / 360 px, croissance 1:1), aperçu collant sur toute la hauteur en `lg` ; `max-h-160` sous `lg`. À 1280 px, l'aperçu reste dans les cotes de l'artboard (≈ 414 px). | Retour de validation : sur grand écran, toute la largeur allait au code et l'aperçu restait à 360 × 640 px. |
 | Tuile d'en-tête | `SpaceIcon size="lg"` (52 px) comme les pages d'espace ; artboards passés de 48 à 52 px (canevas v23). | Une seule taille de tuile d'en-tête. |
 
 **Pourquoi** : les deux écrans prennent la forme validée, et chaque état que le code connaissait (lecture, erreurs de lecture et de validateur, aperçu périmé ou vide, avertissements d'une config valide, « Skips désactivés ») reste visible.

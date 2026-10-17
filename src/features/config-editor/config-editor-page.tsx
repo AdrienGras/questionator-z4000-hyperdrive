@@ -190,7 +190,7 @@ export function ConfigEditorPage() {
         <div
           {...dropProps}
           className={cn(
-            'min-w-0 flex-[999_1_28.75rem] rounded-lg outline-2 outline-offset-4 outline-transparent lg:sticky lg:top-4 lg:h-[calc(100svh-2rem)]',
+            'min-w-0 flex-[1_1_28.75rem] rounded-lg outline-2 outline-offset-4 outline-transparent lg:sticky lg:top-4 lg:h-[calc(100svh-2rem)]',
             dragging && 'outline-primary outline-dashed',
           )}
         >
@@ -286,9 +286,11 @@ export function ConfigEditorPage() {
             />
           </section>
         </div>
+        {/* Aperçu à parts égales avec le code et collant sur toute la hauteur en `lg` : sur grand
+            écran, la largeur gagnée va aux deux colonnes, pas au seul code. */}
         <section
           aria-labelledby={previewTitleId}
-          className="flex max-w-110 min-w-0 flex-[1_1_22.5rem] flex-col gap-3"
+          className="flex min-w-0 flex-[1_1_22.5rem] flex-col gap-3 lg:sticky lg:top-4 lg:h-[calc(100svh-2rem)]"
         >
           <div className="flex flex-col gap-0.5">
             <h2 id={previewTitleId} className="text-h2">

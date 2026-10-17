@@ -80,8 +80,8 @@ export function FileDropField({
 
   return (
     // Écouteurs sur un `div` neutre : un `fieldset` (rôle group) n'est pas un élément interactif.
-    <div {...dropProps} className="min-w-0">
-      <fieldset className="flex min-w-0 flex-col">
+    <div {...dropProps} className="flex min-w-0 flex-1 flex-col">
+      <fieldset className="flex min-w-0 flex-1 flex-col">
         <legend className="mb-2 text-small font-semibold">{label}</legend>
         <input
           ref={input}
@@ -95,7 +95,9 @@ export function FileDropField({
         <div
           data-status={status}
           className={cn(
-            'flex flex-col items-center gap-2 rounded-lg border-[1.5px] bg-card px-5 py-6 text-center transition-colors',
+            // Toujours au grand format, rempli ou vide : même hauteur que la zone voisine (`flex-1`)
+            // et que l'état rempli seul (`min-h-46`).
+            'flex min-h-46 flex-1 flex-col items-center justify-center gap-2 rounded-lg border-[1.5px] bg-card px-5 py-6 text-center transition-colors',
             STATUS_BORDERS[status],
             dragging && 'border-dashed border-primary',
           )}

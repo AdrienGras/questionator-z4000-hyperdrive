@@ -85,7 +85,7 @@ export function ConfigPreview({ ui, config, stale }: ConfigPreviewProps) {
     { id: finalId, label: ui.text('editor_final_screen', {}) },
   ]
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
       {stale && (
         <output className="flex items-start gap-2 rounded-md bg-muted px-3 py-2 text-small">
           <IconAlertTriangle aria-hidden className="mt-px size-4 shrink-0 text-space-editor" />
@@ -96,7 +96,7 @@ export function ConfigPreview({ ui, config, stale }: ConfigPreviewProps) {
       <ThemeScope
         theme={config.theme}
         className={cn(
-          'flex max-h-160 flex-col gap-3 overflow-auto rounded-lg bg-background p-4 text-foreground',
+          'flex max-h-160 flex-col gap-3 overflow-auto rounded-lg bg-background p-4 text-foreground lg:max-h-none lg:min-h-0 lg:flex-1',
           stale && 'opacity-60',
         )}
       >

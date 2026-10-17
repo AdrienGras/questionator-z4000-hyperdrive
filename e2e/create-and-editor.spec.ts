@@ -100,6 +100,36 @@ test('éditeur : le code ne bouge pas quand un problème apparaît ou disparaît
   expect(Math.abs((await top()) - before)).toBeLessThanOrEqual(2)
 })
 
+test('création : les deux zones de dépôt gardent la même hauteur, pleine ou vide', async ({
+  page,
+}) => {
+  await page.goto('#/new')
+  const create = new CreateSessionPage(page)
+  const zones = page.locator('[data-status]')
+  const heights = async () =>
+    Promise.all([0, 1].map(async (i) => (await zones.nth(i).boundingBox())?.height ?? 0))
+  const [emptyHeight] = await heights()
+  await create.uploadStudents(examplePath('students.example.csv'))
+  await expect(zones.first()).toHaveAttribute('data-status', 'ok')
+  const [filled, empty] = await heights()
+  expect(Math.abs((filled ?? 0) - (empty ?? 0))).toBeLessThanOrEqual(1)
+  expect(Math.abs((emptyHeight ?? 0) - (filled ?? 0))).toBeLessThanOrEqual(1)
+})
+
+test('éditeur sur grand écran : aperçu aussi large que le code et haut comme l’écran', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1869, height: 1137 })
+  const editor = new ConfigEditorPage(page)
+  await editor.goto()
+  await expect(editor.categoryNav).toBeVisible()
+  const source = await page.getByRole('region', { name: /\.json$/u }).boundingBox()
+  const preview = await editor.preview.boundingBox()
+  if (source === null || preview === null) throw new Error('colonnes absentes')
+  expect(preview.width).toBeGreaterThanOrEqual(source.width * 0.8)
+  expect(preview.y + preview.height).toBeGreaterThanOrEqual(1137 - 40)
+})
+
 test.describe('téléphone', () => {
   test.use({ viewport: { width: 390, height: 844 } })
 
