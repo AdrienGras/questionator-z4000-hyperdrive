@@ -58,7 +58,7 @@ export function CategoryTile({ ui, config, category }: CategoryTileProps) {
   return (
     <>
       <CategoryBadge color={category.color} icon={category.icon} size="xl" />
-      <span className="font-bold">{category.label}</span>
+      <span className="max-w-full font-bold wrap-anywhere">{category.label}</span>
       <span className="mt-auto text-small font-semibold text-[var(--category-color,var(--color-muted-foreground))] tabular-nums">
         {text('passage_category_max', { max, points })}
       </span>

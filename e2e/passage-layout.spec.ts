@@ -64,6 +64,13 @@ test('1280 px : la note dans la colonne de droite, sous la vue projetée', async
   expect(previewBox.x).toBeGreaterThan(questionBox.x + questionBox.width)
   expect(scoreBox.x).toBe(previewBox.x)
   expect(scoreBox.y).toBeGreaterThan(previewBox.y + previewBox.height)
+
+  // Grille de tirage : seuil de 30rem (D108), 4 catégories en 2 × 2 à côté de la colonne de droite.
+  const grid = page.getByRole('list', { name: 'Choisir une catégorie' })
+  const tops = await grid
+    .getByRole('listitem')
+    .evaluateAll((items) => items.map((item) => Math.round(item.getBoundingClientRect().top)))
+  expect(new Set(tops).size).toBe(2)
 })
 
 test('panneau : statistiques et export restent visibles sous une longue liste', async ({

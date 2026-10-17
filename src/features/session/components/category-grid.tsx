@@ -54,6 +54,7 @@ export function CategoryGrid({
       <CategoryLayout
         aria-label={text('passage_categories', {})}
         className="gap-3"
+        threshold="narrow"
         items={config.categories}
         itemKey={(category) => category.id}
         renderItem={(category) => {
