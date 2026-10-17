@@ -13,7 +13,7 @@ const SPACE_BY_SEGMENT: Readonly<Record<string, MenuItemId>> = {
 
 /** Lien actif du menu pour `pathname` ; `undefined` hors de toute entrée (404). */
 export function activeMenuItem(pathname: string): MenuItemId | undefined {
-  const [segment = ''] = pathname.split('/').filter((part) => part !== '')
+  const segment = pathname.split('/').find((part) => part !== '') ?? ''
   if (segment === '') return 'home'
   return Object.hasOwn(SPACE_BY_SEGMENT, segment) ? SPACE_BY_SEGMENT[segment] : undefined
 }
