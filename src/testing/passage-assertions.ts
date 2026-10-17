@@ -61,8 +61,7 @@ export function outsidePanel(label: string): HTMLElement {
 export function expectRawScore(value: string, label = 'Score brut'): Promise<void> {
   return waitFor(() => {
     const term = screen.getByText(label, { selector: 'dt' })
-    expect(term.nextElementSibling?.textContent).toMatch(
-      new RegExp(`^${value.replace('.', String.raw`\.`)} /`),
-    )
+    // Le score, puis « / maximum » : `startsWith` évite d'échapper le point décimal anglais.
+    expect(term.nextElementSibling?.textContent.startsWith(`${value} /`)).toBe(true)
   })
 }
