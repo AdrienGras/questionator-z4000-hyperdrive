@@ -1597,3 +1597,25 @@ autre encodage 8 bits.
 **Pourquoi** : l'app est restée sur les tokens shadcn par défaut (noir et blanc) et sa navigation est en étoile autour de l'accueil. L'utilisateur garde le squelette shadcn et veut une identité sombre et discrète, dans l'esprit de la bannière du README (D100), où la couleur porte du sens. Spec : `docs/superpowers/specs/2026-10-14-f44-refonte-ui-design.md`. Dix tickets (#143 à #152) : inventaire et maquettes sur canevas (#143, #144), puis implémentation livrée par une PR unique (#145 à #152).
 
 **Reporté dans** : `PRODUCT.md` § F44 ; `CLAUDE.md` (passe sur le canevas pour toute feature qui touche l'interface).
+
+## D103 — F44 phase 2 : maquettes validées et carte des écrans (2026-10-17)
+
+**Question** : une fois les maquettes refaites et validées sur le canevas, qu'est-ce qui change de fond par rapport au code, et comment trancher les écarts avant la phase 3 ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Collision des couleurs | **Traitement 2, code d'espace discret** : dans le menu, l'icône d'espace est colorée sur une tuile neutre ; les catégories gardent leur couleur en teinte douce (fond à ~10 %, bordure à ~35 %). | Les couleurs de catégorie sont arbitraires (auteur de la config) : un code d'espace discret évite qu'elles se confondent avec les repères de navigation. |
+| Forme du menu | Menu latéral repliable : 248 px déplié, 72 px replié (icônes seules, infobulles au survol et au focus), « Replier le menu » en pied, état mémorisé sur l'appareil. La bascule clair / sombre reviendra au ticket 10 en pied de menu. | Laisser de la place à l'écran de notation et aux stats sans perdre la navigation. |
+| Écarts de fond acceptés | Taux de réussite global d'un entraînement (nouveau calcul dans `domain/training`, même définition que les taux « Par niveau ») ; `categoryId` ajouté au détail final de `ProjectedView` (couleur et icône de catégorie projetées, D69 élargie). Ce sont les seules exceptions au non-but « pas de changement dans `src/domain/` » de D102. | Le premier rend lisibles les cartes d'entraînement ; le second est purement visuel et ne révèle rien à l'étudiant. |
+| Écart refusé | Pas de titre de question sur la projection. | Il peut souffler la réponse ; la liste blanche D69 reste fermée au titre. |
+| Règles d'affichage | « Reprendre » : les 3 éléments les plus récents, sessions et entraînements confondus, endommagés exclus. Premier lancement : aucune session et aucun entraînement. État vide des stats de session : aucun étudiant n'a de tentative. | Les maquettes montraient ces écrans sans dire quand ils s'affichent. |
+| Comportements conservés | Notation en un clic (pas d'état « sélectionné ») ; « Éléments de réponse » repliés à chaque question (D28) ; correction d'une note déjà donnée dans l'onglet « Cet étudiant » ; motif d'une question passée dans le détail ; animation de tirage ; tags dans l'ordre de la config ; « à revoir » en tête du détail des stats d'entraînement ; étapes de la mise en place d'un entraînement **indicatives**, toutes actives, prompt toujours accessible. | Le fond ne bouge pas (D102) : là où la maquette s'écartait d'un comportement existant sans raison, c'est la maquette qui a été corrigée. |
+| Petits ajouts de forme | Navigation par catégorie dans l'aperçu de l'éditeur, numéro de ligne des problèmes, nom de fichier dérivé du titre (`configFileName`), phrase par cause sous un bouton désactivé, tuiles visibles pendant une question d'entraînement, barre de progression segmentée, réponse d'entraînement repliable. | Pure présentation de données déjà disponibles. |
+| Libellés | « backup » → « sauvegarde » partout en FR ; « Dernière activité » conservé ; « Choisissez une catégorie » ; « Questionator Z-4000 » dans le menu, nom complet ailleurs ; tuile EN alignée sur le menu (« Practice »). | Un seul mot par notion, celui que l'interface emploie déjà. |
+| Découpage de la phase 3 | Tickets #145 à #152 confirmés tels quels ; les stats d'entraînement vont avec #150, la mise en place et l'écran d'entraînement avec #151. | La carte ne fait apparaître aucun chantier qui justifie un ticket de plus. |
+
+**Pourquoi** : la carte des écrans (`docs/superpowers/specs/2026-10-17-f44-carte-des-ecrans.md`) a confronté les 29 artboards de la page « Après » au code. La plupart des éléments qui semblaient nouveaux existaient déjà ; les vrais écarts ont été tranchés un par un avec l'utilisateur, et le canevas corrigé en conséquence (planches ajoutées : onglet « Cet étudiant », animation de tirage, dialogues de l'accueil).
+
+**Reporté dans** : canevas (page « Après ») ; `docs/superpowers/specs/2026-10-17-f44-carte-des-ecrans.md` ; `docs/ENVIRONMENT.md` (URL du canevas et du design system).

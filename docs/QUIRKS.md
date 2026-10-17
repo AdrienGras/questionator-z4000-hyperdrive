@@ -880,3 +880,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : l'action Sonar vérifie la signature du scanner avec une clé GPG téléchargée depuis des serveurs de clés publics ; quand ils sont indisponibles, l'étape échoue avant toute analyse, et SonarQube Cloud n'a donc rien à rendre pour la PR.
 **Workaround** : avant d'attendre Sonar, regarder `gh pr checks <n>`. Si `check` est rouge sur l'import de clé, relancer le job (`gh run rerun <run-id> --failed`) : c'est un incident réseau, pas un défaut de la PR.
 **Référence** : `.github/workflows/ci.yml` (étape « Analyse SonarQube Cloud »), `.claude/scripts/sonar-check.sh`.
+
+## Artboards du canevas : `<pre><code>` en Courier et `line-height` hérité qui décale une ligne (2026-10-17)
+
+**Découvert** : revue de rendu des maquettes F44 (#144).
+**Symptôme** : (1) un bloc de code d'artboard s'affiche en police à empattements fine alors que le `<pre>` déclare Geist Mono ; (2) dans une carte de stats, le libellé sous « 38 / 60 » descend de quelques pixels par rapport à celui de « 72 % » à côté.
+**Cause** : (1) les artboards n'ont pas le preflight de Tailwind : la feuille du navigateur donne `font-family: monospace` à `<code>`, qui ne hérite donc pas du `<pre>` ; (2) un `<span>` plus petit (« / 60 » en 18 px) hérite du `line-height` en px de son parent (36 px) et agrandit la boîte de ligne.
+**Workaround** : `style="font: inherit"` sur le `<code>` d'un `<pre>` ; `line-height: 1` sur le suffixe plus petit. Dans l'app, le preflight règle le premier cas ; le second peut s'y reproduire avec un `leading-*` en px.
+**Référence** : canevas F44 (`apres/projection-question`, `apres/entrainement-question`, `apres/trainings`).

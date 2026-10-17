@@ -24,6 +24,16 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-17 — F44 : maquettes validées, carte des écrans, D103
+
+**Dernière chose faite** : retouches de l'utilisateur sur le canevas (commentaires envoyés à Claude), revue de rendu des 26 artboards « Après » (rendu local par Playwright), puis carte des écrans : quatre explorations ont confronté chaque artboard au code de `src/`. Les écarts ont été tranchés avec l'utilisateur (tout suivant les recommandations) et le canevas corrigé : 29 artboards sur « Après », dont 3 nouveaux (`passage-panneau-etudiant`, `projection-tirage`, `accueil-dialogues`). Rédigés sur la branche d'intégration `feat/f44-refonte-ui` : `docs/superpowers/specs/2026-10-17-f44-carte-des-ecrans.md`, D103, URL du canevas et du design system dans `ENVIRONMENT.md`.
+
+**Trucs en suspens** : **les docs de cette session ne sont pas commitées** (carte, D103, `ENVIRONMENT`, `INDEX`, `HANDOFF`, `QUIRKS` sur `feat/f44-refonte-ui`) : demander le go, puis les commiter en premier commit de la branche (gitmoji 📝), pousser la branche et fermer #144 à la main (phase 2 validée) ; le design system n'a pas encore le bouton « Replier le menu » ni les chevrons dans ses composants (Sidebar notamment) : à aligner au début de #145, en même temps que les tokens de `src/index.css`. Bouton « danger » (#f75d59, texte blanc) à vérifier en contraste lors de #145.
+
+**Prochaine chose à creuser** : plan de la phase 3, ticket #145 (tokens et composants de base) : lire `project/tokens.json` du design system, le traduire dans `src/index.css` (thème sombre forcé, couleurs d'espace hors thème de session), retirer la bascule de mode. Ouvrir la PR en brouillon dès le premier commit de code.
+
+**Notes pour future Claude** : la surveillance du canevas (commentaires envoyés à Claude) est propre à chaque session : la relancer avec `ArtifactComments` `watch` sur l'URL du canevas si l'utilisateur veut encore commenter. La carte des écrans fait foi pour la phase 3 : « le code fait foi pour tout comportement que la maquette ne montre pas ». Les seuls changements de fond acceptés sont le taux de réussite global d'un entraînement (`domain/training`) et `categoryId` dans `ProjectedView.detail` (D103). Pour revoir un artboard sans navigateur connecté à claude.ai : lire le fichier par l'outil Artifact (`read` avec `path`), retirer l'enveloppe `<x-dc>` et rendre le HTML statique avec Playwright (`@playwright/test` du dépôt, Chromium déjà installé). Les `.dc.html` sont sur une seule ligne très longue : les modifier par script Python avec des remplacements exacts et des assertions de compte, pas avec `sed` à l'aveugle.
+
 ## 2026-10-14 — F44 : spec, plan et tickets de la refonte UI
 
 **Dernière chose faite** : cadrage de F44 (refonte UI) en conversation, puis spec `docs/superpowers/specs/2026-10-14-f44-refonte-ui-design.md`, plan des phases 1-2 `docs/superpowers/plans/2026-10-14-f44-phases-1-2-inventaire-design-system.md`, tickets #143 à #152, D102, section F44 de `PRODUCT.md`, règle « canevas avant l'interface » dans `CLAUDE.md`. Recherche de références sur Dribbble (planches dans `.playwright-mcp/recon/`, non versionnées) : l'utilisateur a retenu les #2, 4, 6, 7, 8, 9 et 10 (Fluently en tête).
