@@ -23,7 +23,7 @@ Carte des paths, services, accès, commandes. À jour au fil des découvertes.
 - **Prévu** (`PRODUCT.md` §9) : write-excel-file, vite-plugin-pwa.
 - **Commandes principales** :
   - `nvm use && corepack pnpm install`
-  - `pnpm dev` — serveur de dev (régénère `src/routeTree.gen.ts`)
+  - `pnpm dev` — serveur de dev (régénère `src/routeTree.gen.ts`). Pour l'ouvrir depuis un autre appareil du tailnet (téléphone) : `__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS=.ts.net pnpm dev --host 0.0.0.0`, puis `http://adrien-laptop.halfbeak-wahoo.ts.net:5173/questionator-z4000-hyperdrive/` (ou l'IP Tailscale `100.76.100.52`). **En `http://` hors `localhost`, la page n'est pas un contexte sécurisé : créer une session, un entraînement ou ajouter un étudiant échoue (`crypto.randomUUID` absent, QUIRKS 2026-10-17) ; n'y valider que l'affichage, ou servir en HTTPS.** La variable autorise le nom MagicDNS, que Vite refuse sinon ; `--host 0.0.0.0` expose aussi le serveur sur les autres interfaces (réseau local, ponts Docker)
   - `pnpm check` — format, lint type-aware, dépendances entre dossiers, types, tests (comme la CI, hors build et sans couverture)
   - `pnpm deps` — dependency-cruiser sur `src/` (`.dependency-cruiser.cjs`, parseur swc) ; vérifier que « N modules » n'est pas 0
   - `pnpm build` / `pnpm preview` — build de prod dans `dist/` et prévisualisation sous `/questionator-z4000-hyperdrive/`
@@ -45,6 +45,8 @@ Carte des paths, services, accès, commandes. À jour au fil des découvertes.
 | GitHub Actions | CI : job `check` (requis par la protection de `main`), job `deploy` | `.github/workflows/ci.yml`, actions épinglées par SHA |
 | SonarQube Cloud | Analyse de `main` et des PR lancée par la CI (étape « Analyse SonarQube Cloud » du job `check`, F42), couverture comprise (quality gate : nouveau code ≥ 80 %). Analyse automatique **désactivée** (*Administration › Analysis Method*) : les deux modes ne peuvent pas coexister | https://sonarcloud.io/project/overview?id=AdrienGras_questionator-z4000-hyperdrive — config `sonar-project.properties`, contrôle `.claude/scripts/sonar-check.sh` |
 | Codecov | Couverture informative : commentaire de PR, statuts `project` et `patch` non bloquants (F42) | https://app.codecov.io/gh/AdrienGras/questionator-z4000-hyperdrive — config `codecov.yml`, envoi par OIDC depuis le job `check` (aucun jeton). Les statuts de commit exigent l'application GitHub Codecov installée sur le compte ; sans elle, seul le commentaire (compte `codecov-commenter`) est publié |
+| Canevas Design F44 | Maquettes de référence de toute interface (D102, D103) : pages « Avant », « Après », « Références », « Collision des couleurs » | https://claude.ai/artifact/DvvtZZb9ie2vknoXtHfnJL — Artifact privé de type Design, partagé dans l'organisation ; artboards dans `project/<page>/<écran>.dc.html`, index `project/canvas.json` |
+| Design system « Questionator Z-4000 » | Référence des tokens et des composants ; `src/index.css` lui correspond (D102) | https://claude.ai/artifact/DMYaQZGYtm8RnJqbBMmBcy — Artifact de type Design System ; `project/tokens.json`, `project/README.md`, `project/components/<Nom>/` |
 | GitHub Project n°3 | Kanban des tickets (une issue par feature Fxx, label `feature`/`spike`). Champs : Status (Backlog → Ready = spec rédigée dans l’issue → In progress → In review → Done), Priority P0–P2, Size XS–XL | https://github.com/users/AdrienGras/projects/3 — `gh project … --owner AdrienGras` |
 
 ## Variables d'environnement

@@ -1,38 +1,61 @@
-import { IconHelp } from '@tabler/icons-react'
 import type { ComponentProps, ReactNode } from 'react'
-import { ColorModeToggle } from '@/components/color-mode-toggle'
-import { buttonVariants } from '@/components/ui/button'
-import type { Ui } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
 
 type PageShellProps = Readonly<{
-  ui: Ui
   /** Titre de la page (rendu dans le `h1`). */
   title: ReactNode
-  /** Lien de retour, au-dessus du titre. */
+  /** Au-dessus du titre : fil d'Ariane (`Breadcrumb`) ou lien retour (`BackLink`). */
   back?: ReactNode
   /** Ligne d'infos sous le titre. */
   meta?: ReactNode
-  /** Actions de la barre, à droite, avant le bouton de thème. */
+  /** Actions de la barre, à droite. */
   actions?: ReactNode
+  /** Tuile à gauche du titre (page d'espace : `SpaceIcon size="lg"`). */
+  icon?: ReactNode
+  /** Décor flou en fond : `home` pour l'accueil, `space` pour une page d'espace. */
+  halo?: 'home' | 'space'
   children: ReactNode
 }> &
   Omit<ComponentProps<'main'>, 'title' | 'children'>
 
+const HALO_CLASS = 'absolute blur-sm'
+const HALO_ACTION = 'bg-[radial-gradient(closest-side,var(--color-halo-action),transparent)]'
+const HALO_COOL = 'bg-[radial-gradient(closest-side,var(--color-halo-cool),transparent)]'
+
+/**
+ * Halos des artboards `accueil` (deux) et `sessions` / `trainings` (un), dérivés de `--primary`.
+ * Calque ancré à la colonne de contenu de `RootLayout` (`relative isolate`), pas au `main` borné en
+ * largeur : le halo va jusqu'au bord droit sur grand écran, et le calque coupé ne remonte ni sur la
+ * barre du haut du téléphone ni sur le menu.
+ */
+function PageHalo({ halo }: Readonly<{ halo: 'home' | 'space' }>) {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+      {halo === 'space' ? (
+        <div className={cn(HALO_CLASS, HALO_ACTION, '-top-55 -right-35 h-85 w-140')} />
+      ) : (
+        <>
+          <div className={cn(HALO_CLASS, HALO_ACTION, '-top-50 -right-30 h-95 w-155')} />
+          <div className={cn(HALO_CLASS, HALO_COOL, '-top-30 right-90 h-75 w-115')} />
+        </>
+      )}
+    </div>
+  )
+}
+
 /**
  * Coque commune des pages examinateur (F19, D75) : `main` centré et borné en
- * largeur, barre de titre (retour, titre, infos à gauche ; actions, aide puis
- * thème à droite), puis le contenu. Le lien d'aide ouvre la documentation dans
- * un nouvel onglet ; le bouton de thème est toujours le dernier de la barre et
- * n'est pas paramétrable. `...rest` est transmis au `main` (ex. la
- * garde de dépôt de la création).
+ * largeur, barre de titre (retour, titre, infos à gauche ; actions à droite),
+ * puis le contenu. L'aide est en pied du menu latéral (D103). `...rest` est
+ * transmis au `main` (ex. la garde de dépôt de la création).
  */
 export function PageShell({
-  ui,
   title,
   back,
   meta,
   actions,
+  icon,
+  halo,
   children,
   className,
   ...rest
@@ -41,30 +64,23 @@ export function PageShell({
     <main
       {...rest}
       className={cn(
-        'mx-auto flex min-h-svh w-full max-w-(--breakpoint-2xl) flex-col gap-6 px-4 py-4 sm:px-6 sm:py-6 lg:px-10',
+        'mx-auto flex flex-1 w-full max-w-(--breakpoint-2xl) flex-col gap-6 px-4 py-6 md:px-10 md:py-8',
         className,
       )}
     >
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-[1_1_20rem] flex-col gap-1">
-          {back}
-          <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-          {meta}
+      {halo !== undefined && <PageHalo halo={halo} />}
+      <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+        <div className="flex min-w-0 flex-[1_1_20rem] items-center gap-4">
+          {icon}
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            {back}
+            <h1 className="text-h1 font-bold tracking-tight">{title}</h1>
+            {meta !== undefined && <div className="text-muted-foreground">{meta}</div>}
+          </div>
         </div>
-        <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-          {actions}
-          <a
-            href={`${import.meta.env.BASE_URL}docs/`}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={ui.text('help_link_label', {})}
-            className={buttonVariants({ variant: 'ghost' })}
-          >
-            <IconHelp aria-hidden />
-            {ui.text('help_link', {})}
-          </a>
-          <ColorModeToggle ui={ui} />
-        </div>
+        {actions !== undefined && (
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">{actions}</div>
+        )}
       </header>
       {children}
     </main>

@@ -6,7 +6,6 @@ import { formatConfigIssue } from '@/domain/config/messages'
 import { validateConfig } from '@/domain/config/validate'
 import { db, type DbStatus } from '@/lib/db/db'
 import { minimalConfig } from '@/testing/config-fixtures'
-import { expectColorModeToggleLast } from '@/testing/page-shell-assertions'
 import { stashConfigForCreation } from '@/lib/config-handoff'
 import { deferred } from '@/testing/deferred'
 import { renderAt } from '@/testing/render-at'
@@ -82,7 +81,7 @@ async function renderFilled(config = VALID_CONFIG) {
   const page = await renderPage()
   choose(page.students, 'etudiants.csv', VALID_CSV)
   choose(page.config, 'config.json', config)
-  await screen.findByText('2 étudiants')
+  await screen.findByText('étudiants')
   await screen.findByRole('heading', { name: 'Oral de test' })
   return page
 }
@@ -121,9 +120,10 @@ describe('écran de création', () => {
     expect(await screen.findByRole('heading', { name: 'Oral de test' })).toBeInTheDocument()
   })
 
-  test('titre, retour à l’accueil et fichiers d’exemple', async () => {
+  test('titre, fil d’Ariane et fichiers d’exemple', async () => {
     await renderPage()
-    expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
+    const trail = within(screen.getByRole('navigation', { name: "Fil d'Ariane" }))
+    expect(trail.getByRole('link', { name: 'Sessions' })).toHaveAttribute('href', '/sessions')
     const students = screen.getByRole('link', { name: "Télécharger la liste d'exemple" })
     expect(students.getAttribute('href')).toMatch(/students\.example\.csv$/)
     expect(students).toHaveAttribute('download')
@@ -132,12 +132,11 @@ describe('écran de création', () => {
     expect(config).toHaveAttribute('download')
   })
 
-  test('barre de titre : retour, « Nouvelle session », thème dernier', async () => {
+  test('barre de titre : fil d’Ariane et « Nouvelle session »', async () => {
     await renderPage()
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Nouvelle session')
     const banner = screen.getByRole('banner')
-    expect(within(banner).getByRole('link', { name: 'Retour à l’accueil' })).toBeInTheDocument()
-    expectColorModeToggleLast()
+    expect(within(banner).getByRole('navigation', { name: "Fil d'Ariane" })).toBeInTheDocument()
   })
 
   test('sans fichier : bouton désactivé et aide de l’aperçu', async () => {
@@ -152,16 +151,15 @@ describe('écran de création', () => {
     await renderFilled()
     expect(screen.getByText('Dupont Marie')).toBeInTheDocument()
     expect(screen.getByText('Martin Paul')).toBeInTheDocument()
-    expect(screen.getByText('A : 1 question, barème 0, 1, 2')).toBeInTheDocument()
-    expect(
-      screen.getByText('1 question par étudiant · note brute sur 2 → note finale sur 20'),
-    ).toBeInTheDocument()
-    expect(screen.getByText(/^Arrondi /)).toBeInTheDocument()
-    expect(screen.getByText('Skips désactivés')).toBeInTheDocument()
+    expect(screen.getByText('1 question')).toBeInTheDocument()
+    expect(screen.getByText('0 · 1 · 2')).toBeInTheDocument()
+    expect(screen.getByText('sur 2 → sur 20')).toBeInTheDocument()
+    expect(screen.getByText('Arrondi')).toBeInTheDocument()
+    expect(screen.getByText('aucun (skips désactivés)')).toBeInTheDocument()
     const name = screen.getByRole('textbox', { name: 'Nom de la session' })
     if (!(name instanceof HTMLInputElement)) throw new Error('champ nom absent')
     expect(name.value).toMatch(/^Oral de test — /)
-    expect(screen.queryByText(/^Déposez/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/pour voir l'aperçu\.$/)).not.toBeInTheDocument()
     expect(submitButton()).toBeEnabled()
   })
 
@@ -170,7 +168,7 @@ describe('écran de création', () => {
     fireEvent.drop(screen.getByRole('group', { name: STUDENTS_LABEL }), {
       dataTransfer: { files: [new File([VALID_CSV], 'etudiants.csv')], types: ['Files'] },
     })
-    expect(await screen.findByText('2 étudiants')).toBeInTheDocument()
+    expect(await screen.findByText('étudiants')).toBeInTheDocument()
     expect(screen.getByText('etudiants.csv')).toBeInTheDocument()
   })
 
@@ -199,10 +197,28 @@ describe('écran de création', () => {
     choose(page.config, 'config.json', text)
     for (const issue of expected.issues) {
       const message = await screen.findByText(formatConfigIssue(issue, 'fr'), { exact: false })
-      expect(message.querySelector('code')).toHaveTextContent(formatPath(issue.path))
+      expect(message.closest('li')?.querySelector('code')).toHaveTextContent(formatPath(issue.path))
     }
     expect(screen.getByText('Fichier invalide')).toBeInTheDocument()
     expect(submitButton()).toBeDisabled()
+  })
+
+  test('bouton désactivé : la phrase de la cause le décrit', async () => {
+    const page = await renderPage()
+    choose(page.students, 'etudiants.csv', VALID_CSV)
+    choose(page.config, 'config.json', JSON.stringify({ ...minimalConfig(), categories: [] }))
+    expect(await screen.findByText('Fichier invalide')).toBeInTheDocument()
+    expect(submitButton()).toBeDisabled()
+    expect(submitButton()).toHaveAccessibleDescription(
+      'Corrigez la configuration pour créer la session.',
+    )
+  })
+
+  test('formulaire complet : ni phrase ni description', async () => {
+    await renderFilled()
+    expect(submitButton()).toBeEnabled()
+    expect(submitButton()).not.toHaveAttribute('aria-describedby')
+    expect(screen.queryByText(/pour créer la session\.$/)).not.toBeInTheDocument()
   })
 
   test('config sans catégorie : erreur affichée, bouton désactivé', async () => {
@@ -258,7 +274,7 @@ describe('écran de création', () => {
 
   test('création : session en base, config figée, navigation vers la session', async () => {
     const { router } = await renderFilled()
-    fireEvent.change(screen.getByRole('textbox', { name: "Nom de l'examinateur" }), {
+    fireEvent.change(screen.getByRole('textbox', { name: "Nom de l'examinateur (facultatif)" }), {
       target: { value: 'Mme Durand' },
     })
     fireEvent.click(submitButton())
@@ -302,7 +318,7 @@ describe('écran de création', () => {
       'alert',
     )
     expect(name).toHaveValue('Mon oral')
-    expect(screen.getByText('2 étudiants')).toBeInTheDocument()
+    expect(screen.getByText('étudiants')).toBeInTheDocument()
     expect(submitButton()).toBeEnabled()
   })
 
@@ -315,7 +331,9 @@ describe('écran de création', () => {
     const { router } = await renderFilled()
     fireEvent.click(submitButton())
     await waitFor(() => expect(submitButton()).toBeDisabled())
-    fireEvent.click(screen.getByRole('link', { name: 'Retour à l’accueil' }))
+    fireEvent.click(
+      within(screen.getByRole('complementary')).getByRole('link', { name: 'Accueil' }),
+    )
     // Attendre le démontage effectif de l'écran (le composant de l'accueil est chargé à la demande).
     await waitFor(() =>
       expect(
@@ -336,7 +354,9 @@ describe('écran de création', () => {
     const { router } = await renderFilled()
     fireEvent.click(submitButton())
     await waitFor(() => expect(submitButton()).toBeDisabled())
-    fireEvent.click(screen.getByRole('link', { name: 'Retour à l’accueil' }))
+    fireEvent.click(
+      within(screen.getByRole('complementary')).getByRole('link', { name: 'Accueil' }),
+    )
     // L'écriture se termine avant le montage de l'accueil : l'écran de création est encore monté.
     expect(screen.getByRole('heading', { level: 1, name: 'Nouvelle session' })).toBeInTheDocument()
     write.resolve()
@@ -373,7 +393,7 @@ describe('écran de création', () => {
       "La validation n'a pas pu démarrer. Rechargez la page.",
     )
     expect(screen.getByText('config.json')).toBeInTheDocument()
-    await screen.findByText('2 étudiants')
+    await screen.findByText('étudiants')
     expect(submitButton()).toBeDisabled()
   })
 

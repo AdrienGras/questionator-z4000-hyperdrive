@@ -1,7 +1,7 @@
 import { getRouteApi, Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
+import { BackLink } from '@/components/back-link'
 import { PageShell } from '@/components/page-shell'
-import { SMALL_TEXT_LINK_CLASS } from '@/components/text-link'
 import { TrainingGate } from '@/components/training-gate'
 import { buttonVariants } from '@/components/ui/button'
 import { currentPending } from '@/domain/training/cycle-draw'
@@ -9,7 +9,6 @@ import { TrainingError } from '@/domain/training/errors'
 import { trainingErrorMessage } from '@/domain/training/errors-messages'
 import type { Training, TrainingDraw } from '@/domain/training/types'
 import { useUi, type Ui } from '@/lib/i18n/use-ui'
-import { cn } from '@/lib/utils'
 import { TrainingQuestion } from '@/features/training/components/training-question'
 import { TrainingTiles } from '@/features/training/components/training-tiles'
 import { journalStepOf, useTrainingActions } from '@/features/training/hooks/use-training-actions'
@@ -54,7 +53,6 @@ function TrainingView({
 
   return (
     <PageShell
-      ui={ui}
       title={training.name}
       actions={
         <>
@@ -74,11 +72,7 @@ function TrainingView({
           </Link>
         </>
       }
-      back={
-        <Link to="/" className={cn('self-start', SMALL_TEXT_LINK_CLASS)}>
-          {ui.text('back_home', {})}
-        </Link>
-      }
+      back={<BackLink to="/">{ui.text('back_home', {})}</BackLink>}
     >
       {errorMessage !== undefined && (
         <p

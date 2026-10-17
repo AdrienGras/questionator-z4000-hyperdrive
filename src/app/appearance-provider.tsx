@@ -52,8 +52,14 @@ function useApplyAppearance(effective: EffectiveMode, tokens: ThemeTokens | unde
   }, [effective, tokens])
 }
 
-/** Apparence de l'app (D60) : la dernière portée déclarée s'applique, sinon la portée globale. */
-export function AppearanceProvider({ children }: Readonly<{ children: ReactNode }>) {
+/**
+ * Apparence de l'app (D60) : la dernière portée déclarée s'applique, sinon la portée globale.
+ * `forcedMode` impose le mode effectif, quels que soient le choix mémorisé, le système et la portée.
+ */
+export function AppearanceProvider({
+  children,
+  forcedMode,
+}: Readonly<{ children: ReactNode; forcedMode?: EffectiveMode }>) {
   const [scopes, setScopes] = useState<readonly ScopeEntry[]>([])
   // Choix faits dans cette fenêtre : valent même si `localStorage` est inaccessible.
   const [choices, setChoices] = useState<Readonly<Record<string, ColorMode>>>({})
@@ -66,7 +72,7 @@ export function AppearanceProvider({ children }: Readonly<{ children: ReactNode 
   const storedForKey = useMemo(() => readStoredMode(scope.key), [scope.key])
   const stored = choices[scope.key] ?? storedForKey
   const systemDark = useSyncExternalStore(subscribeToSystem, systemPrefersDark)
-  const effective = resolveColorMode(stored, scope.defaultMode, systemDark)
+  const effective = forcedMode ?? resolveColorMode(stored, scope.defaultMode, systemDark)
 
   const setMode = useCallback(
     (mode: ColorMode) => {
@@ -88,8 +94,14 @@ export function AppearanceProvider({ children }: Readonly<{ children: ReactNode 
   useApplyAppearance(effective, scope.theme?.[effective])
 
   const value = useMemo<AppearanceContextValue>(
-    () => ({ mode: stored ?? scope.defaultMode, effective, setMode, register, update }),
-    [stored, scope.defaultMode, effective, setMode, register, update],
+    () => ({
+      mode: forcedMode ?? stored ?? scope.defaultMode,
+      effective,
+      setMode,
+      register,
+      update,
+    }),
+    [forcedMode, stored, scope.defaultMode, effective, setMode, register, update],
   )
   return <AppearanceContext.Provider value={value}>{children}</AppearanceContext.Provider>
 }

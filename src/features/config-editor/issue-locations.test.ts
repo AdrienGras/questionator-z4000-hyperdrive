@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest'
 import exampleText from '../../../examples/config.example.json?raw'
-import type { ConfigIssue } from '@/domain/config/issues'
+import { configWarning, type ConfigIssue } from '@/domain/config/issues'
 import { validateConfig } from '@/domain/config/validate'
-import { locateIssue } from './issue-locations'
+import { lineAt, locateIssue } from './issue-locations'
 
 function issuesOf(text: string): ConfigIssue[] {
   return validateConfig(text, { cssSupports: () => true }).issues
@@ -147,5 +147,23 @@ describe('locateIssue (json_syntax : BOM, CRLF, position hors limites)', () => {
     expect(locateIssue(text, syntax(42, 1))).toEqual({ from: text.length, to: text.length })
     expect(locateIssue(text, syntax(2, 0)).from).toBe(2)
     expect(locateIssue('', syntax(1, 5))).toEqual({ from: 0, to: 0 })
+  })
+})
+
+describe('lineAt', () => {
+  test('première ligne, ligne suivante, fin du texte', () => {
+    expect(lineAt('a\nb\nc', 0)).toBe(1)
+    expect(lineAt('a\nb\nc', 2)).toBe(2)
+    expect(lineAt('a\nb\nc', 99)).toBe(3)
+  })
+
+  test('CRLF et BOM ne décalent pas la ligne', () => {
+    expect(lineAt('﻿a\r\nb', 4)).toBe(2)
+  })
+
+  test('ligne d’un problème : celle de sa valeur', () => {
+    const text = '{\n  "a": 1,\n  "icon": "leafs"\n}'
+    const issue = configWarning('unknown_icon', ['icon'], { icon: 'leafs' })
+    expect(lineAt(text, locateIssue(text, issue).from)).toBe(3)
   })
 })

@@ -6,36 +6,59 @@ const SAMPLE: UiMessageParams = {
   app_title: {},
   not_found_title: {},
   back_home: {},
+  back_sessions: {},
+  back_trainings: {},
+  home_subtitle: {},
+  home_train: {},
+  home_resume_title: {},
+  home_kind_session: {},
+  home_kind_training: {},
+  home_training_coverage_short: { covered: 38, total: 60 },
+  home_spaces_title: {},
+  home_space_sessions_body: {},
+  home_space_trainings: {},
+  home_space_trainings_body: {},
+  home_space_editor_body: {},
+  home_space_view_all: {},
+  first_run_title: {},
+  first_run_subtitle: {},
+  first_run_eyebrow: {},
+  first_run_heading: {},
+  first_run_body: {},
+  first_run_step: { n: 1 },
+  first_run_step1: {},
+  first_run_step2: {},
+  first_run_step2_body: {},
+  first_run_step3: {},
+  first_run_step3_body: {},
+  first_run_solo_title: {},
+  first_run_solo_body: {},
+  first_run_solo_cta: {},
+  first_run_resources: {},
+  first_run_editor_link: {},
+  first_run_drop_hint: {},
   home_create: {},
   home_import: {},
-  home_actions_title: {},
-  home_sessions_title: {},
-  home_create_title: {},
-  home_create_body: {},
   home_students_example_link: {},
   home_config_example_link: {},
   create_config_example_link: {},
   home_config_schema_link: {},
-  home_import_title: {},
-  home_import_body: {},
-  home_editor_title: {},
-  home_editor_body: {},
   home_editor_open: {},
-  home_training_title: {},
-  home_training_body: {},
-  home_training_start: {},
   home_trainings_title: {},
   home_training_updated: { date: '05/10/2026 09:00' },
-  home_training_coverage: { percent: 25 },
   home_training_delete_body: {},
   home_training_damaged_body: {},
   persistence_warning_label: {},
   persistence_warning: {},
+  db_outdated_title: {},
   db_outdated: {},
   db_reload: {},
+  db_unavailable_title: {},
   db_unavailable: {},
   update_available: {},
+  update_available_body: {},
   update_reload: {},
+  offline_ready_title: {},
   offline_ready: {},
   offline_ready_dismiss: {},
   color_mode_label: { mode: 'Clair' },
@@ -44,12 +67,25 @@ const SAMPLE: UiMessageParams = {
   color_mode_system: {},
   help_link: {},
   help_link_label: {},
+  menu_brand: {},
+  menu_main_label: {},
+  menu_home: {},
+  menu_spaces: {},
+  menu_sessions: {},
+  menu_editor: {},
+  menu_training: {},
+  menu_help_label: {},
+  menu_collapse: {},
+  menu_expand: {},
+  breadcrumb_label: {},
+  menu_open: {},
+  menu_close: {},
   session_loading: {},
   session_not_found: {},
   damaged_title: {},
   damaged_badge: {},
   damaged_body: {},
-  damaged_details: {},
+  damaged_details: { count: 2 },
   present_waiting: {},
   present_prompt_label: {},
   present_question_index: { current: 1, total: 3 },
@@ -67,6 +103,21 @@ const SAMPLE: UiMessageParams = {
   card_examiner: { name: 'Ada' },
   card_updated: { date: '01/01/2026' },
   card_progress: { done: 3, absent: 1, remaining: 2 },
+  card_progress_of: { total: 24 },
+  card_progress_rest: { absent: 2, remaining: 15 },
+  training_success_label: {},
+  training_success_aria: { rate: '72 %' },
+  training_coverage_label: {},
+  sessions_subtitle: {},
+  sessions_drop_hint: {},
+  sessions_list_title: {},
+  sessions_count: { count: 4 },
+  card_resume_named: { name: 'Oral' },
+  trainings_subtitle: {},
+  trainings_new: {},
+  trainings_count: { count: 4 },
+  trainings_empty_title: {},
+  trainings_empty_body: {},
   card_resume: {},
   card_actions: { name: 'Ada' },
   action_rename: {},
@@ -110,6 +161,16 @@ const SAMPLE: UiMessageParams = {
   create_write_error: {},
   create_preview_title: {},
   create_preview_empty: {},
+  create_subtitle: {},
+  create_students_example_short: {},
+  create_config_example_short: {},
+  optional_hint: {},
+  create_examiner_hint: {},
+  create_blocked_db: {},
+  create_blocked_students: {},
+  create_blocked_config: {},
+  create_blocked_files: {},
+  create_blocked_name: {},
   training_setup_title: {},
   training_setup_gather_title: {},
   training_setup_gather_body: {},
@@ -177,17 +238,22 @@ const SAMPLE: UiMessageParams = {
   training_update_kept: { count: 3 },
   training_update_added: { count: 1 },
   training_update_removed: { count: 2 },
-  preview_students_count: { count: 2 },
+  preview_students_title: {},
+  preview_students_noun: { count: 2 },
   preview_students_list: {},
   preview_line: { line: 3, message: 'Doublon' },
   preview_config_title: {},
-  preview_subject: { subject: 'PHP' },
-  preview_cohort: { cohort: 'B2' },
-  preview_category: { label: 'A', questions: 3, scale: '0, 1, 2' },
-  preview_scoring: { questionsPerStudent: 3, maxRawScore: 6, finalScale: 20 },
-  preview_rounding: { mode: 'nearest', step: 0.5, decimals: 2 },
+  issue_error_label: {},
+  preview_config_errors: { count: 2 },
+  preview_category_questions: { count: 5 },
+  preview_questions_per_student: {},
+  preview_scale_label: {},
+  preview_scale_value: { maxRawScore: 10, finalScale: 20 },
+  preview_rounding_label: {},
+  preview_rounding_value: { mode: 'nearest', step: 0.5, decimals: 2 },
+  preview_skips_label: {},
+  preview_skips_value: { max: 2 },
   preview_skips_disabled: {},
-  preview_skips: { max: 1 },
   markdown_footnotes: {},
   markdown_footnote_back: { n: '1' },
   passage_question_index: { current: 1, total: 3 },
@@ -335,8 +401,13 @@ const SAMPLE: UiMessageParams = {
   export_error: {},
   editor_title: {},
   editor_label: {},
-  editor_source_title: {},
+  editor_subtitle: {},
+  editor_load_file_short: {},
+  editor_issues_title: {},
+  editor_issue_line: { line: 115 },
   editor_preview_title: {},
+  editor_preview_subtitle: {},
+  editor_preview_nav: {},
   editor_load_file: {},
   editor_reset_example: {},
   editor_download: {},
@@ -398,11 +469,11 @@ describe('UI_MESSAGES', () => {
     expect(t(UI_MESSAGES, 'en', 'create_file_status_reading', {})).toBe('Reading…')
   })
 
-  test('preview_students_count accorde le singulier et le pluriel en fr', () => {
-    expect(t(UI_MESSAGES, 'fr', 'preview_students_count', { count: 1 })).toBe('1 étudiant')
-    expect(t(UI_MESSAGES, 'fr', 'preview_students_count', { count: 2 })).toBe('2 étudiants')
-    expect(t(UI_MESSAGES, 'en', 'preview_students_count', { count: 1 })).toBe('1 student')
-    expect(t(UI_MESSAGES, 'en', 'preview_students_count', { count: 2 })).toBe('2 students')
+  test('preview_students_noun accorde le singulier et le pluriel', () => {
+    expect(t(UI_MESSAGES, 'fr', 'preview_students_noun', { count: 1 })).toBe('étudiant')
+    expect(t(UI_MESSAGES, 'fr', 'preview_students_noun', { count: 2 })).toBe('étudiants')
+    expect(t(UI_MESSAGES, 'en', 'preview_students_noun', { count: 1 })).toBe('student')
+    expect(t(UI_MESSAGES, 'en', 'preview_students_noun', { count: 2 })).toBe('students')
   })
 
   test('training_stats_* : singulier et pluriel des chiffres clés', () => {
@@ -420,22 +491,22 @@ describe('UI_MESSAGES', () => {
     expect(t(UI_MESSAGES, 'en', 'training_stats_attempts', { count: 3 })).toBe('3 attempts')
   })
 
-  test('preview_rounding : forme « au pas de » et forme « à N décimales »', () => {
+  test('preview_rounding_value : forme « au pas de » et forme « N décimales »', () => {
     expect(
-      t(UI_MESSAGES, 'fr', 'preview_rounding', { mode: 'nearest', step: 0.5, decimals: 2 }),
-    ).toBe('Arrondi au plus proche, au pas de 0,5')
-    expect(t(UI_MESSAGES, 'fr', 'preview_rounding', { mode: 'up', step: null, decimals: 2 })).toBe(
-      'Arrondi supérieur, à 2 décimales',
-    )
+      t(UI_MESSAGES, 'fr', 'preview_rounding_value', { mode: 'nearest', step: 0.5, decimals: 2 }),
+    ).toBe('au plus proche, au pas de 0,5')
     expect(
-      t(UI_MESSAGES, 'fr', 'preview_rounding', { mode: 'down', step: null, decimals: 1 }),
-    ).toBe('Arrondi inférieur, à 1 décimale')
+      t(UI_MESSAGES, 'fr', 'preview_rounding_value', { mode: 'nearest', step: null, decimals: 2 }),
+    ).toBe('au plus proche, 2 décimales')
     expect(
-      t(UI_MESSAGES, 'en', 'preview_rounding', { mode: 'nearest', step: 0.5, decimals: 2 }),
-    ).toBe('Rounded to nearest, step 0.5')
-    expect(t(UI_MESSAGES, 'en', 'preview_rounding', { mode: 'up', step: null, decimals: 2 })).toBe(
-      'Rounded up, 2 decimals',
-    )
+      t(UI_MESSAGES, 'fr', 'preview_rounding_value', { mode: 'down', step: null, decimals: 1 }),
+    ).toBe('inférieur, 1 décimale')
+    expect(
+      t(UI_MESSAGES, 'en', 'preview_rounding_value', { mode: 'nearest', step: 0.5, decimals: 2 }),
+    ).toBe('to nearest, step 0.5')
+    expect(
+      t(UI_MESSAGES, 'en', 'preview_rounding_value', { mode: 'up', step: null, decimals: 2 }),
+    ).toBe('up, 2 decimals')
   })
 
   test('passage_category_max : « pts » au pluriel, « pt » pour une valeur de 1, même formatée « 1,0 »', () => {

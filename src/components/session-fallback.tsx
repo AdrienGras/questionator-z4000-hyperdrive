@@ -1,6 +1,8 @@
+import { IconFileX, IconLoader2 } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
+import { STATUS_MAIN_CLASS, StatusScreen } from '@/components/status-screen'
+import { buttonVariants } from '@/components/ui/button'
 import type { Ui } from '@/lib/i18n/use-ui'
-import { TEXT_LINK_CLASS } from '@/components/text-link'
 
 type SessionFallbackProps = Readonly<{
   ui: Ui
@@ -14,17 +16,20 @@ export function SessionFallback({ ui, kind, messages }: SessionFallbackProps) {
   const { text } = ui
   if (kind === 'loading') {
     return (
-      <main className="flex min-h-svh flex-col items-center justify-center gap-4 p-6 text-center">
+      <main className={STATUS_MAIN_CLASS}>
+        <IconLoader2
+          aria-hidden
+          className="size-6 animate-spin text-link motion-reduce:animate-none"
+        />
         <p className="text-muted-foreground">{messages?.loading ?? text('session_loading', {})}</p>
       </main>
     )
   }
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center gap-4 p-6 text-center">
-      <h1 className="text-2xl font-bold">{messages?.notFound ?? text('session_not_found', {})}</h1>
-      <Link to="/" className={TEXT_LINK_CLASS}>
+    <StatusScreen icon={<IconFileX />} title={messages?.notFound ?? text('session_not_found', {})}>
+      <Link to="/" className={buttonVariants({ variant: 'default' })}>
         {text('back_home', {})}
       </Link>
-    </main>
+    </StatusScreen>
   )
 }

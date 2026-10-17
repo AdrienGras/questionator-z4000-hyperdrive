@@ -96,6 +96,8 @@ Les couleurs des espaces sont choisies par nous ; les couleurs de catégorie son
 
 ## Phases et outils
 
+Artifacts des phases 1 et 2 (privés, URL aussi dans `docs/ENVIRONMENT.md`) : [canevas Design](https://claude.ai/artifact/DvvtZZb9ie2vknoXtHfnJL) et [design system « Questionator Z-4000 »](https://claude.ai/artifact/DMYaQZGYtm8RnJqbBMmBcy). La [carte des écrans](2026-10-17-f44-carte-des-ecrans.md) relie chaque artboard validé au code et aux tickets de la phase 3.
+
 ### Phase 1 — Inventaire
 
 - Un **canevas Design** (Artifact de type Design, privé) : un artboard par écran et par état clé (liste ci-dessous), redessiné fidèlement à partir du code source.
@@ -165,7 +167,7 @@ En phase 2 seulement (elles n'existent pas encore) : les artboards de `/sessions
 | 9 (#151) | Entraînement | Mise en place, entraînement | PR unique |
 | 10 (#152) | Mode clair dérivé | Thème clair par dérivation du sombre, bascule réactivée, `defaultColorMode` de nouveau effectif | PR unique |
 
-Les tickets 3 à 10 sont **provisoires** : leur découpage est confirmé à la fin de la phase 2, quand on connaît l'ampleur des changements de disposition.
+Le découpage des tickets 3 à 10 a été **confirmé tel quel** à la fin de la phase 2 (D103) : les stats d'entraînement vont avec #150, la mise en place et l'écran d'entraînement avec #151. Le détail par écran est dans la [carte des écrans](2026-10-17-f44-carte-des-ecrans.md).
 
 **Branche et PR** : la branche d'intégration part de `main` à jour au début de la phase 3. La PR est ouverte en brouillon dès le premier commit de code, pour que Sonar analyse chaque poussée ; elle passe en « Ready for review » une fois le ticket 10 fait, CI et Sonar verts, et n'est mergée qu'avec le go explicite de l'utilisateur.
 

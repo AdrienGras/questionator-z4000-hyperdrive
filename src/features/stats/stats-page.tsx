@@ -22,7 +22,7 @@ export function StatsPage() {
   const ui = useUi()
   if (status !== 'open')
     return (
-      <main className="mx-auto flex min-h-svh max-w-3xl flex-col gap-6 p-4 sm:p-6">
+      <main className="mx-auto flex max-w-3xl flex-1 flex-col gap-6 p-4 sm:p-6">
         <DbStatusBanner ui={ui} status={status} />
       </main>
     )

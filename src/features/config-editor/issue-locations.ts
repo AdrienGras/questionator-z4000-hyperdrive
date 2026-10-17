@@ -56,3 +56,17 @@ export function locateIssue(text: string, issue: ConfigIssue): TextRange {
   }
   return rangeOf(root)
 }
+
+/** Ligne (base 1) de la position `offset`, bornée au texte : nombre de sauts de ligne avant elle. */
+export function lineAt(text: string, offset: number): number {
+  const end = Math.min(Math.max(offset, 0), text.length)
+  let line = 1
+  for (
+    let index = text.indexOf('\n');
+    index !== -1 && index < end;
+    index = text.indexOf('\n', index + 1)
+  ) {
+    line++
+  }
+  return line
+}

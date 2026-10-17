@@ -6,35 +6,58 @@ export type UiMessageParams = {
   app_title: NoParams
   not_found_title: NoParams
   back_home: NoParams
+  back_sessions: NoParams
+  back_trainings: NoParams
+  home_subtitle: NoParams
+  home_train: NoParams
+  home_resume_title: NoParams
+  home_kind_session: NoParams
+  home_kind_training: NoParams
+  home_training_coverage_short: { covered: number; total: number }
+  home_spaces_title: NoParams
+  home_space_sessions_body: NoParams
+  home_space_trainings: NoParams
+  home_space_trainings_body: NoParams
+  home_space_editor_body: NoParams
+  home_space_view_all: NoParams
+  first_run_title: NoParams
+  first_run_subtitle: NoParams
+  first_run_eyebrow: NoParams
+  first_run_heading: NoParams
+  first_run_body: NoParams
+  first_run_step: { n: number }
+  first_run_step1: NoParams
+  first_run_step2: NoParams
+  first_run_step2_body: NoParams
+  first_run_step3: NoParams
+  first_run_step3_body: NoParams
+  first_run_solo_title: NoParams
+  first_run_solo_body: NoParams
+  first_run_solo_cta: NoParams
+  first_run_resources: NoParams
+  first_run_editor_link: NoParams
+  first_run_drop_hint: NoParams
   home_create: NoParams
   home_import: NoParams
-  home_actions_title: NoParams
-  home_sessions_title: NoParams
-  home_create_title: NoParams
-  home_create_body: NoParams
   home_students_example_link: NoParams
   home_config_example_link: NoParams
   home_config_schema_link: NoParams
-  home_import_title: NoParams
-  home_import_body: NoParams
-  home_editor_title: NoParams
-  home_editor_body: NoParams
   home_editor_open: NoParams
-  home_training_title: NoParams
-  home_training_body: NoParams
-  home_training_start: NoParams
   home_trainings_title: NoParams
   home_training_updated: { date: string }
-  home_training_coverage: { percent: number }
   home_training_delete_body: NoParams
   home_training_damaged_body: NoParams
   persistence_warning_label: NoParams
   persistence_warning: NoParams
+  db_outdated_title: NoParams
   db_outdated: NoParams
   db_reload: NoParams
+  db_unavailable_title: NoParams
   db_unavailable: NoParams
   update_available: NoParams
+  update_available_body: NoParams
   update_reload: NoParams
+  offline_ready_title: NoParams
   offline_ready: NoParams
   offline_ready_dismiss: NoParams
   color_mode_label: { mode: string }
@@ -43,12 +66,25 @@ export type UiMessageParams = {
   color_mode_system: NoParams
   help_link: NoParams
   help_link_label: NoParams
+  menu_brand: NoParams
+  menu_main_label: NoParams
+  menu_home: NoParams
+  menu_spaces: NoParams
+  menu_sessions: NoParams
+  menu_editor: NoParams
+  menu_training: NoParams
+  menu_help_label: NoParams
+  menu_collapse: NoParams
+  menu_expand: NoParams
+  breadcrumb_label: NoParams
+  menu_open: NoParams
+  menu_close: NoParams
   session_loading: NoParams
   session_not_found: NoParams
   damaged_title: NoParams
   damaged_badge: NoParams
   damaged_body: NoParams
-  damaged_details: NoParams
+  damaged_details: { count: number }
   present_waiting: NoParams
   present_prompt_label: NoParams
   present_question_index: { current: number; total: number }
@@ -66,6 +102,21 @@ export type UiMessageParams = {
   card_examiner: { name: string }
   card_updated: { date: string }
   card_progress: { done: number; absent: number; remaining: number }
+  card_progress_of: { total: number }
+  card_progress_rest: { absent: number; remaining: number }
+  training_success_label: NoParams
+  training_success_aria: { rate: string }
+  training_coverage_label: NoParams
+  sessions_subtitle: NoParams
+  sessions_drop_hint: NoParams
+  sessions_list_title: NoParams
+  sessions_count: { count: number }
+  card_resume_named: { name: string }
+  trainings_subtitle: NoParams
+  trainings_new: NoParams
+  trainings_count: { count: number }
+  trainings_empty_title: NoParams
+  trainings_empty_body: NoParams
   card_resume: NoParams
   card_actions: { name: string }
   action_rename: NoParams
@@ -110,6 +161,16 @@ export type UiMessageParams = {
   create_write_error: NoParams
   create_preview_title: NoParams
   create_preview_empty: NoParams
+  create_subtitle: NoParams
+  create_students_example_short: NoParams
+  create_config_example_short: NoParams
+  optional_hint: NoParams
+  create_examiner_hint: NoParams
+  create_blocked_db: NoParams
+  create_blocked_students: NoParams
+  create_blocked_config: NoParams
+  create_blocked_files: NoParams
+  create_blocked_name: NoParams
   training_setup_title: NoParams
   training_setup_gather_title: NoParams
   training_setup_gather_body: NoParams
@@ -180,18 +241,23 @@ export type UiMessageParams = {
   training_update_kept: { count: number }
   training_update_added: { count: number }
   training_update_removed: { count: number }
-  preview_students_count: { count: number }
+  preview_students_title: NoParams
+  preview_students_noun: { count: number }
   preview_students_list: NoParams
   preview_line: { line: number; message: string }
   preview_config_title: NoParams
-  preview_subject: { subject: string }
-  preview_cohort: { cohort: string }
+  issue_error_label: NoParams
+  preview_config_errors: { count: number }
   /** `scale` : barème déjà mis en forme par l'appelant (`category.scale.join(', ')`). */
-  preview_category: { label: string; questions: number; scale: string }
-  preview_scoring: { questionsPerStudent: number; maxRawScore: number; finalScale: number }
-  preview_rounding: RoundingParams
+  preview_category_questions: { count: number }
+  preview_questions_per_student: NoParams
+  preview_scale_label: NoParams
+  preview_scale_value: { maxRawScore: number; finalScale: number }
+  preview_rounding_label: NoParams
+  preview_rounding_value: RoundingParams
+  preview_skips_label: NoParams
+  preview_skips_value: { max: number }
   preview_skips_disabled: NoParams
-  preview_skips: { max: number }
   markdown_footnotes: NoParams
   /** `n` : numéro de la référence (1-based), avec suffixe `-n` de la re-référence si > 1. */
   markdown_footnote_back: { n: string }
@@ -310,8 +376,13 @@ export type UiMessageParams = {
   export_error: NoParams
   editor_title: NoParams
   editor_label: NoParams
-  editor_source_title: NoParams
+  editor_subtitle: NoParams
+  editor_load_file_short: NoParams
+  editor_issues_title: NoParams
+  editor_issue_line: { line: number }
   editor_preview_title: NoParams
+  editor_preview_subtitle: NoParams
+  editor_preview_nav: NoParams
   editor_load_file: NoParams
   editor_reset_example: NoParams
   editor_download: NoParams
@@ -400,9 +471,9 @@ const ROUNDING_MODE_EN: Record<RoundingMode, string> = {
 function roundingFr({ mode, step, decimals }: RoundingParams): string {
   const precision =
     step === null
-      ? `à ${decimals} ${plural(decimals, 'décimale', 'décimales')}`
+      ? `${decimals} ${plural(decimals, 'décimale', 'décimales')}`
       : `au pas de ${step.toLocaleString('fr')}`
-  return `Arrondi ${ROUNDING_MODE_FR[mode]}, ${precision}`
+  return `${ROUNDING_MODE_FR[mode]}, ${precision}`
 }
 
 function roundingEn({ mode, step, decimals }: RoundingParams): string {
@@ -410,50 +481,71 @@ function roundingEn({ mode, step, decimals }: RoundingParams): string {
     step === null
       ? `${decimals} ${pluralEn(decimals, 'decimal', 'decimals')}`
       : `step ${step.toLocaleString('en')}`
-  return `Rounded ${ROUNDING_MODE_EN[mode]}, ${precision}`
+  return `${ROUNDING_MODE_EN[mode]}, ${precision}`
 }
 
 const fr: Dictionary<UiMessageParams> = {
   app_title: () => 'Questionator Z-4000 Hyperdrive',
   not_found_title: () => 'Page introuvable',
   back_home: () => 'Retour à l’accueil',
+  back_sessions: () => 'Retour aux sessions',
+  back_trainings: () => 'Retour aux entraînements',
+  home_subtitle: () => 'Reprenez un oral ou préparez le suivant.',
+  home_train: () => 'S’entraîner',
+  home_resume_title: () => 'Reprendre',
+  home_kind_session: () => 'Session',
+  home_kind_training: () => 'Entraînement',
+  home_training_coverage_short: ({ covered, total }) => `${covered} / ${total} questions notées`,
+  home_spaces_title: () => 'Espaces',
+  home_space_sessions_body: () => 'Oraux en cours et terminés',
+  home_space_trainings: () => 'Entraînements',
+  home_space_trainings_body: () => 'Révisions en solo',
+  home_space_editor_body: () => 'Erreurs signalées en direct, aperçu des questions',
+  home_space_view_all: () => 'Voir tout',
+  first_run_title: () => 'Bienvenue',
+  first_run_subtitle: () => 'Faites passer des oraux notés par tirage au sort, ou révisez seul.',
+  first_run_eyebrow: () => 'Premier lancement',
+  first_run_heading: () => 'Votre premier oral en trois étapes',
+  first_run_body: () =>
+    'Une liste d’étudiants (CSV) et une config (JSON) suffisent. Des exemples sont prêts.',
+  first_run_step: ({ n }) => `Étape ${n}`,
+  first_run_step1: () => 'Téléchargez les exemples',
+  first_run_step2: () => 'Créez une session',
+  first_run_step2_body: () => 'Avec ces deux fichiers, ou les vôtres.',
+  first_run_step3: () => 'Tirez une question et notez',
+  first_run_step3_body: () => 'La vue projetée affiche la question sur le second écran.',
+  first_run_solo_title: () => 'Ou révisez seul',
+  first_run_solo_body: () => 'À partir d’une config générée par un LLM, sans session ni étudiants.',
+  first_run_solo_cta: () => 'S’entraîner seul',
+  first_run_resources: () => 'Autres ressources',
+  first_run_editor_link: () => 'Écrire une config dans l’éditeur',
+  first_run_drop_hint: () =>
+    'Vous pouvez aussi déposer une sauvegarde (.json) n’importe où sur la page.',
   home_create: () => 'Créer une session',
-  home_import: () => 'Importer un backup',
-  home_actions_title: () => 'Actions',
-  home_sessions_title: () => 'Sessions',
-  home_create_title: () => 'Nouvelle session',
-  home_create_body: () =>
-    "Partez d'une liste d'étudiants (CSV nom / prénom) et d'un fichier de configuration (JSON : catégories, questions, barèmes).",
-  home_students_example_link: () => "Télécharger la liste d'étudiants d'exemple",
-  home_config_example_link: () => "Télécharger la config d'exemple",
+  home_import: () => 'Importer une sauvegarde',
+  home_students_example_link: () => 'Liste d’étudiants d’exemple (.csv)',
+  home_config_example_link: () => 'Config d’exemple (.json)',
   home_config_schema_link: () => 'JSON Schema de la config',
-  home_import_title: () => 'Restaurer une session',
-  home_import_body: () =>
-    "Restaurez une session à partir d'un fichier .json créé par « Exporter un backup ». Vous pouvez aussi déposer le fichier n'importe où sur la page.",
-  home_editor_title: () => 'Éditer une config',
-  home_editor_body: () =>
-    "Écrivez ou corrigez un fichier de configuration : les erreurs sont signalées en direct et les questions affichées telles qu'elles seront projetées.",
   home_editor_open: () => "Ouvrir l'éditeur",
-  home_training_title: () => 'S’entraîner',
-  home_training_body: () => 'Révisez seul à partir d’une config générée par un LLM.',
-  home_training_start: () => 'Commencer',
   home_trainings_title: () => 'Mes entraînements',
   home_training_updated: ({ date }) => `Dernière activité : ${date}`,
-  home_training_coverage: ({ percent }) => `${percent} % des questions notées`,
   home_training_delete_body: () => 'L’historique et les stats de cet entraînement seront perdus.',
   home_training_damaged_body: () =>
     'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Vous pouvez le supprimer.',
   persistence_warning_label: () => 'Stockage non garanti',
   persistence_warning: () =>
-    "Le navigateur n'a pas garanti la conservation des données : il peut effacer vos sessions s'il manque d'espace. Exportez régulièrement un backup.",
-  db_outdated: () =>
-    "L'application a été mise à jour dans un autre onglet. Rechargez la page pour continuer.",
+    "Le navigateur n'a pas garanti la conservation des données : il peut effacer vos sessions s'il manque d'espace. Exportez régulièrement une sauvegarde.",
+  db_outdated_title: () => 'L’application a été mise à jour dans un autre onglet.',
+  db_outdated: () => 'Rechargez la page pour continuer.',
   db_reload: () => 'Recharger',
+  db_unavailable_title: () => 'Le stockage local est indisponible',
   db_unavailable: () =>
-    'Le stockage local est indisponible (navigation privée ou cookies bloqués ?). Les sessions ne peuvent pas être enregistrées.',
+    '(navigation privée ou cookies bloqués ?). Les sessions ne peuvent pas être enregistrées.',
   update_available: () => 'Nouvelle version disponible',
+  update_available_body: () => 'Rechargez quand vous voulez.',
   update_reload: () => 'Recharger',
-  offline_ready: () => "Prête pour le hors ligne : l'application fonctionne désormais sans réseau.",
+  offline_ready_title: () => 'Prête pour le hors ligne',
+  offline_ready: () => 'L’application fonctionne désormais sans réseau.',
   offline_ready_dismiss: () => 'OK',
   color_mode_label: ({ mode }) => `Mode d'affichage : ${mode.toLocaleLowerCase('fr')}`,
   color_mode_light: () => 'Clair',
@@ -461,13 +553,26 @@ const fr: Dictionary<UiMessageParams> = {
   color_mode_system: () => 'Système',
   help_link: () => 'Aide',
   help_link_label: () => 'Aide (nouvel onglet)',
+  menu_brand: () => 'Questionator Z-4000',
+  menu_main_label: () => 'Navigation principale',
+  menu_home: () => 'Accueil',
+  menu_spaces: () => 'Espaces',
+  menu_sessions: () => 'Sessions',
+  menu_editor: () => 'Éditeur de config',
+  menu_training: () => 'Entraînement',
+  menu_help_label: () => 'Aide',
+  menu_collapse: () => 'Replier le menu',
+  menu_expand: () => 'Déplier le menu',
+  breadcrumb_label: () => "Fil d'Ariane",
+  menu_open: () => 'Menu',
+  menu_close: () => 'Fermer le menu',
   session_loading: () => 'Chargement de la session…',
   session_not_found: () => 'Session introuvable',
   damaged_title: () => 'Cette session est endommagée',
   damaged_badge: () => 'Endommagée',
   damaged_body: () =>
-    'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Exportez un backup pour le conserver ou le corriger.',
-  damaged_details: () => 'Détails',
+    'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Exportez une sauvegarde pour le conserver ou le corriger.',
+  damaged_details: ({ count }) => `Détails · ${count} ${plural(count, 'problème', 'problèmes')}`,
   present_waiting: () => "L'épreuve va bientôt commencer.",
   present_prompt_label: () => 'Question en cours',
   present_question_index: ({ current, total }) => `Question ${current} / ${total}`,
@@ -481,16 +586,35 @@ const fr: Dictionary<UiMessageParams> = {
   present_fullscreen: () => 'Plein écran',
   present_exit_fullscreen: () => 'Quitter le plein écran',
   empty_title: () => 'Aucune session',
-  empty_body: () => 'Créez une session ou importez un backup depuis les actions.',
+  empty_body: () => 'Créez une session ou importez une sauvegarde.',
   card_examiner: ({ name }) => `Jury : ${name}`,
   card_updated: ({ date }) => `Modifiée le ${date}`,
   card_progress: ({ done, absent, remaining }) =>
     `${done} ${plural(done, 'passé', 'passés')} · ${absent} ${plural(absent, 'absent', 'absents')} · ${remaining} ${plural(remaining, 'restant', 'restants')}`,
+  card_progress_of: ({ total }) => `/ ${total} ${plural(total, 'passé', 'passés')}`,
+  card_progress_rest: ({ absent, remaining }) =>
+    `${absent} ${plural(absent, 'absent', 'absents')} · ${remaining} ${plural(remaining, 'restant', 'restants')}`,
+  training_success_label: () => 'de réussite',
+  training_success_aria: ({ rate }) => `Taux de réussite : ${rate}`,
+  training_coverage_label: () => 'questions notées',
+  sessions_subtitle: () => 'Vos oraux, de la liste d’étudiants à la note finale.',
+  sessions_drop_hint: () =>
+    'Déposez une sauvegarde (.json) n’importe où sur la page pour la restaurer.',
+  sessions_list_title: () => 'Liste des sessions',
+  sessions_count: ({ count }) =>
+    `${count} ${plural(count, 'session', 'sessions')} · dernière modification d’abord`,
+  card_resume_named: ({ name }) => `Reprendre « ${name} »`,
+  trainings_subtitle: () => 'Révisez seul, à partir d’une config générée par un LLM.',
+  trainings_new: () => 'Nouvel entraînement',
+  trainings_count: ({ count }) =>
+    `${count} ${plural(count, 'entraînement', 'entraînements')} · dernière activité d’abord`,
+  trainings_empty_title: () => 'Aucun entraînement',
+  trainings_empty_body: () => 'Lancez un entraînement à partir d’une config.',
   card_resume: () => 'Reprendre',
   card_actions: ({ name }) => `Actions pour « ${name} »`,
   action_rename: () => 'Renommer',
   action_edit_examiner: () => "Modifier l'examinateur",
-  action_export: () => 'Exporter un backup',
+  action_export: () => 'Exporter une sauvegarde',
   action_delete: () => 'Supprimer',
   rename_title: () => 'Renommer la session',
   rename_label: () => 'Nom de la session',
@@ -504,9 +628,9 @@ const fr: Dictionary<UiMessageParams> = {
     "L'enregistrement a échoué. La session a peut-être été supprimée dans un autre onglet.",
   delete_title: ({ name }) => `Supprimer « ${name} » ?`,
   delete_body: () => 'Cette action est définitive : tous les passages de la session seront perdus.',
-  delete_export_first: () => "Exporter un backup d'abord",
+  delete_export_first: () => "Exporter une sauvegarde d'abord",
   delete_confirm: () => 'Supprimer',
-  import_drop_hint: () => 'Déposez le backup ici',
+  import_drop_hint: () => 'Déposez la sauvegarde ici',
   import_error_title: ({ fileName }) => `Import impossible : ${fileName}`,
   import_read_error: () => "Le fichier n'a pas pu être lu.",
   import_load_error: () => "L'import n'a pas pu démarrer. Rechargez la page et réessayez.",
@@ -534,6 +658,16 @@ const fr: Dictionary<UiMessageParams> = {
   create_preview_title: () => 'Aperçu',
   create_preview_empty: () =>
     "Déposez une liste d'étudiants et une configuration pour voir l'aperçu.",
+  create_subtitle: () => 'Déposez la liste des étudiants et la config de l’oral.',
+  create_students_example_short: () => 'Liste d’exemple',
+  create_config_example_short: () => 'Config d’exemple',
+  optional_hint: () => '(facultatif)',
+  create_examiner_hint: () => 'Repris en colonne dans les exports.',
+  create_blocked_db: () => 'La base n’est pas disponible : la session ne peut pas être créée.',
+  create_blocked_students: () => 'Corrigez la liste d’étudiants pour créer la session.',
+  create_blocked_config: () => 'Corrigez la configuration pour créer la session.',
+  create_blocked_files: () => 'Déposez la liste d’étudiants et la config pour créer la session.',
+  create_blocked_name: () => 'Donnez un nom à la session pour la créer.',
   training_setup_title: () => 'S’entraîner',
   training_setup_gather_title: () => 'Rassemblez votre cours',
   training_setup_gather_body: () =>
@@ -614,19 +748,23 @@ const fr: Dictionary<UiMessageParams> = {
     count > 1
       ? `${count} retirées — elles n’apparaissent plus dans les stats`
       : `${count} retirée — elle n’apparaît plus dans les stats`,
-  preview_students_count: ({ count }) => `${count} ${plural(count, 'étudiant', 'étudiants')}`,
+  preview_students_title: () => 'Étudiants',
+  preview_students_noun: ({ count }) => plural(count, 'étudiant', 'étudiants'),
   preview_students_list: () => 'Voir la liste',
   preview_line: ({ line, message }) => `Ligne ${line} : ${message}`,
   preview_config_title: () => 'Configuration',
-  preview_subject: ({ subject }) => `Matière : ${subject}`,
-  preview_cohort: ({ cohort }) => `Promotion : ${cohort}`,
-  preview_category: ({ label, questions, scale }) =>
-    `${label} : ${questions} ${plural(questions, 'question', 'questions')}, barème ${scale}`,
-  preview_scoring: ({ questionsPerStudent, maxRawScore, finalScale }) =>
-    `${questionsPerStudent} ${plural(questionsPerStudent, 'question', 'questions')} par étudiant · note brute sur ${maxRawScore} → note finale sur ${finalScale}`,
-  preview_rounding: roundingFr,
-  preview_skips_disabled: () => 'Skips désactivés',
-  preview_skips: ({ max }) => `Skips autorisés : ${max} par étudiant`,
+  issue_error_label: () => 'Erreur',
+  preview_config_errors: ({ count }) => plural(count, 'erreur à corriger', 'erreurs à corriger'),
+  preview_category_questions: ({ count }) => `${count} ${plural(count, 'question', 'questions')}`,
+  preview_questions_per_student: () => 'Questions par étudiant',
+  preview_scale_label: () => 'Note brute → finale',
+  preview_scale_value: ({ maxRawScore, finalScale }) =>
+    `sur ${maxRawScore.toLocaleString('fr')} → sur ${finalScale.toLocaleString('fr')}`,
+  preview_rounding_label: () => 'Arrondi',
+  preview_rounding_value: roundingFr,
+  preview_skips_label: () => 'Skips autorisés',
+  preview_skips_value: ({ max }) => `${max} par étudiant`,
+  preview_skips_disabled: () => 'aucun (skips désactivés)',
   markdown_footnotes: () => 'Notes',
   markdown_footnote_back: ({ n }) => `Revenir à la référence ${n}`,
   passage_question_index: ({ current, total }) => `Question ${current} / ${total}`,
@@ -735,8 +873,14 @@ const fr: Dictionary<UiMessageParams> = {
   export_error: () => "L'export a échoué. Réessayez.",
   editor_title: () => 'Éditeur de config',
   editor_label: () => 'Configuration JSON',
-  editor_source_title: () => 'Configuration',
+  editor_subtitle: () => 'Écrivez la config d’un oral et vérifiez-la au fil de la frappe.',
+  editor_load_file_short: () => 'Charger',
+  editor_issues_title: () => 'Problèmes',
+  editor_issue_line: ({ line }) => `ligne ${line}`,
   editor_preview_title: () => 'Aperçu',
+  editor_preview_subtitle: () =>
+    'Chaque question telle qu’elle sera projetée, dans le thème de la config.',
+  editor_preview_nav: () => 'Aller à une catégorie',
   editor_load_file: () => 'Charger un fichier',
   editor_reset_example: () => "Repartir de l'exemple",
   editor_download: () => 'Télécharger',
@@ -805,42 +949,62 @@ const en: Dictionary<UiMessageParams> = {
   app_title: () => 'Questionator Z-4000 Hyperdrive',
   not_found_title: () => 'Page not found',
   back_home: () => 'Back to home',
+  back_sessions: () => 'Back to sessions',
+  back_trainings: () => 'Back to practice',
+  home_subtitle: () => 'Resume a session in progress or prepare the next oral exam.',
+  home_train: () => 'Practice',
+  home_resume_title: () => 'Resume',
+  home_kind_session: () => 'Session',
+  home_kind_training: () => 'Practice',
+  home_training_coverage_short: ({ covered, total }) => `${covered} of ${total} questions rated`,
+  home_spaces_title: () => 'Spaces',
+  home_space_sessions_body: () => 'Exams in progress and finished',
+  home_space_trainings: () => 'Practice',
+  home_space_trainings_body: () => 'Solo review',
+  home_space_editor_body: () => 'Errors flagged as you type, live question preview',
+  home_space_view_all: () => 'View all',
+  first_run_title: () => 'Welcome',
+  first_run_subtitle: () => 'Run graded oral exams with random draws, or review on your own.',
+  first_run_eyebrow: () => 'First launch',
+  first_run_heading: () => 'Your first oral exam in three steps',
+  first_run_body: () =>
+    'A student list (CSV) and a config (JSON) are all you need. Examples are ready.',
+  first_run_step: ({ n }) => `Step ${n}`,
+  first_run_step1: () => 'Download the examples',
+  first_run_step2: () => 'Create a session',
+  first_run_step2_body: () => 'With these two files, or your own.',
+  first_run_step3: () => 'Draw a question and grade',
+  first_run_step3_body: () => 'The projected view shows the question on the second screen.',
+  first_run_solo_title: () => 'Or review on your own',
+  first_run_solo_body: () => 'From a config generated by an LLM, no session or students needed.',
+  first_run_solo_cta: () => 'Practice on your own',
+  first_run_resources: () => 'Other resources',
+  first_run_editor_link: () => 'Write a config in the editor',
+  first_run_drop_hint: () => 'You can also drop a backup (.json) anywhere on the page.',
   home_create: () => 'Create a session',
   home_import: () => 'Import a backup',
-  home_actions_title: () => 'Actions',
-  home_sessions_title: () => 'Sessions',
-  home_create_title: () => 'New session',
-  home_create_body: () =>
-    'Start from a student list (CSV, last name / first name) and a configuration file (JSON: categories, questions, scales).',
-  home_students_example_link: () => 'Download the example student list',
-  home_config_example_link: () => 'Download the example config',
+  home_students_example_link: () => 'Example student list (.csv)',
+  home_config_example_link: () => 'Example config (.json)',
   home_config_schema_link: () => 'Config JSON Schema',
-  home_import_title: () => 'Restore a session',
-  home_import_body: () =>
-    'Restore a session from a .json file made with “Export a backup”. You can also drop the file anywhere on the page.',
-  home_editor_title: () => 'Edit a config',
-  home_editor_body: () =>
-    'Write or fix a configuration file: errors are flagged as you type and questions are shown as they will be projected.',
   home_editor_open: () => 'Open the editor',
-  home_training_title: () => 'Practice',
-  home_training_body: () => 'Review on your own from a config generated by an LLM.',
-  home_training_start: () => 'Start',
   home_trainings_title: () => 'My practice',
   home_training_updated: ({ date }) => `Last activity: ${date}`,
-  home_training_coverage: ({ percent }) => `${percent}% of questions rated`,
   home_training_delete_body: () => 'The history and stats of this practice will be lost.',
   home_training_damaged_body: () =>
     'The saved content is inconsistent; the app cannot open it. You can delete it.',
   persistence_warning_label: () => 'Storage not guaranteed',
   persistence_warning: () =>
     'The browser did not guarantee data retention: it may erase your sessions when space runs low. Export a backup regularly.',
-  db_outdated: () => 'The app was updated in another tab. Reload the page to continue.',
+  db_outdated_title: () => 'The app was updated in another tab.',
+  db_outdated: () => 'Reload the page to continue.',
   db_reload: () => 'Reload',
-  db_unavailable: () =>
-    'Local storage is unavailable (private browsing or blocked cookies?). Sessions cannot be saved.',
+  db_unavailable_title: () => 'Local storage is unavailable',
+  db_unavailable: () => '(private browsing or blocked cookies?). Sessions cannot be saved.',
   update_available: () => 'New version available',
+  update_available_body: () => 'Reload whenever you like.',
   update_reload: () => 'Reload',
-  offline_ready: () => 'Ready to work offline: the app now works without a network.',
+  offline_ready_title: () => 'Ready to work offline',
+  offline_ready: () => 'The app now works without a network.',
   offline_ready_dismiss: () => 'OK',
   color_mode_label: ({ mode }) => `Display mode: ${mode.toLocaleLowerCase('en')}`,
   color_mode_light: () => 'Light',
@@ -848,13 +1012,26 @@ const en: Dictionary<UiMessageParams> = {
   color_mode_system: () => 'System',
   help_link: () => 'Help',
   help_link_label: () => 'Help (opens in a new tab)',
+  menu_brand: () => 'Questionator Z-4000',
+  menu_main_label: () => 'Main navigation',
+  menu_home: () => 'Home',
+  menu_spaces: () => 'Spaces',
+  menu_sessions: () => 'Sessions',
+  menu_editor: () => 'Config editor',
+  menu_training: () => 'Practice',
+  menu_help_label: () => 'Help',
+  menu_collapse: () => 'Collapse menu',
+  menu_expand: () => 'Expand menu',
+  breadcrumb_label: () => 'Breadcrumb',
+  menu_open: () => 'Menu',
+  menu_close: () => 'Close menu',
   session_loading: () => 'Loading session…',
   session_not_found: () => 'Session not found',
   damaged_title: () => 'This session is damaged',
   damaged_badge: () => 'Damaged',
   damaged_body: () =>
     'The saved content is inconsistent; the app cannot open it. Export a backup to keep it or fix it.',
-  damaged_details: () => 'Details',
+  damaged_details: ({ count }) => `Details · ${count} ${pluralEn(count, 'issue', 'issues')}`,
   present_waiting: () => 'The exam will start soon.',
   present_prompt_label: () => 'Current question',
   present_question_index: ({ current, total }) => `Question ${current} / ${total}`,
@@ -868,11 +1045,28 @@ const en: Dictionary<UiMessageParams> = {
   present_fullscreen: () => 'Full screen',
   present_exit_fullscreen: () => 'Exit full screen',
   empty_title: () => 'No sessions yet',
-  empty_body: () => 'Create a session or import a backup from the actions.',
+  empty_body: () => 'Create a session or import a backup.',
   card_examiner: ({ name }) => `Examiner: ${name}`,
   card_updated: ({ date }) => `Updated ${date}`,
   card_progress: ({ done, absent, remaining }) =>
     `${done} done · ${absent} absent · ${remaining} remaining`,
+  card_progress_of: ({ total }) => `/ ${total} done`,
+  card_progress_rest: ({ absent, remaining }) => `${absent} absent · ${remaining} remaining`,
+  training_success_label: () => 'success rate',
+  training_success_aria: ({ rate }) => `Success rate: ${rate}`,
+  training_coverage_label: () => 'questions rated',
+  sessions_subtitle: () => 'Your oral exams, from the student list to the final grade.',
+  sessions_drop_hint: () => 'Drop a backup (.json) anywhere on the page to restore it.',
+  sessions_list_title: () => 'Session list',
+  sessions_count: ({ count }) =>
+    `${count} ${pluralEn(count, 'session', 'sessions')} · most recently updated first`,
+  card_resume_named: ({ name }) => `Resume “${name}”`,
+  trainings_subtitle: () => 'Review on your own, from a config generated by an LLM.',
+  trainings_new: () => 'New practice',
+  trainings_count: ({ count }) =>
+    `${count} practice ${pluralEn(count, 'session', 'sessions')} · most recent activity first`,
+  trainings_empty_title: () => 'No practice yet',
+  trainings_empty_body: () => 'Start a practice from a config.',
   card_resume: () => 'Resume',
   card_actions: ({ name }) => `Actions for "${name}"`,
   action_rename: () => 'Rename',
@@ -919,6 +1113,16 @@ const en: Dictionary<UiMessageParams> = {
   create_write_error: () => 'Creation failed. Please try again.',
   create_preview_title: () => 'Preview',
   create_preview_empty: () => 'Drop a student list and a configuration to see the preview.',
+  create_subtitle: () => 'Drop the student list and the exam config.',
+  create_students_example_short: () => 'Example list',
+  create_config_example_short: () => 'Example config',
+  optional_hint: () => '(optional)',
+  create_examiner_hint: () => 'Included as a column in exports.',
+  create_blocked_db: () => 'The database isn’t available: the session can’t be created.',
+  create_blocked_students: () => 'Fix the student list to create the session.',
+  create_blocked_config: () => 'Fix the configuration to create the session.',
+  create_blocked_files: () => 'Drop the student list and the config to create the session.',
+  create_blocked_name: () => 'Name the session to create it.',
   training_setup_title: () => 'Practice',
   training_setup_gather_title: () => 'Gather your course',
   training_setup_gather_body: () =>
@@ -997,19 +1201,23 @@ const en: Dictionary<UiMessageParams> = {
     count === 1
       ? `${count} removed — it no longer appears in the stats`
       : `${count} removed — they no longer appear in the stats`,
-  preview_students_count: ({ count }) => `${count} ${pluralEn(count, 'student', 'students')}`,
+  preview_students_title: () => 'Students',
+  preview_students_noun: ({ count }) => pluralEn(count, 'student', 'students'),
   preview_students_list: () => 'Show the list',
   preview_line: ({ line, message }) => `Line ${line}: ${message}`,
   preview_config_title: () => 'Configuration',
-  preview_subject: ({ subject }) => `Subject: ${subject}`,
-  preview_cohort: ({ cohort }) => `Cohort: ${cohort}`,
-  preview_category: ({ label, questions, scale }) =>
-    `${label}: ${questions} ${pluralEn(questions, 'question', 'questions')}, scale ${scale}`,
-  preview_scoring: ({ questionsPerStudent, maxRawScore, finalScale }) =>
-    `${questionsPerStudent} ${pluralEn(questionsPerStudent, 'question', 'questions')} per student · raw score out of ${maxRawScore} → final score out of ${finalScale}`,
-  preview_rounding: roundingEn,
-  preview_skips_disabled: () => 'Skips disabled',
-  preview_skips: ({ max }) => `Skips allowed: ${max} per student`,
+  issue_error_label: () => 'Error',
+  preview_config_errors: ({ count }) => pluralEn(count, 'error to fix', 'errors to fix'),
+  preview_category_questions: ({ count }) => `${count} ${pluralEn(count, 'question', 'questions')}`,
+  preview_questions_per_student: () => 'Questions per student',
+  preview_scale_label: () => 'Raw → final score',
+  preview_scale_value: ({ maxRawScore, finalScale }) =>
+    `out of ${maxRawScore.toLocaleString('en')} → out of ${finalScale.toLocaleString('en')}`,
+  preview_rounding_label: () => 'Rounding',
+  preview_rounding_value: roundingEn,
+  preview_skips_label: () => 'Skips allowed',
+  preview_skips_value: ({ max }) => `${max} per student`,
+  preview_skips_disabled: () => 'none (skips disabled)',
   markdown_footnotes: () => 'Footnotes',
   markdown_footnote_back: ({ n }) => `Back to reference ${n}`,
   passage_question_index: ({ current, total }) => `Question ${current} / ${total}`,
@@ -1116,8 +1324,13 @@ const en: Dictionary<UiMessageParams> = {
   export_error: () => 'Export failed. Try again.',
   editor_title: () => 'Config editor',
   editor_label: () => 'JSON configuration',
-  editor_source_title: () => 'Configuration',
+  editor_subtitle: () => 'Write an exam config and check it as you type.',
+  editor_load_file_short: () => 'Load',
+  editor_issues_title: () => 'Problems',
+  editor_issue_line: ({ line }) => `line ${line}`,
   editor_preview_title: () => 'Preview',
+  editor_preview_subtitle: () => 'Each question as it will be projected, in the config’s theme.',
+  editor_preview_nav: () => 'Go to a category',
   editor_load_file: () => 'Load a file',
   editor_reset_example: () => 'Start from the example',
   editor_download: () => 'Download',

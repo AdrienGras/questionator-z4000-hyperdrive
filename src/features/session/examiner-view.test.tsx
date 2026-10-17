@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
 import { categoryButton, outsidePanel } from '@/testing/passage-assertions'
-import { expectColorModeToggleLast, bannerInteractiveNames } from '@/testing/page-shell-assertions'
+import { bannerInteractiveNames } from '@/testing/page-shell-assertions'
 import { makeSession } from '@/testing/session-fixtures'
 import {
   makeConfig,
@@ -85,7 +85,8 @@ test("en-tête, liste des étudiants et changement d'étudiant actif", async () 
   expect(screen.getByText('Durand Alice')).toBeInTheDocument()
   expect(screen.getByText('Question 1 / 3')).toBeInTheDocument()
   expect(screen.getByText('Score brut : 0')).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
+  const trail = within(screen.getByRole('navigation', { name: "Fil d'Ariane" }))
+  expect(trail.getByRole('link', { name: 'Sessions' })).toHaveAttribute('href', '/sessions')
 
   expect(screen.queryByRole('combobox', { name: 'Étudiant' })).not.toBeInTheDocument()
   const dialog = await openSidePanel('Étudiants')
@@ -114,7 +115,7 @@ test('activeStudentId inconnu : session endommagée, vue examinateur non ouverte
   expect(
     await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
   ).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: 'Exporter un backup' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Exporter une sauvegarde' })).toBeInTheDocument()
   expect(screen.queryByText(/^Question /)).not.toBeInTheDocument()
 })
 
@@ -603,7 +604,7 @@ test('grille de 5 catégories : 3 + 2, disposition inchangée après un tirage (
   expect(gridLayout()).toEqual(expected)
 })
 
-test('barre de titre : retour, titre de l’examen, panneau puis thème', async () => {
+test('barre de titre : fil d’Ariane, titre de l’examen, puis panneau', async () => {
   const session = passageSession()
   await putSession(session)
   renderAt('/session/session-1')
@@ -611,10 +612,9 @@ test('barre de titre : retour, titre de l’examen, panneau puis thème', async 
   const title = await screen.findByRole('heading', { level: 1 })
   expect(title).toHaveTextContent(session.config.exam.title)
   const names = bannerInteractiveNames()
-  expect(names[0]).toBe('Retour à l’accueil')
+  expect(names[0]).toBe('Sessions')
   expect(names[1]).toBe('Panneau')
   expect(names).not.toContain('Ouvrir la vue projetée')
-  expectColorModeToggleLast()
 })
 
 test('sans étudiant actif : pas de ligne d’infos, contrôles de projection dans la colonne droite, thème présent', async () => {
@@ -625,5 +625,4 @@ test('sans étudiant actif : pas de ligne d’infos, contrôles de projection da
   const banner = within(screen.getByRole('banner'))
   expect(screen.getByRole('button', { name: 'Ouvrir la vue projetée' })).toBeInTheDocument()
   expect(banner.queryByText(/Question/)).not.toBeInTheDocument()
-  expectColorModeToggleLast()
 })

@@ -1597,3 +1597,119 @@ autre encodage 8 bits.
 **Pourquoi** : l'app est restée sur les tokens shadcn par défaut (noir et blanc) et sa navigation est en étoile autour de l'accueil. L'utilisateur garde le squelette shadcn et veut une identité sombre et discrète, dans l'esprit de la bannière du README (D100), où la couleur porte du sens. Spec : `docs/superpowers/specs/2026-10-14-f44-refonte-ui-design.md`. Dix tickets (#143 à #152) : inventaire et maquettes sur canevas (#143, #144), puis implémentation livrée par une PR unique (#145 à #152).
 
 **Reporté dans** : `PRODUCT.md` § F44 ; `CLAUDE.md` (passe sur le canevas pour toute feature qui touche l'interface).
+
+## D103 — F44 phase 2 : maquettes validées et carte des écrans (2026-10-17)
+
+**Question** : une fois les maquettes refaites et validées sur le canevas, qu'est-ce qui change de fond par rapport au code, et comment trancher les écarts avant la phase 3 ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Collision des couleurs | **Traitement 2, code d'espace discret** : dans le menu, l'icône d'espace est colorée sur une tuile neutre ; les catégories gardent leur couleur en teinte douce (fond à ~10 %, bordure à ~35 %). | Les couleurs de catégorie sont arbitraires (auteur de la config) : un code d'espace discret évite qu'elles se confondent avec les repères de navigation. |
+| Forme du menu | Menu latéral repliable : 248 px déplié, 72 px replié (icônes seules, infobulles au survol et au focus), « Replier le menu » en pied, état mémorisé sur l'appareil. La bascule clair / sombre reviendra au ticket 10 en pied de menu. | Laisser de la place à l'écran de notation et aux stats sans perdre la navigation. |
+| Écarts de fond acceptés | Taux de réussite global d'un entraînement (nouveau calcul dans `domain/training`, même définition que les taux « Par niveau ») ; `categoryId` ajouté au détail final de `ProjectedView` (couleur et icône de catégorie projetées, D69 élargie). Ce sont les seules exceptions au non-but « pas de changement dans `src/domain/` » de D102. | Le premier rend lisibles les cartes d'entraînement ; le second est purement visuel et ne révèle rien à l'étudiant. |
+| Écart refusé | Pas de titre de question sur la projection. | Il peut souffler la réponse ; la liste blanche D69 reste fermée au titre. |
+| Règles d'affichage | « Reprendre » : les 3 éléments les plus récents, sessions et entraînements confondus, endommagés exclus. Premier lancement : aucune session et aucun entraînement. État vide des stats de session : aucun étudiant n'a de tentative. | Les maquettes montraient ces écrans sans dire quand ils s'affichent. |
+| Comportements conservés | Notation en un clic (pas d'état « sélectionné ») ; « Éléments de réponse » repliés à chaque question (D28) ; correction d'une note déjà donnée dans l'onglet « Cet étudiant » ; motif d'une question passée dans le détail ; animation de tirage ; tags dans l'ordre de la config ; « à revoir » en tête du détail des stats d'entraînement ; étapes de la mise en place d'un entraînement **indicatives**, toutes actives, prompt toujours accessible. | Le fond ne bouge pas (D102) : là où la maquette s'écartait d'un comportement existant sans raison, c'est la maquette qui a été corrigée. |
+| Petits ajouts de forme | Navigation par catégorie dans l'aperçu de l'éditeur, numéro de ligne des problèmes, nom de fichier dérivé du titre (`configFileName`), phrase par cause sous un bouton désactivé, tuiles visibles pendant une question d'entraînement, barre de progression segmentée, réponse d'entraînement repliable. | Pure présentation de données déjà disponibles. |
+| Libellés | « backup » → « sauvegarde » partout en FR ; « Dernière activité » conservé ; « Choisissez une catégorie » ; « Questionator Z-4000 » dans le menu, nom complet ailleurs ; tuile EN alignée sur le menu (« Practice »). | Un seul mot par notion, celui que l'interface emploie déjà. |
+| Découpage de la phase 3 | Tickets #145 à #152 confirmés tels quels ; les stats d'entraînement vont avec #150, la mise en place et l'écran d'entraînement avec #151. | La carte ne fait apparaître aucun chantier qui justifie un ticket de plus. |
+
+**Pourquoi** : la carte des écrans (`docs/superpowers/specs/2026-10-17-f44-carte-des-ecrans.md`) a confronté les 29 artboards de la page « Après » au code. La plupart des éléments qui semblaient nouveaux existaient déjà ; les vrais écarts ont été tranchés un par un avec l'utilisateur, et le canevas corrigé en conséquence (planches ajoutées : onglet « Cet étudiant », animation de tirage, dialogues de l'accueil).
+
+**Reporté dans** : canevas (page « Après ») ; `docs/superpowers/specs/2026-10-17-f44-carte-des-ecrans.md` ; `docs/ENVIRONMENT.md` (URL du canevas et du design system).
+
+## D104 — F44.3 : tokens dans le code, mode sombre forcé (2026-10-17)
+
+**Question** : comment poser le design system dans `src/index.css` et les composants de base sans changer le schéma de config, et comment retirer la bascule de mode jusqu'au mode clair dérivé (#152) ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Où vivent les tokens | `:root` garde exactement les `THEME_TOKENS` (valeurs du design system) ; couleurs d'espace, ombres, typo et police mono en `@theme` (hors config) ; fin du dégradé, lueur et halos en `@theme inline`, dérivés de `--primary`. | Schéma de config inchangé (test de parité) ; les couleurs d'espace ne sont pas surchargeables ; `inline` recalcule les dérivés là où le thème d'une session s'applique, `ThemeScope` compris. |
+| Dérivation du dégradé | `color-mix(in oklch, var(--primary) 55%, oklch(0.45 0.2 280))`, soit environ `action-to` avec la `primary` par défaut. Le bouton garde `bg-primary` en aplat de secours. | `color-mix` a le même seuil de navigateurs que Tailwind v4 ; la syntaxe de couleur relative, non. |
+| Danger plein | Variante `destructive-solid` : fond `destructive`, texte `background` (6,2:1). Réservée aux confirmations de suppression et d'écrasement ; les déclencheurs restent en `destructive` (contour). | Le blanc sur `destructive` ne donne que 3,1:1. Garder `destructive` intact préserve son contraste en texte sur `card` (5,8:1). |
+| Mode forcé | `AppearanceProvider forcedMode="dark"` dans `__root.tsx` : choix mémorisé, système et `defaultColorMode` ignorés ; la classe `.dark` reste posée. `ColorModeToggle`, `color-mode.ts` et les clés i18n restent en place, démontés. | #152 n'a qu'à retirer la prop et remonter la bascule en pied de menu ; une préférence « clair » mémorisée avant la refonte ne peut plus bloquer l'app en clair sans bouton pour en sortir. |
+| Config d'exemple | `theme.dark` reprend les valeurs du thème entier (décision de l'utilisateur) ; `theme.light` attend #152. | Illustrer le nouveau style, tous les tokens visibles. |
+| Rattachement des retouches transverses | Chevrons des `<details>` et « backup » → « sauvegarde » en #145 ; forme des bandeaux en #146 avec la coquille. | Retouches globales sans changement de disposition, contre découpage en titre et corps lié à la coquille. |
+| Chevron | Couleur `muted-foreground`, comme sur le canevas (et non la couleur du texte du `summary`). | Le canevas fait foi (D102). |
+| Couleur de lien | `text-link` (`--color-link` = `color-mix(in oklch, var(--primary) 72%, white)`, 6,7:1 sur le fond) pour les liens texte, la variante `link` et les liens markdown ; `primary` reste aux icônes et aplats. | `primary` en texte ne fait que 4,1:1 sur le fond (relecture finale). |
+| Focus et survol | Focus des boutons en contour plein (`outline-solid`) ; survol des boutons neutres en `accent` / `accent-foreground`. | `outline-none` du vendor annulait le contour ; une config de l'ancien modèle (accent clair) rendait le survol illisible (1,55:1). |
+
+**Pourquoi** : poser l'apparence d'un coup sans toucher au contrat de la config (THEME_TOKENS, `defaultColorMode`) et sans perdre la mécanique de mode, qui revient au dernier ticket.
+
+**Reporté dans** : `src/index.css`, `src/components/ui/button.tsx`, `src/app/appearance-provider.tsx` ; design system (Sidebar, Button, Dialog, nouveau Disclosure) et canevas (`accueil-dialogues`, `session-dialogues`) ; `docs/CONVENTIONS.md` § « Tokens et palette — règles ».
+
+## D105 — F44.4 : menu et coquille de page (2026-10-17)
+
+**Question** : où monter le menu latéral pour qu'il soit partout sauf sur la vue projetée, que fait-il avant que `/sessions` et `/trainings` existent (#147), comment se comporte-t-il sur un téléphone, et que deviennent l'aide et les liens « Retour à l'accueil » ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Montage | Une seule instance, `AppMenu`, dans `RootLayout` (`src/routes/__root.tsx`), masquée sur `/present/$sessionId`. Lien actif calculé par `activeMenuItem(pathname)` (premier segment : `/new` et `/session/…` sous Sessions, `/training/…` sous Entraînement) ; les `Link` gardent `activeOptions={{ exact: true }}` pour que l'`aria-current` de TanStack ne contredise jamais le nôtre. | Présent aussi sur les écrans d'état (404, session introuvable ou endommagée) ; ses tokens `sidebar-*` sont lus sur `<html>`, où `AppearanceProvider` pose déjà le thème de la session. |
+| Langue du menu | Celle de l'application, jamais celle de la session ; `lang` posé sur le menu. | Le menu appartient à l'examinateur ; une session en anglais passe `<html lang="en">`, `lang` garde la bonne prononciation aux lecteurs d'écran. |
+| État replié | `questionator:menu-collapsed` = `'true'` ; toute autre valeur, absence ou stockage illisible = déplié ; écriture best-effort. | Mémorisé sur l'appareil (D103) sans jamais bloquer l'app en navigation privée. |
+| Écran étroit *(décision de l'utilisateur)* | Sous 768 px, une barre du haut (marque, « Menu ») ouvre le menu déplié dans un tiroir à gauche de 280 px, sans bouton de repli ; un lien choisi ou Échap le ferme. Artboard `menu-etroit` validé avant le code. | Tout l'écran au contenu sur téléphone ; le rail de 72 px laissait ~300 px. |
+| `/sessions`, `/trainings` *(décision de l'utilisateur)* | Routes créées dès #146, qui affichent l'accueil actuel ; #147 remplace leur composant. | Le menu, le lien actif et leurs tests visent déjà les adresses définitives. |
+| Aide | Sortie de `PageShell` (et la prop `ui` de la coque avec elle), en pied de menu. | D103 ; la coque ne traduit plus rien. |
+| Liens retour | Fil d'Ariane (`Breadcrumb`) sur `/new`, `/editor` et `/session/$id` ; lien retour à chevron (`BackLink`, `createLink`) sur les écrans d'entraînement et les stats, comme sur leurs artboards. | La carte des écrans parlait des écrans d'un espace en général ; les artboards font foi (D102). |
+| Bandeaux et écrans d'état | Messages « base » et « hors ligne » découpés en titre et corps (clés `*_title`), corps de la pastille de mise à jour, « Détails · N problèmes » ; `StatusScreen` pour la 404, session introuvable ou endommagée, entraînement endommagé, retour en bouton principal. | Artboard `bandeaux`. |
+| Infobulles du menu replié | `role="tooltip"` posé sur le `TooltipContent` (base-ui n'en donne aucun). | Comme l'artboard ; atteignable par rôle en e2e. |
+
+**Pourquoi** : un menu unique, monté à la racine, est la seule façon de garantir sa présence sur tous les écrans (pages et écrans d'état) sans le dupliquer page par page, tout en suivant le thème de session.
+
+**Reporté dans** : `src/components/menu/`, `src/components/{breadcrumb,back-link,status-screen,prompt-classes}.tsx`, `src/lib/menu-collapsed.ts`, `src/components/page-shell.tsx` ; canevas (`apres/menu-etroit`), design system (Sidebar) ; `docs/CONVENTIONS.md` § « Page examinateur » et « Menu et coquille de page » ; plan `docs/superpowers/plans/2026-10-17-f44-4-menu-coquille.md`.
+
+## D106 — F44.5 : accueil en tableau de bord et pages d'espace (2026-10-17)
+
+**Question** : comment redistribuer les composants de l'accueil entre `/`, `/sessions` et `/trainings` sans import entre features, que montre l'accueil (et quand montre-t-il le premier lancement), et que deviennent les cas que les maquettes ne disent pas (import d'une sauvegarde ancienne, enregistrements endommagés, pastille de stockage) ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Répartition | Cartes de session et leurs dialogues dans `features/sessions`, cartes d'entraînement dans `features/trainings`, tableau de bord et premier lancement dans `features/home`. L'import d'une sauvegarde (`ImportController`, `useBackupImport`, `useRetained`) remonte dans `src/components/import/`, comme `components/export/`. Briques communes dans `src/components/` : `SpaceIcon`, `SessionProgress`, `SuccessRing`, `TrainingFigures`, et `useTrainingSummary` dans `src/hooks/`. | D59 : un composant de deux features remonte ; l'import sert l'accueil et `/sessions`. |
+| `PageShell` | Props `icon` (tuile à gauche du titre, `SpaceIcon size="lg"` sur une page d'espace) et `halo` (`home`, `space`) : premier usage des tokens `halo-*` de #145. Le calque du halo s'ancre à la colonne de contenu de `RootLayout` (`relative isolate`), coupé à elle : ni sur la barre du haut du téléphone, ni arrêté au bord du `main` borné sur grand écran. | Artboards `accueil`, `sessions`, `trainings`. |
+| « Reprendre » | Les 3 éléments les plus récents, sessions et entraînements confondus (`compareRecords`), endommagés exclus ; section absente s'il n'y en a aucun. | Carte des écrans (D103) ; un endommagé ne se reprend pas. |
+| Compteurs des tuiles | `sessions.length` et `trainings.length`, endommagés compris. | Ils comptent ce que la page d'espace liste. |
+| Premier lancement | Base `open`, les deux listes lues et vides, endommagés compris ; jamais en `outdated` ou `unavailable` (bandeau). `h1` « Bienvenue ». | Un enregistrement endommagé est une donnée : il se traite sur sa page d'espace. |
+| Import depuis l'accueil | Un import réussi mène à `/sessions` (`onImported`). | La date d'une sauvegarde ancienne la laisse hors de « Reprendre » : l'import réussirait sans rien montrer. |
+| Retour des écrans endommagés | Session endommagée : « Retour aux sessions » (`/sessions`) ; entraînement endommagé : « Retour aux entraînements » (`/trainings`). | L'accueil exclut les endommagés : leur carte (export, suppression) n'est plus que sur la page d'espace. Écart aux artboards `bandeaux` et `accueil-dialogues`, mis à jour. |
+| Taux de réussite global | `TrainingStats.rate` : somme des points sur somme des max de toutes les notes, même définition que `byCategory[].rate` ; `null` sans note (« — », anneau vide). | Carte des écrans (D103). |
+| Pastille « Stockage non garanti » | Bouton en pastille sous le sous-titre, explication en infobulle (survol et focus). | L'artboard pose un `title`, que le clavier et le tactile n'atteignent pas ; l'ancien bouton avait une infobulle. |
+| Titre de l'accueil | `h1` « Accueil » (`menu_home`) ; `app_title` reste le nom complet ailleurs. | Artboard `accueil`. |
+| `/trainings` vide | « Aucun entraînement » + « Lancez un entraînement à partir d'une config. », restylé comme l'état vide des sessions. | Non maquetté : le code fait foi (l'ancien accueil masquait la section). |
+| Anneau de réussite | SVG caché, libellé `sr-only` (« Taux de réussite : 72 % »). | oxlint `prefer-tag-over-role` refuse `role="img"`, même sur `<svg>`. |
+
+**Pourquoi** : chaque espace a sa page, l'accueil oriente au lieu de tout lister, et rien de ce que l'ancien accueil permettait (lister, ouvrir, supprimer, restaurer par bouton ou dépôt, signaler un endommagé) ne disparaît.
+
+**Reporté dans** : `src/features/{home,sessions,trainings}/`, `src/components/import/`, `src/components/{space-icon,session-progress,success-ring,training-figures,page-shell,damaged-badge,damaged-session,damaged-training-screen}.tsx`, `src/hooks/use-training-summary.ts`, `src/domain/training/training-stats.ts`, `src/lib/format-date.ts` ; `docs/CONVENTIONS.md` § « Page examinateur » ; plan `docs/superpowers/plans/2026-10-17-f44-5-accueil-espaces.md`.
+
+## D107 — F44.6 : création de session et éditeur de config (2026-10-17)
+
+**Question** : comment ramener `/new` et `/editor` à leurs artboards (`creation-session`, `creation-avertissements`, `editeur-config`) sans toucher au comportement, et que trancher là où les maquettes se taisent (plusieurs causes de blocage, couleur des états, mots-clés JSON, navigation de l'aperçu sous routage par hash) ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Phrase sous « Créer la session » | `submitBlocker` (feature), une cause à la fois, dans l'ordre : base (`outdated` ou `unavailable`), CSV en erreur ou illisible, config invalide, illisible ou validateur absent, fichier manquant, nom vide. Aucune phrase pendant une lecture ni pendant l'écriture. Le bouton porte `aria-describedby` vers la phrase quand elle est là. La cause « fichier manquant » s'ajoute aux quatre de la carte des écrans. | Un état transitoire ne s'explique pas ; sans la cinquième cause, un bouton désactivé avec un seul fichier déposé restait sans explication. |
+| Couleurs d'état | Fichier valide : `space-training` (vert) ; avertissement : `muted-foreground` (texte) et `space-editor` (pastille de marge de l'éditeur) ; erreur : `destructive`. `border-amber-500` disparaît. | Couleurs des artboards ; précédent de `offline-ready-prompt`. Le design system n'a pas de token « succès ». |
+| Syntaxe de l'éditeur | Palette des blocs de code des artboards en mode sombre : propriété `#7dd3fc`, chaîne `#f9a8d4`, nombre `#fcd34d`, ponctuation `muted-foreground`, mot-clé `#c4b5fd` (non maquetté). Le bloc clair `.cm-editor` attend #152. | « Thème de l'éditeur accordé au design system » (#148). |
+| Panneau « Problèmes » | Au-dessus du code, dans la frame, **rendu dès le montage** (en-tête seul avant la première validation), numéro de ligne calculé sur le texte validé (`lineAt`). Chaque variation de sa hauteur est compensée avant la peinture (`ResizeObserver`) : défilement de l'éditeur en `lg` (colonne collante), de la page sinon quand le focus est dans l'éditeur. | Sans cela, le code sautait de 50 à 190 px sous le curseur et la souris à chaque problème apparu ou corrigé pendant la frappe (survols faux, clics sur la mauvaise ligne). |
+| Navigation de l'aperçu | Boutons qui font défiler la frame (`scrollIntoView`, `auto` si mouvement réduit) et donnent le focus au titre de la catégorie ; jamais d'ancre. Ids dérivés de `useId()` et du rang. | Routage par hash : `href="#…"` changerait de page. |
+| Briques partagées | `ActionHalo` (halo derrière l'action principale, `start` ou `end`), `formatScale` (barème selon la langue), `FileDropField` et `ConfigIssueList` restylés dans `src/components/`. La mise en place d'un entraînement prend leur forme dès maintenant ; sa zone compacte relève de #151. | D59 : partagé par deux features. |
+| Débord sur téléphone | Colonne de contenu de `RootLayout` en `overflow-x-clip`. | Le halo d'une action dépasse du bord ; `clip` ne crée pas de conteneur de défilement (colonnes collantes intactes). |
+| `cn` | `extendTailwindMerge` avec les tailles `text-*` du design system. | tailwind-merge les prenait pour des couleurs et les retirait devant `text-destructive` (QUIRKS 2026-10-17). |
+| Libellés | Courts à l'écran, longs en `aria-label` (« Charger » / « Charger un fichier », « Liste d'exemple » / « Télécharger la liste d'exemple ») ; « (facultatif) » dans le libellé de l'examinateur, `examiner_hint` gardé pour le dialogue. | Carte des écrans ; le nom accessible contient le texte visible (WCAG 2.5.3). |
+| Zones de dépôt | Toujours au grand format : même hauteur vides ou remplies (`min-h-46`), et égales entre elles (`flex-1`). | Retour de validation : la zone vide était plus basse que sa voisine remplie. |
+| Colonnes de l'éditeur | Code et aperçu à parts égales (bases 460 / 360 px, croissance 1:1), aperçu collant sur toute la hauteur en `lg` ; `max-h-160` sous `lg`. À 1280 px, l'aperçu reste dans les cotes de l'artboard (≈ 414 px). | Retour de validation : sur grand écran, toute la largeur allait au code et l'aperçu restait à 360 × 640 px. |
+| Tuile d'en-tête | `SpaceIcon size="lg"` (52 px) comme les pages d'espace ; artboards passés de 48 à 52 px (canevas v23). | Une seule taille de tuile d'en-tête. |
+
+**Pourquoi** : les deux écrans prennent la forme validée, et chaque état que le code connaissait (lecture, erreurs de lecture et de validateur, aperçu périmé ou vide, avertissements d'une config valide, « Skips désactivés ») reste visible.
+
+**Reporté dans** : `src/features/create-session/` (`submit-blocker.ts`, `components/preview-card.tsx`), `src/features/config-editor/` (`issue-locations.ts` `lineAt`, `components/issue-list.tsx`, `components/config-preview.tsx`, `editor-theme.ts`), `src/components/{action-halo,format-scale,file-drop-field,config-issue-list}.tsx`, `src/lib/utils.ts`, `src/routes/__root.tsx`, `src/index.css` ; `docs/CONVENTIONS.md` § « Page examinateur » ; plan `docs/superpowers/plans/2026-10-17-f44-6-creation-editeur.md`.

@@ -2,6 +2,7 @@ import {
   IconAlertTriangle,
   IconCircleCheck,
   IconCircleX,
+  IconFileUpload,
   IconLoader2,
   type Icon,
 } from '@tabler/icons-react'
@@ -23,12 +24,21 @@ type FileDropFieldProps = Readonly<{
   disabled?: boolean
 }>
 
-type CheckedStatus = Exclude<FileDropStatus, 'empty' | 'reading'>
-
-const STATUS_ICONS: Record<CheckedStatus, { icon: Icon; className: string }> = {
-  ok: { icon: IconCircleCheck, className: 'text-primary' },
+const STATUS_ICONS: Record<FileDropStatus, { icon: Icon; className: string }> = {
+  empty: { icon: IconFileUpload, className: 'text-muted-foreground' },
+  reading: { icon: IconLoader2, className: 'animate-spin text-muted-foreground' },
+  ok: { icon: IconCircleCheck, className: 'text-space-training' },
   warnings: { icon: IconAlertTriangle, className: 'text-muted-foreground' },
   errors: { icon: IconCircleX, className: 'text-destructive' },
+}
+
+// Bordure de la zone selon l'état (artboards `creation-session`, `creation-avertissements`).
+const STATUS_BORDERS: Record<FileDropStatus, string> = {
+  empty: 'border-dashed border-input',
+  reading: 'border-input',
+  ok: 'border-space-training',
+  warnings: 'border-muted-foreground',
+  errors: 'border-destructive',
 }
 
 const STATUS_LABELS: Record<
@@ -41,18 +51,10 @@ const STATUS_LABELS: Record<
   errors: 'create_file_status_errors',
 }
 
-function StatusIcon({ status }: Readonly<{ status: FileDropStatus }>) {
-  if (status === 'empty') return null
-  if (status === 'reading') {
-    return <IconLoader2 aria-hidden className="size-4 animate-spin text-muted-foreground" />
-  }
-  const { icon: StateIcon, className } = STATUS_ICONS[status]
-  return <StateIcon aria-hidden className={cn('size-4', className)} />
-}
-
 /**
  * Zone de dépôt d'un fichier (écran de création) : bouton qui ouvre un input caché, dépôt par
- * glisser-déposer, nom du fichier et icône d'état de sa validation.
+ * glisser-déposer, nom du fichier, icône et texte d'état de sa validation, bordure colorée selon
+ * cet état.
  */
 export function FileDropField({
   ui,
@@ -74,17 +76,13 @@ export function FileDropField({
     if (file) onFile(file)
   }
 
+  const { icon: StateIcon, className: iconClass } = STATUS_ICONS[status]
+
   return (
     // Écouteurs sur un `div` neutre : un `fieldset` (rôle group) n'est pas un élément interactif.
-    <div
-      {...dropProps}
-      className={cn(
-        'rounded-xl border-2 border-dashed p-4 transition-colors',
-        dragging && 'border-primary',
-      )}
-    >
-      <fieldset className="flex min-w-0 flex-col gap-3">
-        <legend className="mb-3 font-medium">{label}</legend>
+    <div {...dropProps} className="flex min-w-0 flex-1 flex-col">
+      <fieldset className="flex min-w-0 flex-1 flex-col">
+        <legend className="mb-2 text-small font-semibold">{label}</legend>
         <input
           ref={input}
           type="file"
@@ -94,26 +92,43 @@ export function FileDropField({
           disabled={disabled}
           onChange={handleChange}
         />
-        {/* Toujours monté : une région live n'annonce que les changements d'un élément existant. */}
-        <span aria-live="polite" className="sr-only">
-          {fileName !== undefined && status !== 'empty' ? text(STATUS_LABELS[status], {}) : ''}
-        </span>
-        {fileName !== undefined && (
-          <p className="flex items-center gap-2 text-sm">
-            <StatusIcon status={status} />
-            <span className="truncate">{fileName}</span>
-          </p>
-        )}
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={disabled}
-            onClick={() => input.current?.click()}
+        <div
+          data-status={status}
+          className={cn(
+            // Toujours au grand format, rempli ou vide : même hauteur que la zone voisine (`flex-1`)
+            // et que l'état rempli seul (`min-h-46`).
+            'flex min-h-46 flex-1 flex-col items-center justify-center gap-2 rounded-lg border-[1.5px] bg-card px-5 py-6 text-center transition-colors',
+            STATUS_BORDERS[status],
+            dragging && 'border-dashed border-primary',
+          )}
+        >
+          <StateIcon aria-hidden className={cn('size-7 shrink-0', iconClass)} />
+          {fileName !== undefined && (
+            <strong className="max-w-full truncate font-semibold">{fileName}</strong>
+          )}
+          {/* Toujours monté : une région live n'annonce que les changements d'un élément existant.
+              Visible, et seul nœud de l'état (pas de doublon `sr-only`). */}
+          <span
+            aria-live="polite"
+            className={cn(
+              'text-small',
+              status === 'errors' ? 'text-destructive' : 'text-muted-foreground',
+            )}
           >
-            {text(fileName === undefined ? 'create_choose_file' : 'create_replace_file', {})}
-          </Button>
-          <span className="text-sm text-muted-foreground">{text('create_drop_hint', {})}</span>
+            {fileName !== undefined && status !== 'empty' ? text(STATUS_LABELS[status], {}) : ''}
+          </span>
+          <div className="mt-1 flex flex-wrap items-center justify-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={disabled}
+              onClick={() => input.current?.click()}
+            >
+              {text(fileName === undefined ? 'create_choose_file' : 'create_replace_file', {})}
+            </Button>
+            <span className="text-small text-muted-foreground">{text('create_drop_hint', {})}</span>
+          </div>
         </div>
       </fieldset>
     </div>

@@ -880,3 +880,100 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : l'action Sonar vérifie la signature du scanner avec une clé GPG téléchargée depuis des serveurs de clés publics ; quand ils sont indisponibles, l'étape échoue avant toute analyse, et SonarQube Cloud n'a donc rien à rendre pour la PR.
 **Workaround** : avant d'attendre Sonar, regarder `gh pr checks <n>`. Si `check` est rouge sur l'import de clé, relancer le job (`gh run rerun <run-id> --failed`) : c'est un incident réseau, pas un défaut de la PR.
 **Référence** : `.github/workflows/ci.yml` (étape « Analyse SonarQube Cloud »), `.claude/scripts/sonar-check.sh`.
+
+## Artboards du canevas : `<pre><code>` en Courier et `line-height` hérité qui décale une ligne (2026-10-17)
+
+**Découvert** : revue de rendu des maquettes F44 (#144).
+**Symptôme** : (1) un bloc de code d'artboard s'affiche en police à empattements fine alors que le `<pre>` déclare Geist Mono ; (2) dans une carte de stats, le libellé sous « 38 / 60 » descend de quelques pixels par rapport à celui de « 72 % » à côté.
+**Cause** : (1) les artboards n'ont pas le preflight de Tailwind : la feuille du navigateur donne `font-family: monospace` à `<code>`, qui ne hérite donc pas du `<pre>` ; (2) un `<span>` plus petit (« / 60 » en 18 px) hérite du `line-height` en px de son parent (36 px) et agrandit la boîte de ligne.
+**Workaround** : `style="font: inherit"` sur le `<code>` d'un `<pre>` ; `line-height: 1` sur le suffixe plus petit. Dans l'app, le preflight règle le premier cas ; le second peut s'y reproduire avec un `leading-*` en px.
+**Référence** : canevas F44 (`apres/projection-question`, `apres/entrainement-question`, `apres/trainings`).
+
+## Les e2e lisent des valeurs de token minifiées par le build (2026-10-17)
+
+**Découvert** : F44.3, `e2e/appearance.spec.ts`.
+**Symptôme** : `getComputedStyle(document.documentElement).getPropertyValue('--background')` rend `oklch(14.5% 0 0)` au lieu de `oklch(0.145 0 0)`, et `--radius` rend `.625rem`.
+**Cause** : le serveur web de Playwright sert le build de production, dont la CSS est minifiée ; une propriété personnalisée garde le texte minifié tel quel.
+**Workaround** : comparer une propriété calculée, normalisée par le navigateur (`getComputedStyle(document.body).backgroundColor` → `oklch(0.16 0.02 292)`), ou une longueur résolue (`border-top-left-radius` → `18px`), jamais le texte brut d'un token.
+**Référence** : `e2e/appearance.spec.ts`.
+
+## Publier sur le canevas ou le design system exige une lecture complète d'abord (2026-10-17)
+
+**Découvert** : F44.3, tâche 1 (alignement du design system sur D103).
+**Symptôme** : la publication est refusée (« You haven't viewed the latest version of this artifact ») alors que les fichiers modifiés venaient d'être lus avec `read` + `path`.
+**Cause** : lire un fichier par `path` ne compte pas comme avoir vu la version ; seule la lecture de l'artifact entier (`read` avec `url` seul) le fait.
+**Workaround** : `Artifact` `read` sur l'URL (sans `path`) dans la session, puis publier avec `root` et `files` ; les fichiers déjà lus restent valables si la version n'a pas changé.
+**Référence** : URL des deux Artifacts dans `docs/ENVIRONMENT.md`.
+
+## Infobulle base-ui : aucun rôle ARIA, et ouverte au focus clavier seulement (2026-10-17)
+
+**Découvert** : F44.4, `e2e/menu.spec.ts` (menu replié).
+**Symptôme** : `getByRole('tooltip', { name: 'Sessions' })` ne trouve rien alors que l'infobulle s'affiche au survol ; puis, au focus, l'infobulle ne s'ouvre pas du tout.
+**Cause** : `Tooltip.Popup` de base-ui ne pose aucun `role` ; et il ne s'ouvre au focus que sur `:focus-visible`, ce qu'un `locator.focus()` programmatique ne déclenche pas.
+**Workaround** : `role="tooltip"` passé au `TooltipContent` ; en e2e, focaliser l'élément précédent puis `page.keyboard.press('Tab')`.
+**Référence** : `src/components/menu/menu-links.tsx`, `e2e/menu.spec.ts`.
+
+## `Link` TanStack pose son propre `aria-current` dès qu'il est actif, par préfixe (2026-10-17)
+
+**Découvert** : F44.4, menu latéral.
+**Symptôme** : un lien vers `/` serait marqué `aria-current="page"` sur toutes les routes ; un `aria-current` passé en prop est écrasé quand TanStack juge le lien actif.
+**Cause** : `applyLinkState` ajoute `aria-current="page"` (et `data-status="active"`) quand `resolveIsActive` est vrai, ce qui est le cas par défaut dès que le chemin courant commence par celui du lien.
+**Workaround** : `activeOptions={{ exact: true }}` sur les liens dont on calcule soi-même l'état actif (`activeMenuItem`).
+**Référence** : `src/components/menu/menu-links.tsx`, `node_modules/@tanstack/react-router/dist/esm/link.js`.
+
+## `toHaveClass(...buttonVariants(...).split(' '))` échoue sur un `Button` (2026-10-17)
+
+**Découvert** : F44.4, `damaged-session.test.tsx`.
+**Symptôme** : un `Button variant="default"` n'a pas toutes les classes de `buttonVariants({ variant: 'default' })`.
+**Cause** : `Button` passe ses classes par `cn` (tailwind-merge), qui retire les doublons de taille d'icône de la chaîne brute ; un `Link` stylé par `buttonVariants(...)` garde la chaîne brute.
+**Workaround** : comparer à `cn(buttonVariants(...)).split(' ')` pour un `Button`, à la chaîne brute pour un lien.
+**Référence** : `src/components/damaged-session.test.tsx`.
+
+
+## Le garde-fou `heavy-doubles` prend un simple `href` vers `config.example.json` pour un rendu de la config d'exemple (2026-10-17)
+
+**Découvert** : F44.5, `first-run.test.tsx`.
+**Symptôme** : `src/testing/heavy-doubles.test.ts` échoue et réclame les doublures des icônes et du surligneur dans un test qui ne rend aucune config, seulement le lien de téléchargement de l'exemple.
+**Cause** : le garde-fou lit les sources des `.test.tsx` et cherche le texte `config.example.json` (ou `<ConfigEditorPage`) ; une assertion `toHaveAttribute('href', `${base}config.example.json`)` contient ce texte.
+**Workaround** : vérifier le lien par une regex (`toMatch(/config\.example\.json$/)`), avec un commentaire qui dit pourquoi ; ne pas ajouter de doublures inutiles. Un test qui rend vraiment la config d'exemple garde la règle.
+**Référence** : `src/testing/heavy-doubles.test.ts`, `src/features/home/components/first-run.test.tsx`.
+
+## Après `useLiveQuery`, l'accueil rend son en-tête avant ses sections : `getBy` d'un titre de section échoue (2026-10-17)
+
+**Découvert** : F44.5, `home-page.test.tsx` (test en anglais).
+**Symptôme** : `getByRole('heading', { name: 'Spaces' })` échoue juste après un `findBy` du `h1`, alors que la section s'affiche bien.
+**Cause** : le `h1` vient de `PageShell`, rendu tout de suite ; « Reprendre » et « Espaces » attendent la lecture des deux listes (`useSessions`, `useTrainings`), qui arrive au rendu suivant.
+**Workaround** : attendre une section par `findBy`, jamais `getBy` après le seul `h1`.
+**Référence** : `src/features/home/home-page.tsx`.
+
+## Sur le tailnet en `http://`, créer une session ou un entraînement échoue : `crypto.randomUUID` absent hors contexte sécurisé (2026-10-17)
+
+**Découvert** : F44.5, validation de #147 depuis un autre appareil du tailnet.
+**Symptôme** : via `http://adrien-laptop.halfbeak-wahoo.ts.net:5173/…` (ou l'IP Tailscale), choisir les fichiers puis créer une session ne marche pas, sur Firefox comme sur Chrome ; Firefox affiche en plus un « Security Error … may not load or link to file:/// ». Sur `http://localhost:5173`, tout marche.
+**Cause** : une page en `http://` servie depuis un autre nom que `localhost` n'est pas un contexte sécurisé (`window.isSecureContext === false`) ; le navigateur n'y expose pas `crypto.randomUUID`, appelé à la création d'une session, d'un entraînement et à l'ajout d'un étudiant. Vérifié avec Chromium : `localhost` → `{ secure: true, randomUUID: 'function' }`, IP Tailscale → `{ secure: false, randomUUID: 'undefined' }`. La production (HTTPS) n'est pas concernée.
+**Workaround** : tester en `localhost`, ou servir le dev en HTTPS sur le tailnet (`tailscale serve`, certificats HTTPS activés sur le tailnet). Sur le tailnet en `http://`, ne valider que l'affichage.
+**Référence** : `src/features/create-session/hooks/use-create-form.ts`, `src/features/training-setup/hooks/use-training-setup.ts`, `src/features/session/hooks/use-passage-actions.ts` ; `docs/ENVIRONMENT.md` § Stack d'exécution.
+
+## `cn` (tailwind-merge) retirait les tailles de texte du design system devant une couleur (2026-10-17)
+
+**Découvert** : F44.6, captures de `/new` (chiffre « 1 erreur à corriger » en petit).
+**Symptôme** : `cn('text-score-md', 'text-destructive')` rend `text-destructive` seul ; même chose pour `text-small`, `text-h2`… à côté de `text-muted-foreground`.
+**Cause** : tailwind-merge ne connaît pas les tailles `--text-*` déclarées dans `@theme` : `text-score-md` ressemble pour lui à une couleur, en conflit avec la suivante.
+**Workaround** : corrigé dans `src/lib/utils.ts` (`extendTailwindMerge`, `theme.text`). Une nouvelle taille `--text-*` dans `index.css` s'ajoute aussi à cette liste.
+**Référence** : `src/lib/utils.ts`, `src/lib/utils.test.ts`.
+
+## Un bloc qui apparaît au-dessus de CodeMirror fausse le survol en e2e (2026-10-17)
+
+**Découvert** : F44.6, `e2e/config-editor.spec.ts` (survols de `finalScoreDisplay`, `mode`, `icon`).
+**Symptôme** : l'infobulle de survol décrit la clé de la ligne du dessus.
+**Cause** : le panneau « Problèmes », placé au-dessus du code, n'apparaissait qu'à la première validation (300 ms) ; le code descendait sous une souris déjà posée.
+**Workaround** : tout bloc au-dessus de l'éditeur est rendu dès le montage, et chaque variation de sa hauteur est compensée par un défilement (`ResizeObserver` sur le panneau, `JsonEditorApi.scrollBy`). Test e2e « le code ne bouge pas quand un problème apparaît ou disparaît ».
+**Référence** : `src/features/config-editor/components/issue-list.tsx`, `config-editor-page.tsx`.
+
+## jsdom n'implémente pas `scrollIntoView` (2026-10-17)
+
+**Découvert** : F44.6, navigation par catégorie de l'aperçu de l'éditeur.
+**Symptôme** : `TypeError: section.scrollIntoView is not a function` dans un test unitaire.
+**Cause** : jsdom ne fait aucune mise en page et n'expose pas `Element.prototype.scrollIntoView`.
+**Workaround** : dans le test, `Element.prototype.scrollIntoView = vi.fn()` avant le rendu, puis vérifier `mock.contexts[0]` (l'élément défilé).
+**Référence** : `src/features/config-editor/components/config-preview.test.tsx`.

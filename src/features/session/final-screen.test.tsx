@@ -82,10 +82,10 @@ test('détail du passage : rangs des questions notées, passée sans rang', asyn
     2,
   )
 
-  // Le tiroir (Sheet) peut contenir ses propres listes : on ne garde que celles hors du tiroir.
+  // Le tiroir (Sheet) et le menu latéral ont leurs propres listes : on ne garde que celles du contenu.
   const lists = screen
     .getAllByRole('list')
-    .filter((list) => list.closest('[data-slot="sheet-content"]') === null)
+    .filter((list) => list.closest('[data-slot="sheet-content"], aside') === null)
   const [detail] = lists
   if (lists.length !== 1 || detail === undefined) {
     throw new Error(`${lists.length} listes hors panneau, une seule attendue`)

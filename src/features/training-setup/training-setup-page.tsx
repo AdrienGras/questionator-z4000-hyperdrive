@@ -1,8 +1,8 @@
-import { Link, useNavigate, useRouter } from '@tanstack/react-router'
+import { useNavigate, useRouter } from '@tanstack/react-router'
 import { useEffect, useMemo, useRef, useState, type SubmitEvent } from 'react'
 import { DbStatusBanner } from '@/components/db-status-banner'
+import { BackLink } from '@/components/back-link'
 import { PageShell } from '@/components/page-shell'
-import { SMALL_TEXT_LINK_CLASS } from '@/components/text-link'
 import { TrainingGate } from '@/components/training-gate'
 import { Button } from '@/components/ui/button'
 import type { NormalizedConfig } from '@/domain/config/normalize'
@@ -11,25 +11,18 @@ import type { Training } from '@/domain/training/types'
 import { PAGE_DROP_GUARD } from '@/hooks/use-file-drop'
 import { useDbStatus } from '@/lib/db/hooks'
 import { useUi, type Ui } from '@/lib/i18n/use-ui'
-import { cn } from '@/lib/utils'
 import { ConfigStep } from '@/features/training-setup/components/config-step'
 import { PromptStep } from '@/features/training-setup/components/prompt-step'
 import { SetupStep } from '@/features/training-setup/components/setup-step'
 import { useTrainingSetup } from '@/features/training-setup/hooks/use-training-setup'
 
 /** Lien de retour : l'accueil à la création, l'entraînement à la mise à jour. */
-function BackLink({ ui, training }: Readonly<{ ui: Ui; training: Training | undefined }>) {
-  const className = cn('self-start', SMALL_TEXT_LINK_CLASS)
-  if (training === undefined)
-    return (
-      <Link to="/" className={className}>
-        {ui.text('back_home', {})}
-      </Link>
-    )
+function SetupBackLink({ ui, training }: Readonly<{ ui: Ui; training: Training | undefined }>) {
+  if (training === undefined) return <BackLink to="/">{ui.text('back_home', {})}</BackLink>
   return (
-    <Link to="/training/$trainingId" params={{ trainingId: training.id }} className={className}>
+    <BackLink to="/training/$trainingId" params={{ trainingId: training.id }}>
       {ui.text('training_update_back', {})}
-    </Link>
+    </BackLink>
   )
 }
 
@@ -99,10 +92,9 @@ function TrainingSetupForm({ training }: Readonly<{ training?: Training }>) {
 
   return (
     <PageShell
-      ui={ui}
       title={texts.title}
       meta={training?.name}
-      back={<BackLink ui={ui} training={training} />}
+      back={<SetupBackLink ui={ui} training={training} />}
       {...PAGE_DROP_GUARD}
     >
       <DbStatusBanner ui={ui} status={status} />

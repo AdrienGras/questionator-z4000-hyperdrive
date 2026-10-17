@@ -7,7 +7,6 @@ import { minimalConfig } from '@/testing/config-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
 import { attemptOf, sessionWith } from '@/testing/stats-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
-import { expectColorModeToggleLast, bannerInteractiveNames } from '@/testing/page-shell-assertions'
 import { renderAt } from '@/testing/render-at'
 
 beforeEach(async () => {
@@ -37,7 +36,7 @@ test('titre = nom de la session, retour au passage vers la vue examinateur', asy
   expect(await screen.findByRole('heading', { level: 1, name: 'Oral du lundi' })).toBeVisible()
   const back = screen.getByRole('link', { name: 'Retour au passage' })
   expect(back).toHaveAttribute('href', '/session/session-1')
-  expect(screen.getByRole('button', { name: /Mode d'affichage/u })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Aide (nouvel onglet)' })).toBeInTheDocument()
 
   fireEvent.click(back)
   expect(await screen.findByRole('heading', { name: 'Oral de test' })).toBeInTheDocument()
@@ -51,15 +50,6 @@ test('barre de titre : « Retour au passage », nom de la session, thème dernie
   expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Oral du lundi')
   const banner = screen.getByRole('banner')
   expect(within(banner).getByRole('link', { name: 'Retour au passage' })).toBeInTheDocument()
-  expectColorModeToggleLast()
-})
-
-test('config en anglais : le thème de la barre est en anglais', async () => {
-  await putSession(makeSession({ config: { ...makeConfig(), locale: 'en' } }))
-  renderAt('/session/session-1/stats')
-
-  await screen.findByRole('heading', { level: 1 })
-  expect(bannerInteractiveNames().at(-1)).toMatch(/^Display mode:/u)
 })
 
 test('session sans terminé : les cinq indicateurs de notes affichent —', async () => {
@@ -161,7 +151,7 @@ test("question tirée d'id inconnu : session endommagée, statistiques non affic
   expect(
     await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
   ).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: 'Exporter un backup' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Exporter une sauvegarde' })).toBeInTheDocument()
   expect(screen.queryByRole('table', { name: 'Questions les plus tirées' })).not.toBeInTheDocument()
 })
 

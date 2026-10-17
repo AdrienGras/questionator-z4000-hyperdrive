@@ -285,7 +285,7 @@ test('aperçu : étudiant projeté inconnu → session endommagée, aucun aperç
   expect(
     await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
   ).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: 'Exporter un backup' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Exporter une sauvegarde' })).toBeInTheDocument()
 })
 
 test('« Ouvrir » sur la ligne du titre de l’aperçu, pilotage sous l’aperçu, hors de l’en-tête', async () => {

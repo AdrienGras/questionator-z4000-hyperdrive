@@ -1,13 +1,13 @@
 import { getRouteApi, Link } from '@tanstack/react-router'
 import { useMemo } from 'react'
+import { BackLink } from '@/components/back-link'
 import { PageShell } from '@/components/page-shell'
-import { SMALL_TEXT_LINK_CLASS, TEXT_LINK_CLASS } from '@/components/text-link'
+import { TEXT_LINK_CLASS } from '@/components/text-link'
 import { TrainingGate } from '@/components/training-gate'
 import { Card, CardContent } from '@/components/ui/card'
 import { computeTrainingStats } from '@/domain/training/training-stats'
 import type { Training, TrainingDraw } from '@/domain/training/types'
 import { useUi } from '@/lib/i18n/use-ui'
-import { cn } from '@/lib/utils'
 import { CategoryRates } from '@/features/training-stats/components/category-rates'
 import { KeyFigures } from '@/features/training-stats/components/key-figures'
 import { QuestionDetails } from '@/features/training-stats/components/question-details'
@@ -36,16 +36,11 @@ function TrainingStatsView({
   const empty = stats.scoredCount === 0 && stats.passedCount === 0
   return (
     <PageShell
-      ui={ui}
       title={training.name}
       back={
-        <Link
-          to="/training/$trainingId"
-          params={params}
-          className={cn('self-start', SMALL_TEXT_LINK_CLASS)}
-        >
+        <BackLink to="/training/$trainingId" params={params}>
           {text('training_stats_back', {})}
-        </Link>
+        </BackLink>
       }
     >
       {empty ? (

@@ -36,6 +36,12 @@ export class ConfigEditorPage {
 
   readonly createSessionButton: Locator
 
+  /** Titre du panneau « Problèmes », au-dessus du code. */
+  readonly problems: Locator
+
+  /** Navigation par catégorie de l'aperçu (une puce par catégorie, puis « Écran final »). */
+  readonly categoryNav: Locator
+
   private readonly page: Page
 
   constructor(page: Page) {
@@ -54,6 +60,8 @@ export class ConfigEditorPage {
     this.createSessionButton = page.getByRole('button', {
       name: 'Créer une session avec cette config',
     })
+    this.problems = page.getByRole('heading', { level: 2, name: 'Problèmes' })
+    this.categoryNav = page.getByRole('navigation', { name: 'Aller à une catégorie' })
   }
 
   async goto(): Promise<void> {

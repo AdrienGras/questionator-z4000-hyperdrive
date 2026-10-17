@@ -134,9 +134,9 @@ describe('écran de stats d’un entraînement', () => {
     expect(await screen.findByRole('region', { name: 'Chiffres clés' })).toBeInTheDocument()
   })
 
-  test('accès depuis la carte d’accueil : lien « Stats » à côté de « Reprendre »', async () => {
+  test('accès depuis la carte de l’espace Entraînement : lien « Stats » à côté de « Reprendre »', async () => {
     await seed()
-    renderAt('/')
+    renderAt('/trainings')
 
     const heading = await screen.findByRole('heading', { level: 3, name: 'Entraînement de test' })
     const card = heading.closest('li')

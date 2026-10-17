@@ -296,3 +296,42 @@ test('useColorModeControl hors provider lève une erreur explicite', () => {
   vi.spyOn(console, 'error').mockImplementation(() => {})
   expect(() => render(<Control />)).toThrow(/AppearanceProvider/)
 })
+
+describe('AppearanceProvider — mode forcé (refonte F44, D102)', () => {
+  test('sombre malgré un choix « clair » mémorisé et un système clair', () => {
+    localStorage.setItem('questionator:color-mode:global', 'light')
+    render(
+      <AppearanceProvider forcedMode="dark">
+        <Control />
+      </AppearanceProvider>,
+    )
+    expect(html).toHaveClass('dark')
+    expect(screen.getByText('dark/dark')).toBeInTheDocument()
+  })
+
+  test('une portée sans theme.dark n’applique aucun token clair', () => {
+    const scope: AppearanceScope = {
+      ...SESSION_SCOPE,
+      theme: { light: { primary: 'rgb(1, 2, 3)' }, dark: {} },
+    }
+    render(
+      <AppearanceProvider forcedMode="dark">
+        <Scoped scope={scope} />
+      </AppearanceProvider>,
+    )
+    expect(html.style.getPropertyValue('--primary')).toBe('')
+    expect(html).toHaveClass('dark')
+  })
+
+  test('les tokens theme.dark de la portée s’appliquent, choix manuel compris', () => {
+    render(
+      <AppearanceProvider forcedMode="dark">
+        <Scoped scope={SESSION_SCOPE} />
+      </AppearanceProvider>,
+    )
+    expect(html.style.getPropertyValue('--primary')).toBe('rgb(4, 5, 6)')
+    fireEvent.click(screen.getByRole('button', { name: 'clair' }))
+    expect(html).toHaveClass('dark')
+    expect(html.style.getPropertyValue('--primary')).toBe('rgb(4, 5, 6)')
+  })
+})
