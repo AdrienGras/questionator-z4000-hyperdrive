@@ -29,6 +29,11 @@ function renderField(overrides: Partial<Props> = {}) {
     onFile,
     input,
     zone: screen.getByRole('group', { name: "Liste d'étudiants (CSV)" }),
+    box: () => {
+      const box = container.querySelector('[data-status]')
+      if (!(box instanceof HTMLElement)) throw new Error('zone de dépôt absente')
+      return box
+    },
     rerender: (props: Partial<Props>) => rerender(field(props)),
   }
 }
@@ -65,8 +70,8 @@ describe('FileDropField', () => {
   })
 
   test('survol : bordure active, retirée en quittant la zone', () => {
-    const { zone } = renderField()
-    const border = zone.parentElement
+    const { zone, box } = renderField()
+    const border = box()
     fireEvent.dragOver(zone, { dataTransfer: { files: [file], types: ['Files'] } })
     expect(border).toHaveClass('border-dashed', 'border-primary')
     fireEvent.dragLeave(zone, { dataTransfer: { types: ['Files'] } })
@@ -74,13 +79,13 @@ describe('FileDropField', () => {
   })
 
   test('désactivé : dragover empêché quand même, dépôt ignoré', () => {
-    const { zone, onFile } = renderField({ disabled: true })
+    const { zone, box, onFile } = renderField({ disabled: true })
     const dragOver = createEvent.dragOver(zone, {
       dataTransfer: { files: [file], types: ['Files'], dropEffect: 'copy' },
     })
     fireEvent(zone, dragOver)
     expect(dragOver.defaultPrevented).toBe(true)
-    expect(zone.parentElement).not.toHaveClass('border-primary')
+    expect(box()).not.toHaveClass('border-primary')
     const drop = createEvent.drop(zone, { dataTransfer: { files: [file], types: ['Files'] } })
     fireEvent(zone, drop)
     expect(drop.defaultPrevented).toBe(true)
@@ -100,9 +105,34 @@ describe('FileDropField', () => {
     ['warnings', 'Fichier valide, avec avertissements'],
     ['errors', 'Fichier invalide'],
     ['reading', 'Lecture en cours…'],
-  ] as const)('état %s annoncé par un libellé accessible', (status, label) => {
+  ] as const)('état %s visible et annoncé : un seul nœud', (status, label) => {
     renderField({ fileName: 'etudiants.csv', status })
-    expect(screen.getByText(label)).toHaveClass('sr-only')
+    const nodes = screen.getAllByText(label)
+    expect(nodes).toHaveLength(1)
+    expect(nodes[0]).toHaveAttribute('aria-live', 'polite')
+    expect(nodes[0]).not.toHaveClass('sr-only')
+  })
+
+  test.each([
+    ['empty', ['border-dashed', 'border-input']],
+    ['reading', ['border-input']],
+    ['ok', ['border-space-training']],
+    ['warnings', ['border-muted-foreground']],
+    ['errors', ['border-destructive']],
+  ] as const)('bordure selon l’état %s', (status, classes) => {
+    const { box } = renderField({
+      fileName: status === 'empty' ? undefined : 'etudiants.csv',
+      status,
+    })
+    expect(box()).toHaveAttribute('data-status', status)
+    expect(box()).toHaveClass(...classes)
+  })
+
+  test('vide : aucun nom, aucun état, bouton « Choisir un fichier »', () => {
+    renderField()
+    expect(screen.queryByRole('strong')).not.toBeInTheDocument()
+    expect(screen.queryByText(/^Fichier|^Lecture/)).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Choisir un fichier' })).toBeInTheDocument()
   })
 
   test('région live : le passage de la lecture au résultat est annoncé', () => {
