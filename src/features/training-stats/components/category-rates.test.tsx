@@ -4,23 +4,18 @@ import { computeTrainingStats } from '@/domain/training/training-stats'
 import { makeUi } from '@/testing/make-ui'
 import { makeStatsDraws, makeTrainingConfig } from '@/testing/training-fixtures'
 import { CategoryRates } from './category-rates'
-import { rowCells } from '@/testing/table-assertions'
 
-const percent = (value: number) => new Intl.NumberFormat('fr', { style: 'percent' }).format(value)
+test('un anneau par niveau, dans l’ordre de la config : taux et couverture', () => {
+  const config = makeTrainingConfig()
+  const stats = computeTrainingStats(config, makeStatsDraws())
+  render(<CategoryRates ui={makeUi()} config={config} categories={stats.byCategory} />)
 
-test('une ligne par niveau, dans l’ordre de la config : taux et couverture', () => {
-  const stats = computeTrainingStats(makeTrainingConfig(), makeStatsDraws())
-  render(<CategoryRates ui={makeUi()} categories={stats.byCategory} />)
-
-  const table = screen.getByRole('table', { name: 'Par niveau' })
-  expect(
-    within(table)
-      .getAllByRole('rowheader')
-      .map((h) => h.textContent),
-  ).toEqual(['A', 'B'])
-  expect(rowCells(table, 'A')).toEqual([percent(0.75), '2 / 3'])
-  expect(rowCells(table, 'B')).toEqual(['—', '0 / 1'])
-  expect(
-    within(table).getByRole('progressbar', { name: `A : ${percent(0.75)}` }),
-  ).toBeInTheDocument()
+  const region = screen.getByRole('region', { name: 'Par niveau' })
+  const items = within(region).getAllByRole('listitem')
+  expect(items).toHaveLength(2)
+  // `Intl` sépare le signe % par une espace insécable fine.
+  expect(within(items[0]!).getByText(/^Réussite A : 75\s%$/u)).toHaveClass('sr-only')
+  expect(within(items[0]!).getByText('2 / 3 notées')).toBeInTheDocument()
+  expect(within(items[1]!).getByText('Réussite B : —')).toBeInTheDocument()
+  expect(within(items[1]!).getByText('0 / 1 notées')).toBeInTheDocument()
 })

@@ -212,29 +212,28 @@ const SAMPLE: UiMessageParams = {
   training_stats_link: {},
   training_stats_card_link: {},
   training_stats_back: {},
+  training_stats_subtitle: {},
   training_stats_error: {},
   training_stats_empty: {},
   training_stats_start: {},
   training_stats_key_figures: {},
-  training_stats_scored: { count: 42 },
-  training_stats_passed: { count: 5 },
-  training_stats_coverage: { covered: 23, total: 40 },
+  training_stats_scored_label: { count: 2 },
+  training_stats_passed_label: { count: 2 },
   training_stats_review_title: {},
   training_stats_review_empty: {},
-  training_stats_last_score: { score: '0,5 / 2' },
+  training_stats_review_count: { count: 2 },
+  training_stats_last_score: {},
   training_stats_attempts: { count: 3 },
   training_stats_by_category: {},
   training_stats_by_tag: {},
+  training_stats_level_coverage: { covered: 1, total: 2 },
   training_stats_col_level: {},
-  training_stats_col_tag: {},
   training_stats_col_rate: {},
-  training_stats_col_coverage: {},
   training_stats_col_question: {},
   training_stats_col_scored: {},
   training_stats_col_last: {},
   training_stats_col_status: {},
   training_stats_details: { count: 12 },
-  training_stats_rate_label: { label: 'Facile', rate: '82 %' },
   training_update_title: {},
   training_update_link: {},
   training_update_back: {},
@@ -508,17 +507,17 @@ describe('UI_MESSAGES', () => {
   })
 
   test('training_stats_* : singulier et pluriel des chiffres clés', () => {
-    expect(t(UI_MESSAGES, 'fr', 'training_stats_scored', { count: 1 })).toBe('1 réponse notée')
-    expect(t(UI_MESSAGES, 'fr', 'training_stats_scored', { count: 42 })).toBe('42 réponses notées')
-    expect(t(UI_MESSAGES, 'fr', 'training_stats_passed', { count: 5 })).toBe('5 passées')
-    expect(t(UI_MESSAGES, 'fr', 'training_stats_coverage', { covered: 23, total: 40 })).toBe(
-      '23 / 40 questions notées',
+    expect(t(UI_MESSAGES, 'fr', 'training_stats_scored_label', { count: 1 })).toBe('réponse notée')
+    expect(t(UI_MESSAGES, 'fr', 'training_stats_scored_label', { count: 42 })).toBe(
+      'réponses notées',
     )
+    expect(t(UI_MESSAGES, 'fr', 'training_stats_passed_label', { count: 5 })).toBe('passées')
+    expect(t(UI_MESSAGES, 'fr', 'training_stats_review_count', { count: 1 })).toBe('1 question')
     expect(t(UI_MESSAGES, 'fr', 'training_stats_attempts', { count: 1 })).toBe('1 passage')
     expect(t(UI_MESSAGES, 'fr', 'training_stats_details', { count: 1 })).toBe(
       'Détail de 1 question',
     )
-    expect(t(UI_MESSAGES, 'en', 'training_stats_scored', { count: 1 })).toBe('1 rated answer')
+    expect(t(UI_MESSAGES, 'en', 'training_stats_scored_label', { count: 1 })).toBe('rated answer')
     expect(t(UI_MESSAGES, 'en', 'training_stats_attempts', { count: 3 })).toBe('3 attempts')
   })
 

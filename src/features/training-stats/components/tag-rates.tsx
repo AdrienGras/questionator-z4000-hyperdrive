@@ -1,37 +1,26 @@
-import {
-  NUMERIC_CELL,
-  ROW_HEADER,
-  StatsSection,
-  StatsTable,
-} from '@/components/stats/stats-section'
+import { MeterBar } from '@/components/stats/meter-bar'
+import { StatsSection } from '@/components/stats/stats-section'
 import type { TrainingStats } from '@/domain/training/training-stats'
 import type { Ui } from '@/lib/i18n/use-ui'
-import { RateCell } from './rate-cell'
+import { formatPercent } from './rate-cell'
 
-/** Par notion (tag), dans l'ordre des stats : taux de réussite. */
+/** Par notion (tag), dans l'ordre des stats : nom, taux et sa barre. */
 export function TagRates({ ui, tags }: Readonly<{ ui: Ui; tags: TrainingStats['byTag'] }>) {
-  const { text } = ui
+  const { text, locale } = ui
   return (
-    <StatsSection title={text('training_stats_by_tag', {})}>
-      {(headingId) => (
-        <StatsTable
-          labelledBy={headingId}
-          columns={[
-            { label: text('training_stats_col_tag', {}) },
-            { label: text('training_stats_col_rate', {}), numeric: true },
-          ]}
-        >
+    <StatsSection title={text('training_stats_by_tag', {})} className="min-w-0 flex-[2_1_18.75rem]">
+      {() => (
+        <ul className="flex flex-col gap-4.5">
           {tags.map(({ tag, rate }) => (
-            <tr key={tag} className="border-b last:border-0">
-              <th scope="row" className={ROW_HEADER}>
-                {tag}
-              </th>
-              <td className={NUMERIC_CELL}>
-                <RateCell ui={ui} label={tag} rate={rate.rate} />
-              </td>
-            </tr>
+            <li key={tag} className="flex flex-col gap-2">
+              <span className="flex justify-between gap-3">
+                <span className="font-medium wrap-anywhere">{tag}</span>
+                <b className="tabular-nums">{formatPercent(rate.rate, locale)}</b>
+              </span>
+              <MeterBar value={rate.rate} tone="primary" className="h-2 w-full" />
+            </li>
           ))}
-        </StatsTable>
+        </ul>
       )}
     </StatsSection>
   )

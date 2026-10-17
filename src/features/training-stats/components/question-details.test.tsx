@@ -7,14 +7,11 @@ import { QuestionDetails } from './question-details'
 import { rowCells } from '@/testing/table-assertions'
 
 const percent = (value: number) => new Intl.NumberFormat('fr', { style: 'percent' }).format(value)
-const levels = new Map([
-  ['a', 'A'],
-  ['b', 'B'],
-])
 
 test('détail replié par défaut, puis une ligne par question une fois ouvert', () => {
-  const stats = computeTrainingStats(makeTrainingConfig(), makeStatsDraws())
-  render(<QuestionDetails ui={makeUi()} questions={stats.questions} levels={levels} />)
+  const config = makeTrainingConfig()
+  const stats = computeTrainingStats(config, makeStatsDraws())
+  render(<QuestionDetails ui={makeUi()} config={config} questions={stats.questions} />)
 
   const summary = screen.getByText('Détail des 4 questions')
   const details = summary.closest('details')
@@ -32,11 +29,14 @@ test('détail replié par défaut, puis une ligne par question une fois ouvert',
   expect(rowCells(table, 'Question A1')).toEqual(['A', '2', '0,5 / 2', percent(0.63), 'À revoir'])
   expect(rowCells(table, 'Question A2')).toEqual(['A', '1', '2 / 2', percent(1), ''])
   expect(rowCells(table, 'Question B1')).toEqual(['B', '0', '—', '—', ''])
+  expect(within(table).getAllByText('À revoir')[0]).toHaveClass('border-destructive')
 })
 
-test('niveau absent de la table des libellés : l’id de catégorie sert de repli', () => {
+test('niveau absent de la config affichée : l’id de catégorie sert de repli', () => {
   const stats = computeTrainingStats(makeTrainingConfig(), makeStatsDraws())
-  render(<QuestionDetails ui={makeUi()} questions={stats.questions} levels={new Map()} />)
+  const other = makeTrainingConfig()
+  other.categories = []
+  render(<QuestionDetails ui={makeUi()} config={other} questions={stats.questions} />)
 
   fireEvent.click(screen.getByText('Détail des 4 questions'))
 

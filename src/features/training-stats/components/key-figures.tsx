@@ -1,43 +1,58 @@
-import { useId } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
+import type { ReactNode } from 'react'
+import { MeterBar } from '@/components/stats/meter-bar'
+import { StatsGroup } from '@/components/stats/stats-section'
 import type { TrainingStats } from '@/domain/training/training-stats'
 import type { Ui } from '@/lib/i18n/use-ui'
 
-const FIGURE = 'text-lg font-semibold tabular-nums'
+/** Carte d'un chiffre clé : le chiffre, puis son libellé sur la ligne suivante (lus d'un trait). */
+function Figure({
+  value,
+  label,
+  children,
+}: Readonly<{ value: ReactNode; label: string; children?: ReactNode }>) {
+  return (
+    <div className="flex flex-[1_1_12.5rem] flex-col gap-2 rounded-lg bg-card px-6 py-5 shadow-card">
+      <p className="flex flex-col gap-2">
+        <span className="text-score-md tabular-nums">{value}</span>{' '}
+        <span className="text-muted-foreground">{label}</span>
+      </p>
+      {children}
+    </div>
+  )
+}
 
-/** Chiffres clés : réponses notées, passées, couverture des questions (avec sa barre). */
+/** Chiffres clés (artboard `entrainement-stats`) : réponses notées, passées, couverture et sa barre. */
 export function KeyFigures({ ui, stats }: Readonly<{ ui: Ui; stats: TrainingStats }>) {
   const { text } = ui
-  const headingId = useId()
   const { covered, total } = stats.coverage
-  const coverage = text('training_stats_coverage', { covered, total })
   return (
-    <section aria-labelledby={headingId}>
-      <h2 id={headingId} className="sr-only">
-        {text('training_stats_key_figures', {})}
-      </h2>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardContent>
-            <p className={FIGURE}>{text('training_stats_scored', { count: stats.scoredCount })}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <p className={FIGURE}>{text('training_stats_passed', { count: stats.passedCount })}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex flex-col gap-2">
-            {/* La barre porte la couverture dans son nom : le texte visible n'est pas relu. */}
-            <p className={FIGURE} aria-hidden>
-              {coverage}
-            </p>
-            <Progress value={total === 0 ? 0 : (covered / total) * 100} aria-label={coverage} />
-          </CardContent>
-        </Card>
+    <StatsGroup title={text('training_stats_key_figures', {})}>
+      <div className="flex flex-wrap gap-4">
+        <Figure
+          value={stats.scoredCount}
+          label={text('training_stats_scored_label', { count: stats.scoredCount })}
+        />
+        <Figure
+          value={stats.passedCount}
+          label={text('training_stats_passed_label', { count: stats.passedCount })}
+        />
+        <Figure
+          value={
+            <>
+              {covered}
+              <span className="text-lg text-muted-foreground">{` / ${total}`}</span>
+            </>
+          }
+          label={text('training_coverage_label', {})}
+        >
+          <MeterBar
+            value={total === 0 ? null : covered / total}
+            tone="primary"
+            gradient
+            className="h-2 w-full"
+          />
+        </Figure>
       </div>
-    </section>
+    </StatsGroup>
   )
 }

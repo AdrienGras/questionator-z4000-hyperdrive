@@ -1,5 +1,5 @@
 import { NO_VALUE } from '@/components/stats/format-rate'
-import { Progress } from '@/components/ui/progress'
+import { MeterBar } from '@/components/stats/meter-bar'
 import type { Locale } from '@/lib/i18n/i18n'
 import type { Ui } from '@/lib/i18n/use-ui'
 
@@ -17,24 +17,16 @@ export function formatPercent(rate: number | null, locale: Locale): string {
   return new Intl.NumberFormat(locale, { style: 'percent' }).format(toPercent(rate) / 100)
 }
 
-type RateCellProps = Readonly<{ ui: Ui; label: string; rate: number | null }>
+type RateCellProps = Readonly<{ ui: Ui; rate: number | null; color?: string }>
 
-/** Taux d'une ligne : barre `Progress` nommée « libellé : taux », puis le pourcentage. */
-export function RateCell({ ui, label, rate }: RateCellProps) {
-  const text = formatPercent(rate, ui.locale)
+/** Taux d'une ligne : barre décorative teintée par le niveau, arrondie comme le pourcentage écrit. */
+export function RateCell({ ui, rate, color }: RateCellProps) {
   return (
-    <span className="inline-flex items-center justify-end gap-2">
+    <span className="inline-flex items-center justify-end gap-2.5">
       {rate !== null && (
-        <Progress
-          value={toPercent(Math.min(Math.max(rate, 0), 1))}
-          aria-label={ui.text('training_stats_rate_label', { label, rate: text })}
-          className="w-16 shrink-0"
-        />
+        <MeterBar value={toPercent(rate) / 100} tone="category" color={color} className="w-16" />
       )}
-      {/* Avec une barre, son nom porte déjà le taux : le texte visible n'est pas relu. */}
-      <span className="min-w-[3.5ch]" aria-hidden={rate === null ? undefined : true}>
-        {text}
-      </span>
+      <span className="min-w-10.5">{formatPercent(rate, ui.locale)}</span>
     </span>
   )
 }
