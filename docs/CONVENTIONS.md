@@ -362,7 +362,7 @@ vi.mock('@/lib/markdown/highlighter', async (importOriginal) => ({
 - Après une action qui navigue ou écrit, attendre un état qui n'existe qu'après elle (`router.state.location.pathname`, écran d'arrivée, nouveau nom), jamais un texte déjà affiché avant : sinon le test se termine avant l'écriture et la suite de l'action déborde sur le test ou le fichier suivant.
 - Ne pas relever `testTimeout` pour un test lent sous la suite : chercher d'abord ce qu'il charge (`vitest run <fichier> --experimental.importDurations.print`, `--reporter=verbose` seul et sous la suite).
 
-### Bibliothèque lourde confinée à une route (F15, Recharts)
+### Bibliothèque lourde confinée à une route (F15, F16, F18, F26)
 
 ```ts
 // src/routes/<route>.tsx : seul le composant part en chunk paresseux
@@ -375,8 +375,8 @@ export const Route = createFileRoute('/…')({
 
 - Groupe nommé dans `vite.config.ts` (`build.rolldownOptions.output.codeSplitting.groups`) pour que la bibliothèque ait son chunk `_<nom>-<hash>.js` dans le manifeste ; sans lui Rolldown l'inline et aucun contrôle ne la voit. Le socle partagé (React…) va dans le groupe `vendor` en liste blanche, placé avant (QUIRKS 2026-09-30).
 - `pnpm check:bundle` (`scripts/check-initial-bundle.ts`, en CI après `pnpm build`) : aucune fuite depuis les entrées par imports statiques, et garde-fou de non-vacuité (le chunk existe et la route l'atteint). Pour une nouvelle bibliothèque, ajouter son motif et sa route au script, avec tests.
-- Règle `dependency-cruiser` de confinement (modèles : `recharts-only-in-stats`, `xlsx-only-in-lib-xlsx`) : la bibliothèque (et son wrapper `src/components/ui/`) ne s'importe que depuis la feature ou le module `lib/` prévu. Pour un module `lib/` chargé à la demande, `lib-xlsx-dynamic-import-only` interdit tout import statique (`check:bundle` ne garde que le graphe initial).
-- Le script gère une liste de cibles (`BUNDLE_TARGETS`, chacune : chunk, importeur, motif interdit) ; `BUNDLE_TARGETS` (`recharts` et `xlsx` depuis F16) ne doit contenir que des cibles dont l'importeur est réellement chargé en dynamique, sinon la garde de non-vacuité échoue.
+- Règle `dependency-cruiser` de confinement (modèle : `xlsx-only-in-lib-xlsx`) : la bibliothèque (et son wrapper `src/components/ui/`) ne s'importe que depuis la feature ou le module `lib/` prévu. Pour un module `lib/` chargé à la demande, `lib-xlsx-dynamic-import-only` interdit tout import statique (`check:bundle` ne garde que le graphe initial).
+- Le script gère une liste de cibles (`BUNDLE_TARGETS`, chacune : chunk, importeur, motif interdit) ; `BUNDLE_TARGETS` (`xlsx`, `shiki`, `codemirror` ; `recharts` retiré en F44.8, D109) ne doit contenir que des cibles dont l'importeur est réellement chargé en dynamique, sinon la garde de non-vacuité échoue.
 - `errorComponent` gardé dans le fichier de route (`codeSplitGroupings`) : découpé à part, il échouerait à se charger en même temps que le chunk qu'il doit couvrir. Il n'importe pas la bibliothèque.
 
 ## Fichier déposé et lu — squelette
@@ -556,6 +556,7 @@ test('barre de titre : fil d’Ariane puis actions', async () => {
 - Catégorie dans une ligne ou un en-tête : `CategoryBadge` (`@/components/category-badge`, tuile d'icône teintée, tailles `sm` à `projection-lg`), jamais une tuile recopiée. Teinte d'une surface de catégorie : classes écrites en entier avec le type `color:` (`bg-[color:color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_10%,var(--color-card))]`), pour Tailwind (littéraux seulement) et pour `cn`.
 - Note en demi-jauge : `ScoreGauge` (`@/components/score-gauge`, `md` à l'écran, `lg` en projection) ; halo d'une carte pleine largeur : `ActionHalo side="around"`.
 - Dessin informatif (jauge, barre segmentée) : phrase `sr-only` et dessin `aria-hidden`, jamais `role="img"` (oxlint) ; groupe de boutons nommé : `fieldset aria-label`, jamais `role="group"`.
+- Bloc chiffré (D109, `@/components/stats/`) : carte `StatsSection` (titre `as`/`size` séparés, `icon`, `aside`), groupe `StatsGroup` (intertitre en capitales), tableau `StatsTable` (colonne `srOnly` pour une barre), taux en `MeterBar` (`tone="category"` teinté, `"primary"` sinon), anneau `RateRing` (`md`/`lg`), catégorie `CategoryLabel`, écran sans données `StatsEmptyState`. Un taux s'écrit toujours à côté de sa barre : la barre reste décorative.
 
 ## Menu et coquille de page — règles
 

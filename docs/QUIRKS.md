@@ -433,7 +433,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Découvert** : F15, contrôle du bundle initial.
 **Symptôme** : sans groupe `codeSplitting` nommé, Rolldown range Recharts et ses d3 dans le chunk de la route qui l'importe ; le manifeste Vite ne contient alors aucune clé `node_modules/recharts/…` ni chunk dédié, et un contrôle qui cherche Recharts dans le graphe initial passe sans rien voir, fuite ou pas.
 **Workaround** : groupe nommé `recharts` dans `build.rolldownOptions.output.codeSplitting.groups` (clé `_recharts-<hash>.js` dans le manifeste), et garde-fou de non-vacuité dans `check:bundle` : échec si ce chunk n'existe pas ou si la route des statistiques ne l'atteint plus.
-**Référence** : `vite.config.ts`, `scripts/check-initial-bundle.ts` (`findVacuityProblems`).
+**Référence** : `vite.config.ts`, `scripts/check-initial-bundle.ts` (`findVacuityProblems`). *Recharts sorti du projet en F44.8 (D109) ; le mécanisme vaut toujours pour les groupes `xlsx` et `codemirror`.*
 
 ## Un groupe `codeSplitting` embarque ses dépendances partagées : React finit dans `_recharts-*` (2026-09-30)
 
@@ -814,7 +814,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Découvert** : F28 (#72), `pnpm docs:screenshots`.
 **Symptôme** : deux exécutions donnent des PNG différents : barre d'histogramme à mi-hauteur, dates changeantes, icône « Stockage non garanti », pastille de mise à jour, anneau de focus sur un champ.
 **Cause** : `animations: 'disabled'` ne couvre pas l'animation JS de recharts ; `storage.persisted()` est faux en Chromium headless ; un service worker actif peut afficher la pastille de mise à jour ; un champ resté actif dessine son anneau de focus.
-**Workaround** : attendre une barre dessinée à hauteur non nulle et stable (400 ms d'écart) ; `context.clock.setFixedTime` (pas `clock.install`, qui figerait ou ferait dériver les minuteries) ; stubs `storage.persisted/persist` à vrai ; `serviceWorkers: 'block'` ; attendre `document.fonts.ready` ; `blur()` des champs avant capture ; PRNG mulberry32 de graine 72 injecté par `context.addInitScript` (couvre la popup projetée). Les écrans de session sont sombres parce que la config d'exemple fixe `presentation.defaultColorMode` à sombre.
+**Workaround** : attendre une barre dessinée à hauteur non nulle et stable (400 ms d'écart ; depuis F44.8, l'histogramme est en `div` sans animation : une barre `[data-bar]` visible suffit) ; `context.clock.setFixedTime` (pas `clock.install`, qui figerait ou ferait dériver les minuteries) ; stubs `storage.persisted/persist` à vrai ; `serviceWorkers: 'block'` ; attendre `document.fonts.ready` ; `blur()` des champs avant capture ; PRNG mulberry32 de graine 72 injecté par `context.addInitScript` (couvre la popup projetée). Les écrans de session sont sombres parce que la config d'exemple fixe `presentation.defaultColorMode` à sombre.
 **Référence** : `e2e/screenshots/determinism.ts`, `e2e/screenshots/guide.spec.ts`.
 
 ## Slugs d'ancre GitHub et VitePress différents : un lien `blob/main/…#ancre` se vérifie à part (2026-10-03)
@@ -1002,3 +1002,10 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Workaround** : `sidePanel()`, `querySidePanel()`, `findSidePanel()` (`src/testing/side-panel-assertions.ts`) repèrent le `dialog` qui porte la liste d'onglets « Panneau » ; en e2e, `ExaminerPage.panel`. Onglets : « Cet étudiant » et « Liste ».
 **Référence** : `src/features/session/components/side-panel.tsx`, `e2e/pages/examiner-page.ts`.
 
+## Retirer une bibliothèque lourde fait rougir `check:bundle` en CI, pas `pnpm check` (2026-10-18)
+
+**Découvert** : F44.8, retrait de Recharts.
+**Symptôme** : `pnpm check` et l'e2e passent, mais `pnpm check:bundle` échoue après `pnpm build` : « contrôle sans objet, aucun chunk /^_recharts[.-]/ dans le manifeste ».
+**Cause** : la garde de non-vacuité exige le chunk de chaque cible de `BUNDLE_TARGETS` ; `check:bundle` ne tourne qu'après le build (CI), pas dans `pnpm check`.
+**Workaround** : retirer la bibliothèque à quatre endroits : la dépendance, sa cible dans `scripts/check-initial-bundle.ts` (et ses tests), son groupe `codeSplitting` dans `vite.config.ts`, sa règle de confinement dans `.dependency-cruiser.cjs` ; puis `pnpm build && pnpm check:bundle`.
+**Référence** : `scripts/check-initial-bundle.ts` (`findVacuityProblems`), D109.

@@ -145,6 +145,8 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [x] Taux de réussite sur un barème entièrement négatif : le maximum est négatif, `points ÷ max` donne un taux positif trompeur (ex. barème `[-2, -1]`, note −2 → 200 %). Décider : `null` dès que `max ≤ 0`, ou refuser un tel barème (règle de config). → #118 *Fait en #118 : `null` dès que le maximum est ≤ 0 (garde défensive, les règles de config refusent déjà ce barème).*
 - [x] Petits nettoyages de `domain/stats/` : `mean` en une seule division, `?? 0` inatteignable dans `strategies.ts`, `countBy` renommé, `Tally` au lieu de `ReturnType<typeof emptyTally>`, commentaire de limite 2^53 de `populationStdDev`. → #87 *Fait en #87 (PR 4) : `mean` surchargée (liste non vide → `number`), `countBy` → `groupByKey` ; `Tally` existait déjà.*
 - [x] Paragraphe d'état vide répété quatre fois dans `features/stats/components/` : extraire un `StatsEmpty`. → #87 *Fait en #87 (PR 4) : extraite (cinq occurrences, quatre fichiers).*
+- [ ] `examples/training.example.json` sans `color` ni `icon` de catégorie : les anneaux, barres et libellés des stats d'entraînement (F44.8) restent neutres sur l'exemple, alors que l'artboard `entrainement-stats` les teinte. Ajouter les couleurs de la config d'examen (et le dire dans le prompt de génération ?).
+- [ ] e2e de mise en page des stats (`e2e/stats-layout.spec.ts`) : couvrir une config à 13 catégories (anneaux en `grid-cols-2`, détail), écartée en F44.8 faute d'une config d'exemple cohérente à 13 catégories.
 
 ## Entraînement
 
