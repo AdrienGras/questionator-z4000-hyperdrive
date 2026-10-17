@@ -138,3 +138,8 @@ test('grille : tuiles pleines jusqu’à trois par ligne', () => {
   render(<CategoryTiles ui={makeUi()} variant="grid" categories={six} />)
   expect(tile('Catégorie 0')).toHaveAttribute('data-density', 'full')
 })
+
+test('grille : contenu des tuiles centré', () => {
+  render(<CategoryTiles ui={makeUi()} variant="grid" categories={[category('a')]} />)
+  expect(tile('Catégorie a')).toHaveClass('items-center', 'text-center')
+})

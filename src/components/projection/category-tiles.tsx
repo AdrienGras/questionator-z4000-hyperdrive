@@ -42,17 +42,17 @@ const POINTS_COLOR = 'text-[var(--category-color,var(--color-muted-foreground))]
 /** Grande grille (aucune question) et rangée compacte (question en cours) : artboards `projection-tuiles` et `projection-question`. */
 const LAYOUT = {
   grid: {
-    tile: 'min-h-55 flex-col items-start gap-4 rounded-xl p-7',
+    tile: 'min-h-55 flex-col items-center justify-center gap-4 rounded-xl p-7 text-center',
     badge: 'projection-lg',
     label: 'min-w-0 max-w-full text-4xl font-extrabold tracking-[-0.02em] wrap-anywhere',
-    points: 'mt-auto text-[1.625rem] leading-[1.875rem] font-bold',
+    points: 'text-[1.625rem] leading-[1.875rem] font-bold',
   },
   /** Quatre tuiles par ligne ou plus (7 catégories et plus, D74) : trois lignes tiennent à 800 px. */
   compact: {
-    tile: 'min-h-32 flex-col items-start gap-2 rounded-xl p-4',
+    tile: 'min-h-32 flex-col items-center justify-center gap-2 rounded-xl p-4 text-center',
     badge: 'projection-sm',
     label: 'min-w-0 max-w-full text-[1.375rem] leading-7 font-extrabold wrap-anywhere',
-    points: 'mt-auto text-lg font-bold',
+    points: 'text-lg font-bold',
   },
   row: {
     tile: 'h-18 items-center gap-3 rounded-lg px-4',

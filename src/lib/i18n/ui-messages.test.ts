@@ -318,7 +318,6 @@ const SAMPLE: UiMessageParams = {
   projection_open: {},
   projection_open_short: {},
   projection_project: {},
-  projection_project_short: {},
   projection_group: {},
   projection_waiting: {},
   projection_preview_label: {},

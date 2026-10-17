@@ -20,8 +20,8 @@ export function categoryAccent(category: NormalizedCategory): CategoryAccent | u
 // Pas de `pointer-events-none` sur `aria-disabled` : le survol doit ouvrir l'infobulle d'une
 // catégorie épuisée, le clic est neutralisé par l'appelant (QUIRKS).
 const CATEGORY_TILE_BUTTON_CLASS =
-  'flex h-full min-h-32 w-full flex-col items-start justify-start gap-2.5 rounded-xl p-4 ' +
-  'text-left text-base whitespace-normal text-foreground hover:text-foreground ' +
+  'flex h-full min-h-32 w-full flex-col items-center justify-center gap-2.5 rounded-xl p-4 ' +
+  'text-center text-base whitespace-normal text-foreground hover:text-foreground ' +
   'border-[color:color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_35%,transparent)] ' +
   'dark:border-[color:color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_35%,transparent)] ' +
   'bg-[color:color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_10%,var(--color-card))] ' +
@@ -59,7 +59,7 @@ export function CategoryTile({ ui, config, category }: CategoryTileProps) {
     <>
       <CategoryBadge color={category.color} icon={category.icon} size="xl" />
       <span className="max-w-full font-bold wrap-anywhere">{category.label}</span>
-      <span className="mt-auto text-small font-semibold text-[var(--category-color,var(--color-muted-foreground))] tabular-nums">
+      <span className="text-small font-semibold text-[var(--category-color,var(--color-muted-foreground))] tabular-nums">
         {text('passage_category_max', { max, points })}
       </span>
     </>

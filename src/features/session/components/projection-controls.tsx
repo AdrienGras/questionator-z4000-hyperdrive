@@ -15,7 +15,7 @@ type ProjectionControlsProps = Readonly<{
 
 // Bascule à deux positions (artboard `passage-question`) : la position courante en carte.
 const SEGMENT =
-  'h-8 flex-1 rounded-[9px] border-0 text-small font-semibold text-muted-foreground aria-pressed:bg-card aria-pressed:disabled:opacity-100 aria-pressed:text-foreground aria-pressed:shadow-card'
+  'h-auto min-h-8 flex-1 rounded-[9px] border-0 py-1 text-small whitespace-normal font-semibold text-muted-foreground aria-pressed:bg-card aria-pressed:disabled:opacity-100 aria-pressed:text-foreground aria-pressed:shadow-card'
 
 /**
  * Pilotage de la vue projetée (F14) en bascule : y projeter l'étudiant actif (« Cet étudiant ») ou
@@ -45,7 +45,6 @@ export function ProjectionControls({
         variant="ghost"
         size="sm"
         aria-pressed={alreadyProjected}
-        aria-label={text('projection_project', {})}
         className={SEGMENT}
         disabled={disabled || activeStudentId === undefined || alreadyProjected}
         onClick={() => {
@@ -56,7 +55,7 @@ export function ProjectionControls({
         }}
       >
         <IconDeviceDesktop aria-hidden />
-        {text('projection_project_short', {})}
+        {text('projection_project', {})}
       </Button>
       <Button
         type="button"

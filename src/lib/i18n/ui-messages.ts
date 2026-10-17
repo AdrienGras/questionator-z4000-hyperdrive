@@ -328,7 +328,6 @@ export type UiMessageParams = {
   projection_open: NoParams
   projection_open_short: NoParams
   projection_project: NoParams
-  projection_project_short: NoParams
   projection_group: NoParams
   projection_waiting: NoParams
   projection_banner: { name: string }
@@ -848,7 +847,6 @@ const fr: Dictionary<UiMessageParams> = {
   projection_open: () => 'Ouvrir la vue projetée',
   projection_open_short: () => 'Ouvrir',
   projection_project: () => 'Projeter cet étudiant',
-  projection_project_short: () => 'Cet étudiant',
   projection_group: () => 'Projection',
   projection_waiting: () => 'Écran d’attente',
   projection_preview_label: () => 'Vue projetée',
@@ -1326,7 +1324,6 @@ const en: Dictionary<UiMessageParams> = {
   projection_open: () => 'Open the projected view',
   projection_open_short: () => 'Open',
   projection_project: () => 'Project this student',
-  projection_project_short: () => 'This student',
   projection_group: () => 'Projection',
   projection_waiting: () => 'Waiting screen',
   projection_preview_label: () => 'Projected view',

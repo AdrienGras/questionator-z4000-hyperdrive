@@ -81,7 +81,9 @@ test('bascule : « Cet étudiant » pressé et désactivé quand l’actif est p
     'true',
   )
   expect(project()).toBeDisabled()
-  expect(project()).toHaveTextContent('Cet étudiant')
+  // Libellé visible complet : « Cet étudiant » seul n'était pas clair (retour de validation).
+  expect(project()).toHaveTextContent('Projeter cet étudiant')
+  expect(project()).not.toHaveAttribute('aria-label')
   expect(waiting()).toHaveAttribute('aria-pressed', 'false')
 })
 

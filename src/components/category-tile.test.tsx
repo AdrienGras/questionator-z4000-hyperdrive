@@ -31,6 +31,12 @@ test('bouton teinté : accent posé, classes de teinte', () => {
   expect(props.className).toContain('rounded-xl')
 })
 
+test('contenu de la tuile centré', () => {
+  const { className } = categoryTileButtonProps(normal)
+  expect(className).toContain('items-center')
+  expect(className).toContain('text-center')
+})
+
 test('la teinte remplace le fond et la bordure du bouton outline', () => {
   render(
     <Button type="button" variant="outline" {...categoryTileButtonProps(normal)}>
