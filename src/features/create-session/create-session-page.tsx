@@ -4,7 +4,6 @@ import { DbStatusBanner } from '@/components/db-status-banner'
 import { Breadcrumb } from '@/components/breadcrumb'
 import { PageShell } from '@/components/page-shell'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { takeConfigForCreation } from '@/lib/config-handoff'
@@ -158,19 +157,9 @@ export function CreateSessionPage() {
           </h2>
           {bothEmpty && <p className="text-muted-foreground">{text('create_preview_empty', {})}</p>}
           {form.students.kind === 'loaded' && (
-            <Card>
-              <CardContent>
-                <StudentsPreview ui={ui} result={form.students.result} />
-              </CardContent>
-            </Card>
+            <StudentsPreview ui={ui} result={form.students.result} />
           )}
-          {form.config.kind === 'loaded' && (
-            <Card>
-              <CardContent>
-                <ConfigPreview ui={ui} result={form.config.result} />
-              </CardContent>
-            </Card>
-          )}
+          {form.config.kind === 'loaded' && <ConfigPreview ui={ui} result={form.config.result} />}
         </section>
       </div>
     </PageShell>

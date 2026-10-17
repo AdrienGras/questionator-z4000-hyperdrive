@@ -231,19 +231,23 @@ export type UiMessageParams = {
   training_update_kept: { count: number }
   training_update_added: { count: number }
   training_update_removed: { count: number }
-  preview_students_count: { count: number }
+  preview_students_title: NoParams
+  preview_students_noun: { count: number }
   preview_students_list: NoParams
   preview_line: { line: number; message: string }
   preview_config_title: NoParams
   issue_error_label: NoParams
-  preview_subject: { subject: string }
-  preview_cohort: { cohort: string }
+  preview_config_errors: { count: number }
   /** `scale` : barème déjà mis en forme par l'appelant (`category.scale.join(', ')`). */
-  preview_category: { label: string; questions: number; scale: string }
-  preview_scoring: { questionsPerStudent: number; maxRawScore: number; finalScale: number }
-  preview_rounding: RoundingParams
+  preview_category_questions: { count: number }
+  preview_questions_per_student: NoParams
+  preview_scale_label: NoParams
+  preview_scale_value: { maxRawScore: number; finalScale: number }
+  preview_rounding_label: NoParams
+  preview_rounding_value: RoundingParams
+  preview_skips_label: NoParams
+  preview_skips_value: { max: number }
   preview_skips_disabled: NoParams
-  preview_skips: { max: number }
   markdown_footnotes: NoParams
   /** `n` : numéro de la référence (1-based), avec suffixe `-n` de la re-référence si > 1. */
   markdown_footnote_back: { n: string }
@@ -452,9 +456,9 @@ const ROUNDING_MODE_EN: Record<RoundingMode, string> = {
 function roundingFr({ mode, step, decimals }: RoundingParams): string {
   const precision =
     step === null
-      ? `à ${decimals} ${plural(decimals, 'décimale', 'décimales')}`
+      ? `${decimals} ${plural(decimals, 'décimale', 'décimales')}`
       : `au pas de ${step.toLocaleString('fr')}`
-  return `Arrondi ${ROUNDING_MODE_FR[mode]}, ${precision}`
+  return `${ROUNDING_MODE_FR[mode]}, ${precision}`
 }
 
 function roundingEn({ mode, step, decimals }: RoundingParams): string {
@@ -462,7 +466,7 @@ function roundingEn({ mode, step, decimals }: RoundingParams): string {
     step === null
       ? `${decimals} ${pluralEn(decimals, 'decimal', 'decimals')}`
       : `step ${step.toLocaleString('en')}`
-  return `Rounded ${ROUNDING_MODE_EN[mode]}, ${precision}`
+  return `${ROUNDING_MODE_EN[mode]}, ${precision}`
 }
 
 const fr: Dictionary<UiMessageParams> = {
@@ -719,20 +723,23 @@ const fr: Dictionary<UiMessageParams> = {
     count > 1
       ? `${count} retirées — elles n’apparaissent plus dans les stats`
       : `${count} retirée — elle n’apparaît plus dans les stats`,
-  preview_students_count: ({ count }) => `${count} ${plural(count, 'étudiant', 'étudiants')}`,
+  preview_students_title: () => 'Étudiants',
+  preview_students_noun: ({ count }) => plural(count, 'étudiant', 'étudiants'),
   preview_students_list: () => 'Voir la liste',
   preview_line: ({ line, message }) => `Ligne ${line} : ${message}`,
   preview_config_title: () => 'Configuration',
   issue_error_label: () => 'Erreur',
-  preview_subject: ({ subject }) => `Matière : ${subject}`,
-  preview_cohort: ({ cohort }) => `Promotion : ${cohort}`,
-  preview_category: ({ label, questions, scale }) =>
-    `${label} : ${questions} ${plural(questions, 'question', 'questions')}, barème ${scale}`,
-  preview_scoring: ({ questionsPerStudent, maxRawScore, finalScale }) =>
-    `${questionsPerStudent} ${plural(questionsPerStudent, 'question', 'questions')} par étudiant · note brute sur ${maxRawScore} → note finale sur ${finalScale}`,
-  preview_rounding: roundingFr,
-  preview_skips_disabled: () => 'Skips désactivés',
-  preview_skips: ({ max }) => `Skips autorisés : ${max} par étudiant`,
+  preview_config_errors: ({ count }) => plural(count, 'erreur à corriger', 'erreurs à corriger'),
+  preview_category_questions: ({ count }) => `${count} ${plural(count, 'question', 'questions')}`,
+  preview_questions_per_student: () => 'Questions par étudiant',
+  preview_scale_label: () => 'Note brute → finale',
+  preview_scale_value: ({ maxRawScore, finalScale }) =>
+    `sur ${maxRawScore.toLocaleString('fr')} → sur ${finalScale.toLocaleString('fr')}`,
+  preview_rounding_label: () => 'Arrondi',
+  preview_rounding_value: roundingFr,
+  preview_skips_label: () => 'Skips autorisés',
+  preview_skips_value: ({ max }) => `${max} par étudiant`,
+  preview_skips_disabled: () => 'aucun (skips désactivés)',
   markdown_footnotes: () => 'Notes',
   markdown_footnote_back: ({ n }) => `Revenir à la référence ${n}`,
   passage_question_index: ({ current, total }) => `Question ${current} / ${total}`,
@@ -1153,20 +1160,23 @@ const en: Dictionary<UiMessageParams> = {
     count === 1
       ? `${count} removed — it no longer appears in the stats`
       : `${count} removed — they no longer appear in the stats`,
-  preview_students_count: ({ count }) => `${count} ${pluralEn(count, 'student', 'students')}`,
+  preview_students_title: () => 'Students',
+  preview_students_noun: ({ count }) => pluralEn(count, 'student', 'students'),
   preview_students_list: () => 'Show the list',
   preview_line: ({ line, message }) => `Line ${line}: ${message}`,
   preview_config_title: () => 'Configuration',
   issue_error_label: () => 'Error',
-  preview_subject: ({ subject }) => `Subject: ${subject}`,
-  preview_cohort: ({ cohort }) => `Cohort: ${cohort}`,
-  preview_category: ({ label, questions, scale }) =>
-    `${label}: ${questions} ${pluralEn(questions, 'question', 'questions')}, scale ${scale}`,
-  preview_scoring: ({ questionsPerStudent, maxRawScore, finalScale }) =>
-    `${questionsPerStudent} ${pluralEn(questionsPerStudent, 'question', 'questions')} per student · raw score out of ${maxRawScore} → final score out of ${finalScale}`,
-  preview_rounding: roundingEn,
-  preview_skips_disabled: () => 'Skips disabled',
-  preview_skips: ({ max }) => `Skips allowed: ${max} per student`,
+  preview_config_errors: ({ count }) => pluralEn(count, 'error to fix', 'errors to fix'),
+  preview_category_questions: ({ count }) => `${count} ${pluralEn(count, 'question', 'questions')}`,
+  preview_questions_per_student: () => 'Questions per student',
+  preview_scale_label: () => 'Raw → final score',
+  preview_scale_value: ({ maxRawScore, finalScale }) =>
+    `out of ${maxRawScore.toLocaleString('en')} → out of ${finalScale.toLocaleString('en')}`,
+  preview_rounding_label: () => 'Rounding',
+  preview_rounding_value: roundingEn,
+  preview_skips_label: () => 'Skips allowed',
+  preview_skips_value: ({ max }) => `${max} per student`,
+  preview_skips_disabled: () => 'none (skips disabled)',
   markdown_footnotes: () => 'Footnotes',
   markdown_footnote_back: ({ n }) => `Back to reference ${n}`,
   passage_question_index: ({ current, total }) => `Question ${current} / ${total}`,

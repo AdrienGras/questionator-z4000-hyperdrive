@@ -228,18 +228,22 @@ const SAMPLE: UiMessageParams = {
   training_update_kept: { count: 3 },
   training_update_added: { count: 1 },
   training_update_removed: { count: 2 },
-  preview_students_count: { count: 2 },
+  preview_students_title: {},
+  preview_students_noun: { count: 2 },
   preview_students_list: {},
   preview_line: { line: 3, message: 'Doublon' },
   preview_config_title: {},
   issue_error_label: {},
-  preview_subject: { subject: 'PHP' },
-  preview_cohort: { cohort: 'B2' },
-  preview_category: { label: 'A', questions: 3, scale: '0, 1, 2' },
-  preview_scoring: { questionsPerStudent: 3, maxRawScore: 6, finalScale: 20 },
-  preview_rounding: { mode: 'nearest', step: 0.5, decimals: 2 },
+  preview_config_errors: { count: 2 },
+  preview_category_questions: { count: 5 },
+  preview_questions_per_student: {},
+  preview_scale_label: {},
+  preview_scale_value: { maxRawScore: 10, finalScale: 20 },
+  preview_rounding_label: {},
+  preview_rounding_value: { mode: 'nearest', step: 0.5, decimals: 2 },
+  preview_skips_label: {},
+  preview_skips_value: { max: 2 },
   preview_skips_disabled: {},
-  preview_skips: { max: 1 },
   markdown_footnotes: {},
   markdown_footnote_back: { n: '1' },
   passage_question_index: { current: 1, total: 3 },
@@ -450,11 +454,11 @@ describe('UI_MESSAGES', () => {
     expect(t(UI_MESSAGES, 'en', 'create_file_status_reading', {})).toBe('Reading…')
   })
 
-  test('preview_students_count accorde le singulier et le pluriel en fr', () => {
-    expect(t(UI_MESSAGES, 'fr', 'preview_students_count', { count: 1 })).toBe('1 étudiant')
-    expect(t(UI_MESSAGES, 'fr', 'preview_students_count', { count: 2 })).toBe('2 étudiants')
-    expect(t(UI_MESSAGES, 'en', 'preview_students_count', { count: 1 })).toBe('1 student')
-    expect(t(UI_MESSAGES, 'en', 'preview_students_count', { count: 2 })).toBe('2 students')
+  test('preview_students_noun accorde le singulier et le pluriel', () => {
+    expect(t(UI_MESSAGES, 'fr', 'preview_students_noun', { count: 1 })).toBe('étudiant')
+    expect(t(UI_MESSAGES, 'fr', 'preview_students_noun', { count: 2 })).toBe('étudiants')
+    expect(t(UI_MESSAGES, 'en', 'preview_students_noun', { count: 1 })).toBe('student')
+    expect(t(UI_MESSAGES, 'en', 'preview_students_noun', { count: 2 })).toBe('students')
   })
 
   test('training_stats_* : singulier et pluriel des chiffres clés', () => {
@@ -472,22 +476,22 @@ describe('UI_MESSAGES', () => {
     expect(t(UI_MESSAGES, 'en', 'training_stats_attempts', { count: 3 })).toBe('3 attempts')
   })
 
-  test('preview_rounding : forme « au pas de » et forme « à N décimales »', () => {
+  test('preview_rounding_value : forme « au pas de » et forme « N décimales »', () => {
     expect(
-      t(UI_MESSAGES, 'fr', 'preview_rounding', { mode: 'nearest', step: 0.5, decimals: 2 }),
-    ).toBe('Arrondi au plus proche, au pas de 0,5')
-    expect(t(UI_MESSAGES, 'fr', 'preview_rounding', { mode: 'up', step: null, decimals: 2 })).toBe(
-      'Arrondi supérieur, à 2 décimales',
-    )
+      t(UI_MESSAGES, 'fr', 'preview_rounding_value', { mode: 'nearest', step: 0.5, decimals: 2 }),
+    ).toBe('au plus proche, au pas de 0,5')
     expect(
-      t(UI_MESSAGES, 'fr', 'preview_rounding', { mode: 'down', step: null, decimals: 1 }),
-    ).toBe('Arrondi inférieur, à 1 décimale')
+      t(UI_MESSAGES, 'fr', 'preview_rounding_value', { mode: 'nearest', step: null, decimals: 2 }),
+    ).toBe('au plus proche, 2 décimales')
     expect(
-      t(UI_MESSAGES, 'en', 'preview_rounding', { mode: 'nearest', step: 0.5, decimals: 2 }),
-    ).toBe('Rounded to nearest, step 0.5')
-    expect(t(UI_MESSAGES, 'en', 'preview_rounding', { mode: 'up', step: null, decimals: 2 })).toBe(
-      'Rounded up, 2 decimals',
-    )
+      t(UI_MESSAGES, 'fr', 'preview_rounding_value', { mode: 'down', step: null, decimals: 1 }),
+    ).toBe('inférieur, 1 décimale')
+    expect(
+      t(UI_MESSAGES, 'en', 'preview_rounding_value', { mode: 'nearest', step: 0.5, decimals: 2 }),
+    ).toBe('to nearest, step 0.5')
+    expect(
+      t(UI_MESSAGES, 'en', 'preview_rounding_value', { mode: 'up', step: null, decimals: 2 }),
+    ).toBe('up, 2 decimals')
   })
 
   test('passage_category_max : « pts » au pluriel, « pt » pour une valeur de 1, même formatée « 1,0 »', () => {
