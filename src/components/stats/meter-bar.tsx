@@ -13,6 +13,12 @@ type MeterBarProps = Readonly<{
   className?: string
 }>
 
+/** Couleur du remplissage : teinte de la catégorie, dégradé d'action ou aplat d'action. */
+function fillClass(tone: MeterBarProps['tone'], gradient: boolean): string {
+  if (tone === 'category') return 'bg-[var(--category-color,var(--color-muted-foreground))]'
+  return gradient ? 'bg-primary bg-linear-90 from-primary to-action-to' : 'bg-primary'
+}
+
 /**
  * Barre horizontale d'un taux (artboards `statistiques`, `entrainement-stats`). Décorative : le
  * taux est toujours écrit à côté (oxlint refuse `role="img"`).
@@ -29,14 +35,7 @@ export function MeterBar({ value, tone, color, gradient = false, className }: Me
       {value !== null && (
         <span
           style={{ width: `${Math.min(Math.max(value, 0), 1) * 100}%` }}
-          className={cn(
-            'block h-full rounded-full',
-            tone === 'category'
-              ? 'bg-[var(--category-color,var(--color-muted-foreground))]'
-              : gradient
-                ? 'bg-primary bg-linear-90 from-primary to-action-to'
-                : 'bg-primary',
-          )}
+          className={cn('block h-full rounded-full', fillClass(tone, gradient))}
         />
       )}
     </span>
