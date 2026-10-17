@@ -1,6 +1,5 @@
 import { IconArrowsMaximize, IconArrowsMinimize } from '@tabler/icons-react'
 import { useEffect, useState } from 'react'
-import { ColorModeToggle } from '@/components/color-mode-toggle'
 import { Button } from '@/components/ui/button'
 import { useUi } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
@@ -47,7 +46,6 @@ export function PresentControls({ idle }: Readonly<{ idle: boolean }>) {
           {fullscreen ? <IconArrowsMinimize /> : <IconArrowsMaximize />}
         </Button>
       )}
-      <ColorModeToggle ui={ui} />
     </div>
   )
 }

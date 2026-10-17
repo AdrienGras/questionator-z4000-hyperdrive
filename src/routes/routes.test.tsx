@@ -81,7 +81,8 @@ function themedSession(locale?: 'fr' | 'en') {
       ...config,
       ...(locale !== undefined && { locale }),
       exam: { title: 'Oral de PHP' },
-      theme: { light: { primary: 'rgb(1, 2, 3)' }, dark: {} },
+      // Thème sombre forcé pendant la refonte (D102) : seul `theme.dark` s'applique.
+      theme: { light: {}, dark: { primary: 'rgb(1, 2, 3)' } },
       categories: config.categories.map((category) => ({
         ...category,
         label: 'Bases',
@@ -129,7 +130,7 @@ test('une config en anglais donne une vue examinateur entièrement en anglais', 
   renderAt('/session/session-1')
   expect(await screen.findByText('Question 1 / 1')).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'Back to home' })).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: /^Display mode:/ })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Help (opens in a new tab)' })).toBeInTheDocument()
   expect(document.documentElement.lang).toBe('en')
 })
 
@@ -150,11 +151,11 @@ test('revenir à l’accueil depuis une session thémée ne laisse aucun token s
     await screen.findByRole('heading', { name: 'Questionator Z-4000 Hyperdrive' }),
   ).toBeInTheDocument()
   expect(document.documentElement.style.getPropertyValue('--primary')).toBe('')
-  expect(document.documentElement).not.toHaveClass('dark')
+  expect(document.documentElement).toHaveClass('dark')
   expect(document.documentElement.lang).toBe('fr')
 })
 
-test("d'une session à l'autre, --primary, la classe .dark et lang suivent la config active", async () => {
+test("d'une session à l'autre, --primary et lang suivent la config active, .dark reste forcée", async () => {
   await putSession(
     sessionWith('session-a', 'Session A', {
       locale: 'en',
@@ -175,7 +176,7 @@ test("d'une session à l'autre, --primary, la classe .dark et lang suivent la co
   await router.navigate({ to: '/session/$sessionId', params: { sessionId: 'session-b' } })
   await screen.findByRole('heading', { name: 'Session B' })
   expect(document.documentElement.style.getPropertyValue('--primary')).toBe('rgb(9, 9, 9)')
-  expect(document.documentElement).not.toHaveClass('dark')
+  expect(document.documentElement).toHaveClass('dark')
   expect(document.documentElement.lang).toBe('fr')
 
   router.history.back()
@@ -186,9 +187,9 @@ test("d'une session à l'autre, --primary, la classe .dark et lang suivent la co
 
   await router.navigate({ to: '/' })
   await screen.findByRole('heading', { name: 'Questionator Z-4000 Hyperdrive' })
-  // Mode global system, matchMedia simulé en clair : aucun token ni `.dark` à l'accueil.
+  // matchMedia simulé en clair : aucun token à l'accueil, `.dark` forcée (D102).
   expect(document.documentElement.style.getPropertyValue('--primary')).toBe('')
-  expect(document.documentElement).not.toHaveClass('dark')
+  expect(document.documentElement).toHaveClass('dark')
   expect(document.documentElement.lang).toBe('fr')
 })
 

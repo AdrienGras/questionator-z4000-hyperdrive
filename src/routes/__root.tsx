@@ -24,7 +24,8 @@ function RootLayout() {
   const projected = useMatchRoute()({ to: '/present/$sessionId' }) !== false
   return (
     <LocaleProvider locale={useLocale()}>
-      <AppearanceProvider>
+      {/* Thème sombre seul pendant la refonte (D102) ; le mode clair revient en #152. */}
+      <AppearanceProvider forcedMode="dark">
         <div className="min-h-svh bg-background text-foreground">
           <Outlet />
           {!projected && (

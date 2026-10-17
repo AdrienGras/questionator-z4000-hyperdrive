@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { expect, test, vi } from 'vitest'
 import { AppearanceProvider } from '@/app/appearance-provider'
 import { useUi } from '@/lib/i18n/use-ui'
-import { bannerInteractiveNames, expectColorModeToggleLast } from '@/testing/page-shell-assertions'
+import { bannerInteractiveNames, expectHelpLinkLast } from '@/testing/page-shell-assertions'
 import { PageShell } from './page-shell'
 
 function Harness({
@@ -23,14 +23,14 @@ function mount(node: ReactNode) {
   return render(<AppearanceProvider>{node}</AppearanceProvider>)
 }
 
-test('titre seul : h1, pas de retour ni de ligne d’infos, thème dernier', () => {
+test('titre seul : h1, pas de retour ni de ligne d’infos, aide dernière', () => {
   mount(<Harness title="Oral">x</Harness>)
   const h1 = screen.getByRole('heading', { level: 1, name: 'Oral' })
   expect(h1.parentElement?.children).toHaveLength(1)
-  expectColorModeToggleLast()
+  expectHelpLinkLast()
 })
 
-test('retour, infos et actions rendus ; thème après les actions', () => {
+test('retour, infos et actions rendus ; aide après les actions', () => {
   mount(
     <Harness
       title="Oral"
@@ -46,19 +46,18 @@ test('retour, infos et actions rendus ; thème après les actions', () => {
   expect(screen.getByText('Projeter')).toBeInTheDocument()
   const names = bannerInteractiveNames()
   expect(names.slice(0, 2)).toEqual(['Retour', 'Projeter'])
-  expect(names).toHaveLength(4)
-  expectColorModeToggleLast()
+  expect(names).toHaveLength(3)
+  expectHelpLinkLast()
 })
 
-test('lien Aide : ouvre la doc dans un nouvel onglet, juste avant le thème', () => {
+test('lien Aide : ouvre la doc dans un nouvel onglet, dernier de la barre', () => {
   mount(<Harness title="Oral">x</Harness>)
   const link = screen.getByRole('link', { name: 'Aide (nouvel onglet)' })
   expect(link).toHaveAttribute('href', `${import.meta.env.BASE_URL}docs/`)
   expect(link).toHaveAttribute('target', '_blank')
   expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   expect(link).toHaveTextContent('Aide')
-  expect(bannerInteractiveNames().at(-2)).toBe('Aide (nouvel onglet)')
-  expectColorModeToggleLast()
+  expectHelpLinkLast()
 })
 
 test('props du main transmises', () => {
@@ -97,6 +96,6 @@ test('titre long : le bloc titre se replie, le groupe de droite reste aligné à
   // jsdom ne fait pas de mise en page : on fige les classes qui la portent.
   const h1 = screen.getByRole('heading', { level: 1 })
   expect(h1.parentElement).toHaveClass('flex-[1_1_20rem]', 'min-w-0')
-  const toggle = screen.getByRole('button', { name: /^(Mode d'affichage|Display mode)/ })
-  expect(toggle.parentElement).toHaveClass('ml-auto', 'justify-end')
+  const help = screen.getByRole('link', { name: /^(Aide|Help) \(/ })
+  expect(help.parentElement).toHaveClass('ml-auto', 'justify-end')
 })

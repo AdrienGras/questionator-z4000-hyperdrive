@@ -6,7 +6,7 @@ import { formatConfigIssue } from '@/domain/config/messages'
 import { validateConfig } from '@/domain/config/validate'
 import { db, type DbStatus } from '@/lib/db/db'
 import { minimalConfig } from '@/testing/config-fixtures'
-import { expectColorModeToggleLast } from '@/testing/page-shell-assertions'
+import { expectHelpLinkLast } from '@/testing/page-shell-assertions'
 import { stashConfigForCreation } from '@/lib/config-handoff'
 import { deferred } from '@/testing/deferred'
 import { renderAt } from '@/testing/render-at'
@@ -137,7 +137,7 @@ describe('écran de création', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Nouvelle session')
     const banner = screen.getByRole('banner')
     expect(within(banner).getByRole('link', { name: 'Retour à l’accueil' })).toBeInTheDocument()
-    expectColorModeToggleLast()
+    expectHelpLinkLast()
   })
 
   test('sans fichier : bouton désactivé et aide de l’aperçu', async () => {

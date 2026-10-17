@@ -11,7 +11,7 @@ import { makeSession } from '@/testing/session-fixtures'
 import { createTraining } from '@/lib/db/trainings'
 import { makeTraining } from '@/testing/training-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
-import { bannerInteractiveNames, expectColorModeToggleLast } from '@/testing/page-shell-assertions'
+import { bannerInteractiveNames, expectHelpLinkLast } from '@/testing/page-shell-assertions'
 import { storedSession } from '@/testing/stored-session'
 
 const dbState = vi.hoisted((): { status: DbStatus } => ({ status: 'open' }))
@@ -81,7 +81,7 @@ describe('accueil', () => {
     const names = bannerInteractiveNames()
     expect(names).not.toContain('Créer une session')
     expect(names).not.toContain('Importer un backup')
-    expectColorModeToggleLast()
+    expectHelpLinkLast()
   })
 
   test('deux colonnes : actions avant sessions', async () => {
@@ -192,7 +192,7 @@ describe('accueil', () => {
     expect(await screen.findByText(/stockage local est indisponible/)).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Créer une session' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Importer un backup' })).toBeDisabled()
-    expectColorModeToggleLast()
+    expectHelpLinkLast()
   })
 
   test('renommer : nom vide refusé, nouveau nom enregistré', async () => {

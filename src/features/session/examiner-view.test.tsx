@@ -4,7 +4,7 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
 import { categoryButton, outsidePanel } from '@/testing/passage-assertions'
-import { expectColorModeToggleLast, bannerInteractiveNames } from '@/testing/page-shell-assertions'
+import { expectHelpLinkLast, bannerInteractiveNames } from '@/testing/page-shell-assertions'
 import { makeSession } from '@/testing/session-fixtures'
 import {
   makeConfig,
@@ -614,7 +614,7 @@ test('barre de titre : retour, titre de l’examen, panneau puis thème', async 
   expect(names[0]).toBe('Retour à l’accueil')
   expect(names[1]).toBe('Panneau')
   expect(names).not.toContain('Ouvrir la vue projetée')
-  expectColorModeToggleLast()
+  expectHelpLinkLast()
 })
 
 test('sans étudiant actif : pas de ligne d’infos, contrôles de projection dans la colonne droite, thème présent', async () => {
@@ -625,5 +625,5 @@ test('sans étudiant actif : pas de ligne d’infos, contrôles de projection da
   const banner = within(screen.getByRole('banner'))
   expect(screen.getByRole('button', { name: 'Ouvrir la vue projetée' })).toBeInTheDocument()
   expect(banner.queryByText(/Question/)).not.toBeInTheDocument()
-  expectColorModeToggleLast()
+  expectHelpLinkLast()
 })
