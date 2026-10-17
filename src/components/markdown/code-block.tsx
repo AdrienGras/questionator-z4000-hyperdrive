@@ -45,13 +45,28 @@ export function CodeBlock({
   // Un résultat obtenu pour un autre code ou un autre langage n'est jamais affiché.
   const current = result?.code === code && result.lang === language ? result.highlighted : null
 
+  // Toujours un `pre` à la même place : React met à jour le nœud au lieu de le remplacer quand la
+  // coloration arrive (défilement et sélection conservés).
   const block =
     current === null ? (
       <pre data-highlighted="false">
         <code>{code}</code>
       </pre>
     ) : (
-      <HighlightedBlock highlighted={current} />
+      <pre className="shiki" data-highlighted="true" style={styleOf(current.rootStyle)}>
+        <code>
+          {current.lines.map((line) => (
+            <span key={line.offset} className="line">
+              {line.tokens.map((token) => (
+                <span key={token.offset} style={styleOf(token.style)}>
+                  {token.content}
+                </span>
+              ))}
+              {'\n'}
+            </span>
+          ))}
+        </code>
+      </pre>
     )
   if (language === null) return block
   return (
@@ -65,24 +80,5 @@ export function CodeBlock({
       </span>
       {block}
     </div>
-  )
-}
-
-function HighlightedBlock({ highlighted: current }: Readonly<{ highlighted: HighlightedCode }>) {
-  return (
-    <pre className="shiki" data-highlighted="true" style={styleOf(current.rootStyle)}>
-      <code>
-        {current.lines.map((line) => (
-          <span key={line.offset} className="line">
-            {line.tokens.map((token) => (
-              <span key={token.offset} style={styleOf(token.style)}>
-                {token.content}
-              </span>
-            ))}
-            {'\n'}
-          </span>
-        ))}
-      </code>
-    </pre>
   )
 }

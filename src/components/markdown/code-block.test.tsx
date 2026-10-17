@@ -169,3 +169,14 @@ describe('étiquette du langage', () => {
     expect(container.querySelector('[data-code-language]')).toBeNull()
   })
 })
+
+test('la coloration met à jour le même nœud `pre`, sans le remplacer', async () => {
+  const highlight = vi.fn<Highlight>((code) => Promise.resolve(highlighted(code)))
+  const { container } = render(<CodeBlock code="echo 1;" lang="php" highlight={highlight} />)
+  const before = container.querySelector('pre')
+
+  await waitFor(() => {
+    expect(container.querySelector('pre')).toHaveAttribute('data-highlighted', 'true')
+  })
+  expect(container.querySelector('pre')).toBe(before)
+})
