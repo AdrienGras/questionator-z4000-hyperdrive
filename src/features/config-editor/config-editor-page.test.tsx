@@ -179,6 +179,14 @@ describe('ConfigEditorPage', () => {
     await waitFor(() => expect(within(banner).getByRole('button', { name: CREATE })).toBeDisabled())
   })
 
+  it('panneau « Problèmes » présent dès le montage : le code ne bouge pas à la première validation', async () => {
+    await renderEditor()
+    expect(screen.getByRole('heading', { level: 2, name: 'Problèmes' })).toBeInTheDocument()
+    expect(screen.queryByText('Aucune erreur')).toBeNull()
+    await previewReady()
+    expect(screen.getByText('Aucune erreur')).toBeInTheDocument()
+  })
+
   it('les problèmes précèdent le code', async () => {
     await renderEditor()
     await previewReady()

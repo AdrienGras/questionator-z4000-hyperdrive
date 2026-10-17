@@ -230,11 +230,14 @@ export function ConfigEditorPage() {
                 )}
               </div>
             )}
-            {result !== undefined && (
-              <div className="shrink-0 border-b px-4 py-3">
-                <IssueList ui={ui} issues={located} onSelect={selectIssue} />
-              </div>
-            )}
+            {/* Toujours rendu, au-dessus du code : il ne le pousse pas à la première validation. */}
+            <div className="shrink-0 border-b px-4 py-3">
+              <IssueList
+                ui={ui}
+                issues={result === undefined ? undefined : located}
+                onSelect={selectIssue}
+              />
+            </div>
             <JsonEditor
               initialText={draft.initialText}
               onChange={handleChange}

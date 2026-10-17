@@ -8,7 +8,8 @@ export type LocatedIssue = { issue: ConfigIssue; line: number }
 
 type IssueListProps = Readonly<{
   ui: Ui
-  issues: readonly LocatedIssue[]
+  /** `undefined` avant la première validation : en-tête seul, à sa place (pas de saut du code). */
+  issues: readonly LocatedIssue[] | undefined
   onSelect: (issue: ConfigIssue) => void
 }>
 
@@ -17,19 +18,20 @@ type IssueListProps = Readonly<{
  * avec son chemin et sa ligne ; un clic mène à sa position dans le texte.
  */
 export function IssueList({ ui, issues, onSelect }: IssueListProps) {
-  const errors = issues.filter(({ issue }) => issue.severity === 'error')
-  const warnings = issues.filter(({ issue }) => issue.severity === 'warning')
+  const located = issues ?? []
+  const errors = located.filter(({ issue }) => issue.severity === 'error')
+  const warnings = located.filter(({ issue }) => issue.severity === 'warning')
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-small font-semibold">{ui.text('editor_issues_title', {})}</h2>
         <span className="text-small text-muted-foreground tabular-nums">
-          {issues.length === 0
-            ? ui.text('editor_issues_none', {})
-            : ui.text('editor_issues_count', { errors: errors.length, warnings: warnings.length })}
+          {issues?.length === 0 && ui.text('editor_issues_none', {})}
+          {located.length > 0 &&
+            ui.text('editor_issues_count', { errors: errors.length, warnings: warnings.length })}
         </span>
       </div>
-      {issues.length > 0 && (
+      {located.length > 0 && (
         <ul className="max-h-48 overflow-auto">
           {[...errors, ...warnings].map(({ issue, line }, index) => {
             const isError = issue.severity === 'error'

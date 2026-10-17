@@ -58,4 +58,12 @@ describe('IssueList', () => {
     expect(screen.queryByRole('button')).toBeNull()
     expect(screen.queryByRole('list')).toBeNull()
   })
+
+  it('avant la première validation : en-tête seul, sans compteur', () => {
+    render(
+      <IssueList ui={ui} issues={undefined} onSelect={vi.fn<(issue: ConfigIssue) => void>()} />,
+    )
+    expect(screen.getByRole('heading', { level: 2, name: 'Problèmes' })).toBeInTheDocument()
+    expect(screen.queryByText('Aucune erreur')).toBeNull()
+  })
 })
