@@ -33,7 +33,7 @@ export function PageShell({
     <main
       {...rest}
       className={cn(
-        'mx-auto flex min-h-svh w-full max-w-(--breakpoint-2xl) flex-col gap-6 px-4 py-6 md:px-10 md:py-8',
+        'mx-auto flex flex-1 w-full max-w-(--breakpoint-2xl) flex-col gap-6 px-4 py-6 md:px-10 md:py-8',
         className,
       )}
     >

@@ -1,9 +1,12 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
-/** `main` plein écran centré des écrans d'état, partagé avec le chargement d'une session. */
+/**
+ * `main` centré des écrans d'état, partagé avec le chargement d'une session. `flex-1` et non
+ * `min-h-svh` : il remplit la colonne de contenu de `RootLayout`, sous la barre du haut du téléphone.
+ */
 export const STATUS_MAIN_CLASS =
-  'flex min-h-svh flex-col items-center justify-center gap-4 p-6 text-center'
+  'flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center'
 
 type StatusScreenProps = Readonly<{
   icon: ReactNode

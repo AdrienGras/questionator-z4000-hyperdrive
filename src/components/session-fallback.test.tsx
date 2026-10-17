@@ -13,7 +13,7 @@ import { SessionFallback } from './session-fallback'
 
 const MAIN_CLASSES = [
   'flex',
-  'min-h-svh',
+  'flex-1',
   'flex-col',
   'items-center',
   'justify-center',

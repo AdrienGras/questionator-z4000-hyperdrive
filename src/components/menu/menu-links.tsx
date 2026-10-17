@@ -75,15 +75,18 @@ function IconTile({ icon: TileIcon, tone }: Readonly<{ icon: Icon; tone: string 
   )
 }
 
-/** Replié, le libellé passe en `aria-label` et en infobulle, au survol comme au focus. */
-function WithTooltip({
+/**
+ * Replié, le libellé passe en `aria-label` et en infobulle, au survol comme au focus. Toujours
+ * enveloppé, infobulle désactivée une fois déplié : un arbre stable garde le focus sur le bouton
+ * de repli quand il bascule.
+ */
+export function WithTooltip({
   collapsed,
   label,
   trigger,
 }: Readonly<{ collapsed: boolean; label: string; trigger: React.ReactElement }>): ReactNode {
-  if (!collapsed) return trigger
   return (
-    <Tooltip>
+    <Tooltip disabled={!collapsed}>
       <TooltipTrigger render={trigger} />
       {/* base-ui ne donne aucun rôle au popup : `tooltip`, comme sur l'artboard `menu-replie`. */}
       <TooltipContent side="right" role="tooltip">

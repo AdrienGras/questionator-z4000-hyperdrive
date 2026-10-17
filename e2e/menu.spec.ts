@@ -78,3 +78,25 @@ test('vue projetée : aucun menu', async ({ examiner }) => {
   )
   await expect(present.page.getByRole('button', { name: 'Menu', exact: true })).toHaveCount(0)
 })
+
+test('écran étroit : un écran d’état tient sans défiler sous la barre du haut', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  for (const path of ['#/nope', '#/session/inconnue']) {
+    await page.goto(path)
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollHeight - window.innerHeight,
+    )
+    expect(overflow, path).toBeLessThanOrEqual(0)
+  }
+})
+
+test('replié : le bouton de dépliage a aussi son infobulle', async ({ page }) => {
+  const menu = new AppMenu(page)
+  await menu.goto('/editor')
+  await menu.collapse()
+  await menu.toggle(true).hover()
+  await expect(page.getByRole('tooltip', { name: 'Déplier le menu' })).toBeVisible()
+})

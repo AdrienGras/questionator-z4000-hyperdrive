@@ -3,7 +3,7 @@ import { useLocation } from '@tanstack/react-router'
 import { useState } from 'react'
 import { activeMenuItem } from '@/components/menu/active-menu-item'
 import { MenuDrawer } from '@/components/menu/menu-drawer'
-import { MenuLinks } from '@/components/menu/menu-links'
+import { MenuLinks, WithTooltip } from '@/components/menu/menu-links'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useUi } from '@/lib/i18n/use-ui'
 import { readMenuCollapsed, writeMenuCollapsed } from '@/lib/menu-collapsed'
@@ -42,19 +42,25 @@ export function AppMenu() {
       >
         <MenuLinks ui={ui} active={active} collapsed={collapsed} />
         <div className="-mt-3 w-full border-t border-sidebar-border pt-2">
-          <button
-            type="button"
-            aria-expanded={!collapsed}
-            aria-label={collapsed ? toggleLabel : undefined}
-            onClick={toggle}
-            className={cn(
-              'flex h-9 w-full items-center gap-3 rounded-md px-3.5 text-[13px] font-medium text-muted-foreground hover:bg-sidebar-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar-ring',
-              collapsed && 'mx-auto w-12 justify-center px-0',
-            )}
-          >
-            <ToggleIcon aria-hidden className="size-4.5 shrink-0" />
-            {!collapsed && toggleLabel}
-          </button>
+          <WithTooltip
+            collapsed={collapsed}
+            label={toggleLabel}
+            trigger={
+              <button
+                type="button"
+                aria-expanded={!collapsed}
+                aria-label={collapsed ? toggleLabel : undefined}
+                onClick={toggle}
+                className={cn(
+                  'flex h-9 w-full items-center gap-3 rounded-md px-3.5 text-[13px] font-medium text-muted-foreground hover:bg-sidebar-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar-ring',
+                  collapsed && 'mx-auto w-12 justify-center px-0',
+                )}
+              >
+                <ToggleIcon aria-hidden className="size-4.5 shrink-0" />
+                {!collapsed && toggleLabel}
+              </button>
+            }
+          />
         </div>
       </aside>
     </TooltipProvider>

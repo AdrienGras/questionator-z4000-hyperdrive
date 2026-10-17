@@ -83,3 +83,14 @@ test('clavier : liens et bouton natifs, dans l’ordre du parcours', async () =>
     'Replier le menu',
   ])
 })
+
+test('replier au clavier : le focus reste sur le bouton', async () => {
+  renderAt('/editor')
+  const aside = await menu()
+  const toggle = aside.getByRole('button', { name: 'Replier le menu' })
+  toggle.focus()
+  fireEvent.click(toggle)
+  expect(document.activeElement).toBe(aside.getByRole('button', { name: 'Déplier le menu' }))
+  fireEvent.click(aside.getByRole('button', { name: 'Déplier le menu' }))
+  expect(document.activeElement).toBe(aside.getByRole('button', { name: 'Replier le menu' }))
+})

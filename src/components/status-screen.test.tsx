@@ -9,7 +9,7 @@ test('titre en h1, icône, actions, dans un main centré', () => {
     </StatusScreen>,
   )
   const main = screen.getByRole('main')
-  expect(main).toHaveClass('flex', 'min-h-svh', 'items-center', 'justify-center', 'text-center')
+  expect(main).toHaveClass('flex', 'flex-1', 'items-center', 'justify-center', 'text-center')
   expect(screen.getByRole('heading', { level: 1, name: 'Session introuvable' })).toBeInTheDocument()
   const tile = screen.getByTestId('icone').parentElement
   expect(tile).toHaveClass('bg-muted', 'text-muted-foreground')

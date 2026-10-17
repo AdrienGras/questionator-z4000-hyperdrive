@@ -29,7 +29,9 @@ function RootLayout() {
       {/* Thème sombre seul pendant la refonte (D102) ; le mode clair revient en #152. */}
       <AppearanceProvider forcedMode="dark">
         <div className="flex min-h-svh flex-col bg-background text-foreground md:flex-row">
-          {/* Le menu est la seule navigation entre espaces ; jamais sur la vue projetée (D102). */}
+          {/* Le menu est la seule navigation entre espaces ; jamais sur la vue projetée (D102).
+              Les `main` des pages prennent `flex-1` dans la colonne de contenu, jamais `min-h-svh` :
+              sur téléphone, la barre du haut s'ajouterait à la hauteur de l'écran. */}
           {!projected && <AppMenu />}
           <div className="flex min-w-0 flex-1 flex-col">
             <Outlet />
