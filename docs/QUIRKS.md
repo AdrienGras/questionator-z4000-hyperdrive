@@ -977,3 +977,28 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : jsdom ne fait aucune mise en page et n'expose pas `Element.prototype.scrollIntoView`.
 **Workaround** : dans le test, `Element.prototype.scrollIntoView = vi.fn()` avant le rendu, puis vérifier `mock.contexts[0]` (l'élément défilé).
 **Référence** : `src/features/config-editor/components/config-preview.test.tsx`.
+
+## Changer le type d'élément à la même place fait remplacer le nœud par React : un `pre` coloré perd son défilement (2026-10-17)
+
+**Découvert** : F44.7, e2e `long-words` après l'ajout de l'étiquette de langage des blocs de code.
+**Symptôme** : `scrollWidth` et `clientWidth` à 0 sur le `pre` de l'énoncé, mesuré juste après son apparition ; à l'écran, la position de défilement du code se perdait à l'arrivée de la coloration.
+**Cause** : le `pre` coloré était rendu par un sous-composant (`<HighlightedBlock />`) à la place du `<pre>` brut : type différent à la même position, donc démontage et nouveau nœud. Le test mesurait l'ancien nœud, détaché.
+**Workaround** : garder `<pre>` en JSX direct dans les deux branches (seuls les attributs et les enfants changent) ; test « même nœud `pre` » dans `code-block.test.tsx`.
+**Référence** : `src/components/markdown/code-block.tsx`.
+
+## oxlint refuse `role="img"` et `role="group"` (`prefer-tag-over-role`) (2026-10-17)
+
+**Découvert** : F44.7, jauge de note, barre de progression segmentée, bascule de projection.
+**Symptôme** : `pnpm lint` échoue sur un `div role="img" aria-label` ou `div role="group" aria-label`.
+**Cause** : règle `jsx-a11y/prefer-tag-over-role` : elle préfère `img` et `fieldset`.
+**Workaround** : dessin informatif en `aria-hidden` avec une phrase `sr-only` à côté (tests par `getByText(phrase)`, pas `getByRole('img')`) ; groupe de boutons en `<fieldset aria-label>` (`m-0 min-w-0 border-0`), qui garde le rôle `group`.
+**Référence** : `src/components/score-gauge.tsx`, `src/features/session/components/passage-progress.tsx`, `projection-controls.tsx`, `src/components/success-ring.tsx`.
+
+## Le tiroir du passage ne se trouve plus par son nom : il porte celui de la session (2026-10-17)
+
+**Découvert** : F44.7, tous les tests qui visaient `dialog` « Panneau latéral ».
+**Symptôme** : `getByRole('dialog', { name: 'Panneau latéral' })` ne trouve rien.
+**Cause** : le titre du tiroir est le nom de la session (« Panneau » n'est plus qu'un sur-titre).
+**Workaround** : `sidePanel()`, `querySidePanel()`, `findSidePanel()` (`src/testing/side-panel-assertions.ts`) repèrent le `dialog` qui porte la liste d'onglets « Panneau » ; en e2e, `ExaminerPage.panel`. Onglets : « Cet étudiant » et « Liste ».
+**Référence** : `src/features/session/components/side-panel.tsx`, `e2e/pages/examiner-page.ts`.
+

@@ -449,7 +449,7 @@ export function XPage() {
 - Vue projetée : ses composants ne reçoivent jamais la `Session` (`usePresentedConfig`, puis `toProjectedView` en F14).
 - Thème d'une config hors vue de session (aperçu de l'éditeur, F26) : `<ThemeScope theme={config.theme}>` pose les variables du mode effectif sur un `div` (`themeVariables`, même correspondance que `AppearanceProvider`), sans toucher `<html>`. Possible parce que `@theme inline` fait lire `var(--…)` aux utilitaires.
 - CodeMirror (F26) : seulement dans `features/config-editor/`, monté dans un `useEffect` (`JsonEditor`), couleurs par variables `--cm-*` ; jamais dans le bundle initial (`check:bundle`).
-- Écrans de la vue projetée : `src/components/projection/`, point d'entrée `ProjectedScreen`, partagés par la vue projetée et l'aperçu de la vue de passage (D77). Ils ne prennent que la `ProjectedView`.
+- Écrans de la vue projetée : `src/components/projection/`, point d'entrée `ProjectedScreen`, partagés par la vue projetée et l'aperçu de la vue de passage (D77). Ils ne prennent que la `ProjectedView`. Une note finale s'y formate par `formatFixed(toMilli(final), final.decimals, locale)`, une brute par `formatRawScore`, jamais par un `Intl.NumberFormat` à décimales fixes (D108). Positions des décors en proportion de l'écran (la fenêtre n'a pas la taille de l'artboard).
 - Composant rendu à la fois en page et dans un canevas réduit (aperçu F22) : seuils en container queries (`@min-[40rem]:` sous un ancêtre `@container`), jamais en media queries (`sm:`), qui réagiraient à la fenêtre examinateur et non à la largeur simulée. Idem pour tout composant partagé qui y est rendu (`CategoryLayout`).
 - Tests : jsdom n'a pas de `ResizeObserver`. `src/testing/setup.ts` en pose un no-op global ; un test qui a besoin d'une largeur mesurée le remplace par `vi.stubGlobal` et déclenche le rappel dans `act`.
 
@@ -552,6 +552,10 @@ test('barre de titre : fil d’Ariane puis actions', async () => {
 - Action principale d'un écran (D107) : entourée d'`ActionHalo` (`@/components/action-halo`, `side="start"` sous un formulaire, `"end"` en en-tête), un seul par écran. Le débord du halo est coupé par la colonne de contenu de `RootLayout` (`overflow-x-clip`).
 - Libellé court à l'écran, long en `aria-label` (« Charger » / « Charger un fichier ») : le nom accessible contient toujours le texte visible.
 - Bouton désactivé : une phrase dit pourquoi, reliée par `aria-describedby` (une cause à la fois, jamais pendant un état transitoire ; modèle `submitBlocker` de la création).
+- Écran à deux colonnes (D108, modèle `PassageLayout` de `passage-body.tsx`) : grille `lg:grid-cols-[minmax(0,1fr)_25rem] lg:grid-rows-[auto_1fr]`, contenu principal en haut à gauche, colonne de droite sur deux rangées, suite en bas à gauche ; sous `lg`, une colonne, et la carte d'action de droite remonte sous le contenu principal par `order-first`.
+- Catégorie dans une ligne ou un en-tête : `CategoryBadge` (`@/components/category-badge`, tuile d'icône teintée, tailles `sm` à `projection-lg`), jamais une tuile recopiée. Teinte d'une surface de catégorie : classes écrites en entier avec le type `color:` (`bg-[color:color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_10%,var(--color-card))]`), pour Tailwind (littéraux seulement) et pour `cn`.
+- Note en demi-jauge : `ScoreGauge` (`@/components/score-gauge`, `md` à l'écran, `lg` en projection) ; halo d'une carte pleine largeur : `ActionHalo side="around"`.
+- Dessin informatif (jauge, barre segmentée) : phrase `sr-only` et dessin `aria-hidden`, jamais `role="img"` (oxlint) ; groupe de boutons nommé : `fieldset aria-label`, jamais `role="group"`.
 
 ## Menu et coquille de page — règles
 

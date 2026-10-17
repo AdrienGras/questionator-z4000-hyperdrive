@@ -1713,3 +1713,26 @@ autre encodage 8 bits.
 **Pourquoi** : les deux écrans prennent la forme validée, et chaque état que le code connaissait (lecture, erreurs de lecture et de validateur, aperçu périmé ou vide, avertissements d'une config valide, « Skips désactivés ») reste visible.
 
 **Reporté dans** : `src/features/create-session/` (`submit-blocker.ts`, `components/preview-card.tsx`), `src/features/config-editor/` (`issue-locations.ts` `lineAt`, `components/issue-list.tsx`, `components/config-preview.tsx`, `editor-theme.ts`), `src/components/{action-halo,format-scale,file-drop-field,config-issue-list}.tsx`, `src/lib/utils.ts`, `src/routes/__root.tsx`, `src/index.css` ; `docs/CONVENTIONS.md` § « Page examinateur » ; plan `docs/superpowers/plans/2026-10-17-f44-6-creation-editeur.md`.
+
+## D108 — F44.7 : passage examinateur et vue projetée (2026-10-17)
+
+**Question** : comment ramener l'écran de passage et la vue projetée à leurs douze artboards sans toucher à la notation, au tirage, au skip, à l'absence ni à l'ajustement, et que trancher là où les maquettes se taisent ou contredisent une règle en place ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Colonne de droite | La carte « Note » (barème, skip et passes restantes, sous un halo `ActionHalo side="around"`), le commentaire et « Marquer absent » sortent du tiroir et passent dans la colonne de droite, sous la vue projetée. Sur téléphone, la carte « Note » remonte juste sous la question (`order-first`). | Artboards `passage-question` et `passage-note-finale` ; noter sans ouvrir de tiroir. |
+| Commentaire | `CommentField` reste monté par étudiant (`key={student.id}`), la carte qui l'entoure non : un dialogue d'absence ouvert survit au changement d'étudiant actif (D67). | Une clé sur toute la carte démontait ce dialogue. |
+| Panneau | Nommé par la session sous le sur-titre « Panneau », onglets « Cet étudiant » / « Liste » (bascule), pied commun (« Statistiques », « Exporter en Excel ») hors de la zone qui défile. « Cet étudiant » : nom et statut, questions (correction d'une note gardée, D103), deux totaux (brute sur le maximum, finale sur l'échelle). « Liste » : résumé « N étudiants · N terminés · N absents », « Ajouter », lignes à pastille de statut. | Artboards `passage-panneau*` ; la note plafonnée, la convertie et l'ajustement restent sur l'écran final. |
+| Écran final | Note finale en demi-jauge (`ScoreGauge`), notes intermédiaires à côté, détail en barres par question, motif d'une question passée sous son titre, « Étudiant suivant » sous halo. « Passage terminé » en `h2` lu par les lecteurs d'écran, montré par la pastille de l'en-tête. | Artboard `passage-note-finale`. |
+| Vue projetée | Cartes « Question » et « Score » en haut à droite ; grande grille sous « Choisissez une catégorie », rangée compacte pendant une question, question en carte teintée ; note en jauge, plus de tuiles sur l'écran final ; halos en proportion de l'écran. Pas de titre de question (D103). | Artboards `projection-*`. |
+| Domaine (D69 élargie) | `ProjectedView.detail[].categoryId` (couleur et icône du détail, D103) et `final.decimals` (décimales du pas d'arrondi, `formatFixed`) ; rien d'autre. | La note projetée suit l'arrondi de la config comme partout. |
+| Disposition des tuiles *(décision de l'utilisateur)* | D74 maintenue sur les trois grilles (tirage, grande grille et rangée projetées) malgré les artboards (4 sur une ligne). | Règle en place, centrage des lignes courtes. |
+| Accessibilité | `role="img"` et `role="group"` refusés par oxlint : phrase `sr-only` et dessin `aria-hidden` (jauge, barre de progression), `fieldset` pour la bascule de projection. | Comme `SuccessRing`. |
+| Dialogues | « Annuler » en texte seul ; ajout sans croix ; ajustement signé aux décimales des notes finales (« +0,50 »), aperçu en trois morceaux ; « Précisez » dans « Autre motif » ; échec d'écriture avec icône (`WriteErrorAlert`). | Artboard `session-dialogues`. |
+| Bloc de code | Étiquette du langage en haut à droite, hors du `pre`, masquée en projection ; le `pre` reste le même nœud quand la coloration arrive. | Nouveau retenu (D103) ; un nœud remplacé perdait défilement et sélection. |
+
+**Pourquoi** : les deux écrans prennent la forme validée ; chaque état non maquetté (aucun étudiant, absent, quota de skip, note non révélée, pop-up bloquée, bandeau de projection) reste là, restylé.
+
+**Reporté dans** : `src/features/session/components/` (`score-card`, `comment-card`, `passage-progress`, `passage-header-stats`, `student-status-pill`, `write-error-alert`, `passage-body`, `side-panel`…), `src/features/session/passage-segments.ts`, `src/components/{category-badge,score-gauge}.tsx`, `src/components/projection/` (`projection-header`, `projection-halos`…), `src/domain/presentation/projected-view.ts`, `src/domain/scoring/format.ts` ; `docs/CONVENTIONS.md` § « Page examinateur » et « Vue de session thémée » ; plan `docs/superpowers/plans/2026-10-17-f44-7-passage-projection.md`.
