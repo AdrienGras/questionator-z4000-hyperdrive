@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import type { NormalizedCategory } from '@/domain/config/normalize'
+import { LocaleProvider, LocaleScope } from '@/lib/i18n/locale-context'
 import { makeUi } from '@/testing/make-ui'
 import { QuestionPreview } from './question-preview'
 
@@ -59,5 +60,23 @@ describe('QuestionPreview', () => {
       />,
     )
     expect(container.querySelector('details')).toBeNull()
+  })
+
+  it.each([
+    ['fr', '0 / 0,5 / 1'],
+    ['en', '0 / 0.5 / 1'],
+  ] as const)('barème formaté dans la langue de la config (%s)', (locale, expected) => {
+    render(
+      <LocaleProvider locale="fr">
+        <LocaleScope locale={locale}>
+          <QuestionPreview
+            ui={ui}
+            category={{ ...category, scale: [0, 0.5, 1] }}
+            question={{ id: 'q4', title: 'T', tags: [], prompt: 'P' }}
+          />
+        </LocaleScope>
+      </LocaleProvider>,
+    )
+    expect(screen.getByText(expected)).toBeInTheDocument()
   })
 })

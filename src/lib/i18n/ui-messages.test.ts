@@ -406,6 +406,8 @@ const SAMPLE: UiMessageParams = {
   editor_issues_title: {},
   editor_issue_line: { line: 115 },
   editor_preview_title: {},
+  editor_preview_subtitle: {},
+  editor_preview_nav: {},
   editor_load_file: {},
   editor_reset_example: {},
   editor_download: {},

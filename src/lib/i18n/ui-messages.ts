@@ -381,6 +381,8 @@ export type UiMessageParams = {
   editor_issues_title: NoParams
   editor_issue_line: { line: number }
   editor_preview_title: NoParams
+  editor_preview_subtitle: NoParams
+  editor_preview_nav: NoParams
   editor_load_file: NoParams
   editor_reset_example: NoParams
   editor_download: NoParams
@@ -876,6 +878,9 @@ const fr: Dictionary<UiMessageParams> = {
   editor_issues_title: () => 'Problèmes',
   editor_issue_line: ({ line }) => `ligne ${line}`,
   editor_preview_title: () => 'Aperçu',
+  editor_preview_subtitle: () =>
+    'Chaque question telle qu’elle sera projetée, dans le thème de la config.',
+  editor_preview_nav: () => 'Aller à une catégorie',
   editor_load_file: () => 'Charger un fichier',
   editor_reset_example: () => "Repartir de l'exemple",
   editor_download: () => 'Télécharger',
@@ -1324,6 +1329,8 @@ const en: Dictionary<UiMessageParams> = {
   editor_issues_title: () => 'Problems',
   editor_issue_line: ({ line }) => `line ${line}`,
   editor_preview_title: () => 'Preview',
+  editor_preview_subtitle: () => 'Each question as it will be projected, in the config’s theme.',
+  editor_preview_nav: () => 'Go to a category',
   editor_load_file: () => 'Load a file',
   editor_reset_example: () => 'Start from the example',
   editor_download: () => 'Download',

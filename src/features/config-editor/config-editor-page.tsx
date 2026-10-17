@@ -253,11 +253,14 @@ export function ConfigEditorPage() {
         </div>
         <section
           aria-labelledby={previewTitleId}
-          className="flex max-w-110 min-w-0 flex-[1_1_22.5rem] flex-col gap-4"
+          className="flex max-w-110 min-w-0 flex-[1_1_22.5rem] flex-col gap-3"
         >
-          <h2 id={previewTitleId} className="text-h2">
-            {t('editor_preview_title', {})}
-          </h2>
+          <div className="flex flex-col gap-0.5">
+            <h2 id={previewTitleId} className="text-h2">
+              {t('editor_preview_title', {})}
+            </h2>
+            <p className="text-small text-muted-foreground">{t('editor_preview_subtitle', {})}</p>
+          </div>
           <ConfigPreview ui={ui} config={lastValid} stale={result !== undefined && !result.ok} />
         </section>
       </div>
