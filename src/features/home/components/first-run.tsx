@@ -10,7 +10,7 @@ import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { SpaceIcon } from '@/components/space-icon'
 import { buttonVariants } from '@/components/ui/button'
-import { SMALL_TEXT_LINK_CLASS } from '@/components/text-link'
+import { TEXT_LINK_CLASS } from '@/components/text-link'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
 
@@ -18,6 +18,10 @@ type FirstRunProps = Readonly<{ ui: Ui; onImport: () => void }>
 
 const LABEL_CLASS = 'text-label text-muted-foreground uppercase'
 const SMALL_MUTED_CLASS = 'text-[13px] leading-[18px] text-muted-foreground'
+const EXAMPLE_LINK_CLASS = cn(
+  TEXT_LINK_CLASS,
+  'inline-flex items-center gap-1.5 text-[13px] leading-[18px] font-semibold',
+)
 const RESOURCE_CLASS =
   'inline-flex items-center gap-2 text-[13px] leading-[18px] font-medium text-muted-foreground hover:text-foreground'
 
@@ -64,25 +68,11 @@ export function FirstRun({ ui, onImport }: FirstRunProps) {
         <ol className="grid w-full max-w-205 grid-cols-[repeat(auto-fit,minmax(min(100%,200px),1fr))] gap-3">
           <Step ui={ui} n={1} title={text('first_run_step1', {})}>
             <span className="mt-0.5 flex flex-col gap-1.5">
-              <a
-                href={`${base}students.example.csv`}
-                download
-                className={cn(
-                  SMALL_TEXT_LINK_CLASS,
-                  'inline-flex items-center gap-1.5 font-semibold',
-                )}
-              >
+              <a href={`${base}students.example.csv`} download className={EXAMPLE_LINK_CLASS}>
                 <IconDownload aria-hidden className="size-4" />
                 {text('home_students_example_link', {})}
               </a>
-              <a
-                href={`${base}config.example.json`}
-                download
-                className={cn(
-                  SMALL_TEXT_LINK_CLASS,
-                  'inline-flex items-center gap-1.5 font-semibold',
-                )}
-              >
+              <a href={`${base}config.example.json`} download className={EXAMPLE_LINK_CLASS}>
                 <IconDownload aria-hidden className="size-4" />
                 {text('home_config_example_link', {})}
               </a>
