@@ -112,6 +112,8 @@ export type UiMessageParams = {
   training_success_label: NoParams
   training_success_aria: { rate: string }
   training_coverage_label: NoParams
+  rate_ring_label: { label: string; rate: string }
+  rate_ring_caption: NoParams
   sessions_subtitle: NoParams
   sessions_drop_hint: NoParams
   sessions_list_title: NoParams
@@ -615,6 +617,8 @@ const fr: Dictionary<UiMessageParams> = {
   training_success_label: () => 'de réussite',
   training_success_aria: ({ rate }) => `Taux de réussite : ${rate}`,
   training_coverage_label: () => 'questions notées',
+  rate_ring_label: ({ label, rate }) => `Réussite ${label} : ${rate}`,
+  rate_ring_caption: () => 'réussite',
   sessions_subtitle: () => 'Vos oraux, de la liste d’étudiants à la note finale.',
   sessions_drop_hint: () =>
     'Déposez une sauvegarde (.json) n’importe où sur la page pour la restaurer.',
@@ -1099,6 +1103,8 @@ const en: Dictionary<UiMessageParams> = {
   training_success_label: () => 'success rate',
   training_success_aria: ({ rate }) => `Success rate: ${rate}`,
   training_coverage_label: () => 'questions rated',
+  rate_ring_label: ({ label, rate }) => `${label} success: ${rate}`,
+  rate_ring_caption: () => 'success',
   sessions_subtitle: () => 'Your oral exams, from the student list to the final grade.',
   sessions_drop_hint: () => 'Drop a backup (.json) anywhere on the page to restore it.',
   sessions_list_title: () => 'Session list',

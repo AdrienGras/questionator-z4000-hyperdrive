@@ -3,7 +3,7 @@ import type { DrawnQuestion, SkippedQuestion } from '@/domain/stats/types'
 import { reasonsLabel } from '@/domain/stats/labels'
 import { questionTitle } from '@/domain/config/lookup'
 import type { Ui } from '@/lib/i18n/use-ui'
-import { CategoryLabel } from './category-label'
+import { CategoryLabel } from '@/components/stats/category-label'
 import {
   CELL,
   NUMERIC_CELL,

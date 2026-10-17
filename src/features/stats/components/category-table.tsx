@@ -2,7 +2,7 @@ import type { NormalizedConfig } from '@/domain/config/normalize'
 import type { CategoryStats } from '@/domain/stats/types'
 import { formatRate } from '@/components/stats/format-rate'
 import type { Ui } from '@/lib/i18n/use-ui'
-import { CategoryLabel } from './category-label'
+import { CategoryLabel } from '@/components/stats/category-label'
 import {
   NUMERIC_CELL,
   ROW_HEADER,

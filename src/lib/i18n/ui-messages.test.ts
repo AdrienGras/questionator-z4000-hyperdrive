@@ -113,6 +113,8 @@ const SAMPLE: UiMessageParams = {
   training_success_label: {},
   training_success_aria: { rate: '72 %' },
   training_coverage_label: {},
+  rate_ring_label: { label: 'Facile', rate: '50 %' },
+  rate_ring_caption: {},
   sessions_subtitle: {},
   sessions_drop_hint: {},
   sessions_list_title: {},
