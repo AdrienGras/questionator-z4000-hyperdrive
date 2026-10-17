@@ -64,6 +64,60 @@ test('le bouton principal porte le dégradé d’action, dérivé de theme.dark.
   expect(themed.body).toBe('oklch(0.16 0.02 292)')
 })
 
+function backgroundOf(el: Element): string {
+  return getComputedStyle(el).backgroundImage
+}
+
+/**
+ * Crée une session depuis `configPath` et tire une question ; renvoie le fond du halo de la carte
+ * « Note », celui d'un halo de la vue projetée, puis celui de « Étudiant suivant » en fin de passage.
+ */
+async function sessionHalos(page: Page, configPath: string, name: string) {
+  const home = new HomePage(page)
+  await home.goto()
+  const create = await home.createSession()
+  await create.uploadStudents(examplePath('students.example.csv'))
+  await create.uploadConfig(configPath)
+  await create.fillName(name)
+  const examiner = await create.submit()
+  await examiner.draw('Normal')
+  const score = await page
+    .getByRole('region', { name: 'Noter la question' })
+    .locator('xpath=preceding-sibling::div[@aria-hidden="true"]')
+    .evaluate(backgroundOf)
+  const present = await examiner.openPresentView()
+  const projected = await present.page.locator('[data-halo]').first().evaluate(backgroundOf)
+  await present.close()
+  // Trois questions par étudiant dans la config d'exemple : fin du passage, note révélée.
+  await examiner.score('1')
+  await examiner.draw('Difficile')
+  await examiner.score('1')
+  await examiner.draw('Cauchemar')
+  await examiner.score('1')
+  await examiner.confirmAdjustment()
+  const next = await page
+    .getByRole('button', { name: 'Étudiant suivant' })
+    .evaluate((el) => getComputedStyle(el).getPropertyValue('--tw-gradient-to').trim())
+  return { score, projected, next }
+}
+
+test('thème de session : halos du passage et de la projection dérivés de theme.dark.primary', async ({
+  page,
+}, testInfo) => {
+  const themedPath = testInfo.outputPath('primary-halos.config.json')
+  const config = JSON.parse(readFileSync(examplePath('config.example.json'), 'utf8'))
+  config.theme = { dark: { primary: 'oklch(0.55 0.15 150)' } }
+  writeFileSync(themedPath, JSON.stringify(config))
+
+  const byDefault = await sessionHalos(page, examplePath('config.example.json'), 'Halos par défaut')
+  const themed = await sessionHalos(page, themedPath, 'Halos thémés')
+  expect(byDefault.score).toContain('radial-gradient')
+  expect(themed.score).not.toBe(byDefault.score)
+  expect(themed.projected).toContain('radial-gradient')
+  expect(themed.projected).not.toBe(byDefault.projected)
+  expect(themed.next).not.toBe(byDefault.next)
+})
+
 test('surfaces et champs du design system', async ({ page }) => {
   const home = new HomePage(page)
   // Carte de la liste vide de la page Sessions (l'accueil vide montre le premier lancement).
