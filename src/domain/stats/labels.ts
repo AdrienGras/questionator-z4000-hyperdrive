@@ -13,11 +13,6 @@ export function binLabel(bin: HistogramBin, isLast: boolean, locale: Locale): st
   return `[${formatBound(bin.from, locale)} ; ${formatBound(bin.to, locale)}${isLast ? ']' : '['}`
 }
 
-/** Libellé court pour l'axe du graphique, « 0–1 ». */
-export function binTick(bin: HistogramBin, locale: Locale): string {
-  return `${formatBound(bin.from, locale)}–${formatBound(bin.to, locale)}`
-}
-
 /** « Hors programme ×2, sans motif ×1 » : motifs déjà triés par le domaine, `noReason` pour `null`. */
 export function reasonsLabel(
   reasons: SkippedQuestion['reasons'],

@@ -437,10 +437,11 @@ export type UiMessageParams = {
   stats_grades_mean: NoParams
   stats_grades_median: NoParams
   stats_grades_std_dev: NoParams
-  stats_histogram: NoParams
   stats_histogram_empty: NoParams
-  stats_col_range: NoParams
+  stats_histogram_aria: { count: number; bins: string }
+  stats_histogram_bin: { count: number; from: string; to: string }
   stats_categories: NoParams
+  stats_category_counts: { scored: number; choices: number }
   stats_tags: NoParams
   stats_tags_empty: NoParams
   stats_top_drawn: NoParams
@@ -450,7 +451,6 @@ export type UiMessageParams = {
   stats_strategies: NoParams
   stats_strategies_empty: NoParams
   stats_adjustments: NoParams
-  stats_adjustments_count: NoParams
   stats_adjustments_sum: NoParams
   stats_adjustments_mean: NoParams
   stats_col_category: NoParams
@@ -973,10 +973,15 @@ const fr: Dictionary<UiMessageParams> = {
   stats_grades_mean: () => 'Moyenne',
   stats_grades_median: () => 'Médiane',
   stats_grades_std_dev: () => 'Écart-type',
-  stats_histogram: () => 'Histogramme',
   stats_histogram_empty: () => "Aucun étudiant n'a terminé.",
-  stats_col_range: () => 'Intervalle de notes',
-  stats_categories: () => 'Catégories',
+  stats_histogram_aria: ({ count, bins }) =>
+    count > 1
+      ? `Notes des ${count} étudiants notés : ${bins}`
+      : `Note de l’étudiant noté : ${bins}`,
+  stats_histogram_bin: ({ count, from, to }) => `${count} entre ${from} et ${to}`,
+  stats_categories: () => 'Réussite par catégorie',
+  stats_category_counts: ({ scored, choices }) =>
+    `${scored} ${plural(scored, 'notée', 'notées')} · ${choices} choix`,
   stats_tags: () => 'Tags',
   stats_tags_empty: () => "Aucune question n'a de tag.",
   stats_top_drawn: () => 'Questions les plus tirées',
@@ -986,9 +991,8 @@ const fr: Dictionary<UiMessageParams> = {
   stats_strategies: () => 'Stratégies',
   stats_strategies_empty: () => "Aucun étudiant n'a terminé.",
   stats_adjustments: () => 'Ajustements',
-  stats_adjustments_count: () => 'Nombre',
-  stats_adjustments_sum: () => 'Somme',
-  stats_adjustments_mean: () => 'Moyenne',
+  stats_adjustments_sum: () => 'somme',
+  stats_adjustments_mean: () => 'moyenne',
   stats_col_category: () => 'Catégorie',
   stats_col_tag: () => 'Tag',
   stats_col_question: () => 'Question',
@@ -1458,10 +1462,15 @@ const en: Dictionary<UiMessageParams> = {
   stats_grades_mean: () => 'Mean',
   stats_grades_median: () => 'Median',
   stats_grades_std_dev: () => 'Standard deviation',
-  stats_histogram: () => 'Histogram',
   stats_histogram_empty: () => 'No student has finished.',
-  stats_col_range: () => 'Score range',
-  stats_categories: () => 'Categories',
+  stats_histogram_aria: ({ count, bins }) =>
+    count === 1
+      ? `Score of the scored student: ${bins}`
+      : `Scores of the ${count} scored students: ${bins}`,
+  stats_histogram_bin: ({ count, from, to }) => `${count} between ${from} and ${to}`,
+  stats_categories: () => 'Success by category',
+  stats_category_counts: ({ scored, choices }) =>
+    `${scored} scored · ${choices} ${pluralEn(choices, 'pick', 'picks')}`,
   stats_tags: () => 'Tags',
   stats_tags_empty: () => 'No question has a tag.',
   stats_top_drawn: () => 'Most drawn questions',
@@ -1471,9 +1480,8 @@ const en: Dictionary<UiMessageParams> = {
   stats_strategies: () => 'Strategies',
   stats_strategies_empty: () => 'No student has finished.',
   stats_adjustments: () => 'Adjustments',
-  stats_adjustments_count: () => 'Count',
-  stats_adjustments_sum: () => 'Sum',
-  stats_adjustments_mean: () => 'Mean',
+  stats_adjustments_sum: () => 'sum',
+  stats_adjustments_mean: () => 'mean',
   stats_col_category: () => 'Category',
   stats_col_tag: () => 'Tag',
   stats_col_question: () => 'Question',

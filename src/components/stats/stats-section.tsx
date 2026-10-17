@@ -65,20 +65,6 @@ export function StatsGroup({ title, children }: Readonly<{ title: string; childr
   )
 }
 
-/** Indicateurs chiffrés d'une carte : libellé (`dt`) puis valeur (`dd`). */
-export function StatFigures({ items }: Readonly<{ items: { label: string; value: string }[] }>) {
-  return (
-    <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-      {items.map(({ label, value }) => (
-        <div key={label} className="flex flex-col gap-0.5">
-          <dt className="text-small text-muted-foreground">{label}</dt>
-          <dd className="text-xl font-semibold tabular-nums">{value}</dd>
-        </div>
-      ))}
-    </dl>
-  )
-}
-
 export type StatsColumn = { label: string; numeric?: boolean; srOnly?: boolean }
 
 type StatsTableProps = Readonly<{

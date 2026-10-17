@@ -5,19 +5,15 @@ import { PageShell } from '@/components/page-shell'
 import type { Session } from '@/domain/session/types'
 import { computeStats } from '@/domain/stats/compute-stats'
 import { useUi } from '@/lib/i18n/use-ui'
-import { AdjustmentCard } from './adjustment-card'
-import { CategoryTable } from './category-table'
+import { CategoryRings } from './category-rings'
 import { GradesCard } from './grades-card'
-import { HistogramChart } from './histogram-chart'
-import { HistogramTable } from './histogram-table'
 import { QuestionTables } from './question-tables'
-import { StatsGroup, StatsSection } from '@/components/stats/stats-section'
+import { StatsGroup } from '@/components/stats/stats-section'
 import { StatsEmptyState } from '@/components/stats/stats-empty-state'
 import { buttonVariants } from '@/components/ui/button'
 import { SynthesisCard } from './synthesis-card'
 import { StrategyTable } from './strategy-table'
 import { TagTable } from './tag-table'
-import { StatsEmpty } from '@/components/stats/stats-empty'
 
 /** Aucun étudiant n'a de tentative : rien à compter, l'écran montre son état vide (D103). */
 const hasNoAttempt = (session: Session) => session.students.every((s) => s.attempts.length === 0)
@@ -69,22 +65,18 @@ export function StatsView({ session }: Readonly<{ session: Session }>) {
               headcount={stats.headcount}
               grades={stats.grades}
             />
+            <div className="flex flex-wrap items-stretch gap-4">
+              <GradesCard
+                ui={ui}
+                config={config}
+                grades={stats.grades}
+                histogram={stats.histogram}
+                adjustments={stats.adjustments}
+              />
+              <CategoryRings ui={ui} config={config} categories={stats.categories} />
+            </div>
           </StatsGroup>
           <div className="grid gap-4 md:grid-cols-2">
-            <GradesCard ui={ui} config={config} grades={stats.grades} />
-            <StatsSection title={text('stats_histogram', {})} className="md:col-span-2">
-              {(headingId) => (
-                <>
-                  {stats.grades.count === 0 ? (
-                    <StatsEmpty>{text('stats_histogram_empty', {})}</StatsEmpty>
-                  ) : (
-                    <HistogramChart ui={ui} bins={stats.histogram} />
-                  )}
-                  <HistogramTable ui={ui} bins={stats.histogram} labelledBy={headingId} />
-                </>
-              )}
-            </StatsSection>
-            <CategoryTable ui={ui} config={config} categories={stats.categories} />
             <TagTable ui={ui} tags={stats.tags} />
             <QuestionTables
               ui={ui}
@@ -93,7 +85,6 @@ export function StatsView({ session }: Readonly<{ session: Session }>) {
               skipped={stats.skipped}
             />
             <StrategyTable ui={ui} config={config} strategies={stats.strategies} />
-            <AdjustmentCard ui={ui} config={config} adjustments={stats.adjustments} />
           </div>
         </>
       )}
