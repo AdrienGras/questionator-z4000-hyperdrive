@@ -59,3 +59,23 @@ for (const { label, width, row } of [
     if (row) expect(confirm.x).toBeGreaterThan(cancel.x)
   })
 }
+
+test('le bouton « Supprimer » de la modale : texte sombre sur destructive (contraste)', async ({
+  page,
+}) => {
+  const home = new HomePage(page)
+  await home.goto()
+  const create = await home.createSession()
+  await create.uploadStudents(examplePath('students.example.csv'))
+  await create.uploadConfig(examplePath('config.example.json'))
+  await create.fillName('Session contraste')
+  await create.submit()
+  await home.goto()
+
+  const dialog = await home.openDeleteDialog('Session contraste')
+  const color = await dialog
+    .getByRole('button', { name: 'Supprimer' })
+    .evaluate((el) => getComputedStyle(el).color)
+  const background = await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
+  expect(color).toBe(background)
+})

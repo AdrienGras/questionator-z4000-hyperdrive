@@ -71,7 +71,7 @@ export function ConfirmWriteDialog({
         )}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={pending}>{text('dialog_cancel', {})}</AlertDialogCancel>
-          <Button variant="destructive" disabled={pending} onClick={() => void confirm()}>
+          <Button variant="destructive-solid" disabled={pending} onClick={() => void confirm()}>
             {confirmLabel}
           </Button>
         </AlertDialogFooter>
