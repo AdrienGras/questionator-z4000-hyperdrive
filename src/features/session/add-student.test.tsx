@@ -56,6 +56,20 @@ test('champs vides ou nom blanc : les deux boutons sont désactivés, sans avert
   expect(screen.queryByRole('status')).not.toBeInTheDocument()
 })
 
+test('pas de croix, « Annuler » ferme sans écrire', async () => {
+  await mount()
+  const before = (await db.sessions.get('session-1'))?.students
+  openDialog()
+  const dialog = await screen.findByRole('dialog', { name: 'Ajouter un étudiant' })
+  fill('Martin', 'Bob')
+
+  expect(within(dialog).queryByRole('button', { name: 'Fermer' })).not.toBeInTheDocument()
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Annuler' }))
+
+  await waitFor(() => expect(addDialog()).not.toBeInTheDocument())
+  expect((await db.sessions.get('session-1'))?.students).toEqual(before)
+})
+
 test('doublon : avertit avec le nom de l’étudiant existant sans bloquer', async () => {
   await mount()
   openDialog()

@@ -365,13 +365,7 @@ export type UiMessageParams = {
   /** `step` / `max` : pas d'arrondi et échelle finale, déjà formatés. */
   adjust_invalid: { step: string; max: string }
   /** Notes déjà formatées ; `sign` : « + » ou « − », `adjustment` en valeur absolue. */
-  adjust_preview: {
-    converted: string
-    sign: string
-    adjustment: string
-    final: string
-    scale: string
-  }
+  adjust_preview_sum: { converted: string; sign: '+' | '−'; adjustment: string }
   adjust_clamped: { bound: string }
   adjust_reason: NoParams
   passage_error_generic: NoParams
@@ -383,6 +377,7 @@ export type UiMessageParams = {
   passage_skip_body: NoParams
   passage_skip_reasons: NoParams
   passage_skip_free_text: NoParams
+  passage_skip_placeholder: NoParams
   passage_skip_confirm: NoParams
   stats_open: NoParams
   export_button: NoParams
@@ -884,8 +879,7 @@ const fr: Dictionary<UiMessageParams> = {
   adjust_decrement: () => 'Retirer un pas',
   adjust_increment: () => 'Ajouter un pas',
   adjust_invalid: ({ step, max }) => `Saisissez un multiple de ${step}, entre −${max} et ${max}.`,
-  adjust_preview: ({ converted, sign, adjustment, final, scale }) =>
-    `${converted} ${sign} ${adjustment} = ${final} / ${scale}`,
+  adjust_preview_sum: ({ converted, sign, adjustment }) => `${converted} ${sign} ${adjustment} =`,
   adjust_clamped: ({ bound }) => `(bornée à ${bound})`,
   adjust_reason: () => 'Justification (facultative)',
   passage_error_generic: () => 'L’action n’a pas pu être enregistrée. Rechargez la page.',
@@ -900,6 +894,7 @@ const fr: Dictionary<UiMessageParams> = {
     'La question sera exclue pour cet étudiant et ne comptera pas dans son passage. Un skip ne s’annule pas.',
   passage_skip_reasons: () => 'Motif (facultatif)',
   passage_skip_free_text: () => 'Autre motif',
+  passage_skip_placeholder: () => 'Précisez',
   passage_skip_confirm: () => 'Passer',
   stats_open: () => 'Statistiques',
   export_button: () => 'Exporter en Excel',
@@ -1354,8 +1349,7 @@ const en: Dictionary<UiMessageParams> = {
   adjust_decrement: () => 'Remove one step',
   adjust_increment: () => 'Add one step',
   adjust_invalid: ({ step, max }) => `Enter a multiple of ${step}, between −${max} and ${max}.`,
-  adjust_preview: ({ converted, sign, adjustment, final, scale }) =>
-    `${converted} ${sign} ${adjustment} = ${final} / ${scale}`,
+  adjust_preview_sum: ({ converted, sign, adjustment }) => `${converted} ${sign} ${adjustment} =`,
   adjust_clamped: ({ bound }) => `(capped at ${bound})`,
   adjust_reason: () => 'Justification (optional)',
   passage_error_generic: () => 'The action could not be saved. Reload the page.',
@@ -1370,6 +1364,7 @@ const en: Dictionary<UiMessageParams> = {
     'The question will be excluded for this student and will not count towards their exam. A skip cannot be undone.',
   passage_skip_reasons: () => 'Reason (optional)',
   passage_skip_free_text: () => 'Other reason',
+  passage_skip_placeholder: () => 'Specify',
   passage_skip_confirm: () => 'Skip',
   stats_open: () => 'Statistics',
   export_button: () => 'Export to Excel',

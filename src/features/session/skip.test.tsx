@@ -89,6 +89,7 @@ test('motif prédéfini et champ libre s’excluent mutuellement', async () => {
   const dialog = await screen.findByRole('dialog')
   const seen = within(dialog).getByRole('button', { name: 'Déjà vue' })
   const other = within(dialog).getByLabelText('Autre motif')
+  expect(other).toHaveAttribute('placeholder', 'Précisez')
 
   fireEvent.click(seen)
   expect(seen).toHaveAttribute('aria-pressed', 'true')

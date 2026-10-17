@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import type { WriteOutcome } from '@/features/session/hooks/use-passage-actions'
 import type { Ui } from '@/lib/i18n/use-ui'
+import { WriteErrorAlert } from './write-error-alert'
 
 type ConfirmWriteDialogProps = Readonly<{
   ui: Ui
@@ -64,13 +65,11 @@ export function ConfirmWriteDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
-        {failed && (
-          <p role="alert" className="text-sm text-destructive">
-            {text('write_error', {})}
-          </p>
-        )}
+        {failed && <WriteErrorAlert ui={ui} />}
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={pending}>{text('dialog_cancel', {})}</AlertDialogCancel>
+          <AlertDialogCancel variant="ghost" disabled={pending}>
+            {text('dialog_cancel', {})}
+          </AlertDialogCancel>
           <Button variant="destructive-solid" disabled={pending} onClick={() => void confirm()}>
             {confirmLabel}
           </Button>
