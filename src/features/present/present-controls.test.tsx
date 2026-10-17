@@ -51,6 +51,14 @@ test('« Plein écran » demande le plein écran du document', () => {
   expect(request).toHaveBeenCalledTimes(1)
 })
 
+test('« Plein écran » : info-bulle native sur l’effacement des commandes', () => {
+  mount()
+  expect(screen.getByRole('button', { name: 'Plein écran' })).toHaveAttribute(
+    'title',
+    'Plein écran (les commandes s’effacent après 3 s)',
+  )
+})
+
 test('bouton absent si l’API plein écran manque', () => {
   Reflect.deleteProperty(document.documentElement, 'requestFullscreen')
   mount()

@@ -13,7 +13,7 @@ import { useUi, type Ui } from '@/lib/i18n/use-ui'
 /** Note finale une fois révélée ; sinon rien (la pastille de l'en-tête dit « Passage terminé »). */
 function Final({ ui, view }: Readonly<{ ui: Ui; view: ProjectedStudentView }>) {
   if (view.final === undefined) return null
-  return <FinalCard ui={ui} final={view.final} detail={view.detail} />
+  return <FinalCard ui={ui} final={view.final} detail={view.detail} categories={view.categories} />
 }
 
 /** En-tête « catégorie · points » de la question projetée, dans la couleur de la catégorie. */

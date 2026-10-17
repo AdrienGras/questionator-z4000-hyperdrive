@@ -119,13 +119,13 @@ test('terminé : pas de note tant que non révélé, puis note, puis correction 
   renderAt('/present/session-1')
 
   expect(await screen.findByText('Passage terminé')).toBeInTheDocument()
-  expect(screen.queryByText(/Note :/)).not.toBeInTheDocument()
+  expect(screen.queryByText(/Note : .* sur 20/)).not.toBeInTheDocument()
 
   await updateSession('session-1', (s) => ({
     ...s,
     students: s.students.map((st) => ({ ...st, finalRevealedAt: '2026-09-25T10:00:00.000Z' })),
   }))
-  const revealed = await screen.findByText(/Note : .* \/ 20/)
+  const revealed = await screen.findByText(/Note : .* sur 20/)
   const before = revealed.textContent
 
   await updateSession('session-1', (s) =>
@@ -135,7 +135,7 @@ test('terminé : pas de note tant que non révélé, puis note, puis correction 
       { now: () => new Date() },
     ),
   )
-  await waitFor(() => expect(screen.getByText(/Note : .* \/ 20/).textContent).not.toBe(before))
+  await waitFor(() => expect(screen.getByText(/Note : .* sur 20/).textContent).not.toBe(before))
 })
 
 test('score cumulé affiché avec le format de la locale', async () => {

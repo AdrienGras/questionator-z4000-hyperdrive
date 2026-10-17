@@ -289,7 +289,7 @@ test('aperçu : note finale révélée', async () => {
   const done = makeStudent([2, 1], { finalRevealedAt: '2026-09-25T10:00:00.000Z' })
   await mountSession([done], { projection: { mode: 'student', studentId: 'student-1' } })
 
-  await waitFor(() => expect(canvas().textContent).toMatch(/Note : .* \/ 20/))
+  await waitFor(() => expect(canvas().textContent).toMatch(/Note : .* sur 20/))
 })
 
 // L'attente sur un étudiant projeté inconnu est couverte par `domain/presentation/projected-view.test.ts`.

@@ -92,8 +92,11 @@ export type UiMessageParams = {
   present_categories: NoParams
   present_prompt_label: NoParams
   present_finished: NoParams
-  present_final: { value: string; scale: string }
-  present_raw: { value: string }
+  present_note_label: NoParams
+  present_gauge_label: { value: string; scale: string }
+  present_raw_label: NoParams
+  present_detail_heading: NoParams
+  present_fullscreen_hint: NoParams
   present_category_exhausted: NoParams
   present_category_unavailable: NoParams
   present_skipped: NoParams
@@ -591,8 +594,11 @@ const fr: Dictionary<UiMessageParams> = {
   present_categories: () => 'Catégories',
   present_prompt_label: () => 'Question en cours',
   present_finished: () => 'Passage terminé',
-  present_final: ({ value, scale }) => `Note : ${value} / ${scale}`,
-  present_raw: ({ value }) => `Score brut : ${value}`,
+  present_note_label: () => 'Note',
+  present_gauge_label: ({ value, scale }) => `Note : ${value} sur ${scale}`,
+  present_raw_label: () => 'Score brut',
+  present_detail_heading: () => 'Détail par question',
+  present_fullscreen_hint: () => 'Plein écran (les commandes s’effacent après 3 s)',
   present_category_exhausted: () => 'Épuisée',
   present_category_unavailable: () => 'Indisponible',
   present_skipped: () => 'Passée',
@@ -1072,8 +1078,11 @@ const en: Dictionary<UiMessageParams> = {
   present_categories: () => 'Categories',
   present_prompt_label: () => 'Current question',
   present_finished: () => 'Exam complete',
-  present_final: ({ value, scale }) => `Grade: ${value} / ${scale}`,
-  present_raw: ({ value }) => `Raw score: ${value}`,
+  present_note_label: () => 'Grade',
+  present_gauge_label: ({ value, scale }) => `Grade: ${value} out of ${scale}`,
+  present_raw_label: () => 'Raw score',
+  present_detail_heading: () => 'Question by question',
+  present_fullscreen_hint: () => 'Full screen (controls fade after 3 s)',
   present_category_exhausted: () => 'Exhausted',
   present_category_unavailable: () => 'Unavailable',
   present_skipped: () => 'Skipped',

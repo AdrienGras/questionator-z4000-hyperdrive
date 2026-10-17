@@ -49,9 +49,10 @@ function row(label: string): HTMLElement {
 test('jauge : note finale formatée selon l’arrondi, phrase pour les lecteurs d’écran', async () => {
   await openFinal(done({ adjustment: { value: 1, reason: 'Bonne tenue' } }))
 
-  expect(screen.getByText('Note finale : 14,5 sur 20')).toHaveClass('sr-only')
-  expect(screen.getByText('14,5')).toBeInTheDocument()
-  expect(screen.getByText('sur 20')).toBeInTheDocument()
+  const phrase = screen.getByText('Note finale : 14,5 sur 20')
+  expect(phrase).toHaveClass('sr-only')
+  // La jauge de l'examinateur (l'aperçu de la projection en montre une autre).
+  expect(phrase.parentElement).toHaveTextContent(/14,5sur 20$/)
 })
 
 test('liste : brute sur le maximum, plafonnée, convertie, ajustement et justification', async () => {
