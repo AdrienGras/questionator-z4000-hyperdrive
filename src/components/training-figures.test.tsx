@@ -63,3 +63,14 @@ test('taux hors bornes : arc borné au cercle', () => {
   )
   expect(arcLength(container)).toBeLessThanOrEqual(CIRCUMFERENCE)
 })
+
+test('taux nul : anneau sans arc (pas de point au bout arrondi)', () => {
+  const { container } = render(
+    <TrainingFigures
+      ui={makeUi()}
+      summary={{ rate: 0, coverage: { covered: 1, total: 4 } }}
+      showCoverage
+    />,
+  )
+  expect(arcLength(container)).toBeUndefined()
+})

@@ -147,6 +147,8 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [x] Paragraphe d'état vide répété quatre fois dans `features/stats/components/` : extraire un `StatsEmpty`. → #87 *Fait en #87 (PR 4) : extraite (cinq occurrences, quatre fichiers).*
 - [ ] `examples/training.example.json` sans `color` ni `icon` de catégorie : les anneaux, barres et libellés des stats d'entraînement (F44.8) restent neutres sur l'exemple, alors que l'artboard `entrainement-stats` les teinte. Ajouter les couleurs de la config d'examen (et le dire dans le prompt de génération ?).
 - [ ] e2e de mise en page des stats (`e2e/stats-layout.spec.ts`) : couvrir une config à 13 catégories (anneaux en `grid-cols-2`, détail), écartée en F44.8 faute d'une config d'exemple cohérente à 13 catégories.
+- [ ] Relecture finale F44.8, mineurs : nom de catégorie lu deux fois sous un anneau (phrase `sr-only` puis `CategoryLabel`, à cacher) ; « Passés 7 » puis « 7 passés » dans la synthèse ; colonnes `srOnly` « Part » et « Barre » aux cellules vides pour un lecteur d'écran ; « 1 / 1 questions notées » (`training_coverage_label` figé au pluriel) ; effectif à deux chiffres qui chevauche les colonnes voisines de l'histogramme à 390 px ; commentaire de `routes/session.$sessionId_.stats.tsx` et nom d'étape CI qui citent encore Recharts ; couleur de catégorie en texte (D26 assoupli : une couleur claire de config peut passer sous 3:1) ; `RateRing` et `SuccessRing` à factoriser.
+- [ ] `e2e/screenshots/guide.spec.ts` (`pnpm docs:screenshots`, hors CI) rouge depuis F44.5 : attend le bouton « Actions pour « Oral de démonstration » » sur l'accueil devenu tableau de bord. À reprendre avec la passe guide de fin de phase 3.
 
 ## Entraînement
 

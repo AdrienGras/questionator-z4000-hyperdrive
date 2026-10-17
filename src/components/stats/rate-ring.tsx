@@ -32,7 +32,8 @@ const SIZES = {
 export function RateRing({ rate, value, label, caption, color, size }: RateRingProps) {
   const style: (CSSProperties & Record<'--category-color', string>) | undefined =
     color === undefined ? undefined : { '--category-color': color }
-  const arc = rate === null ? null : Math.min(Math.max(rate, 0), 1) * CIRCUMFERENCE
+  // Un arc nul n'est pas dessiné : son bout arrondi laisserait un point de couleur.
+  const arc = rate === null || rate <= 0 ? null : Math.min(rate, 1) * CIRCUMFERENCE
   return (
     <span style={style} className={cn('relative inline-flex shrink-0', SIZES[size].box)}>
       <span className="sr-only">{label}</span>

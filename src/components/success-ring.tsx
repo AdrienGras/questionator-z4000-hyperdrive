@@ -12,7 +12,8 @@ type SuccessRingProps = Readonly<{ rate: number | null; label: string }>
  */
 export function SuccessRing({ rate, label }: SuccessRingProps) {
   const gradient = useId()
-  const arc = rate === null ? null : Math.min(Math.max(rate, 0), 1) * CIRCUMFERENCE
+  // Un arc nul n'est pas dessiné : son bout arrondi laisserait un point de couleur.
+  const arc = rate === null || rate <= 0 ? null : Math.min(rate, 1) * CIRCUMFERENCE
   return (
     <span className="shrink-0">
       <span className="sr-only">{label}</span>

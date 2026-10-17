@@ -4,7 +4,9 @@ import type { NormalizedConfig } from '@/domain/config/normalize'
 import { findCategory } from '@/domain/config/lookup'
 import { cn } from '@/lib/utils'
 
-const LABEL_CLASS = 'inline-flex items-center gap-1.5 text-small font-semibold whitespace-nowrap'
+// Coupable n'importe où : un libellé de config n'a pas de longueur maximale (anneaux, « À revoir »).
+const LABEL_CLASS =
+  'inline-flex max-w-full items-center gap-1.5 text-small font-semibold wrap-anywhere'
 
 /**
  * Libellé de catégorie teinté par sa couleur, avec son icône (artboards `statistiques`,
@@ -31,7 +33,7 @@ export function CategoryLabel({
       )}
     >
       {icon !== undefined && <CategoryIcon name={icon} className="size-4 shrink-0" />}
-      {category.label}
+      <span className="min-w-0">{category.label}</span>
     </span>
   )
 }

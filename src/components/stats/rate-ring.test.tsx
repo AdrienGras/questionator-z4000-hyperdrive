@@ -46,7 +46,8 @@ test('taux hors de [0 ; 1] : arc borné, texte inchangé', () => {
   const { container: under } = render(
     <RateRing rate={-0.2} value="−20 %" label="x" caption="réussite" size="lg" />,
   )
-  expect(arcLength(under)).toBe(0)
+  // Un trait de longueur nulle à bout arrondi dessinerait un point : pas d'arc du tout.
+  expect(arcLength(under)).toBeUndefined()
   expect(screen.getByText('−20 %')).toBeInTheDocument()
   const { container: over } = render(
     <RateRing rate={1.3} value="130 %" label="y" caption="réussite" size="lg" />,
@@ -60,4 +61,11 @@ test('deux tailles : anneau et valeur à l’échelle', () => {
   )
   expect(container.querySelector(':scope > span')).toHaveClass('size-24')
   expect(screen.getByText('100 %')).toHaveClass('text-xl')
+})
+
+test('taux nul : piste seule, aucun point d’arc', () => {
+  const { container } = render(
+    <RateRing rate={0} value="0 %" label="z" caption="réussite" size="lg" />,
+  )
+  expect(container.querySelectorAll('circle')).toHaveLength(1)
 })

@@ -9,18 +9,29 @@ import { HomePage } from './pages/home-page.ts'
 /** Titre de question sans point de coupure (ni espace ni tiret). */
 const LONG_TITLE = 'Q'.repeat(60)
 
-/** Config d'exemple dont chaque question porte un titre insécable de 60 caractères. */
+/** Libellé de catégorie sans point de coupure (la catégorie « Cauchemar », jamais tirée ici). */
+const LONG_LABEL = 'Catégorie_au_libellé_particulièrement_long_pour_le_test'
+
+/**
+ * Config d'exemple dont chaque question porte un titre insécable de 60 caractères, et dont la
+ * dernière catégorie porte un libellé insécable.
+ */
 function writeLongTitlesConfig(path: string): void {
   const config = z
     .looseObject({
       categories: z.array(
-        z.looseObject({ questions: z.array(z.looseObject({ title: z.string().optional() })) }),
+        z.looseObject({
+          label: z.string(),
+          questions: z.array(z.looseObject({ title: z.string().optional() })),
+        }),
       ),
     })
     .parse(JSON.parse(readFileSync(examplePath('config.example.json'), 'utf8')))
   for (const category of config.categories) {
     for (const question of category.questions) question.title = LONG_TITLE
   }
+  const last = config.categories.at(-1)
+  if (last !== undefined) last.label = LONG_LABEL
   writeFileSync(path, JSON.stringify(config))
 }
 
