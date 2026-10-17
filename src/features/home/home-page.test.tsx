@@ -186,6 +186,41 @@ describe('accueil', () => {
     ).toBeInTheDocument()
   })
 
+  test('aucune session ni aucun entraînement : premier lancement, ni Reprendre ni Espaces', async () => {
+    renderAt('/')
+    expect(await screen.findByRole('heading', { level: 1, name: 'Bienvenue' })).toBeInTheDocument()
+    const intro = screen.getByRole('region', { name: 'Votre premier oral en trois étapes' })
+    expect(within(intro).getAllByRole('listitem')).toHaveLength(3)
+    expect(screen.queryByRole('region', { name: 'Reprendre' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Espaces' })).not.toBeInTheDocument()
+  })
+
+  test('une session endommagée seule : tableau de bord, pas de premier lancement', async () => {
+    await db.table('sessions').put({ id: 'abime', name: 'Oral abîmé' })
+    renderAt('/')
+    expect(await screen.findByRole('region', { name: 'Espaces' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { level: 1, name: 'Bienvenue' })).not.toBeInTheDocument()
+  })
+
+  test('premier lancement en best-effort : pastille présente', async () => {
+    persistence.status = 'best-effort'
+    renderAt('/')
+    await screen.findByRole('heading', { level: 1, name: 'Bienvenue' })
+    expect(screen.getByRole('button', { name: 'Stockage non garanti' })).toBeInTheDocument()
+  })
+
+  test.each([['outdated'], ['unavailable']] as const)(
+    '%s sans donnée : bandeau, jamais le premier lancement',
+    async (status) => {
+      dbState.status = status
+      renderAt('/')
+      expect(await screen.findByRole('heading', { level: 1, name: 'Accueil' })).toBeInTheDocument()
+      expect(
+        screen.queryByRole('heading', { name: 'Votre premier oral en trois étapes' }),
+      ).not.toBeInTheDocument()
+    },
+  )
+
   test('navigateur en anglais : interface en anglais', async () => {
     Object.defineProperty(window.navigator, 'languages', { value: ['en-US'], configurable: true })
     try {
