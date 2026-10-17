@@ -121,3 +121,20 @@ test('rangée : catégorie courante marquée, autres atténuées', () => {
   expect(tile('Catégorie a')).toHaveClass('opacity-45')
   expect(screen.queryByRole('heading')).not.toBeInTheDocument()
 })
+
+test('grille : un libellé sans espace coupe au lieu de déborder', () => {
+  render(<CategoryTiles ui={makeUi()} variant="grid" categories={[category('a')]} />)
+  expect(screen.getByText('Catégorie a')).toHaveClass('wrap-anywhere')
+})
+
+test('grille : tuiles resserrées dès quatre par ligne (D74, 7 catégories et plus)', () => {
+  const many = Array.from({ length: 7 }, (_, i) => category(String(i)))
+  render(<CategoryTiles ui={makeUi()} variant="grid" categories={many} />)
+  expect(tile('Catégorie 0')).toHaveAttribute('data-density', 'compact')
+})
+
+test('grille : tuiles pleines jusqu’à trois par ligne', () => {
+  const six = Array.from({ length: 6 }, (_, i) => category(String(i)))
+  render(<CategoryTiles ui={makeUi()} variant="grid" categories={six} />)
+  expect(tile('Catégorie 0')).toHaveAttribute('data-density', 'full')
+})

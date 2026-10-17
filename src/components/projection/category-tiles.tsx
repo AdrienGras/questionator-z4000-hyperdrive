@@ -1,6 +1,7 @@
 import { useId, type CSSProperties } from 'react'
 import { CategoryBadge } from '@/components/category-badge'
 import { CategoryLayout } from '@/components/category-layout'
+import { categoryRows } from '@/domain/presentation/category-rows'
 import type { ProjectedStudentView } from '@/domain/presentation/projected-view'
 import { formatRawScore } from '@/domain/scoring/format'
 import { toMilli } from '@/domain/scoring/milli'
@@ -43,8 +44,15 @@ const LAYOUT = {
   grid: {
     tile: 'min-h-55 flex-col items-start gap-4 rounded-xl p-7',
     badge: 'projection-lg',
-    label: 'text-4xl font-extrabold tracking-[-0.02em]',
+    label: 'min-w-0 max-w-full text-4xl font-extrabold tracking-[-0.02em] wrap-anywhere',
     points: 'mt-auto text-[1.625rem] leading-[1.875rem] font-bold',
+  },
+  /** Quatre tuiles par ligne ou plus (7 catégories et plus, D74) : trois lignes tiennent à 800 px. */
+  compact: {
+    tile: 'min-h-32 flex-col items-start gap-2 rounded-xl p-4',
+    badge: 'projection-sm',
+    label: 'min-w-0 max-w-full text-[1.375rem] leading-7 font-extrabold wrap-anywhere',
+    points: 'mt-auto text-lg font-bold',
   },
   row: {
     tile: 'h-18 items-center gap-3 rounded-lg px-4',
@@ -83,11 +91,12 @@ export function CategoryTiles({
   variant?: 'grid' | 'row'
 }>) {
   const titleId = useId()
-  const layout = LAYOUT[variant]
+  const dense = variant === 'grid' && (categoryRows(categories.length)[0] ?? 0) >= 4
+  const layout = LAYOUT[dense ? 'compact' : variant]
   const showTitle = variant === 'grid' && !finished
   const tiles = (
     <CategoryLayout
-      className={variant === 'grid' ? 'gap-6' : 'gap-4'}
+      className={variant === 'grid' && !dense ? 'gap-6' : 'gap-4'}
       aria-labelledby={showTitle ? titleId : undefined}
       aria-label={variant === 'row' ? ui.text('present_categories', {}) : undefined}
       items={categories}
@@ -101,6 +110,7 @@ export function CategoryTiles({
             style={accent}
             data-colored={category.color !== undefined}
             data-state={state}
+            data-density={variant === 'grid' ? (dense ? 'compact' : 'full') : undefined}
             aria-current={state === 'current' ? 'true' : undefined}
             className={cn(
               'flex h-full',
