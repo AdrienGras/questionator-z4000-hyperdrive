@@ -26,7 +26,7 @@ export function StudentsPreview({ ui, result }: StudentsPreviewProps) {
       </h3>
       {result.students.length > 0 && (
         <details>
-          <summary className="cursor-pointer text-sm text-primary">
+          <summary className="cursor-pointer text-sm text-link">
             {text('preview_students_list', {})}
           </summary>
           <ol className="mt-2 list-decimal pl-6 text-sm">

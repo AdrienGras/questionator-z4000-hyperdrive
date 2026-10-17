@@ -20,7 +20,7 @@ test('thème sombre du design system par défaut', async ({ page }) => {
   expect(style).toEqual({ scheme: 'dark', background: 'oklch(0.16 0.02 292)', radius: '1.125rem' })
 })
 
-/** Crée une session depuis `configPath` et renvoie le fond calculé du bouton principal « Ajouter ». */
+/** Crée une session depuis `configPath` ; renvoie le fond du bouton principal « Ajouter » et de la page. */
 async function primaryButtonBackground(page: Page, configPath: string, name: string) {
   const home = new HomePage(page)
   await home.goto()
@@ -34,15 +34,20 @@ async function primaryButtonBackground(page: Page, configPath: string, name: str
   const submit = page
     .getByRole('dialog', { name: 'Ajouter un étudiant' })
     .getByRole('button', { name: 'Ajouter', exact: true })
-  return submit.evaluate((el) => getComputedStyle(el).backgroundImage)
+  return submit.evaluate((el) => ({
+    image: getComputedStyle(el).backgroundImage,
+    to: getComputedStyle(el).getPropertyValue('--tw-gradient-to').trim(),
+    body: getComputedStyle(document.body).backgroundColor,
+  }))
 }
 
-test('le bouton principal porte le dégradé d’action, qui suit theme.dark.primary', async ({
+test('le bouton principal porte le dégradé d’action, dérivé de theme.dark.primary seul', async ({
   page,
 }, testInfo) => {
-  const themedPath = testInfo.outputPath('themed.config.json')
+  // Config qui ne surcharge que `primary` : le reste vient du design system.
+  const themedPath = testInfo.outputPath('primary-only.config.json')
   const config = JSON.parse(readFileSync(examplePath('config.example.json'), 'utf8'))
-  config.theme.dark.primary = 'oklch(0.7 0.15 150)'
+  config.theme = { dark: { primary: 'oklch(0.55 0.15 150)' } }
   writeFileSync(themedPath, JSON.stringify(config))
 
   const byDefault = await primaryButtonBackground(
@@ -51,9 +56,11 @@ test('le bouton principal porte le dégradé d’action, qui suit theme.dark.pri
     'Session par défaut',
   )
   const themed = await primaryButtonBackground(page, themedPath, 'Session thémée')
-  expect(byDefault).toContain('linear-gradient')
-  expect(themed).toContain('linear-gradient')
-  expect(themed).not.toBe(byDefault)
+  expect(byDefault.image).toContain('linear-gradient')
+  expect(themed.image).toContain('linear-gradient')
+  // Second arrêt (fin du dégradé) : dérivé de `primary`, il change avec lui.
+  expect(themed.to).not.toBe(byDefault.to)
+  expect(themed.body).toBe('oklch(0.16 0.02 292)')
 })
 
 test('surfaces et champs du design system', async ({ page }) => {
@@ -115,4 +122,92 @@ test('chevron dessiné sur les details, sans animation si mouvement réduit', as
 
   await page.emulateMedia({ reducedMotion: 'reduce' })
   expect((await marker()).duration).toBe('0s')
+})
+
+/** Contraste WCAG entre la couleur de texte d'un élément et le fond de `body` (via un canevas). */
+async function textContrastOnPage(page: Page, selector: string): Promise<number> {
+  return page
+    .locator(selector)
+    .first()
+    .evaluate((el) => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 1
+      canvas.height = 1
+      const context = canvas.getContext('2d', { willReadFrequently: true })
+      if (context === null) throw new Error('canevas indisponible')
+      const luminance = (color: string) => {
+        context.fillStyle = color
+        context.fillRect(0, 0, 1, 1)
+        const [r = 0, g = 0, b = 0] = [...context.getImageData(0, 0, 1, 1).data].map((c) => {
+          const s = c / 255
+          return s <= 0.040_45 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4
+        })
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b
+      }
+      const text = luminance(getComputedStyle(el).color)
+      const ground = luminance(getComputedStyle(document.body).backgroundColor)
+      return (Math.max(text, ground) + 0.05) / (Math.min(text, ground) + 0.05)
+    })
+}
+
+test('focus clavier visible sur un bouton', async ({ page }) => {
+  await new HomePage(page).goto()
+  const button = page.locator('[data-slot="button"]').first()
+  await button.focus()
+  await page.keyboard.press('Shift+Tab')
+  await page.keyboard.press('Tab')
+  const focused = page.locator('[data-slot="button"]:focus-visible').first()
+  await expect(focused).toHaveCount(1)
+  expect(await focused.evaluate((el) => getComputedStyle(el).outlineStyle)).not.toBe('none')
+})
+
+test('lien texte lisible : 4,5:1 au moins sur le fond', async ({ page }) => {
+  await page.goto('#/session/inconnue')
+  await expect(page.getByRole('heading', { name: 'Session introuvable' })).toBeVisible()
+  expect(await textContrastOnPage(page, 'main a.underline')).toBeGreaterThanOrEqual(4.5)
+})
+
+test('menu des actions d’une carte aux formes du design system', async ({ examiner, page }) => {
+  void examiner
+  const home = new HomePage(page)
+  await home.goto()
+  await page.getByRole('button', { name: 'Actions pour « Session e2e »' }).click()
+  await expect(page.locator('[data-slot="dropdown-menu-content"]')).toHaveCSS(
+    'border-top-left-radius',
+    '12px',
+  )
+})
+
+test('survol d’un bouton secondaire lisible avec un thème de config de l’ancien modèle', async ({
+  page,
+}) => {
+  // Fixture au thème sombre d'avant la refonte : `accent` cyan clair, `accent-foreground` sombre.
+  const home = new HomePage(page)
+  await home.goto()
+  const create = await home.createSession()
+  await create.uploadStudents(examplePath('students.example.csv'))
+  await create.uploadConfig(new URL('./fixtures/offline-php.config.json', import.meta.url).pathname)
+  await create.fillName('Session ancien thème')
+  const examiner = await create.submit()
+  await examiner.openPanel('Étudiants')
+  const button = page.getByRole('button', { name: 'Ajouter un étudiant' })
+  await button.hover()
+  const expected = await button.evaluate((el) => {
+    const probe = document.createElement('span')
+    probe.style.color = 'var(--accent-foreground)'
+    el.append(probe)
+    const resolved = getComputedStyle(probe).color
+    probe.remove()
+    return resolved
+  })
+  // `transition-all` : la couleur finale arrive après la transition.
+  await expect.poll(() => button.evaluate((el) => getComputedStyle(el).color)).toBe(expected)
+})
+
+test('champs à 16 px sur téléphone (pas de zoom iOS au focus)', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 800 })
+  const home = new HomePage(page)
+  await home.goto()
+  await home.createSession()
+  await expect(page.locator('input:visible').first()).toHaveCSS('font-size', '16px')
 })

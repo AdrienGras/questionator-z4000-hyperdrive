@@ -148,6 +148,8 @@ corepack pnpm dlx shadcn@latest add <composant> -y
 - **Deux registres de couleur** : une couleur d'action (bouton `default` en dégradé `from-primary to-action-to`, une action principale par écran) ; une palette codée qui désigne (espaces : `text-space-*` sur tuile `bg-muted` dans le menu, `bg-space-*/14` sur l'accueil ; catégories : `--category-color` de la config ; données : `chart-1` à `chart-5`).
 - **Couleurs d'espace** : jamais en grand aplat, jamais surchargeables (hors `THEME_TOKENS`).
 - **Boutons** : `default` pour l'action attendue, `outline`/`secondary` (même rendu) pour le reste, `ghost` pour Annuler et les barres d'outils, `destructive` (contour) pour déclencher une suppression, `destructive-solid` (texte `background`) seulement pour la confirmer dans un dialogue.
+- **Liens** : `text-link` (ou `TEXT_LINK_CLASS`), jamais `text-primary` sur du texte (4,1:1) ; `primary` sert aux icônes et aux aplats.
+- **Champs** : `text-base md:text-[15px]` (16 px sur téléphone, sinon Safari iOS zoome au focus).
 - **Rayons** : `rounded-sm|md|lg|xl` = 8 / 12 / 18 / 24 px, dérivés de `--radius` (18 px) ; barres et jauges en `rounded-full`.
 - **`<details>`** : aucun style à ajouter, le chevron vient des règles de base sur `summary` (flex, `gap`) ; un `summary` centré ajoute `justify-center`.
 

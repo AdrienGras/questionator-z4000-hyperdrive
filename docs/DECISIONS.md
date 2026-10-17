@@ -1635,6 +1635,8 @@ autre encodage 8 bits.
 | Config d'exemple | `theme.dark` reprend les valeurs du thème entier (décision de l'utilisateur) ; `theme.light` attend #152. | Illustrer le nouveau style, tous les tokens visibles. |
 | Rattachement des retouches transverses | Chevrons des `<details>` et « backup » → « sauvegarde » en #145 ; forme des bandeaux en #146 avec la coquille. | Retouches globales sans changement de disposition, contre découpage en titre et corps lié à la coquille. |
 | Chevron | Couleur `muted-foreground`, comme sur le canevas (et non la couleur du texte du `summary`). | Le canevas fait foi (D102). |
+| Couleur de lien | `text-link` (`--color-link` = `color-mix(in oklch, var(--primary) 72%, white)`, 6,7:1 sur le fond) pour les liens texte, la variante `link` et les liens markdown ; `primary` reste aux icônes et aplats. | `primary` en texte ne fait que 4,1:1 sur le fond (relecture finale). |
+| Focus et survol | Focus des boutons en contour plein (`outline-solid`) ; survol des boutons neutres en `accent` / `accent-foreground`. | `outline-none` du vendor annulait le contour ; une config de l'ancien modèle (accent clair) rendait le survol illisible (1,55:1). |
 
 **Pourquoi** : poser l'apparence d'un coup sans toucher au contrat de la config (THEME_TOKENS, `defaultColorMode`) et sans perdre la mécanique de mode, qui revient au dernier ticket.
 

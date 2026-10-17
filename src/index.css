@@ -57,6 +57,8 @@
     transparent
   );
   --shadow-action: 0 8px 24px -8px color-mix(in oklch, var(--primary) 60%, transparent);
+  /* Texte de lien : `primary` éclairci, lisible sur le fond et les cartes (D104). */
+  --color-link: color-mix(in oklch, var(--primary) 72%, white);
   --font-heading: var(--font-sans);
   --font-sans: 'Geist Variable', sans-serif;
 }
@@ -221,7 +223,7 @@
   --tw-prose-body: var(--foreground);
   --tw-prose-headings: var(--foreground);
   --tw-prose-lead: var(--muted-foreground);
-  --tw-prose-links: var(--primary);
+  --tw-prose-links: color-mix(in oklch, var(--primary) 72%, white);
   --tw-prose-bold: var(--foreground);
   --tw-prose-counters: var(--muted-foreground);
   --tw-prose-bullets: var(--muted-foreground);
