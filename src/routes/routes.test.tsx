@@ -94,9 +94,7 @@ function themedSession(locale?: 'fr' | 'en') {
 
 test("la route / affiche l'accueil", async () => {
   renderAt('/')
-  expect(
-    await screen.findByRole('heading', { level: 1, name: 'Accueil' }),
-  ).toBeInTheDocument()
+  expect(await screen.findByRole('heading', { level: 1, name: 'Accueil' })).toBeInTheDocument()
 })
 
 test('une route inconnue affiche la page 404 avec un lien de retour', async () => {
@@ -150,9 +148,7 @@ test('revenir à l’accueil depuis une session thémée ne laisse aucun token s
   const { router } = renderAt('/session/session-1')
   await screen.findByRole('heading', { name: 'Oral de PHP' })
   await router.navigate({ to: '/' })
-  expect(
-    await screen.findByRole('heading', { level: 1, name: 'Accueil' }),
-  ).toBeInTheDocument()
+  expect(await screen.findByRole('heading', { level: 1, name: 'Accueil' })).toBeInTheDocument()
   expect(document.documentElement.style.getPropertyValue('--primary')).toBe('')
   expect(document.documentElement).toHaveClass('dark')
   expect(document.documentElement.lang).toBe('fr')
