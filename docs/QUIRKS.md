@@ -945,3 +945,11 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : le `h1` vient de `PageShell`, rendu tout de suite ; « Reprendre » et « Espaces » attendent la lecture des deux listes (`useSessions`, `useTrainings`), qui arrive au rendu suivant.
 **Workaround** : attendre une section par `findBy`, jamais `getBy` après le seul `h1`.
 **Référence** : `src/features/home/home-page.tsx`.
+
+## Sur le tailnet en `http://`, créer une session ou un entraînement échoue : `crypto.randomUUID` absent hors contexte sécurisé (2026-10-17)
+
+**Découvert** : F44.5, validation de #147 depuis un autre appareil du tailnet.
+**Symptôme** : via `http://adrien-laptop.halfbeak-wahoo.ts.net:5173/…` (ou l'IP Tailscale), choisir les fichiers puis créer une session ne marche pas, sur Firefox comme sur Chrome ; Firefox affiche en plus un « Security Error … may not load or link to file:/// ». Sur `http://localhost:5173`, tout marche.
+**Cause** : une page en `http://` servie depuis un autre nom que `localhost` n'est pas un contexte sécurisé (`window.isSecureContext === false`) ; le navigateur n'y expose pas `crypto.randomUUID`, appelé à la création d'une session, d'un entraînement et à l'ajout d'un étudiant. Vérifié avec Chromium : `localhost` → `{ secure: true, randomUUID: 'function' }`, IP Tailscale → `{ secure: false, randomUUID: 'undefined' }`. La production (HTTPS) n'est pas concernée.
+**Workaround** : tester en `localhost`, ou servir le dev en HTTPS sur le tailnet (`tailscale serve`, certificats HTTPS activés sur le tailnet). Sur le tailnet en `http://`, ne valider que l'affichage.
+**Référence** : `src/features/create-session/hooks/use-create-form.ts`, `src/features/training-setup/hooks/use-training-setup.ts`, `src/features/session/hooks/use-passage-actions.ts` ; `docs/ENVIRONMENT.md` § Stack d'exécution.
