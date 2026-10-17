@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { beforeEach, expect, test } from 'vitest'
+import { beforeEach, expect, test, vi } from 'vitest'
 import { serializeBackup } from '@/domain/backup/serialize'
 import { readCommentDraft, writeCommentDraft } from '@/lib/comment-draft'
 import { db } from '@/lib/db/db'
@@ -64,4 +64,37 @@ test('import sans conflit : brouillons orphelins du même id effacés', async ()
 
   expect(await db.sessions.count()).toBe(1)
   expect(readCommentDraft('session-1', 'student-1')).toBeUndefined()
+})
+
+test('import réussi : onImported appelé une fois', async () => {
+  const onImported = vi.fn<() => void>()
+  const { result } = renderHook(() => useBackupImport(onImported))
+  await act(() => result.current.importFile(file(makeSession())))
+  expect(onImported).toHaveBeenCalledTimes(1)
+})
+
+test('fichier refusé ou conflit annulé : onImported jamais appelé', async () => {
+  const onImported = vi.fn<() => void>()
+  const { result } = renderHook(() => useBackupImport(onImported))
+  await act(() =>
+    result.current.importFile(new File(['pas du json'], 'x.json', { type: 'application/json' })),
+  )
+  await waitFor(() => expect(result.current.state.kind).toBe('error'))
+  act(() => result.current.dismiss())
+  await putSession(makeSession())
+  await act(() => result.current.importFile(file(makeSession({ name: 'Autre' }))))
+  await waitFor(() => expect(result.current.state.kind).toBe('conflict'))
+  act(() => result.current.dismiss())
+  expect(onImported).not.toHaveBeenCalled()
+})
+
+test('conflit puis remplacer : onImported appelé après l’écriture', async () => {
+  const onImported = vi.fn<() => void>()
+  await putSession(makeSession())
+  const { result } = renderHook(() => useBackupImport(onImported))
+  await act(() => result.current.importFile(file(makeSession({ name: 'Importée' }))))
+  await waitFor(() => expect(result.current.state.kind).toBe('conflict'))
+  await act(() => result.current.replace())
+  expect(onImported).toHaveBeenCalledTimes(1)
+  expect((await db.sessions.toArray()).map((session) => session.name)).toEqual(['Importée'])
 })

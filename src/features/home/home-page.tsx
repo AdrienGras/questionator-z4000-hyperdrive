@@ -5,7 +5,7 @@ import { useUi } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
 import { ActionCards } from '@/features/home/components/action-cards'
 import { HomeActions } from '@/features/home/components/home-actions'
-import { ImportController } from '@/features/home/components/import-controller'
+import { ImportController } from '@/components/import/import-controller'
 import { SessionList } from '@/features/home/components/session-list'
 import { TrainingList } from '@/features/home/components/training-list'
 

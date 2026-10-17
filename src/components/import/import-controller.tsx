@@ -1,3 +1,4 @@
+import { IconUpload } from '@tabler/icons-react'
 import { useState, type ReactNode } from 'react'
 import {
   AlertDialog,
@@ -24,25 +25,27 @@ import { damagedName, isDamaged, type StoredSession } from '@/lib/db/damaged-ses
 import { uniqueBy } from '@/lib/issue-list'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { formatDateTime } from '@/lib/format-date'
-import { useBackupImport, type ImportState } from '@/features/home/hooks/use-backup-import'
-import { useRetained } from '@/features/home/hooks/use-retained'
+import { useBackupImport, type ImportState } from './use-backup-import'
+import { useRetained } from './use-retained'
 
 type ImportControllerProps = Readonly<{
   ui: Ui
   disabled: boolean
+  /** Appelé après une écriture réussie (nouvelle session ou remplacement confirmé). */
+  onImported?: () => void
   children: (openPicker: () => void) => ReactNode
 }>
 
 /**
- * Import de backup sur l'accueil : input fichier caché (ouvert via `openPicker`), dépôt d'un
+ * Import d'une sauvegarde (accueil, page Sessions) : input fichier caché (ouvert via `openPicker`), dépôt d'un
  * fichier n'importe où sur la zone, dialogues d'erreur et de conflit d'`id`.
  */
-export function ImportController({ ui, disabled, children }: ImportControllerProps) {
+export function ImportController({ ui, disabled, onImported, children }: ImportControllerProps) {
   const { text } = ui
   // Élément en état (ref callback) plutôt qu'en `useRef` : `openPicker` est transmis pendant le
   // rendu, et le compilateur React interdit d'y lire une ref.
   const [input, setInput] = useState<HTMLInputElement | null>(null)
-  const { state, importing, importFile, replace, dismiss } = useBackupImport()
+  const { state, importing, importFile, replace, dismiss } = useBackupImport(onImported)
   // Un dialogue d'import ouvert ou un import en cours : un second fichier ne remplace rien (F34).
   const blocked = disabled || importing || state.kind !== 'idle'
   const { dragging, dropProps } = useFileDrop({
@@ -71,7 +74,8 @@ export function ImportController({ ui, disabled, children }: ImportControllerPro
       {children(openPicker)}
       {dragging && (
         <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4">
-          <p className="rounded-xl border-2 border-dashed border-primary px-8 py-12 text-lg font-medium">
+          <p className="flex min-h-55 w-full max-w-xl flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed border-primary bg-primary/8 p-8 text-lg font-semibold">
+            <IconUpload aria-hidden className="size-8 text-link" />
             {text('import_drop_hint', {})}
           </p>
         </div>

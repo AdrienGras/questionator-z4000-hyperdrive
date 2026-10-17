@@ -28,9 +28,9 @@ async function validateBackup(text: string): Promise<BackupParseResult> {
 
 /**
  * Machine d'états de l'import : lecture → validation → conflit d'`id` éventuel → écriture.
- * Un fichier refusé n'écrit jamais rien.
+ * Un fichier refusé n'écrit jamais rien. `onImported` suit chaque écriture réussie.
  */
-export function useBackupImport() {
+export function useBackupImport(onImported?: () => void) {
   const [state, setState] = useState<ImportState>({ kind: 'idle' })
   const [importing, setImporting] = useState(false)
   // Lu après des `await` : un ref, pas l'état capturé par la fermeture (CONVENTIONS).
@@ -79,6 +79,7 @@ export function useBackupImport() {
       // Aucune session de cet id avant l'import : un brouillon restant est orphelin.
       clearSessionCommentDrafts(result.session.id)
       setState({ kind: 'idle' })
+      onImported?.()
     } catch {
       setState({ kind: 'write-error', fileName: file.name })
     }
@@ -91,6 +92,7 @@ export function useBackupImport() {
       // Un brouillon de l'ancienne session écraserait le commentaire importé à la réouverture.
       clearSessionCommentDrafts(state.incoming.id)
       setState({ kind: 'idle' })
+      onImported?.()
     } catch {
       setState({ kind: 'write-error', fileName: state.fileName })
     }
