@@ -18,30 +18,27 @@ type PageShellProps = Readonly<{
 }> &
   Omit<ComponentProps<'main'>, 'title' | 'children'>
 
-const HALO_CLASS = 'pointer-events-none absolute -z-10 blur-sm'
+const HALO_CLASS = 'absolute blur-sm'
 const HALO_ACTION = 'bg-[radial-gradient(closest-side,var(--color-halo-action),transparent)]'
 const HALO_COOL = 'bg-[radial-gradient(closest-side,var(--color-halo-cool),transparent)]'
 
-/** Halos des artboards `accueil` (deux) et `sessions` / `trainings` (un), dérivés de `--primary`. */
+/**
+ * Halos des artboards `accueil` (deux) et `sessions` / `trainings` (un), dérivés de `--primary`.
+ * Calque coupé au cadre du `main` sur les deux axes : sans lui, le décor remonte sur la barre du
+ * haut du téléphone, peinte avant le `main` (`isolate`).
+ */
 function PageHalo({ halo }: Readonly<{ halo: 'home' | 'space' }>) {
-  if (halo === 'space')
-    return (
-      <div
-        aria-hidden="true"
-        className={cn(HALO_CLASS, HALO_ACTION, '-top-55 -right-35 h-85 w-140')}
-      />
-    )
   return (
-    <>
-      <div
-        aria-hidden="true"
-        className={cn(HALO_CLASS, HALO_ACTION, '-top-50 -right-30 h-95 w-155')}
-      />
-      <div
-        aria-hidden="true"
-        className={cn(HALO_CLASS, HALO_COOL, '-top-30 right-90 h-75 w-115')}
-      />
-    </>
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+      {halo === 'space' ? (
+        <div className={cn(HALO_CLASS, HALO_ACTION, '-top-55 -right-35 h-85 w-140')} />
+      ) : (
+        <>
+          <div className={cn(HALO_CLASS, HALO_ACTION, '-top-50 -right-30 h-95 w-155')} />
+          <div className={cn(HALO_CLASS, HALO_COOL, '-top-30 right-90 h-75 w-115')} />
+        </>
+      )}
+    </div>
   )
 }
 
@@ -67,7 +64,7 @@ export function PageShell({
       {...rest}
       className={cn(
         'mx-auto flex flex-1 w-full max-w-(--breakpoint-2xl) flex-col gap-6 px-4 py-6 md:px-10 md:py-8',
-        halo !== undefined && 'relative isolate overflow-x-clip',
+        halo !== undefined && 'relative isolate',
         className,
       )}
     >

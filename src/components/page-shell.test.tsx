@@ -100,20 +100,25 @@ test('halo space : un décor caché, sans pointeur ; aucun sans la prop', () => 
     </Harness>,
   )
   const main = screen.getByRole('main')
-  const halos = main.querySelectorAll('[aria-hidden="true"].pointer-events-none')
-  expect(halos).toHaveLength(1)
-  expect(main).toHaveClass('relative', 'isolate', 'overflow-x-clip')
+  const layers = main.querySelectorAll(':scope > [aria-hidden="true"].pointer-events-none')
+  expect(layers).toHaveLength(1)
+  expect(layers[0]?.querySelectorAll('[class*="radial-gradient"]')).toHaveLength(1)
+  expect(main).toHaveClass('relative', 'isolate')
   unmount()
   mount(<Harness title="Oral">x</Harness>)
   expect(screen.getByRole('main').querySelectorAll('.pointer-events-none')).toHaveLength(0)
-  expect(screen.getByRole('main')).not.toHaveClass('overflow-x-clip')
+  expect(screen.getByRole('main')).not.toHaveClass('isolate')
 })
 
-test('halo home : deux décors', () => {
+test('halo : décors dans un calque coupé sur les deux axes, sans déborder sur la barre du haut', () => {
   mount(
     <Harness title="Accueil" halo="home">
       x
     </Harness>,
   )
-  expect(screen.getByRole('main').querySelectorAll('[aria-hidden="true"]')).toHaveLength(2)
+  const main = screen.getByRole('main')
+  const layer = main.firstElementChild
+  // jsdom ne fait pas de mise en page : on fige les classes qui coupent le décor au cadre du `main`.
+  expect(layer).toHaveClass('absolute', 'inset-0', 'overflow-hidden', 'pointer-events-none')
+  expect(layer?.querySelectorAll('[class*="radial-gradient"]')).toHaveLength(2)
 })

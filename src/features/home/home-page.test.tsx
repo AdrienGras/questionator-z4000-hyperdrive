@@ -221,6 +221,25 @@ describe('accueil', () => {
     },
   )
 
+  test('import fini après avoir quitté l’accueil : pas de renvoi vers /sessions', async () => {
+    vi.stubGlobal('CSS', { supports: () => true })
+    await seedDashboard()
+    const { router } = renderAt('/')
+    await screen.findByRole('region', { name: 'Espaces' })
+    const backup = makeSession({ id: 'importee', name: 'Oral importé', updatedAt: at(1) })
+    fireEvent.drop(screen.getByRole('main'), {
+      dataTransfer: {
+        files: [new File([serializeBackup(backup)], 'b.json', { type: 'application/json' })],
+        types: ['Files'],
+      },
+    })
+    // L'import lit le fichier et charge son validateur de façon asynchrone : on part avant la fin.
+    await router.navigate({ to: '/trainings' })
+    await waitFor(async () => expect(await db.sessions.get('importee')).toBeDefined())
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(router.state.location.pathname).toBe('/trainings')
+  })
+
   test('navigateur en anglais : interface en anglais', async () => {
     Object.defineProperty(window.navigator, 'languages', { value: ['en-US'], configurable: true })
     try {

@@ -1,5 +1,5 @@
 import { IconPlus, IconSchool, IconUpload } from '@tabler/icons-react'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate, useRouter } from '@tanstack/react-router'
 import { DbStatusBanner } from '@/components/db-status-banner'
 import { ImportController } from '@/components/import/import-controller'
 import { PageShell } from '@/components/page-shell'
@@ -25,6 +25,7 @@ export function HomePage() {
   const sessions = useSessions()
   const trainings = useTrainings()
   const navigate = useNavigate()
+  const router = useRouter()
   const open = status === 'open'
   const loaded = sessions !== undefined && trainings !== undefined
   const recent = loaded ? recentActivity(sessions, trainings) : []
@@ -35,7 +36,10 @@ export function HomePage() {
       <ImportController
         ui={ui}
         disabled={!open}
-        onImported={() => void navigate({ to: '/sessions' })}
+        onImported={() => {
+          // Seulement si l'examinateur est resté sur l'accueil pendant l'import (comme la création).
+          if (router.state.location.pathname === '/') void navigate({ to: '/sessions' })
+        }}
       >
         {(openPicker) =>
           firstRun ? (
