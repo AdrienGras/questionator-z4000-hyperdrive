@@ -15,15 +15,15 @@ function questionCount(text: string): number {
   return parsed.categories.reduce((sum, category) => sum + category.questions.length, 0)
 }
 
-/** Couverture affichée sur la carte après une seule question notée, arrondie comme l'écran. */
-const ONE_RATED_PERCENT = Math.round(100 / questionCount(CONFIG))
+/** Couverture affichée sur la carte de l'accueil après une seule question notée. */
+const ONE_RATED = `1 / ${questionCount(CONFIG)} questions notées`
 
 test('entraînement : tirer, noter, reprendre après rechargement, passer, retrouver la couverture', async ({
   page,
 }) => {
   const home = new HomePage(page)
   await home.goto()
-  await expect(home.trainings).toBeHidden()
+  await expect(home.firstRun).toBeVisible()
 
   const setup = await home.startTraining()
   await setup.pasteConfig(CONFIG)
@@ -50,13 +50,11 @@ test('entraînement : tirer, noter, reprendre après rechargement, passer, retro
   await training.pass()
   await expect(training.question).toBeHidden()
 
-  // Accueil : l'entraînement est listé avec sa couverture (une seule question notée).
+  // Accueil : l'entraînement est dans « Reprendre » avec sa couverture (une seule question notée).
   const back = await training.backHome()
-  const card = back.trainingCard(NAME)
+  const card = back.resumeCard(NAME)
   await expect(card).toBeVisible()
-  await expect(card).toContainText(
-    new RegExp(String.raw`${ONE_RATED_PERCENT}\s%\sdes questions notées`, 'u'),
-  )
+  await expect(card).toContainText(ONE_RATED)
 
   const reopened = await back.openTraining(NAME)
   await expect(reopened.tiles).toBeVisible()

@@ -1,6 +1,7 @@
 import type { Locator } from '@playwright/test'
 import { examplePath, expect, test } from './fixtures.ts'
 import { HomePage } from './pages/home-page.ts'
+import { SessionsPage } from './pages/sessions-page.ts'
 
 // Sans espace ni tiret : aucun point de coupure, le cas le plus dur pour le titre.
 const LONG_NAME = 'Oral_de_rattrapage_du_module_architecture_logicielle_groupe_B_2026'
@@ -36,7 +37,9 @@ for (const { label, width, row } of [
     await create.submit()
     await home.goto()
 
-    const dialog = await home.openDeleteDialog(LONG_NAME)
+    const sessions = new SessionsPage(page)
+    await sessions.goto()
+    const dialog = await sessions.openDeleteDialog(LONG_NAME)
     await expect(dialog).toBeVisible()
     const { frame, exportFirst, cancel, confirm } = await boxes(dialog)
     const buttons = [exportFirst, cancel, confirm]
@@ -72,7 +75,9 @@ test('le bouton « Supprimer » de la modale : texte sombre sur destructive (con
   await create.submit()
   await home.goto()
 
-  const dialog = await home.openDeleteDialog('Session contraste')
+  const sessions = new SessionsPage(page)
+  await sessions.goto()
+  const dialog = await sessions.openDeleteDialog('Session contraste')
   const color = await dialog
     .getByRole('button', { name: 'Supprimer' })
     .evaluate((el) => getComputedStyle(el).color)

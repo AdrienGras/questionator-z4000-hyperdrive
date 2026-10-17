@@ -5,68 +5,82 @@ import { TrainingPage } from './training-page.ts'
 import { TrainingSetupPage } from './training-setup-page.ts'
 import { TrainingStatsPage } from './training-stats-page.ts'
 
-/** Page d'accueil (`#/`). */
+/** Accueil (`#/`) : premier lancement sur base vide, tableau de bord sinon (#147). */
 export class HomePage {
-  /** Section « Mes entraînements » (absente tant qu'il n'y a aucun entraînement). */
-  readonly trainings: Locator
+  /** Section « Votre premier oral en trois étapes » (base vide seulement). */
+  readonly firstRun: Locator
+  /** Section « Reprendre » : les trois éléments les plus récents. */
+  readonly resume: Locator
+  /** Section « Espaces » : une tuile par espace. */
+  readonly spaces: Locator
 
   private readonly page: Page
+  private readonly main: Locator
 
   constructor(page: Page) {
     this.page = page
-    this.trainings = page.getByRole('region', { name: 'Mes entraînements' })
-  }
-
-  /** Carte de l'entraînement `name` dans « Mes entraînements ». */
-  trainingCard(name: string): Locator {
-    return this.trainings
-      .getByRole('listitem')
-      .filter({ has: this.page.getByRole('heading', { name, exact: true }) })
-  }
-
-  /** Suit le lien « Commencer » de la carte « S’entraîner » et renvoie l'écran de mise en place. */
-  async startTraining(): Promise<TrainingSetupPage> {
-    await this.page.getByRole('link', { name: 'Commencer' }).click()
-    await this.page.getByRole('button', { name: 'C’est parti' }).waitFor()
-    return new TrainingSetupPage(this.page)
-  }
-
-  /** Suit « Reprendre » sur la carte de l'entraînement `name` et renvoie son écran. */
-  async openTraining(name: string): Promise<TrainingPage> {
-    await this.trainingCard(name).getByRole('link', { name: 'Reprendre' }).click()
-    const training = new TrainingPage(this.page)
-    await training.tiles.or(training.question).waitFor()
-    return training
-  }
-
-  /** Suit « Stats » sur la carte de l'entraînement `name` et renvoie l'écran de stats. */
-  async openTrainingStats(name: string): Promise<TrainingStatsPage> {
-    await this.trainingCard(name).getByRole('link', { name: 'Stats', exact: true }).click()
-    const stats = new TrainingStatsPage(this.page)
-    await stats.keyFigures.waitFor()
-    return stats
+    this.main = page.getByRole('main')
+    this.firstRun = page.getByRole('region', { name: 'Votre premier oral en trois étapes' })
+    this.resume = page.getByRole('region', { name: 'Reprendre' })
+    this.spaces = page.getByRole('region', { name: 'Espaces' })
   }
 
   async goto(): Promise<void> {
     await this.page.goto('#/')
   }
 
-  /** Suit le lien « Créer une session » et renvoie l'écran de création. */
+  /** Carte de l'entraînement ou de la session `name` dans « Reprendre ». */
+  resumeCard(name: string): Locator {
+    return this.resume
+      .getByRole('article')
+      .filter({ has: this.page.getByRole('heading', { name, exact: true }) })
+  }
+
+  /** Tuile de l'espace dont le nom contient `name` (« Sessions », « Entraînements »…). */
+  spaceTile(name: string): Locator {
+    return this.spaces.getByRole('link', { name: new RegExp(name) })
+  }
+
+  /** Suit le premier lien « Créer une session » de la page et renvoie l'écran de création. */
   async createSession(): Promise<CreateSessionPage> {
-    await this.page.getByRole('link', { name: 'Créer une session' }).first().click()
+    await this.main.getByRole('link', { name: 'Créer une session' }).first().click()
     return new CreateSessionPage(this.page)
   }
 
-  /** Suit le lien « Ouvrir l'éditeur » de la carte « Éditer une config ». */
+  /** Suit « S’entraîner » (tableau de bord) ou « S’entraîner seul » (premier lancement). */
+  async startTraining(): Promise<TrainingSetupPage> {
+    await this.main
+      .getByRole('link', { name: /^S’entraîner/ })
+      .first()
+      .click()
+    await this.page.getByRole('button', { name: 'C’est parti' }).waitFor()
+    return new TrainingSetupPage(this.page)
+  }
+
+  /** Suit la tuile « Éditeur de config » ou le lien « Écrire une config dans l’éditeur ». */
   async openEditor(): Promise<ConfigEditorPage> {
-    await this.page.getByRole('link', { name: "Ouvrir l'éditeur" }).click()
+    await this.main
+      .getByRole('link', { name: /Éditeur de config|Écrire une config dans l’éditeur/ })
+      .first()
+      .click()
     return new ConfigEditorPage(this.page)
   }
 
-  /** Ouvre « Supprimer » dans le menu de la carte de la session et renvoie la modale de confirmation. */
-  async openDeleteDialog(sessionName: string): Promise<Locator> {
-    await this.page.getByRole('button', { name: `Actions pour « ${sessionName} »` }).click()
-    await this.page.getByRole('menuitem', { name: 'Supprimer' }).click()
-    return this.page.getByRole('alertdialog')
+  /** Suit « Reprendre » sur la carte de l'entraînement `name` dans « Reprendre ». */
+  async openTraining(name: string): Promise<TrainingPage> {
+    await this.resumeCard(name)
+      .getByRole('link', { name: /^Reprendre/ })
+      .click()
+    const training = new TrainingPage(this.page)
+    await training.tiles.or(training.question).waitFor()
+    return training
+  }
+
+  /** Suit « Stats » sur la carte de l'entraînement `name` dans « Reprendre ». */
+  async openTrainingStats(name: string): Promise<TrainingStatsPage> {
+    await this.resumeCard(name).getByRole('link', { name: 'Stats', exact: true }).click()
+    const stats = new TrainingStatsPage(this.page)
+    await stats.keyFigures.waitFor()
+    return stats
   }
 }

@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import type { Page } from '@playwright/test'
 import { examplePath, expect, test } from './fixtures.ts'
 import { HomePage } from './pages/home-page.ts'
+import { SessionsPage } from './pages/sessions-page.ts'
 
 // Rendu du design system (F44.3, D102) : ce que jsdom ne calcule pas (tokens, cascade, Tailwind).
 
@@ -65,7 +66,8 @@ test('le bouton principal porte le dégradé d’action, dérivé de theme.dark.
 
 test('surfaces et champs du design system', async ({ page }) => {
   const home = new HomePage(page)
-  await home.goto()
+  // Carte de la liste vide de la page Sessions (l'accueil vide montre le premier lancement).
+  await new SessionsPage(page).goto()
   const card = await page
     .locator('[data-slot="card"]')
     .first()
@@ -93,7 +95,9 @@ test('surfaces et champs du design system', async ({ page }) => {
   await create.fillName('Session surfaces')
   await create.submit()
   await home.goto()
-  const dialog = await home.openDeleteDialog('Session surfaces')
+  const sessions = new SessionsPage(page)
+  await sessions.goto()
+  const dialog = await sessions.openDeleteDialog('Session surfaces')
   await expect(dialog).toHaveCSS('border-top-left-radius', '18px')
 })
 
@@ -171,8 +175,7 @@ test('lien texte lisible : 4,5:1 au moins sur le fond', async ({ page }) => {
 
 test('menu des actions d’une carte aux formes du design system', async ({ examiner, page }) => {
   void examiner
-  const home = new HomePage(page)
-  await home.goto()
+  await new SessionsPage(page).goto()
   await page.getByRole('button', { name: 'Actions pour « Session e2e »' }).click()
   await expect(page.locator('[data-slot="dropdown-menu-content"]')).toHaveCSS(
     'border-top-left-radius',
