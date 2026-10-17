@@ -9,7 +9,12 @@ import type { WriteOutcome } from './hooks/use-passage-actions'
 import { db } from '@/lib/db/db'
 import { makeUi } from '@/testing/make-ui'
 import { makeSession } from '@/testing/session-fixtures'
-import { expectPanelClosed, openSidePanel, panelButton } from '@/testing/side-panel-assertions'
+import {
+  expectPanelClosed,
+  openSidePanel,
+  panelButton,
+  sidePanel,
+} from '@/testing/side-panel-assertions'
 import { makeListStudent } from '@/testing/student-fixtures'
 import { config, mountStudentsTab as mount } from '@/testing/students-tab-harness'
 import { storedSession as stored } from '@/testing/stored-session'
@@ -42,6 +47,22 @@ beforeEach(async () => {
 
 afterEach(() => {
   vi.restoreAllMocks()
+})
+
+test('résumé « 3 étudiants · 1 terminé · 1 absent » et « Ajouter »', async () => {
+  const done = makeListStudent('s-b', 'Bec', 2, [2, 1])
+  await mount([student('s-a', 'Aba', 1), done, student('s-c', 'Cha', 3, { absent: true })])
+
+  expect(within(sidePanel()).getByText('3 étudiants · 1 terminé · 1 absent')).toBeInTheDocument()
+  const add = within(sidePanel()).getByRole('button', { name: 'Ajouter un étudiant' })
+  expect(add).toHaveTextContent('Ajouter')
+})
+
+test('ligne : statut en pastille colorée', async () => {
+  await mount([student('s-a', 'Aba', 1), makeListStudent('s-b', 'Bec', 2, [2, 1])])
+
+  expect(within(rowOf('Aba')).getByText('à passer')).toHaveClass('bg-muted')
+  expect(within(rowOf('Bec')).getByText('terminé')).toHaveClass('text-space-training')
 })
 
 test('la liste suit `order`, pas l’ordre du tableau', async () => {
@@ -90,7 +111,7 @@ test('cliquer un autre étudiant l’active et remet la projection en attente (D
   expect((await stored()).projection).toEqual({ mode: 'waiting' })
   await expectPanelClosed()
   // Rouvert sur « Étudiant » (D91) : retour à la liste.
-  await openSidePanel('Étudiants')
+  await openSidePanel('Liste')
   expect(rowOf('Bec')).toHaveAttribute('aria-current', 'true')
 
   fireEvent.click(rowOf('Aba'))
@@ -157,7 +178,7 @@ test('aller-retour A → B → A avec une question en cours : rien n’est perdu
   await waitFor(() =>
     expect(screen.queryByRole('heading', { level: 2, name: 'Titre a-1' })).not.toBeInTheDocument(),
   )
-  await openSidePanel('Étudiants')
+  await openSidePanel('Liste')
   fireEvent.click(rowOf('Aba'))
 
   expect(await screen.findByRole('heading', { level: 2, name: 'Titre a-1' })).toBeInTheDocument()
@@ -226,7 +247,7 @@ describe('absence depuis la liste (F38)', () => {
     await waitFor(async () => expect((await stored()).students[1]?.absent).toBe(true))
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
     expect((await stored()).activeStudentId).toBe('s-a')
-    expect(screen.getByRole('dialog', { name: 'Panneau latéral' })).toBeInTheDocument()
+    expect(sidePanel()).toBeInTheDocument()
 
     fireEvent.click(await waitFor(() => absentButtonOf('Bec', 'présent')))
 
@@ -247,7 +268,7 @@ describe('absence depuis la liste (F38)', () => {
     expect(bec?.absent).toBe(true)
     expect(bec?.attempts).toEqual([])
     expect((await stored()).activeStudentId).toBe('s-a')
-    expect(screen.getByRole('dialog', { name: 'Panneau latéral' })).toBeInTheDocument()
+    expect(sidePanel()).toBeInTheDocument()
   })
 
   test('cliquer la ligne sélectionne sans toucher à l’absence', async () => {

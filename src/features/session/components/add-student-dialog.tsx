@@ -83,9 +83,11 @@ export function AddStudentDialog({ ui, session, disabled, onAdd }: AddStudentDia
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger render={<Button variant="outline" />}>
-        <IconUserPlus />
-        {text('students_add', {})}
+      <DialogTrigger
+        render={<Button variant="secondary" size="sm" aria-label={text('students_add', {})} />}
+      >
+        <IconUserPlus aria-hidden />
+        {text('students_add_short', {})}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

@@ -329,6 +329,8 @@ export type UiMessageParams = {
   projection_preview_label: NoParams
   students_row_scores: { raw: string; final: string }
   students_add: NoParams
+  students_add_short: NoParams
+  students_summary: { total: number; done: number; absent: number }
   students_add_title: NoParams
   students_add_last_name: NoParams
   students_add_first_name: NoParams
@@ -824,12 +826,12 @@ const fr: Dictionary<UiMessageParams> = {
   attempt_score_label: ({ rank }) => `Note de la question ${rank}`,
   attempt_out_of: ({ max }) => `/ ${max}`,
   score_not_computed: () => '—',
-  side_panel_label: () => 'Panneau latéral',
+  side_panel_label: () => 'Panneau',
   side_panel_open: () => 'Panneau',
   side_panel_close: () => 'Fermer le panneau',
   side_panel_show: () => 'Afficher le panneau',
-  side_panel_tab_student: () => 'Étudiant',
-  side_panel_tab_students: () => 'Étudiants',
+  side_panel_tab_student: () => 'Cet étudiant',
+  side_panel_tab_students: () => 'Liste',
   students_list_label: () => 'Étudiants de la session',
   students_projected: () => 'Projeté',
   projection_open: () => 'Ouvrir la vue projetée',
@@ -844,6 +846,9 @@ const fr: Dictionary<UiMessageParams> = {
     'Autorisez les fenêtres pop-up pour ce site pour ouvrir la vue projetée.',
   students_row_scores: ({ raw, final }) => `${raw} · ${final}`,
   students_add: () => 'Ajouter un étudiant',
+  students_add_short: () => 'Ajouter',
+  students_summary: ({ total, done, absent }) =>
+    `${total} ${plural(total, 'étudiant', 'étudiants')} · ${done} ${plural(done, 'terminé', 'terminés')} · ${absent} ${plural(absent, 'absent', 'absents')}`,
   students_add_title: () => 'Ajouter un étudiant',
   students_add_last_name: () => 'Nom',
   students_add_first_name: () => 'Prénom',
@@ -1290,12 +1295,12 @@ const en: Dictionary<UiMessageParams> = {
   attempt_score_label: ({ rank }) => `Score for question ${rank}`,
   attempt_out_of: ({ max }) => `/ ${max}`,
   score_not_computed: () => '—',
-  side_panel_label: () => 'Side panel',
+  side_panel_label: () => 'Panel',
   side_panel_open: () => 'Panel',
   side_panel_close: () => 'Close the panel',
   side_panel_show: () => 'Show panel',
-  side_panel_tab_student: () => 'Student',
-  side_panel_tab_students: () => 'Students',
+  side_panel_tab_student: () => 'This student',
+  side_panel_tab_students: () => 'List',
   students_list_label: () => 'Session students',
   students_projected: () => 'Projected',
   projection_open: () => 'Open the projected view',
@@ -1309,6 +1314,9 @@ const en: Dictionary<UiMessageParams> = {
   projection_popup_blocked: () => 'Allow pop-ups for this site to open the projected view.',
   students_row_scores: ({ raw, final }) => `${raw} · ${final}`,
   students_add: () => 'Add a student',
+  students_add_short: () => 'Add',
+  students_summary: ({ total, done, absent }) =>
+    `${total} ${pluralEn(total, 'student', 'students')} · ${done} done · ${absent} absent`,
   students_add_title: () => 'Add a student',
   students_add_last_name: () => 'Last name',
   students_add_first_name: () => 'First name',

@@ -6,7 +6,12 @@ import type { Student } from '@/domain/session/types'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
 import { renderAt } from '@/testing/render-at'
-import { expectPanelClosed, openSidePanel, panelButton } from '@/testing/side-panel-assertions'
+import {
+  expectPanelClosed,
+  openSidePanel,
+  panelButton,
+  querySidePanel,
+} from '@/testing/side-panel-assertions'
 import { panel, REVEALED, screenConfig } from '@/testing/screen-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
@@ -37,12 +42,12 @@ afterEach(() => {
 test('fermé au chargement ; « Panneau » l’ouvre sur l’onglet « Étudiant »', async () => {
   await mount(makeStudent([2, 1], { finalRevealedAt: REVEALED }))
 
-  expect(screen.queryByRole('dialog', { name: 'Panneau latéral' })).not.toBeInTheDocument()
-  expect(screen.queryByRole('tab', { name: 'Étudiant' })).not.toBeInTheDocument()
+  expect(querySidePanel()).not.toBeInTheDocument()
+  expect(screen.queryByRole('tab', { name: 'Cet étudiant' })).not.toBeInTheDocument()
 
   const dialog = await openSidePanel()
 
-  expect(within(dialog).getByRole('tab', { name: 'Étudiant' })).toHaveAttribute(
+  expect(within(dialog).getByRole('tab', { name: 'Cet étudiant' })).toHaveAttribute(
     'aria-selected',
     'true',
   )
@@ -51,13 +56,13 @@ test('fermé au chargement ; « Panneau » l’ouvre sur l’onglet « Étudiant
 test('« Panneau » rouvre sur « Étudiant » après un passage sur « Étudiants », même après remontage (D91)', async () => {
   const { unmount } = await mount(makeStudent([2, 1], { finalRevealedAt: REVEALED }))
 
-  await openSidePanel('Étudiants')
+  await openSidePanel('Liste')
   expect(within(panel()).getByRole('list', { name: 'Étudiants de la session' })).toBeVisible()
   fireEvent.click(within(panel()).getByRole('button', { name: 'Fermer le panneau' }))
   await expectPanelClosed()
 
   let dialog = await openSidePanel()
-  expect(within(dialog).getByRole('tab', { name: 'Étudiant' })).toHaveAttribute(
+  expect(within(dialog).getByRole('tab', { name: 'Cet étudiant' })).toHaveAttribute(
     'aria-selected',
     'true',
   )
@@ -66,9 +71,9 @@ test('« Panneau » rouvre sur « Étudiant » après un passage sur « Étudian
   unmount()
   await mount(makeStudent([2, 1], { finalRevealedAt: REVEALED }))
 
-  expect(screen.queryByRole('dialog', { name: 'Panneau latéral' })).not.toBeInTheDocument()
+  expect(querySidePanel()).not.toBeInTheDocument()
   dialog = await openSidePanel()
-  expect(within(dialog).getByRole('tab', { name: 'Étudiant' })).toHaveAttribute(
+  expect(within(dialog).getByRole('tab', { name: 'Cet étudiant' })).toHaveAttribute(
     'aria-selected',
     'true',
   )
@@ -85,12 +90,32 @@ test('onglets sur toute la largeur', async () => {
   for (const tab of tabs) expect(tab).toHaveClass('flex-1')
 })
 
+test('titre : nom de la session sous « Panneau »', async () => {
+  await mount(makeStudent([2, 1], { finalRevealedAt: REVEALED }))
+
+  const dialog = await openSidePanel()
+
+  expect(dialog).toHaveAccessibleName('Oral de test')
+  expect(within(dialog).getByText('Panneau', { selector: 'span' })).toBeInTheDocument()
+})
+
+test('pied commun aux deux onglets : statistiques et export', async () => {
+  await mount(makeStudent([2, 1], { finalRevealedAt: REVEALED }))
+
+  const dialog = await openSidePanel()
+  for (const tab of ['Cet étudiant', 'Liste'] as const) {
+    fireEvent.click(within(dialog).getByRole('tab', { name: tab }))
+    expect(within(dialog).getByRole('link', { name: 'Statistiques' })).toBeVisible()
+    expect(within(dialog).getByRole('button', { name: 'Exporter en Excel' })).toBeVisible()
+  }
+})
+
 test('Échap ferme et rend le focus à « Panneau »', async () => {
   await mount(makeStudent([2, 1], { finalRevealedAt: REVEALED }))
   const button = await panelButton()
 
   const dialog = await openSidePanel()
-  fireEvent.keyDown(within(dialog).getByRole('tab', { name: 'Étudiant' }), { key: 'Escape' })
+  fireEvent.keyDown(within(dialog).getByRole('tab', { name: 'Cet étudiant' }), { key: 'Escape' })
 
   await expectPanelClosed()
   await waitFor(() => expect(button).toHaveFocus())
@@ -138,7 +163,7 @@ test('étudiant sans question tirée : message vide', async () => {
   expect(within(panel()).getByText('Aucune question tirée.')).toBeInTheDocument()
 })
 
-test('étudiant en cours : question en cours, note convertie et finale « — »', async () => {
+test('étudiant en cours : question en cours, note brute sur le maximum, finale « — »', async () => {
   await mount(makeStudent([1, 'pending']))
   await openSidePanel()
 
@@ -146,8 +171,17 @@ test('étudiant en cours : question en cours, note convertie et finale « — »
   expect(drawer.getByRole('heading', { name: 'Questions' })).toBeInTheDocument()
   expect(drawer.getByRole('heading', { name: 'Totaux' })).toBeInTheDocument()
   expect(drawer.getByText('En cours')).toBeInTheDocument()
-  expect(drawer.getByText('Note convertie').nextElementSibling).toHaveTextContent('—')
+  expect(drawer.getByText('en cours')).toBeInTheDocument()
+  expect(drawer.getByText('Note brute').nextElementSibling).toHaveTextContent('1 / 20')
   expect(drawer.getByText('Note finale').nextElementSibling).toHaveTextContent('—')
+  expect(drawer.queryByText('Note convertie')).not.toBeInTheDocument()
+})
+
+test('étudiant terminé : note finale sur l’échelle', async () => {
+  await mount(makeStudent([2, 1], { finalRevealedAt: REVEALED }))
+  await openSidePanel()
+
+  expect(within(panel()).getByText('Note finale').nextElementSibling).toHaveTextContent('3,0 / 20')
 })
 
 test('corriger une note depuis le panneau met à jour l’écran final', async () => {

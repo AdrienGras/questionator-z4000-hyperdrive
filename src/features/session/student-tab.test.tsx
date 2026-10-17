@@ -155,7 +155,7 @@ test('commentaire tapé puis autre étudiant choisi dans le panneau : enregistr�
   await mount([makeStudent([]), makeSecondStudent()])
 
   fireEvent.change(commentBox(), { target: { value: 'Pour Alice' } })
-  await openSidePanel('Étudiants')
+  await openSidePanel('Liste')
   fireEvent.click(within(panel()).getByRole('button', { name: /^Martin Bob/ }))
 
   await waitFor(async () => expect((await stored()).activeStudentId).toBe('student-2'))

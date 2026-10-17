@@ -5,10 +5,10 @@ import { rosterScore } from '@/domain/passage/selectors'
 import { formatScore } from '@/domain/scoring/format'
 import { studentStatus } from '@/domain/scoring/status'
 import type { Student } from '@/domain/session/types'
-import { STATUS_KEY } from '@/features/session/student-status-label'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
 import { AbsentButton } from './absent-button'
+import { StudentStatusPill } from './student-status-pill'
 
 type StudentRowProps = Readonly<{
   ui: Ui
@@ -36,8 +36,9 @@ function scoreText(student: Student, config: NormalizedConfig, ui: Ui): string {
 }
 
 /**
- * Ligne de la liste des étudiants : identité, statut, projection, puis notes, et le bouton
- * d'absence à côté (jamais dans le bouton de sélection : pas de bouton imbriqué).
+ * Ligne de la liste des étudiants (artboard `passage-panneau`) : identité, projection et statut
+ * en pastille, puis notes, et le bouton d'absence à côté (jamais dans le bouton de sélection : pas
+ * de bouton imbriqué).
  */
 export function StudentRow({
   ui,
@@ -50,33 +51,39 @@ export function StudentRow({
   onSetAbsent,
 }: StudentRowProps) {
   const { text } = ui
+  const status = studentStatus(student, config)
   return (
-    <li className="flex items-start gap-1">
+    <li className="flex items-center gap-1">
       <button
         type="button"
         aria-current={active ? 'true' : undefined}
         onClick={() => onSelect(student.id)}
         className={cn(
-          'flex min-w-0 flex-1 flex-col gap-1 rounded-lg border p-2 text-left text-sm transition-colors outline-none',
-          'hover:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50',
-          active && 'border-primary bg-accent hover:bg-accent',
+          'flex min-w-0 flex-1 items-center gap-3 rounded-md px-3 py-2.5 text-left transition-colors outline-none',
+          'hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
+          active && 'bg-accent shadow-[inset_0_0_0_1px_var(--color-primary)]',
         )}
       >
-        <span className="flex items-center gap-2">
-          <span
-            className={cn('min-w-0 font-medium break-words', active && 'text-accent-foreground')}
-          >{`${student.lastName} ${student.firstName}`}</span>
-          <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-            {text(STATUS_KEY[studentStatus(student, config)], {})}
+        <span className="flex min-w-0 flex-1 flex-col gap-1">
+          <span className="flex min-w-0 items-center gap-2">
+            <span className={cn('truncate', active ? 'font-semibold' : 'font-medium')}>
+              {`${student.lastName} ${student.firstName}`}
+            </span>
+            {projected && (
+              <IconDeviceDesktop
+                className="size-4 shrink-0 text-muted-foreground"
+                aria-label={text('students_projected', {})}
+              />
+            )}
           </span>
-          {projected && (
-            <IconDeviceDesktop
-              className="ml-auto size-4"
-              aria-label={text('students_projected', {})}
-            />
-          )}
+          <StudentStatusPill ui={ui} status={status} />
         </span>
-        <span className={cn('text-muted-foreground', active && 'text-accent-foreground')}>
+        <span
+          className={cn(
+            'text-sm whitespace-nowrap tabular-nums',
+            status === 'done' ? 'font-semibold text-foreground' : 'text-muted-foreground',
+          )}
+        >
           {scoreText(student, config, ui)}
         </span>
       </button>

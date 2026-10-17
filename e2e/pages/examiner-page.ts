@@ -19,11 +19,14 @@ export class ExaminerPage {
   /** Un bloc de code resté en texte brut (`data-highlighted="false"`). */
   readonly plainCode: Locator
 
-  /** Champ « Commentaire » de l'onglet « Étudiant » du tiroir (à ouvrir avec `openPanel`). */
+  /** Champ « Commentaire » de la colonne de droite. */
   readonly commentField: Locator
 
-  /** Statut « Enregistré » du commentaire dans le tiroir. */
+  /** Statut « Enregistré » visible du commentaire. */
   readonly commentSaved: Locator
+
+  /** Tiroir latéral : le `dialog` qui porte les onglets « Panneau » (nommé par la session). */
+  readonly panel: Locator
 
   private readonly page: Page
 
@@ -45,9 +48,13 @@ export class ExaminerPage {
     this.banner = page.getByRole('status').filter({ hasText: 'La vue projetée montre' })
     this.commentField = page.getByRole('textbox', { name: 'Commentaire' })
     this.commentSaved = page
-      .getByRole('dialog', { name: 'Panneau latéral' })
+      .locator('section')
+      .filter({ has: this.commentField })
       .getByText('Enregistré', { exact: true })
       .first()
+    this.panel = page
+      .getByRole('dialog')
+      .filter({ has: page.getByRole('tablist', { name: 'Panneau' }) })
   }
 
   /** Tire une question dans la catégorie (`Normal` pour le bouton « Normal 2 pts »). */
@@ -69,26 +76,17 @@ export class ExaminerPage {
     await this.page.getByRole('button', { name: `Noter ${value}`, exact: true }).click()
   }
 
-  /** Saisit le commentaire (onglet « Étudiant » du tiroir), quitte le champ pour forcer l'enregistrement, puis referme le tiroir. */
+  /** Saisit le commentaire (colonne de droite) et quitte le champ pour forcer l'enregistrement. */
   async setComment(text: string): Promise<void> {
-    await this.openPanel('Étudiant')
-    const field = this.page.getByRole('textbox', { name: 'Commentaire' })
-    await field.fill(text)
-    await field.blur()
-    // Attend l'écriture Dexie (statut visible ; la zone sr-only en porte une copie) avant de fermer.
-    await this.page
-      .getByRole('dialog', { name: 'Panneau latéral' })
-      .getByText('Enregistré', { exact: true })
-      .first()
-      .waitFor()
-    await this.page.getByRole('button', { name: 'Fermer le panneau' }).click()
-    await this.page.getByRole('dialog', { name: 'Panneau latéral' }).waitFor({ state: 'hidden' })
+    await this.commentField.fill(text)
+    await this.commentField.blur()
+    // Attend l'écriture Dexie (statut visible ; la zone sr-only en porte une copie).
+    await this.commentSaved.waitFor()
   }
 
-  /** Saisit le commentaire (onglet « Étudiant ») sans quitter le champ ni attendre l'enregistrement. */
+  /** Saisit le commentaire sans quitter le champ ni attendre l'enregistrement. */
   async typeCommentWithoutSaving(text: string): Promise<void> {
-    await this.openPanel('Étudiant')
-    await this.page.getByRole('textbox', { name: 'Commentaire' }).fill(text)
+    await this.commentField.fill(text)
   }
 
   /** Ouvre la vue projetée dans une nouvelle fenêtre et renvoie son écran. */
@@ -116,29 +114,29 @@ export class ExaminerPage {
       .click()
   }
 
-  /** Ouvre le tiroir « Panneau latéral » (fermé au chargement) et, si demandé, y choisit un onglet. */
-  async openPanel(tab?: 'Étudiant' | 'Étudiants'): Promise<void> {
+  /** Ouvre le tiroir latéral (fermé au chargement) et, si demandé, y choisit un onglet. */
+  async openPanel(tab?: 'Cet étudiant' | 'Liste'): Promise<void> {
     await this.page.getByRole('button', { name: 'Panneau', exact: true }).click()
-    await this.page.getByRole('dialog', { name: 'Panneau latéral' }).waitFor()
-    if (tab) await this.page.getByRole('tab', { name: tab, exact: true }).click()
+    await this.panel.waitFor()
+    if (tab) await this.panel.getByRole('tab', { name: tab, exact: true }).click()
   }
 
-  /** Ouvre l'écran des statistiques (bouton de l'onglet « Étudiants » du panneau latéral). */
+  /** Ouvre l'écran des statistiques (pied du panneau latéral). */
   async openStats(): Promise<StatsPage> {
-    await this.openPanel('Étudiants')
+    await this.openPanel()
     await this.page.getByRole('link', { name: 'Statistiques' }).click()
     return new StatsPage(this.page)
   }
 
-  /** Clique « Exporter en Excel » (onglet « Étudiants ») et renvoie le téléchargement déclenché. */
+  /** Clique « Exporter en Excel » (pied du panneau) et renvoie le téléchargement déclenché. */
   async exportWorkbook(): Promise<Download> {
-    await this.openPanel('Étudiants')
+    await this.openPanel()
     const [download] = await Promise.all([
       this.page.waitForEvent('download'),
       this.page.getByRole('button', { name: 'Exporter en Excel' }).click(),
     ])
     await this.page.getByRole('button', { name: 'Fermer le panneau' }).click()
-    await this.page.getByRole('dialog', { name: 'Panneau latéral' }).waitFor({ state: 'hidden' })
+    await this.panel.waitFor({ state: 'hidden' })
     return download
   }
 }

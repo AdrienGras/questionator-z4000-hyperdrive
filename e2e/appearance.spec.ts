@@ -30,7 +30,7 @@ async function primaryButtonBackground(page: Page, configPath: string, name: str
   await create.uploadConfig(configPath)
   await create.fillName(name)
   const examiner = await create.submit()
-  await examiner.openPanel('Étudiants')
+  await examiner.openPanel('Liste')
   await page.getByRole('button', { name: 'Ajouter un étudiant' }).click()
   const submit = page
     .getByRole('dialog', { name: 'Ajouter un étudiant' })
@@ -194,7 +194,7 @@ test('survol d’un bouton secondaire lisible avec un thème de config de l’an
   await create.uploadConfig(new URL('./fixtures/offline-php.config.json', import.meta.url).pathname)
   await create.fillName('Session ancien thème')
   const examiner = await create.submit()
-  await examiner.openPanel('Étudiants')
+  await examiner.openPanel('Liste')
   const button = page.getByRole('button', { name: 'Ajouter un étudiant' })
   await button.hover()
   const expected = await button.evaluate((el) => {

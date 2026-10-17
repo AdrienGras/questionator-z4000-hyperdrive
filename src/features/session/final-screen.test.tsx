@@ -92,9 +92,9 @@ test('détail du passage : rangs des questions notées, passée sans rang', asyn
   }
   const items = within(detail).getAllByRole('listitem')
   expect(items).toHaveLength(3)
-  expect(items[0]).toHaveTextContent(/^1\.\s*ATitre a-12 \/ 20$/)
-  expect(items[1]).toHaveTextContent(/^ATitre a-2Passée — Hors programme$/)
-  expect(items[2]).toHaveTextContent(/^2\.\s*ATitre a-33 \/ 20$/)
+  expect(items[0]).toHaveTextContent(/^1Titre a-1A2 \/ 20$/)
+  expect(items[1]).toHaveTextContent(/^–Titre a-2APassée — Hors programme$/)
+  expect(items[2]).toHaveTextContent(/^2Titre a-3A3 \/ 20$/)
 })
 
 test('réinitialiser : confirmation, attempts vidés, commentaire conservé, grille de retour', async () => {

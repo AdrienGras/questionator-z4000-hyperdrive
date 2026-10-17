@@ -203,6 +203,22 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
           onTabChange={panel.setTab}
           error={failure}
           returnFocusRef={panelButton}
+          title={session.name}
+          footer={
+            <>
+              {/* Lien stylé en bouton : l'écran des statistiques est une route (F15), et
+                  `features/session` n'importe rien de `features/stats`. */}
+              <Link
+                to="/session/$sessionId/stats"
+                params={{ sessionId: session.id }}
+                className={buttonVariants({ variant: 'secondary', size: 'sm' })}
+              >
+                <IconChartBar aria-hidden />
+                {ui.text('stats_open', {})}
+              </Link>
+              <ExportButton ui={ui} session={session} variant="secondary" size="sm" />
+            </>
+          }
           studentsTab={
             <StudentsTab
               ui={ui}
@@ -215,21 +231,6 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
               onSelect={(studentId) => void selectStudent(studentId)}
               onSetAbsent={actions.setAbsent}
               onAdd={addStudent}
-              actionsSlot={
-                <div className="flex flex-wrap items-start gap-2">
-                  {/* Lien stylé en bouton : l'écran des statistiques est une route (F15), et
-                        `features/session` n'importe rien de `features/stats`. */}
-                  <Link
-                    to="/session/$sessionId/stats"
-                    params={{ sessionId: session.id }}
-                    className={buttonVariants({ variant: 'outline' })}
-                  >
-                    <IconChartBar aria-hidden />
-                    {ui.text('stats_open', {})}
-                  </Link>
-                  <ExportButton ui={ui} session={session} />
-                </div>
-              }
             />
           }
           studentTab={

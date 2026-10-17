@@ -319,6 +319,8 @@ const SAMPLE: UiMessageParams = {
   projection_popup_blocked: {},
   students_row_scores: { raw: '2', final: '12,5' },
   students_add: {},
+  students_add_short: {},
+  students_summary: { total: 10, done: 1, absent: 1 },
   students_add_title: {},
   students_add_last_name: {},
   students_add_first_name: {},

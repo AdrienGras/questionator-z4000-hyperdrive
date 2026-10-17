@@ -16,7 +16,10 @@ import { renderAt } from '@/testing/render-at'
 import {
   expectPanelClosed,
   expectPanelStaysOpen,
+  findSidePanel,
   openSidePanel,
+  querySidePanel,
+  sidePanel,
 } from '@/testing/side-panel-assertions'
 import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import type { Session, Student } from '@/domain/session/types'
@@ -58,9 +61,9 @@ function twoStudents(
  * l'étudiant.
  */
 async function studentButton(name: string): Promise<HTMLElement> {
-  const open = screen.queryByRole('dialog', { name: 'Panneau latéral' })
+  const open = querySidePanel()
   const dialog = open ?? (await openSidePanel())
-  fireEvent.click(within(dialog).getByRole('tab', { name: 'Étudiants' }))
+  fireEvent.click(within(dialog).getByRole('tab', { name: 'Liste' }))
   const button = within(within(dialog).getByRole('list', { name: 'Étudiants de la session' }))
     .getAllByRole('button')
     .find((b) => b.textContent.includes(name))
@@ -89,7 +92,7 @@ test("en-tête, liste des étudiants et changement d'étudiant actif", async () 
   expect(trail.getByRole('link', { name: 'Sessions' })).toHaveAttribute('href', '/sessions')
 
   expect(screen.queryByRole('combobox', { name: 'Étudiant' })).not.toBeInTheDocument()
-  const dialog = await openSidePanel('Étudiants')
+  const dialog = await openSidePanel('Liste')
   // Premier bouton de chaque ligne : le second est le bouton d'absence (F38).
   const rows = within(within(dialog).getByRole('list', { name: 'Étudiants de la session' }))
     .getAllByRole('listitem')
@@ -198,8 +201,8 @@ test('étudiant absent : « Marquer présent » sur la page, « Afficher le pann
   expect(screen.getByRole('button', { name: 'Marquer présent' })).toBeVisible()
   fireEvent.click(screen.getByRole('button', { name: 'Afficher le panneau' }))
 
-  const dialog = await screen.findByRole('dialog', { name: 'Panneau latéral' })
-  expect(within(dialog).getByRole('tab', { name: 'Étudiants' })).toHaveAttribute(
+  const dialog = await findSidePanel()
+  expect(within(dialog).getByRole('tab', { name: 'Liste' })).toHaveAttribute(
     'aria-selected',
     'true',
   )
@@ -233,8 +236,8 @@ test('aucun étudiant : « Afficher le panneau » ouvre l’onglet « Étudiants
   await screen.findByRole('heading', { name: 'Aucun étudiant sélectionné' })
   fireEvent.click(screen.getByRole('button', { name: 'Afficher le panneau' }))
 
-  const dialog = await screen.findByRole('dialog', { name: 'Panneau latéral' })
-  expect(within(dialog).getByRole('tab', { name: 'Étudiants' })).toHaveAttribute(
+  const dialog = await findSidePanel()
+  expect(within(dialog).getByRole('tab', { name: 'Liste' })).toHaveAttribute(
     'aria-selected',
     'true',
   )
@@ -597,7 +600,7 @@ test('erreur affichée même hors du panneau de passage (étudiant retiré entre
   fireEvent.click(bobButton)
   await removal
 
-  const dialog = screen.getByRole('dialog', { name: 'Panneau latéral' })
+  const dialog = sidePanel()
   await within(dialog).findByRole('alert')
   fireEvent.keyDown(dialog, { key: 'Escape' })
   await expectPanelClosed()
@@ -633,7 +636,7 @@ test('échec du changement d’étudiant : le tiroir reste ouvert', async () => 
   fireEvent.click(bobButton)
   await removal
 
-  const dialog = screen.getByRole('dialog', { name: 'Panneau latéral' })
+  const dialog = sidePanel()
   expect(await within(dialog).findByRole('alert')).toHaveTextContent(
     'Cet étudiant n’existe plus dans la session.',
   )
@@ -644,7 +647,7 @@ test("onglet « Étudiants » : bouton-lien « Statistiques » vers l'écran des
   await putSession(sessionWith(makeConfig(), twoStudents(), 'student-1'))
   renderAt('/session/session-1')
 
-  const dialog = await openSidePanel('Étudiants')
+  const dialog = await openSidePanel('Liste')
   const link = within(dialog).getByRole('link', { name: 'Statistiques' })
   expect(link.getAttribute('href')).toMatch(/\/session\/session-1\/stats$/u)
 })

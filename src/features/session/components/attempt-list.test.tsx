@@ -13,11 +13,11 @@ test('numérote les seules questions notées et affiche points et motif de passe
 
   const items = screen.getAllByRole('listitem')
   expect(items).toHaveLength(3)
-  expect(items[0]).toHaveTextContent('1.')
+  expect(items[0]).toHaveTextContent(/^1/)
   expect(items[0]).toHaveTextContent('2 / 2')
   expect(items[1]).toHaveTextContent('Passée — hors sujet')
-  expect(items[1]).not.toHaveTextContent(/\d\./)
-  expect(items[2]).toHaveTextContent('2.')
+  expect(items[1]).toHaveTextContent(/^–/)
+  expect(items[2]).toHaveTextContent(/^2/)
   expect(items[2]).toHaveTextContent('1 / 2')
 })
 
@@ -27,7 +27,7 @@ test('une question en cours affiche « En cours », sans rang', () => {
 
   const items = screen.getAllByRole('listitem')
   expect(items[1]).toHaveTextContent('En cours')
-  expect(items[1]).not.toHaveTextContent(/\d\./)
+  expect(items[1]).toHaveTextContent(/^–/)
 })
 
 test('sans onEditScore, aucun sélecteur', () => {

@@ -62,10 +62,10 @@ test('parcours complet : création, passage, vue projetée, statistiques, édite
   await present.prompt.waitFor()
   await capture(present.page, 'vue-projetee')
 
-  await examiner.openPanel('Étudiants')
+  await examiner.openPanel('Liste')
   await capture(page, 'passage-panneau')
   await page.getByRole('button', { name: 'Fermer le panneau' }).click()
-  await page.getByRole('dialog', { name: 'Panneau latéral' }).waitFor({ state: 'hidden' })
+  await examiner.panel.waitFor({ state: 'hidden' })
 
   await examiner.score('1')
   for (const category of ['Facile', 'Difficile']) {
