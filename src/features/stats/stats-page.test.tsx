@@ -124,8 +124,9 @@ test('tags : une ligne par tag avec notés et taux de réussite', async () => {
 
   const table = await screen.findByRole('table', { name: 'Tags' })
   const rate = new Intl.NumberFormat('fr', { style: 'percent' }).format(0.5)
-  expect(rowCells(table, 'boucles')).toEqual(['1', rate])
-  expect(rowCells(table, 'tableaux')).toEqual(['1', rate])
+  expect(rowCells(table, 'boucles')).toEqual(['1', '', rate])
+  expect(rowCells(table, 'tableaux')).toEqual(['1', '', rate])
+  expect(screen.getByRole('region', { name: 'Détail' })).toBeInTheDocument()
   expect(screen.queryByText("Aucune question n'a de tag.")).not.toBeInTheDocument()
 })
 
@@ -141,7 +142,7 @@ test('question passée : motifs « Hors programme ×2, sans motif ×1 »', async
   renderAt('/session/session-1/stats')
 
   const table = await screen.findByRole('table', { name: 'Questions passées' })
-  expect(rowCells(table, 'Question A1')).toEqual(['A', '3', 'Hors programme ×2, sans motif ×1'])
+  expect(rowCells(table, 'Question A1 A')).toEqual(['Hors programme ×2, sans motif ×1', '3'])
 })
 
 // L'id inconnu affiché à la place du titre est couvert par `domain/stats/questions.test.ts`.
@@ -252,4 +253,20 @@ test('sous-titre : « Statistiques · titre · matière · promotion », parties
   await putSession(sessionWith([[attemptOf('a', 'a-1', 1)]]))
   renderAt('/session/session-1/stats')
   expect(await screen.findByText('Statistiques · Oral de test')).toBeInTheDocument()
+})
+
+test('tag sans note : « — » et aucune barre', async () => {
+  const config = minimalConfig()
+  config.categories[0]!.questions = [{ id: 'a-1', prompt: 'Question A1', tags: ['boucles'] }]
+  await putSession(sessionWith([[attemptOf('a', 'a-1', 'pending')]], config))
+  renderAt('/session/session-1/stats')
+
+  const table = await screen.findByRole('table', { name: 'Tags' })
+  const row = within(table).getByRole('rowheader', { name: 'boucles' }).closest('tr')!
+  expect(
+    within(row)
+      .getAllByRole('cell')
+      .map((td) => td.textContent),
+  ).toEqual(['0', '', '—'])
+  expect(row.querySelector('[aria-hidden]')).toBeNull()
 })

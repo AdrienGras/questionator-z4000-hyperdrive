@@ -76,16 +76,20 @@ export function StatsView({ session }: Readonly<{ session: Session }>) {
               <CategoryRings ui={ui} config={config} categories={stats.categories} />
             </div>
           </StatsGroup>
-          <div className="grid gap-4 md:grid-cols-2">
-            <TagTable ui={ui} tags={stats.tags} />
-            <QuestionTables
-              ui={ui}
-              config={config}
-              topDrawn={stats.topDrawn}
-              skipped={stats.skipped}
-            />
-            <StrategyTable ui={ui} config={config} strategies={stats.strategies} />
-          </div>
+          <StatsGroup title={text('stats_detail', {})}>
+            <div className="flex flex-wrap items-stretch gap-4">
+              <QuestionTables
+                ui={ui}
+                config={config}
+                topDrawn={stats.topDrawn}
+                skipped={stats.skipped}
+              />
+            </div>
+            <div className="flex flex-wrap items-stretch gap-4">
+              <StrategyTable ui={ui} config={config} strategies={stats.strategies} />
+              <TagTable ui={ui} tags={stats.tags} />
+            </div>
+          </StatsGroup>
         </>
       )}
     </PageShell>

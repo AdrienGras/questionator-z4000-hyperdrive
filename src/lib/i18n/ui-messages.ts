@@ -420,6 +420,7 @@ export type UiMessageParams = {
   stats_empty_body: NoParams
   stats_empty_action: NoParams
   stats_synthesis: NoParams
+  stats_detail: NoParams
   stats_error: NoParams
   stats_headcount: NoParams
   stats_headcount_total: NoParams
@@ -453,13 +454,13 @@ export type UiMessageParams = {
   stats_adjustments: NoParams
   stats_adjustments_sum: NoParams
   stats_adjustments_mean: NoParams
-  stats_col_category: NoParams
   stats_col_tag: NoParams
   stats_col_question: NoParams
-  stats_col_choices: NoParams
   stats_col_scored: NoParams
   stats_col_success_rate: NoParams
   stats_col_draws: NoParams
+  stats_col_share: NoParams
+  stats_col_bar: NoParams
   stats_col_skips: NoParams
   stats_col_reasons: NoParams
   stats_col_composition: NoParams
@@ -956,6 +957,7 @@ const fr: Dictionary<UiMessageParams> = {
     'Aucune question tirée pour l’instant. Les chiffres apparaissent dès le premier tirage.',
   stats_empty_action: () => 'Aller au passage',
   stats_synthesis: () => 'Synthèse',
+  stats_detail: () => 'Détail',
   stats_error: () => "Les statistiques n'ont pas pu être chargées.",
   stats_headcount: () => 'Chiffres clés',
   stats_headcount_total: () => 'Étudiants',
@@ -993,18 +995,18 @@ const fr: Dictionary<UiMessageParams> = {
   stats_adjustments: () => 'Ajustements',
   stats_adjustments_sum: () => 'somme',
   stats_adjustments_mean: () => 'moyenne',
-  stats_col_category: () => 'Catégorie',
   stats_col_tag: () => 'Tag',
   stats_col_question: () => 'Question',
-  stats_col_choices: () => 'Choix',
-  stats_col_scored: () => 'Questions notées',
+  stats_col_scored: () => 'Notées',
   stats_col_success_rate: () => 'Taux de réussite',
   stats_col_draws: () => 'Tirages',
+  stats_col_share: () => 'Part',
+  stats_col_bar: () => 'Barre',
   stats_col_skips: () => 'Passes',
   stats_col_reasons: () => 'Motifs',
   stats_col_composition: () => 'Composition',
   stats_col_students: () => 'Étudiants',
-  stats_col_mean_final: () => 'Note finale moyenne',
+  stats_col_mean_final: () => 'Note moyenne',
   stats_times: ({ label, count }) => `${label} ×${count}`,
   stats_no_reason: () => 'sans motif',
 }
@@ -1445,6 +1447,7 @@ const en: Dictionary<UiMessageParams> = {
   stats_empty_body: () => 'No question drawn yet. The figures appear with the first draw.',
   stats_empty_action: () => 'Go to the exam',
   stats_synthesis: () => 'Overview',
+  stats_detail: () => 'Details',
   stats_error: () => 'The statistics could not be loaded.',
   stats_headcount: () => 'Key figures',
   stats_headcount_total: () => 'Students',
@@ -1482,18 +1485,18 @@ const en: Dictionary<UiMessageParams> = {
   stats_adjustments: () => 'Adjustments',
   stats_adjustments_sum: () => 'sum',
   stats_adjustments_mean: () => 'mean',
-  stats_col_category: () => 'Category',
   stats_col_tag: () => 'Tag',
   stats_col_question: () => 'Question',
-  stats_col_choices: () => 'Picks',
-  stats_col_scored: () => 'Scored questions',
+  stats_col_scored: () => 'Scored',
   stats_col_success_rate: () => 'Success rate',
   stats_col_draws: () => 'Draws',
+  stats_col_share: () => 'Share',
+  stats_col_bar: () => 'Bar',
   stats_col_skips: () => 'Skips',
   stats_col_reasons: () => 'Reasons',
   stats_col_composition: () => 'Composition',
   stats_col_students: () => 'Students',
-  stats_col_mean_final: () => 'Mean final score',
+  stats_col_mean_final: () => 'Mean score',
   stats_times: ({ label, count }) => `${label} ×${count}`,
   stats_no_reason: () => 'no reason',
 }
