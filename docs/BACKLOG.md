@@ -68,6 +68,12 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 - [ ] Les pastilles du coin bas droit (`UpdatePrompt`, `OfflineReadyPrompt`) recouvrent le bas du contenu tant qu'on ne les ferme pas (vu en F44.4 sur « Détail des N questions » des stats d'entraînement) : réserver une marge basse au contenu quand une pastille est affichée.
 - [ ] Marque du menu cliquable vers l'accueil (aujourd'hui texte seul, comme sur l'artboard).
+- [ ] Lien actif sur une 404 sous un espace connu (`/editor/foo`, `/training/t1/nope`) : `activeMenuItem` ne lit que le premier segment ; le déduire de la route trouvée (`useMatches`) si ça gêne (relecture F44.4).
+- [ ] Tiroir du menu resté ouvert quand l'écran passe au-delà de 768 px (rotation, fenêtre agrandie) : le fermer sur `matchMedia('(min-width: 48rem)')` (relecture F44.4).
+- [ ] `lang={ui.locale}` sur l'infobulle du menu replié (rendue en portail sous `<body>`, donc dans la langue de la session) (relecture F44.4).
+- [ ] `DANGER_TILE_CLASS` de `damaged-session.tsx` recopie la tuile danger de `StatusScreen` : l'exporter ou ajouter une variante projetée (relecture F44.4).
+- [ ] `stats-error.tsx` et `training-stats-error.tsx` à passer sur `StatusScreen` avec retour en bouton (#150, #151).
+- [ ] Vérifier au rendu (e2e à 390 px, `scrollWidth <= clientWidth`) un nom de session sans espace dans le fil d'Ariane (relecture F44.4).
 
 ## Accueil et backup
 

@@ -554,6 +554,7 @@ Arbitrage : D102, D103, D105 (F44.4). Maquettes `apres/menu-replie`, `apres/menu
 - **Une seule instance** : `AppMenu` (`src/components/menu/app-menu.tsx`) est monté dans `RootLayout`, jamais dans une page ; il est masqué sur `/present/$sessionId`. Il rend le menu latéral (`aside`, `md:` et au-delà) et, en dessous, la barre du haut avec son tiroir (`MenuDrawer`). Le contenu des deux vient de `MenuLinks`.
 - **Lien actif** : `activeMenuItem(pathname)` (`src/components/menu/active-menu-item.ts`), par premier segment. **Toute nouvelle route y entre** (test `active-menu-item.test.ts`) ; un `Link` du menu garde `activeOptions={{ exact: true }}` (QUIRKS 2026-10-17).
 - **Langue** : celle de l'application (`useUi()` à la racine), avec `lang` sur le menu ; jamais celle d'une session.
+- **Hauteur** : un `main` de page ou d'écran d'état prend `flex-1` dans la colonne de contenu de `RootLayout`, jamais `min-h-svh` (sur téléphone, la barre du haut de 56 px s'y ajouterait et toute page défilerait).
 - **État replié** : `readMenuCollapsed` / `writeMenuCollapsed` (`src/lib/menu-collapsed.ts`), lecture et écriture protégées.
 - **Code d'espace** : icône `text-space-*` sur tuile `bg-muted` ; Accueil en `text-muted-foreground`, Aide en `text-space-help`.
 - **Tests** : un test qui cherche un lien de nom courant (« Sessions », « Accueil ») le cherche dans `within(screen.getByRole('complementary'))` ou dans la `nav` « Fil d'Ariane » ; un test qui compte les listes d'une page exclut celles de l'`aside`. En e2e, le Page Object `AppMenu` (`e2e/pages/app-menu.ts`).
