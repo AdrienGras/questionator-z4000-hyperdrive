@@ -95,10 +95,18 @@ async function sessionHalos(page: Page, configPath: string, name: string) {
   await examiner.draw('Cauchemar')
   await examiner.score('1')
   await examiner.confirmAdjustment()
-  const next = await page
-    .getByRole('button', { name: 'Étudiant suivant' })
-    .evaluate((el) => getComputedStyle(el).getPropertyValue('--tw-gradient-to').trim())
-  return { score, projected, next }
+  const nextButton = page.getByRole('button', { name: 'Étudiant suivant' })
+  const next = await nextButton.evaluate((el) =>
+    getComputedStyle(el).getPropertyValue('--tw-gradient-to').trim(),
+  )
+  const nextHalo = await nextButton
+    .locator('xpath=preceding-sibling::div[@aria-hidden="true"]')
+    .evaluate(backgroundOf)
+  const menuBar = await page
+    .getByRole('complementary')
+    .locator('a[aria-current="page"]')
+    .evaluate((el) => getComputedStyle(el).boxShadow)
+  return { score, projected, next, nextHalo, menuBar }
 }
 
 test('thème de session : halos du passage et de la projection dérivés de theme.dark.primary', async ({
@@ -106,7 +114,10 @@ test('thème de session : halos du passage et de la projection dérivés de them
 }, testInfo) => {
   const themedPath = testInfo.outputPath('primary-halos.config.json')
   const config = JSON.parse(readFileSync(examplePath('config.example.json'), 'utf8'))
-  config.theme = { dark: { primary: 'oklch(0.55 0.15 150)' } }
+  // La barre active du menu suit son propre jeton (`sidebar-primary`, THEME_TOKENS, D104).
+  config.theme = {
+    dark: { primary: 'oklch(0.55 0.15 150)', 'sidebar-primary': 'oklch(0.55 0.15 150)' },
+  }
   writeFileSync(themedPath, JSON.stringify(config))
 
   const byDefault = await sessionHalos(page, examplePath('config.example.json'), 'Halos par défaut')
@@ -116,6 +127,9 @@ test('thème de session : halos du passage et de la projection dérivés de them
   expect(themed.projected).toContain('radial-gradient')
   expect(themed.projected).not.toBe(byDefault.projected)
   expect(themed.next).not.toBe(byDefault.next)
+  expect(themed.nextHalo).toContain('radial-gradient')
+  expect(themed.nextHalo).not.toBe(byDefault.nextHalo)
+  expect(themed.menuBar).not.toBe(byDefault.menuBar)
 })
 
 test('surfaces et champs du design system', async ({ page }) => {
