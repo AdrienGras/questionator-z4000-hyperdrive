@@ -24,6 +24,26 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-18 — F44.8 : statistiques de session et d'entraînement (#150)
+
+**Dernière chose faite** : plan `docs/superpowers/plans/2026-10-18-f44-8-statistiques.md` exécuté nativement sur `feat/f44-refonte-ui` (PR #154, brouillon), D109.
+- **Stats de session** : sous-titre « Statistiques · titre · matière · promotion » ; « Synthèse » (chiffres clés, Moyenne et Médiane « / barème », barre empilée et légende), « Notes finales » (histogramme dessiné en `div`, chiffres, ajustements en pied), anneaux par catégorie ; « Détail » (questions tirées avec « Part », passées, stratégies en pastilles teintées, tags avec barre) ; état vide global quand aucun étudiant n'a de tentative.
+- **Stats d'entraînement** : trois cartes de chiffres clés, anneaux par niveau, barres par notion, « À revoir » avec icône et compteur, détail replié avec libellé coloré, barre teintée et pastille ; état vide en carte.
+- **Briques** `@/components/stats/` : `StatsSection`, `StatsGroup`, `StatsTable`, `MeterBar`, `RateRing`, `CategoryLabel`, `StatsEmptyState`. Aucun calcul touché, formats conservés.
+- **Recharts retiré** (dépendance, `chart.tsx`, cible `check:bundle`, groupe Vite, règle depcruise) ; le plan oubliait `check:bundle`, révélé par `pnpm build && pnpm check:bundle` (QUIRKS 2026-10-18).
+- **Révélé en route** : en-tête « Réussite » et barre étroite des tags (capture 390), taille `md` de l'anneau d'entraînement ; relecture finale : point coloré d'un anneau à 0 % (aussi sur `SuccessRing`) et long libellé de catégorie qui débordait (e2e `stats-layout`, 83 px). Chacun corrigé avec un test qui échouait d'abord.
+- `pnpm check` (2201 tests), 81 e2e, `check:bundle`, `check:precache`, `check:budget` verts ; captures 1280 et 390 px comparées aux artboards ; canevas v25 (`role="img"` retiré des artboards de stats).
+
+**Trucs en suspens** : #150 **à valider par l'utilisateur en local** (`pnpm dev`). Mineurs de la relecture en BACKLOG § Statistiques. `guide.spec.ts` (captures du guide, hors CI) rouge depuis F44.5 sur l'accueil, consigné en BACKLOG. Le guide ne parle encore ni du menu, ni des nouveaux écrans (passe de fin de phase 3).
+
+**Prochaine chose à creuser** : après validation de #150, plan de #151 (entraînement) d'après `entrainement-mise-en-place`, `entrainement-mise-a-jour`, `entrainement-question` et la section #151 de la carte des écrans.
+
+**Notes pour future Claude** :
+- Retirer une bibliothèque lourde : dépendance, cible de `scripts/check-initial-bundle.ts`, groupe `codeSplitting`, règle depcruise ; `check:bundle` ne tourne pas dans `pnpm check`.
+- Un taux s'écrit toujours à côté de sa barre (`MeterBar` décoratif) ; anneaux et histogramme : phrase `sr-only`.
+- Les textes `Intl` en pourcentage portent une espace fine insécable : viser par regex `\s%` ou comparer `textContent` avec `toBe`, pas `toHaveTextContent`.
+- Captures : config jetable `.superpowers/sdd/<plan>/cap/` (`cap.config.ts` + `*.pw.ts`), comme en F44.6.
+
 ## 2026-10-17 — F44.7 : passage examinateur et vue projetée (#149)
 
 **Dernière chose faite** : plan `docs/superpowers/plans/2026-10-17-f44-7-passage-projection.md` exécuté nativement sur `feat/f44-refonte-ui` (PR #154, brouillon), D108.
