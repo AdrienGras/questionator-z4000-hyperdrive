@@ -24,6 +24,26 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-17 — F44.7 : passage examinateur et vue projetée (#149)
+
+**Dernière chose faite** : plan `docs/superpowers/plans/2026-10-17-f44-7-passage-projection.md` exécuté nativement sur `feat/f44-refonte-ui` (PR #154, brouillon), D108.
+- **Passage** : l'étudiant en titre, barre de progression segmentée et score brut sur son maximum dans l'en-tête (pastille « Passage terminé » une fois fini) ; question en carte (badge et points, étiquette de langage du code) ; « Tirage suivant » en tuiles teintées ; colonne de droite : vue projetée avec bascule « Cet étudiant » / « Écran d'attente », carte « Note » sous halo (barème en grille, skip et passes restantes), commentaire et « Marquer absent » **sortis du tiroir**. Sur téléphone, la carte « Note » remonte sous la question.
+- **Panneau** : nommé par la session, onglets « Cet étudiant » / « Liste », pied commun hors de la zone qui défile ; « Liste » avec résumé et pastilles de statut ; « Cet étudiant » avec deux totaux.
+- **Écran final** : jauge (`ScoreGauge`), notes intermédiaires, détail en barres, motif d'une passée sous le titre ; dialogues alignés (`session-dialogues`), ajustement signé « +0,50 ».
+- **Projection** : cartes « Question » / « Score », grande grille (resserrée dès 4 tuiles par ligne) puis rangée compacte, question teintée, note en jauge aux décimales de l'arrondi (`final.decimals`, `formatFixed`), détail coloré (`categoryId`), écran d'attente, halos.
+- **Révélé en route** : un `pre` coloré remplacé au lieu d'être mis à jour (e2e `long-words`) ; pied du tiroir hors écran (capture) ; grande grille projetée qui débordait à 13 catégories, et séparateur de milliers dans le champ d'ajustement (relecture finale). Chacun corrigé avec un test qui échouait d'abord.
+- `pnpm check` (2162 tests) et 78 e2e verts ; captures 1280 et 390 px dans `.superpowers/sdd/2026-10-17-f44-7-passage-projection/cap/shots/` (script `cap.pw.ts`, `pnpm exec playwright test -c cap.config.ts` depuis ce dossier).
+
+**Trucs en suspens** : #149 **à valider par l'utilisateur** (`pnpm dev`). **Canevas pas encore republié** : une question est ouverte avant de figer les artboards. Sur l'écran de passage, la colonne de gauche fait moins de 40rem à 1280 px : les tuiles de tirage (D74, seuil de conteneur) s'empilent une par ligne et la grille devient haute (BACKLOG § Écran de passage). Les artboards seront ensuite mis à D74 (`passage-question`, `passage-panneau`, `passage-question-theme`, `projection-tuiles`, `projection-tirage`, `projection-question`). Mineurs de la relecture en BACKLOG § Écran de passage. Le guide ne parle encore ni du menu, ni des nouveaux écrans (passe de fin de phase 3).
+
+**Prochaine chose à creuser** : réponse de l'utilisateur sur la grille de tirage de l'examinateur, mise à jour du canevas, puis plan de #150 (statistiques) d'après `statistiques`, `stats-vide`, `entrainement-stats` et la section #150 de la carte des écrans.
+
+**Notes pour future Claude** :
+- Le tiroir du passage se cherche par sa liste d'onglets « Panneau » (`sidePanel()`, `ExaminerPage.panel`), plus par son nom (QUIRKS 2026-10-17).
+- oxlint refuse `role="img"` et `role="group"` : phrase `sr-only` + dessin `aria-hidden`, `fieldset aria-label`.
+- Une teinte de catégorie s'écrit en classes complètes avec le type `color:` (Tailwind ne lit que des littéraux, `cn` les range alors avec les couleurs) ; `CategoryBadge` pour toute tuile d'icône.
+- `CommentField` est clé par étudiant, pas la carte qui l'entoure (dialogue d'absence, D67).
+
 ## 2026-10-17 — F44.6 : création de session et éditeur (#148)
 
 **Dernière chose faite** : plan `docs/superpowers/plans/2026-10-17-f44-6-creation-editeur.md` exécuté nativement sur `feat/f44-refonte-ui` (PR #154, brouillon).
