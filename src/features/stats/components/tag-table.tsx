@@ -38,9 +38,9 @@ export function TagTable({ ui, tags }: Readonly<{ ui: Ui; tags: TagStats[] }>) {
                 <td className={`${NUMERIC_CELL} font-normal text-muted-foreground`}>
                   {tag.scored}
                 </td>
-                <td className={`${CELL} pl-4`}>
+                <td className={`${CELL} sm:pl-4`}>
                   {tag.successRate !== null && (
-                    <MeterBar value={tag.successRate} tone="primary" className="w-24" />
+                    <MeterBar value={tag.successRate} tone="primary" className="w-10 sm:w-24" />
                   )}
                 </td>
                 <td className={NUMERIC_CELL}>{formatRate(tag.successRate, locale)}</td>

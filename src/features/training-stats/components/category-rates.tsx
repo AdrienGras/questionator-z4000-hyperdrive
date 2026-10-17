@@ -33,7 +33,7 @@ export function CategoryRates({ ui, config, categories }: CategoryRatesProps) {
                   label={text('rate_ring_label', { label, rate: value })}
                   caption={text('rate_ring_caption', {})}
                   color={findCategory(config, categoryId)?.color}
-                  className="size-24"
+                  size="md"
                 />
                 <span className="flex flex-col items-center gap-0.5">
                   <CategoryLabel config={config} categoryId={categoryId} />

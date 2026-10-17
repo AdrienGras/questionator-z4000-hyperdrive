@@ -18,6 +18,7 @@ test('phrase pour les lecteurs d’écran, valeur au centre, arc proportionnel',
       label="Réussite Facile : 83,3 %"
       caption="réussite"
       color="#21d3ee"
+      size="lg"
     />,
   )
   expect(screen.getByText('Réussite Facile : 83,3 %')).toHaveClass('sr-only')
@@ -34,7 +35,7 @@ test('phrase pour les lecteurs d’écran, valeur au centre, arc proportionnel',
 
 test('sans taux : piste seule et « — »', () => {
   const { container } = render(
-    <RateRing rate={null} value="—" label="Réussite Normal : —" caption="réussite" />,
+    <RateRing rate={null} value="—" label="Réussite Normal : —" caption="réussite" size="lg" />,
   )
   expect(container.querySelectorAll('circle')).toHaveLength(1)
   expect(arcLength(container)).toBeUndefined()
@@ -43,12 +44,20 @@ test('sans taux : piste seule et « — »', () => {
 
 test('taux hors de [0 ; 1] : arc borné, texte inchangé', () => {
   const { container: under } = render(
-    <RateRing rate={-0.2} value="−20 %" label="x" caption="réussite" />,
+    <RateRing rate={-0.2} value="−20 %" label="x" caption="réussite" size="lg" />,
   )
   expect(arcLength(under)).toBe(0)
   expect(screen.getByText('−20 %')).toBeInTheDocument()
   const { container: over } = render(
-    <RateRing rate={1.3} value="130 %" label="y" caption="réussite" />,
+    <RateRing rate={1.3} value="130 %" label="y" caption="réussite" size="lg" />,
   )
   expect(arcLength(over)).toBeCloseTo(CIRCUMFERENCE)
+})
+
+test('deux tailles : anneau et valeur à l’échelle', () => {
+  const { container } = render(
+    <RateRing rate={1} value="100 %" label="z" caption="réussite" size="md" />,
+  )
+  expect(container.querySelector(':scope > span')).toHaveClass('size-24')
+  expect(screen.getByText('100 %')).toHaveClass('text-xl')
 })

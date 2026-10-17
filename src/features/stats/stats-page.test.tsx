@@ -124,6 +124,11 @@ test('tags : une ligne par tag avec notés et taux de réussite', async () => {
 
   const table = await screen.findByRole('table', { name: 'Tags' })
   const rate = new Intl.NumberFormat('fr', { style: 'percent' }).format(0.5)
+  expect(
+    within(table)
+      .getAllByRole('columnheader')
+      .map((th) => th.textContent),
+  ).toEqual(['Tag', 'Notées', 'Barre', 'Réussite'])
   expect(rowCells(table, 'boucles')).toEqual(['1', '', rate])
   expect(rowCells(table, 'tableaux')).toEqual(['1', '', rate])
   expect(screen.getByRole('region', { name: 'Détail' })).toBeInTheDocument()

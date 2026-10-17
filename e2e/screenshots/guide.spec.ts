@@ -4,23 +4,9 @@ import { examplePath } from '../fixtures.ts'
 import { HomePage } from '../pages/home-page.ts'
 import { capture, expect, test } from './determinism.ts'
 
-/**
- * Attend que l'animation d'entrée de recharts ait fini : la barre est visible et sa hauteur, non
- * nulle, est la même à 400 ms d'intervalle (l'animation dure moins). `animations: 'disabled'` ne
- * couvre que CSS et Web Animations, pas cette animation JS.
- */
+/** Histogramme dessiné : au moins une barre non vide est visible. */
 async function expectBarDrawn(page: Page): Promise<void> {
-  const bar = page.locator('.recharts-bar-rectangle path').first()
-  await expect(bar).toBeVisible()
-  await expect
-    .poll(() =>
-      bar.evaluate(async (path) => {
-        const before = path.getBoundingClientRect().height
-        await new Promise((resolve) => setTimeout(resolve, 400))
-        return before > 0 && before === path.getBoundingClientRect().height
-      }),
-    )
-    .toBe(true)
+  await expect(page.locator('[data-bar]').first()).toBeVisible()
 }
 
 const SESSION_NAME = 'Oral de démonstration'
@@ -77,7 +63,7 @@ test('parcours complet : création, passage, vue projetée, statistiques, édite
   await capture(page, 'passage-note-finale')
 
   const stats = await examiner.openStats()
-  await expect(stats.headcount('Terminés')).toHaveText('1')
+  await expect(stats.headcount('Passés')).toHaveText('1')
   await expect(stats.histogram).toBeAttached()
   await expectBarDrawn(page)
   await capture(page, 'statistiques')

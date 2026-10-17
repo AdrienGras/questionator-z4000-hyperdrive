@@ -36,7 +36,7 @@ export function CategoryRings({ ui, config, categories }: CategoryRingsProps) {
                   label={text('rate_ring_label', { label: category?.label ?? categoryId, rate })}
                   caption={text('rate_ring_caption', {})}
                   color={category?.color}
-                  className="size-26"
+                  size="lg"
                 />
                 <span className="flex flex-col items-center gap-0.5">
                   <CategoryLabel config={config} categoryId={categoryId} />
