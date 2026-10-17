@@ -15,3 +15,13 @@ test.each([
   const halo = container.querySelector('[aria-hidden="true"]')
   expect(halo).toHaveClass('pointer-events-none', edge)
 })
+
+test('autour : décor sur les quatre côtés, enveloppe pleine largeur', () => {
+  const { container } = render(
+    <ActionHalo side="around">
+      <section>Note</section>
+    </ActionHalo>,
+  )
+  expect(container.firstElementChild).not.toHaveClass('self-start')
+  expect(container.querySelector('[aria-hidden="true"]')).toHaveClass('-inset-8')
+})

@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { CategoryIcon } from '@/components/category-icon'
+import { CategoryBadge } from '@/components/category-badge'
 import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import { formatScore } from '@/domain/scoring/format'
 import { toMilli } from '@/domain/scoring/milli'
@@ -13,18 +13,24 @@ export function categoryAccent(category: NormalizedCategory): CategoryAccent | u
   return color === undefined ? undefined : { '--category-color': color }
 }
 
-// `dark:` répété : sinon `dark:border-input` du variant outline l'emporte en sombre.
+// Teinte de catégorie (D103) : fond à 10 % sur la carte, bordure à 35 %, neutre sans couleur ;
+// classes écrites en entier (Tailwind ne lit que des littéraux). Type `color:` explicite : `cn`
+// (tailwind-merge) les range avec les couleurs et retire celles du variant outline. `dark:` répété :
+// sinon les classes `dark:` du variant l'emportent en sombre.
 // Pas de `pointer-events-none` sur `aria-disabled` : le survol doit ouvrir l'infobulle d'une
 // catégorie épuisée, le clic est neutralisé par l'appelant (QUIRKS).
 const CATEGORY_TILE_BUTTON_CLASS =
-  'flex h-full w-full flex-col items-center gap-2 p-4 text-center whitespace-normal ' +
-  'data-[colored=true]:border-[var(--category-color)] ' +
-  'dark:data-[colored=true]:border-[var(--category-color)] ' +
-  'aria-disabled:cursor-not-allowed aria-disabled:opacity-50'
+  'flex h-full min-h-32 w-full flex-col items-start justify-start gap-2.5 rounded-xl p-4 ' +
+  'text-left text-base whitespace-normal text-foreground hover:text-foreground ' +
+  'border-[color:color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_35%,transparent)] ' +
+  'dark:border-[color:color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_35%,transparent)] ' +
+  'bg-[color:color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_10%,var(--color-card))] ' +
+  'hover:bg-[color:color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_16%,var(--color-card))] ' +
+  'aria-disabled:cursor-not-allowed aria-disabled:opacity-45'
 
 /**
- * Props du bouton `outline` qui entoure une tuile : accent (`--category-color`), bordure teintée
- * si la catégorie a une couleur, mise en page pleine hauteur. Communes au tirage d'un passage et
+ * Props du bouton `outline` qui entoure une tuile : accent (`--category-color`), teinte de la
+ * catégorie (neutre sans couleur), mise en page pleine hauteur. Communes au tirage d'un passage et
  * d'un entraînement.
  */
 export function categoryTileButtonProps(category: NormalizedCategory) {
@@ -42,8 +48,8 @@ type CategoryTileProps = Readonly<{
 }>
 
 /**
- * Contenu d'une tuile de catégorie : icône teintée par `--category-color`, libellé et maximum du
- * barème en points. Le bouton qui l'entoure porte l'accent (`categoryAccent`) et l'état.
+ * Contenu d'une tuile de catégorie : tuile d'icône teintée, libellé et maximum du barème en points,
+ * dans la couleur de la catégorie. Le bouton qui l'entoure porte l'accent (`categoryAccent`) et l'état.
  */
 export function CategoryTile({ ui, config, category }: CategoryTileProps) {
   const { text, locale } = ui
@@ -51,14 +57,9 @@ export function CategoryTile({ ui, config, category }: CategoryTileProps) {
   const max = formatScore(toMilli(points), 'raw', config, locale)
   return (
     <>
-      {category.icon !== undefined && (
-        <CategoryIcon
-          name={category.icon}
-          className="size-6 shrink-0 text-[var(--category-color,currentColor)]"
-        />
-      )}
-      <span>{category.label}</span>
-      <span className="text-xs text-muted-foreground">
+      <CategoryBadge color={category.color} icon={category.icon} size="xl" />
+      <span className="font-bold">{category.label}</span>
+      <span className="mt-auto text-small font-semibold text-[var(--category-color,var(--color-muted-foreground))] tabular-nums">
         {text('passage_category_max', { max, points })}
       </span>
     </>

@@ -1,5 +1,4 @@
-import { CategoryIcon } from '@/components/category-icon'
-import { categoryAccent } from '@/components/category-tile'
+import { CategoryBadge } from '@/components/category-badge'
 import { ConfigIssueList } from '@/components/config-issue-list'
 import { formatScale } from '@/components/format-scale'
 import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
@@ -12,23 +11,11 @@ type ConfigPreviewProps = Readonly<{
   result: ValidationResult
 }>
 
-// Tuile teintée par la couleur de la catégorie, neutre sans couleur (D103 : teinte douce).
-const TILE_CLASS =
-  'inline-flex size-7 shrink-0 items-center justify-center rounded-sm ' +
-  'bg-[color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_16%,transparent)] ' +
-  'text-[var(--category-color,var(--color-muted-foreground))]'
-
 function CategoryRow({ ui, category }: Readonly<{ ui: Ui; category: NormalizedCategory }>) {
   const count = category.questions.length
   return (
     <li className="flex items-center gap-3 border-t py-2">
-      <span style={categoryAccent(category)} className={TILE_CLASS}>
-        {category.icon === undefined ? (
-          <span aria-hidden className="size-2 rounded-full bg-current" />
-        ) : (
-          <CategoryIcon name={category.icon} className="size-4 shrink-0" />
-        )}
-      </span>
+      <CategoryBadge color={category.color} icon={category.icon} size="sm" />
       <span className="flex min-w-0 flex-1 flex-col wrap-anywhere">
         <span className="text-sm font-semibold">{category.label}</span>
         <span className="text-xs text-muted-foreground">
