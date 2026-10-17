@@ -1,6 +1,7 @@
 import { useMemo, useRef } from 'react'
 import { IconChartBar, IconExternalLink, IconLayoutSidebarRight } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
+import { Breadcrumb } from '@/components/breadcrumb'
 import { PageShell } from '@/components/page-shell'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -26,8 +27,6 @@ import { ProjectionPreview } from './projection-preview'
 import { SidePanel } from './side-panel'
 import { StudentTab } from './student-tab'
 import { StudentsTab } from './students-tab'
-import { SMALL_TEXT_LINK_CLASS } from '@/components/text-link'
-import { cn } from '@/lib/utils'
 
 /**
  * Message de la dernière action refusée, ou `undefined` (spec F09 §7). En if/return plutôt qu'en
@@ -90,9 +89,11 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
     <TooltipProvider>
       <PageShell
         back={
-          <Link to="/" className={cn('self-start', SMALL_TEXT_LINK_CLASS)}>
-            {ui.text('back_home', {})}
-          </Link>
+          <Breadcrumb
+            ui={ui}
+            root={{ label: ui.text('menu_sessions', {}), to: '/sessions' }}
+            parts={[session.name, config.exam.title]}
+          />
         }
         title={config.exam.title}
         meta={<PassageMeta ui={ui} config={config} student={student} standing={standing} />}

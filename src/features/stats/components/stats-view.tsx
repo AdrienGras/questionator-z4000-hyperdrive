@@ -1,7 +1,6 @@
-import { Link } from '@tanstack/react-router'
 import { useMemo } from 'react'
+import { BackLink } from '@/components/back-link'
 import { PageShell } from '@/components/page-shell'
-import { buttonVariants } from '@/components/ui/button'
 import type { Session } from '@/domain/session/types'
 import { computeStats } from '@/domain/stats/compute-stats'
 import { useUi } from '@/lib/i18n/use-ui'
@@ -30,13 +29,9 @@ export function StatsView({ session }: Readonly<{ session: Session }>) {
     <PageShell
       title={session.name}
       back={
-        <Link
-          to="/session/$sessionId"
-          params={{ sessionId: session.id }}
-          className={buttonVariants({ variant: 'outline', className: 'self-start' })}
-        >
+        <BackLink to="/session/$sessionId" params={{ sessionId: session.id }}>
           {text('stats_back', {})}
-        </Link>
+        </BackLink>
       }
     >
       <div className="grid gap-4 md:grid-cols-2">

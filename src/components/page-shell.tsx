@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
 type PageShellProps = Readonly<{
   /** Titre de la page (rendu dans le `h1`). */
   title: ReactNode
-  /** Lien de retour, au-dessus du titre. */
+  /** Au-dessus du titre : fil d'Ariane (`Breadcrumb`) ou lien retour (`BackLink`). */
   back?: ReactNode
   /** Ligne d'infos sous le titre. */
   meta?: ReactNode
@@ -33,15 +33,15 @@ export function PageShell({
     <main
       {...rest}
       className={cn(
-        'mx-auto flex min-h-svh w-full max-w-(--breakpoint-2xl) flex-col gap-6 px-4 py-4 sm:px-6 sm:py-6 lg:px-10',
+        'mx-auto flex min-h-svh w-full max-w-(--breakpoint-2xl) flex-col gap-6 px-4 py-6 md:px-10 md:py-8',
         className,
       )}
     >
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-[1_1_20rem] flex-col gap-1">
+      <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+        <div className="flex min-w-0 flex-[1_1_20rem] flex-col gap-2">
           {back}
-          <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-          {meta}
+          <h1 className="text-h1 font-bold tracking-tight">{title}</h1>
+          {meta !== undefined && <div className="text-muted-foreground">{meta}</div>}
         </div>
         {actions !== undefined && (
           <div className="ml-auto flex flex-wrap items-center justify-end gap-2">{actions}</div>

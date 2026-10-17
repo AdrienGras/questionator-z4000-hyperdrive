@@ -85,7 +85,8 @@ test("en-tête, liste des étudiants et changement d'étudiant actif", async () 
   expect(screen.getByText('Durand Alice')).toBeInTheDocument()
   expect(screen.getByText('Question 1 / 3')).toBeInTheDocument()
   expect(screen.getByText('Score brut : 0')).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
+  const trail = within(screen.getByRole('navigation', { name: "Fil d'Ariane" }))
+  expect(trail.getByRole('link', { name: 'Sessions' })).toHaveAttribute('href', '/sessions')
 
   expect(screen.queryByRole('combobox', { name: 'Étudiant' })).not.toBeInTheDocument()
   const dialog = await openSidePanel('Étudiants')
@@ -603,7 +604,7 @@ test('grille de 5 catégories : 3 + 2, disposition inchangée après un tirage (
   expect(gridLayout()).toEqual(expected)
 })
 
-test('barre de titre : retour, titre de l’examen, panneau puis thème', async () => {
+test('barre de titre : fil d’Ariane, titre de l’examen, puis panneau', async () => {
   const session = passageSession()
   await putSession(session)
   renderAt('/session/session-1')
@@ -611,7 +612,7 @@ test('barre de titre : retour, titre de l’examen, panneau puis thème', async 
   const title = await screen.findByRole('heading', { level: 1 })
   expect(title).toHaveTextContent(session.config.exam.title)
   const names = bannerInteractiveNames()
-  expect(names[0]).toBe('Retour à l’accueil')
+  expect(names[0]).toBe('Sessions')
   expect(names[1]).toBe('Panneau')
   expect(names).not.toContain('Ouvrir la vue projetée')
 })

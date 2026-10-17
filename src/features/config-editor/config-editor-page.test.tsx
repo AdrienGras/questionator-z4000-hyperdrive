@@ -64,7 +64,8 @@ describe('ConfigEditorPage', () => {
   it('ouvre l’exemple sur deux colonnes, puis en affiche l’aperçu', async () => {
     await renderEditor()
     await previewReady()
-    expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
+    const trail = within(screen.getByRole('navigation', { name: "Fil d'Ariane" }))
+    expect(trail.getByText('Éditeur de config')).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('heading', { level: 2, name: 'Configuration' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 2, name: 'Aperçu' })).toBeInTheDocument()
     expect(editorView().state.doc.toString()).toBe(EXAMPLE_TEXT)

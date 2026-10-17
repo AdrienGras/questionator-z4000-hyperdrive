@@ -54,6 +54,7 @@ const SAMPLE: UiMessageParams = {
   menu_help_label: {},
   menu_collapse: {},
   menu_expand: {},
+  breadcrumb_label: {},
   session_loading: {},
   session_not_found: {},
   damaged_title: {},

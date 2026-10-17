@@ -1,4 +1,4 @@
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import {
   useCallback,
   useId,
@@ -8,6 +8,7 @@ import {
   type ChangeEvent,
   type DragEvent,
 } from 'react'
+import { Breadcrumb } from '@/components/breadcrumb'
 import { PageShell } from '@/components/page-shell'
 import { Button } from '@/components/ui/button'
 import { configFileName } from '@/domain/config/config-file-name'
@@ -28,7 +29,6 @@ import { stashConfigForCreation } from '@/lib/config-handoff'
 import { downloadText } from '@/lib/download'
 import { useUi } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
-import { SMALL_TEXT_LINK_CLASS } from '@/components/text-link'
 
 // Garde de page : un fichier lâché hors de la colonne de l'éditeur ne doit jamais être ouvert par
 // le navigateur (le texte en cours serait quitté). La colonne gère son propre dépôt avant.
@@ -125,11 +125,7 @@ export function ConfigEditorPage() {
   return (
     <PageShell
       title={t('editor_title', {})}
-      back={
-        <Link to="/" className={cn('self-start', SMALL_TEXT_LINK_CLASS)}>
-          {t('back_home', {})}
-        </Link>
-      }
+      back={<Breadcrumb ui={ui} root={{ label: t('menu_editor', {}) }} />}
       onDragOver={handlePageDragOver}
       onDrop={handlePageDrop}
     >

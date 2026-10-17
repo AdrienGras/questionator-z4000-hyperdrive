@@ -129,7 +129,7 @@ test('une config en anglais donne une vue examinateur en anglais, menu dans la l
   await putSession(themedSession('en'))
   renderAt('/session/session-1')
   expect(await screen.findByText('Question 1 / 1')).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: 'Back to home' })).toBeInTheDocument()
+  expect(screen.getByRole('navigation', { name: 'Breadcrumb' })).toBeInTheDocument()
   // Le menu garde la langue de l'application (D105) : l'aide y est en français.
   const aside = screen.getByRole('complementary')
   expect(within(aside).getByRole('link', { name: 'Aide (nouvel onglet)' })).toBeInTheDocument()

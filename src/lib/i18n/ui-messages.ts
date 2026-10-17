@@ -53,6 +53,7 @@ export type UiMessageParams = {
   menu_help_label: NoParams
   menu_collapse: NoParams
   menu_expand: NoParams
+  breadcrumb_label: NoParams
   session_loading: NoParams
   session_not_found: NoParams
   damaged_title: NoParams
@@ -481,6 +482,7 @@ const fr: Dictionary<UiMessageParams> = {
   menu_help_label: () => 'Aide',
   menu_collapse: () => 'Replier le menu',
   menu_expand: () => 'Déplier le menu',
+  breadcrumb_label: () => "Fil d'Ariane",
   session_loading: () => 'Chargement de la session…',
   session_not_found: () => 'Session introuvable',
   damaged_title: () => 'Cette session est endommagée',
@@ -878,6 +880,7 @@ const en: Dictionary<UiMessageParams> = {
   menu_help_label: () => 'Help',
   menu_collapse: () => 'Collapse menu',
   menu_expand: () => 'Expand menu',
+  breadcrumb_label: () => 'Breadcrumb',
   session_loading: () => 'Loading session…',
   session_not_found: () => 'Session not found',
   damaged_title: () => 'This session is damaged',

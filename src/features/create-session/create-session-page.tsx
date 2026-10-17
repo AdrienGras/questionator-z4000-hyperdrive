@@ -1,6 +1,7 @@
-import { Link, useNavigate, useRouter } from '@tanstack/react-router'
+import { useNavigate, useRouter } from '@tanstack/react-router'
 import { useEffect, useId, useRef, type SubmitEvent } from 'react'
 import { DbStatusBanner } from '@/components/db-status-banner'
+import { Breadcrumb } from '@/components/breadcrumb'
 import { PageShell } from '@/components/page-shell'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -17,7 +18,6 @@ import { configSlotStatus, slotErrorKey, slotFileName } from '@/components/file-
 import { studentsSlotStatus } from './slot-status'
 import { useCreateForm } from '@/features/create-session/hooks/use-create-form'
 import { SMALL_TEXT_LINK_CLASS } from '@/components/text-link'
-import { cn } from '@/lib/utils'
 
 /** Écran de création d'une session (F06) : deux fichiers, nom, examinateur, aperçu. */
 export function CreateSessionPage() {
@@ -68,11 +68,7 @@ export function CreateSessionPage() {
   return (
     <PageShell
       title={text('create_title', {})}
-      back={
-        <Link to="/" className={cn('self-start', SMALL_TEXT_LINK_CLASS)}>
-          {text('back_home', {})}
-        </Link>
-      }
+      back={<Breadcrumb ui={ui} root={{ label: text('menu_sessions', {}), to: '/sessions' }} />}
       {...PAGE_DROP_GUARD}
     >
       <DbStatusBanner ui={ui} status={status} />

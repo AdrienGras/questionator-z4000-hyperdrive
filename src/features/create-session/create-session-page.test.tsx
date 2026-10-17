@@ -120,9 +120,10 @@ describe('écran de création', () => {
     expect(await screen.findByRole('heading', { name: 'Oral de test' })).toBeInTheDocument()
   })
 
-  test('titre, retour à l’accueil et fichiers d’exemple', async () => {
+  test('titre, fil d’Ariane et fichiers d’exemple', async () => {
     await renderPage()
-    expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
+    const trail = within(screen.getByRole('navigation', { name: "Fil d'Ariane" }))
+    expect(trail.getByRole('link', { name: 'Sessions' })).toHaveAttribute('href', '/sessions')
     const students = screen.getByRole('link', { name: "Télécharger la liste d'exemple" })
     expect(students.getAttribute('href')).toMatch(/students\.example\.csv$/)
     expect(students).toHaveAttribute('download')
@@ -131,11 +132,11 @@ describe('écran de création', () => {
     expect(config).toHaveAttribute('download')
   })
 
-  test('barre de titre : retour, « Nouvelle session », thème dernier', async () => {
+  test('barre de titre : fil d’Ariane et « Nouvelle session »', async () => {
     await renderPage()
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Nouvelle session')
     const banner = screen.getByRole('banner')
-    expect(within(banner).getByRole('link', { name: 'Retour à l’accueil' })).toBeInTheDocument()
+    expect(within(banner).getByRole('navigation', { name: "Fil d'Ariane" })).toBeInTheDocument()
   })
 
   test('sans fichier : bouton désactivé et aide de l’aperçu', async () => {
@@ -313,7 +314,9 @@ describe('écran de création', () => {
     const { router } = await renderFilled()
     fireEvent.click(submitButton())
     await waitFor(() => expect(submitButton()).toBeDisabled())
-    fireEvent.click(screen.getByRole('link', { name: 'Retour à l’accueil' }))
+    fireEvent.click(
+      within(screen.getByRole('complementary')).getByRole('link', { name: 'Accueil' }),
+    )
     // Attendre le démontage effectif de l'écran (le composant de l'accueil est chargé à la demande).
     await waitFor(() =>
       expect(
@@ -334,7 +337,9 @@ describe('écran de création', () => {
     const { router } = await renderFilled()
     fireEvent.click(submitButton())
     await waitFor(() => expect(submitButton()).toBeDisabled())
-    fireEvent.click(screen.getByRole('link', { name: 'Retour à l’accueil' }))
+    fireEvent.click(
+      within(screen.getByRole('complementary')).getByRole('link', { name: 'Accueil' }),
+    )
     // L'écriture se termine avant le montage de l'accueil : l'écran de création est encore monté.
     expect(screen.getByRole('heading', { level: 1, name: 'Nouvelle session' })).toBeInTheDocument()
     write.resolve()
