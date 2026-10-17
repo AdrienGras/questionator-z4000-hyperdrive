@@ -1,3 +1,4 @@
+import { IconFileX } from '@tabler/icons-react'
 import { createRootRoute, Link, Outlet, useMatchRoute } from '@tanstack/react-router'
 import { AppearanceProvider } from '@/app/appearance-provider'
 import { AppMenu } from '@/components/menu/app-menu'
@@ -5,17 +6,17 @@ import { OfflineReadyPrompt } from '@/components/offline-ready-prompt'
 import { UpdatePrompt } from '@/components/update-prompt'
 import { useUi } from '@/lib/i18n/use-ui'
 import { LocaleProvider, useLocale } from '@/lib/i18n/locale-context'
-import { TEXT_LINK_CLASS } from '@/components/text-link'
+import { StatusScreen } from '@/components/status-screen'
+import { buttonVariants } from '@/components/ui/button'
 
 export function NotFound() {
   const { text } = useUi()
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center gap-4 p-6">
-      <h1 className="text-2xl font-bold">{text('not_found_title', {})}</h1>
-      <Link to="/" className={TEXT_LINK_CLASS}>
+    <StatusScreen icon={<IconFileX />} title={text('not_found_title', {})}>
+      <Link to="/" className={buttonVariants({ variant: 'default' })}>
         {text('back_home', {})}
       </Link>
-    </main>
+    </StatusScreen>
   )
 }
 

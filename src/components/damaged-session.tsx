@@ -1,10 +1,12 @@
+import { IconAlertTriangle, IconDownload } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { exportBackup } from '@/components/export/export-backup'
-import { Button } from '@/components/ui/button'
+import { STATUS_MAIN_CLASS, StatusScreen } from '@/components/status-screen'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { formatBackupIssue, formatIssuePath } from '@/domain/backup/messages'
 import type { DamagedSession } from '@/lib/db/damaged-session'
 import type { Ui } from '@/lib/i18n/use-ui'
-import { TEXT_LINK_CLASS } from '@/components/text-link'
+import { cn } from '@/lib/utils'
 
 /**
  * La vue projetée ne reçoit jamais le contenu de la session (D69) : `damaged` y est facultatif,
@@ -17,7 +19,8 @@ type DamagedSessionScreenProps = Readonly<
   )
 >
 
-const MAIN_CLASSES = 'flex min-h-svh flex-col items-center justify-center gap-4 p-6 text-center'
+const DANGER_TILE_CLASS =
+  'inline-flex size-14 shrink-0 items-center justify-center rounded-md bg-destructive/14 text-destructive'
 
 /**
  * Session endommagée (F31, D81), dans la langue et le thème de l'interface : la config n'est pas
@@ -25,36 +28,53 @@ const MAIN_CLASSES = 'flex min-h-svh flex-col items-center justify-center gap-4 
  */
 export function DamagedSessionScreen(props: DamagedSessionScreenProps) {
   const { text, locale } = props.ui
-  const title = <h1 className="text-2xl font-bold">{text('damaged_title', {})}</h1>
-  if (props.variant === 'present') return <main className={MAIN_CLASSES}>{title}</main>
+  const title = text('damaged_title', {})
+  if (props.variant === 'present') {
+    return (
+      <main className={cn(STATUS_MAIN_CLASS, 'relative isolate overflow-hidden')}>
+        <div
+          aria-hidden
+          className="absolute top-1/2 left-1/2 -z-10 h-70 w-105 -translate-1/2 bg-[radial-gradient(closest-side,var(--color-halo-cool),transparent)] blur-sm"
+        />
+        <span aria-hidden className={DANGER_TILE_CLASS}>
+          <IconAlertTriangle className="size-7" />
+        </span>
+        <h1 className="text-3xl font-extrabold tracking-tight">{title}</h1>
+      </main>
+    )
+  }
   const { damaged } = props
   return (
-    <main className={MAIN_CLASSES}>
-      {title}
-      <p className="max-w-xl text-muted-foreground">{text('damaged_body', {})}</p>
-      <Button variant="outline" onClick={() => exportBackup(damaged.raw)}>
-        {text('action_export', {})}
-      </Button>
-      <Link to="/" className={TEXT_LINK_CLASS}>
-        {text('back_home', {})}
-      </Link>
-      <details className="w-full max-w-xl text-left text-sm">
-        <summary className="cursor-pointer justify-center text-center">
-          {text('damaged_details', {})}
+    <StatusScreen tone="danger" icon={<IconAlertTriangle />} title={title}>
+      <p className="max-w-110 text-muted-foreground">{text('damaged_body', {})}</p>
+      <div className="mt-1 flex flex-wrap justify-center gap-2">
+        <Button onClick={() => exportBackup(damaged.raw)}>
+          <IconDownload aria-hidden />
+          {text('action_export', {})}
+        </Button>
+        <Link to="/" className={buttonVariants({ variant: 'ghost' })}>
+          {text('back_home', {})}
+        </Link>
+      </div>
+      <details className="mt-2 w-full max-w-120 rounded-lg bg-card px-4.5 py-3.5 text-left text-sm shadow-card">
+        <summary className="cursor-pointer font-semibold">
+          {text('damaged_details', { count: damaged.issues.length })}
         </summary>
-        <ul className="mt-3 flex flex-col gap-2">
+        <ul className="mt-2.5">
           {damaged.issues.map((issue, index) => {
             const path = formatIssuePath(issue)
             const message = formatBackupIssue(issue, locale)
             return (
-              <li key={`${index}|${path}|${message}`} className="flex flex-col gap-0.5">
-                {path !== '' && <code className="text-muted-foreground">{path}</code>}
+              <li key={`${index}|${path}|${message}`} className="flex flex-col gap-1 border-t py-3">
+                {path !== '' && (
+                  <code className="font-mono text-xs text-muted-foreground">{path}</code>
+                )}
                 <span>{message}</span>
               </li>
             )
           })}
         </ul>
       </details>
-    </main>
+    </StatusScreen>
   )
 }

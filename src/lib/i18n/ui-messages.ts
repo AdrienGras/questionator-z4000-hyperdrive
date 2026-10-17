@@ -30,11 +30,15 @@ export type UiMessageParams = {
   home_training_damaged_body: NoParams
   persistence_warning_label: NoParams
   persistence_warning: NoParams
+  db_outdated_title: NoParams
   db_outdated: NoParams
   db_reload: NoParams
+  db_unavailable_title: NoParams
   db_unavailable: NoParams
   update_available: NoParams
+  update_available_body: NoParams
   update_reload: NoParams
+  offline_ready_title: NoParams
   offline_ready: NoParams
   offline_ready_dismiss: NoParams
   color_mode_label: { mode: string }
@@ -59,7 +63,7 @@ export type UiMessageParams = {
   damaged_title: NoParams
   damaged_badge: NoParams
   damaged_body: NoParams
-  damaged_details: NoParams
+  damaged_details: { count: number }
   present_waiting: NoParams
   present_prompt_label: NoParams
   present_question_index: { current: number; total: number }
@@ -457,14 +461,17 @@ const fr: Dictionary<UiMessageParams> = {
   persistence_warning_label: () => 'Stockage non garanti',
   persistence_warning: () =>
     "Le navigateur n'a pas garanti la conservation des données : il peut effacer vos sessions s'il manque d'espace. Exportez régulièrement une sauvegarde.",
-  db_outdated: () =>
-    "L'application a été mise à jour dans un autre onglet. Rechargez la page pour continuer.",
+  db_outdated_title: () => 'L’application a été mise à jour dans un autre onglet.',
+  db_outdated: () => 'Rechargez la page pour continuer.',
   db_reload: () => 'Recharger',
+  db_unavailable_title: () => 'Le stockage local est indisponible',
   db_unavailable: () =>
-    'Le stockage local est indisponible (navigation privée ou cookies bloqués ?). Les sessions ne peuvent pas être enregistrées.',
+    '(navigation privée ou cookies bloqués ?). Les sessions ne peuvent pas être enregistrées.',
   update_available: () => 'Nouvelle version disponible',
+  update_available_body: () => 'Rechargez quand vous voulez.',
   update_reload: () => 'Recharger',
-  offline_ready: () => "Prête pour le hors ligne : l'application fonctionne désormais sans réseau.",
+  offline_ready_title: () => 'Prête pour le hors ligne',
+  offline_ready: () => 'L’application fonctionne désormais sans réseau.',
   offline_ready_dismiss: () => 'OK',
   color_mode_label: ({ mode }) => `Mode d'affichage : ${mode.toLocaleLowerCase('fr')}`,
   color_mode_light: () => 'Clair',
@@ -489,7 +496,7 @@ const fr: Dictionary<UiMessageParams> = {
   damaged_badge: () => 'Endommagée',
   damaged_body: () =>
     'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Exportez une sauvegarde pour le conserver ou le corriger.',
-  damaged_details: () => 'Détails',
+  damaged_details: ({ count }) => `Détails · ${count} ${plural(count, 'problème', 'problèmes')}`,
   present_waiting: () => "L'épreuve va bientôt commencer.",
   present_prompt_label: () => 'Question en cours',
   present_question_index: ({ current, total }) => `Question ${current} / ${total}`,
@@ -856,13 +863,16 @@ const en: Dictionary<UiMessageParams> = {
   persistence_warning_label: () => 'Storage not guaranteed',
   persistence_warning: () =>
     'The browser did not guarantee data retention: it may erase your sessions when space runs low. Export a backup regularly.',
-  db_outdated: () => 'The app was updated in another tab. Reload the page to continue.',
+  db_outdated_title: () => 'The app was updated in another tab.',
+  db_outdated: () => 'Reload the page to continue.',
   db_reload: () => 'Reload',
-  db_unavailable: () =>
-    'Local storage is unavailable (private browsing or blocked cookies?). Sessions cannot be saved.',
+  db_unavailable_title: () => 'Local storage is unavailable',
+  db_unavailable: () => '(private browsing or blocked cookies?). Sessions cannot be saved.',
   update_available: () => 'New version available',
+  update_available_body: () => 'Reload whenever you like.',
   update_reload: () => 'Reload',
-  offline_ready: () => 'Ready to work offline: the app now works without a network.',
+  offline_ready_title: () => 'Ready to work offline',
+  offline_ready: () => 'The app now works without a network.',
   offline_ready_dismiss: () => 'OK',
   color_mode_label: ({ mode }) => `Display mode: ${mode.toLocaleLowerCase('en')}`,
   color_mode_light: () => 'Light',
@@ -887,7 +897,7 @@ const en: Dictionary<UiMessageParams> = {
   damaged_badge: () => 'Damaged',
   damaged_body: () =>
     'The saved content is inconsistent; the app cannot open it. Export a backup to keep it or fix it.',
-  damaged_details: () => 'Details',
+  damaged_details: ({ count }) => `Details · ${count} ${pluralEn(count, 'issue', 'issues')}`,
   present_waiting: () => 'The exam will start soon.',
   present_prompt_label: () => 'Current question',
   present_question_index: ({ current, total }) => `Question ${current} / ${total}`,

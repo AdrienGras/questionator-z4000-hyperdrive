@@ -53,6 +53,16 @@ test('affiche « Nouvelle version disponible » et « Recharger » quand une ver
   expect(screen.getByRole('button', { name: 'Recharger' })).toBeInTheDocument()
 })
 
+test('titre en strong, puis le corps', () => {
+  const { update, ready } = makeUpdate()
+  ready()
+  render(<UpdatePrompt update={update} />)
+  expect(screen.getByText('Nouvelle version disponible').tagName).toBe('STRONG')
+  expect(screen.getByRole('status')).toHaveTextContent(
+    /^Nouvelle version disponible\s*Rechargez quand vous voulez\.\s*Recharger$/,
+  )
+})
+
 test("n'affiche rien quand la base est outdated (le bandeau D45 a la priorité)", () => {
   const { update, ready } = makeUpdate()
   ready()

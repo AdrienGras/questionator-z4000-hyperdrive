@@ -9,8 +9,10 @@ import { afterEach, expect, test, vi } from 'vitest'
 import type { BackupIssue } from '@/domain/backup/issues'
 import { serializeBackup } from '@/domain/backup/serialize'
 import type { DamagedSession } from '@/lib/db/damaged-session'
+import { buttonVariants } from '@/components/ui/button'
 import { downloadText } from '@/lib/download'
 import type { Locale } from '@/lib/i18n/i18n'
+import { cn } from '@/lib/utils'
 import { makeUi } from '@/testing/make-ui'
 import { DamagedSessionScreen } from './damaged-session'
 
@@ -66,7 +68,7 @@ test('examinateur : titre, explication, export, retour, détails', async () => {
   ).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
 
-  const details = screen.getByText('Détails').closest('details')
+  const details = screen.getByText('Détails · 2 problèmes').closest('details')
   expect(details).not.toBeNull()
   if (details === null) return
   for (const text of [
@@ -77,6 +79,15 @@ test('examinateur : titre, explication, export, retour, détails', async () => {
   ]) {
     expect(within(details).getByText(text)).toBeInTheDocument()
   }
+})
+
+test('examinateur : export en bouton principal, retour en bouton discret', async () => {
+  renderScreen('examiner')
+  const exportButton = await screen.findByRole('button', { name: 'Exporter une sauvegarde' })
+  // `Button` passe ses classes par `cn` (tailwind-merge), qui fusionne les doublons de `buttonVariants`.
+  expect(exportButton).toHaveClass(...cn(buttonVariants({ variant: 'default' })).split(' '))
+  const back = screen.getByRole('link', { name: 'Retour à l’accueil' })
+  expect(back).toHaveClass(...buttonVariants({ variant: 'ghost' }).split(' '))
 })
 
 test('examinateur : « Exporter une sauvegarde » télécharge le brut à l’identique', async () => {
@@ -101,7 +112,7 @@ test('projetée : titre seul, ni action ni détail', async () => {
   ).toBeInTheDocument()
   expect(screen.queryAllByRole('button')).toEqual([])
   expect(screen.queryAllByRole('link')).toEqual([])
-  expect(screen.queryByText('Détails')).not.toBeInTheDocument()
+  expect(screen.queryByText(/^Détails/)).not.toBeInTheDocument()
   expect(screen.queryByText(/session\.activeStudentId/)).not.toBeInTheDocument()
   expect(screen.queryByText(/fantome/)).not.toBeInTheDocument()
 })
@@ -117,5 +128,5 @@ test('anglais : libellés traduits', async () => {
       'The saved content is inconsistent; the app cannot open it. Export a backup to keep it or fix it.',
     ),
   ).toBeInTheDocument()
-  expect(screen.getByText('Details')).toBeInTheDocument()
+  expect(screen.getByText('Details · 2 issues')).toBeInTheDocument()
 })
