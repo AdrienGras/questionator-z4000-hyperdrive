@@ -18,14 +18,14 @@ beforeEach(async () => {
 describe('carte d’entraînement endommagé', () => {
   test('nom brut, pastille, ni reprise ni couverture, seulement « Supprimer »', async () => {
     await putRaw({ id: 'x', name: 'Révisions cassées' })
-    renderAt('/')
+    renderAt('/trainings')
     const trainings = await screen.findByRole('region', { name: 'Mes entraînements' })
     expect(
       await within(trainings).findByRole('heading', { name: 'Révisions cassées' }),
     ).toBeInTheDocument()
     expect(within(trainings).getByText('Endommagée')).toBeInTheDocument()
-    expect(within(trainings).queryByRole('link', { name: 'Reprendre' })).not.toBeInTheDocument()
-    expect(within(trainings).queryByText(/des questions notées/)).not.toBeInTheDocument()
+    expect(within(trainings).queryByRole('link', { name: /^Reprendre/ })).not.toBeInTheDocument()
+    expect(within(trainings).queryByText('questions notées')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Actions pour « Révisions cassées »' }))
     const items = await screen.findAllByRole('menuitem')
     expect(items.map((item) => item.textContent)).toEqual(['Supprimer'])
@@ -33,13 +33,13 @@ describe('carte d’entraînement endommagé', () => {
 
   test('sans nom lisible, le titre est l’identifiant', async () => {
     await putRaw({ id: 'x' })
-    renderAt('/')
+    renderAt('/trainings')
     expect(await screen.findByRole('heading', { level: 3, name: 'x' })).toBeInTheDocument()
   })
 
   test('« Supprimer » ouvre le dialogue et supprime l’enregistrement', async () => {
     await putRaw({ id: 'x', name: 'Révisions cassées' })
-    renderAt('/')
+    renderAt('/trainings')
     fireEvent.click(
       await screen.findByRole('button', { name: 'Actions pour « Révisions cassées »' }),
     )
@@ -52,10 +52,20 @@ describe('carte d’entraînement endommagé', () => {
   test('la liste affiche une carte saine et une endommagée', async () => {
     await createTraining(makeTraining({ name: 'Révisions saines' }))
     await putRaw({ id: 'x', name: 'Révisions cassées' })
-    renderAt('/')
+    renderAt('/trainings')
     expect(await screen.findByRole('heading', { name: 'Révisions saines' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Révisions cassées' })).toBeInTheDocument()
     const trainings = screen.getByRole('region', { name: 'Mes entraînements' })
-    expect(within(trainings).getAllByRole('link', { name: 'Reprendre' })).toHaveLength(1)
+    expect(within(trainings).getAllByRole('link', { name: /^Reprendre/ })).toHaveLength(1)
+  })
+  test('« Supprimer » visible hors du menu ouvre le dialogue', async () => {
+    await putRaw({ id: 'x', name: 'Révisions cassées' })
+    renderAt('/trainings')
+    const trainings = await screen.findByRole('region', { name: 'Mes entraînements' })
+    await within(trainings).findByRole('heading', { name: 'Révisions cassées' })
+    fireEvent.click(within(trainings).getByRole('button', { name: 'Supprimer' }))
+    expect(
+      await screen.findByRole('heading', { name: 'Supprimer « Révisions cassées » ?' }),
+    ).toBeInTheDocument()
   })
 })

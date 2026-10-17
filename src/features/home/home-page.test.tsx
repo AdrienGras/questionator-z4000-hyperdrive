@@ -1,12 +1,10 @@
 import 'fake-indexeddb/auto'
-import { screen, within } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { exportWorkbook } from '@/components/export/export-workbook'
 import type { PersistenceStatus } from '@/lib/db/persistence'
 import { db, type DbStatus } from '@/lib/db/db'
 import { renderAt } from '@/testing/render-at'
-import { createTraining } from '@/lib/db/trainings'
-import { makeTraining } from '@/testing/training-fixtures'
 
 const dbState = vi.hoisted((): { status: DbStatus } => ({ status: 'open' }))
 const persistence = vi.hoisted((): { status: PersistenceStatus | undefined } => ({
@@ -40,32 +38,6 @@ afterEach(() => {
 })
 
 describe('accueil', () => {
-  test('sans entraînement : pas de section « Mes entraînements »', async () => {
-    renderAt('/')
-    await screen.findByRole('region', { name: 'Actions' })
-    expect(screen.queryByRole('region', { name: 'Mes entraînements' })).not.toBeInTheDocument()
-  })
-
-  test('avec un entraînement : section « Mes entraînements » au-dessus des sessions', async () => {
-    await createTraining(makeTraining({ name: 'Révisions JS' }))
-    renderAt('/')
-    const trainings = await screen.findByRole('region', { name: 'Mes entraînements' })
-    expect(
-      within(trainings).getByRole('heading', { level: 2, name: 'Mes entraînements' }),
-    ).toBeVisible()
-    expect(
-      within(trainings).getByRole('heading', { level: 3, name: 'Révisions JS' }),
-    ).toBeInTheDocument()
-  })
-
-  test('unavailable : pas de section « Mes entraînements »', async () => {
-    await createTraining(makeTraining())
-    dbState.status = 'unavailable'
-    renderAt('/')
-    await screen.findByRole('region', { name: 'Actions' })
-    expect(screen.queryByRole('region', { name: 'Mes entraînements' })).not.toBeInTheDocument()
-  })
-
   test.each([['persisted'], ['unsupported'], [undefined]] as const)(
     'pas d’indicateur de persistance pour %s',
     async (status) => {

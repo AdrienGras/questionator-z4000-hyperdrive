@@ -27,27 +27,36 @@ async function findCard(name: string): Promise<HTMLElement> {
 describe('carte d’entraînement', () => {
   test('nom, dernière activité, couverture et lien « Reprendre »', async () => {
     await createTraining(makeTraining({ name: 'Révisions JS' }))
-    // 1 question notée sur 4 : 25 %. Le tirage passé et le tirage en cours ne comptent pas.
+    // 1 question notée sur 4, à 1/2 : 50 %. Le tirage passé et le tirage en cours ne comptent pas.
     await db.trainingDraws.bulkAdd([
       makeDraw({ questionId: 'a-1', outcome: { kind: 'scored', points: 1, max: 2 } }),
       makeDraw({ questionId: 'a-2', outcome: { kind: 'passed' } }),
       makeDraw({ questionId: 'b-1', outcome: { kind: 'pending' } }),
     ])
-    renderAt('/')
+    renderAt('/trainings')
     const card = await findCard('Révisions JS')
-    expect(await within(card).findByText('25 % des questions notées')).toBeInTheDocument()
+    expect(await within(card).findByText('questions notées')).toBeInTheDocument()
+    expect(within(card).getByText('/ 4')).toBeInTheDocument()
+    expect(within(card).getByText(/^50\s%$/u)).toBeInTheDocument()
+    expect(within(card).getByText(/^Taux de réussite : 50\s%$/u)).toBeInTheDocument()
     expect(within(card).getByText(/^Dernière activité : /)).toBeInTheDocument()
-    expect(within(card).getByRole('link', { name: 'Reprendre' })).toHaveAttribute(
+    expect(within(card).getByRole('link', { name: 'Stats' })).toHaveAttribute(
+      'href',
+      '/training/training-1/stats',
+    )
+    expect(within(card).getByRole('link', { name: 'Reprendre « Révisions JS »' })).toHaveAttribute(
       'href',
       '/training/training-1',
     )
   })
 
-  test('sans tirage : 0 % des questions notées', async () => {
+  test('sans tirage : « — » de réussite et 0 / N questions notées', async () => {
     await createTraining(makeTraining())
-    renderAt('/')
+    renderAt('/trainings')
     const card = await findCard('Entraînement de test')
-    expect(await within(card).findByText('0 % des questions notées')).toBeInTheDocument()
+    expect(await within(card).findByText('—')).toBeInTheDocument()
+    expect(within(card).getByText('0')).toBeInTheDocument()
+    expect(within(card).getByText('/ 4')).toBeInTheDocument()
   })
 
   test('suppression confirmée : entraînement et journal supprimés', async () => {
@@ -55,7 +64,7 @@ describe('carte d’entraînement', () => {
     await db.trainingDraws.add(makeDraw())
     await createTraining(makeTraining({ id: 'autre', name: 'Autre' }))
     await db.trainingDraws.add(makeDraw({ trainingId: 'autre' }))
-    renderAt('/')
+    renderAt('/trainings')
     fireEvent.click(
       await screen.findByRole('button', { name: 'Actions pour « Entraînement de test »' }),
     )
@@ -80,7 +89,7 @@ describe('carte d’entraînement', () => {
   test('« Mettre à jour la config » mène à l’écran de mise à jour', async () => {
     vi.stubGlobal('CSS', { supports: () => true })
     await createTraining(makeTraining())
-    const { router } = renderAt('/')
+    const { router } = renderAt('/trainings')
     fireEvent.click(
       await screen.findByRole('button', { name: 'Actions pour « Entraînement de test »' }),
     )

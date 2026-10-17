@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { HomePage } from '@/features/home/home-page'
+import { TrainingsPage } from '@/features/trainings/trainings-page'
 
-// Provisoire (#146) : l'accueil, en attendant la page de l'espace (#147).
 export const Route = createFileRoute('/trainings')({
-  component: HomePage,
+  component: TrainingsPage,
 })
