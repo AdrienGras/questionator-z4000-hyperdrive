@@ -25,8 +25,8 @@ import { formatScore } from '@/domain/scoring/format'
 import { asMilli, fromMilli, toMilli } from '@/domain/scoring/milli'
 import { stepMilli } from '@/domain/scoring/rounding'
 import type { Student } from '@/domain/session/types'
+import { formatAdjustmentInput } from '@/features/session/adjustment-input'
 import type { WriteOutcome } from '@/features/session/hooks/use-passage-actions'
-import type { Locale } from '@/lib/i18n/i18n'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { WriteErrorAlert } from './write-error-alert'
 
@@ -153,18 +153,6 @@ type AdjustmentFormProps = Readonly<{
   onCancel: () => void
 }>
 
-/**
- * Valeur du champ, signée et aux décimales des notes finales (artboard `session-dialogues`) :
- * « +0,50 », « −0,25 », « 0,00 ». La saisie libre reste lue telle quelle (`parseAdjustmentInput`
- * accepte `+` et le moins typographique).
- */
-function formatInput(value: number, config: NormalizedConfig, locale: Locale): string {
-  const milli = toMilli(value)
-  const magnitude = formatScore(asMilli(Math.abs(milli)), 'final', config, locale)
-  if (milli === 0) return magnitude
-  return `${milli > 0 ? '+' : '−'}${magnitude}`
-}
-
 function AdjustmentForm({
   valueRef,
   ui,
@@ -180,7 +168,7 @@ function AdjustmentForm({
   const errorId = useId()
   const reasonId = useId()
   const [input, setInput] = useState(() =>
-    formatInput(student.adjustment?.value ?? 0, config, locale),
+    formatAdjustmentInput(student.adjustment?.value ?? 0, config, locale),
   )
   const [reason, setReason] = useState(student.adjustment?.reason ?? '')
 
@@ -195,7 +183,7 @@ function AdjustmentForm({
   function step(direction: 1 | -1) {
     const base = value === null ? 0 : toMilli(value)
     const next = Math.min(scale, Math.max(0 - scale, base + direction * stepMilli(config)))
-    setInput(formatInput(fromMilli(asMilli(next)), config, locale))
+    setInput(formatAdjustmentInput(fromMilli(asMilli(next)), config, locale))
   }
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
