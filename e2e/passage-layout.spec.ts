@@ -65,3 +65,13 @@ test('1280 px : la note dans la colonne de droite, sous la vue projetée', async
   expect(scoreBox.x).toBe(previewBox.x)
   expect(scoreBox.y).toBeGreaterThan(previewBox.y + previewBox.height)
 })
+
+test('panneau : statistiques et export restent visibles sous une longue liste', async ({
+  examiner,
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 720 })
+  await examiner.openPanel('Liste')
+  await expect(examiner.panel.getByRole('link', { name: 'Statistiques' })).toBeInViewport()
+  await expect(examiner.panel.getByRole('button', { name: 'Exporter en Excel' })).toBeInViewport()
+})

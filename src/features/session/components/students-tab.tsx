@@ -49,7 +49,7 @@ export function StudentsTab({
         </span>
         <AddStudentDialog ui={ui} session={session} disabled={disabled} onAdd={onAdd} />
       </div>
-      <ul aria-label={ui.text('students_list_label', {})} className="-mx-1 flex flex-col gap-0.5">
+      <ul aria-label={ui.text('students_list_label', {})} className="flex flex-col gap-0.5">
         {sorted.map((student) => (
           <StudentRow
             key={student.id}

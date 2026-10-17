@@ -104,8 +104,9 @@ export function SidePanel({
             <TabsContent value="student">{studentTab}</TabsContent>
             <TabsContent value="students">{studentsTab}</TabsContent>
           </Tabs>
-          <div className="mt-auto flex flex-wrap gap-2 border-t pt-4">{footer}</div>
         </div>
+        {/* Hors de la zone qui défile : toujours visible, même avec une longue liste. */}
+        <div className="flex flex-wrap gap-2 border-t pt-4">{footer}</div>
       </SheetContent>
     </Sheet>
   )
