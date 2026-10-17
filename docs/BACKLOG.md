@@ -86,6 +86,8 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 - [ ] Accueil sur téléphone (#147) : les trois actions de l'en-tête passent à la ligne, « Importer une sauvegarde » seule à droite au-dessus des deux autres. Non maquetté à 390 px ; à revoir en fin de phase 3 (artboard étroit de l'accueil, ou import replié dans un menu).
 - [ ] Écrans d'entraînement (#151) : leur lien « Retour à l'accueil » pourrait mener à `/trainings` ou passer en fil d'Ariane, comme les écrans de session ; à trancher avec les artboards `entrainement-*`.
+- [ ] Relecture de #147 : sur base vide, l'en-tête « Accueil » et ses actions apparaissent ~60 ms avant « Bienvenue » (rendre un en-tête neutre tant que les listes chargent) ; sortir `onImported?.()` du `try` de l'écriture dans `use-backup-import.ts` ; ajouter au test « seulement des endommagés » la tuile Sessions à 1.
+- [ ] Accessibilité des cartes (#147) : le libellé `sr-only` de l'anneau se lit en double avec le taux visible ; le nom des tuiles d'espace commence par un nombre sans unité ; « Exporter une sauvegarde » (carte endommagée) et « Stats » portent le même nom sur chaque carte (un `aria-label` nommé, comme `card_resume_named`).
 - [ ] Guide (`site/guide/`) : accueil en tableau de bord, premier lancement, pages Sessions et Entraînement, captures (`pnpm docs:screenshots`) ; passe prévue en fin de phase 3.
 
 ## Création de session
