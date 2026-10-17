@@ -788,7 +788,9 @@ const fr: Dictionary<UiMessageParams> = {
   markdown_footnote_back: ({ n }) => `Revenir à la référence ${n}`,
   passage_question_number: ({ current }) => `Question ${current}`,
   passage_progress_label: ({ current, total, detail }) =>
-    `Question ${current} sur ${total}${detail === '' ? '' : ` : ${detail}`}`,
+    detail === ''
+      ? `Question ${current} sur ${total}`
+      : `Question ${current} sur ${total} : ${detail}`,
   passage_progress_scored: ({ category }) => `${category} notée`,
   passage_progress_pending: ({ category }) => `${category} en cours`,
   passage_raw_score_label: () => 'Score brut',
@@ -1266,7 +1268,9 @@ const en: Dictionary<UiMessageParams> = {
   markdown_footnote_back: ({ n }) => `Back to reference ${n}`,
   passage_question_number: ({ current }) => `Question ${current}`,
   passage_progress_label: ({ current, total, detail }) =>
-    `Question ${current} of ${total}${detail === '' ? '' : `: ${detail}`}`,
+    detail === ''
+      ? `Question ${current} of ${total}`
+      : `Question ${current} of ${total}: ${detail}`,
   passage_progress_scored: ({ category }) => `${category} scored`,
   passage_progress_pending: ({ category }) => `${category} in progress`,
   passage_raw_score_label: () => 'Raw score',

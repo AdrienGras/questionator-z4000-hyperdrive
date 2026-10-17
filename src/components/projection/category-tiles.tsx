@@ -93,6 +93,8 @@ export function CategoryTiles({
   const titleId = useId()
   const dense = variant === 'grid' && (categoryRows(categories.length)[0] ?? 0) >= 4
   const layout = LAYOUT[dense ? 'compact' : variant]
+  let density: 'compact' | 'full' | undefined
+  if (variant === 'grid') density = dense ? 'compact' : 'full'
   const showTitle = variant === 'grid' && !finished
   const tiles = (
     <CategoryLayout
@@ -110,7 +112,7 @@ export function CategoryTiles({
             style={accent}
             data-colored={category.color !== undefined}
             data-state={state}
-            data-density={variant === 'grid' ? (dense ? 'compact' : 'full') : undefined}
+            data-density={density}
             aria-current={state === 'current' ? 'true' : undefined}
             className={cn(
               'flex h-full',

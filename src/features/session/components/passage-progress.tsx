@@ -51,12 +51,11 @@ export function PassageProgress({
         {` / ${index.total}`}
       </span>
       <span aria-hidden="true" className="flex gap-1">
-        {segments.map((segment, position) => {
+        {segments.map((segment) => {
           const style: (CSSProperties & Record<'--category-color', string>) | undefined =
             segment.color === undefined ? undefined : { '--category-color': segment.color }
           return (
-            // oxlint-disable-next-line react/no-array-index-key -- position fixe dans la barre
-            <span key={position} className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+            <span key={segment.key} className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
               <span
                 style={style}
                 className={cn(

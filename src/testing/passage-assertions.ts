@@ -62,7 +62,7 @@ export function expectRawScore(value: string, label = 'Score brut'): Promise<voi
   return waitFor(() => {
     const term = screen.getByText(label, { selector: 'dt' })
     expect(term.nextElementSibling?.textContent).toMatch(
-      new RegExp(`^${value.replace('.', '\\.')} /`),
+      new RegExp(`^${value.replace('.', String.raw`\.`)} /`),
     )
   })
 }

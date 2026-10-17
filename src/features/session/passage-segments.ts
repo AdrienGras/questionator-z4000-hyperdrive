@@ -3,6 +3,8 @@ import type { Student } from '@/domain/session/types'
 
 /** Un segment de la barre de progression du passage : une question notée, en cours ou à venir. */
 export type PassageSegment = Readonly<{
+  /** Clé stable : l'id de la tentative, ou `todo-<rang>` pour un segment à venir. */
+  key: string
   state: 'scored' | 'pending' | 'todo'
   categoryId?: string
   categoryLabel?: string
@@ -22,6 +24,7 @@ export function passageSegments(student: Student, config: NormalizedConfig): Pas
     .map((attempt): PassageSegment => {
       const category = config.categories.find((c) => c.id === attempt.categoryId)
       return {
+        key: attempt.id,
         state: attempt.outcome === 'pending' ? 'pending' : 'scored',
         categoryId: attempt.categoryId,
         categoryLabel: category?.label ?? attempt.categoryId,
@@ -29,7 +32,8 @@ export function passageSegments(student: Student, config: NormalizedConfig): Pas
       }
     })
     .slice(0, total)
-  const todo = Array.from({ length: total - filled.length }, (): PassageSegment => ({
+  const todo = Array.from({ length: total - filled.length }, (_, rank): PassageSegment => ({
+    key: `todo-${rank}`,
     state: 'todo',
   }))
   return [...filled, ...todo]

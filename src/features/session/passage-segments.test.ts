@@ -9,7 +9,7 @@ test('notées, puis en cours, puis à venir', () => {
   expect(segments.map((segment) => segment.state)).toEqual(['scored', 'pending', 'todo'])
   expect(segments[0]).toMatchObject({ categoryId: 'a', categoryLabel: 'A' })
   expect(segments[1]).toMatchObject({ categoryId: 'a', categoryLabel: 'A' })
-  expect(segments[2]).toEqual({ state: 'todo' })
+  expect(segments[2]).toEqual({ key: 'todo-0', state: 'todo' })
 })
 
 test('une question passée n’occupe aucun segment', () => {
@@ -24,8 +24,8 @@ test('terminé : tous les segments remplis', () => {
 
 test('aucune tentative : tout à venir', () => {
   expect(passageSegments(makeStudent(), config)).toEqual([
-    { state: 'todo' },
-    { state: 'todo' },
-    { state: 'todo' },
+    { key: 'todo-0', state: 'todo' },
+    { key: 'todo-1', state: 'todo' },
+    { key: 'todo-2', state: 'todo' },
   ])
 })
