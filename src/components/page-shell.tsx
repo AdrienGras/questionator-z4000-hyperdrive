@@ -24,8 +24,9 @@ const HALO_COOL = 'bg-[radial-gradient(closest-side,var(--color-halo-cool),trans
 
 /**
  * Halos des artboards `accueil` (deux) et `sessions` / `trainings` (un), dérivés de `--primary`.
- * Calque coupé au cadre du `main` sur les deux axes : sans lui, le décor remonte sur la barre du
- * haut du téléphone, peinte avant le `main` (`isolate`).
+ * Calque ancré à la colonne de contenu de `RootLayout` (`relative isolate`), pas au `main` borné en
+ * largeur : le halo va jusqu'au bord droit sur grand écran, et le calque coupé ne remonte ni sur la
+ * barre du haut du téléphone ni sur le menu.
  */
 function PageHalo({ halo }: Readonly<{ halo: 'home' | 'space' }>) {
   return (
@@ -64,7 +65,6 @@ export function PageShell({
       {...rest}
       className={cn(
         'mx-auto flex flex-1 w-full max-w-(--breakpoint-2xl) flex-col gap-6 px-4 py-6 md:px-10 md:py-8',
-        halo !== undefined && 'relative isolate',
         className,
       )}
     >

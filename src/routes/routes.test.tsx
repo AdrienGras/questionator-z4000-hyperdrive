@@ -253,3 +253,11 @@ test('menu : absent de la vue projetée', async () => {
   expect(screen.queryByRole('navigation', { name: 'Navigation principale' })).toBeNull()
   expect(screen.queryByRole('complementary')).toBeNull()
 })
+
+test('colonne de contenu : contexte des halos, sans le menu ni la barre du haut', async () => {
+  renderAt('/sessions')
+  const main = await screen.findByRole('main')
+  const column = main.parentElement?.closest('.isolate')
+  expect(column).toHaveClass('relative', 'flex-1')
+  expect(column?.contains(screen.getByRole('complementary'))).toBe(false)
+})

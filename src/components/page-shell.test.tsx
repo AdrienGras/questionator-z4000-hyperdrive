@@ -103,11 +103,12 @@ test('halo space : un décor caché, sans pointeur ; aucun sans la prop', () => 
   const layers = main.querySelectorAll(':scope > [aria-hidden="true"].pointer-events-none')
   expect(layers).toHaveLength(1)
   expect(layers[0]?.querySelectorAll('[class*="radial-gradient"]')).toHaveLength(1)
-  expect(main).toHaveClass('relative', 'isolate')
+  // Le calque s'ancre à la colonne de contenu de `RootLayout`, pas au `main` borné en largeur :
+  // sur grand écran, le halo doit aller jusqu'au bord droit de la fenêtre.
+  expect(main).not.toHaveClass('relative')
   unmount()
   mount(<Harness title="Oral">x</Harness>)
   expect(screen.getByRole('main').querySelectorAll('.pointer-events-none')).toHaveLength(0)
-  expect(screen.getByRole('main')).not.toHaveClass('isolate')
 })
 
 test('halo : décors dans un calque coupé sur les deux axes, sans déborder sur la barre du haut', () => {
