@@ -150,4 +150,9 @@ describe('Markdown', () => {
     rerender(<Markdown ui={ui} source="Texte" size="projection" />)
     expect(container.firstElementChild).toHaveClass('prose', 'prose-2xl')
   })
+
+  test('size="projection" masque l’étiquette du langage des blocs de code', () => {
+    const { container } = render(<Markdown ui={ui} source="Texte" size="projection" />)
+    expect(container.firstElementChild).toHaveClass('[&_[data-code-language]]:hidden')
+  })
 })

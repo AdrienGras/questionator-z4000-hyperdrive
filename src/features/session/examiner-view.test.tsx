@@ -283,6 +283,37 @@ test('clic sur une catégorie tire une question et désactive la grille', async 
   expect(await categoryButton('A')).toBeDisabled()
 })
 
+test('question en carte : catégorie et points, titre, énoncé, éléments de réponse repliés', async () => {
+  await putSession(passageSession())
+  renderAt('/session/session-1')
+
+  fireEvent.click(await categoryButton('A'))
+  const card = await screen.findByRole('region', { name: 'Question en cours' })
+  const attempt = await pendingAttempt()
+  const question = answeredCategory.questions.find((q) => q.id === attempt.questionId)!
+  expect(within(card).getByText('A')).toBeInTheDocument()
+  expect(within(card).getByText(/pts?$/)).toBeInTheDocument()
+  expect(within(card).getByRole('heading', { level: 2, name: question.title })).toBeInTheDocument()
+  expect(within(card).getByText('Éléments de réponse').closest('details')).not.toHaveAttribute(
+    'open',
+  )
+})
+
+test('« Tirage suivant » : indice pendant une question, tuiles désactivées', async () => {
+  await putSession(passageSession())
+  renderAt('/session/session-1')
+
+  expect(
+    await screen.findByRole('heading', { level: 2, name: 'Tirage suivant' }),
+  ).toBeInTheDocument()
+  expect(screen.queryByText('Disponible une fois la question notée')).not.toBeInTheDocument()
+  expect(await categoryButton('A')).toBeEnabled()
+
+  fireEvent.click(await categoryButton('A'))
+  expect(await screen.findByText('Disponible une fois la question notée')).toBeInTheDocument()
+  expect(await categoryButton('A')).toBeDisabled()
+})
+
 test('les éléments de réponse restent repliés tant que l’examinateur ne les ouvre pas', async () => {
   await putSession(passageSession())
   renderAt('/session/session-1')

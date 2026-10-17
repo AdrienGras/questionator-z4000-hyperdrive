@@ -262,6 +262,8 @@ const SAMPLE: UiMessageParams = {
   passage_progress_pending: { category: 'Normal' },
   passage_raw_score_label: {},
   passage_categories: {},
+  passage_draw_title: {},
+  passage_draw_hint: {},
   passage_category_max: { max: '2', points: 2 },
   passage_category_exhausted: {},
   passage_answer: {},

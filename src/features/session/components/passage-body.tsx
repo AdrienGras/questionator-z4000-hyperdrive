@@ -107,6 +107,7 @@ export function PassageBody({
         config={config}
         student={student}
         disabled={pending !== undefined || disabled}
+        pending={pending !== undefined}
         onDraw={onDraw}
       />
     </>

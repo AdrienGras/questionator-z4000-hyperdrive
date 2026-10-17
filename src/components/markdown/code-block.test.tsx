@@ -156,3 +156,16 @@ describe('double thème Shiki (src/index.css)', () => {
     expect(css).not.toContain('--shiki-dark-bg')
   })
 })
+
+describe('étiquette du langage', () => {
+  test('affichée pour un langage connu', () => {
+    const highlight = vi.fn<Highlight>(() => new Promise(() => {}))
+    render(<CodeBlock code="echo 1;" lang="php" highlight={highlight} />)
+    expect(screen.getByText('php')).toHaveAttribute('data-code-language')
+  })
+
+  test('absente sans langage ou en texte brut', () => {
+    const { container } = render(<CodeBlock code="x" lang="text" />)
+    expect(container.querySelector('[data-code-language]')).toBeNull()
+  })
+})
