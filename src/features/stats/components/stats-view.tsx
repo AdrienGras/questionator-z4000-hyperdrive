@@ -28,7 +28,6 @@ export function StatsView({ session }: Readonly<{ session: Session }>) {
   const stats = useMemo(() => computeStats(session), [session])
   return (
     <PageShell
-      ui={ui}
       title={session.name}
       back={
         <Link

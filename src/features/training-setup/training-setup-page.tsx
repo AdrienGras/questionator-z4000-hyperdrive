@@ -99,7 +99,6 @@ function TrainingSetupForm({ training }: Readonly<{ training?: Training }>) {
 
   return (
     <PageShell
-      ui={ui}
       title={texts.title}
       meta={training?.name}
       back={<BackLink ui={ui} training={training} />}

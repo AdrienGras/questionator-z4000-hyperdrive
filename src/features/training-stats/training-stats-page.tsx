@@ -36,7 +36,6 @@ function TrainingStatsView({
   const empty = stats.scoredCount === 0 && stats.passedCount === 0
   return (
     <PageShell
-      ui={ui}
       title={training.name}
       back={
         <Link

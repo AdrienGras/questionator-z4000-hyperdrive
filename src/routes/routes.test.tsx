@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto'
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import { beforeEach, expect, test, vi } from 'vitest'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
@@ -125,12 +125,15 @@ test('une session inconnue affiche « Session introuvable » avec un lien de ret
   expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
 })
 
-test('une config en anglais donne une vue examinateur entièrement en anglais', async () => {
+test('une config en anglais donne une vue examinateur en anglais, menu dans la langue de l’app', async () => {
   await putSession(themedSession('en'))
   renderAt('/session/session-1')
   expect(await screen.findByText('Question 1 / 1')).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'Back to home' })).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: 'Help (opens in a new tab)' })).toBeInTheDocument()
+  // Le menu garde la langue de l'application (D105) : l'aide y est en français.
+  const aside = screen.getByRole('complementary')
+  expect(within(aside).getByRole('link', { name: 'Aide (nouvel onglet)' })).toBeInTheDocument()
+  expect(aside).toHaveAttribute('lang', 'fr')
   expect(document.documentElement.lang).toBe('en')
 })
 
@@ -217,4 +220,40 @@ test('sur /present/…, une version activée ailleurs : rechargement unique, san
   await screen.findByRole('heading', { name: 'Oral de PHP' })
   expect(screen.queryByRole('status')).toBeNull()
   expect(reload).toHaveBeenCalledTimes(1)
+})
+
+/** Liens marqués actifs dans le menu latéral. */
+function activeMenuLinks() {
+  return within(screen.getByRole('complementary'))
+    .getAllByRole('link')
+    .filter((link) => link.getAttribute('aria-current') === 'page')
+    .map((link) => link.textContent)
+}
+
+test('menu : Sessions actif sur une session', async () => {
+  await putSession(themedSession())
+  renderAt('/session/session-1')
+  await screen.findByRole('heading', { name: 'Oral de PHP' })
+  expect(activeMenuLinks()).toEqual(['Sessions'])
+})
+
+test('menu : Entraînement actif sur la mise en place', async () => {
+  renderAt('/training/new')
+  await screen.findByRole('complementary')
+  expect(activeMenuLinks()).toEqual(['Entraînement'])
+})
+
+test('menu : présent sur la 404, aucun lien actif', async () => {
+  renderAt('/nimporte-quoi')
+  await screen.findByRole('heading', { name: 'Page introuvable' })
+  expect(screen.getByRole('navigation', { name: 'Navigation principale' })).toBeInTheDocument()
+  expect(activeMenuLinks()).toEqual([])
+})
+
+test('menu : absent de la vue projetée', async () => {
+  await putSession(themedSession())
+  renderAt('/present/session-1')
+  await screen.findByRole('heading', { name: 'Oral de PHP' })
+  expect(screen.queryByRole('navigation', { name: 'Navigation principale' })).toBeNull()
+  expect(screen.queryByRole('complementary')).toBeNull()
 })

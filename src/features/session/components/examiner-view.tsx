@@ -89,7 +89,6 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
   return (
     <TooltipProvider>
       <PageShell
-        ui={ui}
         back={
           <Link to="/" className={cn('self-start', SMALL_TEXT_LINK_CLASS)}>
             {ui.text('back_home', {})}

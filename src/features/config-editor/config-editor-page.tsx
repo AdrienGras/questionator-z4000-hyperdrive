@@ -124,7 +124,6 @@ export function ConfigEditorPage() {
 
   return (
     <PageShell
-      ui={ui}
       title={t('editor_title', {})}
       back={
         <Link to="/" className={cn('self-start', SMALL_TEXT_LINK_CLASS)}>

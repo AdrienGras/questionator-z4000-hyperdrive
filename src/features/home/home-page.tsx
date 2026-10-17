@@ -29,7 +29,7 @@ export function HomePage() {
     <TooltipProvider>
       <ImportController ui={ui} disabled={importDisabled}>
         {(openPicker) => (
-          <PageShell ui={ui} title={ui.text('app_title', {})} actions={<HomeActions ui={ui} />}>
+          <PageShell title={ui.text('app_title', {})} actions={<HomeActions ui={ui} />}>
             <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[24rem_minmax(0,1fr)] lg:items-start">
               <ActionCards
                 ui={ui}

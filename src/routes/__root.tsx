@@ -1,5 +1,6 @@
 import { createRootRoute, Link, Outlet, useMatchRoute } from '@tanstack/react-router'
 import { AppearanceProvider } from '@/app/appearance-provider'
+import { AppMenu } from '@/components/menu/app-menu'
 import { OfflineReadyPrompt } from '@/components/offline-ready-prompt'
 import { UpdatePrompt } from '@/components/update-prompt'
 import { useUi } from '@/lib/i18n/use-ui'
@@ -19,15 +20,19 @@ export function NotFound() {
 }
 
 function RootLayout() {
-  // Jamais de pastille sur la vue projetée : elle se recharge seule (D72), et le message hors ligne
-  // s'adresse à l'examinateur (F36).
+  // Vue projetée : ni menu (D102), ni pastille, puisqu'elle se recharge seule (D72) et que le
+  // message hors ligne s'adresse à l'examinateur (F36).
   const projected = useMatchRoute()({ to: '/present/$sessionId' }) !== false
   return (
     <LocaleProvider locale={useLocale()}>
       {/* Thème sombre seul pendant la refonte (D102) ; le mode clair revient en #152. */}
       <AppearanceProvider forcedMode="dark">
-        <div className="min-h-svh bg-background text-foreground">
-          <Outlet />
+        <div className="flex min-h-svh flex-col bg-background text-foreground md:flex-row">
+          {/* Le menu est la seule navigation entre espaces ; jamais sur la vue projetée (D102). */}
+          {!projected && <AppMenu />}
+          <div className="flex min-w-0 flex-1 flex-col">
+            <Outlet />
+          </div>
           {!projected && (
             <>
               <UpdatePrompt />

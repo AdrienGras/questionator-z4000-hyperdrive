@@ -1,18 +1,14 @@
-import { IconHelp } from '@tabler/icons-react'
 import type { ComponentProps, ReactNode } from 'react'
-import { buttonVariants } from '@/components/ui/button'
-import type { Ui } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
 
 type PageShellProps = Readonly<{
-  ui: Ui
   /** Titre de la page (rendu dans le `h1`). */
   title: ReactNode
   /** Lien de retour, au-dessus du titre. */
   back?: ReactNode
   /** Ligne d'infos sous le titre. */
   meta?: ReactNode
-  /** Actions de la barre, à droite, avant le lien d'aide. */
+  /** Actions de la barre, à droite. */
   actions?: ReactNode
   children: ReactNode
 }> &
@@ -20,14 +16,11 @@ type PageShellProps = Readonly<{
 
 /**
  * Coque commune des pages examinateur (F19, D75) : `main` centré et borné en
- * largeur, barre de titre (retour, titre, infos à gauche ; actions puis aide à
- * droite), puis le contenu. Le lien d'aide ouvre la documentation dans un
- * nouvel onglet ; il est toujours le dernier de la barre et n'est pas
- * paramétrable (bascule de thème retirée pendant la refonte, D102). `...rest` est transmis au `main` (ex. la
- * garde de dépôt de la création).
+ * largeur, barre de titre (retour, titre, infos à gauche ; actions à droite),
+ * puis le contenu. L'aide est en pied du menu latéral (D103). `...rest` est
+ * transmis au `main` (ex. la garde de dépôt de la création).
  */
 export function PageShell({
-  ui,
   title,
   back,
   meta,
@@ -50,19 +43,9 @@ export function PageShell({
           <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
           {meta}
         </div>
-        <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-          {actions}
-          <a
-            href={`${import.meta.env.BASE_URL}docs/`}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={ui.text('help_link_label', {})}
-            className={buttonVariants({ variant: 'ghost' })}
-          >
-            <IconHelp aria-hidden />
-            {ui.text('help_link', {})}
-          </a>
-        </div>
+        {actions !== undefined && (
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">{actions}</div>
+        )}
       </header>
       {children}
     </main>

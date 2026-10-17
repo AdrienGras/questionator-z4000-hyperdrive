@@ -2,35 +2,28 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { expect, test, vi } from 'vitest'
 import { AppearanceProvider } from '@/app/appearance-provider'
-import { useUi } from '@/lib/i18n/use-ui'
-import { bannerInteractiveNames, expectHelpLinkLast } from '@/testing/page-shell-assertions'
+import { bannerInteractiveNames } from '@/testing/page-shell-assertions'
 import { PageShell } from './page-shell'
 
 function Harness({
   children,
   ...props
-}: Readonly<
-  { children?: ReactNode } & Omit<React.ComponentProps<typeof PageShell>, 'ui' | 'children'>
->) {
-  return (
-    <PageShell ui={useUi()} {...props}>
-      {children}
-    </PageShell>
-  )
+}: Readonly<{ children?: ReactNode } & Omit<React.ComponentProps<typeof PageShell>, 'children'>>) {
+  return <PageShell {...props}>{children}</PageShell>
 }
 
 function mount(node: ReactNode) {
   return render(<AppearanceProvider>{node}</AppearanceProvider>)
 }
 
-test('titre seul : h1, pas de retour ni de ligne d’infos, aide dernière', () => {
+test('titre seul : h1, ni retour, ni ligne d’infos, ni actions', () => {
   mount(<Harness title="Oral">x</Harness>)
   const h1 = screen.getByRole('heading', { level: 1, name: 'Oral' })
   expect(h1.parentElement?.children).toHaveLength(1)
-  expectHelpLinkLast()
+  expect(bannerInteractiveNames()).toEqual([])
 })
 
-test('retour, infos et actions rendus ; aide après les actions', () => {
+test('retour, infos et actions rendus, dans cet ordre ; plus d’aide dans la barre', () => {
   mount(
     <Harness
       title="Oral"
@@ -44,20 +37,7 @@ test('retour, infos et actions rendus ; aide après les actions', () => {
   expect(screen.getByText('Retour')).toBeInTheDocument()
   expect(screen.getByText('Durand Alice')).toBeInTheDocument()
   expect(screen.getByText('Projeter')).toBeInTheDocument()
-  const names = bannerInteractiveNames()
-  expect(names.slice(0, 2)).toEqual(['Retour', 'Projeter'])
-  expect(names).toHaveLength(3)
-  expectHelpLinkLast()
-})
-
-test('lien Aide : ouvre la doc dans un nouvel onglet, dernier de la barre', () => {
-  mount(<Harness title="Oral">x</Harness>)
-  const link = screen.getByRole('link', { name: 'Aide (nouvel onglet)' })
-  expect(link).toHaveAttribute('href', `${import.meta.env.BASE_URL}docs/`)
-  expect(link).toHaveAttribute('target', '_blank')
-  expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-  expect(link).toHaveTextContent('Aide')
-  expectHelpLinkLast()
+  expect(bannerInteractiveNames()).toEqual(['Retour', 'Projeter'])
 })
 
 test('props du main transmises', () => {
@@ -96,6 +76,6 @@ test('titre long : le bloc titre se replie, le groupe de droite reste aligné à
   // jsdom ne fait pas de mise en page : on fige les classes qui la portent.
   const h1 = screen.getByRole('heading', { level: 1 })
   expect(h1.parentElement).toHaveClass('flex-[1_1_20rem]', 'min-w-0')
-  const help = screen.getByRole('link', { name: /^(Aide|Help) \(/ })
-  expect(help.parentElement).toHaveClass('ml-auto', 'justify-end')
+  const actions = screen.getByRole('button', { name: 'Projeter' })
+  expect(actions.parentElement).toHaveClass('ml-auto', 'justify-end')
 })

@@ -6,7 +6,6 @@ import { locateIssue } from '@/features/config-editor/issue-locations'
 import { EXAMPLE_TEXT } from '@/features/config-editor/hooks/use-config-draft'
 import { takeConfigForCreation } from '@/lib/config-handoff'
 import { downloadText } from '@/lib/download'
-import { expectHelpLinkLast } from '@/testing/page-shell-assertions'
 import { renderAt } from '@/testing/render-at'
 
 vi.mock('@/lib/download', () => ({ downloadText: vi.fn<typeof downloadText>() }))
@@ -64,9 +63,7 @@ afterEach(() => {
 describe('ConfigEditorPage', () => {
   it('ouvre l’exemple sur deux colonnes, puis en affiche l’aperçu', async () => {
     await renderEditor()
-    // Après l'aperçu, qui ajoute ses propres `header` : la barre de titre doit rester trouvable.
     await previewReady()
-    expectHelpLinkLast()
     expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
     expect(screen.getByRole('heading', { level: 2, name: 'Configuration' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 2, name: 'Aperçu' })).toBeInTheDocument()

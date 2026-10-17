@@ -67,7 +67,6 @@ export function CreateSessionPage() {
 
   return (
     <PageShell
-      ui={ui}
       title={text('create_title', {})}
       back={
         <Link to="/" className={cn('self-start', SMALL_TEXT_LINK_CLASS)}>

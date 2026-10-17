@@ -54,7 +54,6 @@ function TrainingView({
 
   return (
     <PageShell
-      ui={ui}
       title={training.name}
       actions={
         <>

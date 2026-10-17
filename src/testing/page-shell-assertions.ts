@@ -1,8 +1,4 @@
-import { expect } from 'vitest'
 import { screen } from '@testing-library/react'
-
-/** Nom accessible du lien d'aide de la barre, en FR comme en EN (`help_link_label`). */
-const HELP_LINK_LABEL = /^(Aide \(nouvel onglet\)|Help \(opens in a new tab\))$/
 
 /** Nom accessible d'un élément interactif : `aria-label`, sinon texte. */
 export function accessibleName(el: Element): string {
@@ -32,10 +28,4 @@ function pageBanner(): HTMLElement {
 /** Noms accessibles des éléments interactifs de la barre de titre, dans l'ordre du DOM. */
 export function bannerInteractiveNames(): string[] {
   return [...pageBanner().querySelectorAll('a[href], button')].map(accessibleName)
-}
-
-/** Vérifie que le lien d'aide est le dernier élément interactif de la barre (F19, D102). */
-export function expectHelpLinkLast(): void {
-  const names = bannerInteractiveNames()
-  expect(names.at(-1)).toMatch(HELP_LINK_LABEL)
 }

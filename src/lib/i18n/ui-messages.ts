@@ -43,6 +43,16 @@ export type UiMessageParams = {
   color_mode_system: NoParams
   help_link: NoParams
   help_link_label: NoParams
+  menu_brand: NoParams
+  menu_main_label: NoParams
+  menu_home: NoParams
+  menu_spaces: NoParams
+  menu_sessions: NoParams
+  menu_editor: NoParams
+  menu_training: NoParams
+  menu_help_label: NoParams
+  menu_collapse: NoParams
+  menu_expand: NoParams
   session_loading: NoParams
   session_not_found: NoParams
   damaged_title: NoParams
@@ -461,6 +471,16 @@ const fr: Dictionary<UiMessageParams> = {
   color_mode_system: () => 'Système',
   help_link: () => 'Aide',
   help_link_label: () => 'Aide (nouvel onglet)',
+  menu_brand: () => 'Questionator Z-4000',
+  menu_main_label: () => 'Navigation principale',
+  menu_home: () => 'Accueil',
+  menu_spaces: () => 'Espaces',
+  menu_sessions: () => 'Sessions',
+  menu_editor: () => 'Éditeur de config',
+  menu_training: () => 'Entraînement',
+  menu_help_label: () => 'Aide',
+  menu_collapse: () => 'Replier le menu',
+  menu_expand: () => 'Déplier le menu',
   session_loading: () => 'Chargement de la session…',
   session_not_found: () => 'Session introuvable',
   damaged_title: () => 'Cette session est endommagée',
@@ -848,6 +868,16 @@ const en: Dictionary<UiMessageParams> = {
   color_mode_system: () => 'System',
   help_link: () => 'Help',
   help_link_label: () => 'Help (opens in a new tab)',
+  menu_brand: () => 'Questionator Z-4000',
+  menu_main_label: () => 'Main navigation',
+  menu_home: () => 'Home',
+  menu_spaces: () => 'Spaces',
+  menu_sessions: () => 'Sessions',
+  menu_editor: () => 'Config editor',
+  menu_training: () => 'Practice',
+  menu_help_label: () => 'Help',
+  menu_collapse: () => 'Collapse menu',
+  menu_expand: () => 'Expand menu',
   session_loading: () => 'Loading session…',
   session_not_found: () => 'Session not found',
   damaged_title: () => 'This session is damaged',
