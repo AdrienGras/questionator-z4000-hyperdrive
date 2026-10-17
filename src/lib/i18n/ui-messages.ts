@@ -376,7 +376,10 @@ export type UiMessageParams = {
   export_error: NoParams
   editor_title: NoParams
   editor_label: NoParams
-  editor_source_title: NoParams
+  editor_subtitle: NoParams
+  editor_load_file_short: NoParams
+  editor_issues_title: NoParams
+  editor_issue_line: { line: number }
   editor_preview_title: NoParams
   editor_load_file: NoParams
   editor_reset_example: NoParams
@@ -868,7 +871,10 @@ const fr: Dictionary<UiMessageParams> = {
   export_error: () => "L'export a échoué. Réessayez.",
   editor_title: () => 'Éditeur de config',
   editor_label: () => 'Configuration JSON',
-  editor_source_title: () => 'Configuration',
+  editor_subtitle: () => 'Écrivez la config d’un oral et vérifiez-la au fil de la frappe.',
+  editor_load_file_short: () => 'Charger',
+  editor_issues_title: () => 'Problèmes',
+  editor_issue_line: ({ line }) => `ligne ${line}`,
   editor_preview_title: () => 'Aperçu',
   editor_load_file: () => 'Charger un fichier',
   editor_reset_example: () => "Repartir de l'exemple",
@@ -1313,7 +1319,10 @@ const en: Dictionary<UiMessageParams> = {
   export_error: () => 'Export failed. Try again.',
   editor_title: () => 'Config editor',
   editor_label: () => 'JSON configuration',
-  editor_source_title: () => 'Configuration',
+  editor_subtitle: () => 'Write an exam config and check it as you type.',
+  editor_load_file_short: () => 'Load',
+  editor_issues_title: () => 'Problems',
+  editor_issue_line: ({ line }) => `line ${line}`,
   editor_preview_title: () => 'Preview',
   editor_load_file: () => 'Load a file',
   editor_reset_example: () => 'Start from the example',
