@@ -1641,3 +1641,25 @@ autre encodage 8 bits.
 **Pourquoi** : poser l'apparence d'un coup sans toucher au contrat de la config (THEME_TOKENS, `defaultColorMode`) et sans perdre la mécanique de mode, qui revient au dernier ticket.
 
 **Reporté dans** : `src/index.css`, `src/components/ui/button.tsx`, `src/app/appearance-provider.tsx` ; design system (Sidebar, Button, Dialog, nouveau Disclosure) et canevas (`accueil-dialogues`, `session-dialogues`) ; `docs/CONVENTIONS.md` § « Tokens et palette — règles ».
+
+## D105 — F44.4 : menu et coquille de page (2026-10-17)
+
+**Question** : où monter le menu latéral pour qu'il soit partout sauf sur la vue projetée, que fait-il avant que `/sessions` et `/trainings` existent (#147), comment se comporte-t-il sur un téléphone, et que deviennent l'aide et les liens « Retour à l'accueil » ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Montage | Une seule instance, `AppMenu`, dans `RootLayout` (`src/routes/__root.tsx`), masquée sur `/present/$sessionId`. Lien actif calculé par `activeMenuItem(pathname)` (premier segment : `/new` et `/session/…` sous Sessions, `/training/…` sous Entraînement) ; les `Link` gardent `activeOptions={{ exact: true }}` pour que l'`aria-current` de TanStack ne contredise jamais le nôtre. | Présent aussi sur les écrans d'état (404, session introuvable ou endommagée) ; ses tokens `sidebar-*` sont lus sur `<html>`, où `AppearanceProvider` pose déjà le thème de la session. |
+| Langue du menu | Celle de l'application, jamais celle de la session ; `lang` posé sur le menu. | Le menu appartient à l'examinateur ; une session en anglais passe `<html lang="en">`, `lang` garde la bonne prononciation aux lecteurs d'écran. |
+| État replié | `questionator:menu-collapsed` = `'true'` ; toute autre valeur, absence ou stockage illisible = déplié ; écriture best-effort. | Mémorisé sur l'appareil (D103) sans jamais bloquer l'app en navigation privée. |
+| Écran étroit *(décision de l'utilisateur)* | Sous 768 px, une barre du haut (marque, « Menu ») ouvre le menu déplié dans un tiroir à gauche de 280 px, sans bouton de repli ; un lien choisi ou Échap le ferme. Artboard `menu-etroit` validé avant le code. | Tout l'écran au contenu sur téléphone ; le rail de 72 px laissait ~300 px. |
+| `/sessions`, `/trainings` *(décision de l'utilisateur)* | Routes créées dès #146, qui affichent l'accueil actuel ; #147 remplace leur composant. | Le menu, le lien actif et leurs tests visent déjà les adresses définitives. |
+| Aide | Sortie de `PageShell` (et la prop `ui` de la coque avec elle), en pied de menu. | D103 ; la coque ne traduit plus rien. |
+| Liens retour | Fil d'Ariane (`Breadcrumb`) sur `/new`, `/editor` et `/session/$id` ; lien retour à chevron (`BackLink`, `createLink`) sur les écrans d'entraînement et les stats, comme sur leurs artboards. | La carte des écrans parlait des écrans d'un espace en général ; les artboards font foi (D102). |
+| Bandeaux et écrans d'état | Messages « base » et « hors ligne » découpés en titre et corps (clés `*_title`), corps de la pastille de mise à jour, « Détails · N problèmes » ; `StatusScreen` pour la 404, session introuvable ou endommagée, entraînement endommagé, retour en bouton principal. | Artboard `bandeaux`. |
+| Infobulles du menu replié | `role="tooltip"` posé sur le `TooltipContent` (base-ui n'en donne aucun). | Comme l'artboard ; atteignable par rôle en e2e. |
+
+**Pourquoi** : un menu unique, monté à la racine, est la seule façon de garantir sa présence sur tous les écrans (pages et écrans d'état) sans le dupliquer page par page, tout en suivant le thème de session.
+
+**Reporté dans** : `src/components/menu/`, `src/components/{breadcrumb,back-link,status-screen,prompt-classes}.tsx`, `src/lib/menu-collapsed.ts`, `src/components/page-shell.tsx` ; canevas (`apres/menu-etroit`), design system (Sidebar) ; `docs/CONVENTIONS.md` § « Page examinateur » et « Menu et coquille de page » ; plan `docs/superpowers/plans/2026-10-17-f44-4-menu-coquille.md`.

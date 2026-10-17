@@ -64,6 +64,11 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Aperçu de la vue projetée (F22) : suit le mode clair / sombre de l'examinateur, pas celui mémorisé par la vue projetée (D77) ; à reprendre si l'écart gêne.
 - [x] Tests F22 : `FauxResizeObserver` recopié entre `projection.test.tsx` et `projection-preview-leak.test.tsx` (à sortir dans `src/testing/`) ; commentaire et motif de skip prouvés absents de l'aperçu mais seulement présents en base, pas dans le DOM examinateur ; `useElementWidth` garde la dernière largeur après `ref(null)`. → #87 *Fait en #87 (PR 1).*
 
+## Navigation
+
+- [ ] Les pastilles du coin bas droit (`UpdatePrompt`, `OfflineReadyPrompt`) recouvrent le bas du contenu tant qu'on ne les ferme pas (vu en F44.4 sur « Détail des N questions » des stats d'entraînement) : réserver une marge basse au contenu quand une pastille est affichée.
+- [ ] Marque du menu cliquable vers l'accueil (aujourd'hui texte seul, comme sur l'artboard).
+
 ## Accueil et backup
 
 - [x] Carte de session de l'accueil : un nom sans espace ni tiret (ex. `Oral_de_rattrapage_…`) semble déborder de la carte sur mobile (vu en arrière-plan des captures de #104). À confirmer, puis `wrap-anywhere` sur le titre de `SessionCard` et `DamagedSessionCard`. → #118 *Fait en #118 : débordement confirmé (titre à 660 px dans une carte de 359 px, à 375 px de large), `wrap-anywhere` sur le titre des deux cartes.*

@@ -904,3 +904,28 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : lire un fichier par `path` ne compte pas comme avoir vu la version ; seule la lecture de l'artifact entier (`read` avec `url` seul) le fait.
 **Workaround** : `Artifact` `read` sur l'URL (sans `path`) dans la session, puis publier avec `root` et `files` ; les fichiers déjà lus restent valables si la version n'a pas changé.
 **Référence** : URL des deux Artifacts dans `docs/ENVIRONMENT.md`.
+
+## Infobulle base-ui : aucun rôle ARIA, et ouverte au focus clavier seulement (2026-10-17)
+
+**Découvert** : F44.4, `e2e/menu.spec.ts` (menu replié).
+**Symptôme** : `getByRole('tooltip', { name: 'Sessions' })` ne trouve rien alors que l'infobulle s'affiche au survol ; puis, au focus, l'infobulle ne s'ouvre pas du tout.
+**Cause** : `Tooltip.Popup` de base-ui ne pose aucun `role` ; et il ne s'ouvre au focus que sur `:focus-visible`, ce qu'un `locator.focus()` programmatique ne déclenche pas.
+**Workaround** : `role="tooltip"` passé au `TooltipContent` ; en e2e, focaliser l'élément précédent puis `page.keyboard.press('Tab')`.
+**Référence** : `src/components/menu/menu-links.tsx`, `e2e/menu.spec.ts`.
+
+## `Link` TanStack pose son propre `aria-current` dès qu'il est actif, par préfixe (2026-10-17)
+
+**Découvert** : F44.4, menu latéral.
+**Symptôme** : un lien vers `/` serait marqué `aria-current="page"` sur toutes les routes ; un `aria-current` passé en prop est écrasé quand TanStack juge le lien actif.
+**Cause** : `applyLinkState` ajoute `aria-current="page"` (et `data-status="active"`) quand `resolveIsActive` est vrai, ce qui est le cas par défaut dès que le chemin courant commence par celui du lien.
+**Workaround** : `activeOptions={{ exact: true }}` sur les liens dont on calcule soi-même l'état actif (`activeMenuItem`).
+**Référence** : `src/components/menu/menu-links.tsx`, `node_modules/@tanstack/react-router/dist/esm/link.js`.
+
+## `toHaveClass(...buttonVariants(...).split(' '))` échoue sur un `Button` (2026-10-17)
+
+**Découvert** : F44.4, `damaged-session.test.tsx`.
+**Symptôme** : un `Button variant="default"` n'a pas toutes les classes de `buttonVariants({ variant: 'default' })`.
+**Cause** : `Button` passe ses classes par `cn` (tailwind-merge), qui retire les doublons de taille d'icône de la chaîne brute ; un `Link` stylé par `buttonVariants(...)` garde la chaîne brute.
+**Workaround** : comparer à `cn(buttonVariants(...)).split(' ')` pour un `Button`, à la chaîne brute pour un lien.
+**Référence** : `src/components/damaged-session.test.tsx`.
+

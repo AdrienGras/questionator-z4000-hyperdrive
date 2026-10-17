@@ -300,7 +300,7 @@ export function SessionToolbar({ ui, disabled, onExport }: SessionToolbarProps) 
 - `useUi()` (`@/lib/i18n/use-ui`) une seule fois par écran, au composant de page ; les sous-composants reçoivent `ui: Ui` en prop. Langue : celle du navigateur hors session (D51) ; F07 ajoutera `config.locale`.
 - Toute chaîne visible, `aria-label` compris, passe par `text(clé, params)` ; nouvelle clé = ajout dans `UiMessageParams` et dans les dictionnaires `fr` **et** `en` de `src/lib/i18n/ui-messages.ts` (le test échoue sinon).
 - Props en `Readonly<{…}>` (SonarQube S6759) ; jamais `const [x] = useState(...)` sans le setter, et le setter nommé `setX` (S6754 signale aussi `[name, setNameValue]`) : `useMemo` ou une constante de module.
-- Lien texte (retour à l'accueil, fichier d'exemple) : `TEXT_LINK_CLASS` ou `SMALL_TEXT_LINK_CLASS` (`@/components/text-link`, #87), placement en plus par `cn('self-start', …)` ; ne pas recopier la liste de classes.
+- Lien texte (fichier d'exemple, schéma) : `TEXT_LINK_CLASS` ou `SMALL_TEXT_LINK_CLASS` (`@/components/text-link`, #87), placement en plus par `cn('self-start', …)` ; ne pas recopier la liste de classes. Un lien retour passe par `BackLink` (voir « Page examinateur »).
 - Tests : `src/testing/setup.ts` force `navigator.languages = ['fr-FR']` ; un test en anglais redéfinit la propriété puis la restaure. Monter un écran routé via `createAppRouter(createMemoryHistory(...))` (voir `src/testing/render-home.tsx`).
 
 ## Dialogue de saisie — squelette
@@ -515,37 +515,49 @@ const skip = useCallback(
 
 ## Page examinateur — squelette
 
-Arbitrage : D75 (F19). Toute page examinateur (accueil, création, passage, stats) passe par `PageShell` (`src/components/page-shell.tsx`) : largeur, marges et barre de titre viennent de la coque, pas de la page.
+Arbitrage : D75 (F19), D105 (F44.4). Toute page examinateur (accueil, création, passage, stats) passe par `PageShell` (`src/components/page-shell.tsx`) : largeur, marges et barre de titre viennent de la coque, pas de la page. Le menu et l'aide n'en font pas partie : ils sont dans `RootLayout` (voir « Menu et coquille de page »).
 
 ```tsx
 // src/features/<x>/<x>-page.tsx
 <PageShell
-  ui={ui}
   title={t('ma_page_title')}
-  back={<Link to="/">{t('back_home')}</Link>} // optionnel
-  meta={<MaPageMeta />} // optionnel : ligne d'infos sous le titre
-  actions={<Button>…</Button>} // optionnel : à droite, avant le bouton de thème
+  // optionnel, au-dessus du titre : fil d'Ariane d'un écran d'espace, ou lien retour
+  back={<Breadcrumb ui={ui} root={{ label: t('menu_sessions'), to: '/sessions' }} parts={[nom]} />}
+  meta={<MaPageMeta />} // optionnel : ligne d'infos sous le titre, en gris
+  actions={<Button>…</Button>} // optionnel : à droite
   onDrop={onDrop} // toute prop de <main> passe (`...rest`), `className` est fusionnée
 >
   {contenu}
 </PageShell>
 
 // src/features/<x>/<x>-page.test.tsx
-import { expectColorModeToggleLast } from '@/testing/page-shell-assertions'
+import { bannerInteractiveNames } from '@/testing/page-shell-assertions'
 
-test('le bouton de thème est le dernier de la barre de titre', async () => {
+test('barre de titre : fil d’Ariane puis actions', async () => {
   renderAt('/ma-page')
   await screen.findByRole('heading', { name: 'Ma page' })
-  expectColorModeToggleLast()
+  expect(bannerInteractiveNames()).toEqual(['Sessions', 'Projeter'])
 })
 ```
 
 ### Règles tacites
 
-- Jamais de `ColorModeToggle` dans une page ou un sous-composant d'en-tête : la coque le rend en dernier, c'est ce qui garantit sa place.
+- `back` reçoit un `Breadcrumb` (`@/components/breadcrumb`) ou un `BackLink` (`@/components/back-link`, `<BackLink to="/">…</BackLink>`), d'après l'artboard de l'écran ; jamais un `Link` en `TEXT_LINK_CLASS`.
 - Dans une page qui passe par `PageShell`, pas de `<main>` ni de `<h1>` : la coque les fournit. Les boutons d'action vont dans `actions`, pas dans `children`.
-- Restent hors coque : les écrans d'état rendus en retour anticipé (`DbStatusBanner` de `session-page.tsx` et `stats-page.tsx`, `SessionFallback`, `stats-error.tsx`, 404) et la vue projetée (mise en page propre, avec son `<h1>`). `DbStatusBanner` affiché en contenu d'une page (accueil, création) reste dans la coque.
-- Test de la page : `expectColorModeToggleLast()` ; `bannerInteractiveNames()` pour vérifier l'ordre des actions (`src/testing/page-shell-assertions.ts`).
+- Restent hors coque : les écrans d'état rendus en retour anticipé, qui passent par `StatusScreen` (`@/components/status-screen` : tuile d'icône, `h1`, actions ; `SessionFallback`, sessions et entraînements endommagés, 404), les `DbStatusBanner` de `session-page.tsx` et `stats-page.tsx`, `stats-error.tsx`, et la vue projetée (mise en page propre, avec son `<h1>`). `DbStatusBanner` affiché en contenu d'une page (accueil, création) reste dans la coque.
+- Test de la page : `bannerInteractiveNames()` pour l'ordre du fil d'Ariane et des actions (`src/testing/page-shell-assertions.ts`).
+
+## Menu et coquille de page — règles
+
+Arbitrage : D102, D103, D105 (F44.4). Maquettes `apres/menu-replie`, `apres/menu-etroit`, `apres/bandeaux`.
+
+- **Une seule instance** : `AppMenu` (`src/components/menu/app-menu.tsx`) est monté dans `RootLayout`, jamais dans une page ; il est masqué sur `/present/$sessionId`. Il rend le menu latéral (`aside`, `md:` et au-delà) et, en dessous, la barre du haut avec son tiroir (`MenuDrawer`). Le contenu des deux vient de `MenuLinks`.
+- **Lien actif** : `activeMenuItem(pathname)` (`src/components/menu/active-menu-item.ts`), par premier segment. **Toute nouvelle route y entre** (test `active-menu-item.test.ts`) ; un `Link` du menu garde `activeOptions={{ exact: true }}` (QUIRKS 2026-10-17).
+- **Langue** : celle de l'application (`useUi()` à la racine), avec `lang` sur le menu ; jamais celle d'une session.
+- **État replié** : `readMenuCollapsed` / `writeMenuCollapsed` (`src/lib/menu-collapsed.ts`), lecture et écriture protégées.
+- **Code d'espace** : icône `text-space-*` sur tuile `bg-muted` ; Accueil en `text-muted-foreground`, Aide en `text-space-help`.
+- **Tests** : un test qui cherche un lien de nom courant (« Sessions », « Accueil ») le cherche dans `within(screen.getByRole('complementary'))` ou dans la `nav` « Fil d'Ariane » ; un test qui compte les listes d'une page exclut celles de l'`aside`. En e2e, le Page Object `AppMenu` (`e2e/pages/app-menu.ts`).
+- **Pastilles** (`UpdatePrompt`, `OfflineReadyPrompt`) : classes communes dans `src/components/prompt-classes.ts` ; titre en `strong`, corps en `text-sm text-muted-foreground`.
 
 ## Test e2e Playwright — squelette (Page Object Model)
 
