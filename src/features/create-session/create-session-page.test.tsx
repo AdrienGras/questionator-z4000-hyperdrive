@@ -159,7 +159,7 @@ describe('écran de création', () => {
     const name = screen.getByRole('textbox', { name: 'Nom de la session' })
     if (!(name instanceof HTMLInputElement)) throw new Error('champ nom absent')
     expect(name.value).toMatch(/^Oral de test — /)
-    expect(screen.queryByText(/^Déposez/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/pour voir l'aperçu\.$/)).not.toBeInTheDocument()
     expect(submitButton()).toBeEnabled()
   })
 
@@ -201,6 +201,24 @@ describe('écran de création', () => {
     }
     expect(screen.getByText('Fichier invalide')).toBeInTheDocument()
     expect(submitButton()).toBeDisabled()
+  })
+
+  test('bouton désactivé : la phrase de la cause le décrit', async () => {
+    const page = await renderPage()
+    choose(page.students, 'etudiants.csv', VALID_CSV)
+    choose(page.config, 'config.json', JSON.stringify({ ...minimalConfig(), categories: [] }))
+    expect(await screen.findByText('Fichier invalide')).toBeInTheDocument()
+    expect(submitButton()).toBeDisabled()
+    expect(submitButton()).toHaveAccessibleDescription(
+      'Corrigez la configuration pour créer la session.',
+    )
+  })
+
+  test('formulaire complet : ni phrase ni description', async () => {
+    await renderFilled()
+    expect(submitButton()).toBeEnabled()
+    expect(submitButton()).not.toHaveAttribute('aria-describedby')
+    expect(screen.queryByText(/pour créer la session\.$/)).not.toBeInTheDocument()
   })
 
   test('config sans catégorie : erreur affichée, bouton désactivé', async () => {
@@ -256,7 +274,7 @@ describe('écran de création', () => {
 
   test('création : session en base, config figée, navigation vers la session', async () => {
     const { router } = await renderFilled()
-    fireEvent.change(screen.getByRole('textbox', { name: "Nom de l'examinateur" }), {
+    fireEvent.change(screen.getByRole('textbox', { name: "Nom de l'examinateur (facultatif)" }), {
       target: { value: 'Mme Durand' },
     })
     fireEvent.click(submitButton())

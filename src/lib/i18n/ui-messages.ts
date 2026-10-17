@@ -161,6 +161,16 @@ export type UiMessageParams = {
   create_write_error: NoParams
   create_preview_title: NoParams
   create_preview_empty: NoParams
+  create_subtitle: NoParams
+  create_students_example_short: NoParams
+  create_config_example_short: NoParams
+  optional_hint: NoParams
+  create_examiner_hint: NoParams
+  create_blocked_db: NoParams
+  create_blocked_students: NoParams
+  create_blocked_config: NoParams
+  create_blocked_files: NoParams
+  create_blocked_name: NoParams
   training_setup_title: NoParams
   training_setup_gather_title: NoParams
   training_setup_gather_body: NoParams
@@ -643,6 +653,16 @@ const fr: Dictionary<UiMessageParams> = {
   create_preview_title: () => 'Aperçu',
   create_preview_empty: () =>
     "Déposez une liste d'étudiants et une configuration pour voir l'aperçu.",
+  create_subtitle: () => 'Déposez la liste des étudiants et la config de l’oral.',
+  create_students_example_short: () => 'Liste d’exemple',
+  create_config_example_short: () => 'Config d’exemple',
+  optional_hint: () => '(facultatif)',
+  create_examiner_hint: () => 'Repris en colonne dans les exports.',
+  create_blocked_db: () => 'La base n’est pas disponible : la session ne peut pas être créée.',
+  create_blocked_students: () => 'Corrigez la liste d’étudiants pour créer la session.',
+  create_blocked_config: () => 'Corrigez la configuration pour créer la session.',
+  create_blocked_files: () => 'Déposez la liste d’étudiants et la config pour créer la session.',
+  create_blocked_name: () => 'Donnez un nom à la session pour la créer.',
   training_setup_title: () => 'S’entraîner',
   training_setup_gather_title: () => 'Rassemblez votre cours',
   training_setup_gather_body: () =>
@@ -1082,6 +1102,16 @@ const en: Dictionary<UiMessageParams> = {
   create_write_error: () => 'Creation failed. Please try again.',
   create_preview_title: () => 'Preview',
   create_preview_empty: () => 'Drop a student list and a configuration to see the preview.',
+  create_subtitle: () => 'Drop the student list and the exam config.',
+  create_students_example_short: () => 'Example list',
+  create_config_example_short: () => 'Example config',
+  optional_hint: () => '(optional)',
+  create_examiner_hint: () => 'Included as a column in exports.',
+  create_blocked_db: () => 'The database isn’t available: the session can’t be created.',
+  create_blocked_students: () => 'Fix the student list to create the session.',
+  create_blocked_config: () => 'Fix the configuration to create the session.',
+  create_blocked_files: () => 'Drop the student list and the config to create the session.',
+  create_blocked_name: () => 'Name the session to create it.',
   training_setup_title: () => 'Practice',
   training_setup_gather_title: () => 'Gather your course',
   training_setup_gather_body: () =>
