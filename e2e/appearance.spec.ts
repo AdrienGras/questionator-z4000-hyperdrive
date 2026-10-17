@@ -162,8 +162,10 @@ test('focus clavier visible sur un bouton', async ({ page }) => {
 })
 
 test('lien texte lisible : 4,5:1 au moins sur le fond', async ({ page }) => {
-  await page.goto('#/session/inconnue')
-  await expect(page.getByRole('heading', { name: 'Session introuvable' })).toBeVisible()
+  // Liens d'exemple de la création (`SMALL_TEXT_LINK_CLASS`) : « Session introuvable » a désormais
+  // son retour en bouton principal (F44.4).
+  await page.goto('#/new')
+  await expect(page.getByRole('heading', { name: 'Nouvelle session' })).toBeVisible()
   expect(await textContrastOnPage(page, 'main a.underline')).toBeGreaterThanOrEqual(4.5)
 })
 

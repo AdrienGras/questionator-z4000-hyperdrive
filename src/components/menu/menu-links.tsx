@@ -85,7 +85,10 @@ function WithTooltip({
   return (
     <Tooltip>
       <TooltipTrigger render={trigger} />
-      <TooltipContent side="right">{label}</TooltipContent>
+      {/* base-ui ne donne aucun rôle au popup : `tooltip`, comme sur l'artboard `menu-replie`. */}
+      <TooltipContent side="right" role="tooltip">
+        {label}
+      </TooltipContent>
     </Tooltip>
   )
 }
