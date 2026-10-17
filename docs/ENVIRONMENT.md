@@ -23,7 +23,7 @@ Carte des paths, services, accès, commandes. À jour au fil des découvertes.
 - **Prévu** (`PRODUCT.md` §9) : write-excel-file, vite-plugin-pwa.
 - **Commandes principales** :
   - `nvm use && corepack pnpm install`
-  - `pnpm dev` — serveur de dev (régénère `src/routeTree.gen.ts`)
+  - `pnpm dev` — serveur de dev (régénère `src/routeTree.gen.ts`). Pour l'ouvrir depuis un autre appareil du tailnet (téléphone) : `__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS=.ts.net pnpm dev --host 0.0.0.0`, puis `http://adrien-laptop.halfbeak-wahoo.ts.net:5173/questionator-z4000-hyperdrive/` (ou l'IP Tailscale `100.76.100.52`). La variable autorise le nom MagicDNS, que Vite refuse sinon ; `--host 0.0.0.0` expose aussi le serveur sur les autres interfaces (réseau local, ponts Docker)
   - `pnpm check` — format, lint type-aware, dépendances entre dossiers, types, tests (comme la CI, hors build et sans couverture)
   - `pnpm deps` — dependency-cruiser sur `src/` (`.dependency-cruiser.cjs`, parseur swc) ; vérifier que « N modules » n'est pas 0
   - `pnpm build` / `pnpm preview` — build de prod dans `dist/` et prévisualisation sous `/questionator-z4000-hyperdrive/`
