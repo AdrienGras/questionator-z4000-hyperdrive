@@ -182,7 +182,7 @@ export function ConfigEditorPage() {
                 <IconFileCode aria-hidden className="size-4 shrink-0 text-muted-foreground" />
                 {fileName}
               </h2>
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-0.5">
                 <input
                   ref={fileInput}
                   type="file"
@@ -195,6 +195,7 @@ export function ConfigEditorPage() {
                   type="button"
                   variant="ghost"
                   size="sm"
+                  className="px-2.5"
                   aria-label={t('editor_load_file', {})}
                   onClick={() => fileInput.current?.click()}
                 >
@@ -205,12 +206,19 @@ export function ConfigEditorPage() {
                   type="button"
                   variant="ghost"
                   size="sm"
+                  className="px-2.5"
                   onClick={() => editor.current?.setText(EXAMPLE_TEXT)}
                 >
                   <IconRefresh aria-hidden />
                   {t('editor_reset_example', {})}
                 </Button>
-                <Button type="button" variant="ghost" size="sm" onClick={download}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="px-2.5"
+                  onClick={download}
+                >
                   <IconDownload aria-hidden />
                   {t('editor_download', {})}
                 </Button>
