@@ -200,8 +200,8 @@ test('survol d’un bouton secondaire lisible avec un thème de config de l’an
     probe.remove()
     return resolved
   })
-  // `transition-all` : la couleur finale arrive après la transition.
-  await expect.poll(() => button.evaluate((el) => getComputedStyle(el).color)).toBe(expected)
+  // `transition-all` : `toHaveCSS` réessaie jusqu'à la couleur finale.
+  await expect(button).toHaveCSS('color', expected)
 })
 
 test('champs à 16 px sur téléphone (pas de zoom iOS au focus)', async ({ page }) => {
