@@ -9,7 +9,6 @@ export type UiMessageParams = {
   home_create: NoParams
   home_import: NoParams
   home_actions_title: NoParams
-  home_sessions_title: NoParams
   home_create_title: NoParams
   home_create_body: NoParams
   home_students_example_link: NoParams
@@ -88,6 +87,11 @@ export type UiMessageParams = {
   training_success_label: NoParams
   training_success_aria: { rate: string }
   training_coverage_label: NoParams
+  sessions_subtitle: NoParams
+  sessions_drop_hint: NoParams
+  sessions_list_title: NoParams
+  sessions_count: { count: number }
+  card_resume_named: { name: string }
   card_resume: NoParams
   card_actions: { name: string }
   action_rename: NoParams
@@ -442,7 +446,6 @@ const fr: Dictionary<UiMessageParams> = {
   home_create: () => 'Créer une session',
   home_import: () => 'Importer une sauvegarde',
   home_actions_title: () => 'Actions',
-  home_sessions_title: () => 'Sessions',
   home_create_title: () => 'Nouvelle session',
   home_create_body: () =>
     "Partez d'une liste d'étudiants (CSV nom / prénom) et d'un fichier de configuration (JSON : catégories, questions, barèmes).",
@@ -519,7 +522,7 @@ const fr: Dictionary<UiMessageParams> = {
   present_fullscreen: () => 'Plein écran',
   present_exit_fullscreen: () => 'Quitter le plein écran',
   empty_title: () => 'Aucune session',
-  empty_body: () => 'Créez une session ou importez une sauvegarde depuis les actions.',
+  empty_body: () => 'Créez une session ou importez une sauvegarde.',
   card_examiner: ({ name }) => `Jury : ${name}`,
   card_updated: ({ date }) => `Modifiée le ${date}`,
   card_progress: ({ done, absent, remaining }) =>
@@ -530,6 +533,13 @@ const fr: Dictionary<UiMessageParams> = {
   training_success_label: () => 'de réussite',
   training_success_aria: ({ rate }) => `Taux de réussite : ${rate}`,
   training_coverage_label: () => 'questions notées',
+  sessions_subtitle: () => 'Vos oraux, de la liste d’étudiants à la note finale.',
+  sessions_drop_hint: () =>
+    'Déposez une sauvegarde (.json) n’importe où sur la page pour la restaurer.',
+  sessions_list_title: () => 'Liste des sessions',
+  sessions_count: ({ count }) =>
+    `${count} ${plural(count, 'session', 'sessions')} · dernière modification d’abord`,
+  card_resume_named: ({ name }) => `Reprendre « ${name} »`,
   card_resume: () => 'Reprendre',
   card_actions: ({ name }) => `Actions pour « ${name} »`,
   action_rename: () => 'Renommer',
@@ -852,7 +862,6 @@ const en: Dictionary<UiMessageParams> = {
   home_create: () => 'Create a session',
   home_import: () => 'Import a backup',
   home_actions_title: () => 'Actions',
-  home_sessions_title: () => 'Sessions',
   home_create_title: () => 'New session',
   home_create_body: () =>
     'Start from a student list (CSV, last name / first name) and a configuration file (JSON: categories, questions, scales).',
@@ -928,7 +937,7 @@ const en: Dictionary<UiMessageParams> = {
   present_fullscreen: () => 'Full screen',
   present_exit_fullscreen: () => 'Exit full screen',
   empty_title: () => 'No sessions yet',
-  empty_body: () => 'Create a session or import a backup from the actions.',
+  empty_body: () => 'Create a session or import a backup.',
   card_examiner: ({ name }) => `Examiner: ${name}`,
   card_updated: ({ date }) => `Updated ${date}`,
   card_progress: ({ done, absent, remaining }) =>
@@ -938,6 +947,12 @@ const en: Dictionary<UiMessageParams> = {
   training_success_label: () => 'success rate',
   training_success_aria: ({ rate }) => `Success rate: ${rate}`,
   training_coverage_label: () => 'questions rated',
+  sessions_subtitle: () => 'Your oral exams, from the student list to the final grade.',
+  sessions_drop_hint: () => 'Drop a backup (.json) anywhere on the page to restore it.',
+  sessions_list_title: () => 'Session list',
+  sessions_count: ({ count }) =>
+    `${count} ${pluralEn(count, 'session', 'sessions')} · most recently updated first`,
+  card_resume_named: ({ name }) => `Resume “${name}”`,
   card_resume: () => 'Resume',
   card_actions: ({ name }) => `Actions for "${name}"`,
   action_rename: () => 'Rename',

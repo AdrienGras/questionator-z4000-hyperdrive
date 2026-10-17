@@ -3,7 +3,7 @@ import type { Ui } from '@/lib/i18n/use-ui'
 
 type EmptyStateProps = Readonly<{ ui: Ui }>
 
-/** Liste vide : un message seul, les actions (création, import) sont dans `ActionCards`. */
+/** Liste vide : un message seul, les actions (création, import) sont dans l'en-tête de la page. */
 export function EmptyState({ ui }: EmptyStateProps) {
   const { text } = ui
   return (

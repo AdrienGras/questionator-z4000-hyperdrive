@@ -1,12 +1,10 @@
 import { PageShell } from '@/components/page-shell'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { useDbStatus, useSessions, useTrainings } from '@/lib/db/hooks'
+import { useDbStatus, useTrainings } from '@/lib/db/hooks'
 import { useUi } from '@/lib/i18n/use-ui'
-import { cn } from '@/lib/utils'
 import { ActionCards } from '@/features/home/components/action-cards'
 import { HomeActions } from '@/features/home/components/home-actions'
 import { ImportController } from '@/components/import/import-controller'
-import { SessionList } from '@/features/home/components/session-list'
 import { TrainingList } from '@/features/home/components/training-list'
 
 /** Titre d'une section de la colonne de droite. */
@@ -21,7 +19,6 @@ const SECTION_TITLE_CLASS = 'text-xl font-semibold'
 export function HomePage() {
   const ui = useUi()
   const status = useDbStatus()
-  const sessions = useSessions()
   const trainings = useTrainings()
   const showTrainings = status === 'open' && trainings !== undefined && trainings.length > 0
   const importDisabled = status !== 'open'
@@ -46,18 +43,6 @@ export function HomePage() {
                     <TrainingList ui={ui} trainings={trainings} />
                   </section>
                 )}
-                <section
-                  aria-labelledby="home-sessions-title"
-                  className={cn(showTrainings && 'flex flex-col gap-4')}
-                >
-                  <h2
-                    id="home-sessions-title"
-                    className={showTrainings ? SECTION_TITLE_CLASS : 'sr-only'}
-                  >
-                    {ui.text('home_sessions_title', {})}
-                  </h2>
-                  <SessionList ui={ui} status={status} sessions={sessions} />
-                </section>
               </div>
             </div>
           </PageShell>

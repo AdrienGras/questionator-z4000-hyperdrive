@@ -1,5 +1,7 @@
+import { IconDownload } from '@tabler/icons-react'
 import { useState } from 'react'
 import { exportBackup } from '@/components/export/export-backup'
+import { Button } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CardActionsMenu } from '@/components/card-actions-menu'
 import { DamagedBadge } from '@/components/damaged-badge'
@@ -10,14 +12,14 @@ import { DeleteDialog } from './delete-dialog'
 
 type DamagedSessionCardProps = Readonly<{ ui: Ui; damaged: DamagedSession }>
 
-/** Carte d'une session illisible : ni reprise ni progression, seulement export et suppression. */
+/** Carte d'une session illisible : ni reprise ni progression ; export en bouton, export et suppression au menu. */
 export function DamagedSessionCard({ ui, damaged }: DamagedSessionCardProps) {
   const { text } = ui
   const [deleting, setDeleting] = useState(false)
   const name = damagedName(damaged)
 
   return (
-    <Card>
+    <Card className="w-full gap-4">
       <CardHeader>
         <CardTitle className="flex flex-wrap items-center gap-2">
           <h3 className="text-lg font-semibold wrap-anywhere">{name}</h3>
@@ -35,8 +37,15 @@ export function DamagedSessionCard({ ui, damaged }: DamagedSessionCardProps) {
           </CardActionsMenu>
         </CardAction>
       </CardHeader>
-      <CardContent className="text-sm">
-        <p>{text('damaged_body', {})}</p>
+      <CardContent className="flex flex-1 flex-col gap-4">
+        <p className="text-sm text-muted-foreground">{text('damaged_body', {})}</p>
+        {/* L'action utile sort du menu « … » en bouton visible (D103). */}
+        <div className="mt-auto">
+          <Button variant="outline" size="sm" onClick={() => exportBackup(damaged.raw)}>
+            <IconDownload aria-hidden />
+            {text('action_export', {})}
+          </Button>
+        </div>
       </CardContent>
       <DeleteDialog
         ui={ui}

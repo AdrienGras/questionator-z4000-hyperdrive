@@ -63,10 +63,10 @@ function sessionFile(session: Session): File {
   return backupFile(serializeBackup(session))
 }
 
-/** Monte l'accueil et attend qu'il soit rendu ; renvoie l'input fichier caché. */
+/** Monte la page Sessions et attend qu'il soit rendu ; renvoie l'input fichier caché. */
 async function renderImport(): Promise<HTMLInputElement> {
-  const { container } = renderAt('/')
-  await screen.findByRole('heading', { name: 'Questionator Z-4000 Hyperdrive' })
+  const { container } = renderAt('/sessions')
+  await screen.findByRole('heading', { level: 1, name: 'Sessions' })
   const input = container.querySelector('input[type=file]')
   if (!(input instanceof HTMLInputElement)) throw new Error('input fichier absent')
   return input

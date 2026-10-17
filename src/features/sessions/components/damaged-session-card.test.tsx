@@ -16,7 +16,7 @@ beforeEach(async () => {
 describe('carte de session endommagée', () => {
   test('affiche le nom brut, le badge et seulement deux actions', async () => {
     await putRaw({ id: 'x', name: 'Oral cassé' })
-    renderAt('/')
+    renderAt('/sessions')
     expect(await screen.findByRole('heading', { name: 'Oral cassé' })).toBeInTheDocument()
     expect(screen.getByText('Endommagée')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Reprendre' })).not.toBeInTheDocument()
@@ -28,13 +28,13 @@ describe('carte de session endommagée', () => {
 
   test('sans nom lisible, le titre est l’identifiant', async () => {
     await putRaw({ id: 'x' })
-    renderAt('/')
+    renderAt('/sessions')
     expect(await screen.findByRole('heading', { name: 'x' })).toBeInTheDocument()
   })
 
   test('Supprimer ouvre le dialogue et supprime l’enregistrement', async () => {
     await putRaw({ id: 'x', name: 'Oral cassé' })
-    renderAt('/')
+    renderAt('/sessions')
     fireEvent.click(await screen.findByRole('button', { name: 'Actions pour « Oral cassé »' }))
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Supprimer' }))
     const dialog = await screen.findByRole('alertdialog')
@@ -45,9 +45,9 @@ describe('carte de session endommagée', () => {
   test('la liste affiche une carte saine et une endommagée', async () => {
     await db.sessions.put(makeSession({ id: 'ok', name: 'Oral sain' }))
     await putRaw({ id: 'x', name: 'Oral cassé' })
-    renderAt('/')
+    renderAt('/sessions')
     expect(await screen.findByRole('heading', { name: 'Oral sain' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Oral cassé' })).toBeInTheDocument()
-    expect(screen.getAllByRole('link', { name: 'Reprendre' })).toHaveLength(1)
+    expect(screen.getAllByRole('link', { name: /^Reprendre/ })).toHaveLength(1)
   })
 })

@@ -6,21 +6,19 @@ import {
   CardAction,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
 import { CardActionsMenu } from '@/components/card-actions-menu'
 import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import { useWorkbookExport } from '@/components/export/use-workbook-export'
-import { Progress } from '@/components/ui/progress'
+import { SessionProgress } from '@/components/session-progress'
 import { updateSession } from '@/lib/db/sessions'
 import type { Session } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { DeleteDialog } from './delete-dialog'
 import { exportBackup } from '@/components/export/export-backup'
 import { formatDateTime } from '@/lib/format-date'
-import { sessionProgress } from '@/domain/session/progress'
 import { withExaminer } from '@/domain/session/session-edits'
 import { TextFieldDialog } from '@/components/text-field-dialog'
 
@@ -36,18 +34,19 @@ export function SessionCard({ ui, session }: SessionCardProps) {
   const excel = useWorkbookExport(locale)
   const excelBusy = excel.state === 'busy'
   const [dialog, setDialog] = useState<OpenDialog>(null)
-  const { done, absent, remaining, total } = sessionProgress(session)
-  const progressText = text('card_progress', { done, absent, remaining })
+  const updated = text('card_updated', { date: formatDateTime(session.updatedAt, locale) })
   const openChangeFor = (kind: OpenDialog) => (open: boolean) => setDialog(open ? kind : null)
 
   return (
-    <Card>
+    <Card className="w-full gap-4">
       <CardHeader>
         <CardTitle>
           {/* `wrap-anywhere` : un nom sans espace coupe au lieu de déborder de la carte (#118). */}
           <h3 className="text-lg font-semibold wrap-anywhere">{session.name}</h3>
         </CardTitle>
-        <CardDescription>{session.config.exam.title}</CardDescription>
+        <CardDescription className="text-[13px] leading-[18px]">
+          {session.config.exam.title}
+        </CardDescription>
         <CardAction>
           <CardActionsMenu label={text('card_actions', { name: session.name })}>
             <DropdownMenuItem onClick={() => setDialog('rename')}>
@@ -69,30 +68,29 @@ export function SessionCard({ ui, session }: SessionCardProps) {
           </CardActionsMenu>
         </CardAction>
       </CardHeader>
-      <CardContent className="flex flex-col gap-2 text-sm">
-        {session.examiner !== undefined && (
-          <p>{text('card_examiner', { name: session.examiner })}</p>
-        )}
-        <p className="text-muted-foreground">
-          {text('card_updated', { date: formatDateTime(session.updatedAt, locale) })}
+      <CardContent className="flex flex-1 flex-col gap-4">
+        <p className="text-[13px] leading-[18px] text-muted-foreground tabular-nums">
+          {session.examiner === undefined
+            ? updated
+            : `${updated} · ${text('card_examiner', { name: session.examiner })}`}
         </p>
-        <Progress value={total === 0 ? 0 : (done / total) * 100} aria-label={progressText} />
-        <p>{progressText}</p>
+        <SessionProgress ui={ui} session={session} />
         {excel.state === 'failed' && (
           <p role="alert" className="text-sm text-destructive">
             {text('export_error', {})}
           </p>
         )}
+        <div className="mt-auto">
+          <Link
+            to="/session/$sessionId"
+            params={{ sessionId: session.id }}
+            aria-label={text('card_resume_named', { name: session.name })}
+            className={buttonVariants({ variant: 'outline', size: 'sm' })}
+          >
+            {text('card_resume', {})}
+          </Link>
+        </div>
       </CardContent>
-      <CardFooter>
-        <Link
-          to="/session/$sessionId"
-          params={{ sessionId: session.id }}
-          className={buttonVariants({ variant: 'outline' })}
-        >
-          {text('card_resume', {})}
-        </Link>
-      </CardFooter>
 
       <TextFieldDialog
         ui={ui}
