@@ -1,8 +1,7 @@
-import { IconAlertTriangle } from '@tabler/icons-react'
+import { IconAlertTriangle, IconCircleX } from '@tabler/icons-react'
 import { formatPath, type ConfigIssue } from '@/domain/config/issues'
 import { formatConfigIssue } from '@/domain/config/messages'
 import type { Ui } from '@/lib/i18n/use-ui'
-import { cn } from '@/lib/utils'
 import { errorsFirst, keyed } from '@/lib/issue-list'
 
 type ConfigIssueListProps = Readonly<{
@@ -10,19 +9,36 @@ type ConfigIssueListProps = Readonly<{
   issues: readonly ConfigIssue[]
 }>
 
-function IssueItem({ ui, issue }: Readonly<{ ui: Ui; issue: ConfigIssue }>) {
-  const path = formatPath(issue.path)
-  const isError = issue.severity === 'error'
+const PATH_CLASS = 'font-mono text-xs'
+
+/** Erreur (artboard `creation-avertissements`) : libellé « Erreur », chemin en pastille, message. */
+function ErrorItem({ ui, issue, path }: Readonly<{ ui: Ui; issue: ConfigIssue; path: string }>) {
   return (
-    <li
-      className={cn(
-        'flex items-start gap-2',
-        isError ? 'text-destructive' : 'text-muted-foreground',
+    <li className="flex flex-col gap-1.5 text-small text-destructive">
+      <span className="flex items-center gap-1.5 font-semibold">
+        <IconCircleX aria-hidden className="size-4 shrink-0" />
+        {ui.text('issue_error_label', {})}
+      </span>
+      {path !== '' && (
+        <code
+          className={`${PATH_CLASS} self-start rounded-sm bg-muted px-1.5 py-0.5 text-foreground`}
+        >
+          {path}
+        </code>
       )}
-    >
-      {!isError && <IconAlertTriangle aria-hidden className="mt-0.5 size-4 shrink-0" />}
-      {path !== '' && <code className="rounded bg-muted px-1 font-mono text-xs">{path}</code>}
-      {formatConfigIssue(issue, ui.locale)}
+      <span className="text-foreground">{formatConfigIssue(issue, ui.locale)}</span>
+    </li>
+  )
+}
+
+function WarningItem({ ui, issue, path }: Readonly<{ ui: Ui; issue: ConfigIssue; path: string }>) {
+  return (
+    <li className="flex items-start gap-2 text-small text-muted-foreground">
+      <IconAlertTriangle aria-hidden className="mt-px size-4 shrink-0" />
+      <span className="flex min-w-0 flex-col gap-0.5">
+        <span>{formatConfigIssue(issue, ui.locale)}</span>
+        {path !== '' && <code className={PATH_CLASS}>{path}</code>}
+      </span>
     </li>
   )
 }
@@ -35,10 +51,15 @@ export function ConfigIssueList({ ui, issues }: ConfigIssueListProps) {
   const items = keyed(errorsFirst(issues), (issue) => `${formatPath(issue.path)}|${issue.code}`)
   if (items.length === 0) return null
   return (
-    <ul className="flex flex-col gap-1 text-sm">
-      {items.map(({ item, key }) => (
-        <IssueItem key={key} ui={ui} issue={item} />
-      ))}
+    <ul className="flex flex-col gap-3 border-t pt-3 wrap-anywhere">
+      {items.map(({ item, key }) => {
+        const path = formatPath(item.path)
+        return item.severity === 'error' ? (
+          <ErrorItem key={key} ui={ui} issue={item} path={path} />
+        ) : (
+          <WarningItem key={key} ui={ui} issue={item} path={path} />
+        )
+      })}
     </ul>
   )
 }

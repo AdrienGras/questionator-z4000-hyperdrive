@@ -232,6 +232,7 @@ const SAMPLE: UiMessageParams = {
   preview_students_list: {},
   preview_line: { line: 3, message: 'Doublon' },
   preview_config_title: {},
+  issue_error_label: {},
   preview_subject: { subject: 'PHP' },
   preview_cohort: { cohort: 'B2' },
   preview_category: { label: 'A', questions: 3, scale: '0, 1, 2' },

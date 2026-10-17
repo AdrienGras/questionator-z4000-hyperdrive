@@ -235,6 +235,7 @@ export type UiMessageParams = {
   preview_students_list: NoParams
   preview_line: { line: number; message: string }
   preview_config_title: NoParams
+  issue_error_label: NoParams
   preview_subject: { subject: string }
   preview_cohort: { cohort: string }
   /** `scale` : barème déjà mis en forme par l'appelant (`category.scale.join(', ')`). */
@@ -722,6 +723,7 @@ const fr: Dictionary<UiMessageParams> = {
   preview_students_list: () => 'Voir la liste',
   preview_line: ({ line, message }) => `Ligne ${line} : ${message}`,
   preview_config_title: () => 'Configuration',
+  issue_error_label: () => 'Erreur',
   preview_subject: ({ subject }) => `Matière : ${subject}`,
   preview_cohort: ({ cohort }) => `Promotion : ${cohort}`,
   preview_category: ({ label, questions, scale }) =>
@@ -1155,6 +1157,7 @@ const en: Dictionary<UiMessageParams> = {
   preview_students_list: () => 'Show the list',
   preview_line: ({ line, message }) => `Line ${line}: ${message}`,
   preview_config_title: () => 'Configuration',
+  issue_error_label: () => 'Error',
   preview_subject: ({ subject }) => `Subject: ${subject}`,
   preview_cohort: ({ cohort }) => `Cohort: ${cohort}`,
   preview_category: ({ label, questions, scale }) =>

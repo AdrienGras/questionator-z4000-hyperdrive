@@ -33,8 +33,11 @@ function RootLayout() {
               Les `main` des pages prennent `flex-1` dans la colonne de contenu, jamais `min-h-svh` :
               sur téléphone, la barre du haut s'ajouterait à la hauteur de l'écran. */}
           {!projected && <AppMenu />}
-          {/* `relative isolate` : cadre des halos de `PageShell`, qui couvrent toute la colonne. */}
-          <div className="relative isolate flex min-w-0 flex-1 flex-col">
+          {/* `relative isolate` : cadre des halos de `PageShell`, qui couvrent toute la colonne.
+              `overflow-x-clip` : le halo d'une action (`ActionHalo`) peut dépasser du bord sur
+              téléphone ; `clip` ne crée pas de conteneur de défilement, les colonnes collantes de
+              l'éditeur restent collantes. */}
+          <div className="relative isolate flex min-w-0 flex-1 flex-col overflow-x-clip">
             <Outlet />
           </div>
           {!projected && (
