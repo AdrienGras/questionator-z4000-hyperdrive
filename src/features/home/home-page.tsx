@@ -1,30 +1,81 @@
-import { PageShell } from '@/components/page-shell'
-import { TooltipProvider } from '@/components/ui/tooltip'
+import { IconPlus, IconSchool, IconUpload } from '@tabler/icons-react'
+import { Link, useNavigate } from '@tanstack/react-router'
+import { DbStatusBanner } from '@/components/db-status-banner'
 import { ImportController } from '@/components/import/import-controller'
-import { useDbStatus } from '@/lib/db/hooks'
+import { PageShell } from '@/components/page-shell'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { useDbStatus, useSessions, useTrainings } from '@/lib/db/hooks'
 import { useUi } from '@/lib/i18n/use-ui'
-import { ActionCards } from '@/features/home/components/action-cards'
-import { HomeActions } from '@/features/home/components/home-actions'
+import { PersistenceBadge } from '@/features/home/components/persistence-badge'
+import { ResumeSection } from '@/features/home/components/resume-section'
+import { SpaceTiles } from '@/features/home/components/space-tiles'
+import { recentActivity } from '@/features/home/recent-activity'
 
 /**
- * Accueil provisoire (#147) : les cartes d'action seules, les listes vivent sur `/sessions` et
- * `/trainings` ; le tableau de bord remplace cette page à la tâche suivante.
+ * Accueil en tableau de bord (artboard `accueil`, D103) : « Reprendre » (trois éléments récents),
+ * puis les tuiles d'espace. Un import réussi mène à `/sessions`, où la session importée est
+ * visible même si sa date la laisse hors de « Reprendre » (D106).
  */
 export function HomePage() {
   const ui = useUi()
+  const { text } = ui
   const status = useDbStatus()
-  const importDisabled = status !== 'open'
+  const sessions = useSessions()
+  const trainings = useTrainings()
+  const navigate = useNavigate()
+  const open = status === 'open'
+  const loaded = sessions !== undefined && trainings !== undefined
+  const recent = loaded ? recentActivity(sessions, trainings) : []
   return (
     <TooltipProvider>
-      <ImportController ui={ui} disabled={importDisabled}>
+      <ImportController
+        ui={ui}
+        disabled={!open}
+        onImported={() => void navigate({ to: '/sessions' })}
+      >
         {(openPicker) => (
-          <PageShell title={ui.text('app_title', {})} actions={<HomeActions ui={ui} />}>
-            <ActionCards
-              ui={ui}
-              storageAvailable={status !== 'unavailable'}
-              importDisabled={importDisabled}
-              onImport={openPicker}
-            />
+          <PageShell
+            title={text('menu_home', {})}
+            halo="home"
+            meta={
+              <>
+                <p>{text('home_subtitle', {})}</p>
+                <PersistenceBadge ui={ui} />
+              </>
+            }
+            actions={
+              <>
+                <Button variant="ghost" disabled={!open} onClick={openPicker}>
+                  <IconUpload aria-hidden />
+                  {text('home_import', {})}
+                </Button>
+                {status !== 'unavailable' && (
+                  <>
+                    <Link to="/training/new" className={buttonVariants({ variant: 'outline' })}>
+                      <IconSchool aria-hidden />
+                      {text('home_train', {})}
+                    </Link>
+                    <Link to="/new" className={buttonVariants()}>
+                      <IconPlus aria-hidden />
+                      {text('home_create', {})}
+                    </Link>
+                  </>
+                )}
+              </>
+            }
+          >
+            {!open && <DbStatusBanner ui={ui} status={status} />}
+            {open && loaded && (
+              <div className="flex flex-col gap-10">
+                {recent.length > 0 && <ResumeSection ui={ui} items={recent} />}
+                <SpaceTiles
+                  ui={ui}
+                  sessionCount={sessions.length}
+                  trainingCount={trainings.length}
+                />
+              </div>
+            )}
           </PageShell>
         )}
       </ImportController>

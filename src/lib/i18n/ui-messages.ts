@@ -6,22 +6,24 @@ export type UiMessageParams = {
   app_title: NoParams
   not_found_title: NoParams
   back_home: NoParams
+  home_subtitle: NoParams
+  home_train: NoParams
+  home_resume_title: NoParams
+  home_kind_session: NoParams
+  home_kind_training: NoParams
+  home_training_coverage_short: { covered: number; total: number }
+  home_spaces_title: NoParams
+  home_space_sessions_body: NoParams
+  home_space_trainings: NoParams
+  home_space_trainings_body: NoParams
+  home_space_editor_body: NoParams
+  home_space_view_all: NoParams
   home_create: NoParams
   home_import: NoParams
-  home_actions_title: NoParams
-  home_create_title: NoParams
-  home_create_body: NoParams
   home_students_example_link: NoParams
   home_config_example_link: NoParams
   home_config_schema_link: NoParams
-  home_import_title: NoParams
-  home_import_body: NoParams
-  home_editor_title: NoParams
-  home_editor_body: NoParams
   home_editor_open: NoParams
-  home_training_title: NoParams
-  home_training_body: NoParams
-  home_training_start: NoParams
   home_trainings_title: NoParams
   home_training_updated: { date: string }
   home_training_delete_body: NoParams
@@ -447,25 +449,24 @@ const fr: Dictionary<UiMessageParams> = {
   app_title: () => 'Questionator Z-4000 Hyperdrive',
   not_found_title: () => 'Page introuvable',
   back_home: () => 'Retour à l’accueil',
+  home_subtitle: () => 'Reprenez un oral ou préparez le suivant.',
+  home_train: () => 'S’entraîner',
+  home_resume_title: () => 'Reprendre',
+  home_kind_session: () => 'Session',
+  home_kind_training: () => 'Entraînement',
+  home_training_coverage_short: ({ covered, total }) => `${covered} / ${total} questions notées`,
+  home_spaces_title: () => 'Espaces',
+  home_space_sessions_body: () => 'Oraux en cours et terminés',
+  home_space_trainings: () => 'Entraînements',
+  home_space_trainings_body: () => 'Révisions en solo',
+  home_space_editor_body: () => 'Erreurs signalées en direct, aperçu des questions',
+  home_space_view_all: () => 'Voir tout',
   home_create: () => 'Créer une session',
   home_import: () => 'Importer une sauvegarde',
-  home_actions_title: () => 'Actions',
-  home_create_title: () => 'Nouvelle session',
-  home_create_body: () =>
-    "Partez d'une liste d'étudiants (CSV nom / prénom) et d'un fichier de configuration (JSON : catégories, questions, barèmes).",
   home_students_example_link: () => "Télécharger la liste d'étudiants d'exemple",
   home_config_example_link: () => "Télécharger la config d'exemple",
   home_config_schema_link: () => 'JSON Schema de la config',
-  home_import_title: () => 'Restaurer une session',
-  home_import_body: () =>
-    "Restaurez une session à partir d'un fichier .json créé par « Exporter une sauvegarde ». Vous pouvez aussi déposer le fichier n'importe où sur la page.",
-  home_editor_title: () => 'Éditer une config',
-  home_editor_body: () =>
-    "Écrivez ou corrigez un fichier de configuration : les erreurs sont signalées en direct et les questions affichées telles qu'elles seront projetées.",
   home_editor_open: () => "Ouvrir l'éditeur",
-  home_training_title: () => 'S’entraîner',
-  home_training_body: () => 'Révisez seul à partir d’une config générée par un LLM.',
-  home_training_start: () => 'Commencer',
   home_trainings_title: () => 'Mes entraînements',
   home_training_updated: ({ date }) => `Dernière activité : ${date}`,
   home_training_delete_body: () => 'L’historique et les stats de cet entraînement seront perdus.',
@@ -868,25 +869,24 @@ const en: Dictionary<UiMessageParams> = {
   app_title: () => 'Questionator Z-4000 Hyperdrive',
   not_found_title: () => 'Page not found',
   back_home: () => 'Back to home',
+  home_subtitle: () => 'Resume a session in progress or prepare the next oral exam.',
+  home_train: () => 'Practice',
+  home_resume_title: () => 'Resume',
+  home_kind_session: () => 'Session',
+  home_kind_training: () => 'Practice',
+  home_training_coverage_short: ({ covered, total }) => `${covered} of ${total} questions rated`,
+  home_spaces_title: () => 'Spaces',
+  home_space_sessions_body: () => 'Exams in progress and finished',
+  home_space_trainings: () => 'Practice',
+  home_space_trainings_body: () => 'Solo review',
+  home_space_editor_body: () => 'Errors flagged as you type, live question preview',
+  home_space_view_all: () => 'View all',
   home_create: () => 'Create a session',
   home_import: () => 'Import a backup',
-  home_actions_title: () => 'Actions',
-  home_create_title: () => 'New session',
-  home_create_body: () =>
-    'Start from a student list (CSV, last name / first name) and a configuration file (JSON: categories, questions, scales).',
   home_students_example_link: () => 'Download the example student list',
   home_config_example_link: () => 'Download the example config',
   home_config_schema_link: () => 'Config JSON Schema',
-  home_import_title: () => 'Restore a session',
-  home_import_body: () =>
-    'Restore a session from a .json file made with “Export a backup”. You can also drop the file anywhere on the page.',
-  home_editor_title: () => 'Edit a config',
-  home_editor_body: () =>
-    'Write or fix a configuration file: errors are flagged as you type and questions are shown as they will be projected.',
   home_editor_open: () => 'Open the editor',
-  home_training_title: () => 'Practice',
-  home_training_body: () => 'Review on your own from a config generated by an LLM.',
-  home_training_start: () => 'Start',
   home_trainings_title: () => 'My practice',
   home_training_updated: ({ date }) => `Last activity: ${date}`,
   home_training_delete_body: () => 'The history and stats of this practice will be lost.',

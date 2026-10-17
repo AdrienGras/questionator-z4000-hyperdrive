@@ -95,7 +95,7 @@ function themedSession(locale?: 'fr' | 'en') {
 test("la route / affiche l'accueil", async () => {
   renderAt('/')
   expect(
-    await screen.findByRole('heading', { name: 'Questionator Z-4000 Hyperdrive' }),
+    await screen.findByRole('heading', { level: 1, name: 'Accueil' }),
   ).toBeInTheDocument()
 })
 
@@ -151,7 +151,7 @@ test('revenir à l’accueil depuis une session thémée ne laisse aucun token s
   await screen.findByRole('heading', { name: 'Oral de PHP' })
   await router.navigate({ to: '/' })
   expect(
-    await screen.findByRole('heading', { name: 'Questionator Z-4000 Hyperdrive' }),
+    await screen.findByRole('heading', { level: 1, name: 'Accueil' }),
   ).toBeInTheDocument()
   expect(document.documentElement.style.getPropertyValue('--primary')).toBe('')
   expect(document.documentElement).toHaveClass('dark')
@@ -189,7 +189,7 @@ test("d'une session à l'autre, --primary et lang suivent la config active, .dar
   expect(document.documentElement.lang).toBe('en')
 
   await router.navigate({ to: '/' })
-  await screen.findByRole('heading', { name: 'Questionator Z-4000 Hyperdrive' })
+  await screen.findByRole('heading', { level: 1, name: 'Accueil' })
   // matchMedia simulé en clair : aucun token à l'accueil, `.dark` forcée (D102).
   expect(document.documentElement.style.getPropertyValue('--primary')).toBe('')
   expect(document.documentElement).toHaveClass('dark')
