@@ -75,7 +75,45 @@ test('titre long : le bloc titre se replie, le groupe de droite reste aligné à
   )
   // jsdom ne fait pas de mise en page : on fige les classes qui la portent.
   const h1 = screen.getByRole('heading', { level: 1 })
-  expect(h1.parentElement).toHaveClass('flex-[1_1_20rem]', 'min-w-0')
+  expect(h1.parentElement).toHaveClass('min-w-0')
+  // Le bloc qui se replie porte aussi l'éventuelle tuile d'espace (`icon`).
+  expect(h1.parentElement?.parentElement).toHaveClass('flex-[1_1_20rem]', 'min-w-0')
   const actions = screen.getByRole('button', { name: 'Projeter' })
   expect(actions.parentElement).toHaveClass('ml-auto', 'justify-end')
+})
+
+test('icon : tuile avant le titre', () => {
+  mount(
+    <Harness title="Sessions" icon={<span data-testid="tuile" />}>
+      x
+    </Harness>,
+  )
+  const h1 = screen.getByRole('heading', { level: 1, name: 'Sessions' })
+  const tile = screen.getByTestId('tuile')
+  expect(tile.compareDocumentPosition(h1) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+})
+
+test('halo space : un décor caché, sans pointeur ; aucun sans la prop', () => {
+  const { unmount } = mount(
+    <Harness title="Sessions" halo="space">
+      x
+    </Harness>,
+  )
+  const main = screen.getByRole('main')
+  const halos = main.querySelectorAll('[aria-hidden="true"].pointer-events-none')
+  expect(halos).toHaveLength(1)
+  expect(main).toHaveClass('relative', 'isolate', 'overflow-x-clip')
+  unmount()
+  mount(<Harness title="Oral">x</Harness>)
+  expect(screen.getByRole('main').querySelectorAll('.pointer-events-none')).toHaveLength(0)
+  expect(screen.getByRole('main')).not.toHaveClass('overflow-x-clip')
+})
+
+test('halo home : deux décors', () => {
+  mount(
+    <Harness title="Accueil" halo="home">
+      x
+    </Harness>,
+  )
+  expect(screen.getByRole('main').querySelectorAll('[aria-hidden="true"]')).toHaveLength(2)
 })

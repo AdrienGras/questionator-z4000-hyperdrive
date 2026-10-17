@@ -83,6 +83,11 @@ export type UiMessageParams = {
   card_examiner: { name: string }
   card_updated: { date: string }
   card_progress: { done: number; absent: number; remaining: number }
+  card_progress_of: { total: number }
+  card_progress_rest: { absent: number; remaining: number }
+  training_success_label: NoParams
+  training_success_aria: { rate: string }
+  training_coverage_label: NoParams
   card_resume: NoParams
   card_actions: { name: string }
   action_rename: NoParams
@@ -519,6 +524,12 @@ const fr: Dictionary<UiMessageParams> = {
   card_updated: ({ date }) => `Modifiée le ${date}`,
   card_progress: ({ done, absent, remaining }) =>
     `${done} ${plural(done, 'passé', 'passés')} · ${absent} ${plural(absent, 'absent', 'absents')} · ${remaining} ${plural(remaining, 'restant', 'restants')}`,
+  card_progress_of: ({ total }) => `/ ${total} ${plural(total, 'passé', 'passés')}`,
+  card_progress_rest: ({ absent, remaining }) =>
+    `${absent} ${plural(absent, 'absent', 'absents')} · ${remaining} ${plural(remaining, 'restant', 'restants')}`,
+  training_success_label: () => 'de réussite',
+  training_success_aria: ({ rate }) => `Taux de réussite : ${rate}`,
+  training_coverage_label: () => 'questions notées',
   card_resume: () => 'Reprendre',
   card_actions: ({ name }) => `Actions pour « ${name} »`,
   action_rename: () => 'Renommer',
@@ -922,6 +933,11 @@ const en: Dictionary<UiMessageParams> = {
   card_updated: ({ date }) => `Updated ${date}`,
   card_progress: ({ done, absent, remaining }) =>
     `${done} done · ${absent} absent · ${remaining} remaining`,
+  card_progress_of: ({ total }) => `/ ${total} done`,
+  card_progress_rest: ({ absent, remaining }) => `${absent} absent · ${remaining} remaining`,
+  training_success_label: () => 'success rate',
+  training_success_aria: ({ rate }) => `Success rate: ${rate}`,
+  training_coverage_label: () => 'questions rated',
   card_resume: () => 'Resume',
   card_actions: ({ name }) => `Actions for "${name}"`,
   action_rename: () => 'Rename',
