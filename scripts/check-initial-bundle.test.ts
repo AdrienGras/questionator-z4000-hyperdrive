@@ -8,9 +8,6 @@ import {
   CODEMIRROR_CHUNK,
   CODEMIRROR_FORBIDDEN,
   CODEMIRROR_IMPORTER,
-  RECHARTS_FORBIDDEN,
-  RECHARTS_CHUNK,
-  STATS_ROUTE_KEY,
   SHIKI_CHUNK,
   SHIKI_FORBIDDEN,
   SHIKI_IMPORTER,
@@ -20,7 +17,8 @@ import {
   type ManifestChunk,
 } from './check-initial-bundle.ts'
 
-const RECHARTS_KEY = 'node_modules/.pnpm/recharts@3.8.0/node_modules/recharts/es6/index.js'
+const XLSX_KEY =
+  'node_modules/.pnpm/write-excel-file@3.0.0/node_modules/write-excel-file/modules/index.js'
 
 describe('findInitialLeaks', () => {
   it('suit aussi la route d’accueil, chargée aussitôt malgré son découpage paresseux', () => {
@@ -32,125 +30,135 @@ describe('findInitialLeaks', () => {
     expect(findInitialLeaks(manifest, XLSX_FORBIDDEN)).toEqual(['_xlsx-a.js'])
   })
 
-  it('signale un module recharts importé statiquement par l’entrée', () => {
+  it('signale un module write-excel-file importé statiquement par l’entrée', () => {
     const manifest: Record<string, ManifestChunk> = {
-      'index.html': { file: 'assets/index.js', isEntry: true, imports: [RECHARTS_KEY] },
-      [RECHARTS_KEY]: { file: 'assets/recharts.js' },
+      'index.html': { file: 'assets/index.js', isEntry: true, imports: [XLSX_KEY] },
+      [XLSX_KEY]: { file: 'assets/xlsx.js' },
     }
-    expect(findInitialLeaks(manifest, RECHARTS_FORBIDDEN)).toEqual([RECHARTS_KEY])
+    expect(findInitialLeaks(manifest, XLSX_FORBIDDEN)).toEqual([XLSX_KEY])
   })
 
-  it('accepte recharts atteint seulement par import dynamique', () => {
+  it('accepte xlsx atteint seulement par import dynamique', () => {
     const manifest: Record<string, ManifestChunk> = {
-      'index.html': { file: 'assets/index.js', isEntry: true, dynamicImports: ['src/stats.tsx'] },
-      'src/stats.tsx': { file: 'assets/stats.js', isDynamicEntry: true, imports: [RECHARTS_KEY] },
-      [RECHARTS_KEY]: { file: 'assets/recharts.js' },
+      'index.html': { file: 'assets/index.js', isEntry: true, dynamicImports: ['src/export.tsx'] },
+      'src/export.tsx': {
+        file: 'assets/write-workbook.js',
+        isDynamicEntry: true,
+        imports: [XLSX_KEY],
+      },
+      [XLSX_KEY]: { file: 'assets/xlsx.js' },
     }
-    expect(findInitialLeaks(manifest, RECHARTS_FORBIDDEN)).toEqual([])
+    expect(findInitialLeaks(manifest, XLSX_FORBIDDEN)).toEqual([])
   })
 
-  it('détecte une fuite indirecte (entrée, a.js, recharts)', () => {
+  it('détecte une fuite indirecte (entrée, a.js, write-excel-file)', () => {
     const manifest: Record<string, ManifestChunk> = {
       'index.html': { file: 'assets/index.js', isEntry: true, imports: ['_a.js'] },
-      '_a.js': { file: 'assets/a.js', imports: [RECHARTS_KEY] },
-      [RECHARTS_KEY]: { file: 'assets/recharts.js' },
+      '_a.js': { file: 'assets/a.js', imports: [XLSX_KEY] },
+      [XLSX_KEY]: { file: 'assets/xlsx.js' },
     }
-    expect(findInitialLeaks(manifest, RECHARTS_FORBIDDEN)).toEqual([RECHARTS_KEY])
+    expect(findInitialLeaks(manifest, XLSX_FORBIDDEN)).toEqual([XLSX_KEY])
   })
 
-  it('signale le chunk de chart.tsx et supporte les cycles', () => {
+  it('signale un module de lib/xlsx et supporte les cycles', () => {
     const manifest: Record<string, ManifestChunk> = {
       'index.html': { file: 'assets/index.js', isEntry: true, imports: ['_a.js'] },
-      '_a.js': { file: 'assets/a.js', imports: ['_a.js', 'src/components/ui/chart.tsx'] },
-      'src/components/ui/chart.tsx': { file: 'assets/chart.js' },
+      '_a.js': { file: 'assets/a.js', imports: ['_a.js', 'src/lib/xlsx/write-workbook.ts'] },
+      'src/lib/xlsx/write-workbook.ts': { file: 'assets/writer.js' },
     }
-    expect(findInitialLeaks(manifest, RECHARTS_FORBIDDEN)).toEqual(['src/components/ui/chart.tsx'])
+    expect(findInitialLeaks(manifest, XLSX_FORBIDDEN)).toEqual(['src/lib/xlsx/write-workbook.ts'])
   })
 
   it('renvoie [] quand rien n’est interdit', () => {
     const manifest: Record<string, ManifestChunk> = {
       'index.html': { file: 'assets/index.js', isEntry: true },
     }
-    expect(findInitialLeaks(manifest, RECHARTS_FORBIDDEN)).toEqual([])
+    expect(findInitialLeaks(manifest, XLSX_FORBIDDEN)).toEqual([])
   })
 
-  it('le motif réel reconnaît le chunk recharts du manifeste Vite', () => {
+  it('le motif réel reconnaît le chunk xlsx du manifeste Vite', () => {
     const manifest: Record<string, ManifestChunk> = {
-      'index.html': { file: 'assets/index.js', isEntry: true, imports: ['_recharts-CK6PldPx.js'] },
-      '_recharts-CK6PldPx.js': { file: 'assets/recharts-CK6PldPx.js' },
+      'index.html': { file: 'assets/index.js', isEntry: true, imports: ['_xlsx-CK6PldPx.js'] },
+      '_xlsx-CK6PldPx.js': { file: 'assets/xlsx-CK6PldPx.js' },
     }
-    expect(findInitialLeaks(manifest, RECHARTS_FORBIDDEN)).toEqual(['_recharts-CK6PldPx.js'])
+    expect(findInitialLeaks(manifest, XLSX_FORBIDDEN)).toEqual(['_xlsx-CK6PldPx.js'])
   })
 })
 
-/** Extrait réaliste du manifeste de `pnpm build` (F15). */
+/** Extrait réaliste du manifeste de `pnpm build` (F16). */
 const REAL_MANIFEST: Record<string, ManifestChunk> = {
   'index.html': {
     file: 'assets/index.js',
     isEntry: true,
     imports: ['_vendor-DqVrg90E.js'],
-    dynamicImports: [STATS_ROUTE_KEY],
+    dynamicImports: [XLSX_IMPORTER],
   },
   '_vendor-DqVrg90E.js': { file: 'assets/vendor-DqVrg90E.js' },
-  [STATS_ROUTE_KEY]: {
-    file: 'assets/session._sessionId_.stats.js',
+  [XLSX_IMPORTER]: {
+    file: 'assets/write-workbook.js',
     isDynamicEntry: true,
-    imports: ['_vendor-DqVrg90E.js', 'index.html', '_recharts-DtnHr0lg.js'],
+    imports: ['_vendor-DqVrg90E.js', 'index.html', '_xlsx-DtnHr0lg.js'],
   },
-  '_recharts-DtnHr0lg.js': {
-    file: 'assets/recharts-DtnHr0lg.js',
+  '_xlsx-DtnHr0lg.js': {
+    file: 'assets/xlsx-DtnHr0lg.js',
     imports: ['_vendor-DqVrg90E.js'],
   },
 }
 
 describe('findVacuityProblems', () => {
-  it('passe sur un manifeste réaliste (recharts atteint par la route des stats)', () => {
-    expect(findVacuityProblems(REAL_MANIFEST, RECHARTS_CHUNK, STATS_ROUTE_KEY)).toEqual([])
-    expect(findInitialLeaks(REAL_MANIFEST, RECHARTS_FORBIDDEN)).toEqual([])
+  it('passe sur un manifeste réaliste (xlsx atteint par l’écriture du classeur)', () => {
+    expect(findVacuityProblems(REAL_MANIFEST, XLSX_CHUNK, XLSX_IMPORTER)).toEqual([])
+    expect(findInitialLeaks(REAL_MANIFEST, XLSX_FORBIDDEN)).toEqual([])
   })
 
-  it('échoue sans chunk recharts dans le manifeste', () => {
+  it('échoue sans chunk xlsx dans le manifeste', () => {
     const manifest = { ...REAL_MANIFEST }
-    delete manifest['_recharts-DtnHr0lg.js']
-    manifest[STATS_ROUTE_KEY] = { file: 'assets/stats.js', isDynamicEntry: true }
-    const problems = findVacuityProblems(manifest, RECHARTS_CHUNK, STATS_ROUTE_KEY)
+    delete manifest['_xlsx-DtnHr0lg.js']
+    manifest[XLSX_IMPORTER] = { file: 'assets/write-workbook.js', isDynamicEntry: true }
+    const problems = findVacuityProblems(manifest, XLSX_CHUNK, XLSX_IMPORTER)
     expect(problems).toHaveLength(1)
     expect(problems[0]).toMatch(/aucun chunk/)
   })
 
-  it('échoue quand la route des stats n’atteint pas le chunk recharts', () => {
+  it('échoue quand l’écriture du classeur n’atteint pas le chunk xlsx', () => {
     const manifest: Record<string, ManifestChunk> = {
       ...REAL_MANIFEST,
-      [STATS_ROUTE_KEY]: { file: 'assets/stats.js', isDynamicEntry: true, imports: ['index.html'] },
+      [XLSX_IMPORTER]: {
+        file: 'assets/write-workbook.js',
+        isDynamicEntry: true,
+        imports: ['index.html'],
+      },
     }
-    expect(findVacuityProblems(manifest, RECHARTS_CHUNK, STATS_ROUTE_KEY)[0]).toMatch(
-      /n'importe pas statiquement _recharts-DtnHr0lg\.js/,
+    expect(findVacuityProblems(manifest, XLSX_CHUNK, XLSX_IMPORTER)[0]).toMatch(
+      /n'importe pas statiquement _xlsx-DtnHr0lg\.js/,
     )
   })
 
   it('suit les imports indirects et échoue si la route disparaît', () => {
     const indirect: Record<string, ManifestChunk> = {
       ...REAL_MANIFEST,
-      [STATS_ROUTE_KEY]: { file: 'assets/stats.js', imports: ['_chart.js'] },
-      '_chart.js': { file: 'assets/chart.js', imports: ['_recharts-DtnHr0lg.js'] },
+      [XLSX_IMPORTER]: { file: 'assets/write-workbook.js', imports: ['_writer.js'] },
+      '_writer.js': { file: 'assets/writer.js', imports: ['_xlsx-DtnHr0lg.js'] },
     }
-    expect(findVacuityProblems(indirect, RECHARTS_CHUNK, STATS_ROUTE_KEY)).toEqual([])
+    expect(findVacuityProblems(indirect, XLSX_CHUNK, XLSX_IMPORTER)).toEqual([])
     const withoutRoute = { ...REAL_MANIFEST }
-    delete withoutRoute[STATS_ROUTE_KEY]
-    expect(findVacuityProblems(withoutRoute, RECHARTS_CHUNK, STATS_ROUTE_KEY)[0]).toMatch(/absente/)
+    delete withoutRoute[XLSX_IMPORTER]
+    expect(findVacuityProblems(withoutRoute, XLSX_CHUNK, XLSX_IMPORTER)[0]).toMatch(/absente/)
   })
 })
 
 const PYTHON_KEY =
   'node_modules/.pnpm/@shikijs+langs@4.4.3/node_modules/@shikijs/langs/dist/python.mjs'
 
-/** Manifeste à trois cibles : Recharts (route des stats), xlsx (écriture du classeur) et Shiki (validateur). */
+/** Manifeste aux trois cibles : xlsx (écriture du classeur), Shiki (validateur) et CodeMirror (éditeur). */
 const ALL_TARGETS: Record<string, ManifestChunk> = {
-  ...REAL_MANIFEST,
   'index.html': {
-    ...REAL_MANIFEST['index.html'],
-    dynamicImports: [STATS_ROUTE_KEY, XLSX_IMPORTER, CODEMIRROR_IMPORTER],
+    file: 'assets/index.js',
+    isEntry: true,
+    imports: ['_vendor-DqVrg90E.js'],
+    dynamicImports: [XLSX_IMPORTER, CODEMIRROR_IMPORTER],
   },
+  '_vendor-DqVrg90E.js': { file: 'assets/vendor-DqVrg90E.js' },
   [CODEMIRROR_IMPORTER]: {
     file: 'assets/editor-Cm1.js',
     isDynamicEntry: true,
@@ -176,15 +184,10 @@ const problemsOf = (manifest: Record<string, ManifestChunk>): string[] =>
   checkTargets(manifest, BUNDLE_TARGETS)
 
 describe('cibles multiples', () => {
-  it('déclare recharts, xlsx, shiki et codemirror', () => {
-    expect(BUNDLE_TARGETS.map((target) => target.name)).toEqual([
-      'recharts',
-      'xlsx',
-      'shiki',
-      'codemirror',
-    ])
-    expect(BUNDLE_TARGETS[1]).toMatchObject({ chunk: XLSX_CHUNK, importer: XLSX_IMPORTER })
-    expect(BUNDLE_TARGETS[3]).toMatchObject({
+  it('déclare xlsx, shiki et codemirror (Recharts retiré en F44.8)', () => {
+    expect(BUNDLE_TARGETS.map((target) => target.name)).toEqual(['xlsx', 'shiki', 'codemirror'])
+    expect(BUNDLE_TARGETS[0]).toMatchObject({ chunk: XLSX_CHUNK, importer: XLSX_IMPORTER })
+    expect(BUNDLE_TARGETS[2]).toMatchObject({
       chunk: CODEMIRROR_CHUNK,
       importer: CODEMIRROR_IMPORTER,
     })
@@ -200,7 +203,7 @@ describe('cibles multiples', () => {
     ])
   })
 
-  it('ne trouve aucun problème sur un manifeste propre aux quatre cibles', () => {
+  it('ne trouve aucun problème sur un manifeste propre aux trois cibles', () => {
     expect(problemsOf(ALL_TARGETS)).toEqual([])
   })
 
@@ -222,7 +225,7 @@ describe('cibles multiples', () => {
       },
     }
     expect(findInitialLeaks(manifest, XLSX_FORBIDDEN)).toEqual(['_xlsx-Ab12Cd34.js'])
-    expect(findInitialLeaks(manifest, RECHARTS_FORBIDDEN)).toEqual([])
+    expect(findInitialLeaks(manifest, CODEMIRROR_FORBIDDEN)).toEqual([])
   })
 
   it('signale le catalogue Shiki importé statiquement par l’entrée', () => {

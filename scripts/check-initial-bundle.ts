@@ -1,7 +1,7 @@
 /**
- * Vérifie que les bibliothèques lourdes (Recharts et son wrapper shadcn, F15/D70 ; xlsx, F16/D71 ;
- * catalogue et grammaires Shiki, F18 ; CodeMirror, F26)
- * restent hors du bundle initial.
+ * Vérifie que les bibliothèques lourdes (xlsx, F16/D71 ; catalogue et grammaires Shiki, F18 ;
+ * CodeMirror, F26) restent hors du bundle initial. Recharts (F15/D70) est sorti du projet en F44.8
+ * (D109).
  * Lancé par `pnpm check:bundle` après `pnpm build` ; nécessite `build.manifest: true`.
  * Exécuté par Node natif (types retirés) : imports avec extension `.ts`, syntaxe effaçable.
  */
@@ -68,8 +68,8 @@ export function staticClosure(manifest: Record<string, ManifestChunk>, start: st
 }
 
 /**
- * Garde-fou de non-vacuité : sans chunk nommé, ou si l'importeur (écran des statistiques,
- * `write-workbook.ts`) ne l'atteint plus, `findInitialLeaks` passerait sans rien vérifier (chunk
+ * Garde-fou de non-vacuité : sans chunk nommé, ou si l'importeur (`write-workbook.ts`,
+ * `code-languages.ts`, route de l'éditeur) ne l'atteint plus, `findInitialLeaks` passerait sans rien vérifier (chunk
  * inliné ailleurs, groupe renommé, module déplacé). Renvoie les problèmes constatés, [] si le contrôle a du sens.
  */
 export function findVacuityProblems(
@@ -93,15 +93,6 @@ export function findVacuityProblems(
   return []
 }
 
-/** Clé du chunk produit par le groupe `recharts` de `vite.config.ts` (`_recharts-<hash>.js`). */
-export const RECHARTS_CHUNK = /^_recharts[.-]/
-/** Chunk paresseux du composant de l'écran des statistiques (autoCodeSplitting TanStack). */
-export const STATS_ROUTE_KEY = 'src/routes/session.$sessionId_.stats.tsx?tsr-split=component'
-
-// Chunk `recharts` (vite.config.ts, codeSplitting) : clé `_recharts-<hash>.js` dans le manifeste.
-// Repli : chemins sources (pnpm : node_modules/.pnpm/recharts@x/node_modules/recharts/…) et wrapper.
-export const RECHARTS_FORBIDDEN =
-  /(?:^_recharts[.-])|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?recharts\/)|(?:src\/components\/ui\/chart\.tsx)/
 /** Une bibliothèque lourde à garder hors du bundle initial. */
 export type BundleTarget = {
   name: string
@@ -145,12 +136,6 @@ export const CODEMIRROR_FORBIDDEN =
   /(?:^_codemirror[.-])|(?:node_modules\/(?:\.pnpm\/[^/]+\/node_modules\/)?@(?:codemirror|lezer)\/)/
 
 export const BUNDLE_TARGETS: BundleTarget[] = [
-  {
-    name: 'recharts',
-    chunk: RECHARTS_CHUNK,
-    importer: STATS_ROUTE_KEY,
-    forbidden: RECHARTS_FORBIDDEN,
-  },
   { name: 'xlsx', chunk: XLSX_CHUNK, importer: XLSX_IMPORTER, forbidden: XLSX_FORBIDDEN },
   {
     name: 'shiki',

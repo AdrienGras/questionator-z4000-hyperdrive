@@ -31,7 +31,7 @@ export default defineConfig({
   base: '/questionator-z4000-hyperdrive/',
   define: { __APP_VERSION__: JSON.stringify(readPackageVersion()) },
   build: {
-    // Manifeste lu par `scripts/check-initial-bundle.ts` (Recharts et xlsx hors du bundle initial, D70/D71).
+    // Manifeste lu par `scripts/check-initial-bundle.ts` (xlsx, Shiki et CodeMirror hors du bundle initial, D71).
     manifest: true,
     // Limite GLOBALE (Vite l'applique à tous les chunks, pas seulement à celui-ci) : elle coupe
     // l'avertissement pour n'importe quel chunk jusqu'à 2,4 Mo. Elle est fixée ici pour couvrir le
@@ -41,38 +41,34 @@ export default defineConfig({
     // 2 370,47 kB ; valeur fixée juste au-dessus). Effet de bord accepté : le budget des AUTRES
     // chunks n'est donc plus surveillé par Vite en dessous de 2,4 Mo (voir docs/BACKLOG.md).
     chunkSizeWarningLimit: 2400,
-    // Isole Recharts (et ses d3) dans un chunk nommé `recharts` : sans cela Rolldown l'inline dans le
-    // chunk qui l'importe et le manifeste ne le voit plus, donc `check:bundle` ne saurait pas
-    // détecter une fuite dans le bundle initial (D70).
+    // Isole chaque bibliothèque lourde dans un chunk nommé : sans cela Rolldown l'inline dans le chunk
+    // qui l'importe et le manifeste ne la voit plus, donc `check:bundle` ne saurait pas détecter une
+    // fuite dans le bundle initial (D70, D71).
     rolldownOptions: {
       output: {
         codeSplitting: {
           groups: [
-            // Socle partagé par l'application ET par Recharts (React, son runtime, `clsx`,
+            // Socle partagé par l'application et les groupes nommés (React, son runtime, `clsx`,
             // `tiny-invariant`, `use-sync-external-store`). Cause : `includeDependenciesRecursively`
-            // vaut `true` par défaut, donc le groupe `recharts` avale aussi les dépendances qu'il
-            // partage avec l'appli ; sans ce groupe, React finit dans `_recharts-*` et l'entrée
-            // l'importe statiquement. Variante tentante écartée : `{ test: /node_modules[\\/]/,
-            // tags: ['$initial'] }` absorberait un Recharts qui fuit dans `vendor` et aveuglerait
-            // `check:bundle`. La liste blanche échoue du bon côté : si elle dérive, la CI rougit ;
+            // vaut `true` par défaut, donc un groupe avale aussi les dépendances qu'il partage avec
+            // l'appli ; sans ce groupe, React finirait dans l'un d'eux (c'était `_recharts-*` avant
+            // F44.8) et l'entrée l'importerait statiquement. Variante tentante écartée :
+            // `{ test: /node_modules[\\/]/, tags: ['$initial'] }` absorberait une bibliothèque qui
+            // fuit dans `vendor` et aveuglerait `check:bundle`. La liste blanche échoue du bon côté : si elle dérive, la CI rougit ;
             // la compléter quand `check:bundle` signale une fuite.
             {
               name: 'vendor',
               test: /node_modules[\\/](?:\.pnpm[\\/][^\\/]+[\\/]node_modules[\\/])?(?:react|react-dom|scheduler|clsx|tiny-invariant|use-sync-external-store)[\\/]/,
             },
-            {
-              name: 'recharts',
-              test: /node_modules[\\/](?:\.pnpm[\\/][^\\/]+[\\/]node_modules[\\/])?(?:recharts|victory-vendor|d3-[^\\/]+)[\\/]/,
-            },
             // Écriture xlsx (F16, D71) : `write-excel-file` et `fflate`, chargés en `import()` dynamique
-            // depuis `src/lib/xlsx/write-workbook.ts`. Même raison que `recharts` : sans groupe nommé,
+            // depuis `src/lib/xlsx/write-workbook.ts`. Même raison que les autres groupes : sans groupe nommé,
             // Rolldown l'inline dans le chunk appelant et `check:bundle` ne le voit plus.
             {
               name: 'xlsx',
               test: /node_modules[\\/](?:\.pnpm[\\/][^\\/]+[\\/]node_modules[\\/])?(?:write-excel-file|fflate)[\\/]/,
             },
             // Éditeur JSON (F26) : CodeMirror et ses dépendances Lezer, chargés à la demande avec
-            // l'éditeur. Même raison que `recharts` : sans groupe nommé, Rolldown l'inline dans le
+            // l'éditeur. Même raison que les autres groupes : sans groupe nommé, Rolldown l'inline dans le
             // chunk appelant et `check:bundle` ne le voit plus.
             {
               name: 'codemirror',
@@ -119,7 +115,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Tout ce que le build émet, chunks à la demande compris (Shiki, Tabler, Recharts, xlsx),
+        // Tout ce que le build émet, chunks à la demande compris (Shiki, Tabler, xlsx),
         // polices Geist et fichiers de `configSchemaPlugin`. `dist/.vite/` (caché) reste dehors.
         globPatterns: ['**/*.{js,css,html,json,csv,svg,png,webp,woff2}'],
         // La doc VitePress (`dist/docs/`, F27, D96) n'est pas pré-cachée : elle se consulte en ligne.
