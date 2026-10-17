@@ -34,11 +34,21 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 - **Retours de validation (1er passage)** : zones de dépôt toujours au grand format (même hauteur, vides ou remplies) ; aperçu de l'éditeur à parts égales avec le code et collant sur toute la hauteur en `lg`. Deux e2e les tiennent.
 - **Mémoire et canevas** : D107, 3 QUIRKS, 10 BACKLOG (§ Éditeur de config et § Création de session, dont les 8 mineurs de la relecture), CONVENTIONS § Page examinateur ; canevas v23 (tuile 52 px, pastille de marge). `pnpm check` (2087 tests) et 73 e2e verts ; captures 1280 et 390 px comparées aux artboards.
 
-**Trucs en suspens** : #148 **à valider par l'utilisateur en local** (`pnpm dev`, création sur `localhost` ou en HTTPS : QUIRKS 2026-10-17 sur le tailnet en `http://`). PR #154 toujours en brouillon. La mise en place d'un entraînement montre déjà la nouvelle zone de dépôt (forme de la création) en attendant sa version compacte (#151).
+**Trucs en suspens** : #148 **validé par l'utilisateur en local** (`pnpm dev`) après un retour en deux points, corrigés : zones de dépôt toujours au grand format, aperçu de l'éditeur à parts égales et collant en `lg`. PR #154 toujours en brouillon, CI et Sonar verts sur `e117491` avant cette entrée. La mise en place d'un entraînement montre déjà la nouvelle zone de dépôt (forme de la création) en attendant sa version compacte (#151). Le guide ne parle encore ni du menu, ni du nouvel accueil, ni des nouveaux écrans (passe de fin de phase 3).
 
-**Prochaine chose à creuser** : après validation de #148, plan de #149 (passage et vue projetée) d'après la section #149 de la carte des écrans et ses 12 artboards ; vérifier les halos et `ActionHalo` sous un thème de session.
+**Prochaine chose à creuser** : plan de #149 (F44.7, passage examinateur et vue projetée), le plus gros ticket de la phase. Sources :
+- carte des écrans `docs/superpowers/specs/2026-10-17-f44-carte-des-ecrans.md` § « Passage et vue projetée (#149) », lignes 66-84 (forme seule, modifié, nouveau retenu, refusé, à conserver) ;
+- 12 artboards de la page « Après » du canevas : `passage-question`, `passage-panneau`, `passage-panneau-etudiant`, `passage-note-finale`, `passage-question-theme`, `session-dialogues`, `projection-attente`, `projection-tuiles`, `projection-tirage`, `projection-question`, `projection-finale`, `projection-finale-detail` ;
+- deux écarts de fond acceptés en D103 : `categoryId` ajouté à `ProjectedView.detail` (D69 élargie), notes formatées selon l'arrondi de la config partout, projection comprise.
 
-**Notes pour future Claude** : `cn` connaît maintenant les tailles `text-*` du design system : une nouvelle taille dans `index.css` s'ajoute à `src/lib/utils.ts`. Un bloc posé au-dessus de CodeMirror doit exister dès le montage, sinon les e2e de survol visent la mauvaise ligne. Les `header` de l'aperçu de l'éditeur sont aussi des `banner` : viser le premier. Les captures de comparaison vivent dans l'espace git-ignoré `.superpowers/sdd/<plan>/cap/` (`captures.pw.ts`, hors du motif de Vitest) ; une capture prise juste après un changement d'état peut saisir une bordure en pleine transition.
+Critère d'acceptation propre à #149 : le `theme.dark` d'une config pilote action, surfaces et halos ; y vérifier aussi `ActionHalo` et les halos de `PageShell` sous un thème de session. Vu la taille, juger au moment du plan s'il faut deux groupes de tâches (passage, puis projection) ; exécution native comme #145 à #148, puis section #149 dans le corps de la PR #154.
+
+**Notes pour future Claude** :
+- `cn` connaît maintenant les tailles `text-*` du design system : une nouvelle taille dans `index.css` s'ajoute à `src/lib/utils.ts`.
+- Un bloc posé au-dessus de CodeMirror doit exister dès le montage, et sa variation de hauteur doit être compensée, sinon le code saute.
+- Les `header` de l'aperçu de l'éditeur sont aussi des `banner` : viser le premier.
+- **Lire les artboards** : `Artifact` `read` avec `url` du canevas (`docs/ENVIRONMENT.md`) et `paths: ["project/apres/<nom>.dc.html", …]`, `out_dir` dans le scratchpad. Le `<main>` porte l'écran (extraire `<main>…</main>` et retirer les `<svg>` pour lire vite). Pour publier une modification, il faut d'abord un `read` sur l'URL seule (QUIRKS 2026-10-17).
+- **Captures de comparaison** : config Playwright jetable dans l'espace git-ignoré du plan (`.superpowers/sdd/<plan>/cap/`), qui importe `baseURL` et `webServer` de `playwright.config.ts` (avec `cwd` à la racine du dépôt) ; spec nommée `*.pw.ts` avec `testMatch`, sinon Vitest la ramasse dans `pnpm check`. Une capture prise juste après un changement d'état peut saisir une bordure en pleine transition.
 
 ## 2026-10-17 — F44.5 : accueil et pages d'espace (#147)
 
