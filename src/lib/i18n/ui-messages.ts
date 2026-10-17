@@ -261,9 +261,11 @@ export type UiMessageParams = {
   markdown_footnotes: NoParams
   /** `n` : numéro de la référence (1-based), avec suffixe `-n` de la re-référence si > 1. */
   markdown_footnote_back: { n: string }
-  passage_question_index: { current: number; total: number }
-  /** `score` : score brut déjà mis en forme par l'appelant (`formatScore(raw, 'raw', config, locale)`). */
-  passage_raw_score: { score: string }
+  passage_question_number: { current: number }
+  passage_progress_label: { current: number; total: number; detail: string }
+  passage_progress_scored: { category: string }
+  passage_progress_pending: { category: string }
+  passage_raw_score_label: NoParams
   passage_categories: NoParams
   /** `max` : plus grande valeur du barème, déjà mise en forme par l'appelant. */
   /** `max` : valeur formatée ; `points` : la même en nombre, pour l'accord (« 1,0 pt »). */
@@ -767,8 +769,12 @@ const fr: Dictionary<UiMessageParams> = {
   preview_skips_disabled: () => 'aucun (skips désactivés)',
   markdown_footnotes: () => 'Notes',
   markdown_footnote_back: ({ n }) => `Revenir à la référence ${n}`,
-  passage_question_index: ({ current, total }) => `Question ${current} / ${total}`,
-  passage_raw_score: ({ score }) => `Score brut : ${score}`,
+  passage_question_number: ({ current }) => `Question ${current}`,
+  passage_progress_label: ({ current, total, detail }) =>
+    `Question ${current} sur ${total}${detail === '' ? '' : ` : ${detail}`}`,
+  passage_progress_scored: ({ category }) => `${category} notée`,
+  passage_progress_pending: ({ category }) => `${category} en cours`,
+  passage_raw_score_label: () => 'Score brut',
   passage_categories: () => 'Choisir une catégorie',
   passage_category_max: ({ max, points }) => `${max} ${pluralDecimal(points, 'pt', 'pts')}`,
   passage_category_exhausted: () => 'Plus de question disponible dans cette catégorie',
@@ -1220,8 +1226,12 @@ const en: Dictionary<UiMessageParams> = {
   preview_skips_disabled: () => 'none (skips disabled)',
   markdown_footnotes: () => 'Footnotes',
   markdown_footnote_back: ({ n }) => `Back to reference ${n}`,
-  passage_question_index: ({ current, total }) => `Question ${current} / ${total}`,
-  passage_raw_score: ({ score }) => `Raw score: ${score}`,
+  passage_question_number: ({ current }) => `Question ${current}`,
+  passage_progress_label: ({ current, total, detail }) =>
+    `Question ${current} of ${total}${detail === '' ? '' : `: ${detail}`}`,
+  passage_progress_scored: ({ category }) => `${category} scored`,
+  passage_progress_pending: ({ category }) => `${category} in progress`,
+  passage_raw_score_label: () => 'Raw score',
   passage_categories: () => 'Choose a category',
   passage_category_max: ({ max, points }) => `${max} ${pluralEn(points, 'pt', 'pts')}`,
   passage_category_exhausted: () => 'No questions left in this category',

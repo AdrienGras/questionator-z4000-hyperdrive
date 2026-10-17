@@ -5,7 +5,7 @@ import exampleText from '../../../examples/config.example.json?raw'
 import { validateConfig } from '@/domain/config/validate'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
-import { categoryButton } from '@/testing/passage-assertions'
+import { categoryButton, expectRawScore } from '@/testing/passage-assertions'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent } from '@/testing/student-fixtures'
 import { renderAt } from '@/testing/render-at'
@@ -50,7 +50,7 @@ test('« Cauchemar » épuisée après ses deux questions grise le bouton et aff
   await screen.findByText('Éléments de réponse')
   fireEvent.click(screen.getByRole('button', { name: 'Noter 1' }))
   await waitForElementToBeRemoved(() => screen.queryByText('Éléments de réponse'))
-  await screen.findByText('Score brut : 1')
+  await expectRawScore('1')
 
   // `questionsPerStudent` vaut 3 : le passage n'est pas terminé après 2 questions notées.
   expect(screen.queryByRole('heading', { name: 'Passage terminé' })).not.toBeInTheDocument()

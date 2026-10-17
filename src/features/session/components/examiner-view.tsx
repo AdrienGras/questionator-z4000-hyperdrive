@@ -20,7 +20,7 @@ import { AbsentButton } from './absent-button'
 import { CommentField } from './comment-field'
 import { ExportButton } from './export-button'
 import { PassageBody } from './passage-body'
-import { PassageMeta } from './passage-meta'
+import { PassageHeaderStats } from './passage-header-stats'
 import { ProjectionBanner } from './projection-banner'
 import { ProjectionControls } from './projection-controls'
 import { ProjectionPreview } from './projection-preview'
@@ -95,13 +95,24 @@ export function ExaminerView({ session }: Readonly<{ session: Session }>) {
             parts={[session.name, config.exam.title]}
           />
         }
-        title={config.exam.title}
-        meta={<PassageMeta ui={ui} config={config} student={student} standing={standing} />}
+        // L'étudiant en titre (artboard `passage-question`) ; le titre de l'oral sans étudiant actif.
+        title={
+          student === undefined ? config.exam.title : `${student.lastName} ${student.firstName}`
+        }
         actions={
-          <Button ref={panelButton} type="button" variant="outline" onClick={() => panel.show()}>
-            <IconLayoutSidebarRight aria-hidden />
-            {ui.text('side_panel_open', {})}
-          </Button>
+          <>
+            <PassageHeaderStats ui={ui} config={config} student={student} standing={standing} />
+            <Button
+              ref={panelButton}
+              type="button"
+              variant="outline"
+              aria-haspopup="dialog"
+              onClick={() => panel.show()}
+            >
+              <IconLayoutSidebarRight aria-hidden />
+              {ui.text('side_panel_open', {})}
+            </Button>
+          </>
         }
       >
         <div className="flex flex-1 flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-start">

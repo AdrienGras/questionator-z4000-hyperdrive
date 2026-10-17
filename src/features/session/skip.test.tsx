@@ -120,7 +120,7 @@ test('skip avec motif prédéfini : attempt skipped, grille réactivée', async 
     expect(screen.queryByRole('button', { name: /^Passer la question/ })).not.toBeInTheDocument()
   })
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-  expect(screen.getByText('Question 1 / 2')).toBeInTheDocument()
+  expect(screen.getByText(/^Question 1 sur 2/)).toBeInTheDocument()
   expect(await categoryButton('A')).not.toBeDisabled()
 })
 

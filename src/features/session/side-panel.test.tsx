@@ -1,4 +1,5 @@
 import 'fake-indexeddb/auto'
+import { expectRawScore } from '@/testing/passage-assertions'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import type { Student } from '@/domain/session/types'
@@ -183,7 +184,7 @@ test('corriger une note pendant qu’une question est en cours ne la touche pas'
   })
 
   // Signe visible de la nouvelle session (liveQuery) avant toute assertion sur le DOM.
-  await waitFor(() => expect(screen.getByText('Score brut : 2')).toBeInTheDocument())
+  await expectRawScore('2')
   expect(within(panel()).getByRole('combobox', { name: 'Note de la question 1' })).toHaveValue('2')
   const stored = await db.sessions.get('session-1')
   expect(stored?.students[0]?.attempts[0]?.score).toBe(2)
