@@ -6,11 +6,20 @@ import { CreateSessionPage } from './pages/create-session-page.ts'
 
 const EXAMPLE_CONFIG = readFileSync(examplePath('config.example.json'), 'utf8')
 
-/** Largeur qui dépasse de la fenêtre (0 si la page ne défile pas horizontalement). */
+/**
+ * Plus grand dépassement à droite de la fenêtre parmi les éléments du `main`. Mesuré élément par
+ * élément : la colonne de contenu est en `overflow-x-clip`, le `scrollWidth` du document ne voit
+ * plus ce qu'elle coupe. Exclus : décors (`aria-hidden`), texte défilant de CodeMirror, blocs de
+ * code (`pre`, qui défilent eux-mêmes).
+ */
 function horizontalOverflow(page: Page): Promise<number> {
-  return page.evaluate(
-    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-  )
+  return page.evaluate(() => {
+    const width = document.documentElement.clientWidth
+    const rights = [...document.querySelectorAll('main *')]
+      .filter((el) => el.closest('[aria-hidden="true"], .cm-scroller, pre') === null)
+      .map((el) => el.getBoundingClientRect().right)
+    return Math.max(0, ...rights) - width
+  })
 }
 
 /** Écran de création avec les deux fichiers d'exemple déposés. */
@@ -70,6 +79,25 @@ test('éditeur : une puce mène à sa catégorie', async ({ page }) => {
   await expect(heading).toBeFocused()
   await expect(heading).toBeInViewport()
   expect(page.url()).toMatch(/#\/editor$/u)
+})
+
+test('éditeur : le code ne bouge pas quand un problème apparaît ou disparaît', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 })
+  const editor = new ConfigEditorPage(page)
+  await editor.goto()
+  await expect(editor.noIssues).toBeVisible()
+  const line = page.locator('.cm-line').nth(4)
+  const top = async () => (await line.boundingBox())?.y ?? Number.NaN
+  const before = await top()
+  await page.locator('.cm-line').nth(2).click()
+  await page.keyboard.press('End')
+  await page.keyboard.type(' x')
+  await expect(page.getByText(/^\d+ erreurs?, /u)).toBeVisible()
+  expect(Math.abs((await top()) - before)).toBeLessThanOrEqual(2)
+  await page.keyboard.press('Backspace')
+  await page.keyboard.press('Backspace')
+  await expect(editor.noIssues).toBeVisible()
+  expect(Math.abs((await top()) - before)).toBeLessThanOrEqual(2)
 })
 
 test.describe('téléphone', () => {

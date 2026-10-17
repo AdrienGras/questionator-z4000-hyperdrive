@@ -92,6 +92,10 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Création de session
 
+- [ ] `create_blocked_files` dit « Déposez la liste d'étudiants et la config » même quand un seul fichier manque : une phrase par fichier, ou une formulation neutre. *(F44.6, relecture)*
+- [ ] Halo de « Créer la session » posé aussi sur la phrase de blocage et l'indication de l'examinateur (calque isolé) : mesurer le contraste, sinon ne peindre le halo que derrière le bouton. *(F44.6, relecture)*
+- [ ] `overflow-x-clip` sur toute la colonne de contenu : un futur contenu trop large serait coupé au lieu de défiler ; envisager de couper le halo dans `ActionHalo` seul. *(F44.6, relecture)*
+
 - [x] Garde de montage de la création : comparer aussi `router.state.location.pathname` avant de naviguer (fenêtre résiduelle pendant le chargement du chunk de l'accueil). → #87 *Fait en #87 (PR 4) : chemin relevé avant `submit` et comparé après ; test RED reproduit (retour cliqué, écriture terminée avant le montage de l'accueil).*
 - [x] Tests manquants : courses du slot config (nom saisi pendant la lecture, deux configs successives), messages `read-error` / `load-error` rendus, état `unavailable` à l'écran, `activeStudentId` affirmé dans le test d'écran. → #87 *Fait en #87 (PR 2).*
 
@@ -117,6 +121,11 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 ## Éditeur de config
 
 - [ ] Alignement vertical de l'action d'en-tête : `PageShell` aligne en bas (`items-end`), l'artboard `editeur-config` centre « Créer une session avec cette config » sur le bloc titre. À trancher pour toutes les pages avec une action d'en-tête. *(F44.6)*
+- [ ] Puces de l'aperçu : nom accessible sans unité (« Facile 5 ») ; ajouter « questions » en `sr-only`. *(F44.6, relecture)*
+- [ ] « Problèmes » en `h2`, frère du `h2` du nom de fichier alors qu'il est dans sa région : passer en `h3` (adapter les tests qui visent le niveau 2). *(F44.6, relecture)*
+- [ ] Navigation de l'aperçu : `scrollIntoView` fait aussi défiler la page (la navigation sort de l'écran sur téléphone) ; ne faire défiler que la frame. Titre ciblé en `outline-none` : ajouter un `focus-visible:outline` discret. *(F44.6, relecture)*
+- [ ] Validateur qui ne charge pas : le panneau « Problèmes » garde son en-tête sans compteur ; afficher un état. *(F44.6, relecture)*
+- [ ] Infobulles CodeMirror sur iOS (`position: absolute`) : coupées par l'`overflow-hidden` de la frame ? À vérifier sur appareil. *(F44.6, relecture)*
 - [ ] Barre d'outils de la frame : en anglais (« Start from the example »), elle passe à la ligne sous le nom de fichier à 1280 px. *(F44.6)*
 
 - [x] `locateIssue` : BOM en tête (colonne de `json_syntax` décalée d'un caractère en ligne 1), colonne au-delà de la ligne bornée à la fin du texte plutôt qu'à la fin de ligne ; pas de tests CRLF / BOM / index hors limites. → #87 *Fait en #87 (PR 3).*

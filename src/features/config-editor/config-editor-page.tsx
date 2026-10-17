@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router'
 import {
   useCallback,
+  useEffect,
   useId,
   useMemo,
   useRef,
@@ -35,6 +36,9 @@ import { cn } from '@/lib/utils'
 
 // Garde de page : un fichier lâché hors de la colonne de l'éditeur ne doit jamais être ouvert par
 // le navigateur (le texte en cours serait quitté). La colonne gère son propre dépôt avant.
+// Point de rupture de la colonne collante (`lg:sticky`) : en dessous, la page défile.
+const STICKY_COLUMN_QUERY = '(min-width: 64rem)'
+
 function handlePageDragOver(event: DragEvent<HTMLElement>) {
   if (!hasFiles(event)) return
   event.preventDefault()
@@ -62,6 +66,26 @@ export function ConfigEditorPage() {
   const sourceTitleId = useId()
   const previewTitleId = useId()
   const { save } = draft
+  const problemsRef = useRef<HTMLDivElement>(null)
+
+  // Le panneau « Problèmes » est au-dessus du code : quand sa hauteur change (problème apparu ou
+  // corrigé), le texte ne doit pas sauter sous le curseur ni sous la souris. Le décalage est
+  // compensé avant la peinture : défilement de l'éditeur sur grand écran (colonne collante), de la
+  // page sinon, quand on écrit.
+  useEffect(() => {
+    const panel = problemsRef.current
+    if (panel === null || typeof ResizeObserver === 'undefined') return undefined
+    let height = panel.offsetHeight
+    const observer = new ResizeObserver(() => {
+      const delta = panel.offsetHeight - height
+      height = panel.offsetHeight
+      if (delta === 0) return
+      if (window.matchMedia(STICKY_COLUMN_QUERY).matches) editor.current?.scrollBy(delta)
+      else if (editor.current?.hasFocus() === true) window.scrollBy(0, delta)
+    })
+    observer.observe(panel)
+    return () => observer.disconnect()
+  }, [])
 
   const handleChange = useCallback(
     (next: string) => {
@@ -239,7 +263,7 @@ export function ConfigEditorPage() {
               </div>
             )}
             {/* Toujours rendu, au-dessus du code : il ne le pousse pas à la première validation. */}
-            <div className="shrink-0 border-b px-4 py-3">
+            <div ref={problemsRef} className="shrink-0 border-b px-4 py-3">
               <IssueList
                 ui={ui}
                 issues={result === undefined ? undefined : located}

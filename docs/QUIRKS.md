@@ -967,7 +967,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Découvert** : F44.6, `e2e/config-editor.spec.ts` (survols de `finalScoreDisplay`, `mode`, `icon`).
 **Symptôme** : l'infobulle de survol décrit la clé de la ligne du dessus.
 **Cause** : le panneau « Problèmes », placé au-dessus du code, n'apparaissait qu'à la première validation (300 ms) ; le code descendait sous une souris déjà posée.
-**Workaround** : tout bloc au-dessus de l'éditeur est rendu dès le montage, à sa hauteur (en-tête seul avant la validation).
+**Workaround** : tout bloc au-dessus de l'éditeur est rendu dès le montage, et chaque variation de sa hauteur est compensée par un défilement (`ResizeObserver` sur le panneau, `JsonEditorApi.scrollBy`). Test e2e « le code ne bouge pas quand un problème apparaît ou disparaît ».
 **Référence** : `src/features/config-editor/components/issue-list.tsx`, `config-editor-page.tsx`.
 
 ## jsdom n'implémente pas `scrollIntoView` (2026-10-17)

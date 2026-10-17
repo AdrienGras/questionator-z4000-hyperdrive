@@ -30,6 +30,10 @@ export type JsonEditorApi = {
   /** Sélectionne la plage et la fait défiler dans la vue. */
   reveal(from: number, to: number): void
   getText(): string
+  /** Fait défiler le texte de `dy` pixels (compense un bloc qui change de hauteur au-dessus). */
+  scrollBy(dy: number): void
+  /** Vrai si le focus est dans l'éditeur. */
+  hasFocus(): boolean
 }
 
 export type JsonEditorDiagnostic = {
@@ -168,6 +172,11 @@ export function JsonEditor({
       view.focus()
     },
     getText: () => viewRef.current?.state.doc.toString() ?? '',
+    scrollBy(dy) {
+      const view = viewRef.current
+      if (view !== null) view.scrollDOM.scrollTop += dy
+    },
+    hasFocus: () => viewRef.current?.hasFocus ?? false,
   }))
 
   return <div ref={hostRef} className={className} />
