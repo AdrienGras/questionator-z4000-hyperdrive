@@ -197,3 +197,18 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Passer à VitePress 2 stable à sa sortie (aujourd'hui `2.0.0-alpha.20` exact, D96) ; refaire alors le contrôle des libellés contre `default-theme.d.ts` / `local-search.d.ts`.
 - [ ] 404 de la documentation : `dist/docs/404.html` n'est jamais servi (GitHub Pages ne lit qu'un `404.html` à la racine, il n'y en a pas), donc un `/docs/xyz` mort reçoit la 404 par défaut de GitHub. À traiter avec un `404.html` racine ou en acceptant ce comportement.
 - [ ] Liens doc vers l'app : la doc pointe vers l'application par son URL absolue de production, donc en `pnpm preview` ou `docs:dev` le lien « Application » mène à la production, pas à l'instance locale.
+
+## Sécurité
+
+Notes de durcissement de l'audit du 2026-10-18 (D115) : aucune frontière franchie aujourd'hui. Les findings sont suivis dans F45 (#157 à #160).
+
+- [ ] Origine partagée : inventorier les sites GitHub Pages du compte (dépôt `adriengras.github.io` compris) et ce qu'ils exécutent ; si l'un sert du contenu moins fiable, envisager une origine dédiée (domaine personnalisé) avec migration des données locales. Lead `needs_validation` de l'audit, non publié en ticket (D115).
+- [ ] CI : `persist-credentials: false` sur `actions/checkout` ; `id-token: write` seulement pour l'envoi Codecov (job séparé) ; build et `upload-pages-artifact` dans un job sans action tierce (Codecov, Sonar).
+- [ ] Fenêtre projetée (`use-present-window.ts`) : encoder l'identifiant de session dans le hash, nom de fenêtre aléatoire par session, ouverture sans réutilisation d'une fenêtre nommée par une autre page.
+- [ ] `CssValueSchema` : refuser `var(` et `url(` (aujourd'hui `CSS.supports('color', …)` accepte toute valeur contenant `var()`) ; sans effet tant que les valeurs ne vont que dans des propriétés personnalisées.
+- [ ] `referrerPolicy="no-referrer"` sur les `<img>` du Markdown, comme les liens (`noreferrer`).
+- [ ] Règles d'import de sauvegarde : refuser les états que l'interface ne produit pas (ajustement hors grille ou au-delà de l'échelle, `finalRevealedAt` sur un étudiant non terminé, plus de tentatives notées que `questionsPerStudent`).
+- [ ] Rendre la réponse de la question seulement à l'ouverture de son `<details>` (aujourd'hui rendue fermée).
+- [ ] Mise en cache de la revalidation d'une session par `(id, updatedAt)` : chaque écriture la relance dans chaque fenêtre abonnée.
+- [ ] `.gitignore` : ajouter `.env`, `*.pem`, `*.key` (aucun fichier de ce type suivi).
+- [ ] Revue d'une PR de fork : lire le diff de `.claude/` avant d'ouvrir Claude Code dans la branche (les hooks `SessionStart` exécutent les scripts de la branche), ou désactiver les hooks.

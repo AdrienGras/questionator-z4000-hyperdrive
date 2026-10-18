@@ -1860,3 +1860,21 @@ autre encodage 8 bits.
 **Pourquoi** : le README s'ouvre sur l'interface livrée, montrée telle qu'elle est, avec une animation lisible en 800 px et sous les seuils de poids.
 
 **Reporté dans** : `assets/readme-banner.avif`, `assets/readme-banner.webp`, `assets/readme-banner-still.webp`, `README.md` ; spec `docs/superpowers/specs/2026-10-18-f44-12-banniere-3d-design.md`, plan `docs/superpowers/plans/2026-10-18-f44-12-banniere-3d.md`.
+
+## D115 — Audit de sécurité : findings, tickets F45 et divulgation (2026-10-18)
+
+**Question** : après l'audit de sécurité complet de `e53963e` (skill `security-audit`, profil `standard`, rapport hors dépôt), comment traiter les findings et faut-il les suivre en tickets publics ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Findings | 7 confirmés, tous de disponibilité ou d'intégrité locale à partir d'un fichier fourni par un tiers : 3 moyens (coût de Shiki, imbrication Markdown, amplification des tableaux GFM), 4 faibles (validation quadratique à chaque lecture, brouillon d'éditeur empoisonné, spread de tableaux non bornés, `order` à `MAX_SAFE_INTEGER`). Aucune exécution de code, aucune fuite. | `SECURITY.md` compte un fichier qui bloque l'application comme une faille. |
+| Découpage | Quatre tickets par cause racine, en séquence : F45.1 domaine et stockage (#157, sans UI), F45.2 coût du rendu Markdown (#158), F45.3 écrans d'erreur et brouillon d'éditeur (#159), F45.4 bornes de validation (#160, décision produit). | Une cause racine par PR ; les correctifs sans UI d'abord, D102 pour les deux tickets d'UI, les bornes en défense en profondeur après la robustesse. |
+| Divulgation *(utilisateur)* | Tickets publics, formulés en robustesse (correctif et invariant), sans charge utile ni recette de reproduction ; reproductions dans les tests de non-régression et le rapport local. | Code déjà public, impact borné au navigateur de la victime, scénario peu probable, correctif déployé au merge. |
+| Origine partagée | Lead `needs_validation` non publié en ticket : l'app partage l'origine `adriengras.github.io` avec tous les sites Pages du compte, qui peuvent lire IndexedDB et `localStorage`. À trancher par l'utilisateur après inventaire de ses sites Pages ; correctif structurel possible : origine dédiée. | Un ticket public indiquerait où viser si un site voisin exécute du contenu moins fiable. |
+| Durcissement | Notes sans finding versées au BACKLOG (section « Sécurité »). | Pas de frontière franchie aujourd'hui. |
+
+**Pourquoi** : fermer les failles par cause racine, dans l'ordre qui demande le moins de décisions, sans publier de recette exploitable.
+
+**Reporté dans** : issues #157 à #160, `docs/BACKLOG.md` (Sécurité), `docs/QUIRKS.md`, `docs/ENVIRONMENT.md` (emplacement du rapport) ; rapport `~/security-audit-skill/questionator-z4000-hyperdrive/run-1/REPORT.md`.

@@ -24,6 +24,39 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-18 — Audit de sécurité : 7 findings, tickets F45 (#157 à #160)
+
+**Dernière chose faite** : audit de sécurité complet de `e53963e` (skill `security-audit`, profil `standard`), puis suivi (D115).
+- **Conduite** : source et vérifications locales dans un bac à sable `bwrap` (sans réseau, environnement vidé, cible en lecture seule), aucune requête vers le site déployé. 32 unités de couverture en 4 vagues de chasseurs ; le critique post-vague et le critique final distinct n'ont plus rien trouvé. Chaque candidat a été reproduit par un vérificateur indépendant (phase 3), puis relu par un second (phase 5).
+- **Résultat** : 7 findings confirmés, tous déclenchés par un fichier fourni par un tiers (config ou sauvegarde) qui gèle ou casse l'application : 3 moyens (coût de Shiki, imbrication Markdown, amplification des tableaux GFM), 4 faibles (validation quadratique à chaque lecture, brouillon d'éditeur empoisonné, spread de tableaux non bornés, `order` à `MAX_SAFE_INTEGER`). Aucune exécution de code, aucune fuite. Un lead `needs_validation` : l'origine `adriengras.github.io`, partagée avec les autres sites Pages du compte.
+- **Tickets** : F45.1 domaine et stockage (#157), F45.2 rendu Markdown (#158), F45.3 écrans d'erreur et brouillon (#159), F45.4 bornes de validation (#160). Tous Ready, chaînés par « blocked by », publics et sans charge utile (choix de l'utilisateur).
+- **Mémoire** : D115, section « Sécurité » du BACKLOG (durcissement), 5 QUIRKS, emplacement du rapport dans ENVIRONMENT. Sur la branche `docs/f44-cloture`, avec la clôture de F44.
+
+**Trucs en suspens** : l'utilisateur doit inventorier ses sites GitHub Pages pour trancher le lead d'origine partagée (BACKLOG « Sécurité », non publié en ticket). Il doit aussi arbitrer les valeurs des bornes de F45.4 et décider entre un correctif borné de Shiki et un Web Worker (F45.2).
+
+**Prochaine chose à creuser** : F45.1 (#157), dans une nouvelle session : branche `fix/f45-1-…` depuis `main` à jour, sans UI ni canevas. Ensuite F45.2 et F45.3 (D102 : spec, artboards validés, plan, code), puis F45.4.
+
+**Notes pour future Claude** :
+- Le rapport (`~/security-audit-skill/questionator-z4000-hyperdrive/run-1/`) donne pour chaque finding la trace, la reproduction bornée et un correctif proposé : lire `REPORT.md` (§4) et `FINDINGS-DETAIL.md` plutôt que de refaire l'analyse. Les harnais de reproduction des agents sont dans `agents/<id>/scratch/work/src/__audit__/` et `__verify__/`, utiles pour écrire les tests rouges.
+- Correctifs déjà relus en phase 5 : pour Shiki, un budget par bloc ne suffit pas sans céder la main à la boucle d'événements entre deux blocs (sinon N blocs s'enchaînent en une seule chaîne de microtâches). Pour les tableaux GFM, une borne de longueur seule ne suffit pas (N×M) : borner les cellules.
+- Pas de charge utile dans les issues, les PR ni les commits publics (D115) : les tests peuvent contenir les entrées pathologiques, c'est le code, pas une recette commentée.
+
+## 2026-10-18 — F44 clôturée : PR #154 mergée, v2.0.0
+
+**Dernière chose faite** : passe complète puis merge sur go explicite de l'utilisateur.
+- **Passe locale** : `pnpm check` (2260 tests), `pnpm build`, `pnpm docs:build`, 91 e2e, tous verts.
+- **PR #154** : CI verte sur `f8fbd9a`, `sonar-check.sh --pr 154 --wait` OK (0 issue, 0 hotspot). Corps complété (#152, #155, #156, `Closes`, checklist cochée), passée en « Ready for review », mergée avec un commit de merge (`d1f1de5`). #145 à #152, #155 et #156 fermés.
+- **CI de `main`** verte (check, e2e, deploy) ; le site répond.
+- **Tag et release** : tag annoté `v2.0.0` sur le commit de merge et release GitHub « v2.0.0 — Refonte de l'interface » (choix de l'utilisateur : tag et release sans bump de `package.json`, qui reste en `0.1.0`). Notes vérifiées : configs, sauvegardes, export et stockage inchangés (seule une description du schéma a changé).
+
+**Trucs en suspens** : cette entrée et la ligne F44 de `INDEX.md` sont sur la branche `docs/f44-cloture`, commitées mais pas poussées (demande de l'utilisateur : « au moins le commit »). Il reste à pousser et à ouvrir la PR de clôture vers `main`.
+
+**Prochaine chose à creuser** : scan de sécurité de l'application, dans une session dédiée lancée par l'utilisateur. Ensuite, les mineurs de F44.12 notés dans l'entrée précédente, et le backlog.
+
+**Notes pour future Claude** :
+- Première version taguée du dépôt : `v2.0.0`. Il n'existe pas de `v1`, et `package.json` n'a pas suivi. Un futur bump passera par une PR (pas de push direct sur `main`).
+- Les PR du projet se mergent en commit de merge (« Merge pull request #n »), jamais en squash.
+
 ## 2026-10-18 — F44.12 : bannière animée du README en 3D (#156)
 
 **Dernière chose faite** : brainstorming → spec `docs/superpowers/specs/2026-10-18-f44-12-banniere-3d-design.md` → plan `docs/superpowers/plans/2026-10-18-f44-12-banniere-3d.md`, exécuté nativement ; D114.
