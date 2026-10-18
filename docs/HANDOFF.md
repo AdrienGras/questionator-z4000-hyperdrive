@@ -35,7 +35,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 - **Libellé corrigé** (repéré par la revue finale) : `passage_no_student_body` renvoyait encore à l'onglet « Étudiants » / “Students”, renommé « Liste » / “List” en F44.7 ; test dans `ui-messages.test.ts`.
 - `pnpm check` (2260 tests), `pnpm docs:build`, `pnpm docs:screenshots` verts.
 
-**Trucs en suspens** : validation de #155 par l'utilisateur (relire les pages et les captures). Revue finale de la branche du plan à faire. Reste à F44 (D110) : #156 (bannière animée, session dédiée, scénario validé avant l'animation) ; la PR #154 ne quitte le brouillon qu'après #156, CI et Sonar verts, merge sur go explicite.
+**Trucs en suspens** : #155 **validé par l'utilisateur** (2026-10-18, relu sur `pnpm docs:dev`). Revue finale faite (opus) : un point important et dix mineurs, tous corrigés. Reste à F44 (D110) : #156 (bannière animée, session dédiée, scénario validé avant l'animation) ; la PR #154 ne quitte le brouillon qu'après #156, CI et Sonar verts, merge sur go explicite.
 
 **Prochaine chose à creuser** : #156 (F44.12) : scénario de la bannière à faire valider, puis animation avec le mode « motion » du canevas Design et rendu aux formats de D100 (`assets/readme-banner*`). L'`alt` de la bannière dans `README.md` décrit encore l'ancienne interface : à reprendre avec elle.
 
