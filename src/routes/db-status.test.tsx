@@ -26,7 +26,7 @@ test.each([['/session/session-1'], ['/present/session-1']])(
     expect(main).toHaveClass(
       'mx-auto',
       'flex',
-      'min-h-svh',
+      'flex-1',
       'max-w-3xl',
       'flex-col',
       'gap-6',

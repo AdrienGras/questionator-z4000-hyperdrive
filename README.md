@@ -11,7 +11,7 @@
 <picture>
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/readme-banner-still.webp">
   <source type="image/avif" srcset="assets/readme-banner.avif">
-  <img src="assets/readme-banner.webp" width="800" alt="Présentation animée : vous préparez vos questions et vos barèmes ; l'étudiant choisit une difficulté, une question est tirée au sort et projetée ; vous voyez la réponse attendue et notez, le score s'affiche ; puis statistiques et export Excel. Aucune donnée ne quitte votre machine.">
+  <img src="assets/readme-banner.webp" width="800" alt="Présentation animée en 3D sur l'interface de l'application : vous déposez vos questions, vos barèmes et la liste de la classe ; l'étudiant choisit une difficulté, une question est tirée au sort et projetée ; vous voyez la réponse attendue et notez, le score s'affiche ; les questions suivantes défilent, puis la note finale apparaît sur les deux écrans. Viennent ensuite l'éditeur de config, l'export Excel, les révisions en solo et le fonctionnement hors ligne. Aucune donnée ne quitte votre machine.">
 </picture>
 
 **Faites passer des oraux notés par tirage au sort, sur deux écrans, sans rien installer.**
@@ -26,6 +26,7 @@ L'étudiant choisit une difficulté, l'application tire une question, vous notez
 - 🧮 **Notation au fil de l'oral** : score cumulé, questions passées, absents, ajustement de la note finale et arrondi.
 - 📊 **Statistiques et export Excel** : histogramme des notes, questions les plus tirées, classeur complet en un clic.
 - ✏️ **Éditeur de config intégré** : autocomplétion, aide au survol, erreurs en direct et aperçu.
+- 🎓 **Révisions en solo** : à partir d'une config générée par un LLM sur votre cours, vous tirez des questions et vous vous notez. Les stats montrent ce qu'il faut revoir.
 - 🔒 **Tout reste sur votre machine** : aucune donnée n'est envoyée. Vous sauvegardez une session dans un fichier et la réimportez quand vous voulez.
 - ✈️ **Fonctionne hors ligne** : installable comme une application, utilisable sans réseau le jour de l'oral.
 

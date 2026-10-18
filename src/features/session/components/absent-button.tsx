@@ -74,8 +74,9 @@ export function AbsentButton({
   ) : (
     <Button
       type="button"
-      variant="outline"
-      className="self-start"
+      variant="ghost"
+      size="sm"
+      className="-ml-2 self-start text-muted-foreground"
       disabled={disabled}
       onClick={act}
     >

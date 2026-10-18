@@ -1,4 +1,12 @@
-import { useEffect, useId, useRef, useState, type SubmitEvent, type RefObject } from 'react'
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ReactNode,
+  type SubmitEvent,
+  type RefObject,
+} from 'react'
 import { IconMinus, IconPlus } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,8 +25,10 @@ import { formatScore } from '@/domain/scoring/format'
 import { asMilli, fromMilli, toMilli } from '@/domain/scoring/milli'
 import { stepMilli } from '@/domain/scoring/rounding'
 import type { Student } from '@/domain/session/types'
+import { formatAdjustmentInput } from '@/features/session/adjustment-input'
 import type { WriteOutcome } from '@/features/session/hooks/use-passage-actions'
 import type { Ui } from '@/lib/i18n/use-ui'
+import { WriteErrorAlert } from './write-error-alert'
 
 export type AdjustmentMode = 'final' | 'adjust'
 
@@ -143,13 +153,6 @@ type AdjustmentFormProps = Readonly<{
   onCancel: () => void
 }>
 
-/** Valeur du champ sans décimales forcées : « 0,5 », « -0,25 ». */
-function formatInput(value: number, locale: string): string {
-  return new Intl.NumberFormat(locale, { maximumFractionDigits: 3, useGrouping: false }).format(
-    value,
-  )
-}
-
 function AdjustmentForm({
   valueRef,
   ui,
@@ -164,7 +167,9 @@ function AdjustmentForm({
   const fieldId = useId()
   const errorId = useId()
   const reasonId = useId()
-  const [input, setInput] = useState(() => formatInput(student.adjustment?.value ?? 0, locale))
+  const [input, setInput] = useState(() =>
+    formatAdjustmentInput(student.adjustment?.value ?? 0, config, locale),
+  )
   const [reason, setReason] = useState(student.adjustment?.reason ?? '')
 
   const parsed = parseAdjustmentInput(input)
@@ -178,7 +183,7 @@ function AdjustmentForm({
   function step(direction: 1 | -1) {
     const base = value === null ? 0 : toMilli(value)
     const next = Math.min(scale, Math.max(0 - scale, base + direction * stepMilli(config)))
-    setInput(formatInput(fromMilli(asMilli(next)), locale))
+    setInput(formatAdjustmentInput(fromMilli(asMilli(next)), config, locale))
   }
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
@@ -188,20 +193,34 @@ function AdjustmentForm({
     onSave(value, trimmed === '' ? undefined : trimmed)
   }
 
-  let preview: string | undefined
+  let preview: ReactNode
   if (value !== null) {
     const { converted, adjustment, final, clamped } = previewFinal(student, config, value)
-    preview = text('adjust_preview', {
-      converted: fmtFinal(converted),
-      sign: adjustment < 0 ? '−' : '+',
-      adjustment: fmtFinal(Math.abs(adjustment)),
-      final: fmtFinal(final),
-      scale: fmtRaw(scale),
-    })
-    if (clamped) {
-      const bound = converted + adjustment < 0 ? 0 : scale
-      preview = `${preview} ${text('adjust_clamped', { bound: fmtRaw(bound) })}`
-    }
+    const bound = converted + adjustment < 0 ? 0 : scale
+    // Espaces entre les morceaux : la zone annoncée se lit comme une phrase.
+    preview = (
+      <>
+        <span className="text-muted-foreground">
+          {text('adjust_preview_sum', {
+            converted: fmtFinal(converted),
+            sign: adjustment < 0 ? '−' : '+',
+            adjustment: fmtFinal(Math.abs(adjustment)),
+          })}
+        </span>{' '}
+        <span className="text-score-md">{fmtFinal(final)}</span>{' '}
+        <span className="text-muted-foreground">
+          {text('attempt_out_of', { max: fmtRaw(scale) })}
+        </span>
+        {clamped && (
+          <>
+            {' '}
+            <span className="text-small text-muted-foreground">
+              {text('adjust_clamped', { bound: fmtRaw(bound) })}
+            </span>
+          </>
+        )}
+      </>
+    )
   }
 
   return (
@@ -250,7 +269,10 @@ function AdjustmentForm({
           </p>
         )}
       </div>
-      <p aria-live="polite" className="min-h-5 font-medium tabular-nums">
+      <p
+        aria-live="polite"
+        className="flex min-h-9 flex-wrap items-baseline gap-x-1.5 tabular-nums"
+      >
         {preview}
       </p>
       <div className="flex flex-col gap-2">
@@ -262,13 +284,9 @@ function AdjustmentForm({
           onChange={(event) => setReason(event.target.value)}
         />
       </div>
-      {failed && (
-        <p role="alert" className="text-sm text-destructive">
-          {text('write_error', {})}
-        </p>
-      )}
+      {failed && <WriteErrorAlert ui={ui} />}
       <DialogFooter>
-        <Button type="button" variant="outline" disabled={pending} onClick={onCancel}>
+        <Button type="button" variant="ghost" disabled={pending} onClick={onCancel}>
           {text('dialog_cancel', {})}
         </Button>
         <Button type="submit" disabled={value === null || pending}>

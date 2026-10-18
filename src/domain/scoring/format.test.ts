@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { makeConfig } from '@/testing/student-fixtures'
-import { formatScore } from './format'
+import { formatFixed, formatScore } from './format'
 import { asMilli, toMilli } from './milli'
 
 const halfPoints = makeConfig({ rounding: { step: 0.5 } })
@@ -33,5 +33,12 @@ describe('formatScore', () => {
     expect(formatScore(asMilli(7_250), 'raw', halfPoints, 'en')).toBe('7.25')
     expect(formatScore(asMilli(7_000), 'raw', halfPoints, 'fr')).toBe('7')
     expect(formatScore(asMilli(1_333), 'raw', halfPoints, 'fr')).toBe('1,333')
+  })
+})
+
+describe('formatFixed', () => {
+  test('décimales imposées', () => {
+    expect(formatFixed(asMilli(11_500), 2, 'fr')).toBe('11,50')
+    expect(formatFixed(asMilli(11_500), 0, 'en')).toBe('12')
   })
 })

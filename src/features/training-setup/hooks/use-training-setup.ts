@@ -20,6 +20,8 @@ export type TrainingSetup = {
   /** La config à corriger n'a pas pu être relue pour l'éditeur. */
   fixError: boolean
   canSubmit: boolean
+  /** Une config valide est chargée, que la base soit ouverte ou non. */
+  configReady: boolean
   /** La config chargée est invalide : elle peut être reprise dans l'éditeur. */
   canFix: boolean
   setConfigFile: (file: File) => Promise<void>
@@ -140,6 +142,7 @@ export function useTrainingSetup(dbStatus: DbStatus, trainingId?: string): Train
     submitError,
     fixError,
     canSubmit,
+    configReady: validConfig !== null,
     canFix: loaded?.ok === false,
     setConfigFile,
     setPasted,

@@ -1,4 +1,5 @@
 import { useId, useState } from 'react'
+import { IconPlayerSkipForward } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { NormalizedConfig } from '@/domain/config/normalize'
@@ -14,7 +15,8 @@ type SkipButtonProps = Readonly<{
 }>
 
 /**
- * « Passer la question » (F10), absent si `skips.enabled` est faux. Quota atteint : même motif
+ * « Passer la question » (F10), discret (le compteur de passes est à côté, dans la carte « Note »),
+ * absent si `skips.enabled` est faux. Quota atteint : même motif
  * que la catégorie épuisée de `CategoryGrid` — `aria-disabled` et non `disabled`, sinon
  * l'infobulle ne s'ouvre jamais (D06, QUIRKS), clic neutralisé, motif en `aria-describedby`.
  */
@@ -25,7 +27,12 @@ export function SkipButton({ ui, skips, remaining, disabled, onSkip }: SkipButto
 
   if (!skips.enabled) return null
 
-  const label = text('passage_skip_button', { remaining })
+  const label = (
+    <>
+      <IconPlayerSkipForward aria-hidden />
+      {text('passage_skip_label', {})}
+    </>
+  )
 
   if (remaining === 0) {
     return (
@@ -35,7 +42,8 @@ export function SkipButton({ ui, skips, remaining, disabled, onSkip }: SkipButto
             render={
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
+                size="sm"
                 disabled={disabled}
                 aria-disabled="true"
                 aria-describedby={reasonId}
@@ -56,7 +64,13 @@ export function SkipButton({ ui, skips, remaining, disabled, onSkip }: SkipButto
 
   return (
     <div>
-      <Button type="button" variant="outline" disabled={disabled} onClick={() => setOpen(true)}>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        disabled={disabled}
+        onClick={() => setOpen(true)}
+      >
         {label}
       </Button>
       <SkipDialog ui={ui} skips={skips} open={open} onOpenChange={setOpen} onConfirm={onSkip} />

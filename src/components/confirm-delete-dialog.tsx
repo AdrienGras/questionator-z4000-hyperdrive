@@ -65,7 +65,7 @@ export function ConfirmDeleteDialog({
       {/* Trois boutons : la largeur du vendor (24 rem) ne les tient pas sur une ligne. Préfixe
           `data-[size=default]:` : sans lui, `sm:max-w-sm` du vendor (sous ce variant) l'emporterait. */}
       <AlertDialogContent
-        className={extraAction === undefined ? undefined : 'data-[size=default]:sm:max-w-md'}
+        className={extraAction === undefined ? undefined : 'data-[size=default]:sm:max-w-xl'}
       >
         <AlertDialogHeader>
           {/* `wrap-anywhere` : un nom sans espace élargirait la grille de l'en-tête, et la modale avec. */}
@@ -82,7 +82,7 @@ export function ConfirmDeleteDialog({
         <AlertDialogFooter>
           {extraAction}
           <AlertDialogCancel disabled={deleting}>{text('dialog_cancel', {})}</AlertDialogCancel>
-          <Button variant="destructive" disabled={deleting} onClick={() => void confirm()}>
+          <Button variant="destructive-solid" disabled={deleting} onClick={() => void confirm()}>
             {text('delete_confirm', {})}
           </Button>
         </AlertDialogFooter>

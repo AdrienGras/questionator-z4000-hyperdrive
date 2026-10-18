@@ -24,6 +24,209 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-18 — F44.12 : bannière animée du README en 3D (#156)
+
+**Dernière chose faite** : brainstorming → spec `docs/superpowers/specs/2026-10-18-f44-12-banniere-3d-design.md` → plan `docs/superpowers/plans/2026-10-18-f44-12-banniere-3d.md`, exécuté nativement ; D114.
+- **Direction** (utilisateur) : plan-séquence three.js sur les vrais écrans de la refonte, ambiance de la nouvelle UI. Références : la vidéo « mode d'emploi » (lisibilité) et le clip three.js « LGTM » (caméra, objets 3D). L'option borne d'arcade a été écartée après un storyboard.
+- **Film de 41,5 s.** La seconde moitié a été refaite sur deux retours : « +1 », questions 2 et 3 en accéléré, écran final 6,00/20 des deux côtés, puis cinq atouts en objets (éditeur, Excel, solo, hors ligne, local). L'écran de stats et ses anneaux ont été retirés.
+- **Sources hors dépôt** (utilisateur) : atelier `/srv/AdrienGras/questionator-banniere-3d` et archive `~/Downloads/questionator-banniere-3d-sources.zip`. Le dépôt ne reçoit que `assets/readme-banner*` et le texte alternatif du README.
+- **Pas de passe canevas** : exception à D102, tracée dans D114.
+- **Poids** : AVIF 4,23 Mo, WebP 4,79 Mo (qualité 55), image fixe 73 Ko à 39,7 s.
+- **Vérifications** :
+  - rendu GitHub contrôlé sur la branche (AVIF animé, image fixe en mouvement réduit) ;
+  - garde-fou `scripts/readme-banner.test.ts` 5/5, `pnpm check` vert ;
+  - relecture finale (opus) : HANDOFF manquant (fait ici), scénario des captures conservé, étiquettes qui se chevauchaient à 38,5 s corrigées ; mineurs ci-dessous.
+
+**Trucs en suspens** : la bannière de 41,5 s a été validée par l'utilisateur (« lgtm ») avant les deux retouches de la relecture finale : dernière station tenue, étiquettes effacées avant le vol. Ces retouches restent à lui montrer. F44 est complet (D110) : PR #154 à sortir du brouillon après CI et Sonar verts (`.claude/scripts/sonar-check.sh --pr 154 --wait`), merge seulement sur go explicite.
+
+**Prochaine chose à creuser** : passe Sonar et CI de la PR #154, puis la passer en « Ready for review ». Mineurs relevés par la relecture, non traités :
+- petits textes sous 18 px en 800 px : étiquettes, pastille « ACCÉLÉRÉ », adresse de fin ;
+- traînées de l'accéléré qui sautillent (`fast.ts`, pas de 80 px par image) ;
+- numéros de ligne de l'encart JSON (13 à 16 au lieu de 10/14/15) ;
+- contrôle d'ordre de `pnpm check` sans instant entre 24 et 31 s ;
+- plan non mis à jour après la révision : la spec (section « Révision ») et D114 font foi.
+
+**Notes pour future Claude** :
+- **Refaire la bannière** : tout passe par l'atelier, dont le `README.md` donne les commandes. `pnpm render` prend environ 9 min ; `--from/--to` permet de ne refaire qu'une plage. L'image fixe est `f1191`.
+- **Captures en plus** : les six captures des questions 2 et 3 et des écrans finaux se refont avec `captures/banner-extra.spec.ts`, à copier temporairement dans `e2e/screenshots/`. Il est reproductible au hash près.
+- **Poids du WebP** : il est à 92 % de son seuil. Allonger le film exige de baisser `WEBP_Q`.
+- **Pièges** (QUIRKS) : `--disable-partial-raster` pour le déterminisme, WebGL en headless seulement via `channel: 'chromium'` + ANGLE Vulkan, et ffmpeg ne relit pas un WebP animé.
+
+## 2026-10-18 — F44.11 : guide, captures et README (#155)
+
+**Dernière chose faite** : plan `docs/superpowers/plans/2026-10-18-f44-11-guide-captures.md` exécuté nativement sur `feat/f44-refonte-ui` (PR #154, brouillon), D113. Arbitrages de l'utilisateur : captures en sombre avec une seule claire (`mode-clair.png`), quatre captures nouvelles (pages Sessions et Entraînement, accueil « Reprendre », état vide des stats), relecture de la prose de toutes les pages touchées.
+- **Captures** : script réparé (accueil en tableau de bord), scénario unique session puis entraînement, 17 PNG régénérés et identiques sur quatre passes ; `accueil-sessions.png` supprimée.
+- **Garde-fou** : `site/guide/interface.test.ts` (libellés d'avant la refonte, captures absentes, captures orphelines).
+- **Guide** : toutes les pages reprises (menu, fil d'Ariane, bascule et sa portée session / entraînement / global, page Sessions, passage en deux colonnes, panneau « Cet étudiant » / « Liste », projection sans bascule, stats Synthèse / Détail, entraînement D111, éditeur) ; « sauvegarde » partout sauf le nom de fichier `-backup-`.
+- **Guide contributeur** : carte de `src/` à jour, étape canevas dans `workflow.md` (ancre `#interface`), interface et tokens dans `conventions.md`, captures et garde-fou dans `tests.md`.
+- **README** : puce « Révisions en solo » ajoutée ; rien d'autre n'était faux.
+- **Libellé corrigé** (repéré par la revue finale) : `passage_no_student_body` renvoyait encore à l'onglet « Étudiants » / “Students”, renommé « Liste » / “List” en F44.7 ; test dans `ui-messages.test.ts`.
+- `pnpm check` (2260 tests), `pnpm docs:build`, `pnpm docs:screenshots` verts.
+
+**Trucs en suspens** : #155 **validé par l'utilisateur** (2026-10-18, relu sur `pnpm docs:dev`). Revue finale faite (opus) : un point important et dix mineurs, tous corrigés. Reste à F44 (D110) : #156 (bannière animée, session dédiée, scénario validé avant l'animation) ; la PR #154 ne quitte le brouillon qu'après #156, CI et Sonar verts, merge sur go explicite.
+
+**Prochaine chose à creuser** : #156 (F44.12) : scénario de la bannière à faire valider, puis animation avec le mode « motion » du canevas Design et rendu aux formats de D100 (`assets/readme-banner*`). L'`alt` de la bannière dans `README.md` décrit encore l'ancienne interface : à reprendre avec elle.
+
+**Notes pour future Claude** : les captures se vérifient par empreintes (`md5sum site/public/screenshots/*.png`) sur plusieurs passes, pas sur une seule (deux causes de variation trouvées, QUIRKS). Le serveur des captures construit le site : une image citée absente casse tout le script. L'export Excel garde les intitulés d'avant F44 (`domain/export/messages.ts`) ; le guide décrit l'écran et la feuille séparément. L'écran d'entraînement garde « Retour à l'accueil » (pas de fil d'Ariane), les stats « Retour au passage » / « Retour à l'entraînement ».
+
+## 2026-10-18 — F44.10 : mode clair dérivé (#152)
+
+**Dernière chose faite** : passe canevas puis plan `docs/superpowers/plans/2026-10-18-f44-10-mode-clair.md` exécuté nativement sur `feat/f44-refonte-ui` (PR #154, brouillon), D112. Arbitrages de l'utilisateur : passe canevas « tokens + 5 artboards », défaut `system`, bascule dans le menu seulement, encre de catégorie.
+- **Canevas et design system** : tokens clairs dans le design system (v9, `tokens.json`, contrastes dans le README) ; page « Mode clair » du canevas (v30) : `clair/menu-bascule`, `clair/accueil`, `clair/passage-question`, `clair/projection-question`, `clair/statistiques`.
+- **Tokens** : `:root` clair, `.dark` sombre, parité `THEME_TOKENS` testée sur les deux blocs ; valeurs par mode sur `html` / `html.dark` (couleurs d'espace, `--card-shadow` / `--popover-shadow`, lien, `--category-ink-mix`).
+- **Apparence** : `forcedMode` retiré, défaut `system` ; `AppearanceScope.key` facultative, la vue projetée n'en a pas et suit `defaultColorMode`.
+- **Bascule** : `ColorModeToggle` en pied du menu latéral (sous l'Aide, au-dessus de « Replier le menu ») et du tiroir ; `e2e/color-mode.spec.ts` revient (#76).
+- **Encre de catégorie** : `categoryAccent(color)` (`lib/appearance`) ; usages pleins en `--category-ink`, teintes en `--category-color`.
+- **Config d'exemple** : `theme.light` = tokens clairs + `radius`, `defaultColorMode` reste `dark`.
+- **Révélé en route** : les ombres ne se surchargeaient pas sous `html.dark` (Tailwind recopie la valeur, QUIRKS) ; libellé de la bascule qui passait sur deux lignes (1 px) ; test de focus instable (bandeau hors ligne, QUIRKS). Revue finale (opus) : liens markdown à 2,9:1 en clair (`--tw-prose-links`), corrigé avec un e2e qui échouait d'abord.
+- `pnpm check` (2236 tests), 91 e2e (dont `e2e/light-mode.spec.ts`), `check:bundle`, `check:precache`, `check:budget` verts ; captures en clair comparées aux artboards.
+
+**Trucs en suspens** : #152 **validé par l'utilisateur** (2026-10-18). Mineurs de la revue finale non traités, laissés à l'utilisateur : pastille brute de la navigation de l'aperçu de l'éditeur (`config-preview.tsx:46`), menu de choix qui déborde de 3 px dans le tiroir à 390 px, flash clair au chargement pour un système sombre (pas de script avant React), `theme-color` toujours sombre, trous de test (focus après choix menu replié, ombre claire). Reste à F44 (D110) : #155 puis #156 ; la PR #154 ne quitte le brouillon qu'après #156, CI et Sonar verts, merge sur go explicite.
+
+**Prochaine chose à creuser** : plan de #155 (F44.11 : guide utilisateur et contributeur, captures régénérées, README) avec `superpowers:writing-plans`, exécution native, sur `feat/f44-refonte-ui`. Pas de passe canevas : documentation, les captures montrent l'interface validée. Sources : ticket #155, D110, spec F44 (§ Mémoire et documentation), carte des écrans ; `site/guide/`, `site/contribuer/`, `README.md`, `e2e/screenshots/` (`guide.spec.ts`, `determinism.ts`), `playwright.screenshots.config.ts` (script des captures à réparer d'après D110). À y reprendre pour le mode clair :
+- `site/guide/prise-en-main.md:45` : « bouton en haut à droite » → pied de menu ;
+- `site/guide/projeter.md:17` : plus de bouton de mode sur la vue projetée ;
+- `site/guide/projeter.md:63` et `site/guide/reference-config.md:147` : la vue projetée suit toujours `defaultColorMode` ;
+- portée de la bascule à expliquer : sur un écran de session, elle règle le mode de cette session, ailleurs le mode global (D60, D112) ;
+- `playwright.screenshots.config.ts` est en `colorScheme: 'light'` : avec le défaut `system`, les captures sortiront en clair ; choisir le mode voulu (à trancher avec l'utilisateur).
+Ensuite #156 (bannière animée, session dédiée, scénario validé avant l'animation).
+
+**Notes pour future Claude** :
+- Une ombre de `@theme` ne se surcharge pas par mode : Tailwind écrit sa valeur dans l'utilitaire. Passer par une variable lue en `@theme inline` et vérifier dans `dist/assets/*.css`.
+- Sous le filtre rtk, `pnpm exec vitest` peut afficher un rapport JSON périmé : `rtk proxy pnpm exec vitest run …` donne la vraie sortie.
+- En e2e, `HomePage.goto()` n'attend pas le rendu : attendre un titre ou une classe avant de mesurer.
+- Couleur de catégorie : toujours `categoryAccent(color)`, jamais `{ '--category-color': color }` à la main (CONVENTIONS).
+
+## 2026-10-18 — F44.9 : entraînement (#151)
+
+**Dernière chose faite** : plan `docs/superpowers/plans/2026-10-18-f44-9-entrainement.md` exécuté nativement sur `feat/f44-refonte-ui` (PR #154, brouillon), D111. #150 validé par l'utilisateur au lancement de la session.
+- **Mise en place et mise à jour** : tuile d'espace et sous-titre ; étapes à état (faite, en cours en carte « Étape N sur 4 », à venir), indicatives seulement, étape 4 en cours dès une copie, un dépôt ou un texte collé (`step-states.ts`) ; prompt résumé après copie (« Prompt copié. · Copier à nouveau », repli « Afficher le prompt »), même bouton gardé (focus) ; zone de dépôt compacte (`FileDropField size="compact"`) ; collage dans un repli avec « Vérifier », erreurs hors du repli ; pastilles par niveau ; bilan en trois cartes ; phrase sous « C'est parti » désactivé.
+- **Question** : tuiles verrouillées au-dessus (courante marquée), carte teintée, surtitre « Normal · 2 pts », réponse repliable (« Masquer » / « Afficher »), « Notez-vous · sur 2 » et barème en rangée teintée (`ScaleButtons variant="row"`), « Passer » à droite ; sous-titre « Entraînement · question en cours ».
+- **Révélé en route** : police du prompt à 15 px sur grand écran (`md:text-[15px]` de `Textarea`, capture) ; relecture finale : un test d'erreurs hors du repli qui visait le mauvais élément, et l'étape 4 qui retombait à 2 en retouchant un JSON vérifié. Chacun corrigé avec un test qui échouait d'abord.
+- `pnpm check` (2230 tests), 83 e2e (dont `e2e/training-layout.spec.ts`, 390 px, 13 catégories), `check:bundle`, `check:precache`, `check:budget` verts ; captures 1280 et 390 px comparées aux artboards ; canevas v26 (légende et état de la zone compacte, tuiles verrouillées non interactives, « C'est parti » désactivé en dégradé).
+
+**Trucs en suspens** : #151 **validé par l'utilisateur en local** (`pnpm dev`), avec un retour sur l'accueil (#147), appliqué : la carte d'entraînement de « Reprendre » montre taux et couverture en grand, comme la page Entraînement, sans le sous-titre de couverture, et le contenu des cartes est aligné d'une carte à l'autre (`subgrid` dans `ResumeCard`, e2e `Reprendre à 1280 px : chiffres et boutons alignés`) ; artboards `accueil` et `accueil-en` d'abord (canevas v29), puis code ; clé `home_training_coverage_short` supprimée ; D111. Validé par l'utilisateur. Mineurs de la relecture et deux idées de mise en page en BACKLOG § Entraînement. Ordre de la suite inchangé (D110) : #152 → #155 → #156 ; la PR ne quitte le brouillon qu'après #156.
+
+**Prochaine chose à creuser** : plan de #152 (F44.10, mode clair dérivé) avec `superpowers:writing-plans`, exécution native. Sources : ticket #152, spec `docs/superpowers/specs/2026-10-14-f44-refonte-ui-design.md`, carte des écrans (§ Transverse) ; y rétablir `e2e/color-mode.spec.ts` (retiré avec la bascule en #146, voir le corps de la PR).
+
+**Notes pour future Claude** :
+- Le formateur est `oxfmt` (`pnpm format`), pas Prettier : `pnpm exec prettier` échoue, et un `>/dev/null` masque l'échec.
+- Un contenu qui doit garder son focus ne change pas de parent selon un état : un seul conteneur, classes conditionnelles, enfants à emplacements fixes (`null` sinon).
+- `toBeVisible()` de jest-dom tient compte des `<details>` fermés ; `toggle` arrive après le clic (`findBy…`).
+- Aligner des cartes voisines dont les blocs varient : `row-span-N grid grid-rows-subgrid` sur la carte, enfants toujours rendus (un `div` vide au besoin), mesuré en e2e (jsdom ne calcule pas la grille).
+- Avant d'écrire un test qui vise « le premier `listitem` », vérifier ce qu'il y a au-dessus dans la page : la mise en place est elle-même une liste ordonnée.
+
+## 2026-10-18 — F44.8 : statistiques de session et d'entraînement (#150)
+
+**Dernière chose faite** : plan `docs/superpowers/plans/2026-10-18-f44-8-statistiques.md` exécuté nativement sur `feat/f44-refonte-ui` (PR #154, brouillon), D109.
+- **Stats de session** : sous-titre « Statistiques · titre · matière · promotion » ; « Synthèse » (chiffres clés, Moyenne et Médiane « / barème », barre empilée et légende), « Notes finales » (histogramme dessiné en `div`, chiffres, ajustements en pied), anneaux par catégorie ; « Détail » (questions tirées avec « Part », passées, stratégies en pastilles teintées, tags avec barre) ; état vide global quand aucun étudiant n'a de tentative.
+- **Stats d'entraînement** : trois cartes de chiffres clés, anneaux par niveau, barres par notion, « À revoir » avec icône et compteur, détail replié avec libellé coloré, barre teintée et pastille ; état vide en carte.
+- **Briques** `@/components/stats/` : `StatsSection`, `StatsGroup`, `StatsTable`, `MeterBar`, `RateRing`, `CategoryLabel`, `StatsEmptyState`. Aucun calcul touché, formats conservés.
+- **Recharts retiré** (dépendance, `chart.tsx`, cible `check:bundle`, groupe Vite, règle depcruise) ; le plan oubliait `check:bundle`, révélé par `pnpm build && pnpm check:bundle` (QUIRKS 2026-10-18).
+- **Révélé en route** : en-tête « Réussite » et barre étroite des tags (capture 390), taille `md` de l'anneau d'entraînement ; relecture finale : point coloré d'un anneau à 0 % (aussi sur `SuccessRing`) et long libellé de catégorie qui débordait (e2e `stats-layout`, 83 px). Chacun corrigé avec un test qui échouait d'abord.
+- `pnpm check` (2201 tests), 81 e2e, `check:bundle`, `check:precache`, `check:budget` verts ; captures 1280 et 390 px comparées aux artboards ; canevas v25 (`role="img"` retiré des artboards de stats).
+
+**Trucs en suspens** : #150 **en cours de validation par l'utilisateur en local** (`pnpm dev`, serveur déjà lancé sur le port 5173 depuis ce dépôt ; liste de vérifications donnée en fin de session). S'il remonte des retours : les corriger avec un test qui échoue d'abord, mettre à jour l'artboard touché, compléter cette entrée et la section #150 du corps de la PR #154. PR #154 toujours en brouillon, CI 6/6 et Sonar verts (0 issue) sur `feat/f44-refonte-ui`. Mineurs de la relecture en BACKLOG § Statistiques.
+- **Phase 3 étendue (D110)** : deux tickets ajoutés, dans la même PR #154. #155 (F44.11 : guide utilisateur et contributeur, captures, texte du README ; y réparer `e2e/screenshots/guide.spec.ts`, rouge depuis F44.5) et #156 (F44.12 : bannière animée du README refaite depuis les artboards en mode « motion » du canevas, formats de D100, scénario validé par l'utilisateur d'abord, session dédiée). Ordre : #151 → #152 → #155 → #156 ; la PR ne quitte le brouillon qu'après #156.
+- `.claude/scripts/gh-ticket.sh` fiabilisé (projet qui ajoute l'issue de lui-même, QUIRKS 2026-10-18).
+
+**Prochaine chose à creuser** : après validation de #150 par l'utilisateur, plan de #151 (F44.9, entraînement) avec `superpowers:writing-plans`, exécution native comme #145 à #150. Sources :
+- carte des écrans `docs/superpowers/specs/2026-10-17-f44-carte-des-ecrans.md` § « Entraînement (#151) », lignes 99-109 (forme seule, modifié, nouveau retenu, à conserver) ;
+- artboards `entrainement-mise-en-place`, `entrainement-mise-a-jour`, `entrainement-question` (page « Après » du canevas, lecture : Notes de l'entrée F44.6) ;
+- ticket #151 (critère : d'un PDF de cours à une première question tirée, parcours inchangé) ; briques déjà là : `CategoryTile`, `ScaleButtons`, `FileDropField` (forme de la création, version compacte attendue ici), `@/components/stats/` pour un bloc chiffré.
+
+**Notes pour future Claude** :
+- Retirer une bibliothèque lourde : dépendance, cible de `scripts/check-initial-bundle.ts`, groupe `codeSplitting`, règle depcruise ; `check:bundle` ne tourne pas dans `pnpm check`.
+- Un taux s'écrit toujours à côté de sa barre (`MeterBar` décoratif) ; anneaux et histogramme : phrase `sr-only`.
+- Les textes `Intl` en pourcentage portent une espace fine insécable : viser par regex `\s%` ou comparer `textContent` avec `toBe`, pas `toHaveTextContent`.
+- Captures : config jetable `.superpowers/sdd/<plan>/cap/` (`cap.config.ts` + `*.pw.ts`), comme en F44.6.
+
+## 2026-10-17 — F44.7 : passage examinateur et vue projetée (#149)
+
+**Dernière chose faite** : plan `docs/superpowers/plans/2026-10-17-f44-7-passage-projection.md` exécuté nativement sur `feat/f44-refonte-ui` (PR #154, brouillon), D108.
+- **Passage** : l'étudiant en titre, barre de progression segmentée et score brut sur son maximum dans l'en-tête (pastille « Passage terminé » une fois fini) ; question en carte (badge et points, étiquette de langage du code) ; « Tirage suivant » en tuiles teintées ; colonne de droite : vue projetée avec bascule « Cet étudiant » / « Écran d'attente », carte « Note » sous halo (barème en grille, skip et passes restantes), commentaire et « Marquer absent » **sortis du tiroir**. Sur téléphone, la carte « Note » remonte sous la question.
+- **Panneau** : nommé par la session, onglets « Cet étudiant » / « Liste », pied commun hors de la zone qui défile ; « Liste » avec résumé et pastilles de statut ; « Cet étudiant » avec deux totaux.
+- **Écran final** : jauge (`ScoreGauge`), notes intermédiaires, détail en barres, motif d'une passée sous le titre ; dialogues alignés (`session-dialogues`), ajustement signé « +0,50 ».
+- **Projection** : cartes « Question » / « Score », grande grille (resserrée dès 4 tuiles par ligne) puis rangée compacte, question teintée, note en jauge aux décimales de l'arrondi (`final.decimals`, `formatFixed`), détail coloré (`categoryId`), écran d'attente, halos.
+- **Révélé en route** : un `pre` coloré remplacé au lieu d'être mis à jour (e2e `long-words`) ; pied du tiroir hors écran (capture) ; grande grille projetée qui débordait à 13 catégories, et séparateur de milliers dans le champ d'ajustement (relecture finale). Chacun corrigé avec un test qui échouait d'abord.
+- `pnpm check` (2162 tests) et 78 e2e verts ; captures 1280 et 390 px comparées aux artboards.
+
+**Trucs en suspens** : #149 **validé par l'utilisateur en local** (`pnpm dev`) après deux retours, appliqués : contenu des tuiles de sélection centré (examinateur, entraînement, projection), bascule libellée « Projeter cet étudiant ». Canevas v24 publié : artboards à D74 (2 × 2), tuiles centrées, bascule « Projeter cet étudiant » ; grille de tirage de l'examinateur à un seuil de 30rem (décision de l'utilisateur, D108). Mineurs de la relecture en BACKLOG § Écran de passage. Le guide ne parle encore ni du menu, ni des nouveaux écrans (passe de fin de phase 3).
+
+**Prochaine chose à creuser** : plan de #150 (statistiques) d'après `statistiques`, `stats-vide`, `entrainement-stats` et la section #150 de la carte des écrans.
+
+**Notes pour future Claude** :
+- Le tiroir du passage se cherche par sa liste d'onglets « Panneau » (`sidePanel()`, `ExaminerPage.panel`), plus par son nom (QUIRKS 2026-10-17).
+- oxlint refuse `role="img"` et `role="group"` : phrase `sr-only` + dessin `aria-hidden`, `fieldset aria-label`.
+- Une teinte de catégorie s'écrit en classes complètes avec le type `color:` (Tailwind ne lit que des littéraux, `cn` les range alors avec les couleurs) ; `CategoryBadge` pour toute tuile d'icône.
+- `CommentField` est clé par étudiant, pas la carte qui l'entoure (dialogue d'absence, D67).
+
+## 2026-10-17 — F44.6 : création de session et éditeur (#148)
+
+**Dernière chose faite** : plan `docs/superpowers/plans/2026-10-17-f44-6-creation-editeur.md` exécuté nativement sur `feat/f44-refonte-ui` (PR #154, brouillon).
+- **`/new`** : zones de dépôt avec état visible (un seul nœud, `aria-live`) et bordure colorée ; aperçu en cartes « Étudiants » et « Configuration » (résumé en lignes intitulé / valeur, catégories avec tuile teintée, barème « 0 · 0,5 · 1 », « N erreurs à corriger ») ; libellés courts avec le libellé long en `aria-label` ; « (facultatif) » ; une phrase sous le bouton désactivé (`submitBlocker`, cinq causes ordonnées) ; halo d'action.
+- **`/editor`** : frame (nom de fichier `configFileName` en titre, barre d'outils discrète, problèmes numérotés par ligne au-dessus du code, thème CodeMirror du design system), action dans l'en-tête, aperçu avec sous-titre et navigation par catégorie (boutons, pas d'ancres), barème formaté dans la langue de la config.
+- **Briques et correctifs** : `ActionHalo`, `formatScale`, `ConfigIssueList` et `FileDropField` restylés (partagés avec la mise en place d'un entraînement) ; colonne de contenu en `overflow-x-clip`.
+- **Révélé par l'e2e, les captures et la relecture finale** : le panneau « Problèmes », au-dessus du code, le décalait sous la souris et le curseur (à la première validation, puis à chaque problème apparu ou corrigé) : rendu dès le montage, et chaque variation de hauteur compensée par un défilement (`ResizeObserver`). Le test e2e à 390 px mesure désormais élément par élément (le `scrollWidth` du document ne voyait plus rien sous `overflow-x-clip`). `cn` retirait `text-score-md` / `text-small` devant une couleur : `extendTailwindMerge` avec les tailles du design system, correctif global.
+- **Retours de validation (1er passage)** : zones de dépôt toujours au grand format (même hauteur, vides ou remplies) ; aperçu de l'éditeur à parts égales avec le code et collant sur toute la hauteur en `lg`. Deux e2e les tiennent.
+- **Mémoire et canevas** : D107, 3 QUIRKS, 10 BACKLOG (§ Éditeur de config et § Création de session, dont les 8 mineurs de la relecture), CONVENTIONS § Page examinateur ; canevas v23 (tuile 52 px, pastille de marge). `pnpm check` (2087 tests) et 73 e2e verts ; captures 1280 et 390 px comparées aux artboards.
+
+**Trucs en suspens** : #148 **validé par l'utilisateur en local** (`pnpm dev`) après un retour en deux points, corrigés : zones de dépôt toujours au grand format, aperçu de l'éditeur à parts égales et collant en `lg`. PR #154 toujours en brouillon, CI et Sonar verts sur `e117491` avant cette entrée. La mise en place d'un entraînement montre déjà la nouvelle zone de dépôt (forme de la création) en attendant sa version compacte (#151). Le guide ne parle encore ni du menu, ni du nouvel accueil, ni des nouveaux écrans (passe de fin de phase 3).
+
+**Prochaine chose à creuser** : plan de #149 (F44.7, passage examinateur et vue projetée), le plus gros ticket de la phase. Sources :
+- carte des écrans `docs/superpowers/specs/2026-10-17-f44-carte-des-ecrans.md` § « Passage et vue projetée (#149) », lignes 66-84 (forme seule, modifié, nouveau retenu, refusé, à conserver) ;
+- 12 artboards de la page « Après » du canevas : `passage-question`, `passage-panneau`, `passage-panneau-etudiant`, `passage-note-finale`, `passage-question-theme`, `session-dialogues`, `projection-attente`, `projection-tuiles`, `projection-tirage`, `projection-question`, `projection-finale`, `projection-finale-detail` ;
+- deux écarts de fond acceptés en D103 : `categoryId` ajouté à `ProjectedView.detail` (D69 élargie), notes formatées selon l'arrondi de la config partout, projection comprise.
+
+Critère d'acceptation propre à #149 : le `theme.dark` d'une config pilote action, surfaces et halos ; y vérifier aussi `ActionHalo` et les halos de `PageShell` sous un thème de session. Vu la taille, juger au moment du plan s'il faut deux groupes de tâches (passage, puis projection) ; exécution native comme #145 à #148, puis section #149 dans le corps de la PR #154.
+
+**Notes pour future Claude** :
+- `cn` connaît maintenant les tailles `text-*` du design system : une nouvelle taille dans `index.css` s'ajoute à `src/lib/utils.ts`.
+- Un bloc posé au-dessus de CodeMirror doit exister dès le montage, et sa variation de hauteur doit être compensée, sinon le code saute.
+- Les `header` de l'aperçu de l'éditeur sont aussi des `banner` : viser le premier.
+- **Lire les artboards** : `Artifact` `read` avec `url` du canevas (`docs/ENVIRONMENT.md`) et `paths: ["project/apres/<nom>.dc.html", …]`, `out_dir` dans le scratchpad. Le `<main>` porte l'écran (extraire `<main>…</main>` et retirer les `<svg>` pour lire vite). Pour publier une modification, il faut d'abord un `read` sur l'URL seule (QUIRKS 2026-10-17).
+- **Captures de comparaison** : config Playwright jetable dans l'espace git-ignoré du plan (`.superpowers/sdd/<plan>/cap/`), qui importe `baseURL` et `webServer` de `playwright.config.ts` (avec `cwd` à la racine du dépôt) ; spec nommée `*.pw.ts` avec `testMatch`, sinon Vitest la ramasse dans `pnpm check`. Une capture prise juste après un changement d'état peut saisir une bordure en pleine transition.
+
+## 2026-10-17 — F44.5 : accueil et pages d'espace (#147)
+
+**Dernière chose faite** : plan `docs/superpowers/plans/2026-10-17-f44-5-accueil-espaces.md` exécuté nativement sur `feat/f44-refonte-ui` (PR #154, brouillon). `/sessions` et `/trainings` ont leur page (en-tête d'espace avec tuile et halo, compteur, encart de dépôt sur Sessions, action utile d'une carte endommagée en bouton visible). L'accueil devient un tableau de bord : « Reprendre » (3 plus récents, endommagés exclus), tuiles d'espace avec compteur, premier lancement sur base vide. L'import d'une sauvegarde est remonté dans `src/components/import/` ; un import réussi depuis l'accueil mène à `/sessions`. Taux de réussite global (`TrainingStats.rate`), date courte, briques communes (`SpaceIcon`, `SessionProgress`, `SuccessRing`, `TrainingFigures`, `useTrainingSummary`), `PageShell` `icon` et `halo`. Révélé par l'e2e : les écrans de session et d'entraînement endommagés ramènent vers leur page d'espace (« Retour aux sessions », « Retour aux entraînements »), artboards `bandeaux` et `accueil-dialogues` mis à jour (canevas v22). D106, CONVENTIONS § Page examinateur, 2 QUIRKS, 3 BACKLOG. `pnpm check` (2025 tests) et 65 e2e verts ; captures 1280 et 390 px comparées aux artboards. Relecture finale par un relecteur neuf : 2 corrigés (halo qui débordait sur la barre du haut du téléphone, renvoi vers `/sessions` après un import fini hors de l'accueil), mineurs en BACKLOG § Accueil.
+
+**Trucs en suspens** : #147 **validé par l'utilisateur en local** (`pnpm dev`) après deux retours : le halo s'arrêtait au milieu d'un grand écran (ancré au `main` borné, désormais à la colonne de contenu de `RootLayout`) ; la création de session échouait depuis le tailnet en `http://` (contexte non sécurisé, `crypto.randomUUID` absent : environnement, pas une régression, QUIRKS 2026-10-17). #148 peut commencer. PR #154 toujours en brouillon. Le guide ne parle encore ni du menu ni du nouvel accueil (passe de fin de phase 3).
+
+**Prochaine chose à creuser** : plan de #148 (création de session et éditeur) d'après `creation-session`, `creation-avertissements`, `editeur-config` et la section #148 de la carte des écrans ; exécution native comme #145 à #147, puis section #148 dans le corps de la PR #154.
+
+**Notes pour future Claude** : les cartes d'espace vivent dans `features/sessions` et `features/trainings`, jamais dans `features/home` (pas d'import entre features) ; ce qui sert aux deux remonte dans `src/components/`. Un test qui cherche une carte de session ou son menu « … » passe par `/sessions` (l'accueil n'en montre que trois, sans menu, et le premier lancement sur base vide). Un `h1` de page vient de `PageShell` avant que les listes Dexie soient lues : attendre une section par `findBy` (QUIRKS 2026-10-17). En e2e, une écriture IndexedDB faite hors de Dexie ne se voit qu'après `page.reload()`.
+
+## 2026-10-17 — F44.4 : menu et coquille de page (#146)
+
+**Dernière chose faite** : plan `docs/superpowers/plans/2026-10-17-f44-4-menu-coquille.md` exécuté nativement sur `feat/f44-refonte-ui` (PR #154, brouillon). Canevas : artboard `apres/menu-etroit` (barre du haut + tiroir sous 768 px) validé par l'utilisateur, README Sidebar du design system complété. Code : menu latéral repliable (248 / 72 px, état dans `questionator:menu-collapsed`, infobulles une fois replié) monté une fois dans `RootLayout`, absent de la vue projetée ; tiroir sur écran étroit ; lien actif par `activeMenuItem` ; `/sessions` et `/trainings` provisoires sur l'accueil ; aide sortie de `PageShell` (prop `ui` retirée) ; fil d'Ariane sur `/new`, `/editor`, `/session/$id`, `BackLink` ailleurs ; bandeaux en titre et corps, `StatusScreen` pour les écrans d'état. D105, CONVENTIONS (§ Page examinateur réécrite, § Menu et coquille de page), 3 QUIRKS. Relecture finale par un relecteur neuf : 8 mineurs, dont 2 corrigés (défilement de 56 px sur téléphone : `main` en `flex-1` ; infobulle du bouton de repli, focus conservé), les autres en BACKLOG § Navigation. `pnpm check` (1986 tests) et 62 e2e verts.
+
+**Trucs en suspens** : #146 **validé par l'utilisateur en local** (`pnpm dev` sur le tailnet, à 1280 px et sur téléphone) : #147 peut commencer, sur la même branche et la même PR #154 (D102), qui reste en brouillon ; CI et Sonar verts sur `19dc36d`. `/sessions` et `/trainings` affichent l'accueil tant que #147 n'est pas fait. Le guide (`site/guide/`) ne parle pas encore du menu (passe prévue en fin de phase 3).
+
+**Prochaine chose à creuser** : plan de #147 (accueil en tableau de bord, pages `/sessions` et `/trainings`, premier lancement), d'après `accueil`, `accueil-premier-lancement`, `sessions`, `trainings`, `accueil-dialogues` et la section « Accueil, Sessions, Entraînements » de la carte des écrans ; remplacer le composant des deux routes provisoires. Les artboards sont déjà validés (D103) : partir directement sur `superpowers:writing-plans`, puis exécution native comme #145 et #146 ; en fin de ticket, ajouter la section #147 au corps de la PR #154.
+
+**Notes pour future Claude** : les décisions prises en route sont dans D105 et dans le registre d'exécution (supprimé après la relecture). Le menu suit la langue de l'app, pas celle de la session (`lang` posé dessus). Tests : chercher un lien « Sessions » ou « Accueil » dans `within(screen.getByRole('complementary'))` ou la `nav` « Fil d'Ariane », jamais dans toute la page ; `@testing-library/user-event` n'est pas installé (`fireEvent`). Infobulles base-ui sans rôle, ouvertes au focus clavier seulement (QUIRKS). Le navigateur headless de Playwright est en anglais par défaut : passer `locale: 'fr-FR'` dans un script de capture. Les pastilles du coin bas droit peuvent masquer le bas du contenu (BACKLOG § Navigation).
+
+## 2026-10-17 — F44.3 : tokens et composants de base (#145)
+
+**Dernière chose faite** : clôture de F44.2 (spec complétée, docs commitées, #144 fermé, #145 à #152 confirmés), plan `docs/superpowers/plans/2026-10-17-f44-3-tokens-composants-base.md` puis exécution native des 7 tâches sur `feat/f44-refonte-ui`, PR #154 en brouillon. Design system aligné sur D103 (menu repliable, danger plein en texte sombre, composant Disclosure) et canevas corrigé (`accueil-dialogues`, `session-dialogues`). Dans le code : mode sombre forcé (`AppearanceProvider forcedMode="dark"`), bascule démontée ; tokens du design system dans `src/index.css` (`:root` = THEME_TOKENS, `@theme` fixes, `@theme inline` dérivés de `--primary`) ; Geist Mono ; boutons (dégradé, 44 px, `destructive-solid`) ; cartes, dialogues, menus, champs, jauges, onglets ; chevrons des `<details>` ; « backup » → « sauvegarde » en FR. D104. Relecture finale par un relecteur neuf, puis passe de correction : focus clavier des boutons rétabli (`outline-solid`), couleur de lien `text-link` (6,7:1), survol `accent-foreground`, menu « … » restylé, champs à 16 px sur téléphone, artboard de la modale à 576 px. `pnpm check` (1939 tests) et 55 e2e verts.
+
+**Trucs en suspens** : #145 **validé par l'utilisateur en local** (`pnpm dev`, tour des écrans) : #146 peut commencer, sur la même branche `feat/f44-refonte-ui` et la même PR #154 (D102), qui reste en brouillon. Plusieurs écrans montrent encore plusieurs boutons en dégradé : chaque ticket d'écran (#147 à #151) choisit son action principale d'après l'artboard. Les halos (tokens posés) n'ont pas d'utilisateur : le critère « halos compris » se vérifie au premier état vide (#147). Le guide (`site/guide/`) parle encore de « backup » et de la bascule : passe prévue en fin de phase 3.
+
+**Prochaine chose à creuser** : plan de #146 (menu latéral repliable, coquille, aide et marque en pied, fil d'Ariane, bandeaux en titre et corps), d'après `menu-replie`, `bandeaux` et la section « Transverse » de la carte des écrans.
+
+**Notes pour future Claude** : les décisions prises en route sont dans D104 et dans le message de fin de session (registre d'exécution supprimé après la relecture). Mineurs reportés : `hover:brightness-110` du bouton principal (le blanc tombe vers 4,2:1 au survol), `accent` à peine distinct de `secondary` au survol, `index.html` (`color-scheme: light dark`, `theme-color` #1a1033) à aligner sur le fond. Pour publier sur le canevas ou le design system : `read` de l'URL entière d'abord (QUIRKS 2026-10-17), puis `root` + `files`. Les e2e de style comparent des valeurs calculées, jamais le texte d'un token (le build minifie). La modale de suppression à trois boutons est à `max-w-xl` : boutons plus larges qu'avant. `ExaminerPage.chooseColorMode` reste dans les page objects, inutilisé jusqu'à #152.
+
+## 2026-10-17 — F44 : maquettes validées, carte des écrans, D103
+
+**Dernière chose faite** : retouches de l'utilisateur sur le canevas (commentaires envoyés à Claude), revue de rendu des 26 artboards « Après » (rendu local par Playwright), puis carte des écrans : quatre explorations ont confronté chaque artboard au code de `src/`. Les écarts ont été tranchés avec l'utilisateur (tout suivant les recommandations) et le canevas corrigé : 29 artboards sur « Après », dont 3 nouveaux (`passage-panneau-etudiant`, `projection-tirage`, `accueil-dialogues`). Rédigés sur la branche d'intégration `feat/f44-refonte-ui` : `docs/superpowers/specs/2026-10-17-f44-carte-des-ecrans.md`, D103, URL du canevas et du design system dans `ENVIRONMENT.md`.
+
+**Trucs en suspens** : **les docs de cette session ne sont pas commitées** (carte, D103, `ENVIRONMENT`, `INDEX`, `HANDOFF`, `QUIRKS` sur `feat/f44-refonte-ui`) : demander le go, puis les commiter en premier commit de la branche (gitmoji 📝), pousser la branche et fermer #144 à la main (phase 2 validée) ; le design system n'a pas encore le bouton « Replier le menu » ni les chevrons dans ses composants (Sidebar notamment) : à aligner au début de #145, en même temps que les tokens de `src/index.css`. Bouton « danger » (#f75d59, texte blanc) à vérifier en contraste lors de #145.
+
+**Prochaine chose à creuser** : plan de la phase 3, ticket #145 (tokens et composants de base) : lire `project/tokens.json` du design system, le traduire dans `src/index.css` (thème sombre forcé, couleurs d'espace hors thème de session), retirer la bascule de mode. Ouvrir la PR en brouillon dès le premier commit de code.
+
+**Notes pour future Claude** : la surveillance du canevas (commentaires envoyés à Claude) est propre à chaque session : la relancer avec `ArtifactComments` `watch` sur l'URL du canevas si l'utilisateur veut encore commenter. La carte des écrans fait foi pour la phase 3 : « le code fait foi pour tout comportement que la maquette ne montre pas ». Les seuls changements de fond acceptés sont le taux de réussite global d'un entraînement (`domain/training`) et `categoryId` dans `ProjectedView.detail` (D103). Pour revoir un artboard sans navigateur connecté à claude.ai : lire le fichier par l'outil Artifact (`read` avec `path`), retirer l'enveloppe `<x-dc>` et rendre le HTML statique avec Playwright (`@playwright/test` du dépôt, Chromium déjà installé). Les `.dc.html` sont sur une seule ligne très longue : les modifier par script Python avec des remplacements exacts et des assertions de compte, pas avec `sed` à l'aveugle.
+
 ## 2026-10-14 — F44 : spec, plan et tickets de la refonte UI
 
 **Dernière chose faite** : cadrage de F44 (refonte UI) en conversation, puis spec `docs/superpowers/specs/2026-10-14-f44-refonte-ui-design.md`, plan des phases 1-2 `docs/superpowers/plans/2026-10-14-f44-phases-1-2-inventaire-design-system.md`, tickets #143 à #152, D102, section F44 de `PRODUCT.md`, règle « canevas avant l'interface » dans `CLAUDE.md`. Recherche de références sur Dribbble (planches dans `.playwright-mcp/recon/`, non versionnées) : l'utilisateur a retenu les #2, 4, 6, 7, 8, 9 et 10 (Fluently en tête).

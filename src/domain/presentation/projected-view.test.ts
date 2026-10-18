@@ -186,21 +186,35 @@ describe('toProjectedView', () => {
       const view = studentView(
         sessionOf(student, { scoring, presentation: { finalScoreDisplay: 'raw' } }),
       )
-      expect(view.final).toEqual({ raw: 3, scale: 20 })
+      expect(view.final).toEqual({ raw: 3, scale: 20, decimals: 2 })
     })
 
     test('converted : note finale, ajustement compris', () => {
       const view = studentView(
         sessionOf(student, { scoring, presentation: { finalScoreDisplay: 'converted' } }),
       )
-      expect(view.final).toEqual({ final: 16.5, scale: 20 })
+      expect(view.final).toEqual({ final: 16.5, scale: 20, decimals: 2 })
     })
 
     test('both : les trois clés', () => {
       const view = studentView(
         sessionOf(student, { scoring, presentation: { finalScoreDisplay: 'both' } }),
       )
-      expect(view.final).toEqual({ raw: 3, final: 16.5, scale: 20 })
+      expect(view.final).toEqual({ raw: 3, final: 16.5, scale: 20, decimals: 2 })
+    })
+
+    test.each([
+      [0.5, 1],
+      [0.01, 2],
+      [1, 0],
+    ])('note finale : décimales du pas d’arrondi (pas %s → %i)', (step, decimals) => {
+      const view = studentView(
+        sessionOf(student, {
+          scoring: { ...scoring, rounding: { mode: 'nearest', step } },
+          presentation: { finalScoreDisplay: 'both' },
+        }),
+      )
+      expect(view.final?.decimals).toBe(decimals)
     })
   })
 
@@ -222,6 +236,7 @@ describe('toProjectedView', () => {
     expect(view.detail).toEqual([
       {
         questionId: 'a-1',
+        categoryId: 'a',
         categoryLabel: 'Catégorie A',
         title: 'Énoncé A1',
         points: 1,
@@ -230,6 +245,7 @@ describe('toProjectedView', () => {
       },
       {
         questionId: 'a-2',
+        categoryId: 'a',
         categoryLabel: 'Catégorie A',
         title: 'Énoncé A2',
         maxPoints: 2,
@@ -237,6 +253,7 @@ describe('toProjectedView', () => {
       },
       {
         questionId: 'a-3',
+        categoryId: 'a',
         categoryLabel: 'Catégorie A',
         title: 'Énoncé A3',
         points: 2,

@@ -30,5 +30,5 @@ export async function mountStudentsTab(
   overrides: Partial<Session> = {},
 ): Promise<HTMLElement> {
   await mountSession(students, overrides)
-  return openSidePanel('Étudiants')
+  return openSidePanel('Liste')
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { REDUCED_MOTION_QUERY } from '@/lib/appearance/reduced-motion'
 import { cn } from '@/lib/utils'
+import { categoryAccent, type CategoryAccent } from '@/lib/appearance/category-accent'
 
 const SHUFFLE_MS = 1500
 const CARDS = [0, 1, 2]
@@ -10,10 +11,10 @@ function prefersReducedMotion(): boolean {
 }
 
 /**
- * Révélation du tirage (F14), à monter avec `key={drawnAt}` : chaque tirage est un nouveau montage
- * qui décide seul. `animate` : trois cartes neutres (aucun texte, l'énoncé n'est pas dans le DOM)
- * se mélangent puis l'énoncé se retourne ; avec `prefers-reduced-motion`, un fondu remplace le
- * mélange. Sinon (ouverture, réouverture, animation coupée) l'énoncé s'affiche directement.
+ * Révélation du tirage (F14, artboard `projection-tirage`), à monter avec `key={drawnAt}` : chaque
+ * tirage est un nouveau montage qui décide seul. `animate` : trois cartes teintées de la catégorie
+ * (aucun texte, l'énoncé n'est pas dans le DOM) se mélangent puis l'énoncé se retourne ; avec
+ * `prefers-reduced-motion`, un fondu remplace le mélange. Sinon (ouverture, réouverture, animation coupée) l'énoncé s'affiche directement.
  * `animate` est figé au montage : basculer `drawAnimation` pendant une question ne rejoue rien.
  */
 export function DrawReveal({
@@ -34,11 +35,11 @@ export function DrawReveal({
 
   if (shuffling)
     return (
-      <div className="flex min-h-48 items-center justify-center gap-6">
+      <div className="flex min-h-72 flex-1 items-center justify-center gap-10">
         {CARDS.map((index) => {
-          const style: CSSProperties & Record<'--i', number> = {
+          const style: CSSProperties & Record<'--i', number> & Partial<CategoryAccent> = {
             '--i': index,
-            ...(color !== undefined && { backgroundColor: color }),
+            ...categoryAccent(color),
           }
           return (
             <div
@@ -47,16 +48,24 @@ export function DrawReveal({
               aria-hidden="true"
               style={style}
               className={cn(
-                'draw-card h-44 w-32 rounded-xl border-4 shadow-lg',
-                !color && 'bg-primary',
+                'draw-card flex h-70 w-50 items-center justify-center rounded-xl border-[1.5px] shadow-popover',
+                'border-[color:color-mix(in_oklch,var(--category-color,var(--color-primary))_45%,transparent)]',
+                'bg-[color:color-mix(in_oklch,var(--category-color,var(--color-primary))_12%,var(--color-card))]',
               )}
-            />
+            >
+              <span className="size-18 rounded-[22px] bg-linear-135 from-primary to-action-to opacity-90" />
+            </div>
           )
         })}
       </div>
     )
   return (
-    <div className={cn(animated && (reduced ? 'animate-in duration-300 fade-in' : 'draw-reveal'))}>
+    <div
+      className={cn(
+        'flex min-h-0 flex-1 flex-col',
+        animated && (reduced ? 'animate-in duration-300 fade-in' : 'draw-reveal'),
+      )}
+    >
       {children}
     </div>
   )

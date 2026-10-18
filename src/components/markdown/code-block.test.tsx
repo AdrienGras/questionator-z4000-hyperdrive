@@ -156,3 +156,27 @@ describe('double thème Shiki (src/index.css)', () => {
     expect(css).not.toContain('--shiki-dark-bg')
   })
 })
+
+describe('étiquette du langage', () => {
+  test('affichée pour un langage connu', () => {
+    const highlight = vi.fn<Highlight>(() => new Promise(() => {}))
+    render(<CodeBlock code="echo 1;" lang="php" highlight={highlight} />)
+    expect(screen.getByText('php')).toHaveAttribute('data-code-language')
+  })
+
+  test('absente sans langage ou en texte brut', () => {
+    const { container } = render(<CodeBlock code="x" lang="text" />)
+    expect(container.querySelector('[data-code-language]')).toBeNull()
+  })
+})
+
+test('la coloration met à jour le même nœud `pre`, sans le remplacer', async () => {
+  const highlight = vi.fn<Highlight>((code) => Promise.resolve(highlighted(code)))
+  const { container } = render(<CodeBlock code="echo 1;" lang="php" highlight={highlight} />)
+  const before = container.querySelector('pre')
+
+  await waitFor(() => {
+    expect(container.querySelector('pre')).toHaveAttribute('data-highlighted', 'true')
+  })
+  expect(container.querySelector('pre')).toBe(before)
+})

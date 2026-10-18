@@ -8,11 +8,11 @@ L'application tourne entièrement dans le navigateur, sans serveur. Cette page s
 |---|---|
 | `app/` | Création du routeur (`router.tsx`) et fournisseurs globaux (apparence). |
 | `routes/` | Routes TanStack Router, minces : chacune importe la page d'une feature. |
-| `features/<x>/` | Un écran : `config-editor`, `create-session`, `home`, `present`, `session`, `stats`. Chaque dossier a sa page, ses `components/` et, le cas échéant, ses `hooks/`. |
-| `components/` | Composants partagés (`export/`, `markdown/`, `projection/`, `ui/`). `ui/` contient les composants shadcn, vendus et non modifiés. |
+| `features/<x>/` | Un écran : `home` (accueil), `sessions` et `trainings` (pages d'espace), `create-session`, `config-editor`, `session` (passage), `present` (vue projetée), `stats`, `training-setup`, `training`, `training-stats`. Chaque dossier a sa page, ses `components/` et, le cas échéant, ses `hooks/`. |
+| `components/` | Composants partagés : `menu/` (menu latéral et tiroir), `stats/` (graphiques des statistiques), `projection/`, `markdown/`, `import/`, `export/`, `ui/`, et à la racine la coquille de page (`page-shell.tsx`), le fil d'Ariane, les tuiles de catégorie, les bandeaux. `ui/` contient les composants shadcn, vendus et non modifiés. |
 | `hooks/` | Hooks transverses. |
 | `lib/` | Technique, sans règle métier : `db/`, `i18n/`, `pwa/`, `xlsx/`, `markdown/`, `appearance/`, et des utilitaires. |
-| `domain/<concept>/` | Règles du produit, sans React ni Dexie : `backup`, `config`, `export`, `passage`, `presentation`, `scoring`, `session`, `stats`, `students`. |
+| `domain/<concept>/` | Règles du produit, sans React ni Dexie : `backup`, `config`, `export`, `passage`, `presentation`, `scoring`, `session`, `stats`, `students`, `training`. |
 | `testing/` | Fixtures et réglages Vitest, importés par les tests seulement. |
 
 Les tests vivent à côté du code qu'ils couvrent : `x.test.ts` à côté de `x.ts`.
@@ -39,7 +39,7 @@ Les routes sont des fichiers de `src/routes/` (`session.$sessionId.tsx`, `presen
 
 ## Stockage local
 
-Les sessions sont enregistrées dans IndexedDB par [Dexie](https://dexie.org), dans `src/lib/db/`. Seul ce dossier importe le singleton `db`, et toute écriture métier passe par `updateSession`. Cette règle est vérifiée par `pnpm deps`. Le gabarit : [Mutation de session](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/CONVENTIONS.md#mutation-de-session--squelette).
+Les sessions et les entraînements sont enregistrés dans IndexedDB par [Dexie](https://dexie.org), dans `src/lib/db/`. Seul ce dossier importe le singleton `db`. Une écriture de session passe par `updateSession`, une écriture d'entraînement par les fonctions de `src/lib/db/trainings.ts`. Cette règle est vérifiée par `pnpm deps`. Les gabarits : [Mutation de session](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/CONVENTIONS.md#mutation-de-session--squelette) et [Mutation d'entraînement](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/CONVENTIONS.md#mutation-dentraînement--squelette).
 
 ## Service worker
 

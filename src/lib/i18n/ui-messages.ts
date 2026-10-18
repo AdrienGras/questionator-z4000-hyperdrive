@@ -6,35 +6,57 @@ export type UiMessageParams = {
   app_title: NoParams
   not_found_title: NoParams
   back_home: NoParams
+  back_sessions: NoParams
+  back_trainings: NoParams
+  home_subtitle: NoParams
+  home_train: NoParams
+  home_resume_title: NoParams
+  home_kind_session: NoParams
+  home_kind_training: NoParams
+  home_spaces_title: NoParams
+  home_space_sessions_body: NoParams
+  home_space_trainings: NoParams
+  home_space_trainings_body: NoParams
+  home_space_editor_body: NoParams
+  home_space_view_all: NoParams
+  first_run_title: NoParams
+  first_run_subtitle: NoParams
+  first_run_eyebrow: NoParams
+  first_run_heading: NoParams
+  first_run_body: NoParams
+  first_run_step: { n: number }
+  first_run_step1: NoParams
+  first_run_step2: NoParams
+  first_run_step2_body: NoParams
+  first_run_step3: NoParams
+  first_run_step3_body: NoParams
+  first_run_solo_title: NoParams
+  first_run_solo_body: NoParams
+  first_run_solo_cta: NoParams
+  first_run_resources: NoParams
+  first_run_editor_link: NoParams
+  first_run_drop_hint: NoParams
   home_create: NoParams
   home_import: NoParams
-  home_actions_title: NoParams
-  home_sessions_title: NoParams
-  home_create_title: NoParams
-  home_create_body: NoParams
   home_students_example_link: NoParams
   home_config_example_link: NoParams
   home_config_schema_link: NoParams
-  home_import_title: NoParams
-  home_import_body: NoParams
-  home_editor_title: NoParams
-  home_editor_body: NoParams
   home_editor_open: NoParams
-  home_training_title: NoParams
-  home_training_body: NoParams
-  home_training_start: NoParams
   home_trainings_title: NoParams
   home_training_updated: { date: string }
-  home_training_coverage: { percent: number }
   home_training_delete_body: NoParams
   home_training_damaged_body: NoParams
   persistence_warning_label: NoParams
   persistence_warning: NoParams
+  db_outdated_title: NoParams
   db_outdated: NoParams
   db_reload: NoParams
+  db_unavailable_title: NoParams
   db_unavailable: NoParams
   update_available: NoParams
+  update_available_body: NoParams
   update_reload: NoParams
+  offline_ready_title: NoParams
   offline_ready: NoParams
   offline_ready_dismiss: NoParams
   color_mode_label: { mode: string }
@@ -43,19 +65,37 @@ export type UiMessageParams = {
   color_mode_system: NoParams
   help_link: NoParams
   help_link_label: NoParams
+  menu_brand: NoParams
+  menu_main_label: NoParams
+  menu_home: NoParams
+  menu_spaces: NoParams
+  menu_sessions: NoParams
+  menu_editor: NoParams
+  menu_training: NoParams
+  menu_help_label: NoParams
+  menu_collapse: NoParams
+  menu_expand: NoParams
+  breadcrumb_label: NoParams
+  menu_open: NoParams
+  menu_close: NoParams
   session_loading: NoParams
   session_not_found: NoParams
   damaged_title: NoParams
   damaged_badge: NoParams
   damaged_body: NoParams
-  damaged_details: NoParams
+  damaged_details: { count: number }
   present_waiting: NoParams
+  present_question_label: NoParams
+  present_score_label: NoParams
+  present_choose_category: NoParams
+  present_categories: NoParams
   present_prompt_label: NoParams
-  present_question_index: { current: number; total: number }
-  present_cumulative: { score: string }
   present_finished: NoParams
-  present_final: { value: string; scale: string }
-  present_raw: { value: string }
+  present_note_label: NoParams
+  present_gauge_label: { value: string; scale: string }
+  present_raw_label: NoParams
+  present_detail_heading: NoParams
+  present_fullscreen_hint: NoParams
   present_category_exhausted: NoParams
   present_category_unavailable: NoParams
   present_skipped: NoParams
@@ -66,6 +106,23 @@ export type UiMessageParams = {
   card_examiner: { name: string }
   card_updated: { date: string }
   card_progress: { done: number; absent: number; remaining: number }
+  card_progress_of: { total: number }
+  card_progress_rest: { absent: number; remaining: number }
+  training_success_label: NoParams
+  training_success_aria: { rate: string }
+  training_coverage_label: NoParams
+  rate_ring_label: { label: string; rate: string }
+  rate_ring_caption: NoParams
+  sessions_subtitle: NoParams
+  sessions_drop_hint: NoParams
+  sessions_list_title: NoParams
+  sessions_count: { count: number }
+  card_resume_named: { name: string }
+  trainings_subtitle: NoParams
+  trainings_new: NoParams
+  trainings_count: { count: number }
+  trainings_empty_title: NoParams
+  trainings_empty_body: NoParams
   card_resume: NoParams
   card_actions: { name: string }
   action_rename: NoParams
@@ -99,6 +156,7 @@ export type UiMessageParams = {
   create_choose_file: NoParams
   create_replace_file: NoParams
   create_drop_hint: NoParams
+  create_drop_other: NoParams
   create_file_status_ok: NoParams
   create_file_status_warnings: NoParams
   create_file_status_errors: NoParams
@@ -110,7 +168,20 @@ export type UiMessageParams = {
   create_write_error: NoParams
   create_preview_title: NoParams
   create_preview_empty: NoParams
+  create_subtitle: NoParams
+  create_students_example_short: NoParams
+  create_config_example_short: NoParams
+  optional_hint: NoParams
+  create_examiner_hint: NoParams
+  create_blocked_db: NoParams
+  create_blocked_students: NoParams
+  create_blocked_config: NoParams
+  create_blocked_files: NoParams
+  create_blocked_name: NoParams
   training_setup_title: NoParams
+  training_setup_subtitle: NoParams
+  training_setup_step_of: { step: number; total: number }
+  training_setup_step_state: { state: 'done' | 'current' | 'upcoming' }
   training_setup_gather_title: NoParams
   training_setup_gather_body: NoParams
   training_setup_prompt_title: NoParams
@@ -120,6 +191,8 @@ export type UiMessageParams = {
   training_setup_effort_body: NoParams
   training_setup_copy: NoParams
   training_setup_copied: NoParams
+  training_setup_copy_again: NoParams
+  training_setup_show_prompt: NoParams
   training_setup_copy_failed: NoParams
   training_setup_config_title: NoParams
   training_setup_config_body: NoParams
@@ -127,49 +200,57 @@ export type UiMessageParams = {
   training_setup_file_label: NoParams
   training_setup_paste_label: NoParams
   training_setup_check_paste: NoParams
+  training_setup_check_paste_short: NoParams
+  training_setup_drop_empty: NoParams
+  training_setup_category_counts: NoParams
   /** Résumé d'une config valide : une ligne par catégorie. */
   training_setup_category_count: { label: string; count: number }
   training_setup_fix_in_editor: NoParams
   training_setup_submit: NoParams
+  training_setup_submit_blocker: NoParams
   training_loading: NoParams
   training_not_found: NoParams
   training_damaged_title: NoParams
   training_damaged_body: NoParams
+  training_subtitle: { pending: boolean }
   training_tiles_title: NoParams
+  training_tiles_locked: NoParams
   training_reveal: NoParams
   training_answer_title: NoParams
+  training_answer_hide: NoParams
+  training_answer_show: NoParams
   training_no_answer: NoParams
   training_score_heading: NoParams
+  training_score_max: { max: string }
   training_pass: NoParams
   training_question_missing: NoParams
   training_stats_link: NoParams
   training_stats_card_link: NoParams
   training_stats_back: NoParams
+  training_stats_subtitle: NoParams
   training_stats_error: NoParams
   training_stats_empty: NoParams
   training_stats_start: NoParams
   training_stats_key_figures: NoParams
-  training_stats_scored: { count: number }
-  training_stats_passed: { count: number }
-  training_stats_coverage: { covered: number; total: number }
+  training_stats_scored_label: { count: number }
+  training_stats_passed_label: { count: number }
   training_stats_review_title: NoParams
   training_stats_review_empty: NoParams
   /** `score` : « points / max » déjà mis en forme par l'appelant (`formatRawScore`). */
-  training_stats_last_score: { score: string }
+  training_stats_review_count: { count: number }
+  training_stats_last_score: NoParams
   training_stats_attempts: { count: number }
   training_stats_by_category: NoParams
   training_stats_by_tag: NoParams
+  training_stats_level_coverage: { covered: number; total: number }
   training_stats_col_level: NoParams
-  training_stats_col_tag: NoParams
   training_stats_col_rate: NoParams
-  training_stats_col_coverage: NoParams
   training_stats_col_question: NoParams
   training_stats_col_scored: NoParams
   training_stats_col_last: NoParams
   training_stats_col_status: NoParams
   training_stats_details: { count: number }
   /** Nom accessible d'une barre de taux ; `rate` déjà mis en forme (« 82 % »). */
-  training_stats_rate_label: { label: string; rate: string }
   training_update_title: NoParams
   training_update_link: NoParams
   training_update_back: NoParams
@@ -177,35 +258,49 @@ export type UiMessageParams = {
   training_update_write_error: NoParams
   training_update_damaged: NoParams
   training_update_summary: NoParams
-  training_update_kept: { count: number }
-  training_update_added: { count: number }
-  training_update_removed: { count: number }
-  preview_students_count: { count: number }
+  training_update_kept_label: { count: number }
+  training_update_added_label: { count: number }
+  training_update_removed_label: { count: number }
+  training_update_kept_hint: { count: number }
+  training_update_added_hint: { count: number }
+  training_update_removed_hint: { count: number }
+  preview_students_title: NoParams
+  preview_students_noun: { count: number }
   preview_students_list: NoParams
   preview_line: { line: number; message: string }
   preview_config_title: NoParams
-  preview_subject: { subject: string }
-  preview_cohort: { cohort: string }
+  issue_error_label: NoParams
+  preview_config_errors: { count: number }
   /** `scale` : barème déjà mis en forme par l'appelant (`category.scale.join(', ')`). */
-  preview_category: { label: string; questions: number; scale: string }
-  preview_scoring: { questionsPerStudent: number; maxRawScore: number; finalScale: number }
-  preview_rounding: RoundingParams
+  preview_category_questions: { count: number }
+  preview_questions_per_student: NoParams
+  preview_scale_label: NoParams
+  preview_scale_value: { maxRawScore: number; finalScale: number }
+  preview_rounding_label: NoParams
+  preview_rounding_value: RoundingParams
+  preview_skips_label: NoParams
+  preview_skips_value: { max: number }
   preview_skips_disabled: NoParams
-  preview_skips: { max: number }
   markdown_footnotes: NoParams
   /** `n` : numéro de la référence (1-based), avec suffixe `-n` de la re-référence si > 1. */
   markdown_footnote_back: { n: string }
-  passage_question_index: { current: number; total: number }
-  /** `score` : score brut déjà mis en forme par l'appelant (`formatScore(raw, 'raw', config, locale)`). */
-  passage_raw_score: { score: string }
+  passage_question_number: { current: number }
+  passage_progress_label: { current: number; total: number; detail: string }
+  passage_progress_scored: { category: string }
+  passage_progress_pending: { category: string }
+  passage_raw_score_label: NoParams
   passage_categories: NoParams
   /** `max` : plus grande valeur du barème, déjà mise en forme par l'appelant. */
   /** `max` : valeur formatée ; `points` : la même en nombre, pour l'accord (« 1,0 pt »). */
+  passage_draw_title: NoParams
+  passage_draw_hint: NoParams
   passage_category_max: { max: string; points: number }
   passage_category_exhausted: NoParams
   passage_answer: NoParams
   passage_score_heading: NoParams
   /** `value` : valeur du barème déjà mise en forme par l'appelant. */
+  passage_score_card: NoParams
+  passage_score_context: { category: string; max: string }
   passage_score_button: { value: string }
   passage_status_todo: NoParams
   passage_status_in_progress: NoParams
@@ -231,6 +326,8 @@ export type UiMessageParams = {
   final_skipped: NoParams
   final_skipped_reason: { reason: string }
   final_adjust: NoParams
+  final_gauge_label: { value: string; scale: string }
+  final_gauge_scale: { scale: string }
   final_reset: NoParams
   final_next: NoParams
   final_no_next: NoParams
@@ -247,13 +344,17 @@ export type UiMessageParams = {
   students_list_label: NoParams
   students_projected: NoParams
   projection_open: NoParams
+  projection_open_short: NoParams
   projection_project: NoParams
+  projection_group: NoParams
   projection_waiting: NoParams
   projection_banner: { name: string }
   projection_popup_blocked: NoParams
   projection_preview_label: NoParams
   students_row_scores: { raw: string; final: string }
   students_add: NoParams
+  students_add_short: NoParams
+  students_summary: { total: number; done: number; absent: number }
   students_add_title: NoParams
   students_add_last_name: NoParams
   students_add_first_name: NoParams
@@ -286,23 +387,19 @@ export type UiMessageParams = {
   /** `step` / `max` : pas d'arrondi et échelle finale, déjà formatés. */
   adjust_invalid: { step: string; max: string }
   /** Notes déjà formatées ; `sign` : « + » ou « − », `adjustment` en valeur absolue. */
-  adjust_preview: {
-    converted: string
-    sign: string
-    adjustment: string
-    final: string
-    scale: string
-  }
+  adjust_preview_sum: { converted: string; sign: '+' | '−'; adjustment: string }
   adjust_clamped: { bound: string }
   adjust_reason: NoParams
   passage_error_generic: NoParams
   /** `remaining` : passes restantes pour l'étudiant (`skipsRemaining`). */
-  passage_skip_button: { remaining: number }
+  passage_skip_label: NoParams
+  passage_skips_remaining: { remaining: number }
   passage_skip_quota_reached: NoParams
   passage_skip_title: NoParams
   passage_skip_body: NoParams
   passage_skip_reasons: NoParams
   passage_skip_free_text: NoParams
+  passage_skip_placeholder: NoParams
   passage_skip_confirm: NoParams
   stats_open: NoParams
   export_button: NoParams
@@ -310,8 +407,13 @@ export type UiMessageParams = {
   export_error: NoParams
   editor_title: NoParams
   editor_label: NoParams
-  editor_source_title: NoParams
+  editor_subtitle: NoParams
+  editor_load_file_short: NoParams
+  editor_issues_title: NoParams
+  editor_issue_line: { line: number }
   editor_preview_title: NoParams
+  editor_preview_subtitle: NoParams
+  editor_preview_nav: NoParams
   editor_load_file: NoParams
   editor_reset_example: NoParams
   editor_download: NoParams
@@ -328,14 +430,23 @@ export type UiMessageParams = {
   editor_hover_icon_search: NoParams
   editor_hover_icon_hint: NoParams
   stats_back: NoParams
+  stats_kicker: NoParams
+  stats_out_of: { max: string }
+  stats_empty_title: NoParams
+  stats_empty_body: NoParams
+  stats_empty_action: NoParams
+  stats_synthesis: NoParams
+  stats_detail: NoParams
   stats_error: NoParams
   stats_headcount: NoParams
   stats_headcount_total: NoParams
   stats_headcount_done: NoParams
-  stats_headcount_in_progress: NoParams
-  stats_headcount_todo: NoParams
   stats_headcount_absent: NoParams
-  stats_headcount_added: NoParams
+  stats_legend_done: { count: number }
+  stats_legend_in_progress: { count: number }
+  stats_legend_todo: { count: number }
+  stats_legend_absent: { count: number }
+  stats_legend_added: { count: number }
   stats_grades: NoParams
   stats_grades_count: NoParams
   stats_grades_min: NoParams
@@ -343,10 +454,11 @@ export type UiMessageParams = {
   stats_grades_mean: NoParams
   stats_grades_median: NoParams
   stats_grades_std_dev: NoParams
-  stats_histogram: NoParams
   stats_histogram_empty: NoParams
-  stats_col_range: NoParams
+  stats_histogram_aria: { count: number; bins: string }
+  stats_histogram_bin: { count: number; from: string; to: string }
   stats_categories: NoParams
+  stats_category_counts: { scored: number; choices: number }
   stats_tags: NoParams
   stats_tags_empty: NoParams
   stats_top_drawn: NoParams
@@ -356,16 +468,15 @@ export type UiMessageParams = {
   stats_strategies: NoParams
   stats_strategies_empty: NoParams
   stats_adjustments: NoParams
-  stats_adjustments_count: NoParams
   stats_adjustments_sum: NoParams
   stats_adjustments_mean: NoParams
-  stats_col_category: NoParams
   stats_col_tag: NoParams
   stats_col_question: NoParams
-  stats_col_choices: NoParams
   stats_col_scored: NoParams
   stats_col_success_rate: NoParams
   stats_col_draws: NoParams
+  stats_col_share: NoParams
+  stats_col_bar: NoParams
   stats_col_skips: NoParams
   stats_col_reasons: NoParams
   stats_col_composition: NoParams
@@ -400,9 +511,9 @@ const ROUNDING_MODE_EN: Record<RoundingMode, string> = {
 function roundingFr({ mode, step, decimals }: RoundingParams): string {
   const precision =
     step === null
-      ? `à ${decimals} ${plural(decimals, 'décimale', 'décimales')}`
+      ? `${decimals} ${plural(decimals, 'décimale', 'décimales')}`
       : `au pas de ${step.toLocaleString('fr')}`
-  return `Arrondi ${ROUNDING_MODE_FR[mode]}, ${precision}`
+  return `${ROUNDING_MODE_FR[mode]}, ${precision}`
 }
 
 function roundingEn({ mode, step, decimals }: RoundingParams): string {
@@ -410,50 +521,70 @@ function roundingEn({ mode, step, decimals }: RoundingParams): string {
     step === null
       ? `${decimals} ${pluralEn(decimals, 'decimal', 'decimals')}`
       : `step ${step.toLocaleString('en')}`
-  return `Rounded ${ROUNDING_MODE_EN[mode]}, ${precision}`
+  return `${ROUNDING_MODE_EN[mode]}, ${precision}`
 }
 
 const fr: Dictionary<UiMessageParams> = {
   app_title: () => 'Questionator Z-4000 Hyperdrive',
   not_found_title: () => 'Page introuvable',
   back_home: () => 'Retour à l’accueil',
+  back_sessions: () => 'Retour aux sessions',
+  back_trainings: () => 'Retour aux entraînements',
+  home_subtitle: () => 'Reprenez un oral ou préparez le suivant.',
+  home_train: () => 'S’entraîner',
+  home_resume_title: () => 'Reprendre',
+  home_kind_session: () => 'Session',
+  home_kind_training: () => 'Entraînement',
+  home_spaces_title: () => 'Espaces',
+  home_space_sessions_body: () => 'Oraux en cours et terminés',
+  home_space_trainings: () => 'Entraînements',
+  home_space_trainings_body: () => 'Révisions en solo',
+  home_space_editor_body: () => 'Erreurs signalées en direct, aperçu des questions',
+  home_space_view_all: () => 'Voir tout',
+  first_run_title: () => 'Bienvenue',
+  first_run_subtitle: () => 'Faites passer des oraux notés par tirage au sort, ou révisez seul.',
+  first_run_eyebrow: () => 'Premier lancement',
+  first_run_heading: () => 'Votre premier oral en trois étapes',
+  first_run_body: () =>
+    'Une liste d’étudiants (CSV) et une config (JSON) suffisent. Des exemples sont prêts.',
+  first_run_step: ({ n }) => `Étape ${n}`,
+  first_run_step1: () => 'Téléchargez les exemples',
+  first_run_step2: () => 'Créez une session',
+  first_run_step2_body: () => 'Avec ces deux fichiers, ou les vôtres.',
+  first_run_step3: () => 'Tirez une question et notez',
+  first_run_step3_body: () => 'La vue projetée affiche la question sur le second écran.',
+  first_run_solo_title: () => 'Ou révisez seul',
+  first_run_solo_body: () => 'À partir d’une config générée par un LLM, sans session ni étudiants.',
+  first_run_solo_cta: () => 'S’entraîner seul',
+  first_run_resources: () => 'Autres ressources',
+  first_run_editor_link: () => 'Écrire une config dans l’éditeur',
+  first_run_drop_hint: () =>
+    'Vous pouvez aussi déposer une sauvegarde (.json) n’importe où sur la page.',
   home_create: () => 'Créer une session',
-  home_import: () => 'Importer un backup',
-  home_actions_title: () => 'Actions',
-  home_sessions_title: () => 'Sessions',
-  home_create_title: () => 'Nouvelle session',
-  home_create_body: () =>
-    "Partez d'une liste d'étudiants (CSV nom / prénom) et d'un fichier de configuration (JSON : catégories, questions, barèmes).",
-  home_students_example_link: () => "Télécharger la liste d'étudiants d'exemple",
-  home_config_example_link: () => "Télécharger la config d'exemple",
+  home_import: () => 'Importer une sauvegarde',
+  home_students_example_link: () => 'Liste d’étudiants d’exemple (.csv)',
+  home_config_example_link: () => 'Config d’exemple (.json)',
   home_config_schema_link: () => 'JSON Schema de la config',
-  home_import_title: () => 'Restaurer une session',
-  home_import_body: () =>
-    "Restaurez une session à partir d'un fichier .json créé par « Exporter un backup ». Vous pouvez aussi déposer le fichier n'importe où sur la page.",
-  home_editor_title: () => 'Éditer une config',
-  home_editor_body: () =>
-    "Écrivez ou corrigez un fichier de configuration : les erreurs sont signalées en direct et les questions affichées telles qu'elles seront projetées.",
   home_editor_open: () => "Ouvrir l'éditeur",
-  home_training_title: () => 'S’entraîner',
-  home_training_body: () => 'Révisez seul à partir d’une config générée par un LLM.',
-  home_training_start: () => 'Commencer',
   home_trainings_title: () => 'Mes entraînements',
   home_training_updated: ({ date }) => `Dernière activité : ${date}`,
-  home_training_coverage: ({ percent }) => `${percent} % des questions notées`,
   home_training_delete_body: () => 'L’historique et les stats de cet entraînement seront perdus.',
   home_training_damaged_body: () =>
     'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Vous pouvez le supprimer.',
   persistence_warning_label: () => 'Stockage non garanti',
   persistence_warning: () =>
-    "Le navigateur n'a pas garanti la conservation des données : il peut effacer vos sessions s'il manque d'espace. Exportez régulièrement un backup.",
-  db_outdated: () =>
-    "L'application a été mise à jour dans un autre onglet. Rechargez la page pour continuer.",
+    "Le navigateur n'a pas garanti la conservation des données : il peut effacer vos sessions s'il manque d'espace. Exportez régulièrement une sauvegarde.",
+  db_outdated_title: () => 'L’application a été mise à jour dans un autre onglet.',
+  db_outdated: () => 'Rechargez la page pour continuer.',
   db_reload: () => 'Recharger',
+  db_unavailable_title: () => 'Le stockage local est indisponible',
   db_unavailable: () =>
-    'Le stockage local est indisponible (navigation privée ou cookies bloqués ?). Les sessions ne peuvent pas être enregistrées.',
+    '(navigation privée ou cookies bloqués ?). Les sessions ne peuvent pas être enregistrées.',
   update_available: () => 'Nouvelle version disponible',
+  update_available_body: () => 'Rechargez quand vous voulez.',
   update_reload: () => 'Recharger',
-  offline_ready: () => "Prête pour le hors ligne : l'application fonctionne désormais sans réseau.",
+  offline_ready_title: () => 'Prête pour le hors ligne',
+  offline_ready: () => 'L’application fonctionne désormais sans réseau.',
   offline_ready_dismiss: () => 'OK',
   color_mode_label: ({ mode }) => `Mode d'affichage : ${mode.toLocaleLowerCase('fr')}`,
   color_mode_light: () => 'Clair',
@@ -461,36 +592,75 @@ const fr: Dictionary<UiMessageParams> = {
   color_mode_system: () => 'Système',
   help_link: () => 'Aide',
   help_link_label: () => 'Aide (nouvel onglet)',
+  menu_brand: () => 'Questionator Z-4000',
+  menu_main_label: () => 'Navigation principale',
+  menu_home: () => 'Accueil',
+  menu_spaces: () => 'Espaces',
+  menu_sessions: () => 'Sessions',
+  menu_editor: () => 'Éditeur de config',
+  menu_training: () => 'Entraînement',
+  menu_help_label: () => 'Aide',
+  menu_collapse: () => 'Replier le menu',
+  menu_expand: () => 'Déplier le menu',
+  breadcrumb_label: () => "Fil d'Ariane",
+  menu_open: () => 'Menu',
+  menu_close: () => 'Fermer le menu',
   session_loading: () => 'Chargement de la session…',
   session_not_found: () => 'Session introuvable',
   damaged_title: () => 'Cette session est endommagée',
   damaged_badge: () => 'Endommagée',
   damaged_body: () =>
-    'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Exportez un backup pour le conserver ou le corriger.',
-  damaged_details: () => 'Détails',
+    'Le contenu enregistré est incohérent ; l’application ne peut pas l’ouvrir. Exportez une sauvegarde pour le conserver ou le corriger.',
+  damaged_details: ({ count }) => `Détails · ${count} ${plural(count, 'problème', 'problèmes')}`,
   present_waiting: () => "L'épreuve va bientôt commencer.",
+  present_question_label: () => 'Question',
+  present_score_label: () => 'Score',
+  present_choose_category: () => 'Choisissez une catégorie',
+  present_categories: () => 'Catégories',
   present_prompt_label: () => 'Question en cours',
-  present_question_index: ({ current, total }) => `Question ${current} / ${total}`,
-  present_cumulative: ({ score }) => `Score : ${score}`,
   present_finished: () => 'Passage terminé',
-  present_final: ({ value, scale }) => `Note : ${value} / ${scale}`,
-  present_raw: ({ value }) => `Score brut : ${value}`,
+  present_note_label: () => 'Note',
+  present_gauge_label: ({ value, scale }) => `Note : ${value} sur ${scale}`,
+  present_raw_label: () => 'Score brut',
+  present_detail_heading: () => 'Détail par question',
+  present_fullscreen_hint: () => 'Plein écran (les commandes s’effacent après 3 s)',
   present_category_exhausted: () => 'Épuisée',
   present_category_unavailable: () => 'Indisponible',
   present_skipped: () => 'Passée',
   present_fullscreen: () => 'Plein écran',
   present_exit_fullscreen: () => 'Quitter le plein écran',
   empty_title: () => 'Aucune session',
-  empty_body: () => 'Créez une session ou importez un backup depuis les actions.',
+  empty_body: () => 'Créez une session ou importez une sauvegarde.',
   card_examiner: ({ name }) => `Jury : ${name}`,
   card_updated: ({ date }) => `Modifiée le ${date}`,
   card_progress: ({ done, absent, remaining }) =>
     `${done} ${plural(done, 'passé', 'passés')} · ${absent} ${plural(absent, 'absent', 'absents')} · ${remaining} ${plural(remaining, 'restant', 'restants')}`,
+  card_progress_of: ({ total }) => `/ ${total} ${plural(total, 'passé', 'passés')}`,
+  card_progress_rest: ({ absent, remaining }) =>
+    `${absent} ${plural(absent, 'absent', 'absents')} · ${remaining} ${plural(remaining, 'restant', 'restants')}`,
+  training_success_label: () => 'de réussite',
+  training_success_aria: ({ rate }) => `Taux de réussite : ${rate}`,
+  training_coverage_label: () => 'questions notées',
+  rate_ring_label: ({ label, rate }) => `Réussite ${label} : ${rate}`,
+  rate_ring_caption: () => 'réussite',
+  sessions_subtitle: () => 'Vos oraux, de la liste d’étudiants à la note finale.',
+  sessions_drop_hint: () =>
+    'Déposez une sauvegarde (.json) n’importe où sur la page pour la restaurer.',
+  sessions_list_title: () => 'Liste des sessions',
+  sessions_count: ({ count }) =>
+    `${count} ${plural(count, 'session', 'sessions')} · dernière modification d’abord`,
+  card_resume_named: ({ name }) => `Reprendre « ${name} »`,
+  trainings_subtitle: () => 'Révisez seul, à partir d’une config générée par un LLM.',
+  trainings_new: () => 'Nouvel entraînement',
+  trainings_count: ({ count }) =>
+    `${count} ${plural(count, 'entraînement', 'entraînements')} · dernière activité d’abord`,
+  trainings_empty_title: () => 'Aucun entraînement',
+  trainings_empty_body: () => 'Lancez un entraînement à partir d’une config.',
   card_resume: () => 'Reprendre',
   card_actions: ({ name }) => `Actions pour « ${name} »`,
   action_rename: () => 'Renommer',
   action_edit_examiner: () => "Modifier l'examinateur",
-  action_export: () => 'Exporter un backup',
+  action_export: () => 'Exporter une sauvegarde',
   action_delete: () => 'Supprimer',
   rename_title: () => 'Renommer la session',
   rename_label: () => 'Nom de la session',
@@ -504,9 +674,9 @@ const fr: Dictionary<UiMessageParams> = {
     "L'enregistrement a échoué. La session a peut-être été supprimée dans un autre onglet.",
   delete_title: ({ name }) => `Supprimer « ${name} » ?`,
   delete_body: () => 'Cette action est définitive : tous les passages de la session seront perdus.',
-  delete_export_first: () => "Exporter un backup d'abord",
+  delete_export_first: () => "Exporter une sauvegarde d'abord",
   delete_confirm: () => 'Supprimer',
-  import_drop_hint: () => 'Déposez le backup ici',
+  import_drop_hint: () => 'Déposez la sauvegarde ici',
   import_error_title: ({ fileName }) => `Import impossible : ${fileName}`,
   import_read_error: () => "Le fichier n'a pas pu être lu.",
   import_load_error: () => "L'import n'a pas pu démarrer. Rechargez la page et réessayez.",
@@ -522,6 +692,7 @@ const fr: Dictionary<UiMessageParams> = {
   create_choose_file: () => 'Choisir un fichier',
   create_replace_file: () => 'Remplacer',
   create_drop_hint: () => 'ou déposez-le ici',
+  create_drop_other: () => 'ou déposez-en un autre',
   create_file_status_ok: () => 'Fichier valide',
   create_file_status_warnings: () => 'Fichier valide, avec avertissements',
   create_file_status_errors: () => 'Fichier invalide',
@@ -534,7 +705,21 @@ const fr: Dictionary<UiMessageParams> = {
   create_preview_title: () => 'Aperçu',
   create_preview_empty: () =>
     "Déposez une liste d'étudiants et une configuration pour voir l'aperçu.",
+  create_subtitle: () => 'Déposez la liste des étudiants et la config de l’oral.',
+  create_students_example_short: () => 'Liste d’exemple',
+  create_config_example_short: () => 'Config d’exemple',
+  optional_hint: () => '(facultatif)',
+  create_examiner_hint: () => 'Repris en colonne dans les exports.',
+  create_blocked_db: () => 'La base n’est pas disponible : la session ne peut pas être créée.',
+  create_blocked_students: () => 'Corrigez la liste d’étudiants pour créer la session.',
+  create_blocked_config: () => 'Corrigez la configuration pour créer la session.',
+  create_blocked_files: () => 'Déposez la liste d’étudiants et la config pour créer la session.',
+  create_blocked_name: () => 'Donnez un nom à la session pour la créer.',
   training_setup_title: () => 'S’entraîner',
+  training_setup_subtitle: () => 'Du cours à la première question, en quatre étapes.',
+  training_setup_step_of: ({ step, total }) => `Étape ${step} sur ${total}`,
+  training_setup_step_state: ({ state }) =>
+    ({ done: 'Étape faite', current: 'Étape en cours', upcoming: 'Étape à venir' })[state],
   training_setup_gather_title: () => 'Rassemblez votre cours',
   training_setup_gather_body: () =>
     'Réunissez le cours et les ateliers dans un seul PDF ou une seule archive zip. Ce fichier reste chez vous : vous le donnerez au LLM, pas à l’application.',
@@ -547,6 +732,8 @@ const fr: Dictionary<UiMessageParams> = {
     'Plus le cours est long, plus ça compte : un effort réduit donne des questions superficielles ou un JSON incomplet.',
   training_setup_copy: () => 'Copier le prompt',
   training_setup_copied: () => 'Prompt copié.',
+  training_setup_copy_again: () => 'Copier à nouveau',
+  training_setup_show_prompt: () => 'Afficher le prompt',
   training_setup_copy_failed: () =>
     'La copie a échoué : sélectionnez le texte et copiez-le à la main.',
   training_setup_config_title: () => 'Récupérez la config',
@@ -555,51 +742,58 @@ const fr: Dictionary<UiMessageParams> = {
   training_setup_file_label: () => 'Config (JSON)',
   training_setup_paste_label: () => '… ou collez le JSON ici',
   training_setup_check_paste: () => 'Vérifier le JSON collé',
+  training_setup_check_paste_short: () => 'Vérifier',
+  training_setup_drop_empty: () => 'Déposez la config (.json) ici',
+  training_setup_category_counts: () => 'Questions par niveau',
   training_setup_category_count: ({ label, count }) =>
     `${label} : ${count} ${plural(count, 'question', 'questions')}`,
   training_setup_fix_in_editor: () => 'Corriger dans l’éditeur',
   training_setup_submit: () => 'C’est parti',
+  training_setup_submit_blocker: () => 'Disponible une fois la config validée',
   training_loading: () => 'Chargement de l’entraînement…',
   training_not_found: () => 'Entraînement introuvable',
   training_damaged_title: () => 'Cet entraînement est endommagé',
   training_damaged_body: () => 'Ses données ne passent plus la validation. Voici ce qui ne va pas.',
+  training_subtitle: ({ pending }) =>
+    pending ? 'Entraînement · question en cours' : 'Entraînement',
   training_tiles_title: () => 'Choisissez une catégorie',
+  training_tiles_locked: () => 'Catégories (indisponibles pendant la question)',
   training_reveal: () => 'Voir la réponse',
   training_answer_title: () => 'Réponse',
+  training_answer_hide: () => 'Masquer',
+  training_answer_show: () => 'Afficher',
   training_no_answer: () => 'Pas de réponse de référence pour cette question.',
   training_score_heading: () => 'Notez-vous',
+  training_score_max: ({ max }) => `· sur ${max}`,
   training_pass: () => 'Passer',
   training_question_missing: () => 'Cette question n’existe plus dans la config.',
   training_stats_link: () => 'Voir les stats',
   training_stats_card_link: () => 'Stats',
   training_stats_back: () => 'Retour à l’entraînement',
+  training_stats_subtitle: () => 'Stats de l’entraînement',
   training_stats_error: () => 'Les stats n’ont pas pu être chargées.',
   training_stats_empty: () =>
     'Pas encore de réponse notée. Tirez une première question pour voir vos stats.',
   training_stats_start: () => 'Aller à l’entraînement',
   training_stats_key_figures: () => 'Chiffres clés',
-  training_stats_scored: ({ count }) =>
-    `${count} ${plural(count, 'réponse notée', 'réponses notées')}`,
-  training_stats_passed: ({ count }) => `${count} ${plural(count, 'passée', 'passées')}`,
-  training_stats_coverage: ({ covered, total }) =>
-    `${covered} / ${total} ${plural(total, 'question notée', 'questions notées')}`,
+  training_stats_scored_label: ({ count }) => plural(count, 'réponse notée', 'réponses notées'),
+  training_stats_passed_label: ({ count }) => plural(count, 'passée', 'passées'),
   training_stats_review_title: () => 'À revoir',
   training_stats_review_empty: () => 'Aucune question à revoir pour l’instant.',
-  training_stats_last_score: ({ score }) => `Dernière note : ${score}`,
+  training_stats_review_count: ({ count }) => `${count} ${plural(count, 'question', 'questions')}`,
+  training_stats_last_score: () => 'Dernière note',
   training_stats_attempts: ({ count }) => `${count} ${plural(count, 'passage', 'passages')}`,
   training_stats_by_category: () => 'Par niveau',
   training_stats_by_tag: () => 'Par notion',
+  training_stats_level_coverage: ({ covered, total }) => `${covered} / ${total} notées`,
   training_stats_col_level: () => 'Niveau',
-  training_stats_col_tag: () => 'Notion',
   training_stats_col_rate: () => 'Taux de réussite',
-  training_stats_col_coverage: () => 'Questions notées',
   training_stats_col_question: () => 'Question',
   training_stats_col_scored: () => 'Passages notés',
   training_stats_col_last: () => 'Dernière note',
   training_stats_col_status: () => 'Statut',
   training_stats_details: ({ count }) =>
     count > 1 ? `Détail des ${count} questions` : `Détail de ${count} question`,
-  training_stats_rate_label: ({ label, rate }) => `${label} : ${rate}`,
   training_update_title: () => 'Mettre à jour la config',
   training_update_link: () => 'Mettre à jour la config',
   training_update_back: () => 'Retour à l’entraînement',
@@ -607,35 +801,50 @@ const fr: Dictionary<UiMessageParams> = {
   training_update_write_error: () => 'La mise à jour a échoué. Réessayez.',
   training_update_damaged: () => 'Cet entraînement est endommagé : il ne peut pas être mis à jour.',
   training_update_summary: () => 'Bilan de la mise à jour',
-  training_update_kept: ({ count }) =>
-    `${count} ${plural(count, 'question conservée', 'questions conservées')} — historique gardé`,
-  training_update_added: ({ count }) => `${count} ${plural(count, 'nouvelle', 'nouvelles')}`,
-  training_update_removed: ({ count }) =>
-    count > 1
-      ? `${count} retirées — elles n’apparaissent plus dans les stats`
-      : `${count} retirée — elle n’apparaît plus dans les stats`,
-  preview_students_count: ({ count }) => `${count} ${plural(count, 'étudiant', 'étudiants')}`,
+  training_update_kept_label: ({ count }) => plural(count, 'conservée', 'conservées'),
+  training_update_added_label: ({ count }) => plural(count, 'nouvelle', 'nouvelles'),
+  training_update_removed_label: ({ count }) => plural(count, 'retirée', 'retirées'),
+  training_update_kept_hint: () => 'Historique gardé',
+  training_update_added_hint: ({ count }) =>
+    plural(count, 'Ajoutée au tirage', 'Ajoutées au tirage'),
+  training_update_removed_hint: ({ count }) =>
+    plural(count, 'N’apparaît plus dans les stats', 'N’apparaissent plus dans les stats'),
+  preview_students_title: () => 'Étudiants',
+  preview_students_noun: ({ count }) => plural(count, 'étudiant', 'étudiants'),
   preview_students_list: () => 'Voir la liste',
   preview_line: ({ line, message }) => `Ligne ${line} : ${message}`,
   preview_config_title: () => 'Configuration',
-  preview_subject: ({ subject }) => `Matière : ${subject}`,
-  preview_cohort: ({ cohort }) => `Promotion : ${cohort}`,
-  preview_category: ({ label, questions, scale }) =>
-    `${label} : ${questions} ${plural(questions, 'question', 'questions')}, barème ${scale}`,
-  preview_scoring: ({ questionsPerStudent, maxRawScore, finalScale }) =>
-    `${questionsPerStudent} ${plural(questionsPerStudent, 'question', 'questions')} par étudiant · note brute sur ${maxRawScore} → note finale sur ${finalScale}`,
-  preview_rounding: roundingFr,
-  preview_skips_disabled: () => 'Skips désactivés',
-  preview_skips: ({ max }) => `Skips autorisés : ${max} par étudiant`,
+  issue_error_label: () => 'Erreur',
+  preview_config_errors: ({ count }) => plural(count, 'erreur à corriger', 'erreurs à corriger'),
+  preview_category_questions: ({ count }) => `${count} ${plural(count, 'question', 'questions')}`,
+  preview_questions_per_student: () => 'Questions par étudiant',
+  preview_scale_label: () => 'Note brute → finale',
+  preview_scale_value: ({ maxRawScore, finalScale }) =>
+    `sur ${maxRawScore.toLocaleString('fr')} → sur ${finalScale.toLocaleString('fr')}`,
+  preview_rounding_label: () => 'Arrondi',
+  preview_rounding_value: roundingFr,
+  preview_skips_label: () => 'Skips autorisés',
+  preview_skips_value: ({ max }) => `${max} par étudiant`,
+  preview_skips_disabled: () => 'aucun (skips désactivés)',
   markdown_footnotes: () => 'Notes',
   markdown_footnote_back: ({ n }) => `Revenir à la référence ${n}`,
-  passage_question_index: ({ current, total }) => `Question ${current} / ${total}`,
-  passage_raw_score: ({ score }) => `Score brut : ${score}`,
+  passage_question_number: ({ current }) => `Question ${current}`,
+  passage_progress_label: ({ current, total, detail }) =>
+    detail === ''
+      ? `Question ${current} sur ${total}`
+      : `Question ${current} sur ${total} : ${detail}`,
+  passage_progress_scored: ({ category }) => `${category} notée`,
+  passage_progress_pending: ({ category }) => `${category} en cours`,
+  passage_raw_score_label: () => 'Score brut',
   passage_categories: () => 'Choisir une catégorie',
+  passage_draw_title: () => 'Tirage suivant',
+  passage_draw_hint: () => 'Disponible une fois la question notée',
   passage_category_max: ({ max, points }) => `${max} ${pluralDecimal(points, 'pt', 'pts')}`,
   passage_category_exhausted: () => 'Plus de question disponible dans cette catégorie',
   passage_answer: () => 'Éléments de réponse',
   passage_score_heading: () => 'Note',
+  passage_score_card: () => 'Noter la question',
+  passage_score_context: ({ category, max }) => `${category}, sur ${max}`,
   passage_score_button: ({ value }) => `Noter ${value}`,
   passage_status_todo: () => 'à passer',
   passage_status_in_progress: () => 'en cours',
@@ -643,9 +852,10 @@ const fr: Dictionary<UiMessageParams> = {
   passage_status_absent: () => 'absent',
   passage_no_student_title: () => 'Aucun étudiant sélectionné',
   passage_no_student_body: () =>
-    'Choisissez un étudiant dans l’onglet « Étudiants » du panneau pour commencer le passage.',
+    'Choisissez un étudiant dans l’onglet « Liste » du panneau pour commencer le passage.',
   passage_absent_title: () => 'Étudiant absent',
-  passage_absent_body: () => 'Cliquez « Marquer présent » dans le panneau pour le faire passer.',
+  passage_absent_body: () =>
+    'Marquez-le présent pour le faire passer, ou choisissez un autre étudiant.',
   passage_done_title: () => 'Passage terminé',
   final_scores_heading: () => 'Notes',
   final_detail_heading: () => 'Détail du passage',
@@ -659,7 +869,9 @@ const fr: Dictionary<UiMessageParams> = {
   final_points: ({ score, max }) => `${score} / ${max}`,
   final_skipped: () => 'Passée',
   final_skipped_reason: ({ reason }) => `Passée — ${reason}`,
-  final_adjust: () => 'Ajuster',
+  final_adjust: () => 'Ajuster la note',
+  final_gauge_label: ({ value, scale }) => `Note finale : ${value} sur ${scale}`,
+  final_gauge_scale: ({ scale }) => `sur ${scale}`,
   final_reset: () => 'Réinitialiser l’étudiant',
   final_next: () => 'Étudiant suivant',
   final_no_next: () => 'Tous les étudiants sont passés',
@@ -667,16 +879,18 @@ const fr: Dictionary<UiMessageParams> = {
   attempt_score_label: ({ rank }) => `Note de la question ${rank}`,
   attempt_out_of: ({ max }) => `/ ${max}`,
   score_not_computed: () => '—',
-  side_panel_label: () => 'Panneau latéral',
+  side_panel_label: () => 'Panneau',
   side_panel_open: () => 'Panneau',
   side_panel_close: () => 'Fermer le panneau',
   side_panel_show: () => 'Afficher le panneau',
-  side_panel_tab_student: () => 'Étudiant',
-  side_panel_tab_students: () => 'Étudiants',
+  side_panel_tab_student: () => 'Cet étudiant',
+  side_panel_tab_students: () => 'Liste',
   students_list_label: () => 'Étudiants de la session',
   students_projected: () => 'Projeté',
   projection_open: () => 'Ouvrir la vue projetée',
+  projection_open_short: () => 'Ouvrir',
   projection_project: () => 'Projeter cet étudiant',
+  projection_group: () => 'Projection',
   projection_waiting: () => 'Écran d’attente',
   projection_preview_label: () => 'Vue projetée',
   projection_banner: ({ name }) => `La vue projetée montre ${name}.`,
@@ -684,6 +898,9 @@ const fr: Dictionary<UiMessageParams> = {
     'Autorisez les fenêtres pop-up pour ce site pour ouvrir la vue projetée.',
   students_row_scores: ({ raw, final }) => `${raw} · ${final}`,
   students_add: () => 'Ajouter un étudiant',
+  students_add_short: () => 'Ajouter',
+  students_summary: ({ total, done, absent }) =>
+    `${total} ${plural(total, 'étudiant', 'étudiants')} · ${done} ${plural(done, 'terminé', 'terminés')} · ${absent} ${plural(absent, 'absent', 'absents')}`,
   students_add_title: () => 'Ajouter un étudiant',
   students_add_last_name: () => 'Nom',
   students_add_first_name: () => 'Prénom',
@@ -715,19 +932,22 @@ const fr: Dictionary<UiMessageParams> = {
   adjust_decrement: () => 'Retirer un pas',
   adjust_increment: () => 'Ajouter un pas',
   adjust_invalid: ({ step, max }) => `Saisissez un multiple de ${step}, entre −${max} et ${max}.`,
-  adjust_preview: ({ converted, sign, adjustment, final, scale }) =>
-    `${converted} ${sign} ${adjustment} = ${final} / ${scale}`,
+  adjust_preview_sum: ({ converted, sign, adjustment }) => `${converted} ${sign} ${adjustment} =`,
   adjust_clamped: ({ bound }) => `(bornée à ${bound})`,
   adjust_reason: () => 'Justification (facultative)',
   passage_error_generic: () => 'L’action n’a pas pu être enregistrée. Rechargez la page.',
-  passage_skip_button: ({ remaining }) =>
-    `Passer la question (${remaining} ${plural(remaining, 'passe restante', 'passes restantes')})`,
+  passage_skip_label: () => 'Passer la question',
+  passage_skips_remaining: ({ remaining }) =>
+    remaining === 0
+      ? 'Aucune passe restante'
+      : `${remaining} ${plural(remaining, 'passe restante', 'passes restantes')}`,
   passage_skip_quota_reached: () => 'Plus de passe disponible pour cet étudiant.',
   passage_skip_title: () => 'Passer la question ?',
   passage_skip_body: () =>
     'La question sera exclue pour cet étudiant et ne comptera pas dans son passage. Un skip ne s’annule pas.',
   passage_skip_reasons: () => 'Motif (facultatif)',
   passage_skip_free_text: () => 'Autre motif',
+  passage_skip_placeholder: () => 'Précisez',
   passage_skip_confirm: () => 'Passer',
   stats_open: () => 'Statistiques',
   export_button: () => 'Exporter en Excel',
@@ -735,8 +955,14 @@ const fr: Dictionary<UiMessageParams> = {
   export_error: () => "L'export a échoué. Réessayez.",
   editor_title: () => 'Éditeur de config',
   editor_label: () => 'Configuration JSON',
-  editor_source_title: () => 'Configuration',
+  editor_subtitle: () => 'Écrivez la config d’un oral et vérifiez-la au fil de la frappe.',
+  editor_load_file_short: () => 'Charger',
+  editor_issues_title: () => 'Problèmes',
+  editor_issue_line: ({ line }) => `ligne ${line}`,
   editor_preview_title: () => 'Aperçu',
+  editor_preview_subtitle: () =>
+    'Chaque question telle qu’elle sera projetée, dans le thème de la config.',
+  editor_preview_nav: () => 'Aller à une catégorie',
   editor_load_file: () => 'Charger un fichier',
   editor_reset_example: () => "Repartir de l'exemple",
   editor_download: () => 'Télécharger',
@@ -754,14 +980,24 @@ const fr: Dictionary<UiMessageParams> = {
   editor_hover_icon_search: () => 'Rechercher une icône sur tabler.io',
   editor_hover_icon_hint: () => 'Ctrl+Espace propose les noms connus.',
   stats_back: () => 'Retour au passage',
+  stats_kicker: () => 'Statistiques',
+  stats_out_of: ({ max }) => `/ ${max}`,
+  stats_empty_title: () => 'Pas encore de statistiques',
+  stats_empty_body: () =>
+    'Aucune question tirée pour l’instant. Les chiffres apparaissent dès le premier tirage.',
+  stats_empty_action: () => 'Aller au passage',
+  stats_synthesis: () => 'Synthèse',
+  stats_detail: () => 'Détail',
   stats_error: () => "Les statistiques n'ont pas pu être chargées.",
-  stats_headcount: () => 'Effectifs',
+  stats_headcount: () => 'Chiffres clés',
   stats_headcount_total: () => 'Étudiants',
-  stats_headcount_done: () => 'Terminés',
-  stats_headcount_in_progress: () => 'En cours',
-  stats_headcount_todo: () => 'À passer',
+  stats_headcount_done: () => 'Passés',
   stats_headcount_absent: () => 'Absents',
-  stats_headcount_added: () => 'Ajoutés en séance',
+  stats_legend_done: ({ count }) => `${count} ${plural(count, 'passé', 'passés')}`,
+  stats_legend_in_progress: ({ count }) => `${count} en cours`,
+  stats_legend_todo: ({ count }) => `${count} à passer`,
+  stats_legend_absent: ({ count }) => `${count} ${plural(count, 'absent', 'absents')}`,
+  stats_legend_added: ({ count }) => `${count} ${plural(count, 'ajouté', 'ajoutés')} en séance`,
   stats_grades: () => 'Notes finales',
   stats_grades_count: () => 'Étudiants notés',
   stats_grades_min: () => 'Minimum',
@@ -769,10 +1005,15 @@ const fr: Dictionary<UiMessageParams> = {
   stats_grades_mean: () => 'Moyenne',
   stats_grades_median: () => 'Médiane',
   stats_grades_std_dev: () => 'Écart-type',
-  stats_histogram: () => 'Histogramme',
   stats_histogram_empty: () => "Aucun étudiant n'a terminé.",
-  stats_col_range: () => 'Intervalle de notes',
-  stats_categories: () => 'Catégories',
+  stats_histogram_aria: ({ count, bins }) =>
+    count > 1
+      ? `Notes des ${count} étudiants notés : ${bins}`
+      : `Note de l’étudiant noté : ${bins}`,
+  stats_histogram_bin: ({ count, from, to }) => `${count} entre ${from} et ${to}`,
+  stats_categories: () => 'Réussite par catégorie',
+  stats_category_counts: ({ scored, choices }) =>
+    `${scored} ${plural(scored, 'notée', 'notées')} · ${choices} choix`,
   stats_tags: () => 'Tags',
   stats_tags_empty: () => "Aucune question n'a de tag.",
   stats_top_drawn: () => 'Questions les plus tirées',
@@ -782,21 +1023,20 @@ const fr: Dictionary<UiMessageParams> = {
   stats_strategies: () => 'Stratégies',
   stats_strategies_empty: () => "Aucun étudiant n'a terminé.",
   stats_adjustments: () => 'Ajustements',
-  stats_adjustments_count: () => 'Nombre',
-  stats_adjustments_sum: () => 'Somme',
-  stats_adjustments_mean: () => 'Moyenne',
-  stats_col_category: () => 'Catégorie',
+  stats_adjustments_sum: () => 'somme',
+  stats_adjustments_mean: () => 'moyenne',
   stats_col_tag: () => 'Tag',
   stats_col_question: () => 'Question',
-  stats_col_choices: () => 'Choix',
-  stats_col_scored: () => 'Questions notées',
-  stats_col_success_rate: () => 'Taux de réussite',
+  stats_col_scored: () => 'Notées',
+  stats_col_success_rate: () => 'Réussite',
   stats_col_draws: () => 'Tirages',
+  stats_col_share: () => 'Part',
+  stats_col_bar: () => 'Barre',
   stats_col_skips: () => 'Passes',
   stats_col_reasons: () => 'Motifs',
   stats_col_composition: () => 'Composition',
   stats_col_students: () => 'Étudiants',
-  stats_col_mean_final: () => 'Note finale moyenne',
+  stats_col_mean_final: () => 'Note moyenne',
   stats_times: ({ label, count }) => `${label} ×${count}`,
   stats_no_reason: () => 'sans motif',
 }
@@ -805,42 +1045,61 @@ const en: Dictionary<UiMessageParams> = {
   app_title: () => 'Questionator Z-4000 Hyperdrive',
   not_found_title: () => 'Page not found',
   back_home: () => 'Back to home',
+  back_sessions: () => 'Back to sessions',
+  back_trainings: () => 'Back to practice',
+  home_subtitle: () => 'Resume a session in progress or prepare the next oral exam.',
+  home_train: () => 'Practice',
+  home_resume_title: () => 'Resume',
+  home_kind_session: () => 'Session',
+  home_kind_training: () => 'Practice',
+  home_spaces_title: () => 'Spaces',
+  home_space_sessions_body: () => 'Exams in progress and finished',
+  home_space_trainings: () => 'Practice',
+  home_space_trainings_body: () => 'Solo review',
+  home_space_editor_body: () => 'Errors flagged as you type, live question preview',
+  home_space_view_all: () => 'View all',
+  first_run_title: () => 'Welcome',
+  first_run_subtitle: () => 'Run graded oral exams with random draws, or review on your own.',
+  first_run_eyebrow: () => 'First launch',
+  first_run_heading: () => 'Your first oral exam in three steps',
+  first_run_body: () =>
+    'A student list (CSV) and a config (JSON) are all you need. Examples are ready.',
+  first_run_step: ({ n }) => `Step ${n}`,
+  first_run_step1: () => 'Download the examples',
+  first_run_step2: () => 'Create a session',
+  first_run_step2_body: () => 'With these two files, or your own.',
+  first_run_step3: () => 'Draw a question and grade',
+  first_run_step3_body: () => 'The projected view shows the question on the second screen.',
+  first_run_solo_title: () => 'Or review on your own',
+  first_run_solo_body: () => 'From a config generated by an LLM, no session or students needed.',
+  first_run_solo_cta: () => 'Practice on your own',
+  first_run_resources: () => 'Other resources',
+  first_run_editor_link: () => 'Write a config in the editor',
+  first_run_drop_hint: () => 'You can also drop a backup (.json) anywhere on the page.',
   home_create: () => 'Create a session',
   home_import: () => 'Import a backup',
-  home_actions_title: () => 'Actions',
-  home_sessions_title: () => 'Sessions',
-  home_create_title: () => 'New session',
-  home_create_body: () =>
-    'Start from a student list (CSV, last name / first name) and a configuration file (JSON: categories, questions, scales).',
-  home_students_example_link: () => 'Download the example student list',
-  home_config_example_link: () => 'Download the example config',
+  home_students_example_link: () => 'Example student list (.csv)',
+  home_config_example_link: () => 'Example config (.json)',
   home_config_schema_link: () => 'Config JSON Schema',
-  home_import_title: () => 'Restore a session',
-  home_import_body: () =>
-    'Restore a session from a .json file made with “Export a backup”. You can also drop the file anywhere on the page.',
-  home_editor_title: () => 'Edit a config',
-  home_editor_body: () =>
-    'Write or fix a configuration file: errors are flagged as you type and questions are shown as they will be projected.',
   home_editor_open: () => 'Open the editor',
-  home_training_title: () => 'Practice',
-  home_training_body: () => 'Review on your own from a config generated by an LLM.',
-  home_training_start: () => 'Start',
   home_trainings_title: () => 'My practice',
   home_training_updated: ({ date }) => `Last activity: ${date}`,
-  home_training_coverage: ({ percent }) => `${percent}% of questions rated`,
   home_training_delete_body: () => 'The history and stats of this practice will be lost.',
   home_training_damaged_body: () =>
     'The saved content is inconsistent; the app cannot open it. You can delete it.',
   persistence_warning_label: () => 'Storage not guaranteed',
   persistence_warning: () =>
     'The browser did not guarantee data retention: it may erase your sessions when space runs low. Export a backup regularly.',
-  db_outdated: () => 'The app was updated in another tab. Reload the page to continue.',
+  db_outdated_title: () => 'The app was updated in another tab.',
+  db_outdated: () => 'Reload the page to continue.',
   db_reload: () => 'Reload',
-  db_unavailable: () =>
-    'Local storage is unavailable (private browsing or blocked cookies?). Sessions cannot be saved.',
+  db_unavailable_title: () => 'Local storage is unavailable',
+  db_unavailable: () => '(private browsing or blocked cookies?). Sessions cannot be saved.',
   update_available: () => 'New version available',
+  update_available_body: () => 'Reload whenever you like.',
   update_reload: () => 'Reload',
-  offline_ready: () => 'Ready to work offline: the app now works without a network.',
+  offline_ready_title: () => 'Ready to work offline',
+  offline_ready: () => 'The app now works without a network.',
   offline_ready_dismiss: () => 'OK',
   color_mode_label: ({ mode }) => `Display mode: ${mode.toLocaleLowerCase('en')}`,
   color_mode_light: () => 'Light',
@@ -848,31 +1107,68 @@ const en: Dictionary<UiMessageParams> = {
   color_mode_system: () => 'System',
   help_link: () => 'Help',
   help_link_label: () => 'Help (opens in a new tab)',
+  menu_brand: () => 'Questionator Z-4000',
+  menu_main_label: () => 'Main navigation',
+  menu_home: () => 'Home',
+  menu_spaces: () => 'Spaces',
+  menu_sessions: () => 'Sessions',
+  menu_editor: () => 'Config editor',
+  menu_training: () => 'Practice',
+  menu_help_label: () => 'Help',
+  menu_collapse: () => 'Collapse menu',
+  menu_expand: () => 'Expand menu',
+  breadcrumb_label: () => 'Breadcrumb',
+  menu_open: () => 'Menu',
+  menu_close: () => 'Close menu',
   session_loading: () => 'Loading session…',
   session_not_found: () => 'Session not found',
   damaged_title: () => 'This session is damaged',
   damaged_badge: () => 'Damaged',
   damaged_body: () =>
     'The saved content is inconsistent; the app cannot open it. Export a backup to keep it or fix it.',
-  damaged_details: () => 'Details',
+  damaged_details: ({ count }) => `Details · ${count} ${pluralEn(count, 'issue', 'issues')}`,
   present_waiting: () => 'The exam will start soon.',
+  present_question_label: () => 'Question',
+  present_score_label: () => 'Score',
+  present_choose_category: () => 'Choose a category',
+  present_categories: () => 'Categories',
   present_prompt_label: () => 'Current question',
-  present_question_index: ({ current, total }) => `Question ${current} / ${total}`,
-  present_cumulative: ({ score }) => `Score: ${score}`,
   present_finished: () => 'Exam complete',
-  present_final: ({ value, scale }) => `Grade: ${value} / ${scale}`,
-  present_raw: ({ value }) => `Raw score: ${value}`,
+  present_note_label: () => 'Grade',
+  present_gauge_label: ({ value, scale }) => `Grade: ${value} out of ${scale}`,
+  present_raw_label: () => 'Raw score',
+  present_detail_heading: () => 'Question by question',
+  present_fullscreen_hint: () => 'Full screen (controls fade after 3 s)',
   present_category_exhausted: () => 'Exhausted',
   present_category_unavailable: () => 'Unavailable',
   present_skipped: () => 'Skipped',
   present_fullscreen: () => 'Full screen',
   present_exit_fullscreen: () => 'Exit full screen',
   empty_title: () => 'No sessions yet',
-  empty_body: () => 'Create a session or import a backup from the actions.',
+  empty_body: () => 'Create a session or import a backup.',
   card_examiner: ({ name }) => `Examiner: ${name}`,
   card_updated: ({ date }) => `Updated ${date}`,
   card_progress: ({ done, absent, remaining }) =>
     `${done} done · ${absent} absent · ${remaining} remaining`,
+  card_progress_of: ({ total }) => `/ ${total} done`,
+  card_progress_rest: ({ absent, remaining }) => `${absent} absent · ${remaining} remaining`,
+  training_success_label: () => 'success rate',
+  training_success_aria: ({ rate }) => `Success rate: ${rate}`,
+  training_coverage_label: () => 'questions rated',
+  rate_ring_label: ({ label, rate }) => `${label} success: ${rate}`,
+  rate_ring_caption: () => 'success',
+  sessions_subtitle: () => 'Your oral exams, from the student list to the final grade.',
+  sessions_drop_hint: () => 'Drop a backup (.json) anywhere on the page to restore it.',
+  sessions_list_title: () => 'Session list',
+  sessions_count: ({ count }) =>
+    `${count} ${pluralEn(count, 'session', 'sessions')} · most recently updated first`,
+  card_resume_named: ({ name }) => `Resume “${name}”`,
+  trainings_subtitle: () => 'Review on your own, from a config generated by an LLM.',
+  trainings_new: () => 'New practice',
+  trainings_count: ({ count }) =>
+    `${count} practice ${pluralEn(count, 'session', 'sessions')} · most recent activity first`,
+  trainings_empty_title: () => 'No practice yet',
+  trainings_empty_body: () => 'Start a practice from a config.',
   card_resume: () => 'Resume',
   card_actions: ({ name }) => `Actions for "${name}"`,
   action_rename: () => 'Rename',
@@ -908,6 +1204,7 @@ const en: Dictionary<UiMessageParams> = {
   create_choose_file: () => 'Choose a file',
   create_replace_file: () => 'Replace',
   create_drop_hint: () => 'or drop it here',
+  create_drop_other: () => 'or drop another one',
   create_file_status_ok: () => 'Valid file',
   create_file_status_warnings: () => 'Valid file, with warnings',
   create_file_status_errors: () => 'Invalid file',
@@ -919,7 +1216,21 @@ const en: Dictionary<UiMessageParams> = {
   create_write_error: () => 'Creation failed. Please try again.',
   create_preview_title: () => 'Preview',
   create_preview_empty: () => 'Drop a student list and a configuration to see the preview.',
+  create_subtitle: () => 'Drop the student list and the exam config.',
+  create_students_example_short: () => 'Example list',
+  create_config_example_short: () => 'Example config',
+  optional_hint: () => '(optional)',
+  create_examiner_hint: () => 'Included as a column in exports.',
+  create_blocked_db: () => 'The database isn’t available: the session can’t be created.',
+  create_blocked_students: () => 'Fix the student list to create the session.',
+  create_blocked_config: () => 'Fix the configuration to create the session.',
+  create_blocked_files: () => 'Drop the student list and the config to create the session.',
+  create_blocked_name: () => 'Name the session to create it.',
   training_setup_title: () => 'Practice',
+  training_setup_subtitle: () => 'From your course to the first question, in four steps.',
+  training_setup_step_of: ({ step, total }) => `Step ${step} of ${total}`,
+  training_setup_step_state: ({ state }) =>
+    ({ done: 'Step done', current: 'Current step', upcoming: 'Upcoming step' })[state],
   training_setup_gather_title: () => 'Gather your course',
   training_setup_gather_body: () =>
     'Put the course and the workshops in a single PDF or a single zip archive. This file stays with you: you give it to the LLM, not to the app.',
@@ -932,6 +1243,8 @@ const en: Dictionary<UiMessageParams> = {
     'The longer the course, the more it matters: low effort gives shallow questions or an incomplete JSON.',
   training_setup_copy: () => 'Copy the prompt',
   training_setup_copied: () => 'Prompt copied.',
+  training_setup_copy_again: () => 'Copy again',
+  training_setup_show_prompt: () => 'Show the prompt',
   training_setup_copy_failed: () => 'Copy failed: select the text and copy it by hand.',
   training_setup_config_title: () => 'Get the config',
   training_setup_config_body: () => 'The LLM gives you a .json file, or a JSON code block.',
@@ -939,50 +1252,57 @@ const en: Dictionary<UiMessageParams> = {
   training_setup_file_label: () => 'Config (JSON)',
   training_setup_paste_label: () => '… or paste the JSON here',
   training_setup_check_paste: () => 'Check the pasted JSON',
+  training_setup_check_paste_short: () => 'Check',
+  training_setup_drop_empty: () => 'Drop the config (.json) here',
+  training_setup_category_counts: () => 'Questions per level',
   training_setup_category_count: ({ label, count }) =>
     `${label}: ${count} ${pluralEn(count, 'question', 'questions')}`,
   training_setup_fix_in_editor: () => 'Fix in the editor',
   training_setup_submit: () => "Let's go",
+  training_setup_submit_blocker: () => 'Available once the config is valid',
   training_loading: () => 'Loading practice…',
   training_not_found: () => 'Practice not found',
   training_damaged_title: () => 'This practice is damaged',
   training_damaged_body: () => 'Its data no longer passes validation. Here is what is wrong.',
+  training_subtitle: ({ pending }) => (pending ? 'Practice · question in progress' : 'Practice'),
   training_tiles_title: () => 'Choose a category',
+  training_tiles_locked: () => 'Categories (unavailable during the question)',
   training_reveal: () => 'Show the answer',
   training_answer_title: () => 'Answer',
+  training_answer_hide: () => 'Hide',
+  training_answer_show: () => 'Show',
   training_no_answer: () => 'No reference answer for this question.',
   training_score_heading: () => 'Rate yourself',
+  training_score_max: ({ max }) => `· out of ${max}`,
   training_pass: () => 'Skip',
   training_question_missing: () => 'This question is no longer in the config.',
   training_stats_link: () => 'View stats',
   training_stats_card_link: () => 'Stats',
   training_stats_back: () => 'Back to practice',
+  training_stats_subtitle: () => 'Practice stats',
   training_stats_error: () => 'The stats could not be loaded.',
   training_stats_empty: () => 'No rated answer yet. Draw a first question to see your stats.',
   training_stats_start: () => 'Go to practice',
   training_stats_key_figures: () => 'Key figures',
-  training_stats_scored: ({ count }) =>
-    `${count} ${pluralEn(count, 'rated answer', 'rated answers')}`,
-  training_stats_passed: ({ count }) => `${count} skipped`,
-  training_stats_coverage: ({ covered, total }) =>
-    `${covered} / ${total} ${pluralEn(total, 'question rated', 'questions rated')}`,
+  training_stats_scored_label: ({ count }) => pluralEn(count, 'rated answer', 'rated answers'),
+  training_stats_passed_label: () => 'skipped',
   training_stats_review_title: () => 'To review',
   training_stats_review_empty: () => 'No question to review for now.',
-  training_stats_last_score: ({ score }) => `Last score: ${score}`,
+  training_stats_review_count: ({ count }) =>
+    `${count} ${pluralEn(count, 'question', 'questions')}`,
+  training_stats_last_score: () => 'Last score',
   training_stats_attempts: ({ count }) => `${count} ${pluralEn(count, 'attempt', 'attempts')}`,
   training_stats_by_category: () => 'By level',
   training_stats_by_tag: () => 'By topic',
+  training_stats_level_coverage: ({ covered, total }) => `${covered} / ${total} rated`,
   training_stats_col_level: () => 'Level',
-  training_stats_col_tag: () => 'Topic',
   training_stats_col_rate: () => 'Success rate',
-  training_stats_col_coverage: () => 'Questions rated',
   training_stats_col_question: () => 'Question',
   training_stats_col_scored: () => 'Rated attempts',
   training_stats_col_last: () => 'Last score',
   training_stats_col_status: () => 'Status',
   training_stats_details: ({ count }) =>
     `Details of ${count} ${pluralEn(count, 'question', 'questions')}`,
-  training_stats_rate_label: ({ label, rate }) => `${label}: ${rate}`,
   training_update_title: () => 'Update the config',
   training_update_link: () => 'Update the config',
   training_update_back: () => 'Back to practice',
@@ -990,44 +1310,57 @@ const en: Dictionary<UiMessageParams> = {
   training_update_write_error: () => 'The update failed. Try again.',
   training_update_damaged: () => 'This practice is damaged: it cannot be updated.',
   training_update_summary: () => 'Update summary',
-  training_update_kept: ({ count }) =>
-    `${count} ${pluralEn(count, 'question kept', 'questions kept')} — history preserved`,
-  training_update_added: ({ count }) => `${count} new`,
-  training_update_removed: ({ count }) =>
-    count === 1
-      ? `${count} removed — it no longer appears in the stats`
-      : `${count} removed — they no longer appear in the stats`,
-  preview_students_count: ({ count }) => `${count} ${pluralEn(count, 'student', 'students')}`,
+  training_update_kept_label: () => 'kept',
+  training_update_added_label: () => 'new',
+  training_update_removed_label: () => 'removed',
+  training_update_kept_hint: () => 'History kept',
+  training_update_added_hint: () => 'Added to the draw',
+  training_update_removed_hint: () => 'No longer in the stats',
+  preview_students_title: () => 'Students',
+  preview_students_noun: ({ count }) => pluralEn(count, 'student', 'students'),
   preview_students_list: () => 'Show the list',
   preview_line: ({ line, message }) => `Line ${line}: ${message}`,
   preview_config_title: () => 'Configuration',
-  preview_subject: ({ subject }) => `Subject: ${subject}`,
-  preview_cohort: ({ cohort }) => `Cohort: ${cohort}`,
-  preview_category: ({ label, questions, scale }) =>
-    `${label}: ${questions} ${pluralEn(questions, 'question', 'questions')}, scale ${scale}`,
-  preview_scoring: ({ questionsPerStudent, maxRawScore, finalScale }) =>
-    `${questionsPerStudent} ${pluralEn(questionsPerStudent, 'question', 'questions')} per student · raw score out of ${maxRawScore} → final score out of ${finalScale}`,
-  preview_rounding: roundingEn,
-  preview_skips_disabled: () => 'Skips disabled',
-  preview_skips: ({ max }) => `Skips allowed: ${max} per student`,
+  issue_error_label: () => 'Error',
+  preview_config_errors: ({ count }) => pluralEn(count, 'error to fix', 'errors to fix'),
+  preview_category_questions: ({ count }) => `${count} ${pluralEn(count, 'question', 'questions')}`,
+  preview_questions_per_student: () => 'Questions per student',
+  preview_scale_label: () => 'Raw → final score',
+  preview_scale_value: ({ maxRawScore, finalScale }) =>
+    `out of ${maxRawScore.toLocaleString('en')} → out of ${finalScale.toLocaleString('en')}`,
+  preview_rounding_label: () => 'Rounding',
+  preview_rounding_value: roundingEn,
+  preview_skips_label: () => 'Skips allowed',
+  preview_skips_value: ({ max }) => `${max} per student`,
+  preview_skips_disabled: () => 'none (skips disabled)',
   markdown_footnotes: () => 'Footnotes',
   markdown_footnote_back: ({ n }) => `Back to reference ${n}`,
-  passage_question_index: ({ current, total }) => `Question ${current} / ${total}`,
-  passage_raw_score: ({ score }) => `Raw score: ${score}`,
+  passage_question_number: ({ current }) => `Question ${current}`,
+  passage_progress_label: ({ current, total, detail }) =>
+    detail === ''
+      ? `Question ${current} of ${total}`
+      : `Question ${current} of ${total}: ${detail}`,
+  passage_progress_scored: ({ category }) => `${category} scored`,
+  passage_progress_pending: ({ category }) => `${category} in progress`,
+  passage_raw_score_label: () => 'Raw score',
   passage_categories: () => 'Choose a category',
+  passage_draw_title: () => 'Next draw',
+  passage_draw_hint: () => 'Available once the question is scored',
   passage_category_max: ({ max, points }) => `${max} ${pluralEn(points, 'pt', 'pts')}`,
   passage_category_exhausted: () => 'No questions left in this category',
   passage_answer: () => 'Answer notes',
   passage_score_heading: () => 'Score',
+  passage_score_card: () => 'Score the question',
+  passage_score_context: ({ category, max }) => `${category}, out of ${max}`,
   passage_score_button: ({ value }) => `Score ${value}`,
   passage_status_todo: () => 'to do',
   passage_status_in_progress: () => 'in progress',
   passage_status_done: () => 'done',
   passage_status_absent: () => 'absent',
   passage_no_student_title: () => 'No student selected',
-  passage_no_student_body: () => 'Pick a student in the panel’s “Students” tab to start.',
+  passage_no_student_body: () => 'Pick a student in the panel’s “List” tab to start.',
   passage_absent_title: () => 'Student absent',
-  passage_absent_body: () => 'Click “Mark present” in the panel to examine them.',
+  passage_absent_body: () => 'Mark them present to examine them, or choose another student.',
   passage_done_title: () => 'Exam complete',
   final_scores_heading: () => 'Scores',
   final_detail_heading: () => 'Exam breakdown',
@@ -1041,7 +1374,9 @@ const en: Dictionary<UiMessageParams> = {
   final_points: ({ score, max }) => `${score} / ${max}`,
   final_skipped: () => 'Skipped',
   final_skipped_reason: ({ reason }) => `Skipped — ${reason}`,
-  final_adjust: () => 'Adjust',
+  final_adjust: () => 'Adjust the grade',
+  final_gauge_label: ({ value, scale }) => `Final grade: ${value} out of ${scale}`,
+  final_gauge_scale: ({ scale }) => `out of ${scale}`,
   final_reset: () => 'Reset student',
   final_next: () => 'Next student',
   final_no_next: () => 'All students have been examined',
@@ -1049,22 +1384,27 @@ const en: Dictionary<UiMessageParams> = {
   attempt_score_label: ({ rank }) => `Score for question ${rank}`,
   attempt_out_of: ({ max }) => `/ ${max}`,
   score_not_computed: () => '—',
-  side_panel_label: () => 'Side panel',
+  side_panel_label: () => 'Panel',
   side_panel_open: () => 'Panel',
   side_panel_close: () => 'Close the panel',
   side_panel_show: () => 'Show panel',
-  side_panel_tab_student: () => 'Student',
-  side_panel_tab_students: () => 'Students',
+  side_panel_tab_student: () => 'This student',
+  side_panel_tab_students: () => 'List',
   students_list_label: () => 'Session students',
   students_projected: () => 'Projected',
   projection_open: () => 'Open the projected view',
+  projection_open_short: () => 'Open',
   projection_project: () => 'Project this student',
+  projection_group: () => 'Projection',
   projection_waiting: () => 'Waiting screen',
   projection_preview_label: () => 'Projected view',
   projection_banner: ({ name }) => `The projected view shows ${name}.`,
   projection_popup_blocked: () => 'Allow pop-ups for this site to open the projected view.',
   students_row_scores: ({ raw, final }) => `${raw} · ${final}`,
   students_add: () => 'Add a student',
+  students_add_short: () => 'Add',
+  students_summary: ({ total, done, absent }) =>
+    `${total} ${pluralEn(total, 'student', 'students')} · ${done} done · ${absent} absent`,
   students_add_title: () => 'Add a student',
   students_add_last_name: () => 'Last name',
   students_add_first_name: () => 'First name',
@@ -1096,19 +1436,22 @@ const en: Dictionary<UiMessageParams> = {
   adjust_decrement: () => 'Remove one step',
   adjust_increment: () => 'Add one step',
   adjust_invalid: ({ step, max }) => `Enter a multiple of ${step}, between −${max} and ${max}.`,
-  adjust_preview: ({ converted, sign, adjustment, final, scale }) =>
-    `${converted} ${sign} ${adjustment} = ${final} / ${scale}`,
+  adjust_preview_sum: ({ converted, sign, adjustment }) => `${converted} ${sign} ${adjustment} =`,
   adjust_clamped: ({ bound }) => `(capped at ${bound})`,
   adjust_reason: () => 'Justification (optional)',
   passage_error_generic: () => 'The action could not be saved. Reload the page.',
-  passage_skip_button: ({ remaining }) =>
-    `Skip question (${remaining} ${pluralEn(remaining, 'skip', 'skips')} left)`,
+  passage_skip_label: () => 'Skip the question',
+  passage_skips_remaining: ({ remaining }) =>
+    remaining === 0
+      ? 'No skips left'
+      : `${remaining} ${pluralEn(remaining, 'skip left', 'skips left')}`,
   passage_skip_quota_reached: () => 'No skips left for this student.',
   passage_skip_title: () => 'Skip this question?',
   passage_skip_body: () =>
     'The question will be excluded for this student and will not count towards their exam. A skip cannot be undone.',
   passage_skip_reasons: () => 'Reason (optional)',
   passage_skip_free_text: () => 'Other reason',
+  passage_skip_placeholder: () => 'Specify',
   passage_skip_confirm: () => 'Skip',
   stats_open: () => 'Statistics',
   export_button: () => 'Export to Excel',
@@ -1116,8 +1459,13 @@ const en: Dictionary<UiMessageParams> = {
   export_error: () => 'Export failed. Try again.',
   editor_title: () => 'Config editor',
   editor_label: () => 'JSON configuration',
-  editor_source_title: () => 'Configuration',
+  editor_subtitle: () => 'Write an exam config and check it as you type.',
+  editor_load_file_short: () => 'Load',
+  editor_issues_title: () => 'Problems',
+  editor_issue_line: ({ line }) => `line ${line}`,
   editor_preview_title: () => 'Preview',
+  editor_preview_subtitle: () => 'Each question as it will be projected, in the config’s theme.',
+  editor_preview_nav: () => 'Go to a category',
   editor_load_file: () => 'Load a file',
   editor_reset_example: () => 'Start from the example',
   editor_download: () => 'Download',
@@ -1135,14 +1483,23 @@ const en: Dictionary<UiMessageParams> = {
   editor_hover_icon_search: () => 'Search icons on tabler.io',
   editor_hover_icon_hint: () => 'Ctrl+Space suggests known names.',
   stats_back: () => 'Back to the exam',
+  stats_kicker: () => 'Statistics',
+  stats_out_of: ({ max }) => `/ ${max}`,
+  stats_empty_title: () => 'No statistics yet',
+  stats_empty_body: () => 'No question drawn yet. The figures appear with the first draw.',
+  stats_empty_action: () => 'Go to the exam',
+  stats_synthesis: () => 'Overview',
+  stats_detail: () => 'Details',
   stats_error: () => 'The statistics could not be loaded.',
-  stats_headcount: () => 'Headcount',
+  stats_headcount: () => 'Key figures',
   stats_headcount_total: () => 'Students',
-  stats_headcount_done: () => 'Finished',
-  stats_headcount_in_progress: () => 'In progress',
-  stats_headcount_todo: () => 'Not started',
+  stats_headcount_done: () => 'Done',
   stats_headcount_absent: () => 'Absent',
-  stats_headcount_added: () => 'Added during the session',
+  stats_legend_done: ({ count }) => `${count} done`,
+  stats_legend_in_progress: ({ count }) => `${count} in progress`,
+  stats_legend_todo: ({ count }) => `${count} not started`,
+  stats_legend_absent: ({ count }) => `${count} absent`,
+  stats_legend_added: ({ count }) => `${count} added during the session`,
   stats_grades: () => 'Final scores',
   stats_grades_count: () => 'Scored students',
   stats_grades_min: () => 'Minimum',
@@ -1150,10 +1507,15 @@ const en: Dictionary<UiMessageParams> = {
   stats_grades_mean: () => 'Mean',
   stats_grades_median: () => 'Median',
   stats_grades_std_dev: () => 'Standard deviation',
-  stats_histogram: () => 'Histogram',
   stats_histogram_empty: () => 'No student has finished.',
-  stats_col_range: () => 'Score range',
-  stats_categories: () => 'Categories',
+  stats_histogram_aria: ({ count, bins }) =>
+    count === 1
+      ? `Score of the scored student: ${bins}`
+      : `Scores of the ${count} scored students: ${bins}`,
+  stats_histogram_bin: ({ count, from, to }) => `${count} between ${from} and ${to}`,
+  stats_categories: () => 'Success by category',
+  stats_category_counts: ({ scored, choices }) =>
+    `${scored} scored · ${choices} ${pluralEn(choices, 'pick', 'picks')}`,
   stats_tags: () => 'Tags',
   stats_tags_empty: () => 'No question has a tag.',
   stats_top_drawn: () => 'Most drawn questions',
@@ -1163,21 +1525,20 @@ const en: Dictionary<UiMessageParams> = {
   stats_strategies: () => 'Strategies',
   stats_strategies_empty: () => 'No student has finished.',
   stats_adjustments: () => 'Adjustments',
-  stats_adjustments_count: () => 'Count',
-  stats_adjustments_sum: () => 'Sum',
-  stats_adjustments_mean: () => 'Mean',
-  stats_col_category: () => 'Category',
+  stats_adjustments_sum: () => 'sum',
+  stats_adjustments_mean: () => 'mean',
   stats_col_tag: () => 'Tag',
   stats_col_question: () => 'Question',
-  stats_col_choices: () => 'Picks',
-  stats_col_scored: () => 'Scored questions',
-  stats_col_success_rate: () => 'Success rate',
+  stats_col_scored: () => 'Scored',
+  stats_col_success_rate: () => 'Success',
   stats_col_draws: () => 'Draws',
+  stats_col_share: () => 'Share',
+  stats_col_bar: () => 'Bar',
   stats_col_skips: () => 'Skips',
   stats_col_reasons: () => 'Reasons',
   stats_col_composition: () => 'Composition',
   stats_col_students: () => 'Students',
-  stats_col_mean_final: () => 'Mean final score',
+  stats_col_mean_final: () => 'Mean score',
   stats_times: ({ label, count }) => `${label} ×${count}`,
   stats_no_reason: () => 'no reason',
 }

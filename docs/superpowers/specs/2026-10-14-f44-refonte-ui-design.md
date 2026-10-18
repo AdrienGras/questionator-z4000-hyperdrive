@@ -1,7 +1,7 @@
 # F44 — Refonte UI (thème sombre, navigation, passe UX) — Design
 
 - **Date** : 2026-10-14
-- **Ticket** : #143 à #152 (découpage, voir « Découpage »)
+- **Ticket** : #143 à #152, puis #155 et #156 (découpage, voir « Découpage »)
 - **Branche** : une seule branche d'intégration pour tous les tickets, une seule PR vers `main` (voir D102)
 - **Statut** : design validé en conversation, figé ici avant le découpage en tickets et le plan d'implémentation.
 
@@ -96,6 +96,8 @@ Les couleurs des espaces sont choisies par nous ; les couleurs de catégorie son
 
 ## Phases et outils
 
+Artifacts des phases 1 et 2 (privés, URL aussi dans `docs/ENVIRONMENT.md`) : [canevas Design](https://claude.ai/artifact/DvvtZZb9ie2vknoXtHfnJL) et [design system « Questionator Z-4000 »](https://claude.ai/artifact/DMYaQZGYtm8RnJqbBMmBcy). La [carte des écrans](2026-10-17-f44-carte-des-ecrans.md) relie chaque artboard validé au code et aux tickets de la phase 3.
+
 ### Phase 1 — Inventaire
 
 - Un **canevas Design** (Artifact de type Design, privé) : un artboard par écran et par état clé (liste ci-dessous), redessiné fidèlement à partir du code source.
@@ -164,10 +166,12 @@ En phase 2 seulement (elles n'existent pas encore) : les artboards de `/sessions
 | 8 (#150) | Statistiques | Stats de session et d'entraînement | PR unique |
 | 9 (#151) | Entraînement | Mise en place, entraînement | PR unique |
 | 10 (#152) | Mode clair dérivé | Thème clair par dérivation du sombre, bascule réactivée, `defaultColorMode` de nouveau effectif | PR unique |
+| 11 (#155) | Guide, captures et README | Guide utilisateur et contributeur, captures régénérées, texte du README | PR unique |
+| 12 (#156) | Bannière animée du README | Vidéo refaite depuis les artboards (mode « motion » du canevas), formats de D100 | PR unique |
 
-Les tickets 3 à 10 sont **provisoires** : leur découpage est confirmé à la fin de la phase 2, quand on connaît l'ampleur des changements de disposition.
+Le découpage des tickets 3 à 10 a été **confirmé tel quel** à la fin de la phase 2 (D103) : les stats d'entraînement vont avec #150, la mise en place et l'écran d'entraînement avec #151. Le détail par écran est dans la [carte des écrans](2026-10-17-f44-carte-des-ecrans.md). Les tickets 11 et 12 ont été ajoutés pendant la phase 3 (D110) : la documentation et la bannière décrivent encore l'interface d'avant.
 
-**Branche et PR** : la branche d'intégration part de `main` à jour au début de la phase 3. La PR est ouverte en brouillon dès le premier commit de code, pour que Sonar analyse chaque poussée ; elle passe en « Ready for review » une fois le ticket 10 fait, CI et Sonar verts, et n'est mergée qu'avec le go explicite de l'utilisateur.
+**Branche et PR** : la branche d'intégration part de `main` à jour au début de la phase 3. La PR est ouverte en brouillon dès le premier commit de code, pour que Sonar analyse chaque poussée ; elle passe en « Ready for review » une fois le ticket 12 fait, CI et Sonar verts, et n'est mergée qu'avec le go explicite de l'utilisateur.
 
 ## Mémoire et documentation
 

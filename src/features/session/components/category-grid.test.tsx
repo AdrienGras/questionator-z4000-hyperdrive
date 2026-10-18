@@ -22,6 +22,7 @@ function mount(locale: 'fr' | 'en', showCategoryPoints = true) {
       config={config}
       student={makeStudent([])}
       disabled={false}
+      pending={false}
       onDraw={() => {}}
     />,
   )

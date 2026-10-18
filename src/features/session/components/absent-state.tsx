@@ -3,8 +3,9 @@ import type { SidePanelTab } from '@/features/session/hooks/use-side-panel'
 import type { Ui } from '@/lib/i18n/use-ui'
 
 /**
- * État affiché dans la zone de passage quand l'étudiant actif est marqué absent (§7). Le bouton
- * ouvre le tiroir sur l'onglet « Étudiant », où se trouve « Marquer présent » (F21, F38).
+ * État affiché dans la zone de passage quand l'étudiant actif est marqué absent (§7). « Marquer
+ * présent » est dans la colonne de droite (F44.7) ; le bouton ouvre le tiroir sur la liste, pour
+ * choisir un autre étudiant.
  */
 export function AbsentState({
   ui,
@@ -15,7 +16,7 @@ export function AbsentState({
     <div className="flex flex-col gap-2">
       <h2 className="text-lg font-semibold">{text('passage_absent_title', {})}</h2>
       <p className="text-muted-foreground">{text('passage_absent_body', {})}</p>
-      <Button variant="outline" className="self-start" onClick={() => onShowPanel('student')}>
+      <Button variant="outline" className="self-start" onClick={() => onShowPanel('students')}>
         {text('side_panel_show', {})}
       </Button>
     </div>

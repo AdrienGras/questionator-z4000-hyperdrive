@@ -76,6 +76,20 @@ describe('useTrainingSetup', () => {
     expect(await result.current.submit()).toBeUndefined()
   })
 
+  test('configReady : vrai dès une config valide, même base fermée', async () => {
+    const { result } = renderSetup('outdated')
+    expect(result.current.configReady).toBe(false)
+    await act(() => result.current.setConfigFile(configFile()))
+    expect(result.current.configReady).toBe(true)
+    expect(result.current.canSubmit).toBe(false)
+  })
+
+  test('configReady : faux pour une config invalide', async () => {
+    const { result } = renderSetup()
+    await act(() => result.current.setConfigFile(configFile('{"a":1}', 'mauvais.json')))
+    expect(result.current.configReady).toBe(false)
+  })
+
   test('texte collé : validé sous le nom config-collee.json', async () => {
     const { result } = renderSetup()
     act(() => result.current.setPasted(VALID))

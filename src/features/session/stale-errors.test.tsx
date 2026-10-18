@@ -49,7 +49,7 @@ test('tiroir : une erreur survenue tiroir fermé n’y réapparaît pas à l’o
 
 test('tiroir : une erreur survenue tiroir ouvert est affichée', async () => {
   await mountSession([alice, bob])
-  const dialog = await openSidePanel('Étudiants')
+  const dialog = await openSidePanel('Liste')
   failing.on = true
 
   fireEvent.click(within(dialog).getByRole('button', { name: /^Bob/u }))
@@ -59,7 +59,7 @@ test('tiroir : une erreur survenue tiroir ouvert est affichée', async () => {
 
 test('dialogue d’ajout : une erreur antérieure n’y apparaît pas à l’ouverture', async () => {
   await failDrawWhileClosed()
-  await openSidePanel('Étudiants')
+  await openSidePanel('Liste')
 
   fireEvent.click(screen.getByRole('button', { name: 'Ajouter un étudiant' }))
 
@@ -69,7 +69,7 @@ test('dialogue d’ajout : une erreur antérieure n’y apparaît pas à l’ouv
 
 test('dialogue d’ajout : un échec d’ajout dans le dialogue est affiché', async () => {
   await mountSession([alice, bob])
-  await openSidePanel('Étudiants')
+  await openSidePanel('Liste')
   fireEvent.click(screen.getByRole('button', { name: 'Ajouter un étudiant' }))
   failing.on = true
   fireEvent.change(screen.getByLabelText('Nom'), { target: { value: 'Martin' } })
@@ -113,7 +113,7 @@ test('tiroir : l’erreur périmée ne réapparaît pas après un nouveau rendu 
 
 test('dialogue d’ajout : l’erreur périmée ne réapparaît pas après un nouveau rendu de l’écran', async () => {
   await failDrawWhileClosed()
-  await openSidePanel('Étudiants')
+  await openSidePanel('Liste')
   fireEvent.click(screen.getByRole('button', { name: 'Ajouter un étudiant' }))
   const dialog = screen.getByRole('dialog', { name: 'Ajouter un étudiant' })
   expect(within(dialog).queryByRole('alert')).not.toBeInTheDocument()

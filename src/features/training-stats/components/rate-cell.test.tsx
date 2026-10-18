@@ -17,29 +17,18 @@ test('formatPercent : arrondi sans dérive flottante (0,145 donne 15 %, pas 14 %
   expect(formatPercent(0.285, 'en')).toBe('29%')
 })
 
-test('taux noté : pourcentage et barre nommée par le libellé', () => {
-  render(<RateCell ui={makeUi()} label="Facile" rate={0.82} />)
+test('taux noté : pourcentage lisible et barre décorative de même arrondi', () => {
+  const { container } = render(<RateCell ui={makeUi()} rate={0.145} color="#21d3ee" />)
 
-  // Le pourcentage visible est masqué aux lecteurs d'écran : la barre le porte déjà dans son nom.
-  expect(screen.getByText(percent(0.82), { normalizer: (s) => s })).toHaveAttribute(
+  expect(screen.getByText(percent(0.15), { normalizer: (s) => s })).not.toHaveAttribute(
     'aria-hidden',
-    'true',
   )
-  const bar = screen.getByRole('progressbar', { name: `Facile : ${percent(0.82)}` })
-  expect(bar).toHaveAttribute('aria-valuenow', '82')
+  expect(container.querySelector<HTMLElement>('[aria-hidden] > span')?.style.width).toBe('15%')
 })
 
 test('sans note : — et pas de barre', () => {
-  render(<RateCell ui={makeUi()} label="Facile" rate={null} />)
+  const { container } = render(<RateCell ui={makeUi()} rate={null} />)
 
-  // Sans barre, « — » reste la seule information : lisible par les lecteurs d'écran.
-  expect(screen.getByText('—')).not.toHaveAttribute('aria-hidden')
-  expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
-})
-
-test('barre et texte arrondis de la même façon : 0,145 donne 15 des deux côtés', () => {
-  render(<RateCell ui={makeUi()} label="Facile" rate={0.145} />)
-
-  const bar = screen.getByRole('progressbar', { name: `Facile : ${percent(0.15)}` })
-  expect(bar).toHaveAttribute('aria-valuenow', '15')
+  expect(screen.getByText('—')).toBeInTheDocument()
+  expect(container.querySelector('[aria-hidden]')).toBeNull()
 })

@@ -1,6 +1,6 @@
 # Préparer les fichiers
 
-Une session se crée à partir de deux fichiers : la liste des étudiants (un CSV) et la config (un JSON). Cette page explique comment les écrire. Les deux fichiers d'exemple sont un bon point de départ. Téléchargez-les par les liens « Télécharger la liste d'étudiants d'exemple » et « Télécharger la config d'exemple » de l'accueil (ou « Télécharger la liste d'exemple » et « Télécharger la config d'exemple » sur l'écran de création). Les liens directs, [students.example.csv](https://adriengras.github.io/questionator-z4000-hyperdrive/students.example.csv) et [config.example.json](https://adriengras.github.io/questionator-z4000-hyperdrive/config.example.json), peuvent s'ouvrir dans un onglet : faites alors un clic droit puis « Enregistrer le lien sous ».
+Une session se crée à partir de deux fichiers : la liste des étudiants (un CSV) et la config (un JSON). Cette page explique comment les écrire. Partez des deux fichiers d'exemple. Au premier lancement, l'accueil propose les liens « Liste d’étudiants d’exemple (.csv) » et « Config d’exemple (.json) » ; l'écran « Nouvelle session » a toujours les liens « Liste d’exemple » et « Config d’exemple », sous les zones de dépôt. Les liens directs, [students.example.csv](https://adriengras.github.io/questionator-z4000-hyperdrive/students.example.csv) et [config.example.json](https://adriengras.github.io/questionator-z4000-hyperdrive/config.example.json), peuvent s'ouvrir dans un onglet : faites alors un clic droit puis « Enregistrer le lien sous ».
 
 ## La liste des étudiants (CSV)
 
@@ -41,7 +41,7 @@ Sans en-tête reconnu, la première colonne est le nom, la deuxième le prénom,
 - Une ligne sans nom ou sans prénom est ignorée, avec un avertissement.
 - Si deux lignes portent le même nom et le même prénom, les deux sont conservées et l'application vous prévient. La comparaison ignore la casse et les accents : `Durand Alice` et `DURAND alice` sont le même étudiant. Le numéro de ligne est celui que vous voyez dans votre tableur.
 
-![Écran Nouvelle session avec un CSV de 11 étudiants : l'aperçu signale « Ligne 12 : Durand Alice figure déjà ligne 2. »](/screenshots/creation-avertissements.png)
+![Écran Nouvelle session avec un CSV de 11 étudiants : la zone de la liste indique « Fichier valide, avec avertissements » et l'aperçu signale « Ligne 12 : Durand Alice figure déjà ligne 2. »](/screenshots/creation-avertissements.png)
 
 Un avertissement ne bloque pas la création. Seuls deux cas la bloquent : un guillemet qui n'est jamais refermé, et un fichier sans aucun étudiant valide. Chaque message est expliqué dans [FAQ et dépannage](./depannage#csv_syntax) ; voir aussi [Le CSV est mal reconnu](./depannage#csv-mal-reconnu).
 
@@ -122,4 +122,4 @@ Voir [Questions](./reference-config#questions).
 
 ## Avant de créer la session
 
-Lors du dépôt, l'application vérifie la config et affiche l'aperçu : titre, matière, promotion, catégories avec leur nombre de questions, notation, nombre de skips. Une erreur bloque la création, un avertissement non. Chaque message est expliqué dans [FAQ et dépannage](./depannage). Les règles vérifiées sont listées en fin de la [Référence de la config](./reference-config#regles-verifiees-a-la-creation).
+Lors du dépôt, l'application vérifie les deux fichiers. La zone de dépôt affiche l'état du fichier : « Fichier valide », « Fichier valide, avec avertissements » ou « Fichier invalide ». L'aperçu résume la config : titre, matière, promotion, catégories avec leur nombre de questions et leur barème, notation, arrondi, skips autorisés. Une erreur bloque la création, un avertissement non : sous le bouton « Créer la session », une phrase indique ce qu'il reste à corriger. Chaque message est expliqué dans [FAQ et dépannage](./depannage). Les règles vérifiées sont listées en fin de la [Référence de la config](./reference-config#regles-verifiees-a-la-creation).

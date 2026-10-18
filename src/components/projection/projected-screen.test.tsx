@@ -80,3 +80,39 @@ test('racine en @container, className transmis', () => {
   const { container } = render(inFrench(<ProjectedScreen view={waiting} className="min-h-svh" />))
   expect(container.firstElementChild).toHaveClass('@container', 'min-h-svh')
 })
+
+test('écran final révélé : pas de tuiles de catégorie', () => {
+  const view: ProjectedStudentView = {
+    ...student('T1'),
+    current: undefined,
+    finished: true,
+    final: { final: 12, scale: 20, decimals: 2 },
+  }
+  const { container } = render(inFrench(<ProjectedScreen view={view} />))
+  expect(container.querySelector('[data-state]')).toBeNull()
+  expect(screen.getByText('Passage terminé')).toBeInTheDocument()
+})
+
+test('fini sans note révélée : tuiles indisponibles, pas de consigne', () => {
+  const view: ProjectedStudentView = {
+    ...student('T1'),
+    current: undefined,
+    finished: true,
+    categories: [{ id: 'algo', label: 'Algorithmique', exhausted: false, disabled: true }],
+  }
+  render(inFrench(<ProjectedScreen view={view} />))
+  expect(screen.getByText('Indisponible')).toBeInTheDocument()
+  expect(screen.queryByText('Choisissez une catégorie')).not.toBeInTheDocument()
+})
+
+test('attente : marque Questionator en bas de l’écran', () => {
+  render(inFrench(<ProjectedScreen view={waiting} />))
+  expect(screen.getByText('Questionator Z-4000')).toBeInTheDocument()
+})
+
+test('halos décoratifs, cachés aux lecteurs d’écran', () => {
+  const { container } = render(inFrench(<ProjectedScreen view={waiting} />))
+  const halos = container.querySelectorAll('[data-halo]')
+  expect(halos).toHaveLength(2)
+  for (const halo of halos) expect(halo.closest('[aria-hidden="true"]')).not.toBeNull()
+})

@@ -72,6 +72,29 @@ test('« Écran d’attente » enregistre l’attente puis se désactive', async
   await waitFor(() => expect(waiting()).toBeDisabled())
 })
 
+test('bascule : « Cet étudiant » pressé et désactivé quand l’actif est projeté', async () => {
+  await mountSession([A, B], { projection: { mode: 'student', studentId: 's-a' } })
+
+  const group = screen.getByRole('group', { name: 'Projection' })
+  expect(within(group).getByRole('button', { name: 'Projeter cet étudiant' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+  expect(project()).toBeDisabled()
+  // Libellé visible complet : « Cet étudiant » seul n'était pas clair (retour de validation).
+  expect(project()).toHaveTextContent('Projeter cet étudiant')
+  expect(project()).not.toHaveAttribute('aria-label')
+  expect(waiting()).toHaveAttribute('aria-pressed', 'false')
+})
+
+test('bascule : « Écran d’attente » pressé en attente', async () => {
+  await mountSession([A, B], { projection: { mode: 'waiting' } })
+
+  expect(waiting()).toHaveAttribute('aria-pressed', 'true')
+  expect(project()).toHaveAttribute('aria-pressed', 'false')
+  expect(open()).toHaveTextContent('Ouvrir')
+})
+
 test('sans étudiant actif, « Projeter cet étudiant » est désactivé', async () => {
   await mountSession([A, B], { activeStudentId: undefined })
 
@@ -268,7 +291,7 @@ test('aperçu : note finale révélée', async () => {
   const done = makeStudent([2, 1], { finalRevealedAt: '2026-09-25T10:00:00.000Z' })
   await mountSession([done], { projection: { mode: 'student', studentId: 'student-1' } })
 
-  await waitFor(() => expect(canvas().textContent).toMatch(/Note : .* \/ 20/))
+  await waitFor(() => expect(canvas().textContent).toMatch(/Note : .* sur 20/))
 })
 
 // L'attente sur un étudiant projeté inconnu est couverte par `domain/presentation/projected-view.test.ts`.
@@ -285,10 +308,10 @@ test('aperçu : étudiant projeté inconnu → session endommagée, aucun aperç
   expect(
     await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
   ).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: 'Exporter un backup' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Exporter une sauvegarde' })).toBeInTheDocument()
 })
 
-test('« Ouvrir » sur la ligne du titre de l’aperçu, pilotage sous l’aperçu, hors de l’en-tête', async () => {
+test('« Ouvrir » sur la ligne du titre de l’aperçu, bascule sous le canevas, hors de l’en-tête', async () => {
   await mountSession([A, B])
 
   expect(
@@ -299,10 +322,10 @@ test('« Ouvrir » sur la ligne du titre de l’aperçu, pilotage sous l’aper�
   expect(within(preview()).getByRole('button', { name: 'Ouvrir la vue projetée' })).toBe(open())
   expect(title.compareDocumentPosition(open()) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
   expect(open().compareDocumentPosition(canvas()) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
-  // Les deux boutons de pilotage restent sous l'aperçu, hors de sa région.
+  // La bascule de projection est dans la carte, sous le canevas (artboard `passage-question`).
   for (const button of [project(), waiting()]) {
-    expect(preview()).not.toContainElement(button)
-    expect(preview().compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+    expect(preview()).toContainElement(button)
+    expect(canvas().compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
   }
 })
 

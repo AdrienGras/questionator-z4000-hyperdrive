@@ -3,8 +3,8 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { db } from '@/lib/db/db'
 import { putSession } from '@/lib/db/sessions'
-import { categoryButton, outsidePanel } from '@/testing/passage-assertions'
-import { expectColorModeToggleLast, bannerInteractiveNames } from '@/testing/page-shell-assertions'
+import { categoryButton, outsidePanel, expectRawScore } from '@/testing/passage-assertions'
+import { bannerInteractiveNames } from '@/testing/page-shell-assertions'
 import { makeSession } from '@/testing/session-fixtures'
 import {
   makeConfig,
@@ -16,7 +16,10 @@ import { renderAt } from '@/testing/render-at'
 import {
   expectPanelClosed,
   expectPanelStaysOpen,
+  findSidePanel,
   openSidePanel,
+  querySidePanel,
+  sidePanel,
 } from '@/testing/side-panel-assertions'
 import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import type { Session, Student } from '@/domain/session/types'
@@ -58,9 +61,9 @@ function twoStudents(
  * l'étudiant.
  */
 async function studentButton(name: string): Promise<HTMLElement> {
-  const open = screen.queryByRole('dialog', { name: 'Panneau latéral' })
+  const open = querySidePanel()
   const dialog = open ?? (await openSidePanel())
-  fireEvent.click(within(dialog).getByRole('tab', { name: 'Étudiants' }))
+  fireEvent.click(within(dialog).getByRole('tab', { name: 'Liste' }))
   const button = within(within(dialog).getByRole('list', { name: 'Étudiants de la session' }))
     .getAllByRole('button')
     .find((b) => b.textContent.includes(name))
@@ -81,14 +84,15 @@ test("en-tête, liste des étudiants et changement d'étudiant actif", async () 
   await putSession(sessionWith(config, twoStudents(), 'student-1'))
   renderAt('/session/session-1')
 
-  expect(await screen.findByRole('heading', { name: config.exam.title })).toBeInTheDocument()
-  expect(screen.getByText('Durand Alice')).toBeInTheDocument()
-  expect(screen.getByText('Question 1 / 3')).toBeInTheDocument()
-  expect(screen.getByText('Score brut : 0')).toBeInTheDocument()
-  expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
+  expect(await screen.findByRole('heading', { level: 1, name: 'Durand Alice' })).toBeInTheDocument()
+  expect(screen.getByText('Question 1 sur 3')).toBeInTheDocument()
+  expect(screen.getByText('Score brut')).toBeInTheDocument()
+  expect(screen.getByText('/ 2')).toBeInTheDocument()
+  const trail = within(screen.getByRole('navigation', { name: "Fil d'Ariane" }))
+  expect(trail.getByRole('link', { name: 'Sessions' })).toHaveAttribute('href', '/sessions')
 
   expect(screen.queryByRole('combobox', { name: 'Étudiant' })).not.toBeInTheDocument()
-  const dialog = await openSidePanel('Étudiants')
+  const dialog = await openSidePanel('Liste')
   // Premier bouton de chaque ligne : le second est le bouton d'absence (F38).
   const rows = within(within(dialog).getByRole('list', { name: 'Étudiants de la session' }))
     .getAllByRole('listitem')
@@ -106,6 +110,30 @@ test("en-tête, liste des étudiants et changement d'étudiant actif", async () 
   expect(updated?.activeStudentId).toBe('student-2')
 })
 
+test('étudiant terminé : pastille « Passage terminé » dans l’en-tête, ni progression ni score', async () => {
+  const config = makeConfig({ questionsPerStudent: 1 })
+  const done = makeStudent([1], { finalRevealedAt: '2026-09-25T10:00:00.000Z' })
+  await putSession(sessionWith(config, [done, makeSecondStudent()], 'student-1'))
+  renderAt('/session/session-1')
+
+  const header = (await screen.findByRole('heading', { level: 1, name: 'Durand Alice' })).closest(
+    'header',
+  )!
+  expect(within(header).getByText('Passage terminé')).toBeInTheDocument()
+  expect(within(header).queryByText('Score brut')).not.toBeInTheDocument()
+  expect(within(header).queryByText(/^Question \d sur/)).not.toBeInTheDocument()
+})
+
+test('aucun étudiant actif : le titre de l’oral en titre de page', async () => {
+  const config = makeConfig({ questionsPerStudent: 3 })
+  await putSession(sessionWith(config, twoStudents(), undefined))
+  renderAt('/session/session-1')
+
+  expect(
+    await screen.findByRole('heading', { level: 1, name: config.exam.title }),
+  ).toBeInTheDocument()
+})
+
 test('activeStudentId inconnu : session endommagée, vue examinateur non ouverte (F31)', async () => {
   const config = makeConfig({ questionsPerStudent: 3 })
   await putSession(sessionWith(config, twoStudents(), 'inconnu'))
@@ -114,7 +142,7 @@ test('activeStudentId inconnu : session endommagée, vue examinateur non ouverte
   expect(
     await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
   ).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: 'Exporter un backup' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Exporter une sauvegarde' })).toBeInTheDocument()
   expect(screen.queryByText(/^Question /)).not.toBeInTheDocument()
 })
 
@@ -164,20 +192,40 @@ async function absentAliceSession() {
   await putSession(sessionWith(config, [{ ...alice, absent: true }, bob], 'student-1'))
 }
 
-test('étudiant absent : « Afficher le panneau » ouvre l’onglet « Étudiant »', async () => {
+test('étudiant absent : « Marquer présent » sur la page, « Afficher le panneau » ouvre la liste', async () => {
   localStorage.clear()
   await absentAliceSession()
   renderAt('/session/session-1')
 
   await screen.findByRole('heading', { name: 'Étudiant absent' })
+  expect(screen.getByRole('button', { name: 'Marquer présent' })).toBeVisible()
   fireEvent.click(screen.getByRole('button', { name: 'Afficher le panneau' }))
 
-  const dialog = await screen.findByRole('dialog', { name: 'Panneau latéral' })
-  expect(within(dialog).getByRole('tab', { name: 'Étudiant' })).toHaveAttribute(
+  const dialog = await findSidePanel()
+  expect(within(dialog).getByRole('tab', { name: 'Liste' })).toHaveAttribute(
     'aria-selected',
     'true',
   )
-  expect(within(dialog).getByRole('button', { name: 'Marquer présent' })).toBeVisible()
+})
+
+test('commentaire visible sur la page, sans ouvrir le panneau', async () => {
+  const config = makeConfig({ questionsPerStudent: 3 })
+  await putSession(sessionWith(config, twoStudents(), 'student-1'))
+  renderAt('/session/session-1')
+
+  expect(await screen.findByRole('textbox', { name: 'Commentaire' })).toBeVisible()
+  expect(screen.getByRole('button', { name: 'Marquer absent' })).toBeVisible()
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+})
+
+test('étudiant terminé : commentaire présent, pas de carte « Note »', async () => {
+  const config = makeConfig({ questionsPerStudent: 1 })
+  const done = makeStudent([1], { finalRevealedAt: '2026-09-25T10:00:00.000Z' })
+  await putSession(sessionWith(config, [done, makeSecondStudent()], 'student-1'))
+  renderAt('/session/session-1')
+
+  expect(await screen.findByRole('textbox', { name: 'Commentaire' })).toBeVisible()
+  expect(screen.queryByRole('region', { name: 'Noter la question' })).not.toBeInTheDocument()
 })
 
 test('aucun étudiant : « Afficher le panneau » ouvre l’onglet « Étudiants »', async () => {
@@ -188,8 +236,8 @@ test('aucun étudiant : « Afficher le panneau » ouvre l’onglet « Étudiants
   await screen.findByRole('heading', { name: 'Aucun étudiant sélectionné' })
   fireEvent.click(screen.getByRole('button', { name: 'Afficher le panneau' }))
 
-  const dialog = await screen.findByRole('dialog', { name: 'Panneau latéral' })
-  expect(within(dialog).getByRole('tab', { name: 'Étudiants' })).toHaveAttribute(
+  const dialog = await findSidePanel()
+  expect(within(dialog).getByRole('tab', { name: 'Liste' })).toHaveAttribute(
     'aria-selected',
     'true',
   )
@@ -258,6 +306,37 @@ test('clic sur une catégorie tire une question et désactive la grille', async 
   expect(await categoryButton('A')).toBeDisabled()
 })
 
+test('question en carte : catégorie et points, titre, énoncé, éléments de réponse repliés', async () => {
+  await putSession(passageSession())
+  renderAt('/session/session-1')
+
+  fireEvent.click(await categoryButton('A'))
+  const card = await screen.findByRole('region', { name: 'Question en cours' })
+  const attempt = await pendingAttempt()
+  const question = answeredCategory.questions.find((q) => q.id === attempt.questionId)!
+  expect(within(card).getByText('A')).toBeInTheDocument()
+  expect(within(card).getByText(/pts?$/)).toBeInTheDocument()
+  expect(within(card).getByRole('heading', { level: 2, name: question.title })).toBeInTheDocument()
+  expect(within(card).getByText('Éléments de réponse').closest('details')).not.toHaveAttribute(
+    'open',
+  )
+})
+
+test('« Tirage suivant » : indice pendant une question, tuiles désactivées', async () => {
+  await putSession(passageSession())
+  renderAt('/session/session-1')
+
+  expect(
+    await screen.findByRole('heading', { level: 2, name: 'Tirage suivant' }),
+  ).toBeInTheDocument()
+  expect(screen.queryByText('Disponible une fois la question notée')).not.toBeInTheDocument()
+  expect(await categoryButton('A')).toBeEnabled()
+
+  fireEvent.click(await categoryButton('A'))
+  expect(await screen.findByText('Disponible une fois la question notée')).toBeInTheDocument()
+  expect(await categoryButton('A')).toBeDisabled()
+})
+
 test('les éléments de réponse restent repliés tant que l’examinateur ne les ouvre pas', async () => {
   await putSession(passageSession())
   renderAt('/session/session-1')
@@ -290,7 +369,7 @@ test('noter la question ferme le panneau, réactive la grille et un second tirag
   fireEvent.click(screen.getByText('Éléments de réponse'))
   fireEvent.click(screen.getByRole('button', { name: 'Noter 1' }))
 
-  await screen.findByText('Score brut : 1')
+  await expectRawScore('1')
   expect(await categoryButton('A')).not.toBeDisabled()
 
   fireEvent.click(await categoryButton('A'))
@@ -312,8 +391,8 @@ test('boutons de note en fr (0, 0,5, 1) ; noter met à jour l’en-tête et réa
 
   fireEvent.click(screen.getByRole('button', { name: 'Noter 0,5' }))
 
-  expect(await screen.findByText('Score brut : 0,5')).toBeInTheDocument()
-  expect(screen.getByText('Question 2 / 2')).toBeInTheDocument()
+  await expectRawScore('0,5')
+  expect(screen.getByText(/^Question 2 sur 2/)).toBeInTheDocument()
   expect(await categoryButton('A')).not.toBeDisabled()
 })
 
@@ -324,7 +403,7 @@ test('la note qui atteint questionsPerStudent affiche « Passage terminé »', a
   fireEvent.click(await categoryButton('A'))
   await screen.findByText('Éléments de réponse')
   fireEvent.click(screen.getByRole('button', { name: 'Noter 1' }))
-  await screen.findByText('Score brut : 1')
+  await expectRawScore('1')
 
   fireEvent.click(await categoryButton('A'))
   await screen.findByText('Éléments de réponse')
@@ -377,7 +456,7 @@ test('double-clic sur « Noter 1 » ne note qu’une fois, sans alerte affichée
   fireEvent.click(scoreButton)
   fireEvent.click(scoreButton)
 
-  await screen.findByText('Score brut : 1')
+  await expectRawScore('1')
   const stored = await db.sessions.get('session-1')
   const scored = stored?.students[0]?.attempts.filter((a) => a.outcome === 'scored')
   expect(scored).toHaveLength(1)
@@ -499,7 +578,7 @@ test('barème décimal en locale « en » : le bouton de note et le score suiven
 
   fireEvent.click(screen.getByRole('button', { name: 'Score 0.5' }))
 
-  expect(await screen.findByText('Raw score: 0.5')).toBeInTheDocument()
+  await expectRawScore('0.5', 'Raw score')
 })
 
 test('erreur affichée même hors du panneau de passage (étudiant retiré entre le rendu et la sélection)', async () => {
@@ -521,7 +600,7 @@ test('erreur affichée même hors du panneau de passage (étudiant retiré entre
   fireEvent.click(bobButton)
   await removal
 
-  const dialog = screen.getByRole('dialog', { name: 'Panneau latéral' })
+  const dialog = sidePanel()
   await within(dialog).findByRole('alert')
   fireEvent.keyDown(dialog, { key: 'Escape' })
   await expectPanelClosed()
@@ -557,7 +636,7 @@ test('échec du changement d’étudiant : le tiroir reste ouvert', async () => 
   fireEvent.click(bobButton)
   await removal
 
-  const dialog = screen.getByRole('dialog', { name: 'Panneau latéral' })
+  const dialog = sidePanel()
   expect(await within(dialog).findByRole('alert')).toHaveTextContent(
     'Cet étudiant n’existe plus dans la session.',
   )
@@ -568,7 +647,7 @@ test("onglet « Étudiants » : bouton-lien « Statistiques » vers l'écran des
   await putSession(sessionWith(makeConfig(), twoStudents(), 'student-1'))
   renderAt('/session/session-1')
 
-  const dialog = await openSidePanel('Étudiants')
+  const dialog = await openSidePanel('Liste')
   const link = within(dialog).getByRole('link', { name: 'Statistiques' })
   expect(link.getAttribute('href')).toMatch(/\/session\/session-1\/stats$/u)
 })
@@ -603,18 +682,17 @@ test('grille de 5 catégories : 3 + 2, disposition inchangée après un tirage (
   expect(gridLayout()).toEqual(expected)
 })
 
-test('barre de titre : retour, titre de l’examen, panneau puis thème', async () => {
+test('barre de titre : fil d’Ariane, nom de l’étudiant, puis panneau', async () => {
   const session = passageSession()
   await putSession(session)
   renderAt('/session/session-1')
 
   const title = await screen.findByRole('heading', { level: 1 })
-  expect(title).toHaveTextContent(session.config.exam.title)
+  expect(title).toHaveTextContent('Durand Alice')
   const names = bannerInteractiveNames()
-  expect(names[0]).toBe('Retour à l’accueil')
+  expect(names[0]).toBe('Sessions')
   expect(names[1]).toBe('Panneau')
   expect(names).not.toContain('Ouvrir la vue projetée')
-  expectColorModeToggleLast()
 })
 
 test('sans étudiant actif : pas de ligne d’infos, contrôles de projection dans la colonne droite, thème présent', async () => {
@@ -625,5 +703,4 @@ test('sans étudiant actif : pas de ligne d’infos, contrôles de projection da
   const banner = within(screen.getByRole('banner'))
   expect(screen.getByRole('button', { name: 'Ouvrir la vue projetée' })).toBeInTheDocument()
   expect(banner.queryByText(/Question/)).not.toBeInTheDocument()
-  expectColorModeToggleLast()
 })

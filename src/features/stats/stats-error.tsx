@@ -12,7 +12,7 @@ export function StatsError() {
   const { text } = useUi()
   const { sessionId } = route.useParams()
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center gap-4 p-6 text-center">
+    <main className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
       <h1 className="text-2xl font-bold">{text('stats_error', {})}</h1>
       <Link to="/session/$sessionId" params={{ sessionId }} className={TEXT_LINK_CLASS}>
         {text('stats_back', {})}

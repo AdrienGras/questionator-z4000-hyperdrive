@@ -25,26 +25,25 @@ function value(label: string): string {
   return screen.getByText(label).nextElementSibling?.textContent ?? ''
 }
 
-test('étudiant terminé : cinq valeurs chiffrées', () => {
+test('étudiant terminé : brute sur le maximum, plafonnée, convertie, ajustement ; finale dans la jauge', () => {
   const student = makeStudent([1], { adjustment: { value: 1, reason: 'bonus' } })
   renderScores(student, config)
 
-  expect(value('Note brute')).toBe('1')
+  expect(value('Note brute')).toBe('1 / 2')
   expect(value('Note plafonnée')).toBe('1')
   expect(value('Note convertie')).toBe('10,00')
   expect(value('Ajustement')).toBe('+1,00bonus')
-  expect(value('Note finale')).toBe('11,00 / 20')
+  expect(screen.queryByText('Note finale')).not.toBeInTheDocument()
 })
 
-test('étudiant en cours : convertie et finale « — », ajustement « aucun »', () => {
+test('étudiant en cours : convertie « — », ajustement « aucun »', () => {
   const student = makeStudent([1, 'pending'])
   renderScores(student, makeConfig({ questionsPerStudent: 2, maxRawScore: 4, finalScale: 20 }))
 
-  expect(value('Note brute')).toBe('1')
+  expect(value('Note brute')).toBe('1 / 4')
   expect(value('Note plafonnée')).toBe('1')
   expect(value('Note convertie')).toBe('—')
   expect(value('Ajustement')).toBe('aucun')
-  expect(value('Note finale')).toBe('—')
 })
 
 test('ajustement nul enregistré : « aucun », puis le motif', () => {

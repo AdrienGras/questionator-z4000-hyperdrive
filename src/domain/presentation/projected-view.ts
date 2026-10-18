@@ -1,6 +1,8 @@
 import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import { currentPending, isCategoryExhausted, questionIndex } from '@/domain/passage/selectors'
+import { stepDecimals } from '@/domain/scoring/format'
 import { fromMilli } from '@/domain/scoring/milli'
+import { stepMilli } from '@/domain/scoring/rounding'
 import { computeScores, type ScoreBreakdown } from '@/domain/scoring/score'
 import { studentStatus } from '@/domain/scoring/status'
 import type { Session, Student } from '@/domain/session/types'
@@ -37,12 +39,15 @@ export type ProjectedView =
       current?: { categoryId: string; prompt: string; drawnAt: string }
       questionIndex: { current: number; total: number }
       cumulativeRaw?: number
-      final?: { raw?: number; final?: number; scale: number }
+      /** `decimals` : celles du pas d'arrondi, pour formater la note comme partout (D103). */
+      final?: { raw?: number; final?: number; scale: number; decimals: number }
       finished: boolean
       drawAnimation: boolean
       detail?: {
         /** Clé de ligne : une question n'est tirée qu'une fois par étudiant. */
         questionId: string
+        /** Couleur et icône de la catégorie, lues dans `categories` (D103, D69 élargie). */
+        categoryId: string
         categoryLabel: string
         title: string
         points?: number
@@ -75,6 +80,7 @@ function finalOf(scores: ScoreBreakdown, config: NormalizedConfig): ProjectedStu
     ...(finalScoreDisplay !== 'converted' && { raw: fromMilli(scores.raw) }),
     ...(finalScoreDisplay !== 'raw' && final !== null && { final: fromMilli(final) }),
     scale: config.scoring.finalScale,
+    decimals: stepDecimals(stepMilli(config)),
   }
 }
 
@@ -88,6 +94,7 @@ function detailOf(student: Student, config: NormalizedConfig): ProjectedStudentV
     const skipped = attempt.outcome === 'skipped'
     detail.push({
       questionId: attempt.questionId,
+      categoryId: category.id,
       categoryLabel: category.label,
       title: question?.title ?? attempt.questionId,
       ...(!skipped && attempt.score !== undefined && { points: attempt.score }),

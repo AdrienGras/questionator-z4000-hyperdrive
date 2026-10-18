@@ -98,3 +98,48 @@ test('sans maxPoints (showCategoryPoints à false) : aucun point affiché', () =
   render(<CategoryTiles ui={makeUi()} categories={[hidden]} />)
   expect(tile('Catégorie a')).not.toHaveTextContent(/\bpts?\b/)
 })
+
+test('grille : consigne « Choisissez une catégorie »', () => {
+  render(<CategoryTiles ui={makeUi()} variant="grid" categories={[category('a')]} />)
+  expect(
+    screen.getByRole('heading', { level: 2, name: 'Choisissez une catégorie' }),
+  ).toBeInTheDocument()
+})
+
+test('rangée : catégorie courante marquée, autres atténuées', () => {
+  render(
+    <CategoryTiles
+      ui={makeUi()}
+      variant="row"
+      currentCategoryId="b"
+      categories={[category('a', { disabled: true }), category('b', { disabled: true })]}
+    />,
+  )
+  expect(screen.getByRole('list', { name: 'Catégories' })).toBeInTheDocument()
+  expect(tile('Catégorie b')).toHaveAttribute('aria-current', 'true')
+  expect(tile('Catégorie a')).not.toHaveAttribute('aria-current')
+  expect(tile('Catégorie a')).toHaveClass('opacity-45')
+  expect(screen.queryByRole('heading')).not.toBeInTheDocument()
+})
+
+test('grille : un libellé sans espace coupe au lieu de déborder', () => {
+  render(<CategoryTiles ui={makeUi()} variant="grid" categories={[category('a')]} />)
+  expect(screen.getByText('Catégorie a')).toHaveClass('wrap-anywhere')
+})
+
+test('grille : tuiles resserrées dès quatre par ligne (D74, 7 catégories et plus)', () => {
+  const many = Array.from({ length: 7 }, (_, i) => category(String(i)))
+  render(<CategoryTiles ui={makeUi()} variant="grid" categories={many} />)
+  expect(tile('Catégorie 0')).toHaveAttribute('data-density', 'compact')
+})
+
+test('grille : tuiles pleines jusqu’à trois par ligne', () => {
+  const six = Array.from({ length: 6 }, (_, i) => category(String(i)))
+  render(<CategoryTiles ui={makeUi()} variant="grid" categories={six} />)
+  expect(tile('Catégorie 0')).toHaveAttribute('data-density', 'full')
+})
+
+test('grille : contenu des tuiles centré', () => {
+  render(<CategoryTiles ui={makeUi()} variant="grid" categories={[category('a')]} />)
+  expect(tile('Catégorie a')).toHaveClass('items-center', 'text-center')
+})

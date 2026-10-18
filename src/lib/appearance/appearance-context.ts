@@ -4,9 +4,12 @@ import { colorModeKey, type ColorMode, type EffectiveMode } from './color-mode'
 /** Surcharges de tokens shadcn d'un mode : nom sans `--` → valeur CSS (D15). */
 export type ThemeTokens = Readonly<Record<string, string | undefined>>
 
-/** Ce qu'un écran demande à l'apparence : clé de mémorisation, mode par défaut, thème éventuel. */
+/**
+ * Ce qu'un écran demande à l'apparence : clé de mémorisation, mode par défaut, thème éventuel. Sans
+ * `key`, aucun choix n'est lu ni écrit (vue projetée, qui n'a pas de bascule : D112).
+ */
 export type AppearanceScope = Readonly<{
-  key: string
+  key?: string
   defaultMode: ColorMode
   theme?: { light: ThemeTokens; dark: ThemeTokens }
 }>

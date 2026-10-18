@@ -1,8 +1,11 @@
+import { IconDownload } from '@tabler/icons-react'
+import { PROMPT_CLASS, PROMPT_TILE_CLASS } from '@/components/prompt-classes'
 import { Button } from '@/components/ui/button'
 import { useDbStatus } from '@/lib/db/hooks'
 import { useUi } from '@/lib/i18n/use-ui'
 import { usePwaUpdate } from '@/lib/pwa/hooks'
 import { pwaUpdate, type PwaUpdate } from '@/lib/pwa/pwa-update'
+import { cn } from '@/lib/utils'
 
 /**
  * Pastille « Nouvelle version disponible » (D72), en `waiting` comme en `activated`. Absente en
@@ -14,8 +17,14 @@ export function UpdatePrompt({ update = pwaUpdate }: Readonly<{ update?: PwaUpda
   const dbStatus = useDbStatus()
   if (status === 'current' || dbStatus === 'outdated') return null
   return (
-    <output className="fixed right-4 bottom-4 z-50 flex items-center gap-3 rounded-lg border bg-background p-3 shadow-lg">
-      <p className="text-sm">{text('update_available', {})}</p>
+    <output className={PROMPT_CLASS}>
+      <span aria-hidden className={cn(PROMPT_TILE_CLASS, 'bg-primary/16 text-link')}>
+        <IconDownload className="size-5" />
+      </span>
+      <span className="flex flex-1 flex-col gap-0.5">
+        <strong className="font-semibold">{text('update_available', {})}</strong>
+        <span className="text-sm text-muted-foreground">{text('update_available_body', {})}</span>
+      </span>
       <Button size="sm" onClick={() => void applyUpdate()}>
         {text('update_reload', {})}
       </Button>

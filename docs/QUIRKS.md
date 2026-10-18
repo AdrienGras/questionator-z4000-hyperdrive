@@ -433,7 +433,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Découvert** : F15, contrôle du bundle initial.
 **Symptôme** : sans groupe `codeSplitting` nommé, Rolldown range Recharts et ses d3 dans le chunk de la route qui l'importe ; le manifeste Vite ne contient alors aucune clé `node_modules/recharts/…` ni chunk dédié, et un contrôle qui cherche Recharts dans le graphe initial passe sans rien voir, fuite ou pas.
 **Workaround** : groupe nommé `recharts` dans `build.rolldownOptions.output.codeSplitting.groups` (clé `_recharts-<hash>.js` dans le manifeste), et garde-fou de non-vacuité dans `check:bundle` : échec si ce chunk n'existe pas ou si la route des statistiques ne l'atteint plus.
-**Référence** : `vite.config.ts`, `scripts/check-initial-bundle.ts` (`findVacuityProblems`).
+**Référence** : `vite.config.ts`, `scripts/check-initial-bundle.ts` (`findVacuityProblems`). *Recharts sorti du projet en F44.8 (D109) ; le mécanisme vaut toujours pour les groupes `xlsx` et `codemirror`.*
 
 ## Un groupe `codeSplitting` embarque ses dépendances partagées : React finit dans `_recharts-*` (2026-09-30)
 
@@ -814,7 +814,7 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Découvert** : F28 (#72), `pnpm docs:screenshots`.
 **Symptôme** : deux exécutions donnent des PNG différents : barre d'histogramme à mi-hauteur, dates changeantes, icône « Stockage non garanti », pastille de mise à jour, anneau de focus sur un champ.
 **Cause** : `animations: 'disabled'` ne couvre pas l'animation JS de recharts ; `storage.persisted()` est faux en Chromium headless ; un service worker actif peut afficher la pastille de mise à jour ; un champ resté actif dessine son anneau de focus.
-**Workaround** : attendre une barre dessinée à hauteur non nulle et stable (400 ms d'écart) ; `context.clock.setFixedTime` (pas `clock.install`, qui figerait ou ferait dériver les minuteries) ; stubs `storage.persisted/persist` à vrai ; `serviceWorkers: 'block'` ; attendre `document.fonts.ready` ; `blur()` des champs avant capture ; PRNG mulberry32 de graine 72 injecté par `context.addInitScript` (couvre la popup projetée). Les écrans de session sont sombres parce que la config d'exemple fixe `presentation.defaultColorMode` à sombre.
+**Workaround** : attendre une barre dessinée à hauteur non nulle et stable (400 ms d'écart ; depuis F44.8, l'histogramme est en `div` sans animation : une barre `[data-bar]` visible suffit) ; `context.clock.setFixedTime` (pas `clock.install`, qui figerait ou ferait dériver les minuteries) ; stubs `storage.persisted/persist` à vrai ; `serviceWorkers: 'block'` ; attendre `document.fonts.ready` ; `blur()` des champs avant capture ; PRNG mulberry32 de graine 72 injecté par `context.addInitScript` (couvre la popup projetée). Les écrans de session sont sombres parce que la config d'exemple fixe `presentation.defaultColorMode` à sombre.
 **Référence** : `e2e/screenshots/determinism.ts`, `e2e/screenshots/guide.spec.ts`.
 
 ## Slugs d'ancre GitHub et VitePress différents : un lien `blob/main/…#ancre` se vérifie à part (2026-10-03)
@@ -880,3 +880,230 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : l'action Sonar vérifie la signature du scanner avec une clé GPG téléchargée depuis des serveurs de clés publics ; quand ils sont indisponibles, l'étape échoue avant toute analyse, et SonarQube Cloud n'a donc rien à rendre pour la PR.
 **Workaround** : avant d'attendre Sonar, regarder `gh pr checks <n>`. Si `check` est rouge sur l'import de clé, relancer le job (`gh run rerun <run-id> --failed`) : c'est un incident réseau, pas un défaut de la PR.
 **Référence** : `.github/workflows/ci.yml` (étape « Analyse SonarQube Cloud »), `.claude/scripts/sonar-check.sh`.
+
+## Artboards du canevas : `<pre><code>` en Courier et `line-height` hérité qui décale une ligne (2026-10-17)
+
+**Découvert** : revue de rendu des maquettes F44 (#144).
+**Symptôme** : (1) un bloc de code d'artboard s'affiche en police à empattements fine alors que le `<pre>` déclare Geist Mono ; (2) dans une carte de stats, le libellé sous « 38 / 60 » descend de quelques pixels par rapport à celui de « 72 % » à côté.
+**Cause** : (1) les artboards n'ont pas le preflight de Tailwind : la feuille du navigateur donne `font-family: monospace` à `<code>`, qui ne hérite donc pas du `<pre>` ; (2) un `<span>` plus petit (« / 60 » en 18 px) hérite du `line-height` en px de son parent (36 px) et agrandit la boîte de ligne.
+**Workaround** : `style="font: inherit"` sur le `<code>` d'un `<pre>` ; `line-height: 1` sur le suffixe plus petit. Dans l'app, le preflight règle le premier cas ; le second peut s'y reproduire avec un `leading-*` en px.
+**Référence** : canevas F44 (`apres/projection-question`, `apres/entrainement-question`, `apres/trainings`).
+
+## Les e2e lisent des valeurs de token minifiées par le build (2026-10-17)
+
+**Découvert** : F44.3, `e2e/appearance.spec.ts`.
+**Symptôme** : `getComputedStyle(document.documentElement).getPropertyValue('--background')` rend `oklch(14.5% 0 0)` au lieu de `oklch(0.145 0 0)`, et `--radius` rend `.625rem`.
+**Cause** : le serveur web de Playwright sert le build de production, dont la CSS est minifiée ; une propriété personnalisée garde le texte minifié tel quel.
+**Workaround** : comparer une propriété calculée, normalisée par le navigateur (`getComputedStyle(document.body).backgroundColor` → `oklch(0.16 0.02 292)`), ou une longueur résolue (`border-top-left-radius` → `18px`), jamais le texte brut d'un token.
+**Référence** : `e2e/appearance.spec.ts`.
+
+## Publier sur le canevas ou le design system exige une lecture complète d'abord (2026-10-17)
+
+**Découvert** : F44.3, tâche 1 (alignement du design system sur D103).
+**Symptôme** : la publication est refusée (« You haven't viewed the latest version of this artifact ») alors que les fichiers modifiés venaient d'être lus avec `read` + `path`.
+**Cause** : lire un fichier par `path` ne compte pas comme avoir vu la version ; seule la lecture de l'artifact entier (`read` avec `url` seul) le fait.
+**Workaround** : `Artifact` `read` sur l'URL (sans `path`) dans la session, puis publier avec `root` et `files` ; les fichiers déjà lus restent valables si la version n'a pas changé.
+**Référence** : URL des deux Artifacts dans `docs/ENVIRONMENT.md`.
+
+## Infobulle base-ui : aucun rôle ARIA, et ouverte au focus clavier seulement (2026-10-17)
+
+**Découvert** : F44.4, `e2e/menu.spec.ts` (menu replié).
+**Symptôme** : `getByRole('tooltip', { name: 'Sessions' })` ne trouve rien alors que l'infobulle s'affiche au survol ; puis, au focus, l'infobulle ne s'ouvre pas du tout.
+**Cause** : `Tooltip.Popup` de base-ui ne pose aucun `role` ; et il ne s'ouvre au focus que sur `:focus-visible`, ce qu'un `locator.focus()` programmatique ne déclenche pas.
+**Workaround** : `role="tooltip"` passé au `TooltipContent` ; en e2e, focaliser l'élément précédent puis `page.keyboard.press('Tab')`.
+**Référence** : `src/components/menu/menu-links.tsx`, `e2e/menu.spec.ts`.
+
+## `Link` TanStack pose son propre `aria-current` dès qu'il est actif, par préfixe (2026-10-17)
+
+**Découvert** : F44.4, menu latéral.
+**Symptôme** : un lien vers `/` serait marqué `aria-current="page"` sur toutes les routes ; un `aria-current` passé en prop est écrasé quand TanStack juge le lien actif.
+**Cause** : `applyLinkState` ajoute `aria-current="page"` (et `data-status="active"`) quand `resolveIsActive` est vrai, ce qui est le cas par défaut dès que le chemin courant commence par celui du lien.
+**Workaround** : `activeOptions={{ exact: true }}` sur les liens dont on calcule soi-même l'état actif (`activeMenuItem`).
+**Référence** : `src/components/menu/menu-links.tsx`, `node_modules/@tanstack/react-router/dist/esm/link.js`.
+
+## `toHaveClass(...buttonVariants(...).split(' '))` échoue sur un `Button` (2026-10-17)
+
+**Découvert** : F44.4, `damaged-session.test.tsx`.
+**Symptôme** : un `Button variant="default"` n'a pas toutes les classes de `buttonVariants({ variant: 'default' })`.
+**Cause** : `Button` passe ses classes par `cn` (tailwind-merge), qui retire les doublons de taille d'icône de la chaîne brute ; un `Link` stylé par `buttonVariants(...)` garde la chaîne brute.
+**Workaround** : comparer à `cn(buttonVariants(...)).split(' ')` pour un `Button`, à la chaîne brute pour un lien.
+**Référence** : `src/components/damaged-session.test.tsx`.
+
+
+## Le garde-fou `heavy-doubles` prend un simple `href` vers `config.example.json` pour un rendu de la config d'exemple (2026-10-17)
+
+**Découvert** : F44.5, `first-run.test.tsx`.
+**Symptôme** : `src/testing/heavy-doubles.test.ts` échoue et réclame les doublures des icônes et du surligneur dans un test qui ne rend aucune config, seulement le lien de téléchargement de l'exemple.
+**Cause** : le garde-fou lit les sources des `.test.tsx` et cherche le texte `config.example.json` (ou `<ConfigEditorPage`) ; une assertion `toHaveAttribute('href', `${base}config.example.json`)` contient ce texte.
+**Workaround** : vérifier le lien par une regex (`toMatch(/config\.example\.json$/)`), avec un commentaire qui dit pourquoi ; ne pas ajouter de doublures inutiles. Un test qui rend vraiment la config d'exemple garde la règle.
+**Référence** : `src/testing/heavy-doubles.test.ts`, `src/features/home/components/first-run.test.tsx`.
+
+## Après `useLiveQuery`, l'accueil rend son en-tête avant ses sections : `getBy` d'un titre de section échoue (2026-10-17)
+
+**Découvert** : F44.5, `home-page.test.tsx` (test en anglais).
+**Symptôme** : `getByRole('heading', { name: 'Spaces' })` échoue juste après un `findBy` du `h1`, alors que la section s'affiche bien.
+**Cause** : le `h1` vient de `PageShell`, rendu tout de suite ; « Reprendre » et « Espaces » attendent la lecture des deux listes (`useSessions`, `useTrainings`), qui arrive au rendu suivant.
+**Workaround** : attendre une section par `findBy`, jamais `getBy` après le seul `h1`.
+**Référence** : `src/features/home/home-page.tsx`.
+
+## Sur le tailnet en `http://`, créer une session ou un entraînement échoue : `crypto.randomUUID` absent hors contexte sécurisé (2026-10-17)
+
+**Découvert** : F44.5, validation de #147 depuis un autre appareil du tailnet.
+**Symptôme** : via `http://adrien-laptop.halfbeak-wahoo.ts.net:5173/…` (ou l'IP Tailscale), choisir les fichiers puis créer une session ne marche pas, sur Firefox comme sur Chrome ; Firefox affiche en plus un « Security Error … may not load or link to file:/// ». Sur `http://localhost:5173`, tout marche.
+**Cause** : une page en `http://` servie depuis un autre nom que `localhost` n'est pas un contexte sécurisé (`window.isSecureContext === false`) ; le navigateur n'y expose pas `crypto.randomUUID`, appelé à la création d'une session, d'un entraînement et à l'ajout d'un étudiant. Vérifié avec Chromium : `localhost` → `{ secure: true, randomUUID: 'function' }`, IP Tailscale → `{ secure: false, randomUUID: 'undefined' }`. La production (HTTPS) n'est pas concernée.
+**Workaround** : tester en `localhost`, ou servir le dev en HTTPS sur le tailnet (`tailscale serve`, certificats HTTPS activés sur le tailnet). Sur le tailnet en `http://`, ne valider que l'affichage.
+**Référence** : `src/features/create-session/hooks/use-create-form.ts`, `src/features/training-setup/hooks/use-training-setup.ts`, `src/features/session/hooks/use-passage-actions.ts` ; `docs/ENVIRONMENT.md` § Stack d'exécution.
+
+## `cn` (tailwind-merge) retirait les tailles de texte du design system devant une couleur (2026-10-17)
+
+**Découvert** : F44.6, captures de `/new` (chiffre « 1 erreur à corriger » en petit).
+**Symptôme** : `cn('text-score-md', 'text-destructive')` rend `text-destructive` seul ; même chose pour `text-small`, `text-h2`… à côté de `text-muted-foreground`.
+**Cause** : tailwind-merge ne connaît pas les tailles `--text-*` déclarées dans `@theme` : `text-score-md` ressemble pour lui à une couleur, en conflit avec la suivante.
+**Workaround** : corrigé dans `src/lib/utils.ts` (`extendTailwindMerge`, `theme.text`). Une nouvelle taille `--text-*` dans `index.css` s'ajoute aussi à cette liste.
+**Référence** : `src/lib/utils.ts`, `src/lib/utils.test.ts`.
+
+## Un bloc qui apparaît au-dessus de CodeMirror fausse le survol en e2e (2026-10-17)
+
+**Découvert** : F44.6, `e2e/config-editor.spec.ts` (survols de `finalScoreDisplay`, `mode`, `icon`).
+**Symptôme** : l'infobulle de survol décrit la clé de la ligne du dessus.
+**Cause** : le panneau « Problèmes », placé au-dessus du code, n'apparaissait qu'à la première validation (300 ms) ; le code descendait sous une souris déjà posée.
+**Workaround** : tout bloc au-dessus de l'éditeur est rendu dès le montage, et chaque variation de sa hauteur est compensée par un défilement (`ResizeObserver` sur le panneau, `JsonEditorApi.scrollBy`). Test e2e « le code ne bouge pas quand un problème apparaît ou disparaît ».
+**Référence** : `src/features/config-editor/components/issue-list.tsx`, `config-editor-page.tsx`.
+
+## jsdom n'implémente pas `scrollIntoView` (2026-10-17)
+
+**Découvert** : F44.6, navigation par catégorie de l'aperçu de l'éditeur.
+**Symptôme** : `TypeError: section.scrollIntoView is not a function` dans un test unitaire.
+**Cause** : jsdom ne fait aucune mise en page et n'expose pas `Element.prototype.scrollIntoView`.
+**Workaround** : dans le test, `Element.prototype.scrollIntoView = vi.fn()` avant le rendu, puis vérifier `mock.contexts[0]` (l'élément défilé).
+**Référence** : `src/features/config-editor/components/config-preview.test.tsx`.
+
+## Changer le type d'élément à la même place fait remplacer le nœud par React : un `pre` coloré perd son défilement (2026-10-17)
+
+**Découvert** : F44.7, e2e `long-words` après l'ajout de l'étiquette de langage des blocs de code.
+**Symptôme** : `scrollWidth` et `clientWidth` à 0 sur le `pre` de l'énoncé, mesuré juste après son apparition ; à l'écran, la position de défilement du code se perdait à l'arrivée de la coloration.
+**Cause** : le `pre` coloré était rendu par un sous-composant (`<HighlightedBlock />`) à la place du `<pre>` brut : type différent à la même position, donc démontage et nouveau nœud. Le test mesurait l'ancien nœud, détaché.
+**Workaround** : garder `<pre>` en JSX direct dans les deux branches (seuls les attributs et les enfants changent) ; test « même nœud `pre` » dans `code-block.test.tsx`.
+**Référence** : `src/components/markdown/code-block.tsx`.
+
+## oxlint refuse `role="img"` et `role="group"` (`prefer-tag-over-role`) (2026-10-17)
+
+**Découvert** : F44.7, jauge de note, barre de progression segmentée, bascule de projection.
+**Symptôme** : `pnpm lint` échoue sur un `div role="img" aria-label` ou `div role="group" aria-label`.
+**Cause** : règle `jsx-a11y/prefer-tag-over-role` : elle préfère `img` et `fieldset`.
+**Workaround** : dessin informatif en `aria-hidden` avec une phrase `sr-only` à côté (tests par `getByText(phrase)`, pas `getByRole('img')`) ; groupe de boutons en `<fieldset aria-label>` (`m-0 min-w-0 border-0`), qui garde le rôle `group`.
+**Référence** : `src/components/score-gauge.tsx`, `src/features/session/components/passage-progress.tsx`, `projection-controls.tsx`, `src/components/success-ring.tsx`.
+
+## Le tiroir du passage ne se trouve plus par son nom : il porte celui de la session (2026-10-17)
+
+**Découvert** : F44.7, tous les tests qui visaient `dialog` « Panneau latéral ».
+**Symptôme** : `getByRole('dialog', { name: 'Panneau latéral' })` ne trouve rien.
+**Cause** : le titre du tiroir est le nom de la session (« Panneau » n'est plus qu'un sur-titre).
+**Workaround** : `sidePanel()`, `querySidePanel()`, `findSidePanel()` (`src/testing/side-panel-assertions.ts`) repèrent le `dialog` qui porte la liste d'onglets « Panneau » ; en e2e, `ExaminerPage.panel`. Onglets : « Cet étudiant » et « Liste ».
+**Référence** : `src/features/session/components/side-panel.tsx`, `e2e/pages/examiner-page.ts`.
+
+## Retirer une bibliothèque lourde fait rougir `check:bundle` en CI, pas `pnpm check` (2026-10-18)
+
+**Découvert** : F44.8, retrait de Recharts.
+**Symptôme** : `pnpm check` et l'e2e passent, mais `pnpm check:bundle` échoue après `pnpm build` : « contrôle sans objet, aucun chunk /^_recharts[.-]/ dans le manifeste ».
+**Cause** : la garde de non-vacuité exige le chunk de chaque cible de `BUNDLE_TARGETS` ; `check:bundle` ne tourne qu'après le build (CI), pas dans `pnpm check`.
+**Workaround** : retirer la bibliothèque à quatre endroits : la dépendance, sa cible dans `scripts/check-initial-bundle.ts` (et ses tests), son groupe `codeSplitting` dans `vite.config.ts`, sa règle de confinement dans `.dependency-cruiser.cjs` ; puis `pnpm build && pnpm check:bundle`.
+**Référence** : `scripts/check-initial-bundle.ts` (`findVacuityProblems`), D109.
+
+## `gh project item-add` échoue si le projet a déjà ajouté l'issue (2026-10-18)
+
+**Découvert** : création de #155 (F44.11) par `.claude/scripts/gh-ticket.sh`.
+**Symptôme** : l'issue est créée, puis `GraphQL: Content already exists in this project (addProjectV2ItemById)` ; sous `set -e`, le script s'arrête avant Status, Priority, Size et les dépendances. Ponctuel : #156, créée juste après, est passée.
+**Cause** : l'issue entre parfois dans le projet n°3 avant l'appel à `item-add` (ajout automatique côté projet), qui refuse alors le doublon.
+**Workaround** : `gh-ticket.sh` retombe sur `gh project item-list … -q '.items[]|select(.content.number==N).id'` quand `item-add` échoue. Ne pas couper la sortie du script avec `| head` : le `SIGPIPE` l'arrête avant les dépendances `blocked_by`.
+**Référence** : `.claude/scripts/gh-ticket.sh`.
+
+
+## `Textarea` : `md:text-[15px]` l'emporte sur un `text-xs` passé en classe (2026-10-18)
+
+**Découvert** : F44.9, captures à 1280 px de la mise en place d'un entraînement.
+**Symptôme** : le prompt et la zone de collage, en `font-mono text-xs`, s'affichent en 15 px sur grand écran (12 px seulement sur téléphone).
+**Cause** : le composant `Textarea` porte `text-base md:text-[15px]` ; `cn` remplace `text-base` par `text-xs`, mais garde la variante `md:`, qui gagne au-dessus de 768 px.
+**Workaround** : passer aussi `md:text-xs` (ou la variante `md:` de la taille voulue). Testé par `prompt et collage en petite police à toutes les largeurs`.
+**Référence** : `src/components/ui/textarea.tsx`, `src/features/training-setup/components/prompt-step.tsx`.
+
+## Nom accessible : l'espace en tête d'un enfant masqué est rognée (2026-10-18)
+
+**Découvert** : F44.9, titres d'étape « Rassemblez votre cours (Étape faite) ».
+**Symptôme** : `getByRole('heading', { name: 'Rassemblez votre cours (Étape faite)' })` échoue ; le nom calculé est « Rassemblez votre cours(Étape faite) ».
+**Cause** : `dom-accessibility-api` (Testing Library) rogne le texte de chaque élément enfant ; l'espace écrite au début du `span sr-only` disparaît.
+**Workaround** : mettre l'espace dans le parent, hors du `span` : `{title}{' '}<span className="sr-only">(…)</span>`.
+**Référence** : `src/features/training-setup/components/setup-step.tsx`.
+
+## `<details>` : l'événement `toggle` arrive après le clic (2026-10-18)
+
+**Découvert** : F44.9, réponse repliable de la question d'entraînement (« Masquer » / « Afficher »).
+**Symptôme** : après `fireEvent.click` sur le `summary`, l'attribut `open` a disparu mais le libellé piloté par `onToggle` n'a pas encore changé.
+**Cause** : `toggle` est mis en file comme tâche, dans jsdom comme dans le navigateur ; l'état React suit au tour suivant.
+**Workaround** : attendre le libellé (`await screen.findByText('Afficher')`), pas `getByText` juste après le clic.
+**Référence** : `src/features/training/components/training-question.tsx` (`AnswerDisclosure`).
+
+## Tailwind recopie la valeur d'une ombre dans l'utilitaire : `--shadow-*` ne se surcharge pas par mode (2026-10-18)
+
+**Découvert** : F44.10, `e2e/appearance.spec.ts` (cartes en mode sombre).
+**Symptôme** : en sombre, `.dark` bien posée sur `<html>`, les cartes gardent l'ombre du mode clair alors que `html.dark` redéfinit `--shadow-card`.
+**Cause** : pour gérer `shadow-<couleur>`, Tailwind v4 décompose la valeur d'une ombre de `@theme` et l'écrit dans l'utilitaire (`.shadow-card{--tw-shadow:0 1px 2px 0 var(--tw-shadow-color,#1a103314),…}`) au lieu de lire `var(--shadow-card)`. Les couleurs, elles, restent en `var(--color-…)` et se surchargent normalement.
+**Workaround** : `--shadow-card: var(--card-shadow)` dans `@theme inline`, et `--card-shadow` posée sur `html` / `html.dark` (même chose pour `--shadow-popover`). Vérifier dans `dist/assets/*.css` que l'utilitaire lit bien la variable.
+**Référence** : `src/index.css`, D112.
+
+## e2e : `HomePage.goto()` n'attend pas le rendu, et le premier bouton de la page peut être un bandeau qui part seul (2026-10-18)
+
+**Découvert** : F44.10, `e2e/appearance.spec.ts`.
+**Symptôme** : (1) une mesure faite juste après `goto()` lit la page avant React (pas de `.dark`, fond du CSS brut) ; (2) « focus clavier visible sur un bouton » échoue une fois sur deux.
+**Cause** : (1) `goto()` ne fait que `page.goto('#/')` ; (2) `[data-slot="button"]` premier de la page est le « OK » du bandeau « Prête pour le hors ligne », qui apparaît et disparaît au gré du service worker.
+**Workaround** : attendre un repère (titre `h1`, ou `toHaveClass(/dark/)`) avant de mesurer ; viser un bouton de `main` (`page.getByRole('main').locator(…)`). L'accueil n'a aucun `[data-slot="button"]` dans `main` : la page Sessions en a un (« Importer une sauvegarde »).
+**Référence** : `e2e/appearance.spec.ts`, `e2e/pages/home-page.ts`.
+
+
+## Captures du guide : à date égale, l'ordre des sessions et entraînements change d'une passe à l'autre (2026-10-18)
+
+**Découvert** : F44.11.
+**Symptôme** : `accueil-reprendre.png` et `mode-clair.png` diffèrent d'une passe de `pnpm docs:screenshots` à l'autre (une sur trois environ) : la carte de session et celle d'entraînement échangent leur place.
+**Cause** : l'horloge des captures est figée (`setFixedTime`), donc la session et l'entraînement ont le même `updatedAt`. `compareRecords` (`src/lib/db/record-order.ts`) départage alors par `id`, tiré par `crypto.randomUUID`, que la graine de `determinism.ts` ne couvre pas (elle ne remplace que `getRandomValues`).
+**Workaround** : avancer l'horloge (`page.clock.setFixedTime`) avant de créer le second enregistrement. Vérifier le déterminisme en comparant les empreintes (`md5sum site/public/screenshots/*.png`) sur plusieurs passes.
+**Référence** : `e2e/screenshots/guide.spec.ts`, D113.
+
+## Captures du guide : les icônes de catégorie manquent parfois (2026-10-18)
+
+**Découvert** : F44.11.
+**Symptôme** : `creation-avertissements.png` sort une fois sur trois sans les icônes de l'aperçu.
+**Cause** : `CategoryIcon` charge le chunk Tabler à la demande et ne rend rien tant qu'il n'est pas arrivé ; la capture peut partir avant. Chaque nouvelle page (vue projetée comprise) recharge le chunk.
+**Workaround** : attendre `svg.tabler-icon-<nom>` de chaque catégorie avant la capture (`expectCategoryIconsDrawn` dans le script).
+**Référence** : `src/components/category-icon.tsx`, `e2e/screenshots/guide.spec.ts`.
+
+## Supprimer une capture du guide casse le serveur des captures et des e2e (2026-10-18)
+
+**Découvert** : F44.11.
+**Symptôme** : après `git rm` d'une capture, `pnpm docs:screenshots` (et `pnpm e2e`) échoue dès le démarrage : `[UNRESOLVED_IMPORT] Could not resolve '/screenshots/<x>.png' in site/guide/<page>.md`.
+**Cause** : le `webServer` de Playwright construit l'app puis le site VitePress, qui importe chaque image citée par une page.
+**Workaround** : retirer la citation de la page dans le même commit que l'image. `site/guide/interface.test.ts` signale les captures citées absentes et les orphelines.
+**Référence** : `playwright.config.ts` (`webServer`), D113.
+
+## Rendu image par image dans Chromium : `--disable-partial-raster`, sinon un dégradé CSS change d'un niveau selon l'image précédente (2026-10-18)
+
+**Découvert** : F44.12, atelier de la bannière 3D (`pnpm check`, contrôle « ordre de rendu »).
+**Symptôme** : une même image, rendue après des images différentes, diffère de quelques pixels d'un seul niveau, sous un voile en `radial-gradient`.
+**Cause** : Chromium ne retrace que les tuiles invalidées ; le tramage (dithering) de Skia sur les dégradés dépend alors de ce qui a été retracé.
+**Workaround** : lancer Chromium avec `--disable-partial-raster` (atelier : `scripts/lib/page.ts`).
+**Référence** : D114.
+
+## WebGL en headless : le headless-shell de Playwright tourne sur SwiftShader, même avec `--use-angle=gl` (2026-10-18)
+
+**Découvert** : F44.12, atelier de la bannière 3D.
+**Symptôme** : `WEBGL_debug_renderer_info` répond « SwiftShader » ; le rendu est logiciel, donc lent.
+**Cause** : seul le nouveau mode headless (`channel: 'chromium'`) avec ANGLE sur Vulkan atteint le GPU de la machine.
+**Workaround** : `chromium.launch({ channel: 'chromium', args: ['--use-angle=vulkan', '--enable-features=Vulkan', '--enable-gpu', '--ignore-gpu-blocklist'] })`, repli SwiftShader si WebGL2 manque.
+**Référence** : D114.
+
+## ffmpeg ne relit pas un WebP animé (2026-10-18)
+
+**Découvert** : F44.12, vérification de `assets/readme-banner.webp`.
+**Symptôme** : `ffmpeg -i readme-banner.webp …` échoue (« image data not found »), alors que le fichier s'anime dans Chromium.
+**Cause** : le décodeur WebP de ffmpeg ne gère pas les WebP animés (il sait seulement les écrire avec `libwebp_anim`).
+**Workaround** : vérifier un WebP animé dans un navigateur (Playwright : `naturalWidth` et deux captures espacées).
+**Référence** : D114.

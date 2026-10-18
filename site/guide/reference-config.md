@@ -135,7 +135,7 @@ Questions passées (« skips »). Tous les champs sont facultatifs.
 
 ## `presentation`
 
-Affichage de la vue projetée. Tous les champs sont facultatifs.
+Affichage de la vue projetée, et mode d'affichage de départ des écrans de la session. Tous les champs sont facultatifs.
 
 | Champ | Type | Obligatoire | Défaut | Description |
 | --- | --- | --- | --- | --- |
@@ -144,7 +144,7 @@ Affichage de la vue projetée. Tous les champs sont facultatifs.
 | `presentation.finalScoreDisplay` | `raw`, `converted` ou `both` | non | `both` | Note affichée sur l'écran final : brute, convertie ou les deux. |
 | `presentation.showStatsOnFinal` | booléen | non | `false` | Affiche le détail du passage sur l'écran final projeté. |
 | `presentation.drawAnimation` | booléen | non | `true` | Active l'animation lors du tirage. |
-| `presentation.defaultColorMode` | `light`, `dark` ou `system` | non | `system` | Mode d'affichage clair, sombre ou celui du système à l'ouverture de la session. |
+| `presentation.defaultColorMode` | `light`, `dark` ou `system` | non | `system` | Mode d'affichage clair, sombre ou celui du système. La vue projetée le suit toujours. Les écrans de la session (passage, statistiques) partent de ce mode ; la ligne « Mode d'affichage » du menu le change pour cette session. |
 | `presentation.showCategoryPoints` | booléen | non | `true` | Affiche le maximum de points de chaque catégorie sur la vue projetée. |
 
 ```json
@@ -191,14 +191,14 @@ Surcharge des variables CSS de l'interface, par mode clair et sombre. Tout le bl
 | `chart-3` | Couleur 3 des graphiques. |
 | `chart-4` | Couleur 4 des graphiques. |
 | `chart-5` | Couleur 5 des graphiques. |
-| `sidebar` | Fond du panneau latéral. |
-| `sidebar-foreground` | Texte du panneau latéral. |
-| `sidebar-primary` | Couleur principale du panneau latéral. |
-| `sidebar-primary-foreground` | Texte sur la couleur principale du panneau latéral. |
-| `sidebar-accent` | Fond mis en avant dans le panneau latéral. |
-| `sidebar-accent-foreground` | Texte sur le fond mis en avant du panneau latéral. |
-| `sidebar-border` | Bordures du panneau latéral. |
-| `sidebar-ring` | Anneau de focus du panneau latéral. |
+| `sidebar` | Fond du menu latéral. |
+| `sidebar-foreground` | Texte du menu latéral. |
+| `sidebar-primary` | Couleur principale du menu latéral. |
+| `sidebar-primary-foreground` | Texte sur la couleur principale du menu latéral. |
+| `sidebar-accent` | Fond mis en avant dans le menu latéral. |
+| `sidebar-accent-foreground` | Texte sur le fond mis en avant du menu latéral. |
+| `sidebar-border` | Bordures du menu latéral. |
+| `sidebar-ring` | Anneau de focus du menu latéral. |
 
 ```json
 "theme": {
@@ -245,7 +245,7 @@ Chaque élément de `categories[].questions` est une question.
 | Champ | Type | Obligatoire | Défaut | Description |
 | --- | --- | --- | --- | --- |
 | `categories[].questions[].id` | texte non vide | oui | aucun | Identifiant stable de la question, unique dans toute la config. |
-| `categories[].questions[].title` | texte non vide | non | début du `prompt` sans markdown | Libellé court, utilisé dans le panneau latéral et les exports. |
+| `categories[].questions[].title` | texte non vide | non | début du `prompt` sans markdown | Libellé court, affiché sur l'écran de passage, dans le panneau latéral, les statistiques et les exports. |
 | `categories[].questions[].tags` | liste de textes non vides | non | aucun | Notions pédagogiques, utilisées dans les stats. |
 | `categories[].questions[].tags[]` | texte non vide | oui, dans la liste | aucun | Une notion pédagogique. |
 | `categories[].questions[].prompt` | texte non vide | oui | aucun | Énoncé en markdown, affiché aux deux vues. |

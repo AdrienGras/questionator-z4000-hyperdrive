@@ -1,9 +1,12 @@
 import type { CSSProperties } from 'react'
+import { CategoryBadge } from '@/components/category-badge'
+import { cn } from '@/lib/utils'
 import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import { formatScore } from '@/domain/scoring/format'
 import { toMilli } from '@/domain/scoring/milli'
 import type { Attempt } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
+import { categoryAccent, type CategoryAccent } from '@/lib/appearance/category-accent'
 
 type AttemptListProps = Readonly<{
   ui: Ui
@@ -11,6 +14,8 @@ type AttemptListProps = Readonly<{
   attempts: readonly Attempt[]
   disabled?: boolean
   onEditScore?: (attemptId: string, score: number) => void
+  /** `panel` : onglet « Cet étudiant » (note éditable) ; `final` : détail de l'écran final. */
+  variant?: 'panel' | 'final'
 }>
 
 type AttemptRowProps = Readonly<{
@@ -68,13 +73,13 @@ function ScoreSelect({
   const { text, locale } = ui
   const fmt = (value: number) => formatScore(toMilli(value), 'raw', config, locale)
   return (
-    <span className="flex items-baseline gap-1 tabular-nums">
+    <span className="flex shrink-0 items-center gap-1.5 tabular-nums">
       <select
         aria-label={text('attempt_score_label', { rank })}
         value={String(attempt.score)}
         disabled={disabled}
         onChange={(event) => onEditScore(attempt.id, Number(event.target.value))}
-        className="rounded-md border border-input bg-background px-2 py-1"
+        className="h-9 rounded-[10px] border border-input bg-background px-2 text-sm font-semibold"
       >
         {(category?.scale ?? []).map((value) => (
           <option key={value} value={String(value)}>
@@ -82,7 +87,9 @@ function ScoreSelect({
           </option>
         ))}
       </select>
-      <span>{text('attempt_out_of', { max: fmt(maxOf(category)) })}</span>
+      <span className="text-small text-muted-foreground">
+        {text('attempt_out_of', { max: fmt(maxOf(category)) })}
+      </span>
     </span>
   )
 }
@@ -97,9 +104,6 @@ function AttemptRow({
   onEditScore,
 }: AttemptRowProps) {
   const question = category?.questions.find((q) => q.id === attempt.questionId)
-  const color = category?.color
-  const accent: (CSSProperties & Record<'--category-color', string>) | undefined =
-    color === undefined ? undefined : { '--category-color': color }
   const editable =
     onEditScore !== undefined &&
     rank !== undefined &&
@@ -107,14 +111,17 @@ function AttemptRow({
     attempt.score !== undefined
 
   return (
-    <li
-      style={accent}
-      data-colored={color !== undefined}
-      className="flex flex-wrap items-baseline gap-x-3 border-l-4 border-border pl-3 data-[colored=true]:border-[var(--category-color)]"
-    >
-      {rank !== undefined && <span className="tabular-nums">{`${rank}.`}</span>}
-      <span className="font-medium">{category?.label ?? attempt.categoryId}</span>
-      <span className="flex-1">{question?.title ?? attempt.questionId}</span>
+    <li className="flex items-center gap-3 border-t py-2.5 first:border-t-0">
+      <span className="w-3.5 shrink-0 text-small text-muted-foreground tabular-nums">
+        {rank ?? '–'}
+      </span>
+      <CategoryBadge color={category?.color} icon={category?.icon} size="md" />
+      <span className="flex min-w-0 flex-1 flex-col wrap-anywhere">
+        <span className="font-semibold">{question?.title ?? attempt.questionId}</span>
+        <span className="text-small text-muted-foreground">
+          {category?.label ?? attempt.categoryId}
+        </span>
+      </span>
       {editable ? (
         <ScoreSelect
           ui={ui}
@@ -126,7 +133,82 @@ function AttemptRow({
           onEditScore={onEditScore}
         />
       ) : (
-        <span className="tabular-nums">{outcomeText(ui, config, attempt, category)}</span>
+        <span className="text-small font-semibold text-muted-foreground tabular-nums">
+          {outcomeText(ui, config, attempt, category)}
+        </span>
+      )}
+    </li>
+  )
+}
+
+/**
+ * Ligne du détail de l'écran final (artboard `passage-note-finale`) : points sur le maximum et
+ * barre au prorata dans la couleur de la catégorie ; une question passée garde son motif sous le
+ * titre, hors note, et une pastille « Passée ».
+ */
+function FinalAttemptRow({
+  ui,
+  config,
+  attempt,
+  category,
+  rank,
+}: Pick<AttemptRowProps, 'ui' | 'config' | 'attempt' | 'category' | 'rank'>) {
+  const { text, locale } = ui
+  const question = category?.questions.find((q) => q.id === attempt.questionId)
+  const label = category?.label ?? attempt.categoryId
+  const skipped = attempt.outcome === 'skipped'
+  const reason = skipped && attempt.skipReason !== undefined && attempt.skipReason !== ''
+  const max = maxOf(category)
+  const score = attempt.outcome === 'scored' ? attempt.score : undefined
+  const bar: CSSProperties & Partial<CategoryAccent> = {
+    width: `${max > 0 && score !== undefined ? Math.round((score / max) * 100) : 0}%`,
+    ...categoryAccent(category?.color),
+  }
+  return (
+    <li className="flex items-center gap-3.5 border-t py-3 first:border-t-0">
+      <span className="w-4 shrink-0 text-small text-muted-foreground tabular-nums">
+        {rank ?? '–'}
+      </span>
+      <CategoryBadge
+        color={category?.color}
+        icon={category?.icon}
+        size="lg"
+        className={cn(skipped && 'opacity-60')}
+      />
+      <span className="flex min-w-0 flex-1 flex-col wrap-anywhere">
+        <span className={cn('font-semibold', skipped && 'text-muted-foreground')}>
+          {question?.title ?? attempt.questionId}
+        </span>
+        <span className="text-small text-muted-foreground">
+          {reason ? `${label} · ${attempt.skipReason}` : label}
+        </span>
+      </span>
+      {skipped ? (
+        <span className="flex w-24 shrink-0 justify-end">
+          <span className="inline-flex h-6 items-center rounded-full bg-muted px-2.5 text-label text-muted-foreground">
+            {text('final_skipped', {})}
+          </span>
+        </span>
+      ) : (
+        <span className="flex w-24 shrink-0 flex-col items-end gap-1.5">
+          <span className="font-bold tabular-nums">
+            {score === undefined
+              ? text('attempt_pending', {})
+              : formatScore(toMilli(score), 'raw', config, locale)}{' '}
+            <span className="font-normal text-muted-foreground">
+              {text('attempt_out_of', { max: formatScore(toMilli(max), 'raw', config, locale) })}
+            </span>
+          </span>
+          {score !== undefined && (
+            <span aria-hidden="true" className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <span
+                data-bar
+                style={bar}
+                className="block h-full rounded-full bg-[var(--category-ink,var(--color-primary))]"
+              />
+            </span>
+          )}
+        </span>
       )}
     </li>
   )
@@ -139,6 +221,7 @@ export function AttemptList({
   attempts,
   disabled = false,
   onEditScore,
+  variant = 'panel',
 }: AttemptListProps) {
   const rows = attempts.map((attempt, index) => {
     const rank =
@@ -146,6 +229,18 @@ export function AttemptList({
         ? attempts.slice(0, index + 1).filter((a) => a.outcome === 'scored').length
         : undefined
     const category = config.categories.find((c) => c.id === attempt.categoryId)
+    if (variant === 'final') {
+      return (
+        <FinalAttemptRow
+          key={attempt.id}
+          ui={ui}
+          config={config}
+          attempt={attempt}
+          category={category}
+          rank={rank}
+        />
+      )
+    }
     return (
       <AttemptRow
         key={attempt.id}
@@ -159,5 +254,5 @@ export function AttemptList({
       />
     )
   })
-  return <ol className="flex flex-col gap-2">{rows}</ol>
+  return <ol className="flex flex-col">{rows}</ol>
 }

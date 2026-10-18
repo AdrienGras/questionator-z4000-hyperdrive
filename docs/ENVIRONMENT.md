@@ -11,6 +11,7 @@ Carte des paths, services, accès, commandes. À jour au fil des découvertes.
 - **Path hôte** : `/srv/AdrienGras/questionator-z4000-hyperdrive`
 - **Remote** : `git@github.com:AdrienGras/questionator-z4000-hyperdrive.git`
 - **Branche par défaut** : `main`
+- **Atelier de la bannière 3D (F44.12, D114)** : `/srv/AdrienGras/questionator-banniere-3d` (hors dépôt, dépôt git local non poussé, son propre `package.json`) ; archive remise à l'utilisateur : `~/Downloads/questionator-banniere-3d-sources.zip`. Son `README.md` donne les commandes (`pnpm check`, `pnpm render`, `./scripts/encode.sh`).
 - **Convention de merge** : une branche par ticket (`feat/f01-socle`, `fix/…`), PR vers `main` avec `Closes #n`, CI verte requise. Déploiement GitHub Pages à chaque push sur `main`.
 
 ## Stack d'exécution
@@ -23,11 +24,11 @@ Carte des paths, services, accès, commandes. À jour au fil des découvertes.
 - **Prévu** (`PRODUCT.md` §9) : write-excel-file, vite-plugin-pwa.
 - **Commandes principales** :
   - `nvm use && corepack pnpm install`
-  - `pnpm dev` — serveur de dev (régénère `src/routeTree.gen.ts`)
+  - `pnpm dev` — serveur de dev (régénère `src/routeTree.gen.ts`). Pour l'ouvrir depuis un autre appareil du tailnet (téléphone) : `__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS=.ts.net pnpm dev --host 0.0.0.0`, puis `http://adrien-laptop.halfbeak-wahoo.ts.net:5173/questionator-z4000-hyperdrive/` (ou l'IP Tailscale `100.76.100.52`). **En `http://` hors `localhost`, la page n'est pas un contexte sécurisé : créer une session, un entraînement ou ajouter un étudiant échoue (`crypto.randomUUID` absent, QUIRKS 2026-10-17) ; n'y valider que l'affichage, ou servir en HTTPS.** La variable autorise le nom MagicDNS, que Vite refuse sinon ; `--host 0.0.0.0` expose aussi le serveur sur les autres interfaces (réseau local, ponts Docker)
   - `pnpm check` — format, lint type-aware, dépendances entre dossiers, types, tests (comme la CI, hors build et sans couverture)
   - `pnpm deps` — dependency-cruiser sur `src/` (`.dependency-cruiser.cjs`, parseur swc) ; vérifier que « N modules » n'est pas 0
   - `pnpm build` / `pnpm preview` — build de prod dans `dist/` et prévisualisation sous `/questionator-z4000-hyperdrive/`
-  - Après `pnpm build` (comme la CI) : `pnpm check:bundle` (Recharts, xlsx, Shiki, CodeMirror hors du bundle initial), `pnpm check:precache` (tout `dist/` pré-caché), `pnpm check:budget` (budgets gzip, D88 : premier affichage de l'accueil ≤ 275 Ko, chaque chunk ≤ 135 Ko hors `icons-*` et grammaires/thèmes Shiki ; valeurs et mesures en tête de `scripts/check-bundle-budget.ts`)
+  - Après `pnpm build` (comme la CI) : `pnpm check:bundle` (xlsx, Shiki, CodeMirror hors du bundle initial), `pnpm check:precache` (tout `dist/` pré-caché), `pnpm check:budget` (budgets gzip, D88 : premier affichage de l'accueil ≤ 275 Ko, chaque chunk ≤ 135 Ko hors `icons-*` et grammaires/thèmes Shiki ; valeurs et mesures en tête de `scripts/check-bundle-budget.ts`)
   - `pnpm docs:dev` / `pnpm docs:build` / `pnpm docs:preview` — site de documentation VitePress (F27, sources dans `site/`) : `docs:dev` sert sur le port 5173 à `http://localhost:5173/questionator-z4000-hyperdrive/docs/` ; `docs:build` écrit dans `dist/docs/` et doit passer **après** `pnpm build` (qui vide `dist/`)
   - `pnpm docs:screenshots` — régénère les 10 captures du guide dans `site/public/screenshots/` (F28) : `playwright test -c playwright.screenshots.config.ts`, le `webServer` construit l'app puis la doc ; Chromium requis ; **non lancé en CI**, les PNG sont commités ; `reuseExistingServer: !CI` : un `vite preview` périmé resté sur 4173 serait photographié au lieu d'un build frais, vérifier `ss -ltnp | grep 4173` avant de lancer
   - `pnpm test` — tests (régénère aussi l'arbre de routes)
@@ -45,6 +46,8 @@ Carte des paths, services, accès, commandes. À jour au fil des découvertes.
 | GitHub Actions | CI : job `check` (requis par la protection de `main`), job `deploy` | `.github/workflows/ci.yml`, actions épinglées par SHA |
 | SonarQube Cloud | Analyse de `main` et des PR lancée par la CI (étape « Analyse SonarQube Cloud » du job `check`, F42), couverture comprise (quality gate : nouveau code ≥ 80 %). Analyse automatique **désactivée** (*Administration › Analysis Method*) : les deux modes ne peuvent pas coexister | https://sonarcloud.io/project/overview?id=AdrienGras_questionator-z4000-hyperdrive — config `sonar-project.properties`, contrôle `.claude/scripts/sonar-check.sh` |
 | Codecov | Couverture informative : commentaire de PR, statuts `project` et `patch` non bloquants (F42) | https://app.codecov.io/gh/AdrienGras/questionator-z4000-hyperdrive — config `codecov.yml`, envoi par OIDC depuis le job `check` (aucun jeton). Les statuts de commit exigent l'application GitHub Codecov installée sur le compte ; sans elle, seul le commentaire (compte `codecov-commenter`) est publié |
+| Canevas Design F44 | Maquettes de référence de toute interface (D102, D103) : pages « Avant », « Après », « Références », « Collision des couleurs » | https://claude.ai/artifact/DvvtZZb9ie2vknoXtHfnJL — Artifact privé de type Design, partagé dans l'organisation ; artboards dans `project/<page>/<écran>.dc.html`, index `project/canvas.json` |
+| Design system « Questionator Z-4000 » | Référence des tokens et des composants ; `src/index.css` lui correspond (D102) | https://claude.ai/artifact/DMYaQZGYtm8RnJqbBMmBcy — Artifact de type Design System ; `project/tokens.json`, `project/README.md`, `project/components/<Nom>/` |
 | GitHub Project n°3 | Kanban des tickets (une issue par feature Fxx, label `feature`/`spike`). Champs : Status (Backlog → Ready = spec rédigée dans l’issue → In progress → In review → Done), Priority P0–P2, Size XS–XL | https://github.com/users/AdrienGras/projects/3 — `gh project … --owner AdrienGras` |
 
 ## Variables d'environnement

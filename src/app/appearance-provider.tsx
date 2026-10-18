@@ -52,7 +52,10 @@ function useApplyAppearance(effective: EffectiveMode, tokens: ThemeTokens | unde
   }, [effective, tokens])
 }
 
-/** Apparence de l'app (D60) : la dernière portée déclarée s'applique, sinon la portée globale. */
+/**
+ * Apparence de l'app (D60) : la dernière portée déclarée s'applique, sinon la portée globale. Une
+ * portée sans `key` (vue projetée, D112) ne lit ni n'écrit aucun choix : son mode est `defaultMode`.
+ */
 export function AppearanceProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [scopes, setScopes] = useState<readonly ScopeEntry[]>([])
   // Choix faits dans cette fenêtre : valent même si `localStorage` est inaccessible.
@@ -63,17 +66,19 @@ export function AppearanceProvider({ children }: Readonly<{ children: ReactNode 
   // Lu une seule fois par clé : sinon une écriture d'un autre onglet entre-temps basculerait le
   // mode à un instant arbitraire (au prochain rendu non lié à cette clé). Synchro entre onglets
   // hors périmètre.
-  const storedForKey = useMemo(() => readStoredMode(scope.key), [scope.key])
-  const stored = choices[scope.key] ?? storedForKey
+  const { key } = scope
+  const storedForKey = useMemo(() => (key === undefined ? undefined : readStoredMode(key)), [key])
+  const stored = key === undefined ? undefined : (choices[key] ?? storedForKey)
   const systemDark = useSyncExternalStore(subscribeToSystem, systemPrefersDark)
   const effective = resolveColorMode(stored, scope.defaultMode, systemDark)
 
   const setMode = useCallback(
     (mode: ColorMode) => {
-      setChoices((previous) => ({ ...previous, [scope.key]: mode }))
-      writeStoredMode(scope.key, mode)
+      if (key === undefined) return
+      setChoices((previous) => ({ ...previous, [key]: mode }))
+      writeStoredMode(key, mode)
     },
-    [scope.key],
+    [key],
   )
   const register = useCallback((id: string) => {
     setScopes((previous) => [...previous, { id, scope: undefined }])

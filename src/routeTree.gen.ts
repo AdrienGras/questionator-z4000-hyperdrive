@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EditorRouteImport } from './routes/editor'
 import { Route as NewRouteImport } from './routes/new'
+import { Route as SessionsRouteImport } from './routes/sessions'
+import { Route as TrainingsRouteImport } from './routes/trainings'
 import { Route as PresentSessionIdRouteImport } from './routes/present.$sessionId'
 import { Route as SessionSessionIdRouteImport } from './routes/session.$sessionId'
 import { Route as TrainingTrainingIdRouteImport } from './routes/training.$trainingId'
@@ -33,6 +35,16 @@ const EditorRoute = EditorRouteImport.update({
 const NewRoute = NewRouteImport.update({
   id: '/new',
   path: '/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SessionsRoute = SessionsRouteImport.update({
+  id: '/sessions',
+  path: '/sessions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrainingsRoute = TrainingsRouteImport.update({
+  id: '/trainings',
+  path: '/trainings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PresentSessionIdRoute = PresentSessionIdRouteImport.update({
@@ -76,6 +88,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/editor': typeof EditorRoute
   '/new': typeof NewRoute
+  '/sessions': typeof SessionsRoute
+  '/trainings': typeof TrainingsRoute
   '/present/$sessionId': typeof PresentSessionIdRoute
   '/session/$sessionId': typeof SessionSessionIdRoute
   '/training/$trainingId': typeof TrainingTrainingIdRoute
@@ -88,6 +102,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/editor': typeof EditorRoute
   '/new': typeof NewRoute
+  '/sessions': typeof SessionsRoute
+  '/trainings': typeof TrainingsRoute
   '/present/$sessionId': typeof PresentSessionIdRoute
   '/session/$sessionId': typeof SessionSessionIdRoute
   '/training/$trainingId': typeof TrainingTrainingIdRoute
@@ -101,6 +117,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/editor': typeof EditorRoute
   '/new': typeof NewRoute
+  '/sessions': typeof SessionsRoute
+  '/trainings': typeof TrainingsRoute
   '/present/$sessionId': typeof PresentSessionIdRoute
   '/session/$sessionId': typeof SessionSessionIdRoute
   '/training/$trainingId': typeof TrainingTrainingIdRoute
@@ -115,6 +133,8 @@ export interface FileRouteTypes {
     | '/'
     | '/editor'
     | '/new'
+    | '/sessions'
+    | '/trainings'
     | '/present/$sessionId'
     | '/session/$sessionId'
     | '/training/$trainingId'
@@ -127,6 +147,8 @@ export interface FileRouteTypes {
     | '/'
     | '/editor'
     | '/new'
+    | '/sessions'
+    | '/trainings'
     | '/present/$sessionId'
     | '/session/$sessionId'
     | '/training/$trainingId'
@@ -139,6 +161,8 @@ export interface FileRouteTypes {
     | '/'
     | '/editor'
     | '/new'
+    | '/sessions'
+    | '/trainings'
     | '/present/$sessionId'
     | '/session/$sessionId'
     | '/training/$trainingId'
@@ -152,6 +176,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   EditorRoute: typeof EditorRoute
   NewRoute: typeof NewRoute
+  SessionsRoute: typeof SessionsRoute
+  TrainingsRoute: typeof TrainingsRoute
   PresentSessionIdRoute: typeof PresentSessionIdRoute
   SessionSessionIdRoute: typeof SessionSessionIdRoute
   TrainingTrainingIdRoute: typeof TrainingTrainingIdRoute
@@ -182,6 +208,20 @@ declare module '@tanstack/react-router' {
       path: '/new'
       fullPath: '/new'
       preLoaderRoute: typeof NewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sessions': {
+      id: '/sessions'
+      path: '/sessions'
+      fullPath: '/sessions'
+      preLoaderRoute: typeof SessionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/trainings': {
+      id: '/trainings'
+      path: '/trainings'
+      fullPath: '/trainings'
+      preLoaderRoute: typeof TrainingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/present/$sessionId': {
@@ -240,6 +280,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   EditorRoute: EditorRoute,
   NewRoute: NewRoute,
+  SessionsRoute: SessionsRoute,
+  TrainingsRoute: TrainingsRoute,
   PresentSessionIdRoute: PresentSessionIdRoute,
   SessionSessionIdRoute: SessionSessionIdRoute,
   TrainingTrainingIdRoute: TrainingTrainingIdRoute,

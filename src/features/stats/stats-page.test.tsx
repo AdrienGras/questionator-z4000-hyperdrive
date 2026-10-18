@@ -7,7 +7,6 @@ import { minimalConfig } from '@/testing/config-fixtures'
 import { makeSession } from '@/testing/session-fixtures'
 import { attemptOf, sessionWith } from '@/testing/stats-fixtures'
 import { makeConfig, makeStudent } from '@/testing/student-fixtures'
-import { expectColorModeToggleLast, bannerInteractiveNames } from '@/testing/page-shell-assertions'
 import { renderAt } from '@/testing/render-at'
 
 beforeEach(async () => {
@@ -37,7 +36,7 @@ test('titre = nom de la session, retour au passage vers la vue examinateur', asy
   expect(await screen.findByRole('heading', { level: 1, name: 'Oral du lundi' })).toBeVisible()
   const back = screen.getByRole('link', { name: 'Retour au passage' })
   expect(back).toHaveAttribute('href', '/session/session-1')
-  expect(screen.getByRole('button', { name: /Mode d'affichage/u })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Aide (nouvel onglet)' })).toBeInTheDocument()
 
   fireEvent.click(back)
   expect(await screen.findByRole('heading', { name: 'Oral de test' })).toBeInTheDocument()
@@ -51,33 +50,23 @@ test('barre de titre : « Retour au passage », nom de la session, thème dernie
   expect(await screen.findByRole('heading', { level: 1 })).toHaveTextContent('Oral du lundi')
   const banner = screen.getByRole('banner')
   expect(within(banner).getByRole('link', { name: 'Retour au passage' })).toBeInTheDocument()
-  expectColorModeToggleLast()
-})
-
-test('config en anglais : le thème de la barre est en anglais', async () => {
-  await putSession(makeSession({ config: { ...makeConfig(), locale: 'en' } }))
-  renderAt('/session/session-1/stats')
-
-  await screen.findByRole('heading', { level: 1 })
-  expect(bannerInteractiveNames().at(-1)).toMatch(/^Display mode:/u)
 })
 
 test('session sans terminé : les cinq indicateurs de notes affichent —', async () => {
-  await putSession(makeSession({ students: [makeStudent()] }))
+  await putSession(makeSession({ students: [makeStudent(['pending'])] }))
   renderAt('/session/session-1/stats')
 
   const grades = await screen.findByRole('region', { name: 'Notes finales' })
-  for (const label of ['Minimum', 'Maximum', 'Moyenne', 'Médiane', 'Écart-type']) {
+  for (const label of ['Minimum', 'Maximum', 'Écart-type']) {
     expect(indicator(grades, label)).toBe('—')
   }
   expect(indicator(grades, 'Étudiants notés')).toBe('0')
-  const headcount = screen.getByRole('region', { name: 'Effectifs' })
-  expect(indicator(headcount, 'À passer')).toBe('1')
-  expect(screen.getByRole('region', { name: 'Histogramme' })).toBeInTheDocument()
-  expect(screen.getByText('Aucune question tirée.')).toBeInTheDocument()
+  const synthesis = screen.getByRole('region', { name: 'Chiffres clés' })
+  for (const label of ['Moyenne', 'Médiane']) expect(indicator(synthesis, label)).toBe('—')
+  expect(within(synthesis).getByText('1 en cours')).toBeInTheDocument()
   expect(screen.getByText('Aucune question passée.')).toBeInTheDocument()
-  // Histogramme et stratégies : la même phrase, chacune dans son bloc.
-  for (const name of ['Histogramme', 'Stratégies']) {
+  // Notes finales et stratégies : la même phrase, chacune dans son bloc.
+  for (const name of ['Notes finales', 'Stratégies']) {
     const region = screen.getByRole('region', { name })
     expect(within(region).getByText("Aucun étudiant n'a terminé.")).toBeInTheDocument()
   }
@@ -88,14 +77,16 @@ test('un étudiant terminé : moyenne à 2 décimales, taux de catégorie en pou
   renderAt('/session/session-1/stats')
 
   const grades = await screen.findByRole('region', { name: 'Notes finales' })
-  expect(indicator(grades, 'Moyenne')).toBe('10,00')
-  expect(indicator(grades, 'Médiane')).toBe('10,00')
+  const synthesis = screen.getByRole('region', { name: 'Chiffres clés' })
+  expect(indicator(synthesis, 'Moyenne')).toBe('10,00 / 20')
+  expect(indicator(synthesis, 'Médiane')).toBe('10,00 / 20')
   expect(indicator(grades, 'Écart-type')).toBe('0,00')
   expect(indicator(grades, 'Minimum')).toBe('10,00')
 
-  const categories = screen.getByRole('table', { name: 'Catégories' })
-  const rate = new Intl.NumberFormat('fr', { style: 'percent' }).format(0.5)
-  expect(rowCells(categories, 'A')).toEqual(['1', '1', rate])
+  const categories = screen.getByRole('region', { name: 'Réussite par catégorie' })
+  // `Intl` sépare le signe % par une espace insécable fine.
+  expect(within(categories).getByText(/^Réussite A : 50\s%$/u)).toBeInTheDocument()
+  expect(within(categories).getByText('1 notée · 1 choix')).toBeInTheDocument()
 
   const strategies = screen.getByRole('table', { name: 'Stratégies' })
   expect(within(strategies).getByText('A ×1')).toBeInTheDocument()
@@ -133,8 +124,14 @@ test('tags : une ligne par tag avec notés et taux de réussite', async () => {
 
   const table = await screen.findByRole('table', { name: 'Tags' })
   const rate = new Intl.NumberFormat('fr', { style: 'percent' }).format(0.5)
-  expect(rowCells(table, 'boucles')).toEqual(['1', rate])
-  expect(rowCells(table, 'tableaux')).toEqual(['1', rate])
+  expect(
+    within(table)
+      .getAllByRole('columnheader')
+      .map((th) => th.textContent),
+  ).toEqual(['Tag', 'Notées', 'Barre', 'Réussite'])
+  expect(rowCells(table, 'boucles')).toEqual(['1', '', rate])
+  expect(rowCells(table, 'tableaux')).toEqual(['1', '', rate])
+  expect(screen.getByRole('region', { name: 'Détail' })).toBeInTheDocument()
   expect(screen.queryByText("Aucune question n'a de tag.")).not.toBeInTheDocument()
 })
 
@@ -150,7 +147,7 @@ test('question passée : motifs « Hors programme ×2, sans motif ×1 »', async
   renderAt('/session/session-1/stats')
 
   const table = await screen.findByRole('table', { name: 'Questions passées' })
-  expect(rowCells(table, 'Question A1')).toEqual(['A', '3', 'Hors programme ×2, sans motif ×1'])
+  expect(rowCells(table, 'Question A1 A')).toEqual(['Hors programme ×2, sans motif ×1', '3'])
 })
 
 // L'id inconnu affiché à la place du titre est couvert par `domain/stats/questions.test.ts`.
@@ -161,15 +158,15 @@ test("question tirée d'id inconnu : session endommagée, statistiques non affic
   expect(
     await screen.findByRole('heading', { name: 'Cette session est endommagée' }),
   ).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: 'Exporter un backup' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Exporter une sauvegarde' })).toBeInTheDocument()
   expect(screen.queryByRole('table', { name: 'Questions les plus tirées' })).not.toBeInTheDocument()
 })
 
 test('session corrompue après le montage : les statistiques basculent sur l’écran « endommagée » (F31)', async () => {
-  const session = makeSession()
+  const session = makeSession({ students: [makeStudent([1])] })
   await putSession(session)
   renderAt('/session/session-1/stats')
-  await screen.findByRole('region', { name: 'Effectifs' })
+  await screen.findByRole('region', { name: 'Chiffres clés' })
 
   await db.sessions.put({ ...session, activeStudentId: 'inconnu' })
 
@@ -179,19 +176,20 @@ test('session corrompue après le montage : les statistiques basculent sur l’�
 })
 
 test('locale « en » : titres des blocs en anglais', async () => {
-  await putSession(makeSession({ config: { ...makeConfig(), locale: 'en' } }))
+  await putSession(
+    makeSession({ config: { ...makeConfig(), locale: 'en' }, students: [makeStudent([1])] }),
+  )
   renderAt('/session/session-1/stats')
 
-  expect(await screen.findByRole('region', { name: 'Headcount' })).toBeInTheDocument()
+  expect(await screen.findByRole('region', { name: 'Key figures' })).toBeInTheDocument()
+  expect(screen.getByRole('region', { name: 'Overview' })).toBeInTheDocument()
   for (const name of [
     'Final scores',
-    'Histogram',
-    'Categories',
+    'Success by category',
     'Tags',
     'Most drawn questions',
     'Skipped questions',
     'Strategies',
-    'Adjustments',
   ]) {
     expect(screen.getByRole('region', { name })).toBeInTheDocument()
   }
@@ -203,11 +201,11 @@ test('session inconnue : « introuvable »', async () => {
   expect(await screen.findByRole('heading', { name: 'Session introuvable' })).toBeInTheDocument()
 })
 
-test('ajustements : nombre, somme signée et moyenne', async () => {
+test('ajustements : nombre, somme signée et moyenne en pied des notes finales', async () => {
   await putSession(
     makeSession({
       students: [
-        makeStudent([], { id: 'student-1', adjustment: { value: 1 } }),
+        makeStudent([1], { id: 'student-1', adjustment: { value: 1 } }),
         makeStudent([], { id: 'student-2', order: 2, adjustment: { value: -0.5 } }),
         makeStudent([], { id: 'student-3', order: 3 }),
       ],
@@ -215,8 +213,65 @@ test('ajustements : nombre, somme signée et moyenne', async () => {
   )
   renderAt('/session/session-1/stats')
 
-  const region = await screen.findByRole('region', { name: 'Ajustements' })
-  expect(indicator(region, 'Nombre')).toBe('2')
-  expect(indicator(region, 'Somme')).toBe('+0,50')
-  expect(indicator(region, 'Moyenne')).toBe('0,25')
+  const region = await screen.findByRole('region', { name: 'Notes finales' })
+  expect(within(region).getByText(/^Ajustements/)).toHaveTextContent(
+    'Ajustements 2 · somme +0,50 · moyenne 0,25',
+  )
+})
+
+test('aucune tentative : état vide global, retour au passage, aucun bloc', async () => {
+  await putSession(makeSession())
+  renderAt('/session/session-1/stats')
+
+  expect(
+    await screen.findByRole('heading', { level: 2, name: 'Pas encore de statistiques' }),
+  ).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Aller au passage' })).toHaveAttribute(
+    'href',
+    '/session/session-1',
+  )
+  expect(screen.queryByRole('region', { name: 'Synthèse' })).not.toBeInTheDocument()
+})
+
+test('une question notée, aucun terminé : page normale, histogramme vide', async () => {
+  await putSession(
+    makeSession({ config: makeConfig({ questionsPerStudent: 2 }), students: [makeStudent([1])] }),
+  )
+  renderAt('/session/session-1/stats')
+
+  expect(await screen.findByRole('region', { name: 'Synthèse' })).toBeInTheDocument()
+  expect(screen.queryByText('Pas encore de statistiques')).not.toBeInTheDocument()
+  const grades = screen.getByRole('region', { name: 'Notes finales' })
+  expect(within(grades).getByText("Aucun étudiant n'a terminé.")).toBeInTheDocument()
+})
+
+test('sous-titre : « Statistiques · titre · matière · promotion », parties absentes omises', async () => {
+  const config = minimalConfig()
+  config.exam = { title: 'Oral PHP', subject: 'Back-end', cohort: 'B2 2026' }
+  await putSession(sessionWith([[attemptOf('a', 'a-1', 1)]], config))
+  const { unmount } = renderAt('/session/session-1/stats')
+  expect(
+    await screen.findByText('Statistiques · Oral PHP · Back-end · B2 2026'),
+  ).toBeInTheDocument()
+  unmount()
+
+  await putSession(sessionWith([[attemptOf('a', 'a-1', 1)]]))
+  renderAt('/session/session-1/stats')
+  expect(await screen.findByText('Statistiques · Oral de test')).toBeInTheDocument()
+})
+
+test('tag sans note : « — » et aucune barre', async () => {
+  const config = minimalConfig()
+  config.categories[0]!.questions = [{ id: 'a-1', prompt: 'Question A1', tags: ['boucles'] }]
+  await putSession(sessionWith([[attemptOf('a', 'a-1', 'pending')]], config))
+  renderAt('/session/session-1/stats')
+
+  const table = await screen.findByRole('table', { name: 'Tags' })
+  const row = within(table).getByRole('rowheader', { name: 'boucles' }).closest('tr')!
+  expect(
+    within(row)
+      .getAllByRole('cell')
+      .map((td) => td.textContent),
+  ).toEqual(['0', '', '—'])
+  expect(row.querySelector('[aria-hidden]')).toBeNull()
 })

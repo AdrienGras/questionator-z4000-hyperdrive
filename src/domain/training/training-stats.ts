@@ -26,6 +26,8 @@ export type TrainingStats = {
   byTag: { tag: string; rate: Rate }[]
   questions: QuestionStats[]
   coverage: { covered: number; total: number }
+  /** Taux global, même définition que `byCategory[].rate`, sur toutes les questions. */
+  rate: Rate
 }
 
 type Note = { points: number; max: number; drawnAt: string }
@@ -137,5 +139,6 @@ export function computeTrainingStats(
       covered: byCategory.reduce((s, c) => s + c.covered, 0),
       total: byCategory.reduce((s, c) => s + c.total, 0),
     },
+    rate: sumRate([...notes.values()].flat()),
   }
 }

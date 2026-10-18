@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { sidePanel } from './side-panel-assertions'
 import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import { makeConfig } from './student-fixtures'
 
@@ -57,7 +57,7 @@ export function screenConfig(
 /** Date de révélation de la note finale, commune aux sessions de test de l'écran de passage. */
 export const REVEALED = '2026-09-25T10:00:00.000Z'
 
-/** Le tiroir latéral ouvert (`dialog` « Panneau latéral »). */
+/** Le tiroir latéral ouvert (le `dialog` qui porte les onglets « Panneau »). */
 export function panel(): HTMLElement {
-  return screen.getByRole('dialog', { name: 'Panneau latéral' })
+  return sidePanel()
 }

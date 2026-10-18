@@ -51,7 +51,23 @@ function choose(input: HTMLInputElement, name: string, content: string) {
 }
 
 const submitButton = () => screen.getByRole('button', { name: 'C’est parti' })
-const pasteArea = () => screen.getByRole('textbox', { name: '… ou collez le JSON ici' })
+const PASTE_LABEL = '… ou collez le JSON ici'
+
+/** Ouvre le repli « … ou collez le JSON ici » s'il est fermé. */
+function openPaste() {
+  const summary = screen.getByText(PASTE_LABEL, { selector: 'summary' })
+  const details = summary.closest('details')
+  if (details === null) throw new Error('repli de collage absent')
+  if (!details.open) fireEvent.click(summary)
+  return details
+}
+
+/** Zone de collage, dans son repli ouvert. */
+function pasteArea() {
+  const details = openPaste()
+  expect(details).toHaveAttribute('open')
+  return within(details).getByRole('textbox', { name: PASTE_LABEL })
+}
 
 beforeEach(async () => {
   await db.trainings.clear()
@@ -79,9 +95,79 @@ describe('écran de mise en place d’un entraînement', () => {
       'Récupérez la config',
       'Déposez-la',
     ]) {
-      expect(screen.getByRole('heading', { level: 2, name })).toBeInTheDocument()
+      expect(
+        screen.getByRole('heading', { level: 2, name: new RegExp(`^${name} \\(`) }),
+      ).toBeInTheDocument()
     }
     expect(submitButton()).toBeDisabled()
+  })
+
+  test('en-tête : sous-titre de la création', async () => {
+    await renderPage()
+    expect(
+      screen.getByText('Du cours à la première question, en quatre étapes.'),
+    ).toBeInTheDocument()
+  })
+
+  test('au départ, l’étape 2 est en cours : surtitre, état dans les titres, aria-current', async () => {
+    await renderPage()
+    expect(screen.getByText('Étape 2 sur 4')).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Rassemblez votre cours (Étape faite)' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Déposez-la (Étape à venir)' }),
+    ).toBeInTheDocument()
+    const current = screen.getByRole('heading', {
+      level: 2,
+      name: 'Copiez le prompt (Étape en cours)',
+    })
+    expect(current.closest('li')).toHaveAttribute('aria-current', 'step')
+  })
+
+  test('la zone de dépôt est utilisable dès l’arrivée : l’étape 4 passe en cours', async () => {
+    const { input } = await renderPage()
+    choose(input, 'config.json', JSON.stringify(minimalConfig()))
+    await screen.findByRole('heading', { name: 'Oral de test' })
+    expect(submitButton()).toBeEnabled()
+    expect(screen.getByText('Étape 4 sur 4')).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Copiez le prompt (Étape faite)' }),
+    ).toBeInTheDocument()
+  })
+
+  test('copie réussie : étape résumée, focus gardé, prompt dans un repli', async () => {
+    await renderPage()
+    const copy = screen.getByRole('button', { name: 'Copier le prompt' })
+    copy.focus()
+    fireEvent.click(copy)
+    const again = await screen.findByRole('button', { name: 'Copier à nouveau' })
+    expect(again).toBe(copy)
+    expect(again).toHaveFocus()
+    expect(screen.getByText('Prompt copié.')).toHaveAttribute('aria-live', 'polite')
+    expect(screen.getByText('Afficher le prompt').closest('details')).not.toHaveAttribute('open')
+    expect(screen.getByText('Étape 4 sur 4').closest('li')).toHaveAttribute('aria-current', 'step')
+  })
+
+  test('« Copier à nouveau » refusé : résumé gardé, alerte', async () => {
+    await renderPage()
+    fireEvent.click(screen.getByRole('button', { name: 'Copier le prompt' }))
+    const again = await screen.findByRole('button', { name: 'Copier à nouveau' })
+    copyText.mockResolvedValueOnce(false)
+    fireEvent.click(again)
+    expect(await screen.findByRole('alert')).toHaveTextContent('La copie a échoué')
+    expect(screen.getByRole('button', { name: 'Copier à nouveau' })).toBeInTheDocument()
+    expect(screen.getByText('Afficher le prompt')).toBeInTheDocument()
+  })
+
+  test('bouton désactivé sans config valide : une phrase le dit', async () => {
+    const { input } = await renderPage()
+    const blocker = screen.getByText('Disponible une fois la config validée')
+    expect(submitButton()).toHaveAttribute('aria-describedby', blocker.id)
+    choose(input, 'config.json', JSON.stringify(minimalConfig()))
+    await screen.findByRole('heading', { name: 'Oral de test' })
+    expect(screen.queryByText('Disponible une fois la config validée')).toBeNull()
+    expect(submitButton()).not.toHaveAttribute('aria-describedby')
   })
 
   test('le prompt affiché est celui de la langue courante, en lecture seule', async () => {
@@ -89,6 +175,12 @@ describe('écran de mise en place d’un entraînement', () => {
     const prompt = screen.getByRole('textbox', { name: 'Prompt à copier' })
     expect(prompt).toHaveValue(buildTrainingPrompt('fr'))
     expect(prompt).toHaveAttribute('readonly')
+  })
+
+  test('prompt et collage en petite police à toutes les largeurs (artboard : 12 px)', async () => {
+    await renderPage()
+    expect(screen.getByRole('textbox', { name: 'Prompt à copier' })).toHaveClass('md:text-xs')
+    expect(pasteArea()).toHaveClass('md:text-xs')
   })
 
   test('l’étape du prompt met en avant l’effort de réflexion maximal', async () => {
@@ -116,17 +208,23 @@ describe('écran de mise en place d’un entraînement', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'La copie a échoué : sélectionnez le texte et copiez-le à la main.',
     )
+    expect(screen.getByText('Étape 2 sur 4')).toBeInTheDocument()
     fireEvent.click(copy)
     expect(await screen.findByText('Prompt copié.')).toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(screen.getByText('Afficher le prompt')).toBeInTheDocument()
   })
 
   test('fichier valide : résumé par catégorie et bouton actif', async () => {
     const { input } = await renderPage()
     choose(input, 'config.json', twoCategoryConfig())
     expect(await screen.findByRole('heading', { name: 'Oral de test' })).toBeInTheDocument()
-    expect(screen.getByText('A : 1 question')).toBeInTheDocument()
-    expect(screen.getByText('B : 2 questions')).toBeInTheDocument()
+    const counts = screen.getByRole('list', { name: 'Questions par niveau' })
+    const [a, b, ...rest] = within(counts).getAllByRole('listitem')
+    if (a === undefined || b === undefined) throw new Error('pastilles absentes')
+    expect(rest).toHaveLength(0)
+    expect(within(a).getByText('A : 1 question')).toHaveClass('sr-only')
+    expect(within(b).getByText('B : 2 questions')).toHaveClass('sr-only')
     expect(submitButton()).toBeEnabled()
     expect(screen.queryByRole('button', { name: 'Corriger dans l’éditeur' })).toBeNull()
   })
@@ -154,6 +252,70 @@ describe('écran de mise en place d’un entraînement', () => {
       text: '{}',
       fileName: 'config-collee.json',
     })
+  })
+
+  test('JSON collé retouché après vérification : l’étape 4 reste en cours', async () => {
+    await renderPage()
+    fireEvent.change(pasteArea(), { target: { value: '{}' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Vérifier le JSON collé' }))
+    await screen.findByRole('button', { name: 'Corriger dans l’éditeur' })
+    fireEvent.change(pasteArea(), { target: { value: '{"exam":{}}' } })
+    expect(screen.getByText('Étape 4 sur 4')).toBeInTheDocument()
+  })
+
+  test('repli de collage fermé au départ, « Vérifier » à l’intérieur', async () => {
+    await renderPage()
+    const details = screen.getByText(PASTE_LABEL, { selector: 'summary' }).closest('details')
+    expect(details).not.toHaveAttribute('open')
+    const check = screen.getByRole('button', { name: 'Vérifier le JSON collé' })
+    expect(check).toHaveTextContent(/^Vérifier$/)
+    expect(details).toContainElement(check)
+  })
+
+  test('JSON collé invalide : erreurs hors du repli, visibles une fois refermé', async () => {
+    await renderPage()
+    fireEvent.change(pasteArea(), { target: { value: '{}' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Vérifier le JSON collé' }))
+    const fix = await screen.findByRole('button', { name: 'Corriger dans l’éditeur' })
+    // Les erreurs : seuls éléments de liste du bloc de l'étape 4, qui contient aussi le repli.
+    const step = fix.parentElement
+    if (step === null) throw new Error('bloc de l’étape 4 absent')
+    const [issue] = within(step).getAllByRole('listitem')
+    if (issue === undefined) throw new Error('aucune erreur listée')
+    const details = openPaste()
+    fireEvent.click(screen.getByText(PASTE_LABEL, { selector: 'summary' }))
+    expect(details).not.toHaveAttribute('open')
+    expect(details).not.toContainElement(issue)
+    expect(issue).toBeVisible()
+    expect(fix).toBeVisible()
+  })
+
+  test('zone de dépôt compacte : invite tant qu’aucun fichier n’est choisi', async () => {
+    const { input } = await renderPage()
+    expect(screen.getByText('Déposez la config (.json) ici')).toBeInTheDocument()
+    choose(input, 'config.json', JSON.stringify(minimalConfig()))
+    await screen.findByRole('heading', { name: 'Oral de test' })
+    expect(screen.getByText('ou déposez-en un autre')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Remplacer' })).toBeInTheDocument()
+  })
+
+  test('pastilles : teinte de la catégorie, neutre sans couleur', async () => {
+    const { input } = await renderPage()
+    const config = minimalConfig()
+    config.categories.push({
+      id: 'b',
+      label: 'B',
+      scale: [0, 1],
+      questions: [{ id: 'b-1', prompt: 'Question B1' }],
+    })
+    const first = config.categories[0]
+    if (first === undefined) throw new Error('catégorie absente')
+    first.color = '#21d3ee'
+    choose(input, 'config.json', JSON.stringify(config))
+    const counts = await screen.findByRole('list', { name: 'Questions par niveau' })
+    const [colored, neutral] = within(counts).getAllByRole('listitem')
+    expect(colored?.style.getPropertyValue('--category-color')).toBe('#21d3ee')
+    expect(neutral?.style.getPropertyValue('--category-color')).toBe('')
   })
 
   test('JSON collé valide : la validation n’a lieu qu’au clic', async () => {
@@ -297,6 +459,7 @@ describe('mise à jour de la config d’un entraînement', () => {
       '/training/training-1',
     )
     expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(4)
+    expect(screen.getByText('Entraînement de test')).toBeInTheDocument()
     expect(updateButton()).toBeDisabled()
     expect(screen.queryByRole('button', { name: 'C’est parti' })).toBeNull()
   })
@@ -311,9 +474,9 @@ describe('mise à jour de la config d’un entraînement', () => {
         .getAllByRole('listitem')
         .map((item) => item.textContent),
     ).toEqual([
-      '3 questions conservées — historique gardé',
-      '1 nouvelle',
-      '1 retirée — elle n’apparaît plus dans les stats',
+      '3conservéesHistorique gardé',
+      '1nouvelleAjoutée au tirage',
+      '1retiréeN’apparaît plus dans les stats',
     ])
     expect(updateButton()).toBeEnabled()
   })
@@ -344,9 +507,9 @@ describe('mise à jour de la config d’un entraînement', () => {
         .getAllByRole('listitem')
         .map((item) => item.textContent),
     ).toEqual([
-      '0 question conservée — historique gardé',
-      '2 nouvelles',
-      '4 retirées — elles n’apparaissent plus dans les stats',
+      '0conservéeHistorique gardé',
+      '2nouvellesAjoutées au tirage',
+      '4retiréesN’apparaissent plus dans les stats',
     ])
     expect(await db.trainings.get('training-1')).toEqual(before)
   })

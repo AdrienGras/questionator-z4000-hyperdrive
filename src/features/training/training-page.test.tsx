@@ -94,6 +94,38 @@ describe('écran d’entraînement', () => {
     )
   })
 
+  test('sans question : sous-titre « Entraînement »', async () => {
+    await seed()
+    renderAt('/training/training-1')
+    await tiles()
+    const title = screen.getByRole('heading', { level: 1, name: 'Entraînement de test' })
+    expect(title.nextElementSibling).toHaveTextContent(/^Entraînement$/)
+  })
+
+  test('pendant une question : tuiles verrouillées, sous-titre de question', async () => {
+    await seed()
+    renderAt('/training/training-1')
+    fireEvent.click(await tile('B'))
+    await question()
+    const locked = screen.getByRole('list', {
+      name: 'Catégories (indisponibles pendant la question)',
+    })
+    expect(locked.querySelector('[aria-current="true"]')).toHaveTextContent(/^B/)
+    expect(screen.getByText('Entraînement · question en cours')).toBeInTheDocument()
+    expect(screen.queryByRole('list', { name: 'Choisissez une catégorie' })).toBeNull()
+  })
+
+  test('question en attente disparue de la config : aucune tuile marquée', async () => {
+    await seed()
+    await db.trainingDraws.add(makeDraw({ questionId: 'disparue' }))
+    renderAt('/training/training-1')
+    await screen.findByText('Cette question n’existe plus dans la config.')
+    const locked = screen.getByRole('list', {
+      name: 'Catégories (indisponibles pendant la question)',
+    })
+    expect(locked.querySelector('[aria-current]')).toBeNull()
+  })
+
   test('tirer affiche la question, réponse masquée, focus sur son titre', async () => {
     await seed()
     await seedOnlyA1Left()
@@ -232,7 +264,10 @@ describe('écran d’entraînement', () => {
       await screen.findByRole('heading', { level: 1, name: 'Cet entraînement est endommagé' }),
     ).toBeInTheDocument()
     expect(screen.getAllByRole('listitem').length).toBeGreaterThan(0)
-    expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Retour aux entraînements' })).toHaveAttribute(
+      'href',
+      '/trainings',
+    )
   })
 
   test('animation du tirage : présente si activée, absente sinon', async () => {

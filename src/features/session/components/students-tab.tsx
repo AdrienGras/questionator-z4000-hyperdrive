@@ -1,4 +1,5 @@
-import type { ComponentProps, ReactNode } from 'react'
+import type { ComponentProps } from 'react'
+import { sessionProgress } from '@/domain/session/progress'
 import type { Session } from '@/domain/session/types'
 import type { WriteOutcome } from '@/features/session/hooks/use-passage-actions'
 import type { Ui } from '@/lib/i18n/use-ui'
@@ -22,13 +23,11 @@ type StudentsTabProps = Readonly<{
     names: { lastName: string; firstName: string },
     options: { activate: boolean },
   ) => Promise<WriteOutcome>
-  /** Pied de l'onglet, réservé aux actions de liste (F15, F16). */
-  actionsSlot?: ReactNode
 }>
 
 /**
- * Onglet « Étudiants » : liste triée par `order`, changement d'étudiant actif au clic sur la ligne,
- * absence par le bouton de la ligne (sans changer l'étudiant actif).
+ * Onglet « Liste » : résumé et ajout, liste triée par `order`, changement d'étudiant actif au clic
+ * sur la ligne, absence par le bouton de la ligne (sans changer l'étudiant actif).
  */
 export function StudentsTab({
   ui,
@@ -38,14 +37,19 @@ export function StudentsTab({
   onSelect,
   onSetAbsent,
   onAdd,
-  actionsSlot,
 }: StudentsTabProps) {
   const { projection } = session
   const sorted = session.students.toSorted((a, b) => a.order - b.order)
+  const { total, done, absent } = sessionProgress(session)
   return (
-    <div className="flex flex-col gap-4">
-      <AddStudentDialog ui={ui} session={session} disabled={disabled} onAdd={onAdd} />
-      <ul aria-label={ui.text('students_list_label', {})} className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-small text-muted-foreground tabular-nums">
+          {ui.text('students_summary', { total, done, absent })}
+        </span>
+        <AddStudentDialog ui={ui} session={session} disabled={disabled} onAdd={onAdd} />
+      </div>
+      <ul aria-label={ui.text('students_list_label', {})} className="flex flex-col gap-0.5">
         {sorted.map((student) => (
           <StudentRow
             key={student.id}
@@ -63,7 +67,6 @@ export function StudentsTab({
           />
         ))}
       </ul>
-      <div>{actionsSlot}</div>
     </div>
   )
 }

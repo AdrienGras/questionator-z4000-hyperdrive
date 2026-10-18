@@ -58,6 +58,13 @@ function type(dialog: HTMLElement, value: string): void {
   fireEvent.change(field(dialog), { target: { value } })
 }
 
+/** Aperçu du calcul (zone annoncée), découpé en trois morceaux à l'écran. */
+function preview(dialog: HTMLElement): string {
+  return (dialog.querySelector('[aria-live="polite"]')?.textContent ?? '')
+    .replaceAll(/\s+/g, ' ')
+    .trim()
+}
+
 function button(dialog: HTMLElement, name: string): HTMLElement {
   return within(dialog).getByRole('button', { name })
 }
@@ -86,18 +93,18 @@ test('étudiant déjà révélé : pas de popup, « Ajuster » l’ouvre, prére
   await screen.findByRole('heading', { name: 'Passage terminé' })
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
-  fireEvent.click(screen.getByRole('button', { name: 'Ajuster' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Ajuster la note' }))
 
   const dialog = await findDialog()
-  expect(field(dialog)).toHaveValue('-0,5')
+  expect(field(dialog)).toHaveValue('−0,5')
   expect(within(dialog).getByLabelText('Justification (facultative)')).toHaveValue('Hésitant')
-  expect(within(dialog).getByText('13,5 − 0,5 = 13,0 / 20')).toBeInTheDocument()
+  expect(preview(dialog)).toBe('13,5 − 0,5 = 13,0 / 20')
 })
 
 test('fin de passage, « Annuler » : note révélée sans ajustement, popup fermée pour de bon', async () => {
   await mount(makeStudent([13.5]))
   const dialog = await findDialog()
-  expect(field(dialog)).toHaveValue('0')
+  expect(field(dialog)).toHaveValue('0,0')
 
   fireEvent.click(button(dialog, 'Annuler'))
 
@@ -124,7 +131,7 @@ test('mode « ajuster », « Annuler » : aucune écriture', async () => {
   await screen.findByRole('heading', { name: 'Passage terminé' })
   const before = (await stored()).session
 
-  fireEvent.click(screen.getByRole('button', { name: 'Ajuster' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Ajuster la note' }))
   const dialog = await findDialog()
   type(dialog, '1')
   fireEvent.click(button(dialog, 'Annuler'))
@@ -153,7 +160,7 @@ test('mode « ajuster », « Enregistrer » : ajustement sans toucher à la rév
   await mount(makeStudent([13.5], { finalRevealedAt: REVEALED }))
   await screen.findByRole('heading', { name: 'Passage terminé' })
 
-  fireEvent.click(screen.getByRole('button', { name: 'Ajuster' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Ajuster la note' }))
   const dialog = await findDialog()
   type(dialog, '−1,5')
   fireEvent.click(button(dialog, 'Enregistrer'))
@@ -172,7 +179,7 @@ test('ouverture : le contenu du champ est sélectionné, taper remplace la valeu
   // jsdom ne simule pas la frappe sur une sélection : on prouve la sélection elle-même
   // (tout le contenu, donc une frappe réelle remplace la valeur au lieu de s'y ajouter).
   await waitFor(() => expect(input).toHaveFocus())
-  expect(input.value).toBe('0')
+  expect(input.value).toBe('0,0')
   expect(input.selectionStart).toBe(0)
   expect(input.selectionEnd).toBe(input.value.length)
 })
@@ -181,9 +188,9 @@ test('calcul en direct', async () => {
   await mount(makeStudent([13.5]))
   const dialog = await findDialog()
 
-  expect(within(dialog).getByText('13,5 + 0,0 = 13,5 / 20')).toBeInTheDocument()
+  expect(preview(dialog)).toBe('13,5 + 0,0 = 13,5 / 20')
   type(dialog, '1')
-  expect(within(dialog).getByText('13,5 + 1,0 = 14,5 / 20')).toBeInTheDocument()
+  expect(preview(dialog)).toBe('13,5 + 1,0 = 14,5 / 20')
 })
 
 test('calcul en direct borné à l’échelle et à 0', async () => {
@@ -191,9 +198,9 @@ test('calcul en direct borné à l’échelle et à 0', async () => {
   const dialog = await findDialog()
 
   type(dialog, '1')
-  expect(within(dialog).getByText('20,0 + 1,0 = 20,0 / 20 (bornée à 20)')).toBeInTheDocument()
+  expect(preview(dialog)).toBe('20,0 + 1,0 = 20,0 / 20 (bornée à 20)')
   type(dialog, '-20')
-  expect(within(dialog).getByText('20,0 − 20,0 = 0,0 / 20')).toBeInTheDocument()
+  expect(preview(dialog)).toBe('20,0 − 20,0 = 0,0 / 20')
 })
 
 test('calcul en direct borné à 0', async () => {
@@ -201,7 +208,7 @@ test('calcul en direct borné à 0', async () => {
   const dialog = await findDialog()
 
   type(dialog, '-1')
-  expect(within(dialog).getByText('0,0 − 1,0 = 0,0 / 20 (bornée à 0)')).toBeInTheDocument()
+  expect(preview(dialog)).toBe('0,0 − 1,0 = 0,0 / 20 (bornée à 0)')
 })
 
 test('saisie hors du pas : message, aria-invalid, « Enregistrer » désactivé', async () => {
@@ -223,11 +230,11 @@ test('boutons − et + au pas de 0,25', async () => {
 
   fireEvent.click(button(dialog, 'Ajouter un pas'))
   fireEvent.click(button(dialog, 'Ajouter un pas'))
-  expect(field(dialog)).toHaveValue('0,5')
+  expect(field(dialog)).toHaveValue('+0,50')
 
   type(dialog, 'abc')
   fireEvent.click(button(dialog, 'Retirer un pas'))
-  expect(field(dialog)).toHaveValue('-0,25')
+  expect(field(dialog)).toHaveValue('−0,25')
 })
 
 test('double-clic sur « Enregistrer » : une seule écriture, aucune alerte (Review Focus 1)', async () => {
@@ -342,7 +349,7 @@ test('« + » et « − » sont bornés à ± l’échelle finale', async () => 
 
   type(dialog, '19,5')
   fireEvent.click(button(dialog, 'Ajouter un pas'))
-  expect(field(dialog).value).toBe('20')
+  expect(field(dialog).value).toBe('+20,0')
 })
 
 test('« + » depuis une saisie invalide repart de 0', async () => {
@@ -352,17 +359,17 @@ test('« + » depuis une saisie invalide repart de 0', async () => {
   type(dialog, 'abc')
   fireEvent.click(button(dialog, 'Ajouter un pas'))
 
-  expect(field(dialog).value).toBe('0,5')
+  expect(field(dialog).value).toBe('+0,5')
 })
 
 test('pas de 1 sans décimale (`decimals: 0`) : calcul en entiers, pas et saisie au point', async () => {
   await mount(makeStudent([13.5]), { step: 1, decimals: 0 })
   const dialog = await findDialog()
 
-  expect(within(dialog).getByText('14 + 0 = 14 / 20')).toBeInTheDocument()
+  expect(preview(dialog)).toBe('14 + 0 = 14 / 20')
   fireEvent.click(button(dialog, 'Ajouter un pas'))
-  expect(field(dialog)).toHaveValue('1')
-  expect(within(dialog).getByText('14 + 1 = 15 / 20')).toBeInTheDocument()
+  expect(field(dialog)).toHaveValue('+1')
+  expect(preview(dialog)).toBe('14 + 1 = 15 / 20')
 
   type(dialog, '0,5')
   expect(field(dialog)).toHaveAccessibleDescription('Saisissez un multiple de 1, entre −20 et 20.')
@@ -372,5 +379,15 @@ test('pas de 1 sans décimale (`decimals: 0`) : calcul en entiers, pas et saisie
   fireEvent.click(button(dialog, 'Enregistrer'))
   await dialogClosed()
   expect((await stored()).student.adjustment).toEqual({ value: -2 })
-  expect(await screen.findByText('12 / 20')).toBeInTheDocument()
+  expect(await screen.findByText('Note finale : 12 sur 20')).toBeInTheDocument()
+})
+
+test('aperçu découpé : somme, finale en grand, échelle', async () => {
+  await mount(makeStudent([13.5]))
+  const dialog = await findDialog()
+
+  const parts = [...dialog.querySelectorAll('[aria-live="polite"] > span')].map(
+    (el) => el.textContent,
+  )
+  expect(parts).toEqual(['13,5 + 0,0 =', '13,5', '/ 20'])
 })

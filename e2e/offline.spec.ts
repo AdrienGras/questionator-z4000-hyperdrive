@@ -47,7 +47,7 @@ test('réseau coupé après un premier chargement : créer, faire passer, projet
   // 5. Statistiques.
   const stats = await examiner.openStats()
   await expect(stats.histogram).toBeAttached()
-  await expect(stats.headcount('Terminés')).toHaveText('1')
+  await expect(stats.headcount('Passés')).toHaveText('1')
   await stats.backToPassage()
 
   // 6. Export Excel.

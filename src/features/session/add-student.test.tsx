@@ -8,7 +8,11 @@ import type { WriteOutcome } from './hooks/use-passage-actions'
 import { makeUi } from '@/testing/make-ui'
 import { makeSession } from '@/testing/session-fixtures'
 import { makeStudent, makeListStudent } from '@/testing/student-fixtures'
-import { expectPanelStaysOpen, openSidePanel } from '@/testing/side-panel-assertions'
+import {
+  expectPanelStaysOpen,
+  openSidePanel,
+  querySidePanel,
+} from '@/testing/side-panel-assertions'
 import { config, mountStudentsTab } from '@/testing/students-tab-harness'
 import { storedSession as stored } from '@/testing/stored-session'
 import { deferred } from '@/testing/deferred'
@@ -30,7 +34,7 @@ function fill(lastName: string, firstName: string) {
 }
 
 const addDialog = () => screen.queryByRole('dialog', { name: 'Ajouter un étudiant' })
-const drawer = () => screen.queryByRole('dialog', { name: 'Panneau latéral' })
+const drawer = () => querySidePanel()
 const addButton = () => screen.getByRole('button', { name: 'Ajouter' })
 const startButton = () => screen.getByRole('button', { name: 'Ajouter et faire passer' })
 
@@ -50,6 +54,20 @@ test('champs vides ou nom blanc : les deux boutons sont désactivés, sans avert
   expect(addButton()).toBeDisabled()
   expect(startButton()).toBeDisabled()
   expect(screen.queryByRole('status')).not.toBeInTheDocument()
+})
+
+test('pas de croix, « Annuler » ferme sans écrire', async () => {
+  await mount()
+  const before = (await db.sessions.get('session-1'))?.students
+  openDialog()
+  const dialog = await screen.findByRole('dialog', { name: 'Ajouter un étudiant' })
+  fill('Martin', 'Bob')
+
+  expect(within(dialog).queryByRole('button', { name: 'Fermer' })).not.toBeInTheDocument()
+  fireEvent.click(within(dialog).getByRole('button', { name: 'Annuler' }))
+
+  await waitFor(() => expect(addDialog()).not.toBeInTheDocument())
+  expect((await db.sessions.get('session-1'))?.students).toEqual(before)
 })
 
 test('doublon : avertit avec le nom de l’étudiant existant sans bloquer', async () => {
@@ -131,11 +149,11 @@ test('« Ajouter et faire passer » active le nouvel étudiant, remet la project
 
   // Rouvert sur « Étudiant » (D91) : retour à la liste.
   const reopened = await openSidePanel()
-  expect(within(reopened).getByRole('tab', { name: 'Étudiant' })).toHaveAttribute(
+  expect(within(reopened).getByRole('tab', { name: 'Cet étudiant' })).toHaveAttribute(
     'aria-selected',
     'true',
   )
-  fireEvent.click(within(reopened).getByRole('tab', { name: 'Étudiants' }))
+  fireEvent.click(within(reopened).getByRole('tab', { name: 'Liste' }))
   fireEvent.click(within(reopened).getByRole('button', { name: /^Aba/ }))
   expect(await screen.findByRole('heading', { level: 2, name: 'Titre a-1' })).toBeInTheDocument()
 })

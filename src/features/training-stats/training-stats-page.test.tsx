@@ -44,19 +44,25 @@ describe('écran de stats d’un entraînement', () => {
       '/training/training-1',
     )
 
+    expect(screen.getByText('Stats de l’entraînement')).toBeInTheDocument()
     const figures = screen.getByRole('region', { name: 'Chiffres clés' })
-    expect(within(figures).getByText('3 réponses notées')).toBeInTheDocument()
-    expect(within(figures).getByText('1 passée')).toBeInTheDocument()
-    expect(within(figures).getByText('2 / 4 questions notées')).toBeInTheDocument()
+    expect([...figures.querySelectorAll('p')].map((p) => p.textContent)).toEqual([
+      '3 réponses notées',
+      '1 passée',
+      '2 / 4 questions notées',
+    ])
 
     const review = screen.getByRole('region', { name: 'À revoir' })
     expect(within(review).getAllByRole('listitem')).toHaveLength(1)
     expect(within(review).getByText('Question A1')).toBeInTheDocument()
 
-    const levels = screen.getByRole('table', { name: 'Par niveau' })
-    expect(rowCells(levels, 'A')).toEqual([percent(0.75), '2 / 3'])
-    const tags = screen.getByRole('table', { name: 'Par notion' })
-    expect(rowCells(tags, 'y')).toEqual([percent(1)])
+    const levels = screen.getByRole('region', { name: 'Par niveau' })
+    expect(
+      within(levels).getByText(`Réussite A : ${percent(0.75)}`, { normalizer: (s) => s }),
+    ).toBeInTheDocument()
+    expect(within(levels).getByText('2 / 3 notées')).toBeInTheDocument()
+    const tags = screen.getByRole('region', { name: 'Par notion' })
+    expect(within(tags).getAllByRole('listitem').at(-1)?.textContent).toBe(`y${percent(1)}`)
 
     const summary = screen.getByText('Détail des 4 questions')
     expect(summary.closest('details')).not.toHaveAttribute('open')
@@ -90,7 +96,7 @@ describe('écran de stats d’un entraînement', () => {
     await seed(makeStatsDraws(), config)
     renderAt('/training/training-1/stats')
 
-    expect(await screen.findByRole('table', { name: 'Par niveau' })).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: 'Par niveau' })).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: 'Par notion' })).not.toBeInTheDocument()
   })
 
@@ -99,8 +105,11 @@ describe('écran de stats d’un entraînement', () => {
     await seed([makeScoredDraw('b-1', 2, 2)])
     renderAt('/training/training-1/stats')
 
-    const levels = await screen.findByRole('table', { name: 'Par niveau' })
-    expect(rowCells(levels, 'B')).toEqual([percent(1), '1 / 1'])
+    const levels = await screen.findByRole('region', { name: 'Par niveau' })
+    expect(
+      within(levels).getByText(`Réussite B : ${percent(1)}`, { normalizer: (s) => s }),
+    ).toBeInTheDocument()
+    expect(within(levels).getByText('1 / 1 notées')).toBeInTheDocument()
     fireEvent.click(screen.getByText('Détail des 4 questions'))
     const details = screen.getByRole('table', { name: 'Détail des 4 questions' })
     expect(rowCells(details, 'Question B1')).toEqual(['B', '1', '2 / 2', percent(1), ''])
@@ -134,9 +143,9 @@ describe('écran de stats d’un entraînement', () => {
     expect(await screen.findByRole('region', { name: 'Chiffres clés' })).toBeInTheDocument()
   })
 
-  test('accès depuis la carte d’accueil : lien « Stats » à côté de « Reprendre »', async () => {
+  test('accès depuis la carte de l’espace Entraînement : lien « Stats » à côté de « Reprendre »', async () => {
     await seed()
-    renderAt('/')
+    renderAt('/trainings')
 
     const heading = await screen.findByRole('heading', { level: 3, name: 'Entraînement de test' })
     const card = heading.closest('li')

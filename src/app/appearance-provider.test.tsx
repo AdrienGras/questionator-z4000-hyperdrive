@@ -296,3 +296,19 @@ test('useColorModeControl hors provider lève une erreur explicite', () => {
   vi.spyOn(console, 'error').mockImplementation(() => {})
   expect(() => render(<Control />)).toThrow(/AppearanceProvider/)
 })
+
+describe('AppearanceProvider — portée sans mémoire (vue projetée, D112)', () => {
+  test('sans clé : le mode vaut defaultMode, un choix ne change rien et n’écrit rien', () => {
+    const scope: AppearanceScope = { defaultMode: 'dark' }
+    render(
+      <AppearanceProvider>
+        <Scoped scope={scope} />
+      </AppearanceProvider>,
+    )
+    expect(screen.getByText('dark/dark')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'clair' }))
+    expect(html).toHaveClass('dark')
+    expect(screen.getByText('dark/dark')).toBeInTheDocument()
+    expect(localStorage).toHaveLength(0)
+  })
+})

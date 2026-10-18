@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import { binLabel, binTick, compositionLabel, reasonsLabel } from './labels'
+import { binLabel, compositionLabel, formatBound, reasonsLabel } from './labels'
 
 const times = (label: string, count: number) => `${label} ×${count}`
 
@@ -11,8 +11,9 @@ test('binLabel : demi-ouvert à droite, dernière barre fermée, virgule selon l
   expect(binLabel({ from: 0.333, to: 0.6667, count: 0 }, false, 'en')).toBe('[0.333 ; 0.667[')
 })
 
-test('binTick : « a–b »', () => {
-  expect(binTick({ from: 2, to: 2.5, count: 1 }, 'fr')).toBe('2–2,5')
+test('formatBound : jusqu’à 3 décimales, séparateur de la langue', () => {
+  expect(formatBound(0.625, 'fr')).toBe('0,625')
+  expect(formatBound(20, 'en')).toBe('20')
 })
 
 test('reasonsLabel : « x ×n » séparés par une virgule, null → libellé sans motif', () => {

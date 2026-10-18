@@ -21,7 +21,8 @@ export class PresentPage {
     this.waitingMessage = page.getByText("L'épreuve va bientôt commencer.")
     this.prompt = page.getByRole('region', { name: 'Question en cours' })
     this.highlightedCode = this.prompt.locator('pre span[style*="--shiki-"]').first()
-    this.questionIndex = page.getByText(/^Question \d+ \/ \d+$/)
+    // Valeur de la carte « Question » de l'en-tête (« 2 / 3 »).
+    this.questionIndex = page.getByRole('definition').filter({ hasText: /^\d+ \/ \d+$/ })
   }
 
   /** Locator du nom de l'étudiant projeté (titre de niveau 1). */

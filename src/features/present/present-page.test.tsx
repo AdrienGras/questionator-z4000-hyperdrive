@@ -91,7 +91,9 @@ test('étudiant sans tirage : nom, une tuile par catégorie, « Question 1 / 3 �
   expect(await screen.findByText(/Alice/)).toHaveTextContent('Durand')
   expect(screen.getByText('Algorithmique')).toBeInTheDocument()
   expect(screen.getByText('Bases de données')).toBeInTheDocument()
-  expect(screen.getByText('Question 1 / 3')).toBeInTheDocument()
+  expect(screen.getByText('Question', { selector: 'dt' }).nextElementSibling).toHaveTextContent(
+    '1 / 3',
+  )
   expect(screen.queryAllByRole('button').map((b) => b.textContent)).not.toContain('Algorithmique')
   expect(screen.getByText('Algorithmique').closest('[tabindex]')).toBeNull()
 })
@@ -104,18 +106,26 @@ test('question en cours : énoncé affiché, réponse absente', async () => {
   expect(screen.queryByText(/Secret a-1/)).not.toBeInTheDocument()
 })
 
+test('question en cours : aucun titre de question projeté (D103)', async () => {
+  await seed(makeStudent(['pending']))
+  renderAt('/present/session-1')
+
+  await screen.findByText('Énoncé a-1')
+  expect(screen.getByRole('main')).not.toHaveTextContent('Titre a-1')
+})
+
 test('terminé : pas de note tant que non révélé, puis note, puis correction visible', async () => {
   await seed(makeStudent([2, 1, 3]))
   renderAt('/present/session-1')
 
   expect(await screen.findByText('Passage terminé')).toBeInTheDocument()
-  expect(screen.queryByText(/Note :/)).not.toBeInTheDocument()
+  expect(screen.queryByText(/Note : .* sur 20/)).not.toBeInTheDocument()
 
   await updateSession('session-1', (s) => ({
     ...s,
     students: s.students.map((st) => ({ ...st, finalRevealedAt: '2026-09-25T10:00:00.000Z' })),
   }))
-  const revealed = await screen.findByText(/Note : .* \/ 20/)
+  const revealed = await screen.findByText(/Note : .* sur 20/)
   const before = revealed.textContent
 
   await updateSession('session-1', (s) =>
@@ -125,14 +135,16 @@ test('terminé : pas de note tant que non révélé, puis note, puis correction 
       { now: () => new Date() },
     ),
   )
-  await waitFor(() => expect(screen.getByText(/Note : .* \/ 20/).textContent).not.toBe(before))
+  await waitFor(() => expect(screen.getByText(/Note : .* sur 20/).textContent).not.toBe(before))
 })
 
 test('score cumulé affiché avec le format de la locale', async () => {
   await seed(makeStudent([3, 'pending']), { showCumulativeScore: true })
   renderAt('/present/session-1')
 
-  expect(await screen.findByText('Score : 3')).toBeInTheDocument()
+  expect(
+    (await screen.findByText('Score', { selector: 'dt' })).nextElementSibling,
+  ).toHaveTextContent('3')
 })
 
 test('détail final : titres et « Passée » pour une passe', async () => {

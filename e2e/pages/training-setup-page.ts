@@ -34,9 +34,16 @@ export class TrainingSetupPage {
     return this.page.getByText(message)
   }
 
-  /** Colle `text` dans la zone de collage puis lance « Vérifier le JSON collé ». */
+  /**
+   * Ouvre le repli « … ou collez le JSON ici » s'il est fermé, y colle `text`, puis lance
+   * « Vérifier le JSON collé ».
+   */
   async pasteConfig(text: string): Promise<void> {
-    await this.page.getByRole('textbox', { name: '… ou collez le JSON ici' }).fill(text)
+    const area = this.page.getByRole('textbox', { name: '… ou collez le JSON ici' })
+    if (!(await area.isVisible())) {
+      await this.page.locator('summary', { hasText: '… ou collez le JSON ici' }).click()
+    }
+    await area.fill(text)
     await this.page.getByRole('button', { name: 'Vérifier le JSON collé' }).click()
   }
 

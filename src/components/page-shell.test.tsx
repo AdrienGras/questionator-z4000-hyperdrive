@@ -2,35 +2,28 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { expect, test, vi } from 'vitest'
 import { AppearanceProvider } from '@/app/appearance-provider'
-import { useUi } from '@/lib/i18n/use-ui'
-import { bannerInteractiveNames, expectColorModeToggleLast } from '@/testing/page-shell-assertions'
+import { bannerInteractiveNames } from '@/testing/page-shell-assertions'
 import { PageShell } from './page-shell'
 
 function Harness({
   children,
   ...props
-}: Readonly<
-  { children?: ReactNode } & Omit<React.ComponentProps<typeof PageShell>, 'ui' | 'children'>
->) {
-  return (
-    <PageShell ui={useUi()} {...props}>
-      {children}
-    </PageShell>
-  )
+}: Readonly<{ children?: ReactNode } & Omit<React.ComponentProps<typeof PageShell>, 'children'>>) {
+  return <PageShell {...props}>{children}</PageShell>
 }
 
 function mount(node: ReactNode) {
   return render(<AppearanceProvider>{node}</AppearanceProvider>)
 }
 
-test('titre seul : h1, pas de retour ni de ligne d’infos, thème dernier', () => {
+test('titre seul : h1, ni retour, ni ligne d’infos, ni actions', () => {
   mount(<Harness title="Oral">x</Harness>)
   const h1 = screen.getByRole('heading', { level: 1, name: 'Oral' })
   expect(h1.parentElement?.children).toHaveLength(1)
-  expectColorModeToggleLast()
+  expect(bannerInteractiveNames()).toEqual([])
 })
 
-test('retour, infos et actions rendus ; thème après les actions', () => {
+test('retour, infos et actions rendus, dans cet ordre ; plus d’aide dans la barre', () => {
   mount(
     <Harness
       title="Oral"
@@ -44,21 +37,7 @@ test('retour, infos et actions rendus ; thème après les actions', () => {
   expect(screen.getByText('Retour')).toBeInTheDocument()
   expect(screen.getByText('Durand Alice')).toBeInTheDocument()
   expect(screen.getByText('Projeter')).toBeInTheDocument()
-  const names = bannerInteractiveNames()
-  expect(names.slice(0, 2)).toEqual(['Retour', 'Projeter'])
-  expect(names).toHaveLength(4)
-  expectColorModeToggleLast()
-})
-
-test('lien Aide : ouvre la doc dans un nouvel onglet, juste avant le thème', () => {
-  mount(<Harness title="Oral">x</Harness>)
-  const link = screen.getByRole('link', { name: 'Aide (nouvel onglet)' })
-  expect(link).toHaveAttribute('href', `${import.meta.env.BASE_URL}docs/`)
-  expect(link).toHaveAttribute('target', '_blank')
-  expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-  expect(link).toHaveTextContent('Aide')
-  expect(bannerInteractiveNames().at(-2)).toBe('Aide (nouvel onglet)')
-  expectColorModeToggleLast()
+  expect(bannerInteractiveNames()).toEqual(['Retour', 'Projeter'])
 })
 
 test('props du main transmises', () => {
@@ -96,7 +75,51 @@ test('titre long : le bloc titre se replie, le groupe de droite reste aligné à
   )
   // jsdom ne fait pas de mise en page : on fige les classes qui la portent.
   const h1 = screen.getByRole('heading', { level: 1 })
-  expect(h1.parentElement).toHaveClass('flex-[1_1_20rem]', 'min-w-0')
-  const toggle = screen.getByRole('button', { name: /^(Mode d'affichage|Display mode)/ })
-  expect(toggle.parentElement).toHaveClass('ml-auto', 'justify-end')
+  expect(h1.parentElement).toHaveClass('min-w-0')
+  // Le bloc qui se replie porte aussi l'éventuelle tuile d'espace (`icon`).
+  expect(h1.parentElement?.parentElement).toHaveClass('flex-[1_1_20rem]', 'min-w-0')
+  const actions = screen.getByRole('button', { name: 'Projeter' })
+  expect(actions.parentElement).toHaveClass('ml-auto', 'justify-end')
+})
+
+test('icon : tuile avant le titre', () => {
+  mount(
+    <Harness title="Sessions" icon={<span data-testid="tuile" />}>
+      x
+    </Harness>,
+  )
+  const h1 = screen.getByRole('heading', { level: 1, name: 'Sessions' })
+  const tile = screen.getByTestId('tuile')
+  expect(tile.compareDocumentPosition(h1) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+})
+
+test('halo space : un décor caché, sans pointeur ; aucun sans la prop', () => {
+  const { unmount } = mount(
+    <Harness title="Sessions" halo="space">
+      x
+    </Harness>,
+  )
+  const main = screen.getByRole('main')
+  const layers = main.querySelectorAll(':scope > [aria-hidden="true"].pointer-events-none')
+  expect(layers).toHaveLength(1)
+  expect(layers[0]?.querySelectorAll('[class*="radial-gradient"]')).toHaveLength(1)
+  // Le calque s'ancre à la colonne de contenu de `RootLayout`, pas au `main` borné en largeur :
+  // sur grand écran, le halo doit aller jusqu'au bord droit de la fenêtre.
+  expect(main).not.toHaveClass('relative')
+  unmount()
+  mount(<Harness title="Oral">x</Harness>)
+  expect(screen.getByRole('main').querySelectorAll('.pointer-events-none')).toHaveLength(0)
+})
+
+test('halo : décors dans un calque coupé sur les deux axes, sans déborder sur la barre du haut', () => {
+  mount(
+    <Harness title="Accueil" halo="home">
+      x
+    </Harness>,
+  )
+  const main = screen.getByRole('main')
+  const layer = main.firstElementChild
+  // jsdom ne fait pas de mise en page : on fige les classes qui coupent le décor au cadre du `main`.
+  expect(layer).toHaveClass('absolute', 'inset-0', 'overflow-hidden', 'pointer-events-none')
+  expect(layer?.querySelectorAll('[class*="radial-gradient"]')).toHaveLength(2)
 })

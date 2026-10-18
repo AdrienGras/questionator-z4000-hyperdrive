@@ -120,7 +120,7 @@ export const ConfigSchema = z.strictObject({
   }),
   schemaVersion: z.literal(SCHEMA_VERSION).meta({
     description:
-      'Version du format de config, utilisée pour la compatibilité des sessions et des backups.',
+      'Version du format de config, utilisée pour la compatibilité des sessions et des sauvegardes.',
   }),
   locale: z.enum(SUPPORTED_LOCALES).optional().meta({
     description:

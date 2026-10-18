@@ -1,11 +1,13 @@
-import type { CSSProperties } from 'react'
-import { CategoryIcon } from '@/components/category-icon'
+import { useId } from 'react'
+import { CategoryBadge } from '@/components/category-badge'
 import { CategoryLayout } from '@/components/category-layout'
+import { categoryRows } from '@/domain/presentation/category-rows'
 import type { ProjectedStudentView } from '@/domain/presentation/projected-view'
 import { formatRawScore } from '@/domain/scoring/format'
 import { toMilli } from '@/domain/scoring/milli'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
+import { categoryAccent } from '@/lib/appearance/category-accent'
 
 type Category = ProjectedStudentView['categories'][number]
 
@@ -29,60 +31,102 @@ function tileState(
   return finished ? 'unavailable' : 'waiting'
 }
 
-const STATE_CLASSES: Record<TileState, string | undefined> = {
-  available: undefined,
-  current: 'border-4',
-  waiting: 'opacity-60',
-  unavailable: 'opacity-60',
-  exhausted: 'border-dashed opacity-40',
+// Teinte de catégorie (D103), classes écrites en entier (Tailwind ne lit que des littéraux).
+const TINT =
+  'border-[1.5px] border-[color:color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_35%,transparent)] ' +
+  'bg-[color:color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_10%,var(--color-card))]'
+const CURRENT =
+  'border-2 border-[color:var(--category-ink,var(--color-primary))] ' +
+  'bg-[color:color-mix(in_oklch,var(--category-color,var(--color-primary))_18%,var(--color-card))]'
+const POINTS_COLOR = 'text-[var(--category-ink,var(--color-muted-foreground))]'
+
+/** Grande grille (aucune question) et rangée compacte (question en cours) : artboards `projection-tuiles` et `projection-question`. */
+const LAYOUT = {
+  grid: {
+    tile: 'min-h-55 flex-col items-center justify-center gap-4 rounded-xl p-7 text-center',
+    badge: 'projection-lg',
+    label: 'min-w-0 max-w-full text-4xl font-extrabold tracking-[-0.02em] wrap-anywhere',
+    points: 'text-[1.625rem] leading-[1.875rem] font-bold',
+  },
+  /** Quatre tuiles par ligne ou plus (7 catégories et plus, D74) : trois lignes tiennent à 800 px. */
+  compact: {
+    tile: 'min-h-32 flex-col items-center justify-center gap-2 rounded-xl p-4 text-center',
+    badge: 'projection-sm',
+    label: 'min-w-0 max-w-full text-[1.375rem] leading-7 font-extrabold wrap-anywhere',
+    points: 'text-lg font-bold',
+  },
+  row: {
+    tile: 'h-18 items-center gap-3 rounded-lg px-4',
+    badge: 'projection-sm',
+    label: 'min-w-0 truncate text-[1.375rem] leading-7 font-bold',
+    points: 'ml-auto shrink-0 text-lg font-bold',
+  },
+} as const
+
+const DIMMED: Record<TileState, boolean> = {
+  available: false,
+  current: false,
+  waiting: true,
+  unavailable: true,
+  exhausted: true,
 }
 
 /**
- * Tuiles de catégorie de la vue projetée : purement visuelles (ni bouton ni focusable), couleur
- * en accent de bordure et d'icône comme la grille examinateur (D26), même disposition selon le
- * nombre de catégories (`CategoryLayout`, D74).
+ * Tuiles de catégorie de la vue projetée : purement visuelles (ni bouton ni focusable), teintées par
+ * la couleur de la catégorie comme la grille examinateur, même disposition selon le nombre de
+ * catégories (`CategoryLayout`, D74). `grid` (aucune question en cours) : grandes tuiles sous la
+ * consigne « Choisissez une catégorie », sans consigne une fois le passage fini. `row` (question en
+ * cours) : tuiles compactes, la catégorie tirée marquée, les autres atténuées.
  */
 export function CategoryTiles({
   ui,
   categories,
   currentCategoryId,
   finished = false,
+  variant = 'grid',
 }: Readonly<{
   ui: Ui
   categories: ProjectedStudentView['categories']
   currentCategoryId?: string
   finished?: boolean
+  variant?: 'grid' | 'row'
 }>) {
-  return (
+  const titleId = useId()
+  const dense = variant === 'grid' && (categoryRows(categories.length)[0] ?? 0) >= 4
+  const layout = LAYOUT[dense ? 'compact' : variant]
+  let density: 'compact' | 'full' | undefined
+  if (variant === 'grid') density = dense ? 'compact' : 'full'
+  const showTitle = variant === 'grid' && !finished
+  const tiles = (
     <CategoryLayout
-      className="gap-4"
+      className={variant === 'grid' && !dense ? 'gap-6' : 'gap-4'}
+      aria-labelledby={showTitle ? titleId : undefined}
+      aria-label={variant === 'row' ? ui.text('present_categories', {}) : undefined}
       items={categories}
       itemKey={(category) => category.id}
       renderItem={(category) => {
         const state = tileState(category, currentCategoryId, finished)
-        const accent: (CSSProperties & Record<'--category-color', string>) | undefined =
-          category.color === undefined ? undefined : { '--category-color': category.color }
+        const accent = categoryAccent(category.color)
         return (
           <div
             style={accent}
             data-colored={category.color !== undefined}
             data-state={state}
+            data-density={density}
+            aria-current={state === 'current' ? 'true' : undefined}
             className={cn(
-              'flex h-full flex-col items-center gap-2 rounded-lg border p-5 text-center text-2xl',
-              'data-[colored=true]:border-[var(--category-color)]',
-              STATE_CLASSES[state],
+              'flex h-full',
+              layout.tile,
+              state === 'current' ? CURRENT : TINT,
+              state === 'exhausted' && 'border-dashed',
+              DIMMED[state] && 'opacity-45',
             )}
           >
-            {category.icon !== undefined && (
-              <CategoryIcon
-                name={category.icon}
-                className="size-8 shrink-0 text-[var(--category-color,currentColor)]"
-              />
-            )}
-            <span className="font-semibold">{category.label}</span>
+            <CategoryBadge color={category.color} icon={category.icon} size={layout.badge} />
+            <span className={layout.label}>{category.label}</span>
             {/* Même libellé que la grille examinateur ; absent sans `showCategoryPoints`. */}
             {category.maxPoints !== undefined && (
-              <span className="text-base text-muted-foreground">
+              <span className={cn(layout.points, POINTS_COLOR, 'tabular-nums')}>
                 {ui.text('passage_category_max', {
                   max: formatRawScore(toMilli(category.maxPoints), ui.locale),
                   points: category.maxPoints,
@@ -103,5 +147,14 @@ export function CategoryTiles({
         )
       }}
     />
+  )
+  if (!showTitle) return tiles
+  return (
+    <section aria-labelledby={titleId} className="flex flex-col gap-4">
+      <h2 id={titleId} className="text-2xl font-semibold text-muted-foreground">
+        {ui.text('present_choose_category', {})}
+      </h2>
+      {tiles}
+    </section>
   )
 }

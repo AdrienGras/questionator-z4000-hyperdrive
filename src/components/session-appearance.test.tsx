@@ -39,14 +39,14 @@ test('pose les tokens du mode par défaut de la config et les retire au démonta
   expect(html).not.toHaveClass('dark')
 })
 
-test('un choix mémorisé pour cette session et cette vue prime sur le défaut de la config', () => {
-  localStorage.setItem('questionator:color-mode:s1:present', 'light')
+test('vue examinateur : un choix mémorisé pour cette session prime sur le défaut de la config', () => {
+  localStorage.setItem('questionator:color-mode:s1:examiner', 'light')
   const config = themed({
     presentation: { ...makeConfig().presentation, defaultColorMode: 'dark' },
   })
   render(
     <AppearanceProvider>
-      <SessionAppearance sessionId="s1" view="present" config={config}>
+      <SessionAppearance sessionId="s1" view="examiner" config={config}>
         <Label />
       </SessionAppearance>
     </AppearanceProvider>,
@@ -76,4 +76,36 @@ test('sans locale dans la config : langue du navigateur', () => {
     </AppearanceProvider>,
   )
   expect(screen.getByText('Retour à l’accueil')).toBeInTheDocument()
+})
+
+test('vue projetée : ignore un choix mémorisé et suit defaultColorMode', () => {
+  localStorage.setItem('questionator:color-mode:s1:present', 'light')
+  const config = themed({
+    presentation: { ...makeConfig().presentation, defaultColorMode: 'dark' },
+  })
+  render(
+    <AppearanceProvider>
+      <SessionAppearance sessionId="s1" view="present" config={config}>
+        <Label />
+      </SessionAppearance>
+    </AppearanceProvider>,
+  )
+  expect(html).toHaveClass('dark')
+  expect(html.style.getPropertyValue('--primary')).toBe('rgb(4, 5, 6)')
+})
+
+test('en clair, une config sans theme.light n’applique aucun token de theme.dark', () => {
+  const config = themed({
+    theme: { light: {}, dark: { primary: 'rgb(4, 5, 6)' } },
+    presentation: { ...makeConfig().presentation, defaultColorMode: 'light' },
+  })
+  render(
+    <AppearanceProvider>
+      <SessionAppearance sessionId="s1" view="examiner" config={config}>
+        <Label />
+      </SessionAppearance>
+    </AppearanceProvider>,
+  )
+  expect(html).not.toHaveClass('dark')
+  expect(html.style.getPropertyValue('--primary')).toBe('')
 })

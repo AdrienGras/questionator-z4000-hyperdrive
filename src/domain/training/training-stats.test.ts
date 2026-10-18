@@ -36,6 +36,20 @@ describe('computeTrainingStats', () => {
     expect(stats.passedCount).toBe(0)
   })
 
+  it('taux global : somme des points sur somme des max, toutes questions confondues', () => {
+    const stats = computeTrainingStats(config, [scored('a-1', 2, 4), scored('b-1', 3, 4)])
+    expect(stats.rate).toEqual({ points: 5000, max: 8000, rate: 0.625 })
+  })
+
+  it('taux global : null sans note, questions disparues et passages ignorés', () => {
+    const stats = computeTrainingStats(config, [
+      makeDraw({ questionId: 'a-1', outcome: { kind: 'passed' } }),
+      scored('fantome', 2, 2),
+    ])
+    expect(stats.rate.rate).toBeNull()
+    expect(stats.rate.max).toBe(0)
+  })
+
   it('taux par catégorie en millièmes', () => {
     const stats = computeTrainingStats(config, [scored('a-1', 2, 2), scored('a-2', 1, 2)])
     expect(stats.byCategory[0]?.rate).toEqual({ points: 3000, max: 4000, rate: 0.75 })

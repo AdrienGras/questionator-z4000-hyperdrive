@@ -2,11 +2,11 @@ import { EditorView } from '@codemirror/view'
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { validateConfig } from '@/domain/config/validate'
+import { configFileName } from '@/domain/config/config-file-name'
 import { locateIssue } from '@/features/config-editor/issue-locations'
 import { EXAMPLE_TEXT } from '@/features/config-editor/hooks/use-config-draft'
 import { takeConfigForCreation } from '@/lib/config-handoff'
 import { downloadText } from '@/lib/download'
-import { expectColorModeToggleLast } from '@/testing/page-shell-assertions'
 import { renderAt } from '@/testing/render-at'
 
 vi.mock('@/lib/download', () => ({ downloadText: vi.fn<typeof downloadText>() }))
@@ -64,11 +64,12 @@ afterEach(() => {
 describe('ConfigEditorPage', () => {
   it('ouvre l’exemple sur deux colonnes, puis en affiche l’aperçu', async () => {
     await renderEditor()
-    // Après l'aperçu, qui ajoute ses propres `header` : la barre de titre doit rester trouvable.
     await previewReady()
-    expectColorModeToggleLast()
-    expect(screen.getByRole('link', { name: 'Retour à l’accueil' })).toHaveAttribute('href', '/')
-    expect(screen.getByRole('heading', { level: 2, name: 'Configuration' })).toBeInTheDocument()
+    const trail = within(screen.getByRole('navigation', { name: "Fil d'Ariane" }))
+    expect(trail.getByText('Éditeur de config')).toHaveAttribute('aria-current', 'page')
+    expect(
+      screen.getByRole('heading', { level: 2, name: configFileName(EXAMPLE_TEXT) }),
+    ).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 2, name: 'Aperçu' })).toBeInTheDocument()
     expect(editorView().state.doc.toString()).toBe(EXAMPLE_TEXT)
     expect(screen.getByRole('textbox', { name: 'Configuration JSON' })).toBeInTheDocument()
@@ -137,7 +138,7 @@ describe('ConfigEditorPage', () => {
     fireEvent.change(input, { target: { files: [new File(['{"a":1}'], 'a.json')] } })
     await waitFor(() => expect(editorView().state.doc.toString()).toBe('{"a":1}'))
 
-    const column = screen.getByRole('region', { name: 'Configuration' })
+    const column = screen.getByRole('region', { name: /\.json$/ })
     const file = new File(['{"b":2}'], 'b.json')
     fireEvent.drop(column, { dataTransfer: { files: [file], types: ['Files'] } })
     await waitFor(() => expect(editorView().state.doc.toString()).toBe('{"b":2}'))
@@ -153,6 +154,45 @@ describe('ConfigEditorPage', () => {
     // Laisse à une éventuelle lecture concurrente (FileReader de CodeMirror) le temps d'aboutir.
     await new Promise((resolve) => setTimeout(resolve, 50))
     expect(editorView().state.doc.toString()).toBe('{"c":3}')
+  })
+
+  it('la région de la source porte le nom de fichier dérivé du titre', async () => {
+    await renderEditor()
+    await previewReady()
+    expect(screen.getByRole('region', { name: configFileName(EXAMPLE_TEXT) })).toBeInTheDocument()
+  })
+
+  it('« Charger » : nom accessible « Charger un fichier »', async () => {
+    await renderEditor()
+    const load = screen.getByRole('button', { name: 'Charger un fichier' })
+    expect(load.textContent).toBe('Charger')
+  })
+
+  it('« Créer une session avec cette config » dans l’en-tête, désactivé sur une config invalide', async () => {
+    await renderEditor()
+    await previewReady()
+    // Premier `banner` : celui de la page ; les `header` de l'aperçu en sont aussi (QUIRKS).
+    const [banner] = screen.getAllByRole('banner')
+    if (banner === undefined) throw new Error('en-tête absent')
+    expect(within(banner).getByRole('button', { name: CREATE })).toBeEnabled()
+    type('{}')
+    await waitFor(() => expect(within(banner).getByRole('button', { name: CREATE })).toBeDisabled())
+  })
+
+  it('panneau « Problèmes » présent dès le montage : le code ne bouge pas à la première validation', async () => {
+    await renderEditor()
+    expect(screen.getByRole('heading', { level: 2, name: 'Problèmes' })).toBeInTheDocument()
+    expect(screen.queryByText('Aucune erreur')).toBeNull()
+    await previewReady()
+    expect(screen.getByText('Aucune erreur')).toBeInTheDocument()
+  })
+
+  it('les problèmes précèdent le code', async () => {
+    await renderEditor()
+    await previewReady()
+    const problems = screen.getByRole('heading', { level: 2, name: 'Problèmes' })
+    const code = screen.getByRole('textbox', { name: 'Configuration JSON' })
+    expect(problems.compareDocumentPosition(code) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
   it('passe la config valide à l’écran de création', async () => {

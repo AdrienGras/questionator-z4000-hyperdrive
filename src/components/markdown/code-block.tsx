@@ -18,7 +18,9 @@ function styleOf(variables: CssVariables): CSSProperties & CssVariables {
  * `dangerouslySetInnerHTML`. Chaque token porte `--shiki-light` et `--shiki-dark`, et les règles
  * `.shiki` de `index.css` choisissent l'une ou l'autre selon `.dark` : la bascule de mode ne refait
  * aucun rendu. Sans langage ou en pseudo-langage (`text`), pas d'appel à `highlight`. Langage
- * inconnu ou coloration en échec : le texte brut reste (D27).
+ * inconnu ou coloration en échec : le texte brut reste (D27). Un langage connu s'affiche en
+ * étiquette en haut à droite, hors du `pre` pour ne pas défiler avec lui (artboard
+ * `passage-question`) ; `Markdown size="projection"` la masque.
  */
 export function CodeBlock({
   code,
@@ -43,27 +45,40 @@ export function CodeBlock({
   // Un résultat obtenu pour un autre code ou un autre langage n'est jamais affiché.
   const current = result?.code === code && result.lang === language ? result.highlighted : null
 
-  if (current === null) {
-    return (
+  // Toujours un `pre` à la même place : React met à jour le nœud au lieu de le remplacer quand la
+  // coloration arrive (défilement et sélection conservés).
+  const block =
+    current === null ? (
       <pre data-highlighted="false">
         <code>{code}</code>
       </pre>
+    ) : (
+      <pre className="shiki" data-highlighted="true" style={styleOf(current.rootStyle)}>
+        <code>
+          {current.lines.map((line) => (
+            <span key={line.offset} className="line">
+              {line.tokens.map((token) => (
+                <span key={token.offset} style={styleOf(token.style)}>
+                  {token.content}
+                </span>
+              ))}
+              {'\n'}
+            </span>
+          ))}
+        </code>
+      </pre>
     )
-  }
+  if (language === null) return block
   return (
-    <pre className="shiki" data-highlighted="true" style={styleOf(current.rootStyle)}>
-      <code>
-        {current.lines.map((line) => (
-          <span key={line.offset} className="line">
-            {line.tokens.map((token) => (
-              <span key={token.offset} style={styleOf(token.style)}>
-                {token.content}
-              </span>
-            ))}
-            {'\n'}
-          </span>
-        ))}
-      </code>
-    </pre>
+    <div className="relative">
+      {/* Sous la marge haute du `pre` de `prose` (1,5em du texte courant). */}
+      <span
+        data-code-language
+        className="absolute top-[calc(1.5em+0.625rem)] right-3.5 font-mono text-label font-normal text-muted-foreground"
+      >
+        {language}
+      </span>
+      {block}
+    </div>
   )
 }

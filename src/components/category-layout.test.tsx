@@ -54,3 +54,19 @@ test('seuils mesurés sur le conteneur, pas sur la fenêtre (F22)', () => {
   expect(list.className).not.toMatch(/(^|\s)sm:/)
   expect(screen.getAllByRole('listitem')[0]?.className).toContain('@min-[40rem]:col-span-2')
 })
+
+test.each([
+  ['wide', '@min-[40rem]:grid-cols-[repeat(var(--cols),minmax(0,1fr))]'],
+  ['narrow', '@min-[30rem]:grid-cols-[repeat(var(--cols),minmax(0,1fr))]'],
+] as const)('seuil %s : une colonne en dessous, la grille au-dessus', (threshold, gridClass) => {
+  render(
+    <CategoryLayout
+      aria-label="Catégories"
+      threshold={threshold}
+      items={['a', 'b']}
+      itemKey={(item) => item}
+      renderItem={(item) => item}
+    />,
+  )
+  expect(screen.getByRole('list', { name: 'Catégories' })).toHaveClass('grid-cols-1', gridClass)
+})

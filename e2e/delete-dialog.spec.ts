@@ -1,11 +1,12 @@
 import type { Locator } from '@playwright/test'
 import { examplePath, expect, test } from './fixtures.ts'
 import { HomePage } from './pages/home-page.ts'
+import { SessionsPage } from './pages/sessions-page.ts'
 
 // Sans espace ni tiret : aucun point de coupure, le cas le plus dur pour le titre.
 const LONG_NAME = 'Oral_de_rattrapage_du_module_architecture_logicielle_groupe_B_2026'
 
-const BUTTONS = ["Exporter un backup d'abord", 'Annuler', 'Supprimer']
+const BUTTONS = ["Exporter une sauvegarde d'abord", 'Annuler', 'Supprimer']
 
 /** Boîtes de la modale et de ses trois boutons, dans l'ordre d'affichage. */
 async function boxes(dialog: Locator) {
@@ -36,7 +37,9 @@ for (const { label, width, row } of [
     await create.submit()
     await home.goto()
 
-    const dialog = await home.openDeleteDialog(LONG_NAME)
+    const sessions = new SessionsPage(page)
+    await sessions.goto()
+    const dialog = await sessions.openDeleteDialog(LONG_NAME)
     await expect(dialog).toBeVisible()
     const { frame, exportFirst, cancel, confirm } = await boxes(dialog)
     const buttons = [exportFirst, cancel, confirm]
@@ -59,3 +62,25 @@ for (const { label, width, row } of [
     if (row) expect(confirm.x).toBeGreaterThan(cancel.x)
   })
 }
+
+test('le bouton « Supprimer » de la modale : texte sombre sur destructive (contraste)', async ({
+  page,
+}) => {
+  const home = new HomePage(page)
+  await home.goto()
+  const create = await home.createSession()
+  await create.uploadStudents(examplePath('students.example.csv'))
+  await create.uploadConfig(examplePath('config.example.json'))
+  await create.fillName('Session contraste')
+  await create.submit()
+  await home.goto()
+
+  const sessions = new SessionsPage(page)
+  await sessions.goto()
+  const dialog = await sessions.openDeleteDialog('Session contraste')
+  const color = await dialog
+    .getByRole('button', { name: 'Supprimer' })
+    .evaluate((el) => getComputedStyle(el).color)
+  const background = await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
+  expect(color).toBe(background)
+})

@@ -57,7 +57,13 @@ export function Markdown({
   className,
 }: Readonly<{ source: string; ui: Ui; size?: 'default' | 'projection'; className?: string }>) {
   return (
-    <div className={cn('prose max-w-none', size === 'projection' && 'prose-2xl', className)}>
+    <div
+      className={cn(
+        'prose max-w-none',
+        size === 'projection' && 'prose-2xl [&_[data-code-language]]:hidden',
+        className,
+      )}
+    >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         remarkRehypeOptions={{

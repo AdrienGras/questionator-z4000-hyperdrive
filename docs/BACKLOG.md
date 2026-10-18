@@ -61,8 +61,22 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [x] Tests F14 : marqueur `0.37` du test d'étanchéité en sous-chaîne (échec bruyant si un score le contient) ; pas de mutation vérifiée pour `editedAt` et le montant d'ajustement ; test d'architecture aveugle aux réexports de `Session` ; `computeScores` appelé deux fois dans `toProjectedView`. → #87 *Fait en #87 (PR 1).*
 - [ ] `categoryButton` (`src/testing/passage-assertions.ts`) : `waitFor` au délai par défaut (1 s), à allonger si la CI devient lente. → #88 *Revu en #88 : CI stable, pas de changement.*
 - [x] Tuiles de catégorie (F25, D74) : seuil du repli sur une colonne à revoir avec l'aperçu de #56. *Livré en F22 : seuil mesuré sur le conteneur (`@min-[40rem]:`, D77).*
-- [ ] Aperçu de la vue projetée (F22) : suit le mode clair / sombre de l'examinateur, pas celui mémorisé par la vue projetée (D77) ; à reprendre si l'écart gêne.
+- [x] Tirage de l'examinateur (F44.7) : la colonne de gauche fait moins de 40rem à 1280 px, les tuiles (D74) s'empilaient une par ligne. *Fait en F44.7 : seuil de 30rem pour cette grille (D108, décision de l'utilisateur).*
+- [ ] Relecture finale F44.7, mineurs : la mesure de débordement de `e2e/passage-layout.spec.ts` ignore les éléments `aria-hidden` (compteur et barre de progression de l'en-tête) ; pas de test commentaire + « Ajouter et faire passer », ni « entre deux questions : pas d'indice » ; commentaire périmé dans `side-panel.tsx` (« flushe le commentaire ») ; `ScoreGauge` dessine un point au départ de l'arc pour une note de 0 (`strokeLinecap` rond) ; étiquette de langage en absolu, qui peut recouvrir la fin d'une première ligne longue ; boutons du barème trop étroits pour « 0,125 » dans la colonne de 25rem.
+- [ ] Vue projetée (F44.7) : tailles en px du canevas de 1280 (titres de 64 et 112 px, tuiles de 220 px) ; sur un projecteur 1920 × 1080 elles paraissent petites, en 1024 × 768 la rangée compacte peut tronquer les libellés. Passer à des tailles relatives (`cqw`) si le retour l'exige.
+- [ ] Aperçu de la vue projetée (F22) : suit le mode clair / sombre de l'examinateur, alors que la vue projetée suit toujours `defaultColorMode` (D77, D112) ; l'aperçu diffère dès que l'examinateur a choisi un autre mode. À reprendre si l'écart gêne.
 - [x] Tests F22 : `FauxResizeObserver` recopié entre `projection.test.tsx` et `projection-preview-leak.test.tsx` (à sortir dans `src/testing/`) ; commentaire et motif de skip prouvés absents de l'aperçu mais seulement présents en base, pas dans le DOM examinateur ; `useElementWidth` garde la dernière largeur après `ref(null)`. → #87 *Fait en #87 (PR 1).*
+
+## Navigation
+
+- [ ] Les pastilles du coin bas droit (`UpdatePrompt`, `OfflineReadyPrompt`) recouvrent le bas du contenu tant qu'on ne les ferme pas (vu en F44.4 sur « Détail des N questions » des stats d'entraînement) : réserver une marge basse au contenu quand une pastille est affichée.
+- [ ] Marque du menu cliquable vers l'accueil (aujourd'hui texte seul, comme sur l'artboard).
+- [ ] Lien actif sur une 404 sous un espace connu (`/editor/foo`, `/training/t1/nope`) : `activeMenuItem` ne lit que le premier segment ; le déduire de la route trouvée (`useMatches`) si ça gêne (relecture F44.4).
+- [ ] Tiroir du menu resté ouvert quand l'écran passe au-delà de 768 px (rotation, fenêtre agrandie) : le fermer sur `matchMedia('(min-width: 48rem)')` (relecture F44.4).
+- [ ] `lang={ui.locale}` sur l'infobulle du menu replié (rendue en portail sous `<body>`, donc dans la langue de la session) (relecture F44.4).
+- [ ] `DANGER_TILE_CLASS` de `damaged-session.tsx` recopie la tuile danger de `StatusScreen` : l'exporter ou ajouter une variante projetée (relecture F44.4).
+- [ ] `stats-error.tsx` et `training-stats-error.tsx` à passer sur `StatusScreen` avec retour en bouton (#150, #151).
+- [ ] Vérifier au rendu (e2e à 390 px, `scrollWidth <= clientWidth`) un nom de session sans espace dans le fil d'Ariane (relecture F44.4).
 
 ## Accueil et backup
 
@@ -73,7 +87,17 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [x] Ajouter un favicon (404 sur `/favicon.ico` en preview et en prod). → #53 — réglé par F17 (D72), constaté en F19
 - [ ] Afficher la version de l'application (`APP_VERSION`, déjà dans les backups) quelque part dans l'interface, par exemple au pied de l'accueil : le formulaire de bug (#125) demande à défaut la date d'utilisation et le mode (onglet ou installée).
 
+- [ ] Accueil sur téléphone (#147) : les trois actions de l'en-tête passent à la ligne, « Importer une sauvegarde » seule à droite au-dessus des deux autres. Non maquetté à 390 px ; à revoir en fin de phase 3 (artboard étroit de l'accueil, ou import replié dans un menu).
+- [ ] Écrans d'entraînement (#151) : leur lien « Retour à l'accueil » pourrait mener à `/trainings` ou passer en fil d'Ariane, comme les écrans de session ; à trancher avec les artboards `entrainement-*`.
+- [ ] Relecture de #147 : sur base vide, l'en-tête « Accueil » et ses actions apparaissent ~60 ms avant « Bienvenue » (rendre un en-tête neutre tant que les listes chargent) ; sortir `onImported?.()` du `try` de l'écriture dans `use-backup-import.ts` ; ajouter au test « seulement des endommagés » la tuile Sessions à 1.
+- [ ] Accessibilité des cartes (#147) : le libellé `sr-only` de l'anneau se lit en double avec le taux visible ; le nom des tuiles d'espace commence par un nombre sans unité ; « Exporter une sauvegarde » (carte endommagée) et « Stats » portent le même nom sur chaque carte (un `aria-label` nommé, comme `card_resume_named`).
+- [ ] Guide (`site/guide/`) : accueil en tableau de bord, premier lancement, pages Sessions et Entraînement, captures (`pnpm docs:screenshots`) ; passe prévue en fin de phase 3.
+
 ## Création de session
+
+- [ ] `create_blocked_files` dit « Déposez la liste d'étudiants et la config » même quand un seul fichier manque : une phrase par fichier, ou une formulation neutre. *(F44.6, relecture)*
+- [ ] Halo de « Créer la session » posé aussi sur la phrase de blocage et l'indication de l'examinateur (calque isolé) : mesurer le contraste, sinon ne peindre le halo que derrière le bouton. *(F44.6, relecture)*
+- [ ] `overflow-x-clip` sur toute la colonne de contenu : un futur contenu trop large serait coupé au lieu de défiler ; envisager de couper le halo dans `ActionHalo` seul. *(F44.6, relecture)*
 
 - [x] Garde de montage de la création : comparer aussi `router.state.location.pathname` avant de naviguer (fenêtre résiduelle pendant le chargement du chunk de l'accueil). → #87 *Fait en #87 (PR 4) : chemin relevé avant `submit` et comparé après ; test RED reproduit (retour cliqué, écriture terminée avant le montage de l'accueil).*
 - [x] Tests manquants : courses du slot config (nom saisi pendant la lecture, deux configs successives), messages `read-error` / `load-error` rendus, état `unavailable` à l'écran, `activeStudentId` affirmé dans le test d'écran. → #87 *Fait en #87 (PR 2).*
@@ -99,6 +123,14 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Éditeur de config
 
+- [ ] Alignement vertical de l'action d'en-tête : `PageShell` aligne en bas (`items-end`), l'artboard `editeur-config` centre « Créer une session avec cette config » sur le bloc titre. À trancher pour toutes les pages avec une action d'en-tête. *(F44.6)*
+- [ ] Puces de l'aperçu : nom accessible sans unité (« Facile 5 ») ; ajouter « questions » en `sr-only`. *(F44.6, relecture)*
+- [ ] « Problèmes » en `h2`, frère du `h2` du nom de fichier alors qu'il est dans sa région : passer en `h3` (adapter les tests qui visent le niveau 2). *(F44.6, relecture)*
+- [ ] Navigation de l'aperçu : `scrollIntoView` fait aussi défiler la page (la navigation sort de l'écran sur téléphone) ; ne faire défiler que la frame. Titre ciblé en `outline-none` : ajouter un `focus-visible:outline` discret. *(F44.6, relecture)*
+- [ ] Validateur qui ne charge pas : le panneau « Problèmes » garde son en-tête sans compteur ; afficher un état. *(F44.6, relecture)*
+- [ ] Infobulles CodeMirror sur iOS (`position: absolute`) : coupées par l'`overflow-hidden` de la frame ? À vérifier sur appareil. *(F44.6, relecture)*
+- [ ] Barre d'outils de la frame : en anglais (« Start from the example »), elle passe à la ligne sous le nom de fichier à 1280 px. *(F44.6)*
+
 - [x] `locateIssue` : BOM en tête (colonne de `json_syntax` décalée d'un caractère en ligne 1), colonne au-delà de la ligne bornée à la fin du texte plutôt qu'à la fin de ligne ; pas de tests CRLF / BOM / index hors limites. → #87 *Fait en #87 (PR 3).*
 - [x] `JsonEditor` : `aria-label` figé au montage, diagnostics envoyés deux fois au montage ; tests de `reveal` et des diagnostics après montage à ajouter. → #87 *Fait en #87 (PR 3).*
 - [x] Aperçu : énoncé très long sans `break-words`. → #109 *Fait en #109 (`wrap-anywhere` sur la carte).*
@@ -113,6 +145,10 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [x] Taux de réussite sur un barème entièrement négatif : le maximum est négatif, `points ÷ max` donne un taux positif trompeur (ex. barème `[-2, -1]`, note −2 → 200 %). Décider : `null` dès que `max ≤ 0`, ou refuser un tel barème (règle de config). → #118 *Fait en #118 : `null` dès que le maximum est ≤ 0 (garde défensive, les règles de config refusent déjà ce barème).*
 - [x] Petits nettoyages de `domain/stats/` : `mean` en une seule division, `?? 0` inatteignable dans `strategies.ts`, `countBy` renommé, `Tally` au lieu de `ReturnType<typeof emptyTally>`, commentaire de limite 2^53 de `populationStdDev`. → #87 *Fait en #87 (PR 4) : `mean` surchargée (liste non vide → `number`), `countBy` → `groupByKey` ; `Tally` existait déjà.*
 - [x] Paragraphe d'état vide répété quatre fois dans `features/stats/components/` : extraire un `StatsEmpty`. → #87 *Fait en #87 (PR 4) : extraite (cinq occurrences, quatre fichiers).*
+- [ ] `examples/training.example.json` sans `color` ni `icon` de catégorie : les anneaux, barres et libellés des stats d'entraînement (F44.8) restent neutres sur l'exemple, alors que l'artboard `entrainement-stats` les teinte. Ajouter les couleurs de la config d'examen (et le dire dans le prompt de génération ?).
+- [ ] e2e de mise en page des stats (`e2e/stats-layout.spec.ts`) : couvrir une config à 13 catégories (anneaux en `grid-cols-2`, détail), écartée en F44.8 faute d'une config d'exemple cohérente à 13 catégories.
+- [ ] Relecture finale F44.8, mineurs : nom de catégorie lu deux fois sous un anneau (phrase `sr-only` puis `CategoryLabel`, à cacher) ; « Passés 7 » puis « 7 passés » dans la synthèse ; colonnes `srOnly` « Part » et « Barre » aux cellules vides pour un lecteur d'écran ; « 1 / 1 questions notées » (`training_coverage_label` figé au pluriel) ; effectif à deux chiffres qui chevauche les colonnes voisines de l'histogramme à 390 px ; commentaire de `routes/session.$sessionId_.stats.tsx` et nom d'étape CI qui citent encore Recharts ; couleur de catégorie en texte (D26 assoupli : une couleur claire de config peut passer sous 3:1) ; `RateRing` et `SuccessRing` à factoriser.
+- [ ] `e2e/screenshots/guide.spec.ts` (`pnpm docs:screenshots`, hors CI) rouge depuis F44.5 : attend le bouton « Actions pour « Oral de démonstration » » sur l'accueil devenu tableau de bord. À reprendre avec la passe guide de fin de phase 3.
 
 ## Entraînement
 
@@ -125,6 +161,9 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Variante du prompt qui embarque le schéma allégé, pour un LLM sans accès au web.
 - [ ] Mode « compléter une config existante » : donner au LLM la config actuelle pour qu'il ajoute des questions en gardant les `id`.
 - [ ] Sauvegarder le brouillon de l'éditeur avant un passage de config (« Corriger dans l’éditeur ») : le texte en cours y est remplacé (retour de #140).
+- [ ] Mineurs de la relecture de F44.9 (#151) : `headingId` inutile dans `Scoring` (`training-question.tsx`) ; un second succès de « Copier à nouveau » n'est pas annoncé (même texte live) ; le `h3` « Réponse » dans le `summary` peut sortir de la navigation par titres sur certains lecteurs d'écran ; l'e2e à 390 px ne couvre pas la mise à jour (bilan en cartes) ; écart de 12 px laissé par le `span` live vide dans la zone de dépôt compacte vide.
+- [ ] Zone de dépôt compacte remplie à 390 px : nom, état, « ou déposez-en un autre » et « Remplacer » passent sur trois lignes ; masquer l'indication sur téléphone ?
+- [ ] En mise à jour, l'étape 2 montre le prompt en entier tant qu'on ne l'a pas recopié, alors que l'utilisateur l'a souvent déjà ; partir du résumé en mise à jour ?
 
 ## Export Excel
 
@@ -149,6 +188,8 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [x] Commenter sur `PassageActions` que `adjust` et `revealFinal` laissent l'affichage de l'erreur à l'appelant (`ownError`) (F30). → #87 *Fait en #87 (PR 1).*
 
 ## Documentation
+
+- [ ] Bannière du README : version anglaise (README anglais un jour) et formats carré / vertical pour les réseaux, depuis l'atelier de D114 (légendes dans `src/captions.ts`, une seconde composition par format).
 
 - [ ] Documentation hors ligne : la pré-cacher dans un second service worker de portée `/docs/` (D96 la laisse au réseau). Il faudrait adapter `check:precache` et retirer la denylist.
 - [ ] Documentation en anglais, guide compris (le site est en français seul) : i18n VitePress `locales`, libellés de thème et clés de recherche à doubler.

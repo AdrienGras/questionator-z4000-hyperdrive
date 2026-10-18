@@ -75,14 +75,16 @@ for (const width of [1280, 375]) {
     await expect.poll(() => horizontalOverflow(popup)).toBeLessThanOrEqual(0)
     expect(await codeScrolls(popup)).toBe(true)
 
-    // Carte de la session à l'accueil.
-    await home.goto()
-    const title = page.getByRole('heading', { name: LONG_NAME })
-    await expect(title).toBeVisible()
-    await expect.poll(() => horizontalOverflow(page)).toBeLessThanOrEqual(0)
-    // Le titre peut déborder de sa carte sans élargir la page : sa boîte reste dans la fenêtre.
-    const box = await title.boundingBox()
-    expect(box).not.toBeNull()
-    expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(width)
+    // Carte de la session à l'accueil (« Reprendre »), puis sur la page Sessions.
+    for (const path of ['#/', '#/sessions']) {
+      await page.goto(path)
+      const title = page.getByRole('heading', { level: 3, name: LONG_NAME })
+      await expect(title).toBeVisible()
+      await expect.poll(() => horizontalOverflow(page)).toBeLessThanOrEqual(0)
+      // Le titre peut déborder de sa carte sans élargir la page : sa boîte reste dans la fenêtre.
+      const box = await title.boundingBox()
+      expect(box).not.toBeNull()
+      expect((box?.x ?? 0) + (box?.width ?? 0)).toBeLessThanOrEqual(width)
+    }
   })
 }

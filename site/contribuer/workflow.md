@@ -6,6 +6,10 @@ Le déroulé complet du travail, de l'issue à la fusion. La source de ces règl
 
 Tout travail part d'une issue. Pour en ouvrir une, « New issue » propose trois formulaires : **Bug**, **Fonctionnalité** et **Question** ([`.github/ISSUE_TEMPLATE/`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/tree/main/.github/ISSUE_TEMPLATE)). Une issue vide n'est pas acceptée. [`CONTRIBUTING.md`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/CONTRIBUTING.md) dit lequel choisir ; une faille de sécurité passe par [`SECURITY.md`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/SECURITY.md), jamais par une issue.
 
+## Une interface passe par le canevas {#interface}
+
+Un ticket qui touche l'interface suit cet ordre : spec validée, puis maquettes du ticket validées par le mainteneur sur le canevas Design, puis plan, puis code. Le canevas et le design system sont la référence ; si l'implémentation s'écarte d'une maquette, la maquette est mise à jour dans la même PR. Les tickets sans interface (domaine, stockage, CI) n'ont pas cette étape. L'adresse du canevas est dans [`docs/ENVIRONMENT.md`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/ENVIRONMENT.md), la règle dans [`CLAUDE.md`](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/CLAUDE.md#conventions-du-projet).
+
 ## Une branche et une PR par ticket
 
 Chaque ticket a sa branche (`feat/73-guide-contributeur`, `fix/…`) et sa pull request vers `main`. La description de la PR contient `Closes #n`. Personne ne pousse directement sur `main`.

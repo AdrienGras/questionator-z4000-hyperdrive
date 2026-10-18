@@ -1,4 +1,4 @@
-import { IconPlayerPause, IconPlayerPlay } from '@tabler/icons-react'
+import { IconDeviceDesktop, IconPlayerPause } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import type { Projection, ProjectionRequest } from '@/domain/passage/projection'
 import type { Ui } from '@/lib/i18n/use-ui'
@@ -13,9 +13,15 @@ type ProjectionControlsProps = Readonly<{
   onAction?: () => void
 }>
 
+// Bascule à deux positions (artboard `passage-question`) : la position courante en carte.
+const SEGMENT =
+  'h-auto min-h-8 flex-1 rounded-[9px] border-0 py-1 text-small whitespace-normal font-semibold text-muted-foreground aria-pressed:bg-card aria-pressed:disabled:opacity-100 aria-pressed:text-foreground aria-pressed:shadow-card'
+
 /**
- * Pilotage de la vue projetée (F14) : y projeter l'étudiant actif ou revenir à l'écran d'attente.
- * L'ouverture de la fenêtre est à part, sur la ligne du titre de l'aperçu (F39, `usePresentWindow`).
+ * Pilotage de la vue projetée (F14) en bascule : y projeter l'étudiant actif (« Cet étudiant ») ou
+ * revenir à l'écran d'attente. La position courante est pressée et désactivée ; sans étudiant actif
+ * ou pendant une écriture, les deux sont désactivées. L'ouverture de la fenêtre est à part, sur la
+ * ligne du titre de l'aperçu (F39, `usePresentWindow`).
  */
 export function ProjectionControls({
   ui,
@@ -28,12 +34,18 @@ export function ProjectionControls({
   const { text } = ui
   const alreadyProjected = projection.mode === 'student' && projection.studentId === activeStudentId
 
+  const waiting = projection.mode === 'waiting'
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <fieldset
+      aria-label={text('projection_group', {})}
+      className="m-0 flex min-w-0 gap-1 rounded-md border-0 bg-muted p-1"
+    >
       <Button
         type="button"
-        variant="outline"
+        variant="ghost"
         size="sm"
+        aria-pressed={alreadyProjected}
+        className={SEGMENT}
         disabled={disabled || activeStudentId === undefined || alreadyProjected}
         onClick={() => {
           onAction?.()
@@ -42,14 +54,16 @@ export function ProjectionControls({
           }
         }}
       >
-        <IconPlayerPlay aria-hidden />
+        <IconDeviceDesktop aria-hidden />
         {text('projection_project', {})}
       </Button>
       <Button
         type="button"
-        variant="outline"
+        variant="ghost"
         size="sm"
-        disabled={disabled || projection.mode === 'waiting'}
+        aria-pressed={waiting}
+        className={SEGMENT}
+        disabled={disabled || waiting}
         onClick={() => {
           onAction?.()
           void onProject({ mode: 'waiting' })
@@ -58,6 +72,6 @@ export function ProjectionControls({
         <IconPlayerPause aria-hidden />
         {text('projection_waiting', {})}
       </Button>
-    </div>
+    </fieldset>
   )
 }

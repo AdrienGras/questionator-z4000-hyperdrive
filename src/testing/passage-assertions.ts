@@ -53,3 +53,15 @@ export function outsidePanel(label: string): HTMLElement {
   }
   return first
 }
+
+/**
+ * Score brut de l'en-tête du passage (`dt` « Score brut », puis « valeur / maximum ») : attend que
+ * la valeur affichée soit `value`. `label` suit la langue de la session.
+ */
+export function expectRawScore(value: string, label = 'Score brut'): Promise<void> {
+  return waitFor(() => {
+    const term = screen.getByText(label, { selector: 'dt' })
+    // Le score, puis « / maximum » : `startsWith` évite d'échapper le point décimal anglais.
+    expect(term.nextElementSibling?.textContent.startsWith(`${value} /`)).toBe(true)
+  })
+}

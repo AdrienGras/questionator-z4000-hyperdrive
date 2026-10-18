@@ -1,4 +1,5 @@
 import { useId, useState } from 'react'
+import { IconCheck } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -88,6 +89,7 @@ function SkipForm({ ui, skips, onConfirm, onClose }: SkipFormProps) {
                   aria-pressed={selectedReason === reason}
                   onClick={() => toggleReason(reason)}
                 >
+                  {selectedReason === reason && <IconCheck aria-hidden />}
                   {reason}
                 </Button>
               ))}
@@ -100,6 +102,7 @@ function SkipForm({ ui, skips, onConfirm, onClose }: SkipFormProps) {
                 id={freeTextId}
                 value={freeText}
                 maxLength={MAX_REASON_LENGTH}
+                placeholder={text('passage_skip_placeholder', {})}
                 onChange={(event) => changeFreeText(event.target.value)}
               />
             </div>
@@ -107,7 +110,7 @@ function SkipForm({ ui, skips, onConfirm, onClose }: SkipFormProps) {
         </fieldset>
       )}
       <DialogFooter>
-        <Button type="button" variant="outline" onClick={onClose}>
+        <Button type="button" variant="ghost" onClick={onClose}>
           {text('dialog_cancel', {})}
         </Button>
         <Button type="button" onClick={confirm}>

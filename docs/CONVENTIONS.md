@@ -141,6 +141,18 @@ corepack pnpm dlx shadcn@latest add <composant> -y
 - `shadcn add` peut demander d'écraser `button.tsx` : répondre « n » à toute demande d'écrasement d'un fichier existant (`printf 'n\n' | corepack pnpm dlx shadcn@latest add <composant>`), puis rétablir l'import de `cn` (`@/lib/utils`).
 - Couleurs uniquement via les tokens CSS (`bg-primary`, `text-foreground`…), jamais de couleur en dur : le thème de session (F07) surcharge ces tokens.
 
+## Tokens et palette — règles
+
+- **Tout dérive des tokens** : aucune couleur en dur dans un composant. Le design system (URL dans `docs/ENVIRONMENT.md`) est la référence ; `src/index.css` lui correspond (D102, D104).
+- **Étages dans `src/index.css`** : `:root` = thème clair et `.dark` = thème sombre, chacun exactement les `THEME_TOKENS` (surchargeables par `theme.light` / `theme.dark` d'une config, test de parité sur les deux blocs dans `schema.test.ts`) ; `@theme` = valeurs fixes hors config (`--color-space-*` du mode clair, `--font-mono`, échelle `--text-display|h1|h2|h3|score-xl|score-md|body|small|label`) ; `@theme inline` = dérivés de `--primary` (`--color-action-to`, `--color-halo-action`, `--color-halo-cool`, `--shadow-action`, `--color-link`), écrits chacun en entier, et `--shadow-card` / `--shadow-popover` qui lisent `--card-shadow` / `--popover-shadow` ; `html` / `html.dark` = valeurs fixes par mode (couleurs d'espace sombres, ombres, réglages du lien et de l'encre de catégorie), D112. Une ombre ne se surcharge jamais par `--shadow-*` sous `html.dark` : Tailwind recopie sa valeur dans l'utilitaire (QUIRKS).
+- **Deux registres de couleur** : une couleur d'action (bouton `default` en dégradé `from-primary to-action-to`, une action principale par écran) ; une palette codée qui désigne (espaces : `text-space-*` sur tuile `bg-muted` dans le menu, `bg-space-*/14` sur l'accueil ; catégories : `categoryAccent(color)` de la config ; données : `chart-1` à `chart-5`).
+- **Couleurs d'espace** : jamais en grand aplat, jamais surchargeables (hors `THEME_TOKENS`).
+- **Boutons** : `default` pour l'action attendue, `outline`/`secondary` (même rendu) pour le reste, `ghost` pour Annuler et les barres d'outils, `destructive` (contour) pour déclencher une suppression, `destructive-solid` (texte `background`) seulement pour la confirmer dans un dialogue.
+- **Liens** : `text-link` (ou `TEXT_LINK_CLASS`), jamais `text-primary` sur du texte (4,1:1) ; `primary` sert aux icônes et aux aplats.
+- **Champs** : `text-base md:text-[15px]` (16 px sur téléphone, sinon Safari iOS zoome au focus).
+- **Rayons** : `rounded-sm|md|lg|xl` = 8 / 12 / 18 / 24 px, dérivés de `--radius` (18 px) ; barres et jauges en `rounded-full`.
+- **`<details>`** : aucun style à ajouter, le chevron vient des règles de base sur `summary` (flex, `gap`) ; un `summary` centré ajoute `justify-center`.
+
 ## oxlint — règles configurées
 
 - `import/no-unassigned-import` reste en erreur, avec une liste blanche pour les imports à effet de bord légitimes (`**/*.css`, `@testing-library/jest-dom/vitest`). Ajouter une entrée à `allow` dans `.oxlintrc.json` plutôt que désactiver la règle.
@@ -288,7 +300,7 @@ export function SessionToolbar({ ui, disabled, onExport }: SessionToolbarProps) 
 - `useUi()` (`@/lib/i18n/use-ui`) une seule fois par écran, au composant de page ; les sous-composants reçoivent `ui: Ui` en prop. Langue : celle du navigateur hors session (D51) ; F07 ajoutera `config.locale`.
 - Toute chaîne visible, `aria-label` compris, passe par `text(clé, params)` ; nouvelle clé = ajout dans `UiMessageParams` et dans les dictionnaires `fr` **et** `en` de `src/lib/i18n/ui-messages.ts` (le test échoue sinon).
 - Props en `Readonly<{…}>` (SonarQube S6759) ; jamais `const [x] = useState(...)` sans le setter, et le setter nommé `setX` (S6754 signale aussi `[name, setNameValue]`) : `useMemo` ou une constante de module.
-- Lien texte (retour à l'accueil, fichier d'exemple) : `TEXT_LINK_CLASS` ou `SMALL_TEXT_LINK_CLASS` (`@/components/text-link`, #87), placement en plus par `cn('self-start', …)` ; ne pas recopier la liste de classes.
+- Lien texte (fichier d'exemple, schéma) : `TEXT_LINK_CLASS` ou `SMALL_TEXT_LINK_CLASS` (`@/components/text-link`, #87), placement en plus par `cn('self-start', …)` ; ne pas recopier la liste de classes. Un lien retour passe par `BackLink` (voir « Page examinateur »).
 - Tests : `src/testing/setup.ts` force `navigator.languages = ['fr-FR']` ; un test en anglais redéfinit la propriété puis la restaure. Monter un écran routé via `createAppRouter(createMemoryHistory(...))` (voir `src/testing/render-home.tsx`).
 
 ## Dialogue de saisie — squelette
@@ -350,7 +362,7 @@ vi.mock('@/lib/markdown/highlighter', async (importOriginal) => ({
 - Après une action qui navigue ou écrit, attendre un état qui n'existe qu'après elle (`router.state.location.pathname`, écran d'arrivée, nouveau nom), jamais un texte déjà affiché avant : sinon le test se termine avant l'écriture et la suite de l'action déborde sur le test ou le fichier suivant.
 - Ne pas relever `testTimeout` pour un test lent sous la suite : chercher d'abord ce qu'il charge (`vitest run <fichier> --experimental.importDurations.print`, `--reporter=verbose` seul et sous la suite).
 
-### Bibliothèque lourde confinée à une route (F15, Recharts)
+### Bibliothèque lourde confinée à une route (F15, F16, F18, F26)
 
 ```ts
 // src/routes/<route>.tsx : seul le composant part en chunk paresseux
@@ -363,8 +375,8 @@ export const Route = createFileRoute('/…')({
 
 - Groupe nommé dans `vite.config.ts` (`build.rolldownOptions.output.codeSplitting.groups`) pour que la bibliothèque ait son chunk `_<nom>-<hash>.js` dans le manifeste ; sans lui Rolldown l'inline et aucun contrôle ne la voit. Le socle partagé (React…) va dans le groupe `vendor` en liste blanche, placé avant (QUIRKS 2026-09-30).
 - `pnpm check:bundle` (`scripts/check-initial-bundle.ts`, en CI après `pnpm build`) : aucune fuite depuis les entrées par imports statiques, et garde-fou de non-vacuité (le chunk existe et la route l'atteint). Pour une nouvelle bibliothèque, ajouter son motif et sa route au script, avec tests.
-- Règle `dependency-cruiser` de confinement (modèles : `recharts-only-in-stats`, `xlsx-only-in-lib-xlsx`) : la bibliothèque (et son wrapper `src/components/ui/`) ne s'importe que depuis la feature ou le module `lib/` prévu. Pour un module `lib/` chargé à la demande, `lib-xlsx-dynamic-import-only` interdit tout import statique (`check:bundle` ne garde que le graphe initial).
-- Le script gère une liste de cibles (`BUNDLE_TARGETS`, chacune : chunk, importeur, motif interdit) ; `BUNDLE_TARGETS` (`recharts` et `xlsx` depuis F16) ne doit contenir que des cibles dont l'importeur est réellement chargé en dynamique, sinon la garde de non-vacuité échoue.
+- Règle `dependency-cruiser` de confinement (modèle : `xlsx-only-in-lib-xlsx`) : la bibliothèque (et son wrapper `src/components/ui/`) ne s'importe que depuis la feature ou le module `lib/` prévu. Pour un module `lib/` chargé à la demande, `lib-xlsx-dynamic-import-only` interdit tout import statique (`check:bundle` ne garde que le graphe initial).
+- Le script gère une liste de cibles (`BUNDLE_TARGETS`, chacune : chunk, importeur, motif interdit) ; `BUNDLE_TARGETS` (`xlsx`, `shiki`, `codemirror` ; `recharts` retiré en F44.8, D109) ne doit contenir que des cibles dont l'importeur est réellement chargé en dynamique, sinon la garde de non-vacuité échoue.
 - `errorComponent` gardé dans le fichier de route (`codeSplitGroupings`) : découpé à part, il échouerait à se charger en même temps que le chunk qu'il doit couvrir. Il n'importe pas la bibliothèque.
 
 ## Fichier déposé et lu — squelette
@@ -429,16 +441,16 @@ export function XPage() {
 ### Règles tacites
 
 - Un seul écrivain sur `<html>` : `AppearanceProvider` (`src/app/`), monté dans `__root.tsx`. Un écran ne touche jamais `document.documentElement`. Il déclare une portée avec `<SessionAppearance>` ou `useAppearanceScope(scope)` ; une portée garde sa place dans la pile même re-mémoïsée (un nouvel objet à chaque rendu ne la fait pas passer en fin de pile), mais mémoïser `scope` (`useMemo`) reste recommandé pour éviter de réécrire les tokens à chaque rendu (D60).
-- `color-scheme` suit le mode forcé : `:root { color-scheme: light; }` et `.dark { color-scheme: dark; }` dans `src/index.css`, pour que les contrôles natifs (barres de défilement…) suivent le mode de l'app plutôt que la préférence système (D26).
+- `color-scheme: light` dans `:root` et `dark` dans `.dark` de `src/index.css` : les contrôles natifs (barres de défilement…) suivent le mode de l'app plutôt que la préférence système (D26, D104, D112).
 - Sous `SessionAppearance`, `useUi()` s'appelle **dans** l'enfant : appelé au-dessus, il ignore `config.locale`.
-- Couleur de config sur un élément : `style={{ '--category-color': color }}`, autorisé car React passe par `setProperty` (D15). Elle s'utilise en accent (`border-[var(--category-color)]`), jamais en fond sous du texte (D26).
-- Bascule de mode : `<ColorModeToggle ui={ui} />` dans l'en-tête de chaque écran.
+- Couleur de catégorie sur un élément : `style={categoryAccent(color)}` (`@/lib/appearance/category-accent`), autorisé car React passe par `setProperty` (D15) ; jamais `{ '--category-color': color }` à la main. Teinte (fond `color-mix(… N%, transparent | var(--color-card))`, bordure à 35-45 %) en `var(--category-color, <repli>)` ; usage plein (texte, icône, anneau, barre, bordure `border-2`) en `var(--category-ink, <repli>)`, foncé en clair (D112). Jamais en fond sous du texte (D26).
+- Bascule de mode : `ColorModeToggle` en pied du menu latéral et du tiroir, jamais dans un en-tête ni sur la vue projetée (D112). La vue projetée déclare une portée sans `key` : elle suit `defaultColorMode` et ne mémorise rien.
 - Tests : `src/testing/setup.ts` simule `matchMedia` (`setSystemDark(true)` de `@/testing/match-media` pour simuler un système sombre) et vide `localStorage` après chaque test.
 - Vue projetée : ses composants ne reçoivent jamais la `Session` (`usePresentedConfig`, puis `toProjectedView` en F14).
 - Thème d'une config hors vue de session (aperçu de l'éditeur, F26) : `<ThemeScope theme={config.theme}>` pose les variables du mode effectif sur un `div` (`themeVariables`, même correspondance que `AppearanceProvider`), sans toucher `<html>`. Possible parce que `@theme inline` fait lire `var(--…)` aux utilitaires.
 - CodeMirror (F26) : seulement dans `features/config-editor/`, monté dans un `useEffect` (`JsonEditor`), couleurs par variables `--cm-*` ; jamais dans le bundle initial (`check:bundle`).
-- Écrans de la vue projetée : `src/components/projection/`, point d'entrée `ProjectedScreen`, partagés par la vue projetée et l'aperçu de la vue de passage (D77). Ils ne prennent que la `ProjectedView`.
-- Composant rendu à la fois en page et dans un canevas réduit (aperçu F22) : seuils en container queries (`@min-[40rem]:` sous un ancêtre `@container`), jamais en media queries (`sm:`), qui réagiraient à la fenêtre examinateur et non à la largeur simulée. Idem pour tout composant partagé qui y est rendu (`CategoryLayout`).
+- Écrans de la vue projetée : `src/components/projection/`, point d'entrée `ProjectedScreen`, partagés par la vue projetée et l'aperçu de la vue de passage (D77). Ils ne prennent que la `ProjectedView`. Une note finale s'y formate par `formatFixed(toMilli(final), final.decimals, locale)`, une brute par `formatRawScore`, jamais par un `Intl.NumberFormat` à décimales fixes (D108). Positions des décors en proportion de l'écran (la fenêtre n'a pas la taille de l'artboard).
+- Composant rendu à la fois en page et dans un canevas réduit (aperçu F22) : seuils en container queries (`@min-[40rem]:` sous un ancêtre `@container`), jamais en media queries (`sm:`), qui réagiraient à la fenêtre examinateur et non à la largeur simulée. Idem pour tout composant partagé qui y est rendu (`CategoryLayout`). `CategoryLayout` replie à 40rem par défaut ; la grille de l'examinateur passe `threshold="narrow"` (30rem, D108).
 - Tests : jsdom n'a pas de `ResizeObserver`. `src/testing/setup.ts` en pose un no-op global ; un test qui a besoin d'une largeur mesurée le remplace par `vi.stubGlobal` et déclenche le rappel dans `act`.
 
 ## Markdown et bloc de code — squelette
@@ -503,37 +515,61 @@ const skip = useCallback(
 
 ## Page examinateur — squelette
 
-Arbitrage : D75 (F19). Toute page examinateur (accueil, création, passage, stats) passe par `PageShell` (`src/components/page-shell.tsx`) : largeur, marges et barre de titre viennent de la coque, pas de la page.
+Arbitrage : D75 (F19), D105 (F44.4). Toute page examinateur (accueil, création, passage, stats) passe par `PageShell` (`src/components/page-shell.tsx`) : largeur, marges et barre de titre viennent de la coque, pas de la page. Le menu et l'aide n'en font pas partie : ils sont dans `RootLayout` (voir « Menu et coquille de page »).
 
 ```tsx
 // src/features/<x>/<x>-page.tsx
 <PageShell
-  ui={ui}
   title={t('ma_page_title')}
-  back={<Link to="/">{t('back_home')}</Link>} // optionnel
-  meta={<MaPageMeta />} // optionnel : ligne d'infos sous le titre
-  actions={<Button>…</Button>} // optionnel : à droite, avant le bouton de thème
+  // optionnel, au-dessus du titre : fil d'Ariane d'un écran d'espace, ou lien retour
+  back={<Breadcrumb ui={ui} root={{ label: t('menu_sessions'), to: '/sessions' }} parts={[nom]} />}
+  meta={<MaPageMeta />} // optionnel : ligne d'infos sous le titre, en gris
+  actions={<Button>…</Button>} // optionnel : à droite
   onDrop={onDrop} // toute prop de <main> passe (`...rest`), `className` est fusionnée
 >
   {contenu}
 </PageShell>
 
 // src/features/<x>/<x>-page.test.tsx
-import { expectColorModeToggleLast } from '@/testing/page-shell-assertions'
+import { bannerInteractiveNames } from '@/testing/page-shell-assertions'
 
-test('le bouton de thème est le dernier de la barre de titre', async () => {
+test('barre de titre : fil d’Ariane puis actions', async () => {
   renderAt('/ma-page')
   await screen.findByRole('heading', { name: 'Ma page' })
-  expectColorModeToggleLast()
+  expect(bannerInteractiveNames()).toEqual(['Sessions', 'Projeter'])
 })
 ```
 
 ### Règles tacites
 
-- Jamais de `ColorModeToggle` dans une page ou un sous-composant d'en-tête : la coque le rend en dernier, c'est ce qui garantit sa place.
+- `back` reçoit un `Breadcrumb` (`@/components/breadcrumb`) ou un `BackLink` (`@/components/back-link`, `<BackLink to="/">…</BackLink>`), d'après l'artboard de l'écran ; jamais un `Link` en `TEXT_LINK_CLASS`.
 - Dans une page qui passe par `PageShell`, pas de `<main>` ni de `<h1>` : la coque les fournit. Les boutons d'action vont dans `actions`, pas dans `children`.
-- Restent hors coque : les écrans d'état rendus en retour anticipé (`DbStatusBanner` de `session-page.tsx` et `stats-page.tsx`, `SessionFallback`, `stats-error.tsx`, 404) et la vue projetée (mise en page propre, avec son `<h1>`). `DbStatusBanner` affiché en contenu d'une page (accueil, création) reste dans la coque.
-- Test de la page : `expectColorModeToggleLast()` ; `bannerInteractiveNames()` pour vérifier l'ordre des actions (`src/testing/page-shell-assertions.ts`).
+- Restent hors coque : les écrans d'état rendus en retour anticipé, qui passent par `StatusScreen` (`@/components/status-screen` : tuile d'icône, `h1`, actions ; `SessionFallback`, sessions et entraînements endommagés, 404), les `DbStatusBanner` de `session-page.tsx` et `stats-page.tsx`, `stats-error.tsx`, et la vue projetée (mise en page propre, avec son `<h1>`). `DbStatusBanner` affiché en contenu d'une page (accueil, création) reste dans la coque.
+- Test de la page : `bannerInteractiveNames()` pour l'ordre du fil d'Ariane et des actions (`src/testing/page-shell-assertions.ts`).
+- Page d'espace (D106) : `icon={<SpaceIcon space="…" size="lg" />}`, `meta` = sous-titre de l'espace, `halo="space"` ; l'accueil prend `halo="home"`. Un décor qui sort du cadre passe par `halo`, jamais par un `div` en position absolue dans la page : le calque du halo s'ancre à la colonne de contenu de `RootLayout` (`relative isolate`), pas au `main` borné en largeur, et il est coupé à cette colonne (ni barre du haut du téléphone, ni menu).
+- Grille de cartes en `auto-fit`/`auto-fill` : minimum écrit `min(100%, Npx)` (`grid-cols-[repeat(auto-fill,minmax(min(100%,380px),1fr))]`), sinon une carte de 380 px déborde d'un téléphone de 390 px.
+- Une action utile d'une carte endommagée sort du menu « … » en bouton visible (export pour une session, suppression pour un entraînement), le menu la garde aussi.
+- Action principale d'un écran (D107) : entourée d'`ActionHalo` (`@/components/action-halo`, `side="start"` sous un formulaire, `"end"` en en-tête), un seul par écran. Le débord du halo est coupé par la colonne de contenu de `RootLayout` (`overflow-x-clip`).
+- Libellé court à l'écran, long en `aria-label` (« Charger » / « Charger un fichier ») : le nom accessible contient toujours le texte visible.
+- Bouton désactivé : une phrase dit pourquoi, reliée par `aria-describedby` (une cause à la fois, jamais pendant un état transitoire ; modèle `submitBlocker` de la création).
+- Écran à deux colonnes (D108, modèle `PassageLayout` de `passage-body.tsx`) : grille `lg:grid-cols-[minmax(0,1fr)_25rem] lg:grid-rows-[auto_1fr]`, contenu principal en haut à gauche, colonne de droite sur deux rangées, suite en bas à gauche ; sous `lg`, une colonne, et la carte d'action de droite remonte sous le contenu principal par `order-first`.
+- Catégorie dans une ligne ou un en-tête : `CategoryBadge` (`@/components/category-badge`, tuile d'icône teintée, tailles `sm` à `projection-lg`), jamais une tuile recopiée. Teinte d'une surface de catégorie : classes écrites en entier avec le type `color:` (`bg-[color:color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_10%,var(--color-card))]`), pour Tailwind (littéraux seulement) et pour `cn`.
+- Note en demi-jauge : `ScoreGauge` (`@/components/score-gauge`, `md` à l'écran, `lg` en projection) ; halo d'une carte pleine largeur : `ActionHalo side="around"`.
+- Dessin informatif (jauge, barre segmentée) : phrase `sr-only` et dessin `aria-hidden`, jamais `role="img"` (oxlint) ; groupe de boutons nommé : `fieldset aria-label`, jamais `role="group"`.
+- Bloc chiffré (D109, `@/components/stats/`) : carte `StatsSection` (titre `as`/`size` séparés, `icon`, `aside`), groupe `StatsGroup` (intertitre en capitales), tableau `StatsTable` (colonne `srOnly` pour une barre), taux en `MeterBar` (`tone="category"` teinté, `"primary"` sinon), anneau `RateRing` (`md`/`lg`), catégorie `CategoryLabel`, écran sans données `StatsEmptyState`. Un taux s'écrit toujours à côté de sa barre : la barre reste décorative.
+
+## Menu et coquille de page — règles
+
+Arbitrage : D102, D103, D105 (F44.4). Maquettes `apres/menu-replie`, `apres/menu-etroit`, `apres/bandeaux`.
+
+- **Une seule instance** : `AppMenu` (`src/components/menu/app-menu.tsx`) est monté dans `RootLayout`, jamais dans une page ; il est masqué sur `/present/$sessionId`. Il rend le menu latéral (`aside`, `md:` et au-delà) et, en dessous, la barre du haut avec son tiroir (`MenuDrawer`). Le contenu des deux vient de `MenuLinks`.
+- **Lien actif** : `activeMenuItem(pathname)` (`src/components/menu/active-menu-item.ts`), par premier segment. **Toute nouvelle route y entre** (test `active-menu-item.test.ts`) ; un `Link` du menu garde `activeOptions={{ exact: true }}` (QUIRKS 2026-10-17).
+- **Langue** : celle de l'application (`useUi()` à la racine), avec `lang` sur le menu ; jamais celle d'une session.
+- **Hauteur** : un `main` de page ou d'écran d'état prend `flex-1` dans la colonne de contenu de `RootLayout`, jamais `min-h-svh` (sur téléphone, la barre du haut de 56 px s'y ajouterait et toute page défilerait).
+- **État replié** : `readMenuCollapsed` / `writeMenuCollapsed` (`src/lib/menu-collapsed.ts`), lecture et écriture protégées.
+- **Code d'espace** : icône `text-space-*` sur tuile `bg-muted` ; Accueil en `text-muted-foreground`, Aide en `text-space-help`.
+- **Tests** : un test qui cherche un lien de nom courant (« Sessions », « Accueil ») le cherche dans `within(screen.getByRole('complementary'))` ou dans la `nav` « Fil d'Ariane » ; un test qui compte les listes d'une page exclut celles de l'`aside`. En e2e, le Page Object `AppMenu` (`e2e/pages/app-menu.ts`).
+- **Pastilles** (`UpdatePrompt`, `OfflineReadyPrompt`) : classes communes dans `src/components/prompt-classes.ts` ; titre en `strong`, corps en `text-sm text-muted-foreground`.
 
 ## Test e2e Playwright — squelette (Page Object Model)
 

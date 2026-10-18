@@ -1,5 +1,5 @@
 import { useId, useRef, useState, type SubmitEvent } from 'react'
-import { IconUserPlus } from '@tabler/icons-react'
+import { IconAlertTriangle, IconUserPlus } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -15,6 +15,7 @@ import { findDuplicate } from '@/domain/passage/selectors'
 import type { Session } from '@/domain/session/types'
 import type { WriteOutcome } from '@/features/session/hooks/use-passage-actions'
 import type { Ui } from '@/lib/i18n/use-ui'
+import { WriteErrorAlert } from './write-error-alert'
 
 type Names = { lastName: string; firstName: string }
 
@@ -83,11 +84,13 @@ export function AddStudentDialog({ ui, session, disabled, onAdd }: AddStudentDia
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger render={<Button variant="outline" />}>
-        <IconUserPlus />
-        {text('students_add', {})}
+      <DialogTrigger
+        render={<Button variant="secondary" size="sm" aria-label={text('students_add', {})} />}
+      >
+        <IconUserPlus aria-hidden />
+        {text('students_add_short', {})}
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>{text('students_add_title', {})}</DialogTitle>
         </DialogHeader>
@@ -111,18 +114,21 @@ export function AddStudentDialog({ ui, session, disabled, onAdd }: AddStudentDia
             />
           </div>
           {duplicate !== undefined && (
-            <output className="text-sm text-muted-foreground">
-              {text('students_add_duplicate', {
-                name: `${duplicate.lastName} ${duplicate.firstName}`,
-              })}
+            // Pas une erreur : l'ajout reste possible (homonymes), d'où `output` et non `alert`.
+            <output className="flex items-start gap-2 text-small text-muted-foreground">
+              <IconAlertTriangle aria-hidden className="mt-px size-4 shrink-0" />
+              <span>
+                {text('students_add_duplicate', {
+                  name: `${duplicate.lastName} ${duplicate.firstName}`,
+                })}
+              </span>
             </output>
           )}
-          {failed && (
-            <p role="alert" className="text-sm text-destructive">
-              {text('write_error', {})}
-            </p>
-          )}
+          {failed && <WriteErrorAlert ui={ui} />}
           <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => handleOpenChange(false)}>
+              {text('dialog_cancel', {})}
+            </Button>
             <Button
               type="button"
               variant="outline"

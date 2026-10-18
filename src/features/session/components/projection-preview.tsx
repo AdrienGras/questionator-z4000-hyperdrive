@@ -11,26 +11,32 @@ type ProjectionPreviewProps = Readonly<{
   action?: ReactNode
   /** Message sous l'en-tête, près de l'action (popup bloquée). */
   notice?: ReactNode
+  /** Sous l'aperçu : bascule de projection et bandeau. */
+  children?: ReactNode
 }>
 
 /**
- * Aperçu réduit de la vue projetée (F22) : le même rendu que la projection, posé sur un
+ * Carte « Vue projetée » (F22, artboard `passage-question`) : le même rendu que la projection, posé sur un
  * canevas de 1280×720 réduit par `transform: scale` à la largeur mesurée. Il ne reçoit que
  * la `ProjectedView` (D69, D77), sans animation de tirage, et reste hors de l'arbre
  * d'accessibilité et du clavier.
  */
-export function ProjectionPreview({ ui, view, action, notice }: ProjectionPreviewProps) {
+export function ProjectionPreview({ ui, view, action, notice, children }: ProjectionPreviewProps) {
   const titleId = useId()
   return (
-    <section aria-labelledby={titleId} className="flex flex-col gap-2">
+    <section
+      aria-labelledby={titleId}
+      className="flex flex-col gap-3 rounded-lg bg-card p-5 shadow-card"
+    >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 id={titleId} className="text-sm font-medium text-muted-foreground">
+        <h2 id={titleId} className="text-h3">
           {ui.text('projection_preview_label', {})}
         </h2>
         {action}
       </div>
       {notice}
       <ProjectionCanvas view={view} />
+      {children}
     </section>
   )
 }

@@ -338,7 +338,7 @@ L'enregistrement de la session dans le navigateur a échoué. Réessayez. Si le 
 
 > Autorisez les fenêtres pop-up pour ce site pour ouvrir la vue projetée.
 
-Le navigateur a bloqué l'ouverture de la seconde fenêtre. Autorisez les fenêtres pop-up pour le site de l'application, puis cliquez de nouveau sur « Ouvrir la vue projetée ».
+Le navigateur a bloqué l'ouverture de la seconde fenêtre. Autorisez les fenêtres pop-up pour le site de l'application, puis cliquez de nouveau sur « Ouvrir », dans la carte « Vue projetée » de l'écran de passage.
 
 Pour projeter sur un second écran, ouvrez la vue projetée puis déplacez cette fenêtre sur l'écran du vidéoprojecteur. Voir [Projeter](./projeter).
 
@@ -346,11 +346,11 @@ Pour projeter sur un second écran, ouvrez la vue projetée puis déplacez cette
 
 Les sessions sont enregistrées dans le stockage local du navigateur, sur cet appareil. Elles n'existent nulle part ailleurs. Elles disparaissent si vous effacez les données du site, si le navigateur manque d'espace, ou si vous changez de navigateur ou d'appareil.
 
-> Stockage non garanti : le navigateur n'a pas garanti la conservation des données : il peut effacer vos sessions s'il manque d'espace. Exportez régulièrement un backup.
+> Le navigateur n'a pas garanti la conservation des données : il peut effacer vos sessions s'il manque d'espace. Exportez régulièrement une sauvegarde.
 
-Cet avertissement s'affiche quand le navigateur ne promet pas de conserver les données. Exportez régulièrement un backup de vos sessions.
+Ce message s'affiche au survol du badge « Stockage non garanti », sous le titre de l'accueil, quand le navigateur ne promet pas de conserver les données. Exportez alors régulièrement une sauvegarde de vos sessions.
 
-Si des sessions ont déjà disparu, il n'y a pas de moyen de les récupérer, sauf à les restaurer depuis un backup exporté plus tôt : voir [Restaurer : importer un backup](./sessions#restaurer-importer-un-backup).
+Si des sessions ont déjà disparu, il n'y a pas de moyen de les récupérer, sauf à les restaurer depuis une sauvegarde exportée plus tôt : voir [Restaurer une session](./sessions#restaurer-une-session-importer-une-sauvegarde).
 
 > Le stockage local est indisponible (navigation privée ou cookies bloqués ?). Les sessions ne peuvent pas être enregistrées.
 

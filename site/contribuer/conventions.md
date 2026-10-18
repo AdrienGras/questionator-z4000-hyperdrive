@@ -27,6 +27,8 @@ Dans le code existant, les commentaires sont en français et disent pourquoi, pa
 
 Toute chaîne visible passe par le dictionnaire d'interface, jamais en dur : voir [Composant d'écran traduit](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/CONVENTIONS.md#composant-décran-traduit--squelette).
 
+Le canevas Design et le design system de la refonte F44 sont la référence de toute interface ([D102](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/DECISIONS.md#d102--f44--refonte-ui-thème-sombre-et-navigation-2026-10-14)) : un ticket qui touche l'écran passe par ses maquettes avant le code (voir [Workflow](./workflow#interface)). Les couleurs, rayons et ombres viennent des tokens de `src/index.css`, qui suivent ceux du design system : les règles sont dans [Tokens et palette](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/CONVENTIONS.md#tokens-et-palette--règles). Un écran se range dans la coquille commune, avec le menu : voir [Menu et coquille de page](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/CONVENTIONS.md#menu-et-coquille-de-page--règles).
+
 ## Pull request
 
 La checklist avant « Ready for review » est dans [Pull request](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/CONVENTIONS.md#pull-request--checklist-avant--ready-for-review-). Le déroulé est décrit dans [Workflow](./workflow).

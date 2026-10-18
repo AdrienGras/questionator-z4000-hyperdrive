@@ -94,7 +94,7 @@ describe('vue projetée', () => {
   test('tirage en direct : cartes sans énoncé, puis énoncé et plus de cartes', async () => {
     await putSession(sessionWith([]))
     const { container } = renderAt('/present/session-1')
-    await screen.findByText('Question 1 / 3')
+    await screen.findByText('1 / 3', { selector: 'dd' })
 
     await setAttempts('student-1', [attempt(1, 'pending', T2)])
 
@@ -137,7 +137,7 @@ describe('vue projetée', () => {
     // « Question 1 / 3 » s'affichait déjà avec la question en cours : seule la disparition de
     // l'énoncé prouve que la réinitialisation est arrivée à l'écran.
     await waitFor(() => expect(screen.queryByText(PROMPT)).not.toBeInTheDocument())
-    expect(screen.getByText('Question 1 / 3')).toBeInTheDocument()
+    expect(screen.getByText('1 / 3', { selector: 'dd' })).toBeInTheDocument()
     expect(cards(container)).toHaveLength(0)
 
     await setAttempts('student-1', [attempt(2, 'pending', T3)])
@@ -148,7 +148,7 @@ describe('vue projetée', () => {
   test('animation coupée : nouveau tirage affiché directement', async () => {
     await putSession(sessionWith([], { animation: false }))
     const { container } = renderAt('/present/session-1')
-    await screen.findByText('Question 1 / 3')
+    await screen.findByText('1 / 3', { selector: 'dd' })
 
     await setAttempts('student-1', [attempt(1, 'pending', T2)])
 
@@ -160,7 +160,7 @@ describe('vue projetée', () => {
     setReducedMotion(true)
     await putSession(sessionWith([]))
     const { container } = renderAt('/present/session-1')
-    await screen.findByText('Question 1 / 3')
+    await screen.findByText('1 / 3', { selector: 'dd' })
 
     await setAttempts('student-1', [attempt(1, 'pending', T2)])
     expect((await screen.findByText(PROMPT)).closest('.fade-in')).not.toBeNull()

@@ -42,6 +42,16 @@ test('affiche « Prête pour le hors ligne » jusqu’au clic sur « OK »', asy
   expect(update.offlineReady).toBe(false)
 })
 
+test('titre en strong, puis le corps', async () => {
+  const { update, ready } = makeUpdate()
+  render(<OfflineReadyPrompt update={update} />)
+  await ready()
+  expect(screen.getByText('Prête pour le hors ligne').tagName).toBe('STRONG')
+  expect(screen.getByRole('status')).toHaveTextContent(
+    /^Prête pour le hors ligne\s*L’application fonctionne désormais sans réseau\.\s*OK$/,
+  )
+})
+
 test('s’efface devant la pastille de mise à jour', async () => {
   const { update, ready, waiting } = makeUpdate()
   render(<OfflineReadyPrompt update={update} />)
