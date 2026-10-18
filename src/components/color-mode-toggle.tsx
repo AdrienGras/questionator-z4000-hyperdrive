@@ -34,7 +34,9 @@ export function ColorModeToggle({ ui, collapsed }: Readonly<{ ui: Ui; collapsed:
           <DropdownMenuTrigger
             aria-label={collapsed ? toggleLabel : undefined}
             className={cn(
-              'flex h-9 w-full items-center gap-3 rounded-md px-3.5 text-[13px] font-medium text-muted-foreground hover:bg-sidebar-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar-ring',
+              // Sans retour à la ligne : « Mode d'affichage : système » occupe toute la ligne du menu
+              // déplié, à 1 px près, qui déborde dans la marge intérieure.
+              'flex h-9 w-full items-center gap-3 rounded-md px-3.5 text-left text-[13px] font-medium whitespace-nowrap text-muted-foreground hover:bg-sidebar-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar-ring',
               collapsed && 'mx-auto w-12 justify-center px-0',
             )}
           >
