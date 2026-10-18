@@ -33,3 +33,20 @@ test('grille qui s’adapte au nombre de valeurs', () => {
   expect(container.firstElementChild).toHaveClass('grid')
   expect(screen.getByRole('button', { name: 'Noter 1' })).toHaveClass('h-16')
 })
+
+test('rangée : un bouton par valeur, mêmes noms, rangée qui passe à la ligne', () => {
+  const { container } = render(
+    <ScaleButtons
+      ui={makeUi()}
+      config={makeConfig()}
+      scale={[0, 0.5, 1, 1.5, 2]}
+      disabled={false}
+      variant="row"
+      onScore={vi.fn<(value: number) => void>()}
+    />,
+  )
+  expect(screen.getAllByRole('button', { name: /^Noter / })).toHaveLength(5)
+  expect(screen.getByRole('button', { name: 'Noter 1,5' })).toHaveClass('h-14')
+  expect(container.firstElementChild).toHaveClass('flex-wrap')
+  expect(container.firstElementChild).not.toHaveClass('grid')
+})

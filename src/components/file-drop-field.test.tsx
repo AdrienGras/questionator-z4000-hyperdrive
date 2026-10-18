@@ -148,3 +148,27 @@ describe('FileDropField', () => {
     expect(screen.queryByText(/^Fichier/)).not.toBeInTheDocument()
   })
 })
+
+describe('FileDropField compact', () => {
+  test('vide : texte d’invite et « Choisir un fichier », sans l’indication du grand format', () => {
+    renderField({ size: 'compact', emptyHint: 'Déposez la config (.json) ici' })
+    expect(screen.getByText('Déposez la config (.json) ici')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Choisir un fichier' })).toBeInTheDocument()
+    expect(screen.queryByText('ou déposez-le ici')).not.toBeInTheDocument()
+  })
+
+  test('rempli : nom, état annoncé, « ou déposez-en un autre » et « Remplacer »', () => {
+    renderField({ size: 'compact', fileName: 'revisions.json', status: 'ok' })
+    expect(screen.getByText('revisions.json')).toBeInTheDocument()
+    expect(screen.getByText('ou déposez-en un autre')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Remplacer' })).toBeInTheDocument()
+    expect(screen.getByText('Fichier valide')).toHaveAttribute('aria-live', 'polite')
+    expect(screen.getByText("Liste d'étudiants (CSV)").tagName).toBe('LEGEND')
+  })
+
+  test('un dépôt de fichier appelle onFile', () => {
+    const { zone, onFile } = renderField({ size: 'compact' })
+    fireEvent.drop(zone, { dataTransfer: { files: [file], types: ['Files'] } })
+    expect(onFile).toHaveBeenCalledExactlyOnceWith(file)
+  })
+})

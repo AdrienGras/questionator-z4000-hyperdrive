@@ -158,6 +158,7 @@ const SAMPLE: UiMessageParams = {
   create_choose_file: {},
   create_replace_file: {},
   create_drop_hint: {},
+  create_drop_other: {},
   create_file_status_ok: {},
   create_file_status_warnings: {},
   create_file_status_errors: {},

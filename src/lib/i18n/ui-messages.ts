@@ -157,6 +157,7 @@ export type UiMessageParams = {
   create_choose_file: NoParams
   create_replace_file: NoParams
   create_drop_hint: NoParams
+  create_drop_other: NoParams
   create_file_status_ok: NoParams
   create_file_status_warnings: NoParams
   create_file_status_errors: NoParams
@@ -676,6 +677,7 @@ const fr: Dictionary<UiMessageParams> = {
   create_choose_file: () => 'Choisir un fichier',
   create_replace_file: () => 'Remplacer',
   create_drop_hint: () => 'ou déposez-le ici',
+  create_drop_other: () => 'ou déposez-en un autre',
   create_file_status_ok: () => 'Fichier valide',
   create_file_status_warnings: () => 'Fichier valide, avec avertissements',
   create_file_status_errors: () => 'Fichier invalide',
@@ -1171,6 +1173,7 @@ const en: Dictionary<UiMessageParams> = {
   create_choose_file: () => 'Choose a file',
   create_replace_file: () => 'Replace',
   create_drop_hint: () => 'or drop it here',
+  create_drop_other: () => 'or drop another one',
   create_file_status_ok: () => 'Valid file',
   create_file_status_warnings: () => 'Valid file, with warnings',
   create_file_status_errors: () => 'Invalid file',

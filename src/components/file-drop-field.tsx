@@ -22,6 +22,13 @@ type FileDropFieldProps = Readonly<{
   status: FileDropStatus
   onFile: (file: File) => void
   disabled?: boolean
+  /**
+   * `large` (défaut, écran de création) : zone haute, contenu centré. `compact` (mise en place d'un
+   * entraînement) : une rangée, artboards `entrainement-mise-en-place` et `entrainement-mise-a-jour`.
+   */
+  size?: 'large' | 'compact'
+  /** Invite de la zone compacte vide (« Déposez la config (.json) ici »). */
+  emptyHint?: string
 }>
 
 const STATUS_ICONS: Record<FileDropStatus, { icon: Icon; className: string }> = {
@@ -52,7 +59,7 @@ const STATUS_LABELS: Record<
 }
 
 /**
- * Zone de dépôt d'un fichier (écran de création) : bouton qui ouvre un input caché, dépôt par
+ * Zone de dépôt d’un fichier (création de session, mise en place d’un entraînement) : bouton qui ouvre un input caché, dépôt par
  * glisser-déposer, nom du fichier, icône et texte d'état de sa validation, bordure colorée selon
  * cet état.
  */
@@ -64,6 +71,8 @@ export function FileDropField({
   status,
   onFile,
   disabled = false,
+  size = 'large',
+  emptyHint,
 }: FileDropFieldProps) {
   const { text } = ui
   const input = useRef<HTMLInputElement>(null)
@@ -77,6 +86,30 @@ export function FileDropField({
   }
 
   const { icon: StateIcon, className: iconClass } = STATUS_ICONS[status]
+  // Toujours monté : une région live n'annonce que les changements d'un élément existant. Visible,
+  // et seul nœud de l'état (pas de doublon `sr-only`).
+  const liveStatus = (
+    <span
+      aria-live="polite"
+      className={cn(
+        'text-small',
+        status === 'errors' ? 'text-destructive' : 'text-muted-foreground',
+      )}
+    >
+      {fileName !== undefined && status !== 'empty' ? text(STATUS_LABELS[status], {}) : ''}
+    </span>
+  )
+  const chooseButton = (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      disabled={disabled}
+      onClick={() => input.current?.click()}
+    >
+      {text(fileName === undefined ? 'create_choose_file' : 'create_replace_file', {})}
+    </Button>
+  )
 
   return (
     // Écouteurs sur un `div` neutre : un `fieldset` (rôle group) n'est pas un élément interactif.
@@ -92,44 +125,56 @@ export function FileDropField({
           disabled={disabled}
           onChange={handleChange}
         />
-        <div
-          data-status={status}
-          className={cn(
-            // Toujours au grand format, rempli ou vide : même hauteur que la zone voisine (`flex-1`)
-            // et que l'état rempli seul (`min-h-46`).
-            'flex min-h-46 flex-1 flex-col items-center justify-center gap-2 rounded-lg border-[1.5px] bg-card px-5 py-6 text-center transition-colors',
-            STATUS_BORDERS[status],
-            dragging && 'border-dashed border-primary',
-          )}
-        >
-          <StateIcon aria-hidden className={cn('size-7 shrink-0', iconClass)} />
-          {fileName !== undefined && (
-            <strong className="max-w-full truncate font-semibold">{fileName}</strong>
-          )}
-          {/* Toujours monté : une région live n'annonce que les changements d'un élément existant.
-              Visible, et seul nœud de l'état (pas de doublon `sr-only`). */}
-          <span
-            aria-live="polite"
+        {size === 'large' ? (
+          <div
+            data-status={status}
             className={cn(
-              'text-small',
-              status === 'errors' ? 'text-destructive' : 'text-muted-foreground',
+              // Toujours au grand format, rempli ou vide : même hauteur que la zone voisine (`flex-1`)
+              // et que l'état rempli seul (`min-h-46`).
+              'flex min-h-46 flex-1 flex-col items-center justify-center gap-2 rounded-lg border-[1.5px] bg-card px-5 py-6 text-center transition-colors',
+              STATUS_BORDERS[status],
+              dragging && 'border-dashed border-primary',
             )}
           >
-            {fileName !== undefined && status !== 'empty' ? text(STATUS_LABELS[status], {}) : ''}
-          </span>
-          <div className="mt-1 flex flex-wrap items-center justify-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={disabled}
-              onClick={() => input.current?.click()}
-            >
-              {text(fileName === undefined ? 'create_choose_file' : 'create_replace_file', {})}
-            </Button>
-            <span className="text-small text-muted-foreground">{text('create_drop_hint', {})}</span>
+            <StateIcon aria-hidden className={cn('size-7 shrink-0', iconClass)} />
+            {fileName !== undefined && (
+              <strong className="max-w-full truncate font-semibold">{fileName}</strong>
+            )}
+            {liveStatus}
+            <div className="mt-1 flex flex-wrap items-center justify-center gap-2">
+              {chooseButton}
+              <span className="text-small text-muted-foreground">
+                {text('create_drop_hint', {})}
+              </span>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div
+            data-status={status}
+            className={cn(
+              'flex flex-wrap items-center gap-3 rounded-md border-[1.5px] px-4 py-3.5 transition-colors',
+              fileName !== undefined && 'bg-background',
+              STATUS_BORDERS[status],
+              dragging && 'border-dashed border-primary',
+            )}
+          >
+            <StateIcon aria-hidden className={cn('size-5.5 shrink-0', iconClass)} />
+            {fileName === undefined ? (
+              <span className="min-w-0 flex-1 text-muted-foreground">{emptyHint}</span>
+            ) : (
+              <strong className="min-w-0 truncate font-semibold">{fileName}</strong>
+            )}
+            {liveStatus}
+            <span className="ml-auto flex flex-wrap items-center gap-2">
+              {fileName !== undefined && (
+                <span className="text-small text-muted-foreground">
+                  {text('create_drop_other', {})}
+                </span>
+              )}
+              {chooseButton}
+            </span>
+          </div>
+        )}
       </fieldset>
     </div>
   )
