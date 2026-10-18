@@ -309,6 +309,6 @@ describe('AppearanceProvider — portée sans mémoire (vue projetée, D112)', (
     fireEvent.click(screen.getByRole('button', { name: 'clair' }))
     expect(html).toHaveClass('dark')
     expect(screen.getByText('dark/dark')).toBeInTheDocument()
-    expect(localStorage.length).toBe(0)
+    expect(localStorage).toHaveLength(0)
   })
 })
