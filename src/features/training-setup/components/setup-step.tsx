@@ -38,8 +38,7 @@ export function SetupStep({ ui, number, total, state, title, children }: SetupSt
       )}
     >
       {/* Espace hors du texte masqué : le calcul du nom accessible rogne celle d'un enfant. */}
-      {title}{' '}
-      <span className="sr-only">({text('training_setup_step_state', { state })})</span>
+      {title} <span className="sr-only">({text('training_setup_step_state', { state })})</span>
     </h2>
   )
   return (

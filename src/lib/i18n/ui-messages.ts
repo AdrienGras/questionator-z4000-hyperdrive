@@ -201,6 +201,9 @@ export type UiMessageParams = {
   training_setup_file_label: NoParams
   training_setup_paste_label: NoParams
   training_setup_check_paste: NoParams
+  training_setup_check_paste_short: NoParams
+  training_setup_drop_empty: NoParams
+  training_setup_category_counts: NoParams
   /** Résumé d'une config valide : une ligne par catégorie. */
   training_setup_category_count: { label: string; count: number }
   training_setup_fix_in_editor: NoParams
@@ -251,9 +254,12 @@ export type UiMessageParams = {
   training_update_write_error: NoParams
   training_update_damaged: NoParams
   training_update_summary: NoParams
-  training_update_kept: { count: number }
-  training_update_added: { count: number }
-  training_update_removed: { count: number }
+  training_update_kept_label: { count: number }
+  training_update_added_label: { count: number }
+  training_update_removed_label: { count: number }
+  training_update_kept_hint: { count: number }
+  training_update_added_hint: { count: number }
+  training_update_removed_hint: { count: number }
   preview_students_title: NoParams
   preview_students_noun: { count: number }
   preview_students_list: NoParams
@@ -733,6 +739,9 @@ const fr: Dictionary<UiMessageParams> = {
   training_setup_file_label: () => 'Config (JSON)',
   training_setup_paste_label: () => '… ou collez le JSON ici',
   training_setup_check_paste: () => 'Vérifier le JSON collé',
+  training_setup_check_paste_short: () => 'Vérifier',
+  training_setup_drop_empty: () => 'Déposez la config (.json) ici',
+  training_setup_category_counts: () => 'Questions par niveau',
   training_setup_category_count: ({ label, count }) =>
     `${label} : ${count} ${plural(count, 'question', 'questions')}`,
   training_setup_fix_in_editor: () => 'Corriger dans l’éditeur',
@@ -783,13 +792,14 @@ const fr: Dictionary<UiMessageParams> = {
   training_update_write_error: () => 'La mise à jour a échoué. Réessayez.',
   training_update_damaged: () => 'Cet entraînement est endommagé : il ne peut pas être mis à jour.',
   training_update_summary: () => 'Bilan de la mise à jour',
-  training_update_kept: ({ count }) =>
-    `${count} ${plural(count, 'question conservée', 'questions conservées')} — historique gardé`,
-  training_update_added: ({ count }) => `${count} ${plural(count, 'nouvelle', 'nouvelles')}`,
-  training_update_removed: ({ count }) =>
-    count > 1
-      ? `${count} retirées — elles n’apparaissent plus dans les stats`
-      : `${count} retirée — elle n’apparaît plus dans les stats`,
+  training_update_kept_label: ({ count }) => plural(count, 'conservée', 'conservées'),
+  training_update_added_label: ({ count }) => plural(count, 'nouvelle', 'nouvelles'),
+  training_update_removed_label: ({ count }) => plural(count, 'retirée', 'retirées'),
+  training_update_kept_hint: () => 'Historique gardé',
+  training_update_added_hint: ({ count }) =>
+    plural(count, 'Ajoutée au tirage', 'Ajoutées au tirage'),
+  training_update_removed_hint: ({ count }) =>
+    plural(count, 'N’apparaît plus dans les stats', 'N’apparaissent plus dans les stats'),
   preview_students_title: () => 'Étudiants',
   preview_students_noun: ({ count }) => plural(count, 'étudiant', 'étudiants'),
   preview_students_list: () => 'Voir la liste',
@@ -1234,6 +1244,9 @@ const en: Dictionary<UiMessageParams> = {
   training_setup_file_label: () => 'Config (JSON)',
   training_setup_paste_label: () => '… or paste the JSON here',
   training_setup_check_paste: () => 'Check the pasted JSON',
+  training_setup_check_paste_short: () => 'Check',
+  training_setup_drop_empty: () => 'Drop the config (.json) here',
+  training_setup_category_counts: () => 'Questions per level',
   training_setup_category_count: ({ label, count }) =>
     `${label}: ${count} ${pluralEn(count, 'question', 'questions')}`,
   training_setup_fix_in_editor: () => 'Fix in the editor',
@@ -1284,13 +1297,12 @@ const en: Dictionary<UiMessageParams> = {
   training_update_write_error: () => 'The update failed. Try again.',
   training_update_damaged: () => 'This practice is damaged: it cannot be updated.',
   training_update_summary: () => 'Update summary',
-  training_update_kept: ({ count }) =>
-    `${count} ${pluralEn(count, 'question kept', 'questions kept')} — history preserved`,
-  training_update_added: ({ count }) => `${count} new`,
-  training_update_removed: ({ count }) =>
-    count === 1
-      ? `${count} removed — it no longer appears in the stats`
-      : `${count} removed — they no longer appear in the stats`,
+  training_update_kept_label: () => 'kept',
+  training_update_added_label: () => 'new',
+  training_update_removed_label: () => 'removed',
+  training_update_kept_hint: () => 'History kept',
+  training_update_added_hint: () => 'Added to the draw',
+  training_update_removed_hint: () => 'No longer in the stats',
   preview_students_title: () => 'Students',
   preview_students_noun: ({ count }) => pluralEn(count, 'student', 'students'),
   preview_students_list: () => 'Show the list',
