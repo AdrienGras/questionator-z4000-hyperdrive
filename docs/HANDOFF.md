@@ -34,9 +34,14 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 - **Révélé en route** : en-tête « Réussite » et barre étroite des tags (capture 390), taille `md` de l'anneau d'entraînement ; relecture finale : point coloré d'un anneau à 0 % (aussi sur `SuccessRing`) et long libellé de catégorie qui débordait (e2e `stats-layout`, 83 px). Chacun corrigé avec un test qui échouait d'abord.
 - `pnpm check` (2201 tests), 81 e2e, `check:bundle`, `check:precache`, `check:budget` verts ; captures 1280 et 390 px comparées aux artboards ; canevas v25 (`role="img"` retiré des artboards de stats).
 
-**Trucs en suspens** : #150 **à valider par l'utilisateur en local** (`pnpm dev`). Mineurs de la relecture en BACKLOG § Statistiques. `guide.spec.ts` (captures du guide, hors CI) rouge depuis F44.5 sur l'accueil, consigné en BACKLOG. Le guide ne parle encore ni du menu, ni des nouveaux écrans (passe de fin de phase 3).
+**Trucs en suspens** : #150 **en cours de validation par l'utilisateur en local** (`pnpm dev`, serveur déjà lancé sur le port 5173 depuis ce dépôt ; liste de vérifications donnée en fin de session). S'il remonte des retours : les corriger avec un test qui échoue d'abord, mettre à jour l'artboard touché, compléter cette entrée et la section #150 du corps de la PR #154. PR #154 toujours en brouillon, CI 6/6 et Sonar verts (0 issue) sur `feat/f44-refonte-ui`. Mineurs de la relecture en BACKLOG § Statistiques.
+- **Phase 3 étendue (D110)** : deux tickets ajoutés, dans la même PR #154. #155 (F44.11 : guide utilisateur et contributeur, captures, texte du README ; y réparer `e2e/screenshots/guide.spec.ts`, rouge depuis F44.5) et #156 (F44.12 : bannière animée du README refaite depuis les artboards en mode « motion » du canevas, formats de D100, scénario validé par l'utilisateur d'abord, session dédiée). Ordre : #151 → #152 → #155 → #156 ; la PR ne quitte le brouillon qu'après #156.
+- `.claude/scripts/gh-ticket.sh` fiabilisé (projet qui ajoute l'issue de lui-même, QUIRKS 2026-10-18).
 
-**Prochaine chose à creuser** : après validation de #150, plan de #151 (entraînement) d'après `entrainement-mise-en-place`, `entrainement-mise-a-jour`, `entrainement-question` et la section #151 de la carte des écrans.
+**Prochaine chose à creuser** : après validation de #150 par l'utilisateur, plan de #151 (F44.9, entraînement) avec `superpowers:writing-plans`, exécution native comme #145 à #150. Sources :
+- carte des écrans `docs/superpowers/specs/2026-10-17-f44-carte-des-ecrans.md` § « Entraînement (#151) », lignes 99-109 (forme seule, modifié, nouveau retenu, à conserver) ;
+- artboards `entrainement-mise-en-place`, `entrainement-mise-a-jour`, `entrainement-question` (page « Après » du canevas, lecture : Notes de l'entrée F44.6) ;
+- ticket #151 (critère : d'un PDF de cours à une première question tirée, parcours inchangé) ; briques déjà là : `CategoryTile`, `ScaleButtons`, `FileDropField` (forme de la création, version compacte attendue ici), `@/components/stats/` pour un bloc chiffré.
 
 **Notes pour future Claude** :
 - Retirer une bibliothèque lourde : dépendance, cible de `scripts/check-initial-bundle.ts`, groupe `codeSplitting`, règle depcruise ; `check:bundle` ne tourne pas dans `pnpm check`.
