@@ -24,6 +24,34 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-18 — F44.12 : bannière animée du README en 3D (#156)
+
+**Dernière chose faite** : brainstorming → spec `docs/superpowers/specs/2026-10-18-f44-12-banniere-3d-design.md` → plan `docs/superpowers/plans/2026-10-18-f44-12-banniere-3d.md`, exécuté nativement ; D114.
+- **Direction** (utilisateur) : plan-séquence three.js sur les vrais écrans de la refonte, ambiance de la nouvelle UI. Références : la vidéo « mode d'emploi » (lisibilité) et le clip three.js « LGTM » (caméra, objets 3D). L'option borne d'arcade a été écartée après un storyboard.
+- **Film de 41,5 s.** La seconde moitié a été refaite sur deux retours : « +1 », questions 2 et 3 en accéléré, écran final 6,00/20 des deux côtés, puis cinq atouts en objets (éditeur, Excel, solo, hors ligne, local). L'écran de stats et ses anneaux ont été retirés.
+- **Sources hors dépôt** (utilisateur) : atelier `/srv/AdrienGras/questionator-banniere-3d` et archive `~/Downloads/questionator-banniere-3d-sources.zip`. Le dépôt ne reçoit que `assets/readme-banner*` et le texte alternatif du README.
+- **Pas de passe canevas** : exception à D102, tracée dans D114.
+- **Poids** : AVIF 4,23 Mo, WebP 4,79 Mo (qualité 55), image fixe 73 Ko à 39,7 s.
+- **Vérifications** :
+  - rendu GitHub contrôlé sur la branche (AVIF animé, image fixe en mouvement réduit) ;
+  - garde-fou `scripts/readme-banner.test.ts` 5/5, `pnpm check` vert ;
+  - relecture finale (opus) : HANDOFF manquant (fait ici), scénario des captures conservé, étiquettes qui se chevauchaient à 38,5 s corrigées ; mineurs ci-dessous.
+
+**Trucs en suspens** : la bannière de 41,5 s a été validée par l'utilisateur (« lgtm ») avant les deux retouches de la relecture finale : dernière station tenue, étiquettes effacées avant le vol. Ces retouches restent à lui montrer. F44 est complet (D110) : PR #154 à sortir du brouillon après CI et Sonar verts (`.claude/scripts/sonar-check.sh --pr 154 --wait`), merge seulement sur go explicite.
+
+**Prochaine chose à creuser** : passe Sonar et CI de la PR #154, puis la passer en « Ready for review ». Mineurs relevés par la relecture, non traités :
+- petits textes sous 18 px en 800 px : étiquettes, pastille « ACCÉLÉRÉ », adresse de fin ;
+- traînées de l'accéléré qui sautillent (`fast.ts`, pas de 80 px par image) ;
+- numéros de ligne de l'encart JSON (13 à 16 au lieu de 10/14/15) ;
+- contrôle d'ordre de `pnpm check` sans instant entre 24 et 31 s ;
+- plan non mis à jour après la révision : la spec (section « Révision ») et D114 font foi.
+
+**Notes pour future Claude** :
+- **Refaire la bannière** : tout passe par l'atelier, dont le `README.md` donne les commandes. `pnpm render` prend environ 9 min ; `--from/--to` permet de ne refaire qu'une plage. L'image fixe est `f1191`.
+- **Captures en plus** : les six captures des questions 2 et 3 et des écrans finaux se refont avec `captures/banner-extra.spec.ts`, à copier temporairement dans `e2e/screenshots/`. Il est reproductible au hash près.
+- **Poids du WebP** : il est à 92 % de son seuil. Allonger le film exige de baisser `WEBP_Q`.
+- **Pièges** (QUIRKS) : `--disable-partial-raster` pour le déterminisme, WebGL en headless seulement via `channel: 'chromium'` + ANGLE Vulkan, et ffmpeg ne relit pas un WebP animé.
+
 ## 2026-10-18 — F44.11 : guide, captures et README (#155)
 
 **Dernière chose faite** : plan `docs/superpowers/plans/2026-10-18-f44-11-guide-captures.md` exécuté nativement sur `feat/f44-refonte-ui` (PR #154, brouillon), D113. Arbitrages de l'utilisateur : captures en sombre avec une seule claire (`mode-clair.png`), quatre captures nouvelles (pages Sessions et Entraînement, accueil « Reprendre », état vide des stats), relecture de la prose de toutes les pages touchées.
