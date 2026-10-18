@@ -24,6 +24,22 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-18 — F44 clôturée : PR #154 mergée, v2.0.0
+
+**Dernière chose faite** : passe complète puis merge sur go explicite de l'utilisateur.
+- **Passe locale** : `pnpm check` (2260 tests), `pnpm build`, `pnpm docs:build`, 91 e2e, tous verts.
+- **PR #154** : CI verte sur `f8fbd9a`, `sonar-check.sh --pr 154 --wait` OK (0 issue, 0 hotspot). Corps complété (#152, #155, #156, `Closes`, checklist cochée), passée en « Ready for review », mergée avec un commit de merge (`d1f1de5`). #145 à #152, #155 et #156 fermés.
+- **CI de `main`** verte (check, e2e, deploy) ; le site répond.
+- **Tag et release** : tag annoté `v2.0.0` sur le commit de merge et release GitHub « v2.0.0 — Refonte de l'interface » (choix de l'utilisateur : tag et release sans bump de `package.json`, qui reste en `0.1.0`). Notes vérifiées : configs, sauvegardes, export et stockage inchangés (seule une description du schéma a changé).
+
+**Trucs en suspens** : cette entrée et la ligne F44 de `INDEX.md` sont sur la branche `docs/f44-cloture`, commitées mais pas poussées (demande de l'utilisateur : « au moins le commit »). Il reste à pousser et à ouvrir la PR de clôture vers `main`.
+
+**Prochaine chose à creuser** : scan de sécurité de l'application, dans une session dédiée lancée par l'utilisateur. Ensuite, les mineurs de F44.12 notés dans l'entrée précédente, et le backlog.
+
+**Notes pour future Claude** :
+- Première version taguée du dépôt : `v2.0.0`. Il n'existe pas de `v1`, et `package.json` n'a pas suivi. Un futur bump passera par une PR (pas de push direct sur `main`).
+- Les PR du projet se mergent en commit de merge (« Merge pull request #n »), jamais en squash.
+
 ## 2026-10-18 — F44.12 : bannière animée du README en 3D (#156)
 
 **Dernière chose faite** : brainstorming → spec `docs/superpowers/specs/2026-10-18-f44-12-banniere-3d-design.md` → plan `docs/superpowers/plans/2026-10-18-f44-12-banniere-3d.md`, exécuté nativement ; D114.
