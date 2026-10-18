@@ -180,10 +180,11 @@ test('stats et mise à jour de config : la note reste, la retirée disparaît, l
 
   const update = await back.openUpdate()
   await update.pasteConfig(updated)
+  // Cartes du bilan : chiffre, libellé, indication.
   await expect(update.updateSummary.getByRole('listitem')).toHaveText([
-    `${total - 1} questions conservées — historique gardé`,
-    '1 nouvelle',
-    '1 retirée — elle n’apparaît plus dans les stats',
+    new RegExp(String.raw`^${total - 1}\s*conservées\s*Historique gardé$`),
+    /^1\s*nouvelle\s*Ajoutée au tirage$/,
+    /^1\s*retirée\s*N’apparaît plus dans les stats$/,
   ])
   const afterUpdate = await update.update()
 
