@@ -117,7 +117,7 @@ Changer d'étudiant remet la vue projetée sur l'écran d'attente si elle montra
 Pour déclarer un étudiant absent, deux endroits :
 
 - dans le panneau, onglet « Liste », l'icône à droite de sa ligne (« Marquer *nom* absent ») ;
-- pour l'étudiant en cours, le bouton « Marquer absent » sous la carte du commentaire.
+- pour l'étudiant en cours, le bouton « Marquer absent », en bas de la carte « Commentaire ».
 
 Si l'étudiant a déjà des questions tirées, une fenêtre « Déclarer … absent ? » prévient que **ces questions seront supprimées**. Le commentaire est conservé. Confirmez avec « Déclarer absent ».
 

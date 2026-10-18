@@ -41,9 +41,9 @@ La CI lance les tests de bout en bout dans un job `e2e`, après l'installation d
 
 ## Les captures du guide
 
-`pnpm docs:screenshots` régénère les images de `site/public/screenshots/` avec Playwright, via la config dédiée `playwright.screenshots.config.ts`. Le hasard et l'horloge y sont figés pour que deux exécutions donnent les mêmes images. Les captures sont en mode sombre ; seule `mode-clair.png` montre le mode clair. La CI ne les lance pas : les PNG sont commités. Après un changement visible de l'interface, relancez la commande, vérifiez les images et commitez-les.
+`pnpm docs:screenshots` régénère les images de `site/public/screenshots/` avec Playwright, via la config dédiée `playwright.screenshots.config.ts`. Le hasard et l'horloge y sont figés pour que deux exécutions donnent les mêmes images. Les captures sont en mode sombre ; seule `mode-clair.png` montre le mode clair. La CI ne les lance pas : les PNG sont commités. Après un changement visible de l'interface, relancez la commande, vérifiez les images et commitez-les. Le choix est expliqué dans [D97](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/DECISIONS.md#d97--f28-72--guide-utilisateur-captures-et-garde-fous-2026-10-02), le mode sombre dans [D113](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/DECISIONS.md#d113--f4411--guide-captures-et-readme-2026-10-18).
 
-`site/guide/interface.test.ts` refuse les libellés d'avant la refonte F44 (« backup », onglet « Étudiants »…), les captures citées mais absentes et les captures que plus aucune page ne cite. Le choix est expliqué dans [D97](https://github.com/AdrienGras/questionator-z4000-hyperdrive/blob/main/docs/DECISIONS.md#d97--f28-72--guide-utilisateur-captures-et-garde-fous-2026-10-02).
+`site/guide/interface.test.ts` refuse les libellés d'avant la refonte F44 (« backup », onglet « Étudiants »…), les captures citées mais absentes et les captures que plus aucune page ne cite.
 
 ## Ce qui se teste où
 

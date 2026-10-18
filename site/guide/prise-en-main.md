@@ -19,14 +19,14 @@ Exportez régulièrement une sauvegarde. Voir [Créer, reprendre et importer une
 
 Le menu, à gauche, reste visible sur tous les écrans sauf la vue projetée. Il mène à l'accueil et aux trois espaces de l'application :
 
-- **Accueil** : vos dernières sessions et votre dernier entraînement, à reprendre en un clic ;
+- **Accueil** : vos trois sessions ou entraînements les plus récents, à reprendre en un clic, et les tuiles des espaces ;
 - **Sessions** : la liste de vos oraux, la création d'une session et l'import d'une sauvegarde ;
 - **Éditeur de config** : écrire ou corriger une config, avec un contrôle en direct ;
 - **Entraînement** : réviser seul un cours, sans examinateur ni étudiants.
 
 En bas du menu, « Aide » ouvre cette documentation dans un nouvel onglet. « Replier le menu » ne garde que les icônes : leur nom s'affiche au survol. L'application retient ce choix sur votre appareil. Dans une fenêtre étroite, le menu se range derrière le bouton « Menu », en haut de l'écran.
 
-Sur les écrans d'une session, une ligne au-dessus du titre indique où vous êtes, par exemple `Sessions › Oral de démonstration · Oral PHP`. Cliquez sur « Sessions » pour revenir à la liste.
+Sur l'écran de passage, une ligne au-dessus du titre indique où vous êtes, par exemple `Sessions › Oral de démonstration · Oral PHP`. Cliquez sur « Sessions » pour revenir à la liste. Les autres écrans ont un lien de retour, comme « Retour au passage » sur les statistiques.
 
 ### Choisir le mode clair ou sombre
 
@@ -34,7 +34,7 @@ La ligne « Mode d'affichage », en bas du menu, propose trois choix : « Clair 
 
 Le réglage dépend de l'écran où vous le faites :
 
-- sur l'accueil, les pages Sessions et Entraînement, l'éditeur et l'écran de création, il vaut pour toute l'application ;
+- sur l'accueil, les pages Sessions et Entraînement, l'éditeur et l'écran de création, il vaut pour tous ces écrans, mais pas pour les sessions et les entraînements, qui ont leur propre réglage ;
 - sur l'écran de passage et les statistiques d'une session, il ne vaut que pour cette session, et de même pour un entraînement. Au départ, une session ou un entraînement suit le champ `defaultColorMode` de sa config.
 
 La vue projetée n'a pas ce réglage : elle suit toujours `defaultColorMode`. Voir [Projeter](./projeter).

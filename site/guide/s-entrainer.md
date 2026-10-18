@@ -14,10 +14,11 @@ L'application ne lit jamais votre cours. Vous le donnez au LLM, pas à l'applica
 Ouvrez l'espace Entraînement depuis le menu, puis cliquez sur « Nouvel entraînement ». Le bouton « S’entraîner » de l'accueil, ou « S’entraîner seul » au premier lancement, mène au même écran. L'écran « S’entraîner » propose quatre étapes, de « Étape 1 sur 4 » à « Étape 4 sur 4 ». L'étape en cours est mise en avant, mais l'ordre n'est qu'indicatif : toutes restent utilisables, et vous pouvez déposer une config dès l'ouverture.
 
 1. **Rassemblez votre cours.** Réunissez le cours et les ateliers dans un seul PDF ou une seule archive zip.
-2. **Copiez le prompt.** Cliquez sur « Copier le prompt ». L'étape se résume alors en « Prompt copié. », avec un bouton « Copier à nouveau », et le texte se range dans « Afficher le prompt ». Si la copie échoue, sélectionnez le texte du champ « Prompt à copier » et copiez-le à la main.
-3. **Récupérez la config.** Collez le prompt dans le LLM, joignez votre fichier de cours et attendez le résultat. **Réglez le LLM sur son effort de réflexion maximal** : plus le cours est long, plus ça compte, et un effort réduit donne des questions superficielles ou un JSON incomplet. Le LLM rend un fichier `.json`, ou un bloc de code JSON.
+2. **Copiez le prompt.** Cliquez sur « Copier le prompt ». L'étape se résume alors en « Prompt copié. », avec un bouton « Copier à nouveau », et le texte se range dans « Afficher le prompt ». Si la copie échoue, sélectionnez le texte du champ « Prompt à copier » et copiez-le à la main. L'étape le rappelle aussi : **réglez le LLM sur son effort de réflexion maximal**. Plus le cours est long, plus ça compte : un effort réduit donne des questions superficielles ou un JSON incomplet.
 
    ![Étape 2 sur 4, « Copiez le prompt » : l’encadré « Réglez le LLM sur son effort de réflexion maximal », le prompt à copier et le bouton Copier le prompt.](/screenshots/entrainement-mise-en-place.png)
+
+3. **Récupérez la config.** Collez le prompt dans le LLM, joignez votre fichier de cours et attendez le résultat. Le LLM rend un fichier `.json`, ou un bloc de code JSON.
 
 4. **Déposez-la.** Déposez le fichier dans la zone « Config (JSON) », marquée « Déposez la config (.json) ici », ou choisissez-le. Une fois lu, la zone affiche son nom et son état, par exemple « Fichier valide ». Si le LLM n'a rendu qu'un bloc de code, dépliez « … ou collez le JSON ici », collez-le, puis cliquez sur « Vérifier ».
 
@@ -59,7 +60,7 @@ La carte porte aussi un lien « Stats ». Son menu « … » propose « Mettre �
 
 Comme les sessions, les entraînements sont enregistrés dans le stockage local de ce navigateur. Voir [Prise en main](./prise-en-main#vos-donnees-restent-sur-votre-appareil).
 
-Si les données d'un entraînement ne passent plus la validation, la carte porte la pastille « Endommagée » et ne peut pas être ouverte : il ne reste que « Supprimer », affiché en bouton sur la carte.
+Si les données d'un entraînement ne passent plus la validation, la carte porte le badge « Endommagée » et ne peut pas être ouverte : il ne reste que « Supprimer », affiché en bouton sur la carte.
 
 ## Voir ses stats
 

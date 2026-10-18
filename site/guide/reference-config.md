@@ -245,7 +245,7 @@ Chaque élément de `categories[].questions` est une question.
 | Champ | Type | Obligatoire | Défaut | Description |
 | --- | --- | --- | --- | --- |
 | `categories[].questions[].id` | texte non vide | oui | aucun | Identifiant stable de la question, unique dans toute la config. |
-| `categories[].questions[].title` | texte non vide | non | début du `prompt` sans markdown | Libellé court, utilisé dans le menu latéral et les exports. |
+| `categories[].questions[].title` | texte non vide | non | début du `prompt` sans markdown | Libellé court, affiché sur l'écran de passage, dans le panneau latéral, les statistiques et les exports. |
 | `categories[].questions[].tags` | liste de textes non vides | non | aucun | Notions pédagogiques, utilisées dans les stats. |
 | `categories[].questions[].tags[]` | texte non vide | oui, dans la liste | aucun | Une notion pédagogique. |
 | `categories[].questions[].prompt` | texte non vide | oui | aucun | Énoncé en markdown, affiché aux deux vues. |

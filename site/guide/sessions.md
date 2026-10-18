@@ -74,6 +74,7 @@ Tout reste dans le navigateur de l'appareil que vous utilisez. Rien n'est envoy�
 | Donnée | Où | Ce qui la fait disparaître |
 | --- | --- | --- |
 | Les sessions : config, étudiants, passages, notes, commentaires | Base du navigateur (IndexedDB) | Effacer les données du site, un manque d'espace, « Supprimer » |
+| Les entraînements : config et historique des notes | Base du navigateur (IndexedDB) | Effacer les données du site, un manque d'espace, « Supprimer » |
 | Le brouillon de l'éditeur de config | Stockage local du navigateur | Effacer les données du site |
 | Le mode d'affichage, global et propre à chaque session ou entraînement | Stockage local du navigateur | Effacer les données du site |
 | Le menu replié ou déplié | Stockage local du navigateur | Effacer les données du site |

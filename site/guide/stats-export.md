@@ -1,6 +1,6 @@
 # Statistiques et export Excel
 
-Cette page décrit l'écran des statistiques d'une session et le fichier Excel qu'on peut en tirer.
+Cette page décrit l'écran des statistiques d'une session et le fichier Excel que vous pouvez en tirer.
 
 ## Ouvrir les statistiques
 

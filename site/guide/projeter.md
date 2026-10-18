@@ -37,12 +37,12 @@ Le titre de l'examen et le message « L'épreuve va bientôt commencer. ». Il s
 
 ### Pendant le passage
 
-![Vue projetée : le titre de l'examen et le nom de l'étudiant, les cartes Question 1 / 3 et Score 0 en haut à droite, les quatre catégories en rangée avec Normal en surbrillance, puis l'énoncé de la question en cours.](/screenshots/vue-projetee.png)
+![Vue projetée : le titre de l'examen et le nom de l'étudiant, les cartes Question 1 / 3 et Score 0 en haut à droite, les quatre catégories en tuiles compactes avec Normal en surbrillance, puis l'énoncé de la question en cours.](/screenshots/vue-projetee.png)
 
 De haut en bas :
 
 - le titre de l'examen et le nom de l'étudiant (prénom puis nom) ; en haut à droite, la carte « Question » (« 1 / 3 ») et, selon la config, la carte « Score » avec le score cumulé ;
-- une tuile par catégorie, avec son icône. Avant le tirage, la consigne « Choisissez une catégorie » invite l'étudiant à choisir. Pendant une question, les tuiles passent en rangée compacte : celle de la question en cours est en surbrillance, les autres sont atténuées. Une catégorie qui n'a plus de question pour cet étudiant porte la mention « Épuisée » ;
+- une tuile par catégorie, avec son icône. Avant le tirage, la consigne « Choisissez une catégorie » invite l'étudiant à choisir. Pendant une question, les tuiles se resserrent : celle de la question en cours est en surbrillance, les autres sont atténuées. Une catégorie qui n'a plus de question pour cet étudiant porte la mention « Épuisée » ;
 - l'énoncé de la question en cours, sous la catégorie et sa valeur (« Normal · 2 pts »), sans son titre ni ses éléments de réponse.
 
 ### À la fin du passage
