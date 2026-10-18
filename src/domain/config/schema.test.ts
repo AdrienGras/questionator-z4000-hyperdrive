@@ -3,14 +3,22 @@ import css from '@/index.css?raw'
 import { minimalConfig } from '@/testing/config-fixtures'
 import { ConfigSchema, THEME_TOKENS, type ParsedConfig } from './schema'
 
-function rootCssVariables(source: string): string[] {
-  const rootBlock = /^:root\s*\{([^}]*)\}/m.exec(source)?.[1] ?? ''
-  return [...rootBlock.matchAll(/--([a-z0-9-]+)\s*:/g)].map((match) => match[1] ?? '')
+/** Variables du premier bloc `selector` de `src/index.css` (`:root` : thème clair, `.dark` : sombre). */
+function blockCssVariables(source: string, selector: ':root' | '.dark'): string[] {
+  const escaped = selector.replace('.', '\\.')
+  const block = new RegExp(`^${escaped}\\s*\\{([^}]*)\\}`, 'm').exec(source)?.[1] ?? ''
+  return [...block.matchAll(/--([a-z0-9-]+)\s*:/g)].map((match) => match[1] ?? '')
 }
 
 describe('ConfigSchema', () => {
   test('THEME_TOKENS correspond exactement aux variables du bloc :root de src/index.css', () => {
-    const variables = rootCssVariables(css)
+    const variables = blockCssVariables(css, ':root')
+    expect(variables).toHaveLength(THEME_TOKENS.length)
+    expect(new Set(variables)).toEqual(new Set(THEME_TOKENS))
+  })
+
+  test('THEME_TOKENS correspond exactement aux variables du bloc .dark de src/index.css', () => {
+    const variables = blockCssVariables(css, '.dark')
     expect(variables).toHaveLength(THEME_TOKENS.length)
     expect(new Set(variables)).toEqual(new Set(THEME_TOKENS))
   })

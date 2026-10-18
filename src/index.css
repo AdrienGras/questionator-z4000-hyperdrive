@@ -57,21 +57,22 @@
     transparent
   );
   --shadow-action: 0 8px 24px -8px color-mix(in oklch, var(--primary) 60%, transparent);
-  /* Texte de lien : `primary` éclairci, lisible sur le fond et les cartes (D104). */
-  --color-link: color-mix(in oklch, var(--primary) 72%, white);
+  /* Texte de lien : `primary` éclairci en sombre (72 % avec du blanc), foncé en clair (82 % avec du
+     noir), lisible sur le fond et les cartes (D104, D112) ; réglages posés sur `html`. */
+  --color-link: color-mix(in oklch, var(--primary) var(--link-strength), var(--link-toward));
   --font-heading: var(--font-sans);
   --font-sans: 'Geist Variable', sans-serif;
 }
 
-/* Valeurs fixes du design system, hors config : couleurs d'espace (jamais surchargeables), ombres,
-   police du code et échelle typographique. */
+/* Valeurs fixes du design system, hors config : couleurs d'espace (jamais surchargeables) et ombres
+   du mode clair (le sombre les remplace dans `html.dark`), police du code et échelle typographique. */
 @theme {
-  --color-space-sessions: oklch(0.8 0.12 215);
-  --color-space-editor: oklch(0.84 0.14 80);
-  --color-space-training: oklch(0.76 0.16 150);
-  --color-space-help: oklch(0.72 0.12 295);
-  --shadow-card: inset 0 1px 0 0 #ffffff0d, 0 1px 2px 0 #00000066;
-  --shadow-popover: 0 24px 48px -12px #000000cc;
+  --color-space-sessions: oklch(0.49 0.105 225);
+  --color-space-editor: oklch(0.51 0.11 70);
+  --color-space-training: oklch(0.49 0.125 150);
+  --color-space-help: oklch(0.52 0.14 295);
+  --shadow-card: 0 1px 2px 0 #1a103314, 0 2px 8px -2px #1a10330f;
+  --shadow-popover: 0 24px 48px -12px #1a103333;
   --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
   --text-display: 3rem;
   --text-display--line-height: 3.25rem;
@@ -105,10 +106,48 @@
   --text-label--letter-spacing: 0.04em;
 }
 
-/* Thème sombre du design system « Questionator Z-4000 » (F44, D102) : exactement les `THEME_TOKENS`,
-   surchargeables par le bloc `theme` d'une config. Seul thème jusqu'au mode clair dérivé (#152) ;
-   la classe `.dark`, toujours posée, garde les variantes `dark:` des composants. */
+/* Thème clair du design system « Questionator Z-4000 » (F44.10, D112), dérivé du sombre : mêmes
+   teintes, luminosités inversées. Exactement les `THEME_TOKENS`, surchargeables par `theme.light`
+   d'une config. */
 :root {
+  color-scheme: light;
+  --radius: 1.125rem;
+  --background: oklch(0.975 0.008 292);
+  --foreground: oklch(0.21 0.03 292);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.21 0.03 292);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.21 0.03 292);
+  --primary: oklch(0.585 0.235 356);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.94 0.012 292);
+  --secondary-foreground: oklch(0.21 0.03 292);
+  --muted: oklch(0.94 0.012 292);
+  --muted-foreground: oklch(0.47 0.03 292);
+  --accent: oklch(0.955 0.014 292);
+  --accent-foreground: oklch(0.21 0.03 292);
+  --destructive: oklch(0.54 0.2 25);
+  --border: oklch(0.9 0.014 292);
+  --input: oklch(0.6 0.035 292);
+  --ring: oklch(0.585 0.235 356);
+  --chart-1: oklch(0.585 0.235 356);
+  --chart-2: oklch(0.49 0.105 225);
+  --chart-3: oklch(0.51 0.11 70);
+  --chart-4: oklch(0.49 0.125 150);
+  --chart-5: oklch(0.52 0.14 295);
+  --sidebar: oklch(0.955 0.01 292);
+  --sidebar-foreground: oklch(0.21 0.03 292);
+  --sidebar-primary: oklch(0.585 0.235 356);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.925 0.016 292);
+  --sidebar-accent-foreground: oklch(0.21 0.03 292);
+  --sidebar-border: oklch(0.9 0.014 292);
+  --sidebar-ring: oklch(0.585 0.235 356);
+}
+
+/* Thème sombre (F44, D102) : exactement les `THEME_TOKENS`, surchargeables par `theme.dark`. Après
+   `:root` : même spécificité, il doit l'emporter. */
+.dark {
   color-scheme: dark;
   --radius: 1.125rem;
   --background: oklch(0.16 0.02 292);
@@ -142,6 +181,27 @@
   --sidebar-accent-foreground: oklch(0.965 0.008 292);
   --sidebar-border: oklch(0.3 0.03 292);
   --sidebar-ring: oklch(0.7 0.2 356);
+}
+
+/* Valeurs fixes qui dépendent du mode, hors config (D112) : couleurs d'espace et ombres (clair dans
+   `@theme`, sombre ici ; hors couche, ce bloc l'emporte sur `@layer theme`), puis les réglages des
+   dérivés de `@theme inline` (lien) et de l'encre de catégorie (`categoryAccent`). */
+html {
+  --category-ink-mix: 60%;
+  --link-strength: 82%;
+  --link-toward: black;
+}
+
+html.dark {
+  --color-space-sessions: oklch(0.8 0.12 215);
+  --color-space-editor: oklch(0.84 0.14 80);
+  --color-space-training: oklch(0.76 0.16 150);
+  --color-space-help: oklch(0.72 0.12 295);
+  --shadow-card: inset 0 1px 0 0 #ffffff0d, 0 1px 2px 0 #00000066;
+  --shadow-popover: 0 24px 48px -12px #000000cc;
+  --category-ink-mix: 100%;
+  --link-strength: 72%;
+  --link-toward: white;
 }
 
 @layer base {
@@ -189,14 +249,15 @@
    `:root` du thème, que `THEME_TOKENS` décrit ; ces variables ne sont pas personnalisables par la
    config. */
 .cm-editor {
-  --cm-string: #0a3069;
-  --cm-number: #0550ae;
-  --cm-keyword: #cf222e;
-  --cm-property: #116329;
-  --cm-punctuation: #57606a;
+  --cm-string: #be185d;
+  --cm-number: #92400e;
+  --cm-keyword: #6d28d9;
+  --cm-property: #0369a1;
+  --cm-punctuation: var(--muted-foreground);
 }
 
-/* Mode sombre : palette du design system, la même que les blocs de code des artboards (F44.6). */
+/* Palette du design system, la même que les blocs de code des artboards : clair (D112) ci-dessus,
+   sombre (F44.6) ci-dessous. */
 .dark .cm-editor {
   --cm-string: #f9a8d4;
   --cm-number: #fcd34d;
