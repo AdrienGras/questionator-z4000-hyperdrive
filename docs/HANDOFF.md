@@ -24,6 +24,22 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-18 — F44.11 : guide, captures et README (#155)
+
+**Dernière chose faite** : plan `docs/superpowers/plans/2026-10-18-f44-11-guide-captures.md` exécuté nativement sur `feat/f44-refonte-ui` (PR #154, brouillon), D113. Arbitrages de l'utilisateur : captures en sombre avec une seule claire (`mode-clair.png`), quatre captures nouvelles (pages Sessions et Entraînement, accueil « Reprendre », état vide des stats), relecture de la prose de toutes les pages touchées.
+- **Captures** : script réparé (accueil en tableau de bord), scénario unique session puis entraînement, 17 PNG régénérés et identiques sur quatre passes ; `accueil-sessions.png` supprimée.
+- **Garde-fou** : `site/guide/interface.test.ts` (libellés d'avant la refonte, captures absentes, captures orphelines).
+- **Guide** : toutes les pages reprises (menu, fil d'Ariane, bascule et sa portée session / entraînement / global, page Sessions, passage en deux colonnes, panneau « Cet étudiant » / « Liste », projection sans bascule, stats Synthèse / Détail, entraînement D111, éditeur) ; « sauvegarde » partout sauf le nom de fichier `-backup-`.
+- **Guide contributeur** : carte de `src/` à jour, étape canevas dans `workflow.md` (ancre `#interface`), interface et tokens dans `conventions.md`, captures et garde-fou dans `tests.md`.
+- **README** : puce « Révisions en solo » ajoutée ; rien d'autre n'était faux.
+- `pnpm check` (2259 tests), `pnpm docs:build`, `pnpm docs:screenshots` verts.
+
+**Trucs en suspens** : validation de #155 par l'utilisateur (relire les pages et les captures). Revue finale de la branche du plan à faire. Reste à F44 (D110) : #156 (bannière animée, session dédiée, scénario validé avant l'animation) ; la PR #154 ne quitte le brouillon qu'après #156, CI et Sonar verts, merge sur go explicite.
+
+**Prochaine chose à creuser** : #156 (F44.12) : scénario de la bannière à faire valider, puis animation avec le mode « motion » du canevas Design et rendu aux formats de D100 (`assets/readme-banner*`). L'`alt` de la bannière dans `README.md` décrit encore l'ancienne interface : à reprendre avec elle.
+
+**Notes pour future Claude** : les captures se vérifient par empreintes (`md5sum site/public/screenshots/*.png`) sur plusieurs passes, pas sur une seule (deux causes de variation trouvées, QUIRKS). Le serveur des captures construit le site : une image citée absente casse tout le script. L'export Excel garde les intitulés d'avant F44 (`domain/export/messages.ts`) ; le guide décrit l'écran et la feuille séparément. L'écran d'entraînement garde « Retour à l'accueil » (pas de fil d'Ariane), les stats « Retour au passage » / « Retour à l'entraînement ».
+
 ## 2026-10-18 — F44.10 : mode clair dérivé (#152)
 
 **Dernière chose faite** : passe canevas puis plan `docs/superpowers/plans/2026-10-18-f44-10-mode-clair.md` exécuté nativement sur `feat/f44-refonte-ui` (PR #154, brouillon), D112. Arbitrages de l'utilisateur : passe canevas « tokens + 5 artboards », défaut `system`, bascule dans le menu seulement, encre de catégorie.

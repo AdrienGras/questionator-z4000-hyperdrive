@@ -1817,3 +1817,23 @@ autre encodage 8 bits.
 **Pourquoi** : le mode clair revient sans refonte, lisible, piloté comme avant par la config et par une bascule à un endroit stable.
 
 **Reporté dans** : `src/index.css`, `src/domain/config/schema.test.ts`, `src/lib/appearance/category-accent.ts`, `src/lib/appearance/appearance-context.ts`, `src/app/appearance-provider.tsx`, `src/components/session-appearance.tsx`, `src/components/color-mode-toggle.tsx`, `src/components/menu/` (`app-menu`, `menu-drawer`), composants à usage plein de catégorie ; `examples/config.example.json` ; `e2e/appearance.spec.ts`, `e2e/light-mode.spec.ts`, `e2e/color-mode.spec.ts`, `e2e/menu.spec.ts` ; `docs/CONVENTIONS.md` § tokens et § apparence ; carte des écrans ; plan `docs/superpowers/plans/2026-10-18-f44-10-mode-clair.md`.
+
+## D113 — F44.11 : guide, captures et README (2026-10-18)
+
+**Question** : comment remettre le guide utilisateur, ses captures, le guide contributeur et le README d'accord avec l'interface livrée par F44, sans nouvelle page ni nouvelle fonctionnalité (D110) ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Mode des captures *(utilisateur)* | Toutes en sombre (`colorScheme: 'dark'` dans `playwright.screenshots.config.ts`), une seule en clair : `mode-clair.png` (accueil, `emulateMedia` en fin de scénario). | Identité néon et référence du canevas ; le défaut `system` aurait mêlé clair (écrans globaux) et sombre (session d'exemple en `defaultColorMode: dark`). |
+| Nouvelles captures *(utilisateur)* | `sessions.png` (remplace `accueil-sessions.png`), `accueil-reprendre.png`, `entrainements.png`, `stats-vide.png`, `mode-clair.png` ; `accueil.png` montre désormais le premier lancement. 17 captures en tout. | Les pages d'espace et le tableau de bord sont les nouveaux points d'entrée du guide. |
+| Script des captures | Un seul scénario enchaîne session et entraînement, pour que l'accueil et les pages d'espace montrent les deux ; horloge avancée d'une heure avant l'entraînement ; attente des icônes de catégorie avant trois captures ; `entrainement-question` dans une fenêtre de 1280 × 1110 au lieu d'une page entière. | Déterminisme vérifié sur quatre passes (QUIRKS) ; en page entière, le menu latéral s'arrêtait à 800 px. |
+| Garde-fou | `site/guide/interface.test.ts` : aucun libellé d'avant la refonte dans le guide (« backup » hors nom de fichier, « Restaurer une session », « Éditer une config », « Commencer », onglet « Étudiant(s) », bascule de mode « en haut à droite »), aucune capture citée absente, aucune capture orpheline. « Retour à l'accueil » n'y est pas : l'écran d'entraînement l'affiche toujours. | Le guide décrivait l'ancien accueil sans qu'aucun test ne le voie. |
+| Rédaction *(utilisateur : « à revoir aussi si les textes des docs sont bons »)* | Chaque page touchée relue en entier, passe `humanize-fr` ; tout libellé cité vérifié dans `ui-messages.ts` ou sur les captures. Vocabulaire : « sauvegarde » partout, sauf le nom de fichier `-backup-`. | La refonte a renommé des libellés ; le guide doit citer ce qui est à l'écran. |
+| Stats et export | L'écran est décrit par ses deux groupes (Synthèse, Détail) ; l'ancien tableau des blocs décrit désormais la feuille « Statistiques » de l'export, qui garde ses intitulés (`domain/export/messages.ts`). | L'export n'a pas changé avec F44. |
+| README | Rien n'y était faux ; ajout d'une puce « Révisions en solo ». La bannière reste à #156. | L'entraînement est un espace du menu et n'y figurait pas. |
+
+**Pourquoi** : la refonte part avec une documentation qui la décrit, vérifiée par un test et par des captures reproductibles.
+
+**Reporté dans** : `site/guide/` (toutes les pages sauf `index`), `site/guide/interface.test.ts`, `site/contribuer/` (`architecture`, `conventions`, `workflow`, `tests`), `README.md`, `e2e/screenshots/guide.spec.ts`, `playwright.screenshots.config.ts`, `site/public/screenshots/` ; plan `docs/superpowers/plans/2026-10-18-f44-11-guide-captures.md`.

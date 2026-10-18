@@ -26,6 +26,7 @@ L'étudiant choisit une difficulté, l'application tire une question, vous notez
 - 🧮 **Notation au fil de l'oral** : score cumulé, questions passées, absents, ajustement de la note finale et arrondi.
 - 📊 **Statistiques et export Excel** : histogramme des notes, questions les plus tirées, classeur complet en un clic.
 - ✏️ **Éditeur de config intégré** : autocomplétion, aide au survol, erreurs en direct et aperçu.
+- 🎓 **Révisions en solo** : à partir d'une config générée par un LLM sur votre cours, vous tirez des questions et vous vous notez. Les stats montrent ce qu'il faut revoir.
 - 🔒 **Tout reste sur votre machine** : aucune donnée n'est envoyée. Vous sauvegardez une session dans un fichier et la réimportez quand vous voulez.
 - ✈️ **Fonctionne hors ligne** : installable comme une application, utilisable sans réseau le jour de l'oral.
 

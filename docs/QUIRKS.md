@@ -1059,3 +1059,27 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Workaround** : attendre un repère (titre `h1`, ou `toHaveClass(/dark/)`) avant de mesurer ; viser un bouton de `main` (`page.getByRole('main').locator(…)`). L'accueil n'a aucun `[data-slot="button"]` dans `main` : la page Sessions en a un (« Importer une sauvegarde »).
 **Référence** : `e2e/appearance.spec.ts`, `e2e/pages/home-page.ts`.
 
+
+## Captures du guide : à date égale, l'ordre des sessions et entraînements change d'une passe à l'autre (2026-10-18)
+
+**Découvert** : F44.11.
+**Symptôme** : `accueil-reprendre.png` et `mode-clair.png` diffèrent d'une passe de `pnpm docs:screenshots` à l'autre (une sur trois environ) : la carte de session et celle d'entraînement échangent leur place.
+**Cause** : l'horloge des captures est figée (`setFixedTime`), donc la session et l'entraînement ont le même `updatedAt`. `compareRecords` (`src/lib/db/record-order.ts`) départage alors par `id`, tiré par `crypto.randomUUID`, que la graine de `determinism.ts` ne couvre pas (elle ne remplace que `getRandomValues`).
+**Workaround** : avancer l'horloge (`page.clock.setFixedTime`) avant de créer le second enregistrement. Vérifier le déterminisme en comparant les empreintes (`md5sum site/public/screenshots/*.png`) sur plusieurs passes.
+**Référence** : `e2e/screenshots/guide.spec.ts`, D113.
+
+## Captures du guide : les icônes de catégorie manquent parfois (2026-10-18)
+
+**Découvert** : F44.11.
+**Symptôme** : `creation-avertissements.png` sort une fois sur trois sans les icônes de l'aperçu.
+**Cause** : `CategoryIcon` charge le chunk Tabler à la demande et ne rend rien tant qu'il n'est pas arrivé ; la capture peut partir avant. Chaque nouvelle page (vue projetée comprise) recharge le chunk.
+**Workaround** : attendre `svg.tabler-icon-<nom>` de chaque catégorie avant la capture (`expectCategoryIconsDrawn` dans le script).
+**Référence** : `src/components/category-icon.tsx`, `e2e/screenshots/guide.spec.ts`.
+
+## Supprimer une capture du guide casse le serveur des captures et des e2e (2026-10-18)
+
+**Découvert** : F44.11.
+**Symptôme** : après `git rm` d'une capture, `pnpm docs:screenshots` (et `pnpm e2e`) échoue dès le démarrage : `[UNRESOLVED_IMPORT] Could not resolve '/screenshots/<x>.png' in site/guide/<page>.md`.
+**Cause** : le `webServer` de Playwright construit l'app puis le site VitePress, qui importe chaque image citée par une page.
+**Workaround** : retirer la citation de la page dans le même commit que l'image. `site/guide/interface.test.ts` signale les captures citées absentes et les orphelines.
+**Référence** : `playwright.config.ts` (`webServer`), D113.

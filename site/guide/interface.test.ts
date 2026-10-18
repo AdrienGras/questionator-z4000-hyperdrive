@@ -4,10 +4,6 @@ import { describe, expect, test } from 'vitest'
 
 const SCREENSHOTS_DIR = join(import.meta.dirname, '..', 'public', 'screenshots')
 
-/** Pages pas encore réécrites pour l'interface de F44 (F44.11) : chaque tâche retire les siennes. */
-const PENDING: ReadonlySet<string> = new Set([
-])
-
 /** Libellés et parcours d'avant la refonte (F44) : le lecteur chercherait un bouton disparu. */
 const OBSOLETE: ReadonlyArray<{ label: string; pattern: RegExp }> = [
   // Seul le nom du fichier exporté garde « -backup- » (`domain/backup/serialize.ts`).
@@ -37,7 +33,7 @@ function read(page: string): string {
 }
 
 describe('guide : interface livrée par F44', () => {
-  const pages = listPages().filter((page) => !PENDING.has(page))
+  const pages = listPages()
 
   test.each(pages)('%s ne cite aucun libellé d’avant la refonte', (page) => {
     const hits: string[] = []
@@ -56,5 +52,15 @@ describe('guide : interface livrée par F44', () => {
       .map((match) => match[1])
       .filter((file) => !existsSync(join(SCREENSHOTS_DIR, file)))
     expect(missing).toEqual([])
+  })
+
+  test('aucune capture n’est orpheline', () => {
+    const cited = new Set(
+      pages.flatMap((page) => [...read(page).matchAll(SCREENSHOT)].map((m) => m[1])),
+    )
+    const orphans = readdirSync(SCREENSHOTS_DIR).filter(
+      (file) => file.endsWith('.png') && !cited.has(file),
+    )
+    expect(orphans).toEqual([])
   })
 })
