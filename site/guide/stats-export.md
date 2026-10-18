@@ -4,43 +4,52 @@ Cette page décrit l'écran des statistiques d'une session et le fichier Excel q
 
 ## Ouvrir les statistiques
 
-Sur l'écran de passage, cliquez sur « Panneau », ouvrez l'onglet « Étudiants », puis cliquez sur « Statistiques ». Le bouton « Retour au passage » ramène à l'écran précédent.
+Sur l'écran de passage, cliquez sur « Panneau », puis sur « Statistiques », en bas du panneau. Le lien « Retour au passage » ramène à l'écran précédent.
 
 L'écran reste à jour : si vous faites passer un étudiant dans une autre fenêtre, les chiffres suivent.
 
-![Écran des statistiques : effectifs, notes finales, histogramme et tableau par catégorie.](/screenshots/statistiques.png)
+![Écran des statistiques : la synthèse (10 étudiants, 1 passé, 0 absent, moyenne et médiane 6,00 / 20) avec sa barre d'avancement et sa légende, puis l'histogramme des notes finales et les anneaux de réussite par catégorie.](/screenshots/statistiques.png)
+
+Tant qu'aucune question n'a été tirée, l'écran affiche seulement « Pas encore de statistiques » et le bouton « Aller au passage ». Dès le premier tirage, les blocs apparaissent.
+
+![Statistiques d'une session sans tirage : le message « Pas encore de statistiques », l'explication et le bouton Aller au passage.](/screenshots/stats-vide.png)
 
 ## Ce que montre l'écran
 
-Les blocs se suivent dans cet ordre.
+Sous le titre, la ligne « Statistiques · *titre* · *matière* · *promotion* » rappelle l'examen. Les blocs sont rangés en deux groupes.
+
+**Synthèse**
 
 | Bloc | Contenu |
 | --- | --- |
-| Effectifs | Nombre d'étudiants, terminés, en cours, à passer, absents, et « Ajoutés en séance » (étudiants ajoutés pendant la session). |
-| Notes finales | « Étudiants notés », minimum, maximum, moyenne, médiane et écart-type des notes finales. |
-| Histogramme | Le nombre d'étudiants par tranche de note finale, en graphique et en tableau (colonnes « Intervalle de notes » et « Étudiants »). |
-| Catégories | Pour chaque catégorie : « Choix », « Questions notées » et « Taux de réussite ». |
-| Tags | Pour chaque tag des questions : « Questions notées » et « Taux de réussite ». |
-| Questions les plus tirées | Les dix questions tirées le plus souvent, avec leur catégorie et le nombre de « Tirages ». |
-| Questions passées | Les questions passées au moins une fois : nombre de « Passes » et « Motifs », par exemple « Hors programme ×2, sans motif ×1 ». |
-| Stratégies | La composition des passages terminés, par exemple « Facile ×2 · Difficile ×1 », avec le nombre d'étudiants et leur « Note finale moyenne ». |
-| Ajustements | « Nombre », « Somme » et « Moyenne » des ajustements non nuls. |
+| Chiffres clés | « Étudiants », « Passés », « Absents », puis la « Moyenne » et la « Médiane » des notes finales, sur l'échelle finale. Une barre et sa légende répartissent les étudiants entre passés, en cours, à passer et absents ; à droite, le nombre d'étudiants ajoutés en séance. |
+| Notes finales | L'histogramme des notes finales, avec « Étudiants notés », « Minimum », « Maximum » et « Écart-type ». En bas, la ligne « Ajustements » : nombre, somme et moyenne des ajustements non nuls. |
+| Réussite par catégorie | Un anneau par catégorie avec son taux de réussite, et le nombre de questions notées et de choix (« 1 notée · 1 choix »). |
+
+**Détail**
+
+| Bloc | Contenu |
+| --- | --- |
+| Questions les plus tirées | Les dix questions tirées le plus souvent, avec leur nombre de « Tirages » et leur « Part » dans l'ensemble des tirages. |
+| Questions passées | Les questions passées au moins une fois : nombre de « Passes » et « Motifs », par exemple « Hors programme ×2 ». |
+| Stratégies | La composition des passages terminés, par exemple « Facile ×2 » et « Difficile ×1 », avec le nombre d'« Étudiants » et leur « Note moyenne ». |
+| Tags | Pour chaque tag, dans l'ordre de la config : questions « Notées », une barre et le taux de « Réussite ». |
 
 Pour lire les chiffres :
 
 - **Seuls les passages terminés comptent** dans les notes finales, l'histogramme et les stratégies. Un étudiant en cours n'y figure pas.
-- **L'histogramme** a une barre par point de note quand l'échelle va jusqu'à 20 (0–1, 1–2, …, 19–20). Au-delà de 20, il a 20 barres de largeur égale. Chaque barre inclut sa borne basse. La dernière inclut aussi la note maximale.
-- **Le « Taux de réussite »** est le total des points obtenus divisé par le total des points possibles, sur les questions notées. Un tiret signifie qu'aucune question n'a encore été notée.
-- **« Choix »** compte les questions tirées dans la catégorie et notées ou passées. Une question en cours n'y est pas.
-- **Les absents** sont comptés dans les effectifs. Leurs questions, s'il en reste, sont ignorées dans les autres blocs.
-- Un bloc sans donnée affiche une phrase à la place du tableau, par exemple « Aucune question tirée ».
+- **L'histogramme** a une barre par point de note quand l'échelle va jusqu'à 20 (0–1, 1–2, …, 19–20). Au-delà de 20, il a 20 barres de largeur égale. Chaque barre inclut sa borne basse. La dernière inclut aussi la note maximale. Le nombre d'étudiants s'affiche au-dessus de chaque barre non vide.
+- **La « Réussite »** est le total des points obtenus divisé par le total des points possibles, sur les questions notées. Un tiret signifie qu'aucune question n'a encore été notée.
+- **Les « choix »** comptent les questions tirées dans la catégorie et notées ou passées. Une question en cours n'y est pas.
+- **Les absents** sont comptés dans la synthèse. Leurs questions, s'il en reste, sont ignorées dans les autres blocs.
+- Un bloc sans donnée affiche une phrase à la place du tableau, par exemple « Aucune question tirée. ».
 
 ## Exporter en Excel
 
 Le bouton « Exporter en Excel » télécharge un classeur `.xlsx` avec les résultats de la session. Il existe à deux endroits :
 
-- dans le panneau, onglet « Étudiants », à côté de « Statistiques » ;
-- dans le menu « ... » de la carte de la session, sur l'accueil.
+- en bas du panneau de l'écran de passage, à côté de « Statistiques » ;
+- dans le menu « … » de la carte de la session, sur la page Sessions.
 
 Le bouton affiche « Export en cours… » pendant la préparation. Si elle échoue, le message « L'export a échoué. Réessayez. » apparaît.
 
@@ -86,7 +95,21 @@ Une ligne par question tirée, regroupées par étudiant, dans l'ordre du tirage
 
 ### Statistiques
 
-Les neuf blocs de l'écran des statistiques, l'un sous l'autre, séparés par une ligne vide. Les en-têtes sont ceux de l'écran, avec deux différences. L'histogramme a les colonnes « Intervalle » et « Effectif ». Et un bloc sans donnée (par exemple « Questions passées » quand aucune question n'a été passée) n'affiche pas de phrase comme « Aucune question passée. » : la feuille garde sa ligne de titre et sa ligne d'en-tête, suivies d'une ligne vide.
+Les mêmes données que l'écran des statistiques, en neuf blocs l'un sous l'autre, séparés par une ligne vide. La feuille garde ses propres intitulés :
+
+| Bloc | Contenu |
+| --- | --- |
+| Effectifs | Nombre d'étudiants, terminés, en cours, à passer, absents, et « Ajoutés en séance » (étudiants ajoutés pendant la session). |
+| Notes finales | « Étudiants notés », minimum, maximum, moyenne, médiane et écart-type des notes finales. |
+| Histogramme | Le nombre d'étudiants par tranche de note finale, en deux colonnes, « Intervalle » et « Effectif ». |
+| Catégories | Pour chaque catégorie : « Choix », « Questions notées » et « Taux de réussite ». |
+| Tags | Pour chaque tag des questions : « Questions notées » et « Taux de réussite ». |
+| Questions les plus tirées | Les dix questions tirées le plus souvent, avec leur catégorie et le nombre de « Tirages ». |
+| Questions passées | Les questions passées au moins une fois : nombre de « Passes » et « Motifs », par exemple « Hors programme ×2, sans motif ×1 ». |
+| Stratégies | La composition des passages terminés, par exemple « Facile ×2 · Difficile ×1 », avec le nombre d'étudiants et leur « Note finale moyenne ». |
+| Ajustements | « Nombre », « Somme » et « Moyenne » des ajustements non nuls. |
+
+Un bloc sans donnée (par exemple « Questions passées » quand aucune question n'a été passée) garde sa ligne de titre et sa ligne d'en-tête, suivies d'une ligne vide.
 
 ### Configuration
 
@@ -111,4 +134,4 @@ Un étudiant qui n'a pas terminé son passage a la colonne « Finale » vide. L'
 ## Pour la suite
 
 - [Faire passer un oral](./faire-passer) : comment la note finale est calculée.
-- [Créer, reprendre et importer une session](./sessions) : le backup, qui conserve tout, là où l'Excel ne garde que les résultats.
+- [Créer, reprendre et importer une session](./sessions) : la sauvegarde, qui conserve tout, là où l'Excel ne garde que les résultats.
