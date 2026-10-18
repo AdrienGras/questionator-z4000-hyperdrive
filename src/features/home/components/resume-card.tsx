@@ -13,7 +13,11 @@ type ResumeCardProps = Readonly<{
 
 export const SMALL_MUTED_CLASS = 'text-[13px] leading-[18px] text-muted-foreground'
 
-/** Carte de la section « Reprendre » (artboard `accueil`) : type, date courte, titre, état, liens. */
+/**
+ * Carte de la section « Reprendre » (artboard `accueil`) : type, date courte, titre, état, liens.
+ * Quatre lignes prises dans la grille de la section (`subgrid`) : d'une carte à l'autre, l'état et
+ * les liens commencent à la même hauteur, sous-titre ou non.
+ */
 export function ResumeCard({
   space,
   kind,
@@ -24,7 +28,7 @@ export function ResumeCard({
   actions,
 }: ResumeCardProps) {
   return (
-    <article className="flex flex-col gap-3.5 rounded-xl bg-card p-5 shadow-card">
+    <article className="row-span-4 grid grid-rows-subgrid gap-3.5 rounded-xl bg-card p-5 shadow-card">
       <div className="flex items-center gap-2.5">
         <SpaceIcon space={space} size="sm" />
         <span className="text-label text-muted-foreground uppercase">{kind}</span>
@@ -38,8 +42,9 @@ export function ResumeCard({
           <p className={`tabular-nums ${SMALL_MUTED_CLASS}`}>{subtitle}</p>
         )}
       </div>
-      {children}
-      <div className="mt-auto flex flex-wrap gap-1 pt-1">{actions}</div>
+      {/* Toujours rendu : chaque carte garde ses quatre lignes. */}
+      <div>{children}</div>
+      <div className="flex flex-wrap gap-1 pt-1">{actions}</div>
     </article>
   )
 }

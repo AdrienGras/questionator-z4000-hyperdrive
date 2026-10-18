@@ -23,6 +23,32 @@ function horizontalOverflow(page: Page): Promise<number> {
   )
 }
 
+/** Haut du contenu (chiffres) et des boutons d'une carte de « Reprendre » : 3e et 4e enfants. */
+async function rowTops(card: ReturnType<HomePage['resumeCard']>): Promise<number[]> {
+  return card.evaluate((article) =>
+    [article.children[2], article.children[3]].map((el) => el?.getBoundingClientRect().top ?? -1),
+  )
+}
+
+test('Reprendre à 1280 px : chiffres et boutons alignés d’une carte à l’autre', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await createExampleSession(page, 'Oral du matin')
+  const home = new HomePage(page)
+  await home.goto()
+  const setup = await home.startTraining()
+  await setup.pasteConfig(TRAINING_CONFIG)
+  await setup.start()
+  await home.goto()
+  const session = home.resumeCard('Oral du matin')
+  const training = home.resumeCard('Git, les bases')
+  await expect(training.getByText('questions notées')).toBeVisible()
+  const [sessionTops, trainingTops] = [await rowTops(session), await rowTops(training)]
+  expect(sessionTops.every((top) => top > 0)).toBe(true)
+  expect(trainingTops).toEqual(sessionTops)
+})
+
 test('base vide : premier lancement, puis tableau de bord après une session', async ({ page }) => {
   const home = new HomePage(page)
   await home.goto()
