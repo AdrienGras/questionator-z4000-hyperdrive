@@ -290,7 +290,8 @@ html.dark {
   --tw-prose-body: var(--foreground);
   --tw-prose-headings: var(--foreground);
   --tw-prose-lead: var(--muted-foreground);
-  --tw-prose-links: color-mix(in oklch, var(--primary) 72%, white);
+  /* Même formule que `--color-link` (`@theme inline`, non émise en variable) : réglée par mode sur `html`. */
+  --tw-prose-links: color-mix(in oklch, var(--primary) var(--link-strength), var(--link-toward));
   --tw-prose-bold: var(--foreground);
   --tw-prose-counters: var(--muted-foreground);
   --tw-prose-bullets: var(--muted-foreground);

@@ -1,6 +1,8 @@
+import { readFileSync, writeFileSync } from 'node:fs'
 import type { Page } from '@playwright/test'
-import { expect, test } from './fixtures.ts'
+import { examplePath, expect, test } from './fixtures.ts'
 import { AppMenu } from './pages/app-menu.ts'
+import { HomePage } from './pages/home-page.ts'
 
 // Mode clair dérivé (F44.10, D112) : ce que jsdom ne calcule pas (cascade `html` / `html.dark`,
 // `color-mix` de l'encre de catégorie).
@@ -77,4 +79,53 @@ test('la vue projetée ignore un choix mémorisé et suit defaultColorMode', asy
   const present = await examiner.openPresentView()
   await expect(present.waitingMessage).toBeVisible()
   await expect(present.page.locator('html')).toHaveClass(/\bdark\b/)
+})
+
+/** Contraste WCAG entre la couleur de `el` et celle de la carte qui le contient (canevas 1 × 1). */
+function contrastOnCard(el: Element): number {
+  const canvas = document.createElement('canvas')
+  canvas.width = 1
+  canvas.height = 1
+  const context = canvas.getContext('2d', { willReadFrequently: true })
+  if (context === null) throw new Error('canevas indisponible')
+  const luminance = (color: string) => {
+    context.fillStyle = color
+    context.fillRect(0, 0, 1, 1)
+    const [r = 0, g = 0, b = 0] = [...context.getImageData(0, 0, 1, 1).data].map((c) => {
+      const v = c / 255
+      return v <= 0.040_45 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4
+    })
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+  }
+  let ground: Element | null = el.parentElement
+  while (ground !== null && getComputedStyle(ground).backgroundColor === 'rgba(0, 0, 0, 0)')
+    ground = ground.parentElement
+  const text = luminance(getComputedStyle(el).color)
+  const back = luminance(getComputedStyle(ground ?? document.body).backgroundColor)
+  return (Math.max(text, back) + 0.05) / (Math.min(text, back) + 0.05)
+}
+
+test('lien d’un énoncé markdown lisible en clair : 4,5:1 au moins sur sa carte', async ({
+  page,
+}, testInfo) => {
+  // Config d'exemple en clair, chaque énoncé suivi d'un lien.
+  const path = testInfo.outputPath('links.config.json')
+  const config = JSON.parse(readFileSync(examplePath('config.example.json'), 'utf8'))
+  config.presentation.defaultColorMode = 'light'
+  for (const category of config.categories)
+    for (const question of category.questions)
+      question.prompt = `${question.prompt}\n\nVoir [la documentation](https://www.php.net).`
+  writeFileSync(path, JSON.stringify(config))
+  const home = new HomePage(page)
+  await home.goto()
+  const create = await home.createSession()
+  await create.uploadStudents(examplePath('students.example.csv'))
+  await create.uploadConfig(path)
+  await create.fillName('Session liens')
+  const examiner = await create.submit()
+  await examiner.draw('Facile')
+  const link = page.getByRole('main').getByRole('link', { name: 'la documentation' }).first()
+  await expect(link).toBeVisible()
+  await expect(page.locator('html')).not.toHaveClass(/\bdark\b/)
+  expect(await link.evaluate(contrastOnCard)).toBeGreaterThanOrEqual(4.5)
 })
