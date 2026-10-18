@@ -213,11 +213,16 @@ export type UiMessageParams = {
   training_not_found: NoParams
   training_damaged_title: NoParams
   training_damaged_body: NoParams
+  training_subtitle: { pending: boolean }
   training_tiles_title: NoParams
+  training_tiles_locked: NoParams
   training_reveal: NoParams
   training_answer_title: NoParams
+  training_answer_hide: NoParams
+  training_answer_show: NoParams
   training_no_answer: NoParams
   training_score_heading: NoParams
+  training_score_max: { max: string }
   training_pass: NoParams
   training_question_missing: NoParams
   training_stats_link: NoParams
@@ -751,11 +756,17 @@ const fr: Dictionary<UiMessageParams> = {
   training_not_found: () => 'Entraînement introuvable',
   training_damaged_title: () => 'Cet entraînement est endommagé',
   training_damaged_body: () => 'Ses données ne passent plus la validation. Voici ce qui ne va pas.',
+  training_subtitle: ({ pending }) =>
+    pending ? 'Entraînement · question en cours' : 'Entraînement',
   training_tiles_title: () => 'Choisissez une catégorie',
+  training_tiles_locked: () => 'Catégories (indisponibles pendant la question)',
   training_reveal: () => 'Voir la réponse',
   training_answer_title: () => 'Réponse',
+  training_answer_hide: () => 'Masquer',
+  training_answer_show: () => 'Afficher',
   training_no_answer: () => 'Pas de réponse de référence pour cette question.',
   training_score_heading: () => 'Notez-vous',
+  training_score_max: ({ max }) => `· sur ${max}`,
   training_pass: () => 'Passer',
   training_question_missing: () => 'Cette question n’existe plus dans la config.',
   training_stats_link: () => 'Voir les stats',
@@ -1256,11 +1267,16 @@ const en: Dictionary<UiMessageParams> = {
   training_not_found: () => 'Practice not found',
   training_damaged_title: () => 'This practice is damaged',
   training_damaged_body: () => 'Its data no longer passes validation. Here is what is wrong.',
+  training_subtitle: ({ pending }) => (pending ? 'Practice · question in progress' : 'Practice'),
   training_tiles_title: () => 'Choose a category',
+  training_tiles_locked: () => 'Categories (unavailable during the question)',
   training_reveal: () => 'Show the answer',
   training_answer_title: () => 'Answer',
+  training_answer_hide: () => 'Hide',
+  training_answer_show: () => 'Show',
   training_no_answer: () => 'No reference answer for this question.',
   training_score_heading: () => 'Rate yourself',
+  training_score_max: ({ max }) => `· out of ${max}`,
   training_pass: () => 'Skip',
   training_question_missing: () => 'This question is no longer in the config.',
   training_stats_link: () => 'View stats',

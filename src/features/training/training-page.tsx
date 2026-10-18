@@ -1,3 +1,4 @@
+import { IconChartBar, IconRefresh } from '@tabler/icons-react'
 import { getRouteApi, Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { BackLink } from '@/components/back-link'
@@ -7,8 +8,10 @@ import { buttonVariants } from '@/components/ui/button'
 import { currentPending } from '@/domain/training/cycle-draw'
 import { TrainingError } from '@/domain/training/errors'
 import { trainingErrorMessage } from '@/domain/training/errors-messages'
+import { categoryOfQuestion } from '@/domain/training/resolve-draw'
 import type { Training, TrainingDraw } from '@/domain/training/types'
 import { useUi, type Ui } from '@/lib/i18n/use-ui'
+import { LockedTiles } from '@/features/training/components/locked-tiles'
 import { TrainingQuestion } from '@/features/training/components/training-question'
 import { TrainingTiles } from '@/features/training/components/training-tiles'
 import { journalStepOf, useTrainingActions } from '@/features/training/hooks/use-training-actions'
@@ -23,7 +26,7 @@ function errorText(error: Error | null, ui: Ui): string | undefined {
 }
 
 /**
- * Corps de l'écran, une colonne : les tuiles, ou la question en cours qui les remplace. Le focus
+ * Corps de l'écran, une colonne : les tuiles, ou la question en cours sous les tuiles verrouillées. Le focus
  * ne bouge qu'après une action de l'utilisateur (`acted`), jamais au chargement de la page.
  */
 function TrainingView({
@@ -54,6 +57,7 @@ function TrainingView({
   return (
     <PageShell
       title={training.name}
+      meta={ui.text('training_subtitle', { pending: pending !== undefined })}
       actions={
         <>
           <Link
@@ -61,6 +65,7 @@ function TrainingView({
             params={{ trainingId: training.id }}
             className={buttonVariants({ variant: 'ghost' })}
           >
+            <IconRefresh data-icon="inline-start" aria-hidden="true" />
             {ui.text('training_update_link', {})}
           </Link>
           <Link
@@ -68,6 +73,7 @@ function TrainingView({
             params={{ trainingId: training.id }}
             className={buttonVariants({ variant: 'outline' })}
           >
+            <IconChartBar data-icon="inline-start" aria-hidden="true" />
             {ui.text('training_stats_link', {})}
           </Link>
         </>
@@ -93,17 +99,24 @@ function TrainingView({
           onDraw={(categoryId) => act(() => actions.draw(categoryId))}
         />
       ) : (
-        <TrainingQuestion
-          key={drawId}
-          ui={ui}
-          config={config}
-          questionId={pending.questionId}
-          disabled={actions.busy}
-          animate={config.presentation.drawAnimation}
-          focusOnMount={acted}
-          onScore={(points) => act(() => actions.score(drawId, points))}
-          onPass={() => act(() => actions.pass(drawId))}
-        />
+        <>
+          <LockedTiles
+            ui={ui}
+            config={config}
+            currentCategoryId={categoryOfQuestion(config, pending.questionId)?.id}
+          />
+          <TrainingQuestion
+            key={drawId}
+            ui={ui}
+            config={config}
+            questionId={pending.questionId}
+            disabled={actions.busy}
+            animate={config.presentation.drawAnimation}
+            focusOnMount={acted}
+            onScore={(points) => act(() => actions.score(drawId, points))}
+            onPass={() => act(() => actions.pass(drawId))}
+          />
+        </>
       )}
     </PageShell>
   )
