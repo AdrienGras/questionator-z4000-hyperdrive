@@ -161,6 +161,9 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 - [ ] Variante du prompt qui embarque le schéma allégé, pour un LLM sans accès au web.
 - [ ] Mode « compléter une config existante » : donner au LLM la config actuelle pour qu'il ajoute des questions en gardant les `id`.
 - [ ] Sauvegarder le brouillon de l'éditeur avant un passage de config (« Corriger dans l’éditeur ») : le texte en cours y est remplacé (retour de #140).
+- [ ] Mineurs de la relecture de F44.9 (#151) : `headingId` inutile dans `Scoring` (`training-question.tsx`) ; un second succès de « Copier à nouveau » n'est pas annoncé (même texte live) ; le `h3` « Réponse » dans le `summary` peut sortir de la navigation par titres sur certains lecteurs d'écran ; l'e2e à 390 px ne couvre pas la mise à jour (bilan en cartes) ; écart de 12 px laissé par le `span` live vide dans la zone de dépôt compacte vide.
+- [ ] Zone de dépôt compacte remplie à 390 px : nom, état, « ou déposez-en un autre » et « Remplacer » passent sur trois lignes ; masquer l'indication sur téléphone ?
+- [ ] En mise à jour, l'étape 2 montre le prompt en entier tant qu'on ne l'a pas recopié, alors que l'utilisateur l'a souvent déjà ; partir du résumé en mise à jour ?
 
 ## Export Excel
 

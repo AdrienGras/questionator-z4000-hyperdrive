@@ -1018,3 +1018,27 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Workaround** : `gh-ticket.sh` retombe sur `gh project item-list … -q '.items[]|select(.content.number==N).id'` quand `item-add` échoue. Ne pas couper la sortie du script avec `| head` : le `SIGPIPE` l'arrête avant les dépendances `blocked_by`.
 **Référence** : `.claude/scripts/gh-ticket.sh`.
 
+
+## `Textarea` : `md:text-[15px]` l'emporte sur un `text-xs` passé en classe (2026-10-18)
+
+**Découvert** : F44.9, captures à 1280 px de la mise en place d'un entraînement.
+**Symptôme** : le prompt et la zone de collage, en `font-mono text-xs`, s'affichent en 15 px sur grand écran (12 px seulement sur téléphone).
+**Cause** : le composant `Textarea` porte `text-base md:text-[15px]` ; `cn` remplace `text-base` par `text-xs`, mais garde la variante `md:`, qui gagne au-dessus de 768 px.
+**Workaround** : passer aussi `md:text-xs` (ou la variante `md:` de la taille voulue). Testé par `prompt et collage en petite police à toutes les largeurs`.
+**Référence** : `src/components/ui/textarea.tsx`, `src/features/training-setup/components/prompt-step.tsx`.
+
+## Nom accessible : l'espace en tête d'un enfant masqué est rognée (2026-10-18)
+
+**Découvert** : F44.9, titres d'étape « Rassemblez votre cours (Étape faite) ».
+**Symptôme** : `getByRole('heading', { name: 'Rassemblez votre cours (Étape faite)' })` échoue ; le nom calculé est « Rassemblez votre cours(Étape faite) ».
+**Cause** : `dom-accessibility-api` (Testing Library) rogne le texte de chaque élément enfant ; l'espace écrite au début du `span sr-only` disparaît.
+**Workaround** : mettre l'espace dans le parent, hors du `span` : `{title}{' '}<span className="sr-only">(…)</span>`.
+**Référence** : `src/features/training-setup/components/setup-step.tsx`.
+
+## `<details>` : l'événement `toggle` arrive après le clic (2026-10-18)
+
+**Découvert** : F44.9, réponse repliable de la question d'entraînement (« Masquer » / « Afficher »).
+**Symptôme** : après `fireEvent.click` sur le `summary`, l'attribut `open` a disparu mais le libellé piloté par `onToggle` n'a pas encore changé.
+**Cause** : `toggle` est mis en file comme tâche, dans jsdom comme dans le navigateur ; l'état React suit au tour suivant.
+**Workaround** : attendre le libellé (`await screen.findByText('Afficher')`), pas `getByText` juste après le clic.
+**Référence** : `src/features/training/components/training-question.tsx` (`AnswerDisclosure`).

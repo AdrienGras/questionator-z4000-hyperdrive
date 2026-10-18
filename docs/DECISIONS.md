@@ -1775,3 +1775,23 @@ autre encodage 8 bits.
 
 **Reporté dans** : `docs/superpowers/specs/2026-10-14-f44-refonte-ui-design.md` (§ Découpage), carte des écrans, `docs/INDEX.md`.
 
+
+## D111 — F44.9 : entraînement (2026-10-18)
+
+**Question** : comment ramener `/training/new`, `/training/$trainingId/update` et `/training/$trainingId` à leurs trois artboards (`entrainement-mise-en-place`, `entrainement-mise-a-jour`, `entrainement-question`) sans changer le parcours, d'un PDF de cours à une première question tirée ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Parcours | Aucun changement du prompt, du tirage en cycle, de `lib/db/trainings.ts` ni des écritures des hooks ; `useTrainingSetup` expose seulement `configReady`. `e2e/training.spec.ts` ne change que par ses page objects et le texte du bilan. | Critère d'acceptation de #151. |
+| Étapes | Indicatives seulement (D103) : toutes restent utilisables. Étape en cours = 4 dès que le prompt a été copié ou qu'une config est choisie (déposée, ou JSON collé même retouché après « Vérifier »), sinon 2 (`setupStepStates`) ; même règle en mise à jour. Le texte collé compte : sans lui, retoucher un JSON vérifié vidait l'emplacement et ramenait l'étape 2 (relecture finale). L'étape en cours est une carte (« Étape N sur 4 »), l'état est dit dans le titre (texte masqué) et par `aria-current="step"`. Un seul conteneur par étape : le contenu n'est pas remonté quand l'étape en cours change. | Artboards ; le bouton de copie garde le focus. |
+| Copie | `copied` reste vrai après une première copie réussie : prompt résumé (« Prompt copié. · Copier à nouveau ») et rangé dans un repli « Afficher le prompt ». Le bouton et la région live gardent leur emplacement : mêmes nœuds, focus gardé, succès annoncé. Un échec montre l'alerte dans les deux formes. | Carte des écrans (secours d'une copie à la main). |
+| Dépôt et collage | `FileDropField size="compact"` : rangée, invite « Déposez la config (.json) ici », puis nom, état visible (« Fichier valide »), « ou déposez-en un autre » et « Remplacer ». Collage dans un repli « … ou collez le JSON ici » avec « Vérifier » (libellé long en `aria-label`) ; erreurs et « Corriger dans l'éditeur » hors du repli. | Artboards ; l'état reste visible comme à la création (D107). |
+| Résumé et bilan | Questions par niveau en pastilles teintées (phrase masquée par pastille) ; bilan en trois cartes (chiffre, libellé, indication), indications accordées au nombre (« N'apparaît plus dans les stats » au singulier). | Artboard `entrainement-mise-a-jour`. |
+| Question | Tuiles verrouillées (non interactives, la catégorie courante `aria-current`) au-dessus de la question ; carte teintée de la catégorie, surtitre « Normal · 2 pts », réponse dans un repli ouvert à la révélation (« Masquer » / « Afficher »), « Notez-vous · sur 2 » et barème en rangée teintée (`ScaleButtons variant="row"`), « Passer » à droite. Sous-titre « Entraînement » ou « Entraînement · question en cours ». | Artboard `entrainement-question`. |
+| Écarts reportés au canevas (v26) | Légende « Config (JSON) » visible à l'étape 4 à venir ; « Fichier valide » dans la zone compacte ; tuiles verrouillées en éléments non interactifs ; « C'est parti » désactivé en dégradé à 45 % comme tout bouton principal de l'app. | Accessibilité et cohérence avec la création de session. |
+
+**Pourquoi** : les trois écrans prennent leur forme validée ; les états non maquettés (tuiles seules, question disparue, alertes, erreurs de config, bandeau de base, états de `TrainingGate`) restent là, restylés.
+
+**Reporté dans** : `src/features/training-setup/` (`step-states.ts`, `setup-step`, `prompt-step`, `config-step`, `update-summary`, page), `src/features/training/` (`locked-tiles`, `training-question`, page), `src/components/file-drop-field.tsx`, `src/components/scale-buttons.tsx`, `e2e/training-layout.spec.ts`, canevas v26.
