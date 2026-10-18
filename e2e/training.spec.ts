@@ -15,8 +15,8 @@ function questionCount(text: string): number {
   return parsed.categories.reduce((sum, category) => sum + category.questions.length, 0)
 }
 
-/** Couverture affichée sur la carte de l'accueil après une seule question notée. */
-const ONE_RATED = `1 / ${questionCount(CONFIG)} questions notées`
+/** Couverture affichée sur la carte de l'accueil après une seule question notée (chiffre, puis libellé). */
+const ONE_RATED = new RegExp(String.raw`1 / ${questionCount(CONFIG)}\s*questions notées`)
 
 test('entraînement : tirer, noter, reprendre après rechargement, passer, retrouver la couverture', async ({
   page,

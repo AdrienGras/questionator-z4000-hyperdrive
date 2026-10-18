@@ -13,7 +13,6 @@ export type UiMessageParams = {
   home_resume_title: NoParams
   home_kind_session: NoParams
   home_kind_training: NoParams
-  home_training_coverage_short: { covered: number; total: number }
   home_spaces_title: NoParams
   home_space_sessions_body: NoParams
   home_space_trainings: NoParams
@@ -536,7 +535,6 @@ const fr: Dictionary<UiMessageParams> = {
   home_resume_title: () => 'Reprendre',
   home_kind_session: () => 'Session',
   home_kind_training: () => 'Entraînement',
-  home_training_coverage_short: ({ covered, total }) => `${covered} / ${total} questions notées`,
   home_spaces_title: () => 'Espaces',
   home_space_sessions_body: () => 'Oraux en cours et terminés',
   home_space_trainings: () => 'Entraînements',
@@ -1054,7 +1052,6 @@ const en: Dictionary<UiMessageParams> = {
   home_resume_title: () => 'Resume',
   home_kind_session: () => 'Session',
   home_kind_training: () => 'Practice',
-  home_training_coverage_short: ({ covered, total }) => `${covered} of ${total} questions rated`,
   home_spaces_title: () => 'Spaces',
   home_space_sessions_body: () => 'Exams in progress and finished',
   home_space_trainings: () => 'Practice',

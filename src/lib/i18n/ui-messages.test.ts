@@ -13,7 +13,6 @@ const SAMPLE: UiMessageParams = {
   home_resume_title: {},
   home_kind_session: {},
   home_kind_training: {},
-  home_training_coverage_short: { covered: 38, total: 60 },
   home_spaces_title: {},
   home_space_sessions_body: {},
   home_space_trainings: {},

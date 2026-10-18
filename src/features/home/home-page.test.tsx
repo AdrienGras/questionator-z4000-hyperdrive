@@ -87,7 +87,10 @@ describe('accueil', () => {
     )
     const training = within(cards[2] ?? resume)
     expect(training.getByText('Entraînement')).toBeInTheDocument()
-    expect(training.getByText('1 / 4 questions notées')).toBeInTheDocument()
+    // Mêmes chiffres que la carte de la page Entraînement : couverture en grand, plus de sous-titre.
+    expect(training.getByText('questions notées')).toBeInTheDocument()
+    expect(training.getByText('/ 4')).toBeInTheDocument()
+    expect(training.queryByText('1 / 4 questions notées')).not.toBeInTheDocument()
     expect(training.getByText(/^50\s%$/u)).toBeInTheDocument()
     expect(training.getByRole('link', { name: 'Stats' })).toHaveAttribute(
       'href',

@@ -8,7 +8,10 @@ import { formatShortDateTime } from '@/lib/format-date'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { ResumeCard } from './resume-card'
 
-/** Entraînement dans « Reprendre » : couverture et taux une fois le journal lu, reprise et stats. */
+/**
+ * Entraînement dans « Reprendre » : taux et couverture une fois le journal lu, mêmes chiffres que la
+ * carte de la page Entraînement, puis reprise et stats.
+ */
 export function ResumeTrainingCard({ ui, training }: Readonly<{ ui: Ui; training: Training }>) {
   const { locale, text } = ui
   const summary = useTrainingSummary(training)
@@ -19,9 +22,6 @@ export function ResumeTrainingCard({ ui, training }: Readonly<{ ui: Ui; training
       kind={text('home_kind_training', {})}
       date={formatShortDateTime(training.updatedAt, locale)}
       title={training.name}
-      subtitle={
-        summary === undefined ? undefined : text('home_training_coverage_short', summary.coverage)
-      }
       actions={
         <>
           <Link
@@ -43,7 +43,7 @@ export function ResumeTrainingCard({ ui, training }: Readonly<{ ui: Ui; training
         </>
       }
     >
-      {summary !== undefined && <TrainingFigures ui={ui} summary={summary} showCoverage={false} />}
+      {summary !== undefined && <TrainingFigures ui={ui} summary={summary} showCoverage />}
     </ResumeCard>
   )
 }
