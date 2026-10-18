@@ -57,6 +57,11 @@
     transparent
   );
   --shadow-action: 0 8px 24px -8px color-mix(in oklch, var(--primary) 60%, transparent);
+  /* Ombres de carte et de menu : Tailwind recopie la valeur d'une ombre dans l'utilitaire, une
+     surcharge de `--shadow-*` sous `html.dark` serait sans effet ; elles lisent donc une variable
+     posée par mode (`html`, `html.dark`). */
+  --shadow-card: var(--card-shadow);
+  --shadow-popover: var(--popover-shadow);
   /* Texte de lien : `primary` éclairci en sombre (72 % avec du blanc), foncé en clair (82 % avec du
      noir), lisible sur le fond et les cartes (D104, D112) ; réglages posés sur `html`. */
   --color-link: color-mix(in oklch, var(--primary) var(--link-strength), var(--link-toward));
@@ -64,15 +69,13 @@
   --font-sans: 'Geist Variable', sans-serif;
 }
 
-/* Valeurs fixes du design system, hors config : couleurs d'espace (jamais surchargeables) et ombres
-   du mode clair (le sombre les remplace dans `html.dark`), police du code et échelle typographique. */
+/* Valeurs fixes du design system, hors config : couleurs d'espace (jamais surchargeables) du mode
+   clair (le sombre les remplace dans `html.dark`), police du code et échelle typographique. */
 @theme {
   --color-space-sessions: oklch(0.49 0.105 225);
   --color-space-editor: oklch(0.51 0.11 70);
   --color-space-training: oklch(0.49 0.125 150);
   --color-space-help: oklch(0.52 0.14 295);
-  --shadow-card: 0 1px 2px 0 #1a103314, 0 2px 8px -2px #1a10330f;
-  --shadow-popover: 0 24px 48px -12px #1a103333;
   --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
   --text-display: 3rem;
   --text-display--line-height: 3.25rem;
@@ -183,10 +186,12 @@
   --sidebar-ring: oklch(0.7 0.2 356);
 }
 
-/* Valeurs fixes qui dépendent du mode, hors config (D112) : couleurs d'espace et ombres (clair dans
-   `@theme`, sombre ici ; hors couche, ce bloc l'emporte sur `@layer theme`), puis les réglages des
-   dérivés de `@theme inline` (lien) et de l'encre de catégorie (`categoryAccent`). */
+/* Valeurs fixes qui dépendent du mode, hors config (D112) : couleurs d'espace (clair dans `@theme`,
+   sombre ici ; hors couche, ce bloc l'emporte sur `@layer theme`), ombres, réglages des dérivés de
+   `@theme inline` (lien) et de l'encre de catégorie (`categoryAccent`). */
 html {
+  --card-shadow: 0 1px 2px 0 #1a103314, 0 2px 8px -2px #1a10330f;
+  --popover-shadow: 0 24px 48px -12px #1a103333;
   --category-ink-mix: 60%;
   --link-strength: 82%;
   --link-toward: black;
@@ -197,8 +202,8 @@ html.dark {
   --color-space-editor: oklch(0.84 0.14 80);
   --color-space-training: oklch(0.76 0.16 150);
   --color-space-help: oklch(0.72 0.12 295);
-  --shadow-card: inset 0 1px 0 0 #ffffff0d, 0 1px 2px 0 #00000066;
-  --shadow-popover: 0 24px 48px -12px #000000cc;
+  --card-shadow: inset 0 1px 0 0 #ffffff0d, 0 1px 2px 0 #00000066;
+  --popover-shadow: 0 24px 48px -12px #000000cc;
   --category-ink-mix: 100%;
   --link-strength: 72%;
   --link-toward: white;

@@ -6,19 +6,41 @@ import { SessionsPage } from './pages/sessions-page.ts'
 
 // Rendu du design system (F44.3, D102) : ce que jsdom ne calcule pas (tokens, cascade, Tailwind).
 
-test('thème sombre du design system par défaut', async ({ page }) => {
+/**
+ * Accueil rendu, puis classe `.dark`, `color-scheme` et fond calculé (la valeur brute du token est
+ * minifiée au build). `goto` n'attend pas le rendu : sans le titre, on lirait la page avant React.
+ */
+async function rootAppearance(page: Page) {
   await new HomePage(page).goto()
-  await expect(page.locator('html')).toHaveClass(/\bdark\b/)
-  const style = await page.evaluate(() => {
-    const root = getComputedStyle(document.documentElement)
-    return {
-      scheme: root.colorScheme,
-      // Couleur calculée (normalisée) : la valeur brute du token est minifiée au build.
-      background: getComputedStyle(document.body).backgroundColor,
-      radius: root.getPropertyValue('--radius').trim(),
-    }
+  await page.getByRole('heading', { level: 1, name: 'Accueil' }).waitFor()
+  return page.evaluate(() => ({
+    dark: document.documentElement.classList.contains('dark'),
+    scheme: getComputedStyle(document.documentElement).colorScheme,
+    background: getComputedStyle(document.body).backgroundColor,
+    radius: getComputedStyle(document.documentElement).getPropertyValue('--radius').trim(),
+  }))
+}
+
+test('système clair : thème clair du design system (D112)', async ({ page }) => {
+  expect(await rootAppearance(page)).toEqual({
+    dark: false,
+    scheme: 'light',
+    background: 'oklch(0.975 0.008 292)',
+    radius: '1.125rem',
   })
-  expect(style).toEqual({ scheme: 'dark', background: 'oklch(0.16 0.02 292)', radius: '1.125rem' })
+})
+
+test.describe('système sombre', () => {
+  test.use({ colorScheme: 'dark' })
+
+  test('thème sombre du design system', async ({ page }) => {
+    expect(await rootAppearance(page)).toEqual({
+      dark: true,
+      scheme: 'dark',
+      background: 'oklch(0.16 0.02 292)',
+      radius: '1.125rem',
+    })
+  })
 })
 
 /** Crée une session depuis `configPath` ; renvoie le fond du bouton principal « Ajouter » et de la page. */
@@ -132,7 +154,12 @@ test('thème de session : halos du passage et de la projection dérivés de them
   expect(themed.menuBar).not.toBe(byDefault.menuBar)
 })
 
-test('surfaces et champs du design system', async ({ page }) => {
+test('surfaces et champs du design system (mode sombre : liseré de lumière des cartes)', async ({
+  page,
+}) => {
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await new SessionsPage(page).goto()
+  await expect(page.locator('html')).toHaveClass(/\bdark\b/)
   const home = new HomePage(page)
   // Carte de la liste vide de la page Sessions (l'accueil vide montre le premier lancement).
   await new SessionsPage(page).goto()
@@ -223,12 +250,14 @@ async function textContrastOnPage(page: Page, selector: string): Promise<number>
 }
 
 test('focus clavier visible sur un bouton', async ({ page }) => {
-  await new HomePage(page).goto()
-  const button = page.locator('[data-slot="button"]').first()
+  // Bouton de `main` (« Importer une sauvegarde ») : le premier bouton de la page peut être le « OK »
+  // du bandeau hors ligne, qui part seul.
+  await new SessionsPage(page).goto()
+  const button = page.getByRole('main').locator('[data-slot="button"]').first()
   await button.focus()
   await page.keyboard.press('Shift+Tab')
   await page.keyboard.press('Tab')
-  const focused = page.locator('[data-slot="button"]:focus-visible').first()
+  const focused = page.getByRole('main').locator('[data-slot="button"]:focus-visible').first()
   await expect(focused).toHaveCount(1)
   expect(await focused.evaluate((el) => getComputedStyle(el).outlineStyle)).not.toBe('none')
 })
