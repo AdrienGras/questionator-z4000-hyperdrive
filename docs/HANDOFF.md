@@ -24,6 +24,33 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-18 — F44.10 : mode clair dérivé (#152)
+
+**Dernière chose faite** : passe canevas puis plan `docs/superpowers/plans/2026-10-18-f44-10-mode-clair.md` exécuté nativement sur `feat/f44-refonte-ui` (PR #154, brouillon), D112. Arbitrages de l'utilisateur : passe canevas « tokens + 5 artboards », défaut `system`, bascule dans le menu seulement, encre de catégorie.
+- **Canevas et design system** : tokens clairs dans le design system (v9, `tokens.json`, contrastes dans le README) ; page « Mode clair » du canevas (v30) : `clair/menu-bascule`, `clair/accueil`, `clair/passage-question`, `clair/projection-question`, `clair/statistiques`.
+- **Tokens** : `:root` clair, `.dark` sombre, parité `THEME_TOKENS` testée sur les deux blocs ; valeurs par mode sur `html` / `html.dark` (couleurs d'espace, `--card-shadow` / `--popover-shadow`, lien, `--category-ink-mix`).
+- **Apparence** : `forcedMode` retiré, défaut `system` ; `AppearanceScope.key` facultative, la vue projetée n'en a pas et suit `defaultColorMode`.
+- **Bascule** : `ColorModeToggle` en pied du menu latéral (sous l'Aide, au-dessus de « Replier le menu ») et du tiroir ; `e2e/color-mode.spec.ts` revient (#76).
+- **Encre de catégorie** : `categoryAccent(color)` (`lib/appearance`) ; usages pleins en `--category-ink`, teintes en `--category-color`.
+- **Config d'exemple** : `theme.light` = tokens clairs + `radius`, `defaultColorMode` reste `dark`.
+- **Révélé en route** : les ombres ne se surchargeaient pas sous `html.dark` (Tailwind recopie la valeur, QUIRKS) ; libellé de la bascule qui passait sur deux lignes (1 px) ; test de focus instable (bandeau hors ligne, QUIRKS). Revue finale (opus) : liens markdown à 2,9:1 en clair (`--tw-prose-links`), corrigé avec un e2e qui échouait d'abord.
+- `pnpm check` (2236 tests), 91 e2e (dont `e2e/light-mode.spec.ts`), `check:bundle`, `check:precache`, `check:budget` verts ; captures en clair comparées aux artboards.
+
+**Trucs en suspens** : #152 **à valider par l'utilisateur en local** (`pnpm dev`, système clair ou bascule du menu). Mineurs de la revue finale non traités : pastille brute de la navigation de l'aperçu de l'éditeur (`config-preview.tsx:46`), menu de choix qui déborde de 3 px dans le tiroir à 390 px, flash clair au chargement pour un système sombre (pas de script avant React), `theme-color` toujours sombre, trous de test (focus après choix menu replié, ombre claire). Ordre de la suite inchangé (D110) : #155 → #156 ; la PR ne quitte le brouillon qu'après #156.
+
+**Prochaine chose à creuser** : après validation de #152, #155 (guide, captures, README). À y reprendre pour le mode clair :
+- `site/guide/prise-en-main.md:45` : « bouton en haut à droite » → pied de menu ;
+- `site/guide/projeter.md:17` : plus de bouton de mode sur la vue projetée ;
+- `site/guide/projeter.md:63` et `site/guide/reference-config.md:147` : la vue projetée suit toujours `defaultColorMode` ;
+- portée de la bascule à expliquer : sur un écran de session, elle règle le mode de cette session, ailleurs le mode global (D60, D112) ;
+- `playwright.screenshots.config.ts` est en `colorScheme: 'light'` : avec le défaut `system`, les captures sortiront en clair ; choisir le mode voulu.
+
+**Notes pour future Claude** :
+- Une ombre de `@theme` ne se surcharge pas par mode : Tailwind écrit sa valeur dans l'utilitaire. Passer par une variable lue en `@theme inline` et vérifier dans `dist/assets/*.css`.
+- Sous le filtre rtk, `pnpm exec vitest` peut afficher un rapport JSON périmé : `rtk proxy pnpm exec vitest run …` donne la vraie sortie.
+- En e2e, `HomePage.goto()` n'attend pas le rendu : attendre un titre ou une classe avant de mesurer.
+- Couleur de catégorie : toujours `categoryAccent(color)`, jamais `{ '--category-color': color }` à la main (CONVENTIONS).
+
 ## 2026-10-18 — F44.9 : entraînement (#151)
 
 **Dernière chose faite** : plan `docs/superpowers/plans/2026-10-18-f44-9-entrainement.md` exécuté nativement sur `feat/f44-refonte-ui` (PR #154, brouillon), D111. #150 validé par l'utilisateur au lancement de la session.
