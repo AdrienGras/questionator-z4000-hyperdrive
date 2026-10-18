@@ -26,8 +26,7 @@ function RootLayout() {
   const projected = useMatchRoute()({ to: '/present/$sessionId' }) !== false
   return (
     <LocaleProvider locale={useLocale()}>
-      {/* Thème sombre seul pendant la refonte (D102) ; le mode clair revient en #152. */}
-      <AppearanceProvider forcedMode="dark">
+      <AppearanceProvider>
         <div className="flex min-h-svh flex-col bg-background text-foreground md:flex-row">
           {/* Le menu est la seule navigation entre espaces ; jamais sur la vue projetée (D102).
               Les `main` des pages prennent `flex-1` dans la colonne de contenu, jamais `min-h-svh` :

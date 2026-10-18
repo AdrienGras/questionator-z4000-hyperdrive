@@ -81,8 +81,8 @@ function themedSession(locale?: 'fr' | 'en') {
       ...config,
       ...(locale !== undefined && { locale }),
       exam: { title: 'Oral de PHP' },
-      // Thème sombre forcé pendant la refonte (D102) : seul `theme.dark` s'applique.
-      theme: { light: {}, dark: { primary: 'rgb(1, 2, 3)' } },
+      // `defaultColorMode` de `makeConfig` et matchMedia simulé en clair : `theme.light` s'applique.
+      theme: { light: { primary: 'rgb(1, 2, 3)' }, dark: {} },
       categories: config.categories.map((category) => ({
         ...category,
         label: 'Bases',
@@ -150,11 +150,11 @@ test('revenir à l’accueil depuis une session thémée ne laisse aucun token s
   await router.navigate({ to: '/' })
   expect(await screen.findByRole('heading', { level: 1, name: 'Accueil' })).toBeInTheDocument()
   expect(document.documentElement.style.getPropertyValue('--primary')).toBe('')
-  expect(document.documentElement).toHaveClass('dark')
+  expect(document.documentElement).not.toHaveClass('dark')
   expect(document.documentElement.lang).toBe('fr')
 })
 
-test("d'une session à l'autre, --primary et lang suivent la config active, .dark reste forcée", async () => {
+test("d'une session à l'autre, --primary, mode et lang suivent la config active", async () => {
   await putSession(
     sessionWith('session-a', 'Session A', {
       locale: 'en',
@@ -175,7 +175,7 @@ test("d'une session à l'autre, --primary et lang suivent la config active, .dar
   await router.navigate({ to: '/session/$sessionId', params: { sessionId: 'session-b' } })
   await screen.findByRole('heading', { name: 'Session B' })
   expect(document.documentElement.style.getPropertyValue('--primary')).toBe('rgb(9, 9, 9)')
-  expect(document.documentElement).toHaveClass('dark')
+  expect(document.documentElement).not.toHaveClass('dark')
   expect(document.documentElement.lang).toBe('fr')
 
   router.history.back()
@@ -186,9 +186,9 @@ test("d'une session à l'autre, --primary et lang suivent la config active, .dar
 
   await router.navigate({ to: '/' })
   await screen.findByRole('heading', { level: 1, name: 'Accueil' })
-  // matchMedia simulé en clair : aucun token à l'accueil, `.dark` forcée (D102).
+  // matchMedia simulé en clair : aucun token à l'accueil, mode du système.
   expect(document.documentElement.style.getPropertyValue('--primary')).toBe('')
-  expect(document.documentElement).toHaveClass('dark')
+  expect(document.documentElement).not.toHaveClass('dark')
   expect(document.documentElement.lang).toBe('fr')
 })
 

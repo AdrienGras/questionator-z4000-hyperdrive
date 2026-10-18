@@ -20,13 +20,18 @@ type SessionAppearanceProps = Readonly<{
 
 /**
  * Thème, mode et langue d'une vue de session (F07, D26, D60). Les enfants appellent `useUi()`
- * eux-mêmes : un `useUi()` au-dessus de ce composant ignorerait `config.locale`.
+ * eux-mêmes : un `useUi()` au-dessus de ce composant ignorerait `config.locale`. La vue projetée n'a
+ * pas de bascule : elle ne mémorise rien et suit `defaultColorMode` (D112).
  */
 export function SessionAppearance({ sessionId, view, config, children }: SessionAppearanceProps) {
   const { defaultColorMode } = config.presentation
   const { theme } = config
   const scope = useMemo<AppearanceScope>(
-    () => ({ key: colorModeKey({ sessionId, view }), defaultMode: defaultColorMode, theme }),
+    () => ({
+      key: view === 'present' ? undefined : colorModeKey({ sessionId, view }),
+      defaultMode: defaultColorMode,
+      theme,
+    }),
     [sessionId, view, defaultColorMode, theme],
   )
   useAppearanceScope(scope)
