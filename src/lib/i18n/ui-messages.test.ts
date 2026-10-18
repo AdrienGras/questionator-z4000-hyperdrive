@@ -579,4 +579,12 @@ describe('UI_MESSAGES', () => {
     expect(t(UI_MESSAGES, 'en', 'absent_body', { count: 1 })).toContain('1 drawn question.')
     expect(t(UI_MESSAGES, 'en', 'absent_body', { count: 2 })).toContain('2 drawn questions.')
   })
+
+  test('passage_no_student_body cite l’onglet de la liste sous son libellé actuel', () => {
+    // L'onglet « Étudiants » est devenu « Liste » (F44.7) ; le message le nommait encore.
+    const fr = t(UI_MESSAGES, 'fr', 'side_panel_tab_students', {})
+    const en = t(UI_MESSAGES, 'en', 'side_panel_tab_students', {})
+    expect(t(UI_MESSAGES, 'fr', 'passage_no_student_body', {})).toContain(`« ${fr} »`)
+    expect(t(UI_MESSAGES, 'en', 'passage_no_student_body', {})).toContain(`“${en}”`)
+  })
 })

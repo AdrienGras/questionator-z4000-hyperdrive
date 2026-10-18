@@ -852,7 +852,7 @@ const fr: Dictionary<UiMessageParams> = {
   passage_status_absent: () => 'absent',
   passage_no_student_title: () => 'Aucun étudiant sélectionné',
   passage_no_student_body: () =>
-    'Choisissez un étudiant dans l’onglet « Étudiants » du panneau pour commencer le passage.',
+    'Choisissez un étudiant dans l’onglet « Liste » du panneau pour commencer le passage.',
   passage_absent_title: () => 'Étudiant absent',
   passage_absent_body: () =>
     'Marquez-le présent pour le faire passer, ou choisissez un autre étudiant.',
@@ -1358,7 +1358,7 @@ const en: Dictionary<UiMessageParams> = {
   passage_status_done: () => 'done',
   passage_status_absent: () => 'absent',
   passage_no_student_title: () => 'No student selected',
-  passage_no_student_body: () => 'Pick a student in the panel’s “Students” tab to start.',
+  passage_no_student_body: () => 'Pick a student in the panel’s “List” tab to start.',
   passage_absent_title: () => 'Student absent',
   passage_absent_body: () => 'Mark them present to examine them, or choose another student.',
   passage_done_title: () => 'Exam complete',

@@ -32,7 +32,8 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 - **Guide** : toutes les pages reprises (menu, fil d'Ariane, bascule et sa portée session / entraînement / global, page Sessions, passage en deux colonnes, panneau « Cet étudiant » / « Liste », projection sans bascule, stats Synthèse / Détail, entraînement D111, éditeur) ; « sauvegarde » partout sauf le nom de fichier `-backup-`.
 - **Guide contributeur** : carte de `src/` à jour, étape canevas dans `workflow.md` (ancre `#interface`), interface et tokens dans `conventions.md`, captures et garde-fou dans `tests.md`.
 - **README** : puce « Révisions en solo » ajoutée ; rien d'autre n'était faux.
-- `pnpm check` (2259 tests), `pnpm docs:build`, `pnpm docs:screenshots` verts.
+- **Libellé corrigé** (repéré par la revue finale) : `passage_no_student_body` renvoyait encore à l'onglet « Étudiants » / “Students”, renommé « Liste » / “List” en F44.7 ; test dans `ui-messages.test.ts`.
+- `pnpm check` (2260 tests), `pnpm docs:build`, `pnpm docs:screenshots` verts.
 
 **Trucs en suspens** : validation de #155 par l'utilisateur (relire les pages et les captures). Revue finale de la branche du plan à faire. Reste à F44 (D110) : #156 (bannière animée, session dédiée, scénario validé avant l'animation) ; la PR #154 ne quitte le brouillon qu'après #156, CI et Sonar verts, merge sur go explicite.
 
