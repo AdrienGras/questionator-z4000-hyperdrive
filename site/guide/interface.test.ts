@@ -6,8 +6,6 @@ const SCREENSHOTS_DIR = join(import.meta.dirname, '..', 'public', 'screenshots')
 
 /** Pages pas encore réécrites pour l'interface de F44 (F44.11) : chaque tâche retire les siennes. */
 const PENDING: ReadonlySet<string> = new Set([
-  'sessions.md',
-  'preparer-les-fichiers.md',
   'faire-passer.md',
   'projeter.md',
   'reference-config.md',

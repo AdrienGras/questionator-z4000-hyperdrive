@@ -350,7 +350,7 @@ Les sessions sont enregistrées dans le stockage local du navigateur, sur cet ap
 
 Cet avertissement s'affiche quand le navigateur ne promet pas de conserver les données. Exportez régulièrement un backup de vos sessions.
 
-Si des sessions ont déjà disparu, il n'y a pas de moyen de les récupérer, sauf à les restaurer depuis un backup exporté plus tôt : voir [Restaurer : importer un backup](./sessions#restaurer-importer-un-backup).
+Si des sessions ont déjà disparu, il n'y a pas de moyen de les récupérer, sauf à les restaurer depuis une sauvegarde exportée plus tôt : voir [Restaurer une session](./sessions#restaurer-une-session-importer-une-sauvegarde).
 
 > Le stockage local est indisponible (navigation privée ou cookies bloqués ?). Les sessions ne peuvent pas être enregistrées.
 
