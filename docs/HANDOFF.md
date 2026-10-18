@@ -24,6 +24,23 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 > Entrées antérieures archivées : [2026-09](handoff/2026-09.md)
 <!-- ARCHIVES:END -->
 
+## 2026-10-18 — Audit de sécurité : 7 findings, tickets F45 (#157 à #160)
+
+**Dernière chose faite** : audit de sécurité complet de `e53963e` (skill `security-audit`, profil `standard`), puis suivi (D115).
+- **Conduite** : source et vérifications locales dans un bac à sable `bwrap` (sans réseau, environnement vidé, cible en lecture seule), aucune requête vers le site déployé. 32 unités de couverture en 4 vagues de chasseurs ; le critique post-vague et le critique final distinct n'ont plus rien trouvé. Chaque candidat a été reproduit par un vérificateur indépendant (phase 3), puis relu par un second (phase 5).
+- **Résultat** : 7 findings confirmés, tous déclenchés par un fichier fourni par un tiers (config ou sauvegarde) qui gèle ou casse l'application : 3 moyens (coût de Shiki, imbrication Markdown, amplification des tableaux GFM), 4 faibles (validation quadratique à chaque lecture, brouillon d'éditeur empoisonné, spread de tableaux non bornés, `order` à `MAX_SAFE_INTEGER`). Aucune exécution de code, aucune fuite. Un lead `needs_validation` : l'origine `adriengras.github.io`, partagée avec les autres sites Pages du compte.
+- **Tickets** : F45.1 domaine et stockage (#157), F45.2 rendu Markdown (#158), F45.3 écrans d'erreur et brouillon (#159), F45.4 bornes de validation (#160). Tous Ready, chaînés par « blocked by », publics et sans charge utile (choix de l'utilisateur).
+- **Mémoire** : D115, section « Sécurité » du BACKLOG (durcissement), 5 QUIRKS, emplacement du rapport dans ENVIRONMENT. Sur la branche `docs/f44-cloture`, avec la clôture de F44.
+
+**Trucs en suspens** : l'utilisateur doit inventorier ses sites GitHub Pages pour trancher le lead d'origine partagée (BACKLOG « Sécurité », non publié en ticket). Il doit aussi arbitrer les valeurs des bornes de F45.4 et décider entre un correctif borné de Shiki et un Web Worker (F45.2).
+
+**Prochaine chose à creuser** : F45.1 (#157), dans une nouvelle session : branche `fix/f45-1-…` depuis `main` à jour, sans UI ni canevas. Ensuite F45.2 et F45.3 (D102 : spec, artboards validés, plan, code), puis F45.4.
+
+**Notes pour future Claude** :
+- Le rapport (`~/security-audit-skill/questionator-z4000-hyperdrive/run-1/`) donne pour chaque finding la trace, la reproduction bornée et un correctif proposé : lire `REPORT.md` (§4) et `FINDINGS-DETAIL.md` plutôt que de refaire l'analyse. Les harnais de reproduction des agents sont dans `agents/<id>/scratch/work/src/__audit__/` et `__verify__/`, utiles pour écrire les tests rouges.
+- Correctifs déjà relus en phase 5 : pour Shiki, un budget par bloc ne suffit pas sans céder la main à la boucle d'événements entre deux blocs (sinon N blocs s'enchaînent en une seule chaîne de microtâches). Pour les tableaux GFM, une borne de longueur seule ne suffit pas (N×M) : borner les cellules.
+- Pas de charge utile dans les issues, les PR ni les commits publics (D115) : les tests peuvent contenir les entrées pathologiques, c'est le code, pas une recette commentée.
+
 ## 2026-10-18 — F44 clôturée : PR #154 mergée, v2.0.0
 
 **Dernière chose faite** : passe complète puis merge sur go explicite de l'utilisateur.

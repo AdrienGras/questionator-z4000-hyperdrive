@@ -1107,3 +1107,43 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : le décodeur WebP de ffmpeg ne gère pas les WebP animés (il sait seulement les écrire avec `libwebp_anim`).
 **Workaround** : vérifier un WebP animé dans un navigateur (Playwright : `naturalWidth` et deux captures espacées).
 **Référence** : D114.
+
+## jsonc-parser déborde la pile sur un JSON très imbriqué, là où `JSON.parse` ne déborde pas (2026-10-18)
+
+**Découvert** : audit de sécurité (D115), éditeur de config.
+**Symptôme** : `parseJson('['.repeat(20000))` lève `RangeError: Maximum call stack size exceeded` au lieu de renvoyer `json_syntax`.
+**Cause** : `JSON.parse` de V8 n'est pas récursif (il rejette ou accepte sans déborder), mais la localisation d'erreur (`parse`) et `parseTree` de jsonc-parser 3.3.1 récursent une fois par niveau ; environ 6 000 à 10 000 niveaux suffisent sous V8.
+**Workaround** : entourer tout appel à jsonc-parser d'un `try/catch` avec repli (F45.1, F45.3).
+**Référence** : `src/domain/config/parse-json.ts:38`, `src/features/config-editor/issue-locations.ts:45`.
+
+## Un tableau GFM complète chaque ligne du corps à la largeur de l'en-tête : N×M cellules pour 4N+2M octets (2026-10-18)
+
+**Découvert** : audit de sécurité (D115), rendu Markdown.
+**Symptôme** : un en-tête de N colonnes suivi de M lignes d'un seul caractère, sans `|`, rend exactement N×M `<td>`.
+**Cause** : une ligne sans `|` qui suit un tableau reste une ligne du corps, et `mdast-util-to-hast` 13.2.1 (`handlers/table-row.js`) complète chaque ligne jusqu'à `align.length`.
+**Workaround** : borner le nombre de cellules (largeur × lignes) avant `remark-rehype` (F45.2) ; une borne de longueur seule ne suffit pas.
+**Référence** : `src/components/markdown/markdown.tsx`.
+
+## `Math.max(...arr)` lève `RangeError` au-delà d'environ 100 000 à 125 000 éléments (2026-10-18)
+
+**Découvert** : audit de sécurité (D115), tirage d'entraînement et statistiques.
+**Symptôme** : `Maximum call stack size exceeded` sur `Math.min/max(...tableau)` ou `push(...tableau)` quand le tableau vient d'un gros fichier.
+**Cause** : chaque élément devient un argument de la fonction ; V8 plafonne le nombre d'arguments par la taille de pile. Le seuil observé sous Node 24 se situe entre 100 000 et 150 000 selon la profondeur d'appel.
+**Workaround** : `reduce` ou boucle pour tout tableau issu d'un fichier (F45.1).
+**Référence** : `src/domain/training/cycle-draw.ts:30`, `src/domain/stats/grades.ts:25`.
+
+## Shiki : `tokenizeTimeLimit` vaut par ligne et par thème, et n'interrompt pas un seul passage de regex (2026-10-18)
+
+**Découvert** : audit de sécurité (D115), coloration des blocs de code.
+**Symptôme** : une ligne longue d'un bloc `go` coûte environ 1 s (2 thèmes × 500 ms par défaut) ; une seule ligne `typescript` pathologique croît de façon quadratique au-delà de la limite.
+**Cause** : la limite par défaut est de 500 ms par ligne et par thème ; un seul `exec` de regex du moteur JavaScript ne peut pas être interrompu. Plusieurs blocs d'un même énoncé, dont les promesses sont déjà résolues, s'enchaînent dans une seule chaîne de microtâches.
+**Workaround** : budget par bloc, `tokenizeMaxLineLength` et `tokenizeTimeLimit` bas, céder la main à la boucle d'événements entre deux blocs, ou Web Worker (F45.2).
+**Référence** : `src/lib/markdown/highlighter.ts:128`.
+
+## `gh-ticket.sh` s'arrête net si sa sortie est coupée par `| head` (2026-10-18)
+
+**Découvert** : création des tickets F45.
+**Symptôme** : l'issue est créée mais Status, Priority, Size et les dépendances ne sont pas posés.
+**Cause** : le script tourne sous `set -euo pipefail` ; `| head -1` ferme le tube après la première ligne, l'écriture suivante reçoit SIGPIPE et le script s'arrête.
+**Workaround** : ne pas tronquer la sortie du script (récupérer l'URL avec `| tail -n +1 | grep -m1 https` après coup, ou relire le numéro avec `gh issue list`). Sous zsh, un `set -- $var` ne découpe pas `$var` en mots : écrire la boucle de rattrapage sous `bash -c`.
+**Référence** : `.claude/scripts/gh-ticket.sh`.
