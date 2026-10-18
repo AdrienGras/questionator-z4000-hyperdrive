@@ -36,14 +36,15 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 - **Révélé en route** : les ombres ne se surchargeaient pas sous `html.dark` (Tailwind recopie la valeur, QUIRKS) ; libellé de la bascule qui passait sur deux lignes (1 px) ; test de focus instable (bandeau hors ligne, QUIRKS). Revue finale (opus) : liens markdown à 2,9:1 en clair (`--tw-prose-links`), corrigé avec un e2e qui échouait d'abord.
 - `pnpm check` (2236 tests), 91 e2e (dont `e2e/light-mode.spec.ts`), `check:bundle`, `check:precache`, `check:budget` verts ; captures en clair comparées aux artboards.
 
-**Trucs en suspens** : #152 **à valider par l'utilisateur en local** (`pnpm dev`, système clair ou bascule du menu). Mineurs de la revue finale non traités : pastille brute de la navigation de l'aperçu de l'éditeur (`config-preview.tsx:46`), menu de choix qui déborde de 3 px dans le tiroir à 390 px, flash clair au chargement pour un système sombre (pas de script avant React), `theme-color` toujours sombre, trous de test (focus après choix menu replié, ombre claire). Ordre de la suite inchangé (D110) : #155 → #156 ; la PR ne quitte le brouillon qu'après #156.
+**Trucs en suspens** : #152 **validé par l'utilisateur** (2026-10-18). Mineurs de la revue finale non traités, laissés à l'utilisateur : pastille brute de la navigation de l'aperçu de l'éditeur (`config-preview.tsx:46`), menu de choix qui déborde de 3 px dans le tiroir à 390 px, flash clair au chargement pour un système sombre (pas de script avant React), `theme-color` toujours sombre, trous de test (focus après choix menu replié, ombre claire). Reste à F44 (D110) : #155 puis #156 ; la PR #154 ne quitte le brouillon qu'après #156, CI et Sonar verts, merge sur go explicite.
 
-**Prochaine chose à creuser** : après validation de #152, #155 (guide, captures, README). À y reprendre pour le mode clair :
+**Prochaine chose à creuser** : plan de #155 (F44.11 : guide utilisateur et contributeur, captures régénérées, README) avec `superpowers:writing-plans`, exécution native, sur `feat/f44-refonte-ui`. Pas de passe canevas : documentation, les captures montrent l'interface validée. Sources : ticket #155, D110, spec F44 (§ Mémoire et documentation), carte des écrans ; `site/guide/`, `site/contribuer/`, `README.md`, `e2e/screenshots/` (`guide.spec.ts`, `determinism.ts`), `playwright.screenshots.config.ts` (script des captures à réparer d'après D110). À y reprendre pour le mode clair :
 - `site/guide/prise-en-main.md:45` : « bouton en haut à droite » → pied de menu ;
 - `site/guide/projeter.md:17` : plus de bouton de mode sur la vue projetée ;
 - `site/guide/projeter.md:63` et `site/guide/reference-config.md:147` : la vue projetée suit toujours `defaultColorMode` ;
 - portée de la bascule à expliquer : sur un écran de session, elle règle le mode de cette session, ailleurs le mode global (D60, D112) ;
-- `playwright.screenshots.config.ts` est en `colorScheme: 'light'` : avec le défaut `system`, les captures sortiront en clair ; choisir le mode voulu.
+- `playwright.screenshots.config.ts` est en `colorScheme: 'light'` : avec le défaut `system`, les captures sortiront en clair ; choisir le mode voulu (à trancher avec l'utilisateur).
+Ensuite #156 (bannière animée, session dédiée, scénario validé avant l'animation).
 
 **Notes pour future Claude** :
 - Une ombre de `@theme` ne se surcharge pas par mode : Tailwind écrit sa valeur dans l'utilitaire. Passer par une variable lue en `@theme inline` et vérifier dans `dist/assets/*.css`.
