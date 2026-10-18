@@ -180,6 +180,9 @@ export type UiMessageParams = {
   create_blocked_files: NoParams
   create_blocked_name: NoParams
   training_setup_title: NoParams
+  training_setup_subtitle: NoParams
+  training_setup_step_of: { step: number; total: number }
+  training_setup_step_state: { state: 'done' | 'current' | 'upcoming' }
   training_setup_gather_title: NoParams
   training_setup_gather_body: NoParams
   training_setup_prompt_title: NoParams
@@ -189,6 +192,8 @@ export type UiMessageParams = {
   training_setup_effort_body: NoParams
   training_setup_copy: NoParams
   training_setup_copied: NoParams
+  training_setup_copy_again: NoParams
+  training_setup_show_prompt: NoParams
   training_setup_copy_failed: NoParams
   training_setup_config_title: NoParams
   training_setup_config_body: NoParams
@@ -200,6 +205,7 @@ export type UiMessageParams = {
   training_setup_category_count: { label: string; count: number }
   training_setup_fix_in_editor: NoParams
   training_setup_submit: NoParams
+  training_setup_submit_blocker: NoParams
   training_loading: NoParams
   training_not_found: NoParams
   training_damaged_title: NoParams
@@ -701,6 +707,10 @@ const fr: Dictionary<UiMessageParams> = {
   create_blocked_files: () => 'Déposez la liste d’étudiants et la config pour créer la session.',
   create_blocked_name: () => 'Donnez un nom à la session pour la créer.',
   training_setup_title: () => 'S’entraîner',
+  training_setup_subtitle: () => 'Du cours à la première question, en quatre étapes.',
+  training_setup_step_of: ({ step, total }) => `Étape ${step} sur ${total}`,
+  training_setup_step_state: ({ state }) =>
+    ({ done: 'Étape faite', current: 'Étape en cours', upcoming: 'Étape à venir' })[state],
   training_setup_gather_title: () => 'Rassemblez votre cours',
   training_setup_gather_body: () =>
     'Réunissez le cours et les ateliers dans un seul PDF ou une seule archive zip. Ce fichier reste chez vous : vous le donnerez au LLM, pas à l’application.',
@@ -713,6 +723,8 @@ const fr: Dictionary<UiMessageParams> = {
     'Plus le cours est long, plus ça compte : un effort réduit donne des questions superficielles ou un JSON incomplet.',
   training_setup_copy: () => 'Copier le prompt',
   training_setup_copied: () => 'Prompt copié.',
+  training_setup_copy_again: () => 'Copier à nouveau',
+  training_setup_show_prompt: () => 'Afficher le prompt',
   training_setup_copy_failed: () =>
     'La copie a échoué : sélectionnez le texte et copiez-le à la main.',
   training_setup_config_title: () => 'Récupérez la config',
@@ -725,6 +737,7 @@ const fr: Dictionary<UiMessageParams> = {
     `${label} : ${count} ${plural(count, 'question', 'questions')}`,
   training_setup_fix_in_editor: () => 'Corriger dans l’éditeur',
   training_setup_submit: () => 'C’est parti',
+  training_setup_submit_blocker: () => 'Disponible une fois la config validée',
   training_loading: () => 'Chargement de l’entraînement…',
   training_not_found: () => 'Entraînement introuvable',
   training_damaged_title: () => 'Cet entraînement est endommagé',
@@ -1196,6 +1209,10 @@ const en: Dictionary<UiMessageParams> = {
   create_blocked_files: () => 'Drop the student list and the config to create the session.',
   create_blocked_name: () => 'Name the session to create it.',
   training_setup_title: () => 'Practice',
+  training_setup_subtitle: () => 'From your course to the first question, in four steps.',
+  training_setup_step_of: ({ step, total }) => `Step ${step} of ${total}`,
+  training_setup_step_state: ({ state }) =>
+    ({ done: 'Step done', current: 'Current step', upcoming: 'Upcoming step' })[state],
   training_setup_gather_title: () => 'Gather your course',
   training_setup_gather_body: () =>
     'Put the course and the workshops in a single PDF or a single zip archive. This file stays with you: you give it to the LLM, not to the app.',
@@ -1208,6 +1225,8 @@ const en: Dictionary<UiMessageParams> = {
     'The longer the course, the more it matters: low effort gives shallow questions or an incomplete JSON.',
   training_setup_copy: () => 'Copy the prompt',
   training_setup_copied: () => 'Prompt copied.',
+  training_setup_copy_again: () => 'Copy again',
+  training_setup_show_prompt: () => 'Show the prompt',
   training_setup_copy_failed: () => 'Copy failed: select the text and copy it by hand.',
   training_setup_config_title: () => 'Get the config',
   training_setup_config_body: () => 'The LLM gives you a .json file, or a JSON code block.',
@@ -1219,6 +1238,7 @@ const en: Dictionary<UiMessageParams> = {
     `${label}: ${count} ${pluralEn(count, 'question', 'questions')}`,
   training_setup_fix_in_editor: () => 'Fix in the editor',
   training_setup_submit: () => "Let's go",
+  training_setup_submit_blocker: () => 'Available once the config is valid',
   training_loading: () => 'Loading practice…',
   training_not_found: () => 'Practice not found',
   training_damaged_title: () => 'This practice is damaged',

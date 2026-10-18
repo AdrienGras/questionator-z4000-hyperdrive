@@ -79,9 +79,77 @@ describe('écran de mise en place d’un entraînement', () => {
       'Récupérez la config',
       'Déposez-la',
     ]) {
-      expect(screen.getByRole('heading', { level: 2, name })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 2, name: new RegExp(`^${name} \\(`) })).toBeInTheDocument()
     }
     expect(submitButton()).toBeDisabled()
+  })
+
+  test('en-tête : sous-titre de la création', async () => {
+    await renderPage()
+    expect(
+      screen.getByText('Du cours à la première question, en quatre étapes.'),
+    ).toBeInTheDocument()
+  })
+
+  test('au départ, l’étape 2 est en cours : surtitre, état dans les titres, aria-current', async () => {
+    await renderPage()
+    expect(screen.getByText('Étape 2 sur 4')).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Rassemblez votre cours (Étape faite)' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Déposez-la (Étape à venir)' }),
+    ).toBeInTheDocument()
+    const current = screen.getByRole('heading', {
+      level: 2,
+      name: 'Copiez le prompt (Étape en cours)',
+    })
+    expect(current.closest('li')).toHaveAttribute('aria-current', 'step')
+  })
+
+  test('la zone de dépôt est utilisable dès l’arrivée : l’étape 4 passe en cours', async () => {
+    const { input } = await renderPage()
+    choose(input, 'config.json', JSON.stringify(minimalConfig()))
+    await screen.findByRole('heading', { name: 'Oral de test' })
+    expect(submitButton()).toBeEnabled()
+    expect(screen.getByText('Étape 4 sur 4')).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Copiez le prompt (Étape faite)' }),
+    ).toBeInTheDocument()
+  })
+
+  test('copie réussie : étape résumée, focus gardé, prompt dans un repli', async () => {
+    await renderPage()
+    const copy = screen.getByRole('button', { name: 'Copier le prompt' })
+    copy.focus()
+    fireEvent.click(copy)
+    const again = await screen.findByRole('button', { name: 'Copier à nouveau' })
+    expect(again).toBe(copy)
+    expect(again).toHaveFocus()
+    expect(screen.getByText('Prompt copié.')).toHaveAttribute('aria-live', 'polite')
+    expect(screen.getByText('Afficher le prompt').closest('details')).not.toHaveAttribute('open')
+    expect(screen.getByText('Étape 4 sur 4').closest('li')).toHaveAttribute('aria-current', 'step')
+  })
+
+  test('« Copier à nouveau » refusé : résumé gardé, alerte', async () => {
+    await renderPage()
+    fireEvent.click(screen.getByRole('button', { name: 'Copier le prompt' }))
+    const again = await screen.findByRole('button', { name: 'Copier à nouveau' })
+    copyText.mockResolvedValueOnce(false)
+    fireEvent.click(again)
+    expect(await screen.findByRole('alert')).toHaveTextContent('La copie a échoué')
+    expect(screen.getByRole('button', { name: 'Copier à nouveau' })).toBeInTheDocument()
+    expect(screen.getByText('Afficher le prompt')).toBeInTheDocument()
+  })
+
+  test('bouton désactivé sans config valide : une phrase le dit', async () => {
+    const { input } = await renderPage()
+    const blocker = screen.getByText('Disponible une fois la config validée')
+    expect(submitButton()).toHaveAttribute('aria-describedby', blocker.id)
+    choose(input, 'config.json', JSON.stringify(minimalConfig()))
+    await screen.findByRole('heading', { name: 'Oral de test' })
+    expect(screen.queryByText('Disponible une fois la config validée')).toBeNull()
+    expect(submitButton()).not.toHaveAttribute('aria-describedby')
   })
 
   test('le prompt affiché est celui de la langue courante, en lecture seule', async () => {
@@ -116,9 +184,11 @@ describe('écran de mise en place d’un entraînement', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'La copie a échoué : sélectionnez le texte et copiez-le à la main.',
     )
+    expect(screen.getByText('Étape 2 sur 4')).toBeInTheDocument()
     fireEvent.click(copy)
     expect(await screen.findByText('Prompt copié.')).toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(screen.getByText('Afficher le prompt')).toBeInTheDocument()
   })
 
   test('fichier valide : résumé par catégorie et bouton actif', async () => {
@@ -297,6 +367,7 @@ describe('mise à jour de la config d’un entraînement', () => {
       '/training/training-1',
     )
     expect(screen.getAllByRole('heading', { level: 2 })).toHaveLength(4)
+    expect(screen.getByText('Entraînement de test')).toBeInTheDocument()
     expect(updateButton()).toBeDisabled()
     expect(screen.queryByRole('button', { name: 'C’est parti' })).toBeNull()
   })
