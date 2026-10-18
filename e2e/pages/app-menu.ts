@@ -42,6 +42,17 @@ export class AppMenu {
     await this.toggle(true).waitFor()
   }
 
+  /** Bascule de mode du menu latéral (« Mode d'affichage : … », D112). */
+  colorModeButton(): Locator {
+    return this.aside.getByRole('button', { name: /^Mode d'affichage/ })
+  }
+
+  /** Choisit un mode d'affichage dans la bascule du menu latéral. */
+  async chooseColorMode(label: 'Clair' | 'Sombre' | 'Système'): Promise<void> {
+    await this.colorModeButton().click()
+    await this.page.getByRole('menuitemradio', { name: label }).click()
+  }
+
   /** Ouvre le tiroir (écran étroit) et renvoie son lien `name`. */
   async openDrawer(): Promise<Locator> {
     await this.menuButton.click()

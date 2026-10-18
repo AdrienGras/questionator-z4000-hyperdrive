@@ -28,6 +28,10 @@ test('replié : infobulle au survol et au focus, état gardé au rechargement', 
   await menu.link('Sessions').focus()
   await page.keyboard.press('Tab')
   await expect(page.getByRole('tooltip', { name: 'Éditeur de config' })).toBeVisible()
+  // La bascule de mode (D112) : icône seule, libellé en infobulle au focus clavier.
+  await menu.aside.getByRole('link', { name: 'Aide (nouvel onglet)' }).focus()
+  await page.keyboard.press('Tab')
+  await expect(page.getByRole('tooltip', { name: "Mode d'affichage : système" })).toBeVisible()
 
   await page.reload()
   await expect(menu.toggle(true)).toBeVisible()
@@ -39,7 +43,7 @@ test('clavier : Tab parcourt le menu dans l’ordre', async ({ page }) => {
   await menu.goto('/editor')
   await menu.link('Accueil').focus()
   const names: (string | null)[] = []
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 6; i++) {
     await page.keyboard.press('Tab')
     names.push(
       await page.evaluate(
@@ -55,6 +59,7 @@ test('clavier : Tab parcourt le menu dans l’ordre', async ({ page }) => {
     'Éditeur de config',
     'Entraînement',
     'Aide (nouvel onglet)',
+    "Mode d'affichage : système",
     'Replier le menu',
   ])
 })

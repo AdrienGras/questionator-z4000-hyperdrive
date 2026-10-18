@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto'
-import { fireEvent, screen, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
 import { renderAt } from '@/testing/render-at'
 
@@ -73,13 +73,15 @@ test('clavier : liens et bouton natifs, dans l’ordre du parcours', async () =>
   const aside = await screen.findByRole('complementary')
   // jsdom ne simule pas Tab : l'ordre de tabulation est celui du DOM pour des éléments natifs.
   const focusable = [...aside.querySelectorAll('a[href], button')]
-  expect(focusable.every((el) => !el.hasAttribute('tabindex'))).toBe(true)
+  // Aucun tabindex positif (le déclencheur base-ui de la bascule pose `tabindex="0"`, neutre).
+  expect(focusable.every((el) => Number(el.getAttribute('tabindex') ?? 0) <= 0)).toBe(true)
   expect(focusable.map((el) => el.getAttribute('aria-label') ?? el.textContent)).toEqual([
     'Accueil',
     'Sessions',
     'Éditeur de config',
     'Entraînement',
     'Aide (nouvel onglet)',
+    "Mode d'affichage : système",
     'Replier le menu',
   ])
 })
@@ -93,4 +95,26 @@ test('replier au clavier : le focus reste sur le bouton', async () => {
   expect(document.activeElement).toBe(aside.getByRole('button', { name: 'Déplier le menu' }))
   fireEvent.click(aside.getByRole('button', { name: 'Déplier le menu' }))
   expect(document.activeElement).toBe(aside.getByRole('button', { name: 'Replier le menu' }))
+})
+
+test('bascule de mode en pied : libellé visible, nom accessible seul une fois replié', async () => {
+  renderAt('/editor')
+  const aside = await menu()
+  expect(aside.getByRole('button', { name: "Mode d'affichage : système" })).toHaveTextContent(
+    "Mode d'affichage : système",
+  )
+  fireEvent.click(aside.getByRole('button', { name: 'Replier le menu' }))
+  const collapsed = aside.getByRole('button', { name: "Mode d'affichage : système" })
+  expect(collapsed).not.toHaveTextContent('Mode')
+})
+
+test('choisir Sombre pose .dark, mémorise le choix global et rend le focus à la bascule', async () => {
+  renderAt('/editor')
+  const aside = await menu()
+  fireEvent.click(aside.getByRole('button', { name: "Mode d'affichage : système" }))
+  fireEvent.click(await screen.findByRole('menuitemradio', { name: 'Sombre' }))
+  await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument())
+  expect(document.documentElement).toHaveClass('dark')
+  expect(localStorage.getItem('questionator:color-mode:global')).toBe('dark')
+  expect(aside.getByRole('button', { name: "Mode d'affichage : sombre" })).toHaveFocus()
 })

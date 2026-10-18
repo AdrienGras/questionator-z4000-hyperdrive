@@ -8,13 +8,13 @@ import { useUi } from '@/lib/i18n/use-ui'
 import { ColorModeToggle } from './color-mode-toggle'
 
 function Toggle() {
-  return <ColorModeToggle ui={useUi()} />
+  return <ColorModeToggle ui={useUi()} collapsed={false} />
 }
 
-function PresentToggle() {
+function SessionToggle() {
   const scope = useMemo(
     () => ({
-      key: colorModeKey({ sessionId: 's1', view: 'present' as const }),
+      key: colorModeKey({ sessionId: 's1', view: 'examiner' as const }),
       defaultMode: 'light' as const,
     }),
     [],
@@ -38,17 +38,16 @@ test('affiche le mode courant et permet d’en choisir un autre', async () => {
   ).toBeInTheDocument()
 })
 
-test('dans la vue projetée, le choix ne touche pas la clé de la vue examinateur', async () => {
-  localStorage.setItem('questionator:color-mode:s1:examiner', 'light')
+test('dans une session, le choix s’écrit sous la clé de la session, pas sous la clé globale', async () => {
   render(
     <AppearanceProvider>
-      <PresentToggle />
+      <SessionToggle />
     </AppearanceProvider>,
   )
   fireEvent.click(screen.getByRole('button', { name: "Mode d'affichage : clair" }))
   fireEvent.click(await screen.findByRole('menuitemradio', { name: 'Sombre' }))
-  expect(localStorage.getItem('questionator:color-mode:s1:present')).toBe('dark')
-  expect(localStorage.getItem('questionator:color-mode:s1:examiner')).toBe('light')
+  expect(localStorage.getItem('questionator:color-mode:s1:examiner')).toBe('dark')
+  expect(localStorage.getItem('questionator:color-mode:global')).toBeNull()
 })
 
 test('choisir un mode ferme le menu et rend le focus au bouton', async () => {

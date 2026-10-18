@@ -1,6 +1,7 @@
 import { IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand } from '@tabler/icons-react'
 import { useLocation } from '@tanstack/react-router'
 import { useState } from 'react'
+import { ColorModeToggle } from '@/components/color-mode-toggle'
 import { activeMenuItem } from '@/components/menu/active-menu-item'
 import { MenuDrawer } from '@/components/menu/menu-drawer'
 import { MenuLinks, WithTooltip } from '@/components/menu/menu-links'
@@ -13,7 +14,8 @@ import { cn } from '@/lib/utils'
  * Menu latéral permanent (D102, D103), monté une fois dans `RootLayout`, hors vue projetée ; en
  * tiroir sous 768 px (`MenuDrawer`). Langue de l'application, pas celle d'une session (D105) :
  * `lang` le dit aux lecteurs d'écran quand une session passe `<html>` dans une autre langue. Ses
- * tokens `sidebar-*` sont lus sur `<html>`, où le thème de la session s'applique.
+ * tokens `sidebar-*` sont lus sur `<html>`, où le thème de la session s'applique. Pied : Aide,
+ * bascule de mode (D112), puis « Replier le menu ».
  */
 export function AppMenu() {
   const ui = useUi()
@@ -41,6 +43,10 @@ export function AppMenu() {
         )}
       >
         <MenuLinks ui={ui} active={active} collapsed={collapsed} />
+        {/* Bascule de mode sous l'Aide, au-dessus du filet de repli (artboard `clair/menu-bascule`). */}
+        <div className="-mt-4 w-full">
+          <ColorModeToggle ui={ui} collapsed={collapsed} />
+        </div>
         <div className="-mt-3 w-full border-t border-sidebar-border pt-2">
           <WithTooltip
             collapsed={collapsed}

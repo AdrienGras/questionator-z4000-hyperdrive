@@ -1,5 +1,6 @@
 import { IconMenu2, IconX } from '@tabler/icons-react'
 import { useState } from 'react'
+import { ColorModeToggle } from '@/components/color-mode-toggle'
 import type { MenuItemId } from '@/components/menu/active-menu-item'
 import { MenuLinks } from '@/components/menu/menu-links'
 import { Button } from '@/components/ui/button'
@@ -14,7 +15,8 @@ type MenuDrawerProps = Readonly<{
 /**
  * Menu sur écran étroit (< 768 px, artboard `menu-etroit`) : une barre du haut (marque, bouton
  * « Menu ») qui ouvre le menu déplié dans un tiroir à gauche, sans bouton de repli. Un lien
- * choisi ou Échap le referme ; le focus revient au bouton « Menu », son déclencheur.
+ * choisi ou Échap le referme ; le focus revient au bouton « Menu », son déclencheur. La bascule de
+ * mode est en pied (D112).
  */
 export function MenuDrawer({ ui, active }: MenuDrawerProps) {
   const { text } = ui
@@ -51,6 +53,10 @@ export function MenuDrawer({ ui, active }: MenuDrawerProps) {
             <IconX aria-hidden />
           </SheetClose>
           <MenuLinks ui={ui} active={active} collapsed={false} onNavigate={() => setOpen(false)} />
+          {/* Bascule de mode en pied, sous l'Aide et un filet ; pas de bouton de repli ici. */}
+          <div className="-mt-3 w-full border-t border-sidebar-border pt-2">
+            <ColorModeToggle ui={ui} collapsed={false} />
+          </div>
         </SheetContent>
       </Sheet>
     </div>

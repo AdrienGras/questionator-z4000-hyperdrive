@@ -46,3 +46,11 @@ test('« Fermer le menu » ferme le tiroir', async () => {
   fireEvent.click(drawer.getByRole('button', { name: 'Fermer le menu' }))
   await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Menu' })).toBeNull())
 })
+
+test('la bascule de mode est en pied du tiroir, libellé visible', async () => {
+  renderAt('/')
+  const drawer = within(await openDrawer())
+  expect(drawer.getByRole('button', { name: "Mode d'affichage : système" })).toHaveTextContent(
+    "Mode d'affichage : système",
+  )
+})
