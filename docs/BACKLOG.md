@@ -189,6 +189,8 @@ Organise les entrées par thème (`## <Thème>`), chaque idée étant une case �
 
 ## Documentation
 
+- [ ] Bannière du README : version anglaise (README anglais un jour) et formats carré / vertical pour les réseaux, depuis l'atelier de D114 (légendes dans `src/captions.ts`, une seconde composition par format).
+
 - [ ] Documentation hors ligne : la pré-cacher dans un second service worker de portée `/docs/` (D96 la laisse au réseau). Il faudrait adapter `check:precache` et retirer la denylist.
 - [ ] Documentation en anglais, guide compris (le site est en français seul) : i18n VitePress `locales`, libellés de thème et clés de recherche à doubler.
 - [ ] Captures du guide en mode sombre (F28 : clair/sombre selon la config d'exemple, un seul jeu de PNG).

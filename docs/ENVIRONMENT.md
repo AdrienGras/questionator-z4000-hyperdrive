@@ -11,6 +11,7 @@ Carte des paths, services, accès, commandes. À jour au fil des découvertes.
 - **Path hôte** : `/srv/AdrienGras/questionator-z4000-hyperdrive`
 - **Remote** : `git@github.com:AdrienGras/questionator-z4000-hyperdrive.git`
 - **Branche par défaut** : `main`
+- **Atelier de la bannière 3D (F44.12, D114)** : `/srv/AdrienGras/questionator-banniere-3d` (hors dépôt, dépôt git local non poussé, son propre `package.json`) ; archive remise à l'utilisateur : `~/Downloads/questionator-banniere-3d-sources.zip`. Son `README.md` donne les commandes (`pnpm check`, `pnpm render`, `./scripts/encode.sh`).
 - **Convention de merge** : une branche par ticket (`feat/f01-socle`, `fix/…`), PR vers `main` avec `Closes #n`, CI verte requise. Déploiement GitHub Pages à chaque push sur `main`.
 
 ## Stack d'exécution

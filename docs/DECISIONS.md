@@ -1837,3 +1837,26 @@ autre encodage 8 bits.
 **Pourquoi** : la refonte part avec une documentation qui la décrit, vérifiée par un test et par des captures reproductibles.
 
 **Reporté dans** : `site/guide/` (toutes les pages sauf `index`), `site/guide/interface.test.ts`, `site/contribuer/` (`architecture`, `conventions`, `workflow`, `tests`), `README.md`, `e2e/screenshots/guide.spec.ts`, `playwright.screenshots.config.ts`, `site/public/screenshots/` ; plan `docs/superpowers/plans/2026-10-18-f44-11-guide-captures.md`.
+
+## D114 — F44.12 : bannière animée du README en 3D (2026-10-18)
+
+**Question** : comment refaire la bannière animée du README (D100) sur l'interface livrée par F44, avec le niveau de finition d'une animation three.js, sans sortir des formats et seuils de D100 ?
+
+**Décision** :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Direction *(utilisateur)* | Plan-séquence dans un vrai espace 3D : les écrans réels de la refonte flottent, la caméra vole de l'un à l'autre ; à chaque étape un numéro, un titre court et une phrase révélée mot à mot. Ambiance et style de la nouvelle interface (tokens sombres, Geist). | Une borne d'arcade avec carte des niveaux, essayée en storyboard, n'était « pas compréhensible » ; la vidéo « mode d'emploi » (lisibilité) et le clip three.js « LGTM » (caméra, objets 3D) servent de références. |
+| Déroulé *(utilisateur, après deux rendus)* | 41,5 s : titre fait d'énoncés, plongée dans le « O » ; 01 Préparer (fichiers déposés, vue éclatée de la config) ; 02 Tirer (tuiles, tambour) ; 03 Projeter (la vue projetée rejoint le grand écran) ; 04 Noter (« +1 ») ; « Et ainsi de suite » (questions 2 et 3 en accéléré) ; 05 Résultat (6,00 / 20 sur les deux écrans) ; « Et aussi » en objets sur socles : éditeur de config, export Excel, révisions en solo, hors ligne, 100 % local ; fin sur titre, soleil et adresse. | Premier retour : les anneaux lumineux des stats ne disaient rien, et l'écran final manquait. Second retour : l'éditeur de config remis parmi les atouts (film allongé de 1,5 s plutôt que cinq stations de 1,1 s). |
+| Données | Uniquement celles de l'application : session « Oral de démonstration », Alice Durand notée 1 / 2, 1 / 1 et 1 / 3 (3 / 10, 6,00 / 20), autocomplétion réelle du schéma (`rounding.mode`), nom réel du fichier exporté. « +1 » et non « +2 » : l'écran final et les stats montrent 1 / 2. | Une bannière ne présente pas pour vrai ce que l'application n'affiche pas. |
+| Captures supplémentaires | Questions 2 et 3, écrans finaux (examinateur et projeté) pris par un scénario Playwright jumeau de `e2e/screenshots/guide.spec.ts` (même graine, même horloge), temporaire, écrit dans l'atelier et non versionné. | Aucune capture du guide ne montrait ces écrans. |
+| Outil | Page three.js rendue image par image (`window.__renderAt(t)`, fonction pure du temps), capturée par Playwright, assemblée par ffmpeg ; au lieu du mode « motion » prévu par le ticket. | L'artefact Motion n'embarque pas three.js (DOM, SVG, canvas 2D) et le canevas Design n'exporte pas de vidéo. |
+| Sources *(utilisateur)* | Hors dépôt, comme la vidéo de D100 : atelier local et archive remise à l'utilisateur (`docs/ENVIRONMENT.md`). Le dépôt ne reçoit que les trois images. | Pas de `three` dans les dépendances, rien de neuf pour Sonar ni `pnpm deps` ; la bannière ne se refait qu'à une refonte. |
+| Canevas *(utilisateur)* | Exception à D102 : pas de passe sur le canevas Design ; storyboard, planches et aperçus montrés dans le navigateur. | La bannière n'est pas une interface de l'application et montre des écrans déjà validés sur le canevas. |
+| Déterminisme | Contrôles de l'atelier : une même image rendue deux fois dans des ordres différents est identique, la dernière image enchaîne sur la première, la première image ne dépend pas des chargements. Chromium en nouveau mode headless, ANGLE sur Vulkan, `--disable-partial-raster`. | Un film rendu image par image doit pouvoir se relancer sans surprise (QUIRKS). |
+| Formats (D100, inchangés) | AVIF animé 1600 × 900, 30 i/s, CRF 38 : 4,26 Mo ; WebP de secours 800 × 450, 12 i/s, qualité 55 : 4,84 Mo ; image fixe à 39,7 s (titre, phrase, adresse) : 73 Ko. Rendu vérifié sur la page GitHub de la branche, image fixe comprise en mouvement réduit. | À qualité 70, le WebP de 41,5 s pesait 5,9 Mo, au-dessus du seuil de 5 Mo. |
+| Texte alternatif | Réécrit pour le nouveau déroulé, au vouvoiement, sans genrer l'examinateur. | Même rôle que dans D95 et D100. |
+
+**Pourquoi** : le README s'ouvre sur l'interface livrée, montrée telle qu'elle est, avec une animation lisible en 800 px et sous les seuils de poids.
+
+**Reporté dans** : `assets/readme-banner.avif`, `assets/readme-banner.webp`, `assets/readme-banner-still.webp`, `README.md` ; spec `docs/superpowers/specs/2026-10-18-f44-12-banniere-3d-design.md`, plan `docs/superpowers/plans/2026-10-18-f44-12-banniere-3d.md`.

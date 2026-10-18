@@ -1083,3 +1083,27 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : le `webServer` de Playwright construit l'app puis le site VitePress, qui importe chaque image citée par une page.
 **Workaround** : retirer la citation de la page dans le même commit que l'image. `site/guide/interface.test.ts` signale les captures citées absentes et les orphelines.
 **Référence** : `playwright.config.ts` (`webServer`), D113.
+
+## Rendu image par image dans Chromium : `--disable-partial-raster`, sinon un dégradé CSS change d'un niveau selon l'image précédente (2026-10-18)
+
+**Découvert** : F44.12, atelier de la bannière 3D (`pnpm check`, contrôle « ordre de rendu »).
+**Symptôme** : une même image, rendue après des images différentes, diffère de quelques pixels d'un seul niveau, sous un voile en `radial-gradient`.
+**Cause** : Chromium ne retrace que les tuiles invalidées ; le tramage (dithering) de Skia sur les dégradés dépend alors de ce qui a été retracé.
+**Workaround** : lancer Chromium avec `--disable-partial-raster` (atelier : `scripts/lib/page.ts`).
+**Référence** : D114.
+
+## WebGL en headless : le headless-shell de Playwright tourne sur SwiftShader, même avec `--use-angle=gl` (2026-10-18)
+
+**Découvert** : F44.12, atelier de la bannière 3D.
+**Symptôme** : `WEBGL_debug_renderer_info` répond « SwiftShader » ; le rendu est logiciel, donc lent.
+**Cause** : seul le nouveau mode headless (`channel: 'chromium'`) avec ANGLE sur Vulkan atteint le GPU de la machine.
+**Workaround** : `chromium.launch({ channel: 'chromium', args: ['--use-angle=vulkan', '--enable-features=Vulkan', '--enable-gpu', '--ignore-gpu-blocklist'] })`, repli SwiftShader si WebGL2 manque.
+**Référence** : D114.
+
+## ffmpeg ne relit pas un WebP animé (2026-10-18)
+
+**Découvert** : F44.12, vérification de `assets/readme-banner.webp`.
+**Symptôme** : `ffmpeg -i readme-banner.webp …` échoue (« image data not found »), alors que le fichier s'anime dans Chromium.
+**Cause** : le décodeur WebP de ffmpeg ne gère pas les WebP animés (il sait seulement les écrire avec `libwebp_anim`).
+**Workaround** : vérifier un WebP animé dans un navigateur (Playwright : `naturalWidth` et deux captures espacées).
+**Référence** : D114.
