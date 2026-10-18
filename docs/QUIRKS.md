@@ -1042,3 +1042,20 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : `toggle` est mis en file comme tâche, dans jsdom comme dans le navigateur ; l'état React suit au tour suivant.
 **Workaround** : attendre le libellé (`await screen.findByText('Afficher')`), pas `getByText` juste après le clic.
 **Référence** : `src/features/training/components/training-question.tsx` (`AnswerDisclosure`).
+
+## Tailwind recopie la valeur d'une ombre dans l'utilitaire : `--shadow-*` ne se surcharge pas par mode (2026-10-18)
+
+**Découvert** : F44.10, `e2e/appearance.spec.ts` (cartes en mode sombre).
+**Symptôme** : en sombre, `.dark` bien posée sur `<html>`, les cartes gardent l'ombre du mode clair alors que `html.dark` redéfinit `--shadow-card`.
+**Cause** : pour gérer `shadow-<couleur>`, Tailwind v4 décompose la valeur d'une ombre de `@theme` et l'écrit dans l'utilitaire (`.shadow-card{--tw-shadow:0 1px 2px 0 var(--tw-shadow-color,#1a103314),…}`) au lieu de lire `var(--shadow-card)`. Les couleurs, elles, restent en `var(--color-…)` et se surchargent normalement.
+**Workaround** : `--shadow-card: var(--card-shadow)` dans `@theme inline`, et `--card-shadow` posée sur `html` / `html.dark` (même chose pour `--shadow-popover`). Vérifier dans `dist/assets/*.css` que l'utilitaire lit bien la variable.
+**Référence** : `src/index.css`, D112.
+
+## e2e : `HomePage.goto()` n'attend pas le rendu, et le premier bouton de la page peut être un bandeau qui part seul (2026-10-18)
+
+**Découvert** : F44.10, `e2e/appearance.spec.ts`.
+**Symptôme** : (1) une mesure faite juste après `goto()` lit la page avant React (pas de `.dark`, fond du CSS brut) ; (2) « focus clavier visible sur un bouton » échoue une fois sur deux.
+**Cause** : (1) `goto()` ne fait que `page.goto('#/')` ; (2) `[data-slot="button"]` premier de la page est le « OK » du bandeau « Prête pour le hors ligne », qui apparaît et disparaît au gré du service worker.
+**Workaround** : attendre un repère (titre `h1`, ou `toHaveClass(/dark/)`) avant de mesurer ; viser un bouton de `main` (`page.getByRole('main').locator(…)`). L'accueil n'a aucun `[data-slot="button"]` dans `main` : la page Sessions en a un (« Importer une sauvegarde »).
+**Référence** : `e2e/appearance.spec.ts`, `e2e/pages/home-page.ts`.
+

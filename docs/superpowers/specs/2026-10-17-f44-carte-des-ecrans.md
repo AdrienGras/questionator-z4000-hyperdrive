@@ -29,7 +29,7 @@ Règle de lecture : **le code fait foi pour tout comportement que la maquette ne
 ## Transverse (#145, #146)
 
 - **Menu latéral** (nouveau, prévu par D102) : Accueil, intertitre « Espaces », Sessions, Éditeur de config, Entraînement, Aide en pied, puis « Replier le menu ». Replié à 72 px : icônes seules, infobulles au survol et au focus, séparateur à la place de l'intertitre. L'état replié est mémorisé sur l'appareil (`localStorage`, lecture protégée). Le lien actif couvre les sous-routes de son espace.
-- **Aide** : quitte l'en-tête de page pour le pied du menu. **Bascule de thème** : retirée pendant la refonte (D102), elle revient au ticket 10 en pied de menu, au-dessus de « Replier le menu ».
+- **Aide** : quitte l'en-tête de page pour le pied du menu. **Bascule de thème** : retirée pendant la refonte (D102), revenue en #152 en pied de menu, au-dessus de « Replier le menu » (D112, voir « Mode clair »).
 - **Marque** : « Questionator Z-4000 » dans le menu ; `app_title` garde le nom complet ailleurs.
 - **Fil d'Ariane** : remplace les liens « Retour à l'accueil » des écrans d'un espace (`Sessions › <nom de session> · <titre de l'oral>`). Les écrans hors espace gardent un lien retour.
 - **Bandeaux** (`db-status-banner`, `update-prompt`, `offline-ready-prompt`, `damaged-session`, `session-fallback`) : forme seule. Les messages « hors ligne » et « base » sont découpés en titre et corps ; « Détails » de la session endommagée affiche le nombre de problèmes ; « Session introuvable » passe son retour en bouton principal.
@@ -107,6 +107,14 @@ Règle de lecture : **le code fait foi pour tout comportement que la maquette ne
 - Tuiles de catégories visibles et désactivées pendant une question, la catégorie courante marquée.
 
 **À conserver, non maquetté** : avant révélation (« Voir la réponse »), tuiles seules, question disparue, alertes d'erreur, liste d'erreurs de config et « Corriger dans l'éditeur », erreur d'écriture, bandeau de base, état vide des stats d'entraînement.
+
+## Mode clair (#152)
+
+Artboards de la page « Mode clair » (canevas v30) : `clair/menu-bascule`, `clair/accueil`, `clair/passage-question`, `clair/projection-question`, `clair/statistiques` ; tokens clairs dans le design system v9. Arbitrages dans D112.
+
+- **Bascule** : ligne du pied de menu, sous l'Aide, au gabarit de « Replier le menu » ; soleil ou lune selon le mode effectif, libellé `color_mode_label`, trois choix radio à droite. Replié : icône seule et infobulle. Tiroir : en pied, après un filet. Pas sur la vue projetée, qui suit `defaultColorMode`.
+- **Couleurs** : tokens clairs dérivés du sombre ; couleurs d'espace, lien, ombres et syntaxe de l'éditeur ont une valeur par mode ; les couleurs de catégorie pleines prennent l'encre (foncée en clair).
+- **Écrans non maquettés en clair** (sessions, entraînements, création, éditeur, entraînement, dialogues, bandeaux) : mêmes tokens, aucune disposition propre au mode clair.
 
 ## Nouvelles chaînes i18n
 
