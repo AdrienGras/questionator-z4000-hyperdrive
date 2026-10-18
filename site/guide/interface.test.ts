@@ -6,8 +6,6 @@ const SCREENSHOTS_DIR = join(import.meta.dirname, '..', 'public', 'screenshots')
 
 /** Pages pas encore réécrites pour l'interface de F44 (F44.11) : chaque tâche retire les siennes. */
 const PENDING: ReadonlySet<string> = new Set([
-  's-entrainer.md',
-  'editeur-config.md',
 ])
 
 /** Libellés et parcours d'avant la refonte (F44) : le lecteur chercherait un bouton disparu. */
