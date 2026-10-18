@@ -11,7 +11,7 @@
 <picture>
   <source media="(prefers-reduced-motion: reduce)" srcset="assets/readme-banner-still.webp">
   <source type="image/avif" srcset="assets/readme-banner.avif">
-  <img src="assets/readme-banner.webp" width="800" alt="Présentation animée : vous préparez vos questions et vos barèmes ; l'étudiant choisit une difficulté, une question est tirée au sort et projetée ; vous voyez la réponse attendue et notez, le score s'affiche ; puis statistiques et export Excel. Aucune donnée ne quitte votre machine.">
+  <img src="assets/readme-banner.webp" width="800" alt="Présentation animée en 3D sur l'interface de l'application : vous déposez vos questions, vos barèmes et la liste de la classe ; l'étudiant choisit une difficulté, une question est tirée au sort et projetée ; vous voyez la réponse attendue et notez, le score s'affiche ; les questions suivantes défilent, puis la note finale apparaît sur les deux écrans. Viennent ensuite l'éditeur de config, l'export Excel, les révisions en solo et le fonctionnement hors ligne. Aucune donnée ne quitte votre machine.">
 </picture>
 
 **Faites passer des oraux notés par tirage au sort, sur deux écrans, sans rien installer.**
