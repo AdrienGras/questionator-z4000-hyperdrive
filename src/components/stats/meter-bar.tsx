@@ -1,5 +1,5 @@
-import type { CSSProperties } from 'react'
 import { cn } from '@/lib/utils'
+import { categoryAccent } from '@/lib/appearance/category-accent'
 
 type MeterBarProps = Readonly<{
   /** Taux entre 0 et 1, borné au dessin ; `null` : piste seule. */
@@ -15,7 +15,7 @@ type MeterBarProps = Readonly<{
 
 /** Couleur du remplissage : teinte de la catégorie, dégradé d'action ou aplat d'action. */
 function fillClass(tone: MeterBarProps['tone'], gradient: boolean): string {
-  if (tone === 'category') return 'bg-[var(--category-color,var(--color-muted-foreground))]'
+  if (tone === 'category') return 'bg-[var(--category-ink,var(--color-muted-foreground))]'
   return gradient ? 'bg-primary bg-linear-90 from-primary to-action-to' : 'bg-primary'
 }
 
@@ -24,8 +24,7 @@ function fillClass(tone: MeterBarProps['tone'], gradient: boolean): string {
  * taux est toujours écrit à côté (oxlint refuse `role="img"`).
  */
 export function MeterBar({ value, tone, color, gradient = false, className }: MeterBarProps) {
-  const style: (CSSProperties & Record<'--category-color', string>) | undefined =
-    tone === 'category' && color !== undefined ? { '--category-color': color } : undefined
+  const style = tone === 'category' ? categoryAccent(color) : undefined
   return (
     <span
       aria-hidden="true"

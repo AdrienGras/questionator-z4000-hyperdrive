@@ -17,7 +17,7 @@ test('catégorie colorée avec icône : teinte en variable, icône, libellé', a
   const label = container.querySelector<HTMLElement>(':scope > span')!
   expect(label.style.getPropertyValue('--category-color')).toBe('#21d3ee')
   expect(label).toHaveTextContent('Facile')
-  expect(label.className).toContain('var(--category-color,var(--color-muted-foreground))')
+  expect(label.className).toContain('var(--category-ink,var(--color-muted-foreground))')
   await waitFor(() => expect(label.querySelector('svg')).not.toBeNull())
 })
 

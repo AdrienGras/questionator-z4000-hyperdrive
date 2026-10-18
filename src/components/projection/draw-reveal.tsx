@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { REDUCED_MOTION_QUERY } from '@/lib/appearance/reduced-motion'
 import { cn } from '@/lib/utils'
+import { categoryAccent, type CategoryAccent } from '@/lib/appearance/category-accent'
 
 const SHUFFLE_MS = 1500
 const CARDS = [0, 1, 2]
@@ -36,11 +37,9 @@ export function DrawReveal({
     return (
       <div className="flex min-h-72 flex-1 items-center justify-center gap-10">
         {CARDS.map((index) => {
-          const style: CSSProperties &
-            Record<'--i', number> &
-            Partial<Record<'--category-color', string>> = {
+          const style: CSSProperties & Record<'--i', number> & Partial<CategoryAccent> = {
             '--i': index,
-            ...(color !== undefined && { '--category-color': color }),
+            ...categoryAccent(color),
           }
           return (
             <div

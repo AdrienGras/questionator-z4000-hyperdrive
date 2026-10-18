@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { expect, test } from 'vitest'
+import { categoryAccent } from '@/lib/appearance/category-accent'
 import type { NormalizedCategory } from '@/domain/config/normalize'
 import { makeConfig } from '@/testing/student-fixtures'
 import { makeUi } from '@/testing/make-ui'
@@ -26,7 +27,7 @@ test('tuile : libellé, maximum en points, badge', () => {
 
 test('bouton teinté : accent posé, classes de teinte', () => {
   const props = categoryTileButtonProps(normal)
-  expect(props.style).toEqual({ '--category-color': '#a78bfa' })
+  expect(props.style).toEqual(categoryAccent('#a78bfa'))
   expect(props.className).toContain('min-h-32')
   expect(props.className).toContain('rounded-xl')
 })

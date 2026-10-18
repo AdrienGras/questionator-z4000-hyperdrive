@@ -1,4 +1,4 @@
-import { useId, type CSSProperties } from 'react'
+import { useId } from 'react'
 import { CategoryBadge } from '@/components/category-badge'
 import { CategoryLayout } from '@/components/category-layout'
 import { categoryRows } from '@/domain/presentation/category-rows'
@@ -7,6 +7,7 @@ import { formatRawScore } from '@/domain/scoring/format'
 import { toMilli } from '@/domain/scoring/milli'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
+import { categoryAccent } from '@/lib/appearance/category-accent'
 
 type Category = ProjectedStudentView['categories'][number]
 
@@ -35,9 +36,9 @@ const TINT =
   'border-[1.5px] border-[color:color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_35%,transparent)] ' +
   'bg-[color:color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_10%,var(--color-card))]'
 const CURRENT =
-  'border-2 border-[color:var(--category-color,var(--color-primary))] ' +
+  'border-2 border-[color:var(--category-ink,var(--color-primary))] ' +
   'bg-[color:color-mix(in_oklch,var(--category-color,var(--color-primary))_18%,var(--color-card))]'
-const POINTS_COLOR = 'text-[var(--category-color,var(--color-muted-foreground))]'
+const POINTS_COLOR = 'text-[var(--category-ink,var(--color-muted-foreground))]'
 
 /** Grande grille (aucune question) et rangée compacte (question en cours) : artboards `projection-tuiles` et `projection-question`. */
 const LAYOUT = {
@@ -105,8 +106,7 @@ export function CategoryTiles({
       itemKey={(category) => category.id}
       renderItem={(category) => {
         const state = tileState(category, currentCategoryId, finished)
-        const accent: (CSSProperties & Record<'--category-color', string>) | undefined =
-          category.color === undefined ? undefined : { '--category-color': category.color }
+        const accent = categoryAccent(category.color)
         return (
           <div
             style={accent}

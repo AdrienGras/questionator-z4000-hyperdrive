@@ -1,17 +1,9 @@
-import type { CSSProperties } from 'react'
 import { CategoryBadge } from '@/components/category-badge'
 import type { NormalizedCategory, NormalizedConfig } from '@/domain/config/normalize'
 import { formatScore } from '@/domain/scoring/format'
 import { toMilli } from '@/domain/scoring/milli'
 import type { Ui } from '@/lib/i18n/use-ui'
-
-export type CategoryAccent = CSSProperties & Record<'--category-color', string>
-
-/** Accent couleur d'une tuile (D26) : `--category-color`, posé sur le bouton qui la contient. */
-export function categoryAccent(category: NormalizedCategory): CategoryAccent | undefined {
-  const { color } = category
-  return color === undefined ? undefined : { '--category-color': color }
-}
+import { categoryAccent } from '@/lib/appearance/category-accent'
 
 // Teinte de catégorie (D103) : fond à 10 % sur la carte, bordure à 35 %, neutre sans couleur ;
 // classes écrites en entier (Tailwind ne lit que des littéraux). Type `color:` explicite : `cn`
@@ -29,13 +21,13 @@ const CATEGORY_TILE_BUTTON_CLASS =
   'aria-disabled:cursor-not-allowed aria-disabled:opacity-45'
 
 /**
- * Props du bouton `outline` qui entoure une tuile : accent (`--category-color`), teinte de la
+ * Props du bouton `outline` qui entoure une tuile : accent (`categoryAccent`), teinte de la
  * catégorie (neutre sans couleur), mise en page pleine hauteur. Communes au tirage d'un passage et
  * d'un entraînement.
  */
 export function categoryTileButtonProps(category: NormalizedCategory) {
   return {
-    style: categoryAccent(category),
+    style: categoryAccent(category.color),
     'data-colored': category.color !== undefined,
     className: CATEGORY_TILE_BUTTON_CLASS,
   }
@@ -59,7 +51,7 @@ export function CategoryTile({ ui, config, category }: CategoryTileProps) {
     <>
       <CategoryBadge color={category.color} icon={category.icon} size="xl" />
       <span className="max-w-full font-bold wrap-anywhere">{category.label}</span>
-      <span className="text-small font-semibold text-[var(--category-color,var(--color-muted-foreground))] tabular-nums">
+      <span className="text-small font-semibold text-[var(--category-ink,var(--color-muted-foreground))] tabular-nums">
         {text('passage_category_max', { max, points })}
       </span>
     </>

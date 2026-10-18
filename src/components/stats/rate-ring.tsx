@@ -1,5 +1,5 @@
-import type { CSSProperties } from 'react'
 import { cn } from '@/lib/utils'
+import { categoryAccent } from '@/lib/appearance/category-accent'
 
 const RADIUS = 58
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
@@ -30,8 +30,7 @@ const SIZES = {
  * (oxlint refuse `role="img"`).
  */
 export function RateRing({ rate, value, label, caption, color, size }: RateRingProps) {
-  const style: (CSSProperties & Record<'--category-color', string>) | undefined =
-    color === undefined ? undefined : { '--category-color': color }
+  const style = categoryAccent(color)
   // Un arc nul n'est pas dessiné : son bout arrondi laisserait un point de couleur.
   const arc = rate === null || rate <= 0 ? null : Math.min(rate, 1) * CIRCUMFERENCE
   return (
@@ -48,7 +47,7 @@ export function RateRing({ rate, value, label, caption, color, size }: RateRingP
             strokeWidth="12"
             strokeLinecap="round"
             strokeDasharray={`${arc} ${CIRCUMFERENCE}`}
-            className="stroke-[var(--category-color,var(--color-muted-foreground))]"
+            className="stroke-[var(--category-ink,var(--color-muted-foreground))]"
           />
         )}
       </svg>

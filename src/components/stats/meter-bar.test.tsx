@@ -32,7 +32,7 @@ test('teinte de catégorie posée en variable, repli neutre sans couleur', () =>
   expect(track.style.getPropertyValue('--category-color')).toBe('#21d3ee')
   const { container: neutral } = render(<MeterBar value={0.5} tone="category" />)
   expect(neutral.firstElementChild).not.toHaveAttribute('style')
-  expect(fill(neutral)?.className).toContain('var(--category-color,var(--color-muted-foreground))')
+  expect(fill(neutral)?.className).toContain('var(--category-ink,var(--color-muted-foreground))')
 })
 
 test('dégradé d’action sur demande', () => {

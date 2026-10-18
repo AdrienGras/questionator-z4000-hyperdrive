@@ -1,4 +1,4 @@
-import { categoryAccent } from '@/components/category-tile'
+import { categoryAccent } from '@/lib/appearance/category-accent'
 import { CategoryIcon } from '@/components/category-icon'
 import { ConfigIssueList } from '@/components/config-issue-list'
 import { FileDropField } from '@/components/file-drop-field'
@@ -34,8 +34,8 @@ function TrainingSummary({ ui, config }: Readonly<{ ui: Ui; config: NormalizedCo
         {config.categories.map((category) => (
           <li
             key={category.id}
-            style={categoryAccent(category)}
-            className="inline-flex h-8 max-w-full items-center gap-2 rounded-sm bg-[color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_12%,transparent)] px-3 text-small font-semibold text-[var(--category-color,var(--color-muted-foreground))]"
+            style={categoryAccent(category.color)}
+            className="inline-flex h-8 max-w-full items-center gap-2 rounded-sm bg-[color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_12%,transparent)] px-3 text-small font-semibold text-[var(--category-ink,var(--color-muted-foreground))]"
           >
             <span aria-hidden="true" className="flex min-w-0 items-center gap-2">
               {category.icon !== undefined && (

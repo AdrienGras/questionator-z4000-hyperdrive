@@ -1,7 +1,7 @@
 import { IconChevronDown, IconChevronUp, IconPlayerSkipForward } from '@tabler/icons-react'
 import { useId, useState } from 'react'
 import { CategoryIcon } from '@/components/category-icon'
-import { categoryAccent } from '@/components/category-tile'
+import { categoryAccent } from '@/lib/appearance/category-accent'
 import { Markdown } from '@/components/markdown/markdown'
 import { ScaleButtons } from '@/components/scale-buttons'
 import { Button } from '@/components/ui/button'
@@ -155,7 +155,7 @@ export function TrainingQuestion({
   return (
     <section
       aria-label={text('present_prompt_label', {})}
-      style={category === undefined ? undefined : categoryAccent(category)}
+      style={categoryAccent(category?.color)}
       className={cn(
         'flex flex-col gap-5 rounded-xl border p-7 wrap-anywhere',
         CARD_TINT,
@@ -175,7 +175,7 @@ export function TrainingQuestion({
       {!missing && (
         <>
           <div className="flex flex-col gap-1.5">
-            <span className="inline-flex items-center gap-2 text-label text-[var(--category-color,var(--color-muted-foreground))] uppercase">
+            <span className="inline-flex items-center gap-2 text-label text-[var(--category-ink,var(--color-muted-foreground))] uppercase">
               {category.icon !== undefined && (
                 <CategoryIcon name={category.icon} className="size-4 shrink-0" />
               )}

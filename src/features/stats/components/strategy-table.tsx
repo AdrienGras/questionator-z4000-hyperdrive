@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react'
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import type { Strategy } from '@/domain/stats/types'
 import { categoryLabel, findCategory } from '@/domain/config/lookup'
@@ -12,6 +11,7 @@ import {
 } from '@/components/stats/stats-section'
 import { StatsEmpty } from '@/components/stats/stats-empty'
 import { DETAIL_CARD } from './question-tables'
+import { categoryAccent } from '@/lib/appearance/category-accent'
 
 type StrategyTableProps = Readonly<{
   ui: Ui
@@ -43,8 +43,7 @@ export function StrategyTable({ ui, config, strategies }: StrategyTableProps) {
             {strategies.map((strategy) => {
               const pills = strategy.composition.map(({ categoryId, count }) => {
                 const color = findCategory(config, categoryId)?.color
-                const style: (CSSProperties & Record<'--category-color', string>) | undefined =
-                  color === undefined ? undefined : { '--category-color': color }
+                const style = categoryAccent(color)
                 return {
                   categoryId,
                   style,
@@ -65,7 +64,7 @@ export function StrategyTable({ ui, config, strategies }: StrategyTableProps) {
                         <span
                           key={categoryId}
                           style={style}
-                          className="inline-flex h-6 items-center rounded-sm bg-[color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_14%,transparent)] px-2.5 text-label whitespace-nowrap text-[var(--category-color,var(--color-muted-foreground))]"
+                          className="inline-flex h-6 items-center rounded-sm bg-[color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_14%,transparent)] px-2.5 text-label whitespace-nowrap text-[var(--category-ink,var(--color-muted-foreground))]"
                         >
                           {label}
                         </span>

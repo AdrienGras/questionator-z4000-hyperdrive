@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react'
+import { useState } from 'react'
 import { CategoryIcon } from '@/components/category-icon'
 import { Markdown } from '@/components/markdown/markdown'
 import { CategoryTiles } from '@/components/projection/category-tiles'
@@ -9,6 +9,7 @@ import type { ProjectedStudentView } from '@/domain/presentation/projected-view'
 import { formatRawScore } from '@/domain/scoring/format'
 import { toMilli } from '@/domain/scoring/milli'
 import { useUi, type Ui } from '@/lib/i18n/use-ui'
+import { categoryAccent } from '@/lib/appearance/category-accent'
 
 /** Note finale une fois révélée ; sinon rien (la pastille de l'en-tête dit « Passage terminé »). */
 function Final({ ui, view }: Readonly<{ ui: Ui; view: ProjectedStudentView }>) {
@@ -30,7 +31,7 @@ function QuestionTitle({
           points: category.maxPoints,
         })
   return (
-    <p className="flex items-center gap-2.5 text-lg font-bold tracking-[.06em] text-[var(--category-color,var(--color-primary))] uppercase">
+    <p className="flex items-center gap-2.5 text-lg font-bold tracking-[.06em] text-[var(--category-ink,var(--color-primary))] uppercase">
       {category.icon !== undefined && (
         <CategoryIcon name={category.icon} className="size-6.5 shrink-0" />
       )}
@@ -56,8 +57,7 @@ export function StudentScreen({
     current === undefined
       ? undefined
       : view.categories.find((category) => category.id === current.categoryId)
-  const accent: (CSSProperties & Record<'--category-color', string>) | undefined =
-    currentCategory?.color === undefined ? undefined : { '--category-color': currentCategory.color }
+  const accent = categoryAccent(currentCategory?.color)
   return (
     <div className="flex flex-1 flex-col gap-6 p-6 @min-[40rem]:px-16 @min-[40rem]:py-12">
       <ProjectionHeader ui={ui} view={view} />

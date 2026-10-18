@@ -1,8 +1,8 @@
-import type { CSSProperties } from 'react'
 import { CategoryIcon } from '@/components/category-icon'
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import { findCategory } from '@/domain/config/lookup'
 import { cn } from '@/lib/utils'
+import { categoryAccent } from '@/lib/appearance/category-accent'
 
 // Coupable n'importe où : un libellé de config n'a pas de longueur maximale (anneaux, « À revoir »).
 const LABEL_CLASS =
@@ -21,14 +21,13 @@ export function CategoryLabel({
   if (category === undefined)
     return <span className={cn(LABEL_CLASS, 'text-muted-foreground', className)}>{categoryId}</span>
   const { color, icon } = category
-  const accent: (CSSProperties & Record<'--category-color', string>) | undefined =
-    color === undefined ? undefined : { '--category-color': color }
+  const accent = categoryAccent(color)
   return (
     <span
       style={accent}
       className={cn(
         LABEL_CLASS,
-        'text-[var(--category-color,var(--color-muted-foreground))]',
+        'text-[var(--category-ink,var(--color-muted-foreground))]',
         className,
       )}
     >

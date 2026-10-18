@@ -1,10 +1,10 @@
-import type { CSSProperties } from 'react'
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import { questionIndex } from '@/domain/passage/selectors'
 import type { Student } from '@/domain/session/types'
 import { passageSegments, type PassageSegment } from '@/features/session/passage-segments'
 import type { Ui } from '@/lib/i18n/use-ui'
 import { cn } from '@/lib/utils'
+import { categoryAccent } from '@/lib/appearance/category-accent'
 
 const FILL: Record<PassageSegment['state'], string> = {
   scored: 'w-full',
@@ -52,14 +52,13 @@ export function PassageProgress({
       </span>
       <span aria-hidden="true" className="flex gap-1">
         {segments.map((segment) => {
-          const style: (CSSProperties & Record<'--category-color', string>) | undefined =
-            segment.color === undefined ? undefined : { '--category-color': segment.color }
+          const style = categoryAccent(segment.color)
           return (
             <span key={segment.key} className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
               <span
                 style={style}
                 className={cn(
-                  'block h-full rounded-full bg-[var(--category-color,var(--color-primary))]',
+                  'block h-full rounded-full bg-[var(--category-ink,var(--color-primary))]',
                   FILL[segment.state],
                 )}
               />

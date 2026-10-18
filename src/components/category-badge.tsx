@@ -1,6 +1,6 @@
-import type { CSSProperties } from 'react'
 import { CategoryIcon } from '@/components/category-icon'
 import { cn } from '@/lib/utils'
+import { categoryAccent } from '@/lib/appearance/category-accent'
 
 type BadgeSize = 'sm' | 'md' | 'lg' | 'xl' | 'projection-sm' | 'projection-lg'
 
@@ -24,8 +24,7 @@ export function CategoryBadge({
   size,
   className,
 }: Readonly<{ color?: string; icon?: string; size: BadgeSize; className?: string }>) {
-  const style: (CSSProperties & Record<'--category-color', string>) | undefined =
-    color === undefined ? undefined : { '--category-color': color }
+  const style = categoryAccent(color)
   const classes = SIZES[size]
   return (
     <span
@@ -34,7 +33,7 @@ export function CategoryBadge({
       className={cn(
         'inline-flex shrink-0 items-center justify-center',
         'bg-[color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_16%,transparent)]',
-        'text-[var(--category-color,var(--color-muted-foreground))]',
+        'text-[var(--category-ink,var(--color-muted-foreground))]',
         classes.box,
         className,
       )}

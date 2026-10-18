@@ -1,5 +1,5 @@
 import { CategoryBadge } from '@/components/category-badge'
-import { categoryAccent } from '@/components/category-tile'
+import { categoryAccent } from '@/lib/appearance/category-accent'
 import type { NormalizedConfig } from '@/domain/config/normalize'
 import { formatScore } from '@/domain/scoring/format'
 import { toMilli } from '@/domain/scoring/milli'
@@ -18,7 +18,7 @@ const TINT =
   'border border-[color:color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_35%,transparent)] ' +
   'bg-[color:color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_10%,var(--color-card))] opacity-45'
 const CURRENT =
-  'border-2 border-[color:var(--category-color,var(--color-muted-foreground))] ' +
+  'border-2 border-[color:var(--category-ink,var(--color-muted-foreground))] ' +
   'bg-[color:color-mix(in_oklch,var(--category-color,var(--color-muted-foreground))_16%,var(--color-card))]'
 
 /**
@@ -39,7 +39,7 @@ export function LockedTiles({ ui, config, currentCategoryId }: LockedTilesProps)
         return (
           <li key={category.id}>
             <div
-              style={categoryAccent(category)}
+              style={categoryAccent(category.color)}
               aria-current={current ? 'true' : undefined}
               className={cn(
                 'flex h-14 items-center gap-2.5 rounded-lg px-3.5',
@@ -48,7 +48,7 @@ export function LockedTiles({ ui, config, currentCategoryId }: LockedTilesProps)
             >
               <CategoryBadge color={category.color} icon={category.icon} size="md" />
               <span className="min-w-0 truncate font-bold">{category.label}</span>
-              <span className="ml-auto shrink-0 text-small font-semibold text-[var(--category-color,var(--color-muted-foreground))] tabular-nums">
+              <span className="ml-auto shrink-0 text-small font-semibold text-[var(--category-ink,var(--color-muted-foreground))] tabular-nums">
                 {text('passage_category_max', {
                   max: formatScore(toMilli(points), 'raw', config, locale),
                   points,

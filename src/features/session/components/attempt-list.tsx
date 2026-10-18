@@ -6,6 +6,7 @@ import { formatScore } from '@/domain/scoring/format'
 import { toMilli } from '@/domain/scoring/milli'
 import type { Attempt } from '@/domain/session/types'
 import type { Ui } from '@/lib/i18n/use-ui'
+import { categoryAccent, type CategoryAccent } from '@/lib/appearance/category-accent'
 
 type AttemptListProps = Readonly<{
   ui: Ui
@@ -159,9 +160,9 @@ function FinalAttemptRow({
   const reason = skipped && attempt.skipReason !== undefined && attempt.skipReason !== ''
   const max = maxOf(category)
   const score = attempt.outcome === 'scored' ? attempt.score : undefined
-  const bar: (CSSProperties & Record<'--category-color', string>) | CSSProperties = {
+  const bar: CSSProperties & Partial<CategoryAccent> = {
     width: `${max > 0 && score !== undefined ? Math.round((score / max) * 100) : 0}%`,
-    ...(category?.color !== undefined && { '--category-color': category.color }),
+    ...categoryAccent(category?.color),
   }
   return (
     <li className="flex items-center gap-3.5 border-t py-3 first:border-t-0">
@@ -203,7 +204,7 @@ function FinalAttemptRow({
               <span
                 data-bar
                 style={bar}
-                className="block h-full rounded-full bg-[var(--category-color,var(--color-primary))]"
+                className="block h-full rounded-full bg-[var(--category-ink,var(--color-primary))]"
               />
             </span>
           )}
