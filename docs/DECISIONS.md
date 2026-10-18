@@ -1759,3 +1759,19 @@ autre encodage 8 bits.
 
 **Reporté dans** : `src/components/stats/`, `src/features/stats/components/` (`synthesis-card`, `grades-card`, `histogram-bars`, `category-rings`, `question-tables`, `strategy-table`, `tag-table`, `stats-view`), `src/features/training-stats/`, `src/domain/stats/labels.ts` (`formatBound` exporté, `binTick` retiré), `scripts/check-initial-bundle.ts`, `vite.config.ts`, `.dependency-cruiser.cjs` ; `docs/CONVENTIONS.md` § « Page examinateur » ; plan `docs/superpowers/plans/2026-10-18-f44-8-statistiques.md`.
 
+## D110 — F44 : deux tickets de documentation ajoutés à la phase 3 (2026-10-18)
+
+**Question** : où faire la mise à jour du guide, de ses captures et du README, que le découpage confirmé en D103 ne prévoyait pas ?
+
+**Décision** *(utilisateur)* :
+
+| Sujet | Décision | Raison |
+|---|---|---|
+| Guide, captures, README | Ticket 11, F44.11 (#155) : guide utilisateur et contributeur, captures régénérées (script des captures du guide réparé), texte du README. Après #152, pour que les captures montrent l'interface finale. | Le guide et ses captures décrivent l'interface d'avant F44. |
+| Bannière du README | Ticket 12, F44.12 (#156), dernier de la phase : vidéo refaite à partir des artboards avec le mode « motion » du canevas Design, rendue aux formats de D100 ; scénario validé par l'utilisateur avant l'animation. | La bannière montre l'ancienne interface ; elle demande une session dédiée. |
+| PR | Les deux tickets partent dans la PR unique #154 (D102), qui ne quitte le brouillon qu'après le ticket 12. | Une seule livraison pour la refonte. |
+
+**Pourquoi** : livrer la refonte avec une documentation qui la décrit, plutôt qu'en ticket séparé après le merge.
+
+**Reporté dans** : `docs/superpowers/specs/2026-10-14-f44-refonte-ui-design.md` (§ Découpage), carte des écrans, `docs/INDEX.md`.
+

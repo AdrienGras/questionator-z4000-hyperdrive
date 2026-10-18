@@ -1009,3 +1009,12 @@ Corps attendu pour chaque entrée : `**Découvert**` (contexte de la découverte
 **Cause** : la garde de non-vacuité exige le chunk de chaque cible de `BUNDLE_TARGETS` ; `check:bundle` ne tourne qu'après le build (CI), pas dans `pnpm check`.
 **Workaround** : retirer la bibliothèque à quatre endroits : la dépendance, sa cible dans `scripts/check-initial-bundle.ts` (et ses tests), son groupe `codeSplitting` dans `vite.config.ts`, sa règle de confinement dans `.dependency-cruiser.cjs` ; puis `pnpm build && pnpm check:bundle`.
 **Référence** : `scripts/check-initial-bundle.ts` (`findVacuityProblems`), D109.
+
+## `gh project item-add` échoue si le projet a déjà ajouté l'issue (2026-10-18)
+
+**Découvert** : création de #155 (F44.11) par `.claude/scripts/gh-ticket.sh`.
+**Symptôme** : l'issue est créée, puis `GraphQL: Content already exists in this project (addProjectV2ItemById)` ; sous `set -e`, le script s'arrête avant Status, Priority, Size et les dépendances. Ponctuel : #156, créée juste après, est passée.
+**Cause** : l'issue entre parfois dans le projet n°3 avant l'appel à `item-add` (ajout automatique côté projet), qui refuse alors le doublon.
+**Workaround** : `gh-ticket.sh` retombe sur `gh project item-list … -q '.items[]|select(.content.number==N).id'` quand `item-add` échoue. Ne pas couper la sortie du script avec `| head` : le `SIGPIPE` l'arrête avant les dépendances `blocked_by`.
+**Référence** : `.claude/scripts/gh-ticket.sh`.
+

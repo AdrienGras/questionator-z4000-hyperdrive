@@ -1,7 +1,7 @@
 # F44 — Carte des écrans : maquettes validées face au code
 
 - **Date** : 2026-10-17
-- **Tickets** : clôt la phase 2 (#144) et sert de référence aux tickets de la phase 3 (#145 à #152)
+- **Tickets** : clôt la phase 2 (#144) et sert de référence aux tickets de la phase 3 (#145 à #152, puis #155 et #156 pour la documentation, D110)
 - **Spec parente** : `2026-10-14-f44-refonte-ui-design.md`
 - **Décision** : D103
 - **Canevas** : page « Après » (URL dans `docs/ENVIRONMENT.md`), 29 artboards
