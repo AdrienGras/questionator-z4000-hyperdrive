@@ -10,12 +10,15 @@ export default defineConfig({
   workers: 1,
   fullyParallel: false,
   retries: 0,
+  // Un seul scénario enchaîne la session et l'entraînement : plus long que les 30 s par défaut.
+  timeout: 180_000,
   reporter: 'list',
   use: {
     baseURL,
     viewport: { width: 1280, height: 800 },
     deviceScaleFactor: 2,
-    colorScheme: 'light',
+    // Sombre (F44.11, D113) : seule la capture `mode-clair` force le clair dans le scénario.
+    colorScheme: 'dark',
     locale: 'fr-FR',
     timezoneId: 'Europe/Paris',
     // Sans service worker : pas de mise à jour de l'app ni de bandeau parasite dans les captures.
