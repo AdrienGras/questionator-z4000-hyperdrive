@@ -32,7 +32,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 - **Révélé en route** : police du prompt à 15 px sur grand écran (`md:text-[15px]` de `Textarea`, capture) ; relecture finale : un test d'erreurs hors du repli qui visait le mauvais élément, et l'étape 4 qui retombait à 2 en retouchant un JSON vérifié. Chacun corrigé avec un test qui échouait d'abord.
 - `pnpm check` (2230 tests), 83 e2e (dont `e2e/training-layout.spec.ts`, 390 px, 13 catégories), `check:bundle`, `check:precache`, `check:budget` verts ; captures 1280 et 390 px comparées aux artboards ; canevas v26 (légende et état de la zone compacte, tuiles verrouillées non interactives, « C'est parti » désactivé en dégradé).
 
-**Trucs en suspens** : #151 **validé par l'utilisateur en local** (`pnpm dev`), avec un retour sur l'accueil (#147), appliqué : la carte d'entraînement de « Reprendre » montre taux et couverture en grand, comme la page Entraînement, sans le sous-titre de couverture (artboards `accueil` et `accueil-en` d'abord, canevas v28, puis code ; clé `home_training_coverage_short` supprimée ; D111). Mineurs de la relecture et deux idées de mise en page en BACKLOG § Entraînement. Ordre de la suite inchangé (D110) : #152 → #155 → #156 ; la PR ne quitte le brouillon qu'après #156.
+**Trucs en suspens** : #151 **validé par l'utilisateur en local** (`pnpm dev`), avec un retour sur l'accueil (#147), appliqué : la carte d'entraînement de « Reprendre » montre taux et couverture en grand, comme la page Entraînement, sans le sous-titre de couverture, et le contenu des cartes est aligné d'une carte à l'autre (`subgrid` dans `ResumeCard`, e2e `Reprendre à 1280 px : chiffres et boutons alignés`) ; artboards `accueil` et `accueil-en` d'abord (canevas v29), puis code ; clé `home_training_coverage_short` supprimée ; D111. Validé par l'utilisateur. Mineurs de la relecture et deux idées de mise en page en BACKLOG § Entraînement. Ordre de la suite inchangé (D110) : #152 → #155 → #156 ; la PR ne quitte le brouillon qu'après #156.
 
 **Prochaine chose à creuser** : plan de #152 (F44.10, mode clair dérivé) avec `superpowers:writing-plans`, exécution native. Sources : ticket #152, spec `docs/superpowers/specs/2026-10-14-f44-refonte-ui-design.md`, carte des écrans (§ Transverse) ; y rétablir `e2e/color-mode.spec.ts` (retiré avec la bascule en #146, voir le corps de la PR).
 
@@ -40,6 +40,7 @@ corps, sans distinction entre ce qui est fait, en suspens, ou à creuser.
 - Le formateur est `oxfmt` (`pnpm format`), pas Prettier : `pnpm exec prettier` échoue, et un `>/dev/null` masque l'échec.
 - Un contenu qui doit garder son focus ne change pas de parent selon un état : un seul conteneur, classes conditionnelles, enfants à emplacements fixes (`null` sinon).
 - `toBeVisible()` de jest-dom tient compte des `<details>` fermés ; `toggle` arrive après le clic (`findBy…`).
+- Aligner des cartes voisines dont les blocs varient : `row-span-N grid grid-rows-subgrid` sur la carte, enfants toujours rendus (un `div` vide au besoin), mesuré en e2e (jsdom ne calcule pas la grille).
 - Avant d'écrire un test qui vise « le premier `listitem` », vérifier ce qu'il y a au-dessus dans la page : la mise en place est elle-même une liste ordonnée.
 
 ## 2026-10-18 — F44.8 : statistiques de session et d'entraînement (#150)
