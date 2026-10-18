@@ -177,6 +177,12 @@ describe('écran de mise en place d’un entraînement', () => {
     expect(prompt).toHaveAttribute('readonly')
   })
 
+  test('prompt et collage en petite police à toutes les largeurs (artboard : 12 px)', async () => {
+    await renderPage()
+    expect(screen.getByRole('textbox', { name: 'Prompt à copier' })).toHaveClass('md:text-xs')
+    expect(pasteArea()).toHaveClass('md:text-xs')
+  })
+
   test('l’étape du prompt met en avant l’effort de réflexion maximal', async () => {
     await renderPage()
     const note = screen.getByRole('note')

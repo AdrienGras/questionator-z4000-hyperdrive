@@ -90,7 +90,7 @@ export function ConfigStep({ ui, setup, onFix, current }: ConfigStepProps) {
             value={setup.pasted}
             disabled={setup.submitting}
             onChange={(event) => setup.setPasted(event.target.value)}
-            className="field-sizing-fixed h-32 resize-y bg-background font-mono text-xs"
+            className="field-sizing-fixed h-32 resize-y bg-background font-mono text-xs md:text-xs"
           />
           <Button
             type="button"

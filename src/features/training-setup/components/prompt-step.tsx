@@ -40,7 +40,7 @@ function PromptBody({ ui, prompt }: Readonly<{ ui: Ui; prompt: string }>) {
           rows={9}
           value={prompt}
           aria-describedby={hintId}
-          className="field-sizing-fixed resize-y bg-background font-mono text-xs"
+          className="field-sizing-fixed resize-y bg-background font-mono text-xs md:text-xs"
         />
         <p id={hintId} className="text-small text-muted-foreground">
           {text('training_setup_prompt_hint', {})}
