@@ -254,6 +254,15 @@ describe('écran de mise en place d’un entraînement', () => {
     })
   })
 
+  test('JSON collé retouché après vérification : l’étape 4 reste en cours', async () => {
+    await renderPage()
+    fireEvent.change(pasteArea(), { target: { value: '{}' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Vérifier le JSON collé' }))
+    await screen.findByRole('button', { name: 'Corriger dans l’éditeur' })
+    fireEvent.change(pasteArea(), { target: { value: '{"exam":{}}' } })
+    expect(screen.getByText('Étape 4 sur 4')).toBeInTheDocument()
+  })
+
   test('repli de collage fermé au départ, « Vérifier » à l’intérieur', async () => {
     await renderPage()
     const details = screen.getByText(PASTE_LABEL, { selector: 'summary' }).closest('details')
@@ -268,11 +277,17 @@ describe('écran de mise en place d’un entraînement', () => {
     fireEvent.change(pasteArea(), { target: { value: '{}' } })
     fireEvent.click(screen.getByRole('button', { name: 'Vérifier le JSON collé' }))
     const fix = await screen.findByRole('button', { name: 'Corriger dans l’éditeur' })
+    // Les erreurs : seuls éléments de liste du bloc de l'étape 4, qui contient aussi le repli.
+    const step = fix.parentElement
+    if (step === null) throw new Error('bloc de l’étape 4 absent')
+    const [issue] = within(step).getAllByRole('listitem')
+    if (issue === undefined) throw new Error('aucune erreur listée')
     const details = openPaste()
     fireEvent.click(screen.getByText(PASTE_LABEL, { selector: 'summary' }))
     expect(details).not.toHaveAttribute('open')
-    expect(details).not.toContainElement(fix)
-    expect(details).not.toContainElement(screen.getAllByRole('listitem')[0] ?? null)
+    expect(details).not.toContainElement(issue)
+    expect(issue).toBeVisible()
+    expect(fix).toBeVisible()
   })
 
   test('zone de dépôt compacte : invite tant qu’aucun fichier n’est choisi', async () => {

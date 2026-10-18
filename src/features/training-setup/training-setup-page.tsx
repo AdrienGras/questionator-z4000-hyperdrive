@@ -70,7 +70,9 @@ function TrainingSetupForm({ training }: Readonly<{ training?: Training }>) {
   const [copy, setCopy] = useState<PromptCopy>({ copied: false, failed: false })
   const states = setupStepStates({
     copied: copy.copied,
-    configChosen: setup.config.kind !== 'empty',
+    // Un texte collé compte comme une config en cours : le retoucher, ce qui vide l'emplacement
+    // vérifié, ne ramène pas l'étape en cours à la 2 (la page bougerait sous le curseur).
+    configChosen: setup.config.kind !== 'empty' || setup.pasted.trim() !== '',
   })
   const blockerId = useId()
   // Si l'utilisateur a quitté l'écran pendant l'écriture, on ne le ramène pas de force ; le chemin

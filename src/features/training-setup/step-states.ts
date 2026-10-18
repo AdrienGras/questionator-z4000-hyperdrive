@@ -5,7 +5,7 @@ type StepStates = readonly [StepState, StepState, StepState, StepState]
 /**
  * État des quatre étapes de la mise en place (D103), indicatif seulement : toutes restent
  * utilisables. L'étape en cours est la 4 dès que le prompt a été copié ou qu'une config a été
- * choisie, sinon la 2 ; les étapes 1 et 3 se passent hors de l'application.
+ * choisie (déposée, ou JSON collé), sinon la 2 ; les étapes 1 et 3 se passent hors de l'application.
  */
 export function setupStepStates({
   copied,
